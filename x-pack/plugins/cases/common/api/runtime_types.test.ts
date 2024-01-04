@@ -6,7 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import { BulkCreateCommentRequestRt, CommentType } from './cases';
 
 import { decodeWithExcessOrThrow } from './runtime_types';
 
@@ -100,16 +99,6 @@ describe('runtime_types', () => {
       });
 
       expect(decodeWithExcessOrThrow(schemaRt)({ a: 'hi' })).toStrictEqual({ a: 'hi' });
-    });
-
-    describe('BulkCreateCommentRequestRt', () => {
-      it('does not throw an error for BulkCreateCommentRequestRt', () => {
-        expect(() =>
-          decodeWithExcessOrThrow(BulkCreateCommentRequestRt)([
-            { comment: 'hi', type: CommentType.user, owner: 'owner' },
-          ])
-        ).not.toThrow();
-      });
     });
   });
 });

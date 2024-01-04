@@ -17,12 +17,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
-  const { dashboardControls, discover, timePicker, common, dashboard } = getPageObjects([
+  const { dashboardControls, discover, timePicker, dashboard } = getPageObjects([
     'dashboardControls',
     'discover',
     'timePicker',
     'dashboard',
-    'common',
   ]);
 
   describe('Time Slider Control', async () => {
@@ -55,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create, edit, and delete', async () => {
       before(async () => {
-        await common.navigateToApp('dashboard');
+        await dashboard.navigateToApp();
         await dashboard.preserveCrossAppState();
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
@@ -107,7 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueBefore).to.not.equal(valueAfter);
 
-        await dashboardControls.closeTimeSliderPopover();
         await dashboard.clickCancelOutOfEditMode();
         const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueNow).to.equal(valueBefore);
@@ -132,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('panel interactions', async () => {
       describe('saved search', async () => {
         before(async () => {
-          await common.navigateToApp('dashboard');
+          await dashboard.navigateToApp();
           await dashboard.loadSavedDashboard('timeslider and saved search');
           await dashboard.waitForRenderComplete();
         });

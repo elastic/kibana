@@ -21,6 +21,8 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import type { RawEventData } from '../../../../common/types/response_actions';
 import { useResponseActionsView } from './response_actions_view';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -53,7 +55,7 @@ import { EnrichmentRangePicker } from './cti_details/enrichment_range_picker';
 import { InvestigationGuideView } from './investigation_guide_view';
 import { Overview } from './overview';
 import { Insights } from './insights/insights';
-import { useRiskScoreData } from './use_risk_score_data';
+import { useRiskScoreData } from '../../../entity_analytics/api/hooks/use_risk_score_data';
 import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/renderers/helpers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -169,6 +171,8 @@ const EventDetailsComponent: React.FC<Props> = ({
   const goToTableTab = useCallback(() => setSelectedTabId(EventsViewType.tableView), []);
 
   const eventFields = useMemo(() => getEnrichmentFields(data), [data]);
+  const basicAlertData = useBasicDataFromDetailsData(data);
+  const { rule: maybeRule } = useRuleWithFallback(basicAlertData.ruleId);
   const existingEnrichments = useMemo(
     () =>
       isAlert
@@ -198,7 +202,7 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const enrichmentCount = allEnrichments.length;
 
-  const { hostRisk, userRisk, isLicenseValid } = useRiskScoreData(data);
+  const { hostRisk, userRisk, isAuthorized } = useRiskScoreData(data);
 
   const renderer = useMemo(
     () =>
@@ -212,12 +216,13 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const showThreatSummary = useMemo(() => {
     const hasEnrichments = enrichmentCount > 0;
-    const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
+    const hasRiskInfoWithLicense = isAuthorized && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
-  }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
+  }, [enrichmentCount, hostRisk, isAuthorized, userRisk]);
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -284,6 +289,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     isReadOnly,
                   }}
                   goToTable={goToTableTab}
+                  investigationFields={maybeRule?.investigation_fields?.field_names ?? []}
                 />
                 <EuiSpacer size="xl" />
                 <Insights
@@ -314,7 +320,9 @@ const EventDetailsComponent: React.FC<Props> = ({
                   </>
                 )}
 
-                <InvestigationGuideView data={data} />
+                {basicAlertData.ruleId && maybeRule?.note && (
+                  <InvestigationGuideView basicData={basicAlertData} ruleNote={maybeRule.note} />
+                )}
               </>
             ),
           }
@@ -327,16 +335,19 @@ const EventDetailsComponent: React.FC<Props> = ({
       id,
       handleOnEventClosed,
       isReadOnly,
+      threatDetails,
       renderer,
       detailsEcsData,
       isDraggable,
       goToTableTab,
-      threatDetails,
+      maybeRule?.investigation_fields,
+      maybeRule?.note,
       showThreatSummary,
       hostRisk,
       userRisk,
       allEnrichments,
       isEnrichmentsLoading,
+      basicAlertData,
     ]
   );
 

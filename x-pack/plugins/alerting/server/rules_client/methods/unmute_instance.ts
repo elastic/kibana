@@ -12,6 +12,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { MuteOptions } from '../types';
 import { RulesClientContext } from '../types';
 import { updateMeta } from '../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export async function unmuteInstance(
   context: RulesClientContext,
@@ -35,7 +36,7 @@ async function unmuteInstanceWithOCC(
   }
 ) {
   const { attributes, version } = await context.unsecuredSavedObjectsClient.get<Rule>(
-    'alert',
+    RULE_SAVED_OBJECT_TYPE,
     alertId
   );
 
@@ -47,13 +48,13 @@ async function unmuteInstanceWithOCC(
       entity: AlertingAuthorizationEntity.Rule,
     });
     if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized('execute');
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
     }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UNMUTE_ALERT,
-        savedObject: { type: 'alert', id: alertId },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: alertId },
         error,
       })
     );
@@ -64,7 +65,7 @@ async function unmuteInstanceWithOCC(
     ruleAuditEvent({
       action: RuleAuditAction.UNMUTE_ALERT,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id: alertId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: alertId },
     })
   );
 
@@ -73,7 +74,7 @@ async function unmuteInstanceWithOCC(
   const mutedInstanceIds = attributes.mutedInstanceIds || [];
   if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
     await context.unsecuredSavedObjectsClient.update<RawRule>(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       alertId,
       updateMeta(context, {
         updatedBy: await context.getUserName(),

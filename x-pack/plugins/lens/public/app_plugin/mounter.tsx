@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
-import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
@@ -48,10 +47,9 @@ import {
   navigateAway,
   LensRootStore,
   loadInitial,
-  LensAppState,
-  LensState,
+  setState,
 } from '../state_management';
-import { getPreloadedState, setState } from '../state_management/lens_slice';
+import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
 import {
   LensAppLocator,
@@ -103,6 +101,8 @@ export async function getLensServices(
     spaces,
     share,
     unifiedSearch,
+    serverless,
+    contentManagement,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -115,6 +115,7 @@ export async function getLensServices(
     storage,
     inspector: getLensInspectorService(inspector),
     navigation,
+    contentManagement,
     fieldFormats,
     stateTransfer,
     usageCollection,
@@ -130,7 +131,7 @@ export async function getLensServices(
     settings: coreStart.settings,
     application: coreStart.application,
     notifications: coreStart.notifications,
-    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement.client),
+    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
@@ -149,6 +150,7 @@ export async function getLensServices(
     unifiedSearch,
     docLinks: coreStart.docLinks,
     locator,
+    serverless,
   };
 }
 
@@ -276,9 +278,7 @@ export async function mountApp(
     initialContext,
     initialStateFromLocator,
   };
-  const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
-    lens: getPreloadedState(storeDeps) as LensAppState,
-  } as unknown as PreloadedState<LensState>);
+  const lensStore: LensRootStore = makeConfigureStore(storeDeps);
 
   const EditorRenderer = React.memo(
     (props: { id?: string; history: History<unknown>; editByValue?: boolean }) => {
@@ -322,7 +322,7 @@ export async function mountApp(
           data.query.filterManager.setAppFilters([]);
           data.query.queryString.clearQuery();
         }
-        lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
+        lensStore.dispatch(setState(getPreloadedState(storeDeps)));
         lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
       }, [initialInput, props.history, redirectCallback]);
       useEffect(() => {

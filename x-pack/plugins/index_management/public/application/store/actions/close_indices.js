@@ -19,14 +19,14 @@ export const closeIndices =
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.message);
+      notificationService.showDangerToast(error.body.message);
       return dispatch(clearRowStatus({ indexNames }));
     }
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.closeIndicesAction.successfullyClosedIndicesMessage', {
-        defaultMessage: 'Successfully closed: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Successfully closed {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
   };

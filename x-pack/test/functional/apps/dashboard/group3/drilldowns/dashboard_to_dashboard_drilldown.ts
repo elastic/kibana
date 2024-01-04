@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         log.debug('Dashboard Drilldowns:initTests');
         await security.testUser.setRoles(['test_logstash_reader', 'global_dashboard_all']);
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.preserveCrossAppState();
         await elasticChart.setNewChartUiDebugFlag();
 
@@ -399,7 +399,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Actually use copied dashboards in a new space:
 
-        await PageObjects.common.navigateToApp('dashboard', {
+        await PageObjects.common.navigateToApp('dashboards', {
           basePath: `/s/${destinationSpaceId}`,
         });
         await PageObjects.dashboard.preserveCrossAppState();

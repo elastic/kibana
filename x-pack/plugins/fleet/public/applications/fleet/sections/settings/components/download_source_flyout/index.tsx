@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiComboBox,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -23,10 +24,11 @@ import {
   EuiLink,
   EuiSwitch,
   EuiSpacer,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { DownloadSource } from '../../../../types';
+import type { DownloadSource, FleetProxy } from '../../../../types';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 
@@ -35,17 +37,22 @@ import { useDowloadSourceFlyoutForm } from './use_download_source_flyout_form';
 export interface EditDownloadSourceFlyoutProps {
   downloadSource?: DownloadSource;
   onClose: () => void;
+  proxies: FleetProxy[];
 }
 
 export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourceFlyoutProps> = ({
   onClose,
   downloadSource,
+  proxies,
 }) => {
   useBreadcrumbs('settings');
   const form = useDowloadSourceFlyoutForm(onClose, downloadSource);
   const inputs = form.inputs;
   const { docLinks } = useStartServices();
-
+  const proxiesOptions = useMemo(
+    () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
+    [proxies]
+  );
   return (
     <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
       <EuiFlyoutHeader hasBorder={true}>
@@ -126,6 +133,57 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
                 'xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputPlaceholder',
                 {
                   defaultMessage: 'Specify host',
+                }
+              )}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdLabel"
+                defaultMessage="Proxy {badge}"
+                values={{
+                  badge: (
+                    <EuiBetaBadge
+                      size="s"
+                      className="eui-alignTop"
+                      label={i18n.translate(
+                        'xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge',
+                        {
+                          defaultMessage: 'Beta',
+                        }
+                      )}
+                    />
+                  ),
+                }}
+              />
+            }
+            helpText={
+              <FormattedMessage
+                id="xpack.fleet.settings.editDownloadSourcesFlyout.proxyInputDescription"
+                defaultMessage="Proxy used for accessing the download source. Currently only the proxy URL is used, headers and certificates are not supported."
+              />
+            }
+          >
+            <EuiComboBox
+              fullWidth
+              data-test-subj="settingsOutputsFlyout.proxyIdInput"
+              {...inputs.proxyIdInput.props}
+              onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+              selectedOptions={
+                inputs.proxyIdInput.value !== ''
+                  ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
+                  : []
+              }
+              options={proxiesOptions}
+              singleSelection={{ asPlainText: true }}
+              isDisabled={inputs.proxyIdInput.props.disabled}
+              isClearable={true}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdPlaceholder',
+                {
+                  defaultMessage: 'Select proxy',
                 }
               )}
             />

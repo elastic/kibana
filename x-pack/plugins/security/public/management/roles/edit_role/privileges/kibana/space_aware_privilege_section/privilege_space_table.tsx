@@ -25,12 +25,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { getSpaceColor } from '@kbn/spaces-plugin/public';
 
-import type { FeaturesPrivileges, Role } from '../../../../../../../common/model';
+import { PrivilegeDisplay } from './privilege_display';
+import type { FeaturesPrivileges, Role } from '../../../../../../../common';
 import { copyRole } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { PrivilegeDisplay } from './privilege_display';
 
 const SPACES_DISPLAY_COUNT = 4;
 

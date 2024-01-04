@@ -34,7 +34,7 @@ import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
@@ -50,11 +50,11 @@ import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { PlaintextStacktrace } from './plaintext_stacktrace';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
-import { ErrorSampleCoPilotPrompt } from './error_sample_co_pilot_prompt';
 import { ErrorTab, ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { ExceptionStacktrace } from './exception_stacktrace';
 import { SampleSummary } from './sample_summary';
+import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 
 const TransactionLinkName = euiStyled.div`
   margin-left: ${({ theme }) => theme.eui.euiSizeS};
@@ -102,7 +102,11 @@ export function ErrorSampleDetails({
   const {
     path: { groupId },
     query,
-  } = useApmParams('/services/{serviceName}/errors/{groupId}');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/errors/{groupId}',
+    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
+    '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
+  );
 
   const { kuery } = query;
 
@@ -337,7 +341,7 @@ export function ErrorSampleDetails({
         <SampleSummary error={error} />
       )}
 
-      <ErrorSampleCoPilotPrompt error={error} transaction={transaction} />
+      <ErrorSampleContextualInsight error={error} transaction={transaction} />
 
       <EuiTabs>
         {tabs.map(({ key, label }) => {

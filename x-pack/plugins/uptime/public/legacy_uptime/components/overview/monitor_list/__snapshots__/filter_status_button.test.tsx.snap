@@ -2,18 +2,18 @@
 
 exports[`FilterStatusButton renders without errors for valid props 1`] = `
 <button
-  class="euiButtonEmpty euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text"
+  class="euiButtonEmpty euiFilterButton euiFilterButton-hasActiveFilters emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiFilterButton-withNext-hasActiveFilters"
   data-test-subj="foo"
   type="button"
 >
   <span
-    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+    class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
   >
     <span
-      class="eui-textTruncate euiButtonEmpty__text"
+      class="eui-textTruncate euiButtonEmpty__text euiFilterButton__text emotion-euiFilterButton__text"
     >
       <span
-        class="euiFilterButton__textShift"
+        class="euiFilterButton__textShift emotion-euiFilterButton__textShift"
         data-text="Up"
         title="Up"
       >

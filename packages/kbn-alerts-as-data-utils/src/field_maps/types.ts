@@ -34,6 +34,7 @@ export interface EcsMetadata {
   scaling_factor?: number;
   short: string;
   type: string;
+  properties?: Record<string, { type: string }>;
 }
 
 export interface FieldMap {
@@ -50,5 +51,6 @@ export interface FieldMap {
     path?: string;
     scaling_factor?: number;
     dynamic?: boolean | 'strict';
+    properties?: Record<string, { type: string }>;
   };
 }

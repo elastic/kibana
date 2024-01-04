@@ -22,7 +22,6 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/150343
   describe('installs package that has a prerelease version', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
@@ -70,13 +69,21 @@ export default function (providerContext: FtrProviderContext) {
       expect(response.body.items.find((item: any) => item.id.includes(gaVersion)));
     });
 
-    it('should install the beta package when no version is provided and prerelease is true', async function () {
+    it('should install the beta package when prerelease is true', async function () {
       const response = await supertest
-        .post(`/api/fleet/epm/packages/${testPackage}?prerelease=true`)
+        .post(`/api/fleet/epm/packages/${testPackage}/${testPackageVersion}?prerelease=true`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true }) // using force to ignore package verification error
         .expect(200);
+      expect(response.body.items.find((item: any) => item.id.includes(betaVersion)));
+    });
 
+    it('should install the beta package when no version is provided and prerelease is true', async function () {
+      const response = await supertest
+        .post(`/api/fleet/epm/packages/${testPackage}/${testPackageVersion}?prerelease=true`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true }) // using force to ignore package verification error
+        .expect(200);
       expect(response.body.items.find((item: any) => item.id.includes(betaVersion)));
     });
 

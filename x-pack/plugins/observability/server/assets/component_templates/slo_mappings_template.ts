@@ -5,14 +5,45 @@
  * 2.0.
  */
 
+import { SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
+
 export const getSLOMappingsTemplate = (name: string) => ({
   name,
   template: {
     mappings: {
       properties: {
+        event: {
+          properties: {
+            ingested: {
+              type: 'date',
+              format: 'strict_date_optional_time',
+            },
+          },
+        },
         '@timestamp': {
           type: 'date',
           format: 'date_optional_time||epoch_millis',
+        },
+        // APM service and transaction specific fields
+        service: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            environment: {
+              type: 'keyword',
+            },
+          },
+        },
+        transaction: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            type: {
+              type: 'keyword',
+            },
+          },
         },
         slo: {
           properties: {
@@ -23,6 +54,9 @@ export const getSLOMappingsTemplate = (name: string) => ({
             revision: {
               type: 'long',
             },
+            instanceId: {
+              type: 'keyword',
+            },
             numerator: {
               type: 'long',
             },
@@ -32,7 +66,7 @@ export const getSLOMappingsTemplate = (name: string) => ({
             isGoodSlice: {
               type: 'byte',
             },
-            context: {
+            groupings: {
               type: 'flattened',
             },
           },
@@ -42,7 +76,7 @@ export const getSLOMappingsTemplate = (name: string) => ({
   },
   _meta: {
     description: 'Mappings for SLO rollup data',
-    version: 1,
+    version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',
   },

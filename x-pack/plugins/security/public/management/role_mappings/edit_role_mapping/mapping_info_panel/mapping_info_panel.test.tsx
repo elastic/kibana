@@ -11,12 +11,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { Role, RoleMapping } from '../../../../../common/model';
+import { MappingInfoPanel } from './mapping_info_panel';
+import type { Role, RoleMapping } from '../../../../../common';
 import type { RolesAPIClient } from '../../../roles';
 import { rolesAPIClientMock } from '../../../roles/roles_api_client.mock';
 import { RoleSelector } from '../role_selector';
 import { RoleTemplateEditor } from '../role_selector/role_template_editor';
-import { MappingInfoPanel } from './mapping_info_panel';
 
 describe('MappingInfoPanel', () => {
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;

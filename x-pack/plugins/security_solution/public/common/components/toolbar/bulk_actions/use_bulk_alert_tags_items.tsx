@@ -5,49 +5,101 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
 import type { RenderContentPanelProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import * as i18n from './translations';
+import { useSetAlertTags } from './use_set_alert_tags';
 
-interface UseBulkAlertTagsItemsProps {
+export interface UseBulkAlertTagsItemsProps {
   refetch?: () => void;
 }
 
-export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) => {
-  const alertTagsItems = [
-    {
-      key: 'manage-alert-tags',
-      'data-test-subj': 'alert-tags-context-menu-item',
-      name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-      panel: 1,
-      label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-      disableOnQuery: true,
-    },
-  ];
+export interface UseBulkAlertTagsPanel {
+  id: number;
+  title: JSX.Element;
+  'data-test-subj': string;
+  renderContent: (props: RenderContentPanelProps) => JSX.Element;
+}
 
-  const alertTagsPanels = [
-    {
-      id: 1,
-      title: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-      renderContent: ({
-        alertItems,
-        refresh,
-        setIsBulkActionsLoading,
-        clearSelection,
-        closePopoverMenu,
-      }: RenderContentPanelProps) => (
-        <BulkAlertTagsPanel
-          alertItems={alertItems}
-          refresh={refresh}
-          refetchQuery={refetch}
-          setIsLoading={setIsBulkActionsLoading}
-          clearSelection={clearSelection}
-          closePopoverMenu={closePopoverMenu}
-        />
-      ),
+export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) => {
+  const { hasIndexWrite } = useAlertsPrivileges();
+  const setAlertTags = useSetAlertTags();
+  const handleOnAlertTagsSubmit = useCallback(
+    async (tags, ids, onSuccess, setIsLoading) => {
+      if (setAlertTags) {
+        await setAlertTags(tags, ids, onSuccess, setIsLoading);
+      }
     },
-  ];
+    [setAlertTags]
+  );
+
+  const alertTagsItems = useMemo(
+    () =>
+      hasIndexWrite
+        ? [
+            {
+              key: 'manage-alert-tags',
+              'data-test-subj': 'alert-tags-context-menu-item',
+              name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+              panel: 1,
+              label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+              disableOnQuery: true,
+            },
+          ]
+        : [],
+    [hasIndexWrite]
+  );
+
+  const TitleContent = useMemo(
+    () => (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>{i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO} position="right" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    []
+  );
+
+  const renderContent = useCallback(
+    ({
+      alertItems,
+      refresh,
+      setIsBulkActionsLoading,
+      clearSelection,
+      closePopoverMenu,
+    }: RenderContentPanelProps) => (
+      <BulkAlertTagsPanel
+        alertItems={alertItems}
+        refresh={refresh}
+        refetchQuery={refetch}
+        setIsLoading={setIsBulkActionsLoading}
+        clearSelection={clearSelection}
+        closePopoverMenu={closePopoverMenu}
+        onSubmit={handleOnAlertTagsSubmit}
+      />
+    ),
+    [handleOnAlertTagsSubmit, refetch]
+  );
+
+  const alertTagsPanels: UseBulkAlertTagsPanel[] = useMemo(
+    () =>
+      hasIndexWrite
+        ? [
+            {
+              id: 1,
+              title: TitleContent,
+              'data-test-subj': 'alert-tags-context-menu-panel',
+              renderContent,
+            },
+          ]
+        : [],
+    [TitleContent, hasIndexWrite, renderContent]
+  );
 
   return {
     alertTagsItems,

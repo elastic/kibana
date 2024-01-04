@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'whitespace but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
-        expect(await PageObjects.discover.mainErrorVisible()).to.be(true);
+        await PageObjects.discover.showsErrorCallout();
         const message = await PageObjects.discover.getDiscoverErrorMessage();
         expect(message).to.contain(expectedError);
       });

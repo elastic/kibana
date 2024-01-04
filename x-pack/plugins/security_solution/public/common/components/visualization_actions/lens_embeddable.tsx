@@ -9,12 +9,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ACTION_CUSTOMIZE_PANEL, ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
-import type { XYState } from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, XYState } from '@kbn/lens-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -29,6 +29,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
 const HOVER_ACTIONS_PADDING = 24;
+const DISABLED_ACTIONS = [ACTION_CUSTOMIZE_PANEL];
 
 const LensComponentWrapper = styled.div<{
   $height?: number;
@@ -39,9 +40,13 @@ const LensComponentWrapper = styled.div<{
   width: ${({ width }) => width ?? 'auto'};
 
   ${({ $addHoverActionsPadding }) =>
-    $addHoverActionsPadding
-      ? `.embPanel__header--floater { top: ${HOVER_ACTIONS_PADDING * -1}px; }`
-      : ''}
+    $addHoverActionsPadding ? `.embPanel__header { top: ${HOVER_ACTIONS_PADDING * -1}px; }` : ''}
+
+  .embPanel__header {
+    z-index: 2;
+    position: absolute;
+    right: 0;
+  }
 
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
@@ -77,6 +82,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   timerange,
   width: wrapperWidth,
   withActions = true,
+  disableOnClickFilter = false,
 }) => {
   const style = useMemo(
     () => ({
@@ -181,9 +187,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [onLoad]
   );
 
-  const onFilterCallback = useCallback(
-    async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
-      if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
+  const onFilterCallback = useCallback(() => {
+    const callback: EmbeddableComponentProps['onFilter'] = async (e) => {
+      if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area' || disableOnClickFilter) {
+        e.preventDefault();
         return;
       }
       // Update timerange when clicking on a dot in an area chart
@@ -197,9 +204,14 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
           range: [rangeFilter.gte, rangeFilter.lt],
         });
       }
-    },
-    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType]
-  );
+    };
+    return callback;
+  }, [
+    createFiltersFromValueClickAction,
+    updateDateRange,
+    preferredSeriesType,
+    disableOnClickFilter,
+  ]);
 
   const adHocDataViews = useMemo(
     () =>
@@ -267,6 +279,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             style={style}
             timeRange={timerange}
             attributes={attributes}
+            disabledActions={DISABLED_ACTIONS}
             onLoad={onLoadCallback}
             onBrushEnd={updateDateRange}
             onFilter={onFilterCallback}
@@ -295,6 +308,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       )}
     </>
   );
+};
+
+const isClickTriggerEvent = (
+  e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']
+): e is ClickTriggerEvent['data'] => {
+  return Array.isArray(e.data) && 'column' in e.data[0];
 };
 
 export const LensEmbeddable = React.memo(LensEmbeddableComponent);

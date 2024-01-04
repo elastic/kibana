@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
+import expect from '@kbn/expect';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default function ({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
+  const es = getService('es');
+  const svlCommonApi = getService('svlCommonApi');
+
+  describe('filter fields', () => {
+    before(async () => {
+      await es.index({
+        index: 'helloworld1',
+        refresh: true,
+        id: 'helloworld',
+        body: { hello: 'world' },
+      });
+
+      await es.index({
+        index: 'helloworld2',
+        refresh: true,
+        id: 'helloworld2',
+        body: { bye: 'world' },
+      });
+    });
+
+    it('can filter', async () => {
+      const a = await supertest
+        .put(FIELDS_FOR_WILDCARD_PATH)
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        // TODO: API requests in Serverless require internal request headers
+        .set(svlCommonApi.getInternalRequestHeader())
+        .query({ pattern: 'helloworld*' })
+        .send({ index_filter: { exists: { field: 'bye' } } });
+
+      const fieldNames = a.body.fields.map((fld: { name: string }) => fld.name);
+
+      expect(fieldNames.indexOf('bye') > -1).to.be(true);
+      expect(fieldNames.indexOf('hello') === -1).to.be(true);
+    });
+  });
+}

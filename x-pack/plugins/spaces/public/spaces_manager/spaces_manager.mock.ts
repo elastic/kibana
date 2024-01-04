@@ -8,8 +8,8 @@
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 
-import type { Space } from '../../common';
 import type { SpacesManager } from './spaces_manager';
+import type { Space } from '../../common';
 
 function createSpacesManagerMock() {
   return {

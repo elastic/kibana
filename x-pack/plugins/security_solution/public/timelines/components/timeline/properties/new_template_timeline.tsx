@@ -8,19 +8,19 @@
 import React from 'react';
 
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 import { useCreateTimelineButton } from './use_create_timeline';
 
 interface OwnProps {
-  closeGearMenu?: () => void;
+  onClick?: () => void;
   outline?: boolean;
   title?: string;
   timelineId?: string;
 }
 
 export const NewTemplateTimelineComponent: React.FC<OwnProps> = ({
-  closeGearMenu,
+  onClick,
   outline,
   title,
   timelineId = TimelineId.active,
@@ -28,7 +28,7 @@ export const NewTemplateTimelineComponent: React.FC<OwnProps> = ({
   const { getButton } = useCreateTimelineButton({
     timelineId,
     timelineType: TimelineType.template,
-    closeGearMenu,
+    onClick,
   });
 
   const button = getButton({ outline, title });

@@ -32,6 +32,7 @@ export function registerRouteForBundle(
       path: `${routePath}{path*}`,
       options: {
         authRequired: false,
+        access: 'public',
       },
       validate: {
         params: schema.object({

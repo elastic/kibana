@@ -55,11 +55,16 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       },
     };
 
+    const fakeDisabled: CSSObject = {
+      color: euiVars.euiButtonColorDisabledText,
+    };
+
     return {
       processTree,
       detailPanel,
       nonGrowGroup,
       resizeHandle,
+      fakeDisabled,
       sessionViewerComponent,
     };
   }, [euiTheme, isFullScreen, height, euiVars]);

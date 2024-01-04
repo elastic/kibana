@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useBulkExport } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_bulk_export';
@@ -45,7 +45,7 @@ describe('RuleActionsOverflow', () => {
     jest.clearAllMocks();
   });
   afterAll(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('rules details menu panel', () => {
@@ -56,6 +56,7 @@ describe('RuleActionsOverflow', () => {
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
         />,
         { wrapper: TestProviders }
       );
@@ -72,6 +73,7 @@ describe('RuleActionsOverflow', () => {
           rule={null}
           userHasPermissions
           canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
         />,
         { wrapper: TestProviders }
       );
@@ -88,6 +90,7 @@ describe('RuleActionsOverflow', () => {
           rule={mockRule('id')}
           userHasPermissions={false}
           canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
         />,
         { wrapper: TestProviders }
       );
@@ -105,6 +108,7 @@ describe('RuleActionsOverflow', () => {
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
         />,
         { wrapper: TestProviders }
       );
@@ -126,6 +130,7 @@ describe('RuleActionsOverflow', () => {
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
         />,
         { wrapper: TestProviders }
       );
@@ -142,6 +147,7 @@ describe('RuleActionsOverflow', () => {
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
         />,
         { wrapper: TestProviders }
       );
@@ -161,6 +167,7 @@ describe('RuleActionsOverflow', () => {
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
         />,
         { wrapper: TestProviders }
       );
@@ -171,7 +178,7 @@ describe('RuleActionsOverflow', () => {
       expect(getByTestId('rules-details-popover')).not.toHaveTextContent(/.+/);
     });
 
-    test('it calls deleteRulesAction when rules-details-delete-rule is clicked', () => {
+    test('it calls deleteRulesAction when rules-details-delete-rule is clicked', async () => {
       const executeBulkAction = jest.fn();
       useExecuteBulkActionMock.mockReturnValue({ executeBulkAction });
 
@@ -181,16 +188,19 @@ describe('RuleActionsOverflow', () => {
           rule={mockRule('id')}
           userHasPermissions
           canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
         />,
         { wrapper: TestProviders }
       );
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));
       fireEvent.click(getByTestId('rules-details-delete-rule'));
 
-      expect(executeBulkAction).toHaveBeenCalledWith(expect.objectContaining({ type: 'delete' }));
+      await waitFor(() => {
+        expect(executeBulkAction).toHaveBeenCalledWith(expect.objectContaining({ type: 'delete' }));
+      });
     });
 
-    test('it calls deleteRulesAction with the rule.id when rules-details-delete-rule is clicked', () => {
+    test('it calls deleteRulesAction with the rule.id when rules-details-delete-rule is clicked', async () => {
       const executeBulkAction = jest.fn();
       useExecuteBulkActionMock.mockReturnValue({ executeBulkAction });
 
@@ -201,13 +211,17 @@ describe('RuleActionsOverflow', () => {
           rule={rule}
           userHasPermissions
           canDuplicateRuleWithActions={true}
+          confirmDeletion={() => Promise.resolve(true)}
         />,
         { wrapper: TestProviders }
       );
+
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));
       fireEvent.click(getByTestId('rules-details-delete-rule'));
 
-      expect(executeBulkAction).toHaveBeenCalledWith({ type: 'delete', ids: ['id'] });
+      await waitFor(() => {
+        expect(executeBulkAction).toHaveBeenCalledWith({ type: 'delete', ids: ['id'] });
+      });
     });
   });
 });

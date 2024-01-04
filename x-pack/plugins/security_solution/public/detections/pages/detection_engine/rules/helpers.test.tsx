@@ -24,7 +24,8 @@ import {
   mockRule,
 } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import { AlertSuppressionMissingFieldsStrategy } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleAction } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import type {
@@ -35,7 +36,6 @@ import type {
   ActionsStepRule,
 } from './types';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
-import type { RuleAlertAction } from '../../../../../common/detection_engine/types';
 
 describe('rule helpers', () => {
   moment.suppressDeprecationWarnings = true;
@@ -125,6 +125,7 @@ describe('rule helpers', () => {
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
         suppressionMissingFields: expect.any(String),
+        enableThresholdSuppression: false,
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -144,6 +145,7 @@ describe('rule helpers', () => {
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
         timestampOverrideFallbackDisabled: false,
+        investigationFields: [],
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
@@ -180,6 +182,14 @@ describe('rule helpers', () => {
       const result: AboutStepRule = getAboutStepsData(mockedRule, false);
 
       expect(result.note).toEqual('');
+    });
+
+    test('returns customHighlightedField as empty array if property does not exist on rule', () => {
+      const mockedRule = mockRuleWithEverything('test-id');
+      delete mockedRule.investigation_fields;
+      const result: AboutStepRule = getAboutStepsData(mockedRule, false);
+
+      expect(result.investigationFields).toEqual([]);
     });
   });
 
@@ -242,9 +252,8 @@ describe('rule helpers', () => {
     });
 
     test('returns with saved_id of undefined if value does not exist on rule', () => {
-      const mockedRule = {
-        ...mockRule('test-id'),
-      };
+      const mockedRule = mockRule('test-id');
+      // @ts-expect-error Saved query rule requires saved_id
       delete mockedRule.saved_id;
       const result: DefineStepRule = getDefineStepsData(mockedRule);
       const expected = expect.objectContaining({
@@ -277,7 +286,7 @@ describe('rule helpers', () => {
       test('returns default suppress value in suppress strategy is missing', () => {
         const result: DefineStepRule = getDefineStepsData(mockRule('test-id'));
         const expected = expect.objectContaining({
-          suppressionMissingFields: AlertSuppressionMissingFieldsStrategy.Suppress,
+          suppressionMissingFields: AlertSuppressionMissingFieldsStrategyEnum.suppress,
         });
 
         expect(result).toEqual(expected);
@@ -288,11 +297,11 @@ describe('rule helpers', () => {
           ...mockRule('test-id'),
           alert_suppression: {
             group_by: [],
-            missing_fields_strategy: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+            missing_fields_strategy: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
           },
         });
         const expected = expect.objectContaining({
-          suppressionMissingFields: AlertSuppressionMissingFieldsStrategy.DoNotSuppress,
+          suppressionMissingFields: AlertSuppressionMissingFieldsStrategyEnum.doNotSuppress,
         });
 
         expect(result).toEqual(expected);
@@ -361,7 +370,7 @@ describe('rule helpers', () => {
 
   describe('getActionsStepsData', () => {
     test('returns expected ActionsStepRule rule object', () => {
-      const actions: RuleAlertAction[] = [
+      const actions: RuleAction[] = [
         {
           id: 'id',
           group: 'group',

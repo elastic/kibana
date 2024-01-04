@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiPopover, EuiText } from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 
@@ -52,7 +52,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
               id: rule.id,
               name: rule.name,
             },
-            type: CommentType.alert,
+            type: AttachmentType.alert,
           },
         ]
       : [];
@@ -95,7 +95,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           <EuiButtonEmpty
             size="s"
             color="text"
-            disabled={!alert?.fields[ALERT_RULE_UUID]}
+            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
             onClick={handleViewRuleDetails}
             data-test-subj="view-rule-details-button"
           >

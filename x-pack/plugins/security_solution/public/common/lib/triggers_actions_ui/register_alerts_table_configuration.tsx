@@ -23,7 +23,7 @@ import {
 import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
 import { getRenderCellValueHook } from '../../../detections/configurations/security_solution_detections/render_cell_value';
-import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
+import { useFetchPageContext } from '../../../detections/configurations/security_solution_detections/fetch_page_context';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const registerAlertsTableConfiguration = (
@@ -33,11 +33,6 @@ const registerAlertsTableConfiguration = (
   const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
   const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
   const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns();
-
-  const useInternalFlyout = () => {
-    const { header, body, footer } = useToGetInternalFlyout();
-    return { header, body, footer };
-  };
 
   const renderCellValueHookAlertPage = getRenderCellValueHook({
     scopeId: SourcererScopeName.detections,
@@ -64,13 +59,13 @@ const registerAlertsTableConfiguration = (
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookAlertPage,
     useActionsColumn: getUseActionColumnHook(TableId.alertsOnAlertsPage),
-    useInternalFlyout,
     useBulkActions: getBulkActionHook(TableId.alertsOnAlertsPage),
     useCellActions: getUseCellActionsHook(TableId.alertsOnAlertsPage),
     usePersistentControls: getPersistentControlsHook(TableId.alertsOnAlertsPage),
     sort,
     useFieldBrowserOptions: getUseTriggersActionsFieldBrowserOptions(SourcererScopeName.detections),
     showInspectButton: true,
+    useFetchPageContext,
   });
 
   // register Alert Table on RuleDetails Page
@@ -80,13 +75,13 @@ const registerAlertsTableConfiguration = (
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookAlertPage,
     useActionsColumn: getUseActionColumnHook(TableId.alertsOnRuleDetailsPage),
-    useInternalFlyout,
     useBulkActions: getBulkActionHook(TableId.alertsOnRuleDetailsPage),
     useCellActions: getUseCellActionsHook(TableId.alertsOnRuleDetailsPage),
     usePersistentControls: getPersistentControlsHook(TableId.alertsOnRuleDetailsPage),
     sort,
     useFieldBrowserOptions: getUseTriggersActionsFieldBrowserOptions(SourcererScopeName.detections),
     showInspectButton: true,
+    useFetchPageContext,
   });
 
   registerIfNotAlready(registry, {
@@ -94,11 +89,26 @@ const registerAlertsTableConfiguration = (
     cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true },
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookCasePage,
-    useInternalFlyout,
+    useActionsColumn: getUseActionColumnHook(TableId.alertsOnCasePage),
     useBulkActions: getBulkActionHook(TableId.alertsOnCasePage),
     useCellActions: getUseCellActionsHook(TableId.alertsOnCasePage),
     sort,
     showInspectButton: true,
+    useFetchPageContext,
+  });
+
+  registerIfNotAlready(registry, {
+    id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RISK_INPUTS,
+    cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID], syncAlerts: true },
+    columns: alertColumns,
+    getRenderCellValue: renderCellValueHookAlertPage,
+    useActionsColumn: getUseActionColumnHook(TableId.alertsRiskInputs),
+    useBulkActions: getBulkActionHook(TableId.alertsRiskInputs),
+    useCellActions: getUseCellActionsHook(TableId.alertsRiskInputs),
+    usePersistentControls: getPersistentControlsHook(TableId.alertsRiskInputs),
+    sort,
+    showInspectButton: true,
+    useFetchPageContext,
   });
 };
 

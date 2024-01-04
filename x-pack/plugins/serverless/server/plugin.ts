@@ -13,7 +13,13 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { getConfigDirectory } from '@kbn/utils';
 import { ProjectType } from '@kbn/serverless-types';
 
-import { ServerlessPluginSetup, ServerlessPluginStart } from './types';
+import { ALL_COMMON_SETTINGS } from '@kbn/serverless-common-settings';
+import type {
+  ServerlessServerSetup,
+  ServerlessServerStart,
+  ServerlessServerSetupDependencies,
+  ServerlessServerStartDependencies,
+} from './types';
 import { ServerlessConfig } from './config';
 import { API_SWITCH_PROJECT } from '../common';
 
@@ -33,8 +39,23 @@ const typeToIdMap: Record<ProjectType, string> = {
   search: 'es',
 };
 
-export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, ServerlessPluginStart> {
+export class ServerlessPlugin
+  implements
+    Plugin<
+      ServerlessServerSetup,
+      ServerlessServerStart,
+      ServerlessServerSetupDependencies,
+      ServerlessServerStartDependencies
+    >
+{
   private readonly config: ServerlessConfig;
+  private projectSettingsAdded: boolean = false;
+
+  private setupProjectSettings(core: CoreSetup, keys: string[]): void {
+    const settings = [...ALL_COMMON_SETTINGS].concat(keys);
+    core.uiSettings.setAllowlist(settings);
+    this.projectSettingsAdded = true;
+  }
 
   constructor(private readonly context: PluginInitializerContext) {
     this.config = this.context.config.get<ServerlessConfig>();
@@ -75,10 +96,17 @@ export class ServerlessPlugin implements Plugin<ServerlessPluginSetup, Serverles
       );
     }
 
-    return {};
+    return {
+      setupProjectSettings: (keys: string[]) => this.setupProjectSettings(core, keys),
+    };
   }
 
   public start(_core: CoreStart) {
+    if (!this.projectSettingsAdded) {
+      throw new Error(
+        "The uiSettings allowlist for serverless hasn't been set up. Make sure to set up your serverless project settings with setupProjectSettings()"
+      );
+    }
     return {};
   }
 

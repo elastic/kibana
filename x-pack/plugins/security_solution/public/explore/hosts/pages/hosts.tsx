@@ -56,6 +56,7 @@ import { ID } from '../containers/hosts';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -124,7 +125,8 @@ const HostsComponent = () => {
     },
     [dispatch]
   );
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
   const [globalFilterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -156,6 +158,7 @@ const HostsComponent = () => {
   });
 
   const isEnterprisePlus = useLicense().isEnterprise();
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
@@ -187,7 +190,7 @@ const HostsComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -215,7 +218,7 @@ const HostsComponent = () => {
               <TabNavigation
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: capabilities.isPlatinumOrTrialLicense,
+                  isRiskyHostsEnabled: hasEntityAnalyticsCapability,
                   isEnterprise: isEnterprisePlus,
                 })}
               />

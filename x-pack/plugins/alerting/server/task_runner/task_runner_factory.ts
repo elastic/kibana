@@ -118,6 +118,11 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId,
       AlertData
-    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
+    >({
+      ruleType,
+      taskInstance,
+      context: this.taskRunnerContext!,
+      inMemoryMetrics,
+    });
   }
 }

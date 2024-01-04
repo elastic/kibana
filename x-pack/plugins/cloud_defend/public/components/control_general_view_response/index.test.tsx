@@ -8,9 +8,10 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
+import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewResponse } from '.';
-import { Response, Selector } from '../../types';
+import { Response, Selector } from '../../../common';
 import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {
@@ -112,9 +113,9 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(getByTestId('cloud-defend-chkblockaction')).not.toBeChecked();
   });
 
-  it('allows the user to add more selectors to match on', () => {
+  it('allows the user to add more selectors to match on', async () => {
     const { getByTestId, rerender } = render(<WrappedComponent />);
-    getByTestId('comboBoxSearchInput').focus();
+    await showEuiComboBoxOptions();
 
     const options = getByTestId(
       'comboBoxOptionsList cloud-defend-responsematch-optionsList'
@@ -182,9 +183,11 @@ describe('<ControlGeneralViewSelector />', () => {
     // focus 'match' input box, lets ensure selectors can't be re-used across 'match' and 'exclude' fields
     getAllByTestId('comboBoxSearchInput')[0].focus();
 
-    options = getByTestId(
-      'comboBoxOptionsList cloud-defend-responsematch-optionsList'
-    ).querySelectorAll('.euiComboBoxOption__content');
+    options = await waitFor(() =>
+      getByTestId('comboBoxOptionsList cloud-defend-responsematch-optionsList').querySelectorAll(
+        '.euiComboBoxOption__content'
+      )
+    );
     expect(options).toHaveLength(2);
     expect(options[0].textContent).toBe('mock2');
   });

@@ -7,8 +7,8 @@
 
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
-import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
 jest.mock('../../lib/analytics/fetch_analytics_collection', () => ({

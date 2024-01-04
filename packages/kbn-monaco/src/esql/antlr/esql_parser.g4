@@ -23,15 +23,23 @@ sourceCommand
     : explainCommand
     | fromCommand
     | rowCommand
+    | showCommand
     ;
 
 processingCommand
     : evalCommand
+    | inlinestatsCommand
     | limitCommand
-    | projectCommand
+    | keepCommand
     | sortCommand
     | statsCommand
     | whereCommand
+    | dropCommand
+    | renameCommand
+    | dissectCommand
+    | grokCommand
+    | enrichCommand
+    | mvExpandCommand
     ;
 
 whereCommand
@@ -39,38 +47,41 @@ whereCommand
     ;
 
 booleanExpression
-    : NOT booleanExpression
-    | valueExpression
-    | left=booleanExpression operator=AND right=booleanExpression
-    | left=booleanExpression operator=OR right=booleanExpression
+    : NOT booleanExpression                                                      #logicalNot
+    | valueExpression                                                            #booleanDefault
+    | regexBooleanExpression                                                     #regexExpression
+    | left=booleanExpression operator=AND right=booleanExpression                #logicalBinary
+    | left=booleanExpression operator=OR right=booleanExpression                 #logicalBinary
+    | valueExpression (NOT)? IN LP valueExpression (COMMA valueExpression)* RP   #logicalIn
+    | valueExpression IS NOT? NULL                                               #isNull
+    ;
+
+regexBooleanExpression
+    : valueExpression (NOT)? kind=LIKE pattern=string
+    | valueExpression (NOT)? kind=RLIKE pattern=string
     ;
 
 valueExpression
-    : operatorExpression
-    | comparison
-    ;
-
-comparison
-    : left=operatorExpression comparisonOperator right=operatorExpression
-    ;
-
-mathFn
-    : functionIdentifier LP (functionExpressionArgument (COMMA functionExpressionArgument)*)? RP
+    : operatorExpression                                                                      #valueExpressionDefault
+    | left=operatorExpression comparisonOperator right=operatorExpression                     #comparison
     ;
 
 operatorExpression
-    : primaryExpression
-    | mathFn
-    | operator=(MINUS | PLUS) operatorExpression
-    | left=operatorExpression operator=(ASTERISK | SLASH | PERCENT) right=operatorExpression
-    | left=operatorExpression operator=(PLUS | MINUS) right=operatorExpression
+    : primaryExpression                                                                       #operatorExpressionDefault
+    | operator=(MINUS | PLUS) operatorExpression                                              #arithmeticUnary
+    | left=operatorExpression operator=(ASTERISK | SLASH | PERCENT) right=operatorExpression  #arithmeticBinary
+    | left=operatorExpression operator=(PLUS | MINUS) right=operatorExpression                #arithmeticBinary
     ;
 
 primaryExpression
-    : constant
-    | qualifiedName
-    | LP booleanExpression RP
-    | identifier LP (booleanExpression (COMMA booleanExpression)*)? RP
+    : constant                                                                          #constantDefault
+    | qualifiedName                                                                     #dereference
+    | functionExpression                                                                #function
+    | LP booleanExpression RP                                                           #parenthesizedExpression
+    ;
+
+functionExpression
+    : identifier LP (ASTERISK | (booleanExpression (COMMA booleanExpression)*))? RP
     ;
 
 rowCommand
@@ -83,41 +94,45 @@ fields
 
 field
     : booleanExpression
-    | userVariable ASSIGN booleanExpression
+    | qualifiedName ASSIGN booleanExpression
     ;
-
-userVariable
-   :  identifier
-   ;
 
 fromCommand
-    : FROM sourceIdentifier (COMMA sourceIdentifier)*
+    : FROM fromIdentifier (COMMA fromIdentifier)* metadata?
     ;
+
+metadata
+    : OPENING_BRACKET METADATA fromIdentifier (COMMA fromIdentifier)* CLOSING_BRACKET
+    ;
+
 
 evalCommand
     : EVAL fields
     ;
 
 statsCommand
-    : STATS fields (BY qualifiedNames)?
+    : STATS fields? (BY grouping)?
     ;
 
-sourceIdentifier
-    : SRC_UNQUOTED_IDENTIFIER
-    | SRC_QUOTED_IDENTIFIER
+inlinestatsCommand
+    : INLINESTATS fields (BY grouping)?
     ;
 
-functionExpressionArgument
-   : qualifiedName
-   | string
-   ;
+grouping
+    : qualifiedName (COMMA qualifiedName)*
+    ;
+
+fromIdentifier
+    : FROM_UNQUOTED_IDENTIFIER
+    | QUOTED_IDENTIFIER
+    ;
 
 qualifiedName
     : identifier (DOT identifier)*
     ;
 
-qualifiedNames
-    : qualifiedName (COMMA qualifiedName)*
+qualifiedNamePattern
+    : identifierPattern (DOT identifierPattern)*
     ;
 
 identifier
@@ -125,15 +140,22 @@ identifier
     | QUOTED_IDENTIFIER
     ;
 
-functionIdentifier
-    : UNARY_FUNCTION
+identifierPattern
+    : PROJECT_UNQUOTED_IDENTIFIER
+    | QUOTED_IDENTIFIER
     ;
 
 constant
     : NULL                                                                              #nullLiteral
-    | number                                                                            #numericLiteral
+    | integerValue UNQUOTED_IDENTIFIER                                                  #qualifiedIntegerLiteral
+    | decimalValue                                                                      #decimalLiteral
+    | integerValue                                                                      #integerLiteral
     | booleanValue                                                                      #booleanLiteral
+    | PARAM                                                                             #inputParam
     | string                                                                            #stringLiteral
+    | OPENING_BRACKET numericValue (COMMA numericValue)* CLOSING_BRACKET                #numericArrayLiteral
+    | OPENING_BRACKET booleanValue (COMMA booleanValue)* CLOSING_BRACKET                #booleanArrayLiteral
+    | OPENING_BRACKET string (COMMA string)* CLOSING_BRACKET                            #stringArrayLiteral
     ;
 
 limitCommand
@@ -145,25 +167,61 @@ sortCommand
     ;
 
 orderExpression
-    : booleanExpression (ORDERING)? (NULLS_ORDERING (NULLS_ORDERING_DIRECTION))?
+    : booleanExpression ordering=(ASC | DESC)? (NULLS nullOrdering=(FIRST | LAST))?
     ;
 
-projectCommand
-    :  PROJECT projectClause (COMMA projectClause)*
+keepCommand
+    :  KEEP qualifiedNamePattern (COMMA qualifiedNamePattern)*
+    |  PROJECT qualifiedNamePattern (COMMA qualifiedNamePattern)*
     ;
 
-projectClause
-    : sourceIdentifier
-    | newName=sourceIdentifier ASSIGN oldName=sourceIdentifier
+dropCommand
+    : DROP qualifiedNamePattern (COMMA qualifiedNamePattern)*
+    ;
+
+renameCommand
+    : RENAME renameClause (COMMA renameClause)*
+    ;
+
+renameClause:
+    oldName=qualifiedNamePattern AS newName=qualifiedNamePattern
+    ;
+
+dissectCommand
+    : DISSECT primaryExpression string commandOptions?
+    ;
+
+grokCommand
+    : GROK primaryExpression string
+    ;
+
+mvExpandCommand
+    : MV_EXPAND qualifiedName
+    ;
+
+commandOptions
+    : commandOption (COMMA commandOption)*
+    ;
+
+commandOption
+    : identifier ASSIGN constant
     ;
 
 booleanValue
-    : BOOLEAN_VALUE
+    : TRUE | FALSE
     ;
 
-number
-    : DECIMAL_LITERAL  #decimalLiteral
-    | INTEGER_LITERAL  #integerLiteral
+numericValue
+    : decimalValue
+    | integerValue
+    ;
+
+decimalValue
+    : (PLUS | MINUS)? DECIMAL_LITERAL
+    ;
+
+integerValue
+    : (PLUS | MINUS)? INTEGER_LITERAL
     ;
 
 string
@@ -171,7 +229,7 @@ string
     ;
 
 comparisonOperator
-    : COMPARISON_OPERATOR
+    : EQ | NEQ | LT | LTE | GT | GTE
     ;
 
 explainCommand
@@ -180,4 +238,17 @@ explainCommand
 
 subqueryExpression
     : OPENING_BRACKET query CLOSING_BRACKET
+    ;
+
+showCommand
+    : SHOW INFO                                                           #showInfo
+    | SHOW FUNCTIONS                                                      #showFunctions
+    ;
+
+enrichCommand
+    : ENRICH policyName=fromIdentifier (ON matchField=qualifiedNamePattern)? (WITH enrichWithClause (COMMA enrichWithClause)*)?
+    ;
+
+enrichWithClause
+    : (newName=qualifiedNamePattern ASSIGN)? enrichField=qualifiedNamePattern
     ;

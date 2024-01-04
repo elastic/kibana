@@ -233,7 +233,7 @@ describe('filters', () => {
           filters: [
             {
               input: {
-                query: 'bytes : *',
+                query: '"bytes" : *',
                 language: 'kuery',
               },
               label: '',
@@ -272,14 +272,14 @@ describe('filters', () => {
           filters: [
             {
               input: {
-                query: 'bytes : *',
+                query: '"bytes" : *',
                 language: 'kuery',
               },
               label: '',
             },
             {
               input: {
-                query: 'dest : *',
+                query: '"dest" : *',
                 language: 'kuery',
               },
               label: '',
@@ -292,7 +292,7 @@ describe('filters', () => {
 
   describe('popover param editor', () => {
     // @ts-expect-error
-    window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
+    window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
     jest.mock('@kbn/unified-search-plugin/public', () => ({
       QueryStringInput: () => {
         return 'QueryStringInput';

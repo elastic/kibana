@@ -6,12 +6,13 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ReportingCore } from '../..';
-import { RunContext } from '@kbn/task-manager-plugin/server';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ReportingConfigType } from '../../config';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import { MonitorReportsTask } from '.';
+import type { ReportingCore } from '../..';
+import { createMockReportingCore } from '../../test_helpers';
 
 const logger = loggingSystemMock.createLogger();
 

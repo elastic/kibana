@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { analyzeMarkdown } from '@kbn/elastic-assistant';
 import type { Conversation, CodeBlockDetails } from '@kbn/elastic-assistant';
 import React from 'react';
@@ -48,6 +48,34 @@ export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetails
   return getFieldsAsCsv(allFields);
 };
 
+const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = [
+  'kql',
+  'dsl',
+  'eql',
+  'esql',
+  'sql', // Models often put the code block language as sql, for esql, so adding this as a fallback
+];
+
+/**
+ * Returns message contents with replacements applied.
+ *
+ * @param message
+ * @param replacements
+ */
+export const getMessageContentWithReplacements = ({
+  messageContent,
+  replacements,
+}: {
+  messageContent: string;
+  replacements: Record<string, string> | undefined;
+}): string =>
+  replacements != null
+    ? Object.keys(replacements).reduce(
+        (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
+        messageContent
+      )
+    : messageContent;
+
 /**
  * Augments the messages in a conversation with code block details, including
  * the start and end indices of the code block in the message, the type of the
@@ -58,40 +86,50 @@ export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetails
 export const augmentMessageCodeBlocks = (
   currentConversation: Conversation
 ): CodeBlockDetails[][] => {
-  const cbd = currentConversation.messages.map(({ content }) => analyzeMarkdown(content));
-
-  return cbd.map((codeBlocks, messageIndex) =>
-    codeBlocks.map((codeBlock, codeBlockIndex) => ({
-      ...codeBlock,
-      controlContainer: document.querySelectorAll(
-        `.message-${messageIndex} .euiCodeBlock__controls`
-      )[codeBlockIndex],
-      button: (
-        <SendToTimelineButton
-          asEmptyButton={true}
-          dataProviders={[
-            {
-              id: 'assistant-data-provider',
-              name: `Assistant Query from conversation ${currentConversation.id}`,
-              enabled: true,
-              excluded: false,
-              queryType: codeBlock.type,
-              kqlQuery: codeBlock.content ?? '',
-              queryMatch: {
-                field: 'host.name',
-                operator: ':',
-                value: 'test',
-              },
-              and: [],
-            },
-          ]}
-          keepDataView={true}
-        >
-          <EuiToolTip position="right" content={'Add to timeline'}>
-            <EuiIcon type="timeline" />
-          </EuiToolTip>
-        </SendToTimelineButton>
-      ),
-    }))
+  const cbd = currentConversation.messages.map(({ content }) =>
+    analyzeMarkdown(
+      getMessageContentWithReplacements({
+        messageContent: content ?? '',
+        replacements: currentConversation.replacements,
+      })
+    )
   );
+
+  const output = cbd.map((codeBlocks, messageIndex) =>
+    codeBlocks.map((codeBlock, codeBlockIndex) => {
+      return {
+        ...codeBlock,
+        getControlContainer: () =>
+          document.querySelectorAll(`.message-${messageIndex} .euiCodeBlock__controls`)[
+            codeBlockIndex
+          ],
+        button: sendToTimelineEligibleQueryTypes.includes(codeBlock.type) ? (
+          <SendToTimelineButton
+            asEmptyButton={true}
+            dataProviders={[
+              {
+                id: 'assistant-data-provider',
+                name: `Assistant Query from conversation ${currentConversation.id}`,
+                enabled: true,
+                excluded: false,
+                queryType: codeBlock.type,
+                kqlQuery: codeBlock.content ?? '',
+                queryMatch: {
+                  field: 'host.name',
+                  operator: ':',
+                  value: 'test',
+                },
+                and: [],
+              },
+            ]}
+            keepDataView={true}
+          >
+            <EuiIcon type="timeline" />
+          </SendToTimelineButton>
+        ) : null,
+      };
+    })
+  );
+
+  return output;
 };

@@ -1,0 +1,8 @@
+summary: Response from running a PagerDuty connector.
+value:
+  connector_id: 45de9f70-954f-4608-b12a-db7cf808e49d
+  data:
+    dedup_key: 5115e138b26b484a81eaea779faa6016
+    message: Event processed
+    status: success
+  status: ok

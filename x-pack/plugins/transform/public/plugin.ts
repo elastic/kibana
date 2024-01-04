@@ -18,16 +18,20 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public/plugin';
-import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public/plugin';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
 export interface PluginsDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  dataViewEditor?: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   management: ManagementSetup;
@@ -40,9 +44,15 @@ export interface PluginsDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export class TransformUiPlugin {
+  private isServerless: boolean = false;
+  constructor(initializerContext: PluginInitializerContext) {
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
+  }
+
   public setup(coreSetup: CoreSetup<PluginsDependencies>, pluginsSetup: PluginsDependencies): void {
     const { management, home, triggersActionsUi } = pluginsSetup;
 
@@ -56,7 +66,7 @@ export class TransformUiPlugin {
       order: 5,
       mount: async (params) => {
         const { mountManagementSection } = await import('./app/mount_management_section');
-        return mountManagementSection(coreSetup, params);
+        return mountManagementSection(coreSetup, params, this.isServerless);
       },
     });
     registerFeature(home);

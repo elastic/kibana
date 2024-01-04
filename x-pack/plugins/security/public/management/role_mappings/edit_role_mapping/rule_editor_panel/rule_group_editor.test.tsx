@@ -10,11 +10,11 @@ import React from 'react';
 
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import { AllRule, AnyRule, ExceptAnyRule, FieldRule } from '../../model';
 import { AddRuleButton } from './add_rule_button';
 import { FieldRuleEditor } from './field_rule_editor';
 import { RuleGroupEditor } from './rule_group_editor';
 import { RuleGroupTitle } from './rule_group_title';
+import { AllRule, AnyRule, ExceptAnyRule, FieldRule } from '../../model';
 
 describe('RuleGroupEditor', () => {
   it('renders an empty group', () => {

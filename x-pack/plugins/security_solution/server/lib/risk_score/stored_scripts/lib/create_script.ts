@@ -4,27 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-export const createStoredScriptBodySchema = schema.object({
-  id: schema.string({ minLength: 1 }),
-  script: schema.object({
-    lang: schema.oneOf([
-      schema.string(),
-      schema.literal('painless'),
-      schema.literal('expression'),
-      schema.literal('mustache'),
-      schema.literal('java'),
-    ]),
-    options: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    source: schema.string(),
-  }),
-});
-
-type CreateStoredScriptBodySchema = TypeOf<typeof createStoredScriptBodySchema>;
+import type { CreateStoredScriptRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const createStoredScript = async ({
   esClient,
@@ -33,7 +15,7 @@ export const createStoredScript = async ({
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  options: CreateStoredScriptBodySchema;
+  options: CreateStoredScriptRequestBody;
 }) => {
   try {
     await esClient.putScript(options);

@@ -39,6 +39,10 @@ export class TimeRangeContainer extends Container<
     super(initialInput, { embeddableLoaded: {} }, getFactory, parent);
   }
 
+  public getAllDataViews() {
+    return [];
+  }
+
   public getInheritedInput() {
     return { timeRange: this.input.timeRange };
   }

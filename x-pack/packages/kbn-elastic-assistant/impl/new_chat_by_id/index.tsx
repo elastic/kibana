@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import { useAssistantContext } from '../assistant_context';
@@ -20,6 +20,8 @@ export interface Props {
   iconType?: string | null;
   /** Optionally specify a well known ID, or default to a UUID */
   promptContextId?: string;
+  /** Defaults to false. If true, shows icon button without text */
+  iconOnly?: boolean;
 }
 
 const NewChatByIdComponent: React.FC<Props> = ({
@@ -27,6 +29,7 @@ const NewChatByIdComponent: React.FC<Props> = ({
   conversationId,
   iconType,
   promptContextId,
+  iconOnly = false,
 }) => {
   const { showAssistantOverlay } = useAssistantContext();
 
@@ -50,12 +53,28 @@ const NewChatByIdComponent: React.FC<Props> = ({
   }, [iconType]);
 
   return useMemo(
-    () => (
-      <EuiButtonEmpty data-test-subj="newChatById" iconType={icon} onClick={showOverlay}>
-        {children}
-      </EuiButtonEmpty>
-    ),
-    [children, icon, showOverlay]
+    () =>
+      iconOnly ? (
+        <EuiToolTip content={i18n.NEW_CHAT}>
+          <EuiButtonIcon
+            data-test-subj="newChatById"
+            iconType={icon ?? 'discuss'}
+            onClick={showOverlay}
+            color={'text'}
+            aria-label={i18n.NEW_CHAT}
+          />
+        </EuiToolTip>
+      ) : (
+        <EuiButtonEmpty
+          data-test-subj="newChatById"
+          iconType={icon}
+          onClick={showOverlay}
+          aria-label={i18n.NEW_CHAT}
+        >
+          {children}
+        </EuiButtonEmpty>
+      ),
+    [children, icon, showOverlay, iconOnly]
   );
 };
 

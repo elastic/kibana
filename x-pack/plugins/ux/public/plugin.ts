@@ -20,6 +20,7 @@ import {
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import {
   DataPublicPluginSetup,
@@ -42,6 +43,10 @@ import {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import {
+  ObservabilityAIAssistantPluginStart,
+  ObservabilityAIAssistantPluginSetup,
+} from '@kbn/observability-ai-assistant-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -54,6 +59,7 @@ export interface ApmPluginSetupDeps {
   licensing: LicensingPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -65,6 +71,7 @@ export interface ApmPluginStartDeps {
   inspector: InspectorPluginStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   exploratoryView: ExploratoryViewPublicStart;
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
@@ -76,7 +83,7 @@ async function getDataStartPlugin(core: CoreSetup) {
 }
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
-  constructor() {}
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
@@ -163,6 +170,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       )
     );
 
+    const isDev = this.initContext.env.mode.dev;
+
     core.application.register({
       id: 'ux',
       title: 'User Experience',
@@ -196,6 +205,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         ]);
 
         return renderApp({
+          isDev,
           core: coreStart,
           deps: pluginSetupDeps,
           appMountParameters,

@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { getApmIndexPatterns } from './get_indices';
 
 export function getFieldCaps({
@@ -15,7 +15,7 @@ export function getFieldCaps({
   apmIndices,
 }: {
   esClient: ElasticsearchClient;
-  apmIndices: ApmIndicesConfig;
+  apmIndices: APMIndices;
 }) {
   return esClient.fieldCaps({
     index: getApmIndexPatterns([apmIndices.metric, apmIndices.transaction]),

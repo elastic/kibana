@@ -24,6 +24,7 @@ import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/s
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { IEventLogClientService } from '@kbn/event-log-plugin/server';
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineAlertTypes } from './alert_types';
@@ -87,12 +88,14 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         'test.longRunning',
         'test.exceedsAlertLimit',
         'test.always-firing-alert-as-data',
+        'test.patternFiringAad',
+        'test.waitingRule',
       ],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
           savedObject: {
-            all: ['alert'],
+            all: [RULE_SAVED_OBJECT_TYPE],
             read: [],
           },
           alerting: {
@@ -115,6 +118,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.longRunning',
                 'test.exceedsAlertLimit',
                 'test.always-firing-alert-as-data',
+                'test.patternFiringAad',
+                'test.waitingRule',
               ],
             },
           },
@@ -124,7 +129,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           app: ['alerts', 'kibana'],
           savedObject: {
             all: [],
-            read: ['alert'],
+            read: [RULE_SAVED_OBJECT_TYPE],
           },
           alerting: {
             rule: {
@@ -146,6 +151,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                 'test.longRunning',
                 'test.exceedsAlertLimit',
                 'test.always-firing-alert-as-data',
+                'test.patternFiringAad',
+                'test.waitingRule',
               ],
             },
           },

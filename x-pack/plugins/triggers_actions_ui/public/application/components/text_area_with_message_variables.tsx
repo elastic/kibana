@@ -7,9 +7,10 @@
 
 import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
-import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariables } from './add_message_variables';
+import { AddMessageVariables } from '@kbn/alerts-ui-shared';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+import { TextAreaWithAutocomplete } from './text_area_with_autocomplete';
 import { templateActionVariable } from '../lib';
 
 interface Props {
@@ -20,10 +21,11 @@ interface Props {
   isDisabled?: boolean;
   editAction: (property: string, value: any, index: number) => void;
   label: string;
+  helpText?: string;
   errors?: string[];
 }
 
-export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
+const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
   messageVariables,
   paramsProperty,
   index,
@@ -32,6 +34,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
   editAction,
   label,
   errors,
+  helpText,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
@@ -64,6 +67,7 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
           paramsProperty={paramsProperty}
         />
       }
+      helpText={helpText}
     >
       <EuiTextArea
         disabled={isDisabled}
@@ -84,4 +88,16 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
       />
     </EuiFormRow>
   );
+};
+
+export const TextAreaWithMessageVariables = (props: Props) => {
+  let isMustacheAutocompleteOn;
+  try {
+    isMustacheAutocompleteOn = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
+  } catch (e) {
+    isMustacheAutocompleteOn = false;
+  }
+
+  if (isMustacheAutocompleteOn) return TextAreaWithAutocomplete(props);
+  return TextAreaWithMessageVariablesLegacy(props);
 };

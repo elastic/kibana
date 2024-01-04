@@ -6,10 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type {
-  UserAuthenticationsRequestOptions,
-  AuthenticationHit,
-} from '../../../../../../../common/search_strategy';
+import type { UserAuthenticationsRequestOptions } from '../../../../../../../common/api/search_strategy';
+import type { AuthenticationHit } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   UsersQueries,

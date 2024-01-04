@@ -22,6 +22,10 @@ import { MobileTransactionOverview } from '../../app/mobile/transaction_overview
 import { TransactionDetails } from '../../app/transaction_details';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { ErrorGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/error_group_details';
+import { CrashGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/crash_group_details';
+import { MobileErrorCrashesOverview } from '../../app/mobile/errors_and_crashes_overview';
+import { ServiceDependencies } from '../../app/service_dependencies';
 
 export function page({
   title,
@@ -178,6 +182,67 @@ export const mobileServiceDetailRoute = {
           },
         },
       },
+      '/mobile-services/{serviceName}/errors-and-crashes': {
+        ...page({
+          tabKey: 'errors-and-crashes',
+          title: i18n.translate('xpack.apm.views.errorsAndCrashes.title', {
+            defaultMessage: 'Errors & Crashes',
+          }),
+          element: <Outlet />,
+          searchBarOptions: {
+            showTimeComparison: true,
+            showMobileFilters: true,
+          },
+        }),
+        params: t.partial({
+          query: t.partial({
+            page: toNumberRt,
+            pageSize: toNumberRt,
+            sortField: t.string,
+            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            mobileErrorTabId: t.string,
+            device: t.string,
+            osVersion: t.string,
+            appVersion: t.string,
+            netConnectionType: t.string,
+          }),
+        }),
+        children: {
+          '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}':
+            {
+              element: <ErrorGroupDetails />,
+              params: t.type({
+                path: t.type({
+                  groupId: t.string,
+                }),
+                query: t.partial({ errorId: t.string }),
+              }),
+            },
+          '/mobile-services/{serviceName}/errors-and-crashes/': {
+            element: <MobileErrorCrashesOverview />,
+          },
+          '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}':
+            {
+              element: <CrashGroupDetails />,
+              params: t.type({
+                path: t.type({
+                  groupId: t.string,
+                }),
+                query: t.partial({ errorId: t.string }),
+              }),
+            },
+        },
+      },
+      '/mobile-services/{serviceName}/dependencies': page({
+        element: <ServiceDependencies />,
+        tabKey: 'dependencies',
+        title: i18n.translate('xpack.apm.views.dependencies.title', {
+          defaultMessage: 'Dependencies',
+        }),
+        searchBarOptions: {
+          showTimeComparison: true,
+        },
+      }),
       '/mobile-services/{serviceName}/service-map': page({
         tabKey: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {

@@ -7,6 +7,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { ScreenshotModeExamplePlugin } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => new ScreenshotModeExamplePlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { ScreenshotModeExamplePlugin } = await import('./plugin');
+  return new ScreenshotModeExamplePlugin(ctx);
+};

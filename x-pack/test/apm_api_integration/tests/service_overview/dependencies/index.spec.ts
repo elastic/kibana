@@ -344,6 +344,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(firstItem.location).toMatchInline(`
           Object {
             "agentName": "dotnet",
+            "dependencyName": "opbeans:3000",
             "environment": "production",
             "id": "5948c153c2d8989f92a9c75ef45bb845f53e200d",
             "serviceName": "opbeans-dotnet",

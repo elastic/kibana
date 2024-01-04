@@ -6,12 +6,15 @@
  */
 
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
+import { EuiSpacer, EuiFlyoutBody, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import deepEqual from 'fast-deep-equal';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 
+import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { getRawData } from '../../../../assistant/helpers';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
@@ -21,7 +24,6 @@ import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
@@ -40,6 +42,12 @@ import {
   PROMPT_CONTEXT_EVENT_CATEGORY,
   PROMPT_CONTEXTS,
 } from '../../../../assistant/content/prompt_contexts';
+
+const FlyoutFooterContainerPanel = styled(EuiPanel)`
+  .side-panel-flyout-footer {
+    background-color: transparent;
+  }
+`;
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -72,9 +80,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   scopeId,
   isReadOnly,
 }) => {
-  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   // TODO: changing feature flags requires a hard refresh to take effect, but this temporary workaround technically violates the rules of hooks:
-  const useAssistant = isAssistantEnabled ? useAssistantOverlay : useAssistantNoop;
+  const useAssistant = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const currentSpaceId = useSpaceId();
   const { indexName } = expandedEvent;
   const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
@@ -87,6 +95,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       skip: !expandedEvent.eventId,
     }
   );
+  const getFieldsData = useGetFieldsData(rawEventData?.fields);
 
   const {
     isolateAction,
@@ -130,6 +139,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           showAlertDetails={showAlertDetails}
           timestamp={timestamp}
           promptContextId={promptContextId}
+          scopeId={scopeId}
+          refetchFlyoutData={refetchFlyoutData}
+          getFieldsData={getFieldsData}
         />
       ) : (
         <ExpandableEventTitle
@@ -141,6 +153,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           timestamp={timestamp}
           handleOnEventClosed={handleOnEventClosed}
           promptContextId={promptContextId}
+          scopeId={scopeId}
+          refetchFlyoutData={refetchFlyoutData}
+          getFieldsData={getFieldsData}
         />
       ),
     [
@@ -154,8 +169,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       ruleName,
       showAlertDetails,
       timestamp,
-      handleOnEventClosed,
       promptContextId,
+      handleOnEventClosed,
+      scopeId,
+      refetchFlyoutData,
+      getFieldsData,
     ]
   );
 
@@ -254,17 +272,19 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     <>
       {header}
       {body}
-      <FlyoutFooter
-        detailsData={detailsData}
-        detailsEcsData={ecsData}
-        refetchFlyoutData={refetchFlyoutData}
-        handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        isReadOnly={isReadOnly}
-        loadingEventDetails={loading}
-        onAddIsolationStatusClick={showHostIsolationPanel}
-        scopeId={scopeId}
-      />
+      <FlyoutFooterContainerPanel hasShadow={false} borderRadius="none">
+        <FlyoutFooter
+          detailsData={detailsData}
+          detailsEcsData={ecsData}
+          refetchFlyoutData={refetchFlyoutData}
+          handleOnEventClosed={handleOnEventClosed}
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          isReadOnly={isReadOnly}
+          loadingEventDetails={loading}
+          onAddIsolationStatusClick={showHostIsolationPanel}
+          scopeId={scopeId}
+        />
+      </FlyoutFooterContainerPanel>
     </>
   );
 };

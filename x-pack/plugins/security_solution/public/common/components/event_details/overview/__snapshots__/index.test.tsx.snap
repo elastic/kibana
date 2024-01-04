@@ -82,32 +82,29 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
               class="c2"
             >
               <div
-                class="euiPopover emotion-euiPopover"
+                class="euiPopover emotion-euiPopover-inline-block"
                 data-test-subj="alertStatus"
               >
-                <div
-                  class="euiPopover__anchor css-16vtueo-render"
+                <button
+                  aria-label="Click to change alert status"
+                  class="euiBadge c3 emotion-euiBadge-primary-clickable"
+                  data-test-subj="rule-status-badge"
                 >
-                  <button
-                    aria-label="Click to change alert status"
-                    class="euiBadge c3 emotion-euiBadge-primary-clickable"
+                  <span
+                    class="euiBadge__content emotion-euiBadge__content"
                   >
                     <span
-                      class="euiBadge__content emotion-euiBadge__content"
+                      class="euiBadge__text emotion-euiBadge__text-clickable"
                     >
-                      <span
-                        class="euiBadge__text emotion-euiBadge__text-clickable"
-                      >
-                        open
-                      </span>
-                      <span
-                        class="euiBadge__icon emotion-euiBadge__icon-right"
-                        color="inherit"
-                        data-euiicon-type="arrowDown"
-                      />
+                      open
                     </span>
-                  </button>
-                </div>
+                    <span
+                      class="euiBadge__icon emotion-euiBadge__icon-right"
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </span>
+                </button>
               </div>
             </div>
             <div

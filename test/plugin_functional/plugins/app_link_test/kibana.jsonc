@@ -5,9 +5,6 @@
   "plugin": {
     "id": "appLinkTest",
     "server": false,
-    "browser": true,
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "browser": true
   }
 }

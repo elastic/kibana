@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { CaseStatuses, StatusAll } from '../../../../common';
+import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { CaseUI } from '../../../containers/types';
@@ -127,7 +127,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
           ...props,
-          hiddenStatuses: [CaseStatuses.closed, StatusAll],
+          hiddenStatuses: [CaseStatuses.closed],
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },

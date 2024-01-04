@@ -7,7 +7,11 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -19,6 +23,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { formatLegacyActions } from '../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
@@ -33,6 +38,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -43,16 +49,20 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -67,7 +77,7 @@ describe('get()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
@@ -134,7 +144,7 @@ describe('get()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
@@ -211,6 +221,83 @@ describe('get()', () => {
                                                                             `);
   });
 
+  test('gets rule with actions using system connectors', async () => {
+    const rulesClient = new RulesClient(rulesClientParams);
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'system_action:system_action-id',
+            params: {},
+          },
+        ],
+        notifyWhen: 'onActiveAlert',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+    const result = await rulesClient.get({ id: '1' });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "group": "default",
+            "id": "system_action-id",
+            "params": Object {},
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "id": "1",
+        "notifyWhen": "onActiveAlert",
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "snoozeSchedule": Array [],
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+                                                                                                                  Array [
+                                                                                                                    "alert",
+                                                                                                                    "1",
+                                                                                                                  ]
+                                                                            `);
+  });
+
   test('should call useSavedObjectReferences.injectReferences if defined for rule type', async () => {
     const injectReferencesFn = jest.fn().mockReturnValue({
       bar: true,
@@ -227,6 +314,7 @@ describe('get()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -235,11 +323,12 @@ describe('get()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
@@ -314,7 +403,7 @@ describe('get()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
@@ -353,6 +442,7 @@ describe('get()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -361,11 +451,12 @@ describe('get()', () => {
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     }));
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
@@ -408,7 +499,7 @@ describe('get()', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           alertTypeId: 'myType',
           consumer: 'myApp',
@@ -471,7 +562,7 @@ describe('get()', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           alertTypeId: '123',
           schedule: { interval: '10s' },
@@ -493,7 +584,7 @@ describe('get()', () => {
             action: 'rule_get',
             outcome: 'success',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -512,7 +603,7 @@ describe('get()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {
@@ -527,7 +618,7 @@ describe('get()', () => {
   describe('legacy actions migration for SIEM', () => {
     const rule = {
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },

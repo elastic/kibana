@@ -37,19 +37,16 @@ export const migrateExplicitlyHiddenTitles: SavedObjectMigrationFn<any, any> = (
       // Convert each panel into the dashboard panel state
       const originalPanelState = convertSavedDashboardPanelToPanelState<EmbeddableInput>(panel);
       newPanels.push(
-        convertPanelStateToSavedDashboardPanel(
-          {
-            ...originalPanelState,
-            explicitInput: {
-              ...originalPanelState.explicitInput,
-              ...(originalPanelState.explicitInput.title === '' &&
-              !originalPanelState.explicitInput.hidePanelTitles
-                ? { hidePanelTitles: true }
-                : {}),
-            },
+        convertPanelStateToSavedDashboardPanel({
+          ...originalPanelState,
+          explicitInput: {
+            ...originalPanelState.explicitInput,
+            ...(originalPanelState.explicitInput.title === '' &&
+            !originalPanelState.explicitInput.hidePanelTitles
+              ? { hidePanelTitles: true }
+              : {}),
           },
-          panel.version
-        )
+        })
       );
     });
     return {

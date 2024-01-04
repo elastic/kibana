@@ -16,50 +16,52 @@ import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../timeline/utils/common';
 import { bulkDeleteSavedObjects } from '../helpers/bulk_delete_saved_objects';
-import { deletePrebuiltSavedObjectsSchema } from '../schema';
+import { deletePrebuiltSavedObjectsRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const deletePrebuiltSavedObjectsRoute = (
   router: SecuritySolutionPluginRouter,
   security: SetupPlugins['security']
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: PREBUILT_SAVED_OBJECTS_BULK_DELETE,
-      validate: deletePrebuiltSavedObjectsSchema,
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const { template_name: templateName } = request.params;
-      const deleteAll = request?.body?.deleteAll;
+    })
+    .addVersion(
+      { validate: { request: deletePrebuiltSavedObjectsRequestBody }, version: '1' },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        const { template_name: templateName } = request.params;
+        const deleteAll = request?.body?.deleteAll;
 
-      try {
-        const securitySolution = await context.securitySolution;
+        try {
+          const securitySolution = await context.securitySolution;
 
-        const spaceId = securitySolution?.getSpaceId();
+          const spaceId = securitySolution?.getSpaceId();
 
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
+          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const savedObjectsClient = (await frameworkRequest.context.core).savedObjects.client;
 
-        const res = await bulkDeleteSavedObjects({
-          deleteAll,
-          savedObjectsClient,
-          spaceId,
-          savedObjectTemplate: templateName,
-        });
+          const res = await bulkDeleteSavedObjects({
+            deleteAll,
+            savedObjectsClient,
+            spaceId,
+            savedObjectTemplate: templateName,
+          });
 
-        return response.ok({
-          body: res,
-        });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return response.ok({
+            body: res,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

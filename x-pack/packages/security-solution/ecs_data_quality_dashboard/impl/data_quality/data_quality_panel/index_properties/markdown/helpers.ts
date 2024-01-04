@@ -201,6 +201,8 @@ export const getTabCountsMarkdownComment = (
 ): string =>
   `### **${i18n.INCOMPATIBLE_FIELDS}** ${getCodeFormattedValue(
     `${partitionedFieldMetadata.incompatible.length}`
+  )} **${i18n.SAME_FAMILY}** ${getCodeFormattedValue(
+    `${partitionedFieldMetadata.sameFamily.length}`
   )} **${i18n.CUSTOM_FIELDS}** ${getCodeFormattedValue(
     `${partitionedFieldMetadata.custom.length}`
   )} **${i18n.ECS_COMPLIANT_FIELDS}** ${getCodeFormattedValue(
@@ -216,13 +218,18 @@ export const getResultEmoji = (incompatible: number | undefined): string => {
   }
 };
 
-export const getSummaryTableMarkdownHeader = (): string =>
-  `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${ILM_PHASE} | ${SIZE} |
+export const getSummaryTableMarkdownHeader = (isILMAvailable: boolean): string =>
+  isILMAvailable
+    ? `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${ILM_PHASE} | ${SIZE} |
 |${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
-    DOCS
-  )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
-    ILM_PHASE
-  )}|${getHeaderSeparator(SIZE)}|`;
+        DOCS
+      )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
+        ILM_PHASE
+      )}|${getHeaderSeparator(SIZE)}|`
+    : `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${SIZE} |
+|${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
+        DOCS
+      )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(SIZE)}|`;
 
 export const getSummaryTableMarkdownRow = ({
   docsCount,
@@ -231,6 +238,7 @@ export const getSummaryTableMarkdownRow = ({
   ilmPhase,
   incompatible,
   indexName,
+  isILMAvailable,
   patternDocsCount,
   sizeInBytes,
 }: {
@@ -240,17 +248,26 @@ export const getSummaryTableMarkdownRow = ({
   ilmPhase: IlmPhase | undefined;
   incompatible: number | undefined;
   indexName: string;
+  isILMAvailable: boolean;
   patternDocsCount: number;
   sizeInBytes: number | undefined;
 }): string =>
-  `| ${getResultEmoji(incompatible)} | ${escape(indexName)} | ${formatNumber(
-    docsCount
-  )} (${getDocsCountPercent({
-    docsCount,
-    patternDocsCount,
-  })}) | ${incompatible ?? EMPTY_PLACEHOLDER} | ${
-    ilmPhase != null ? getCodeFormattedValue(ilmPhase) : EMPTY_PLACEHOLDER
-  } | ${formatBytes(sizeInBytes)} |
+  isILMAvailable
+    ? `| ${getResultEmoji(incompatible)} | ${escape(indexName)} | ${formatNumber(
+        docsCount
+      )} (${getDocsCountPercent({
+        docsCount,
+        patternDocsCount,
+      })}) | ${incompatible ?? EMPTY_PLACEHOLDER} | ${
+        ilmPhase != null ? getCodeFormattedValue(ilmPhase) : EMPTY_PLACEHOLDER
+      } | ${formatBytes(sizeInBytes)} |
+`
+    : `| ${getResultEmoji(incompatible)} | ${escape(indexName)} | ${formatNumber(
+        docsCount
+      )} (${getDocsCountPercent({
+        docsCount,
+        patternDocsCount,
+      })}) | ${incompatible ?? EMPTY_PLACEHOLDER} | ${formatBytes(sizeInBytes)} |
 `;
 
 export const getSummaryTableMarkdownComment = ({
@@ -259,6 +276,7 @@ export const getSummaryTableMarkdownComment = ({
   formatNumber,
   ilmPhase,
   indexName,
+  isILMAvailable,
   partitionedFieldMetadata,
   patternDocsCount,
   sizeInBytes,
@@ -268,17 +286,19 @@ export const getSummaryTableMarkdownComment = ({
   formatNumber: (value: number | undefined) => string;
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isILMAvailable: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   patternDocsCount: number;
   sizeInBytes: number | undefined;
 }): string =>
-  `${getSummaryTableMarkdownHeader()}
+  `${getSummaryTableMarkdownHeader(isILMAvailable)}
 ${getSummaryTableMarkdownRow({
   docsCount,
   formatBytes,
   formatNumber,
   ilmPhase,
   indexName,
+  isILMAvailable,
   incompatible: partitionedFieldMetadata.incompatible.length,
   patternDocsCount,
   sizeInBytes,

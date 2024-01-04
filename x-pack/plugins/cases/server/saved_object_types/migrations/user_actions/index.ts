@@ -13,7 +13,7 @@ import type {
   SavedObjectMigrationMap,
 } from '@kbn/core/server';
 
-import { ConnectorTypes } from '../../../../common/api';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import type { SanitizedCaseOwner } from '..';
 import { addOwnerToSO } from '..';

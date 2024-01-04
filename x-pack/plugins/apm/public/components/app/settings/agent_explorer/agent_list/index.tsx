@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
@@ -20,7 +21,6 @@ import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer'
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { AgentIcon } from '../../../../shared/agent_icon';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../shared/item_badge';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
@@ -67,7 +67,10 @@ export function getAgentsColumns({
             <EuiButtonIcon
               size="xs"
               iconSize="s"
-              aria-label="Toggle agent instances view"
+              aria-label={i18n.translate(
+                'xpack.apm.getAgentsColumns.euiButtonIcon.toggleAgentInstancesViewLabel',
+                { defaultMessage: 'Toggle agent instances view' }
+              )}
               data-test-subj="apmAgentExplorerListToggle"
               onClick={() => onAgentSelected(agent)}
               display={isSelected ? 'base' : 'empty'}
@@ -96,7 +99,7 @@ export function getAgentsColumns({
           content={
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <AgentIcon agentName={agentName} />
+                <AgentIcon agentName={agentName} size="l" />
               </EuiFlexItem>
               <EuiFlexItem className="eui-textTruncate">
                 <span className="eui-textTruncate">{serviceName}</span>

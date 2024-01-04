@@ -5,148 +5,91 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { matchPath, useLocation } from 'react-router-dom';
-import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import {
-  SolutionSideNavItemPosition,
-  type SolutionSideNavItem,
-} from '@kbn/security-solution-side-nav';
-import { useKibana } from '../../common/services';
-import { type GetLinkProps, useGetLinkProps } from '../../common/hooks/use_link_props';
+import { useCallback, useMemo } from 'react';
+import { type NavigationLink } from '@kbn/security-solution-navigation';
+import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
+import { SolutionSideNavItemPosition } from '@kbn/security-solution-side-nav';
 import { useNavLinks } from '../../common/hooks/use_nav_links';
+import type { ProjectSideNavItem } from './types';
+import type { ProjectNavigationLink, ProjectPageName } from '../links/types';
+import { isBottomNavItemId } from '../links/util';
 
-type NavigationLink = ReturnType<typeof useNavLinks>[number];
-
-const isBottomNavItem = (id: string) =>
-  id === SecurityPageName.landing || id === SecurityPageName.administration;
-const isGetStartedNavItem = (id: string) => id === SecurityPageName.landing;
+type GetLinkProps = (link: NavigationLink) => {
+  href: string & Partial<ProjectSideNavItem>;
+};
 
 /**
  * Formats generic navigation links into the shape expected by the `SolutionSideNav`
  */
-const formatLink = (navLink: NavigationLink, getLinkProps: GetLinkProps): SolutionSideNavItem => ({
-  id: navLink.id,
-  label: navLink.title,
-  iconType: navLink.sideNavIcon,
-  position: isBottomNavItem(navLink.id)
-    ? SolutionSideNavItemPosition.bottom
-    : SolutionSideNavItemPosition.top,
-  ...getLinkProps({ deepLinkId: navLink.id }),
-  ...(navLink.categories?.length && { categories: navLink.categories }),
-  ...(navLink.links?.length && {
-    items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
-      if (!current.disabled) {
-        acc.push({
-          id: current.id,
-          label: current.title,
-          iconType: current.sideNavIcon,
-          isBeta: current.isBeta,
-          betaOptions: current.betaOptions,
-          ...getLinkProps({ deepLinkId: current.id }),
-        });
-      }
-      return acc;
-    }, []),
-  }),
-});
-
-/**
- * Formats the get started navigation links into the shape expected by the `SolutionSideNav`
- */
-const formatGetStartedLink = (
-  navLink: NavigationLink,
+const formatLink = (
+  navLink: NavigationLink<ProjectPageName>,
   getLinkProps: GetLinkProps
-): SolutionSideNavItem => ({
-  id: navLink.id,
-  label: navLink.title,
-  iconType: navLink.sideNavIcon,
-  position: SolutionSideNavItemPosition.bottom,
-  ...getLinkProps({ deepLinkId: navLink.id }),
-  appendSeparator: true,
-});
+): ProjectSideNavItem => {
+  const items = navLink.links?.reduce<ProjectSideNavItem[]>((acc, current) => {
+    if (!current.disabled) {
+      acc.push({
+        id: current.id,
+        label: current.title,
+        iconType: current.sideNavIcon,
+        isBeta: current.isBeta,
+        betaOptions: current.betaOptions,
+        ...getLinkProps(current),
+      });
+    }
+    return acc;
+  }, []);
 
-// DFS for the sideNavItem matching the current `pathname`, returns all item hierarchy when found
-const findItemsByPath = (
-  sideNavItems: SolutionSideNavItem[],
-  pathname: string
-): SolutionSideNavItem[] => {
-  for (const sideNavItem of sideNavItems) {
-    if (sideNavItem.items?.length) {
-      const found = findItemsByPath(sideNavItem.items, pathname);
-      if (found.length) {
-        found.unshift(sideNavItem);
-        return found;
-      }
-    }
-    if (matchPath(pathname, { path: sideNavItem.href })) {
-      return [sideNavItem];
-    }
-  }
-  return [];
+  return {
+    id: navLink.id,
+    label: navLink.title,
+    iconType: navLink.sideNavIcon,
+    position: isBottomNavItemId(navLink.id)
+      ? SolutionSideNavItemPosition.bottom
+      : SolutionSideNavItemPosition.top,
+    ...getLinkProps(navLink),
+    ...(navLink.categories?.length && { categories: navLink.categories }),
+    ...(items && { items }),
+  };
 };
 
 /**
  * Returns all the formatted SideNavItems, including external links
  */
-export const useSideNavItems = (): SolutionSideNavItem[] => {
+export const useSideNavItems = (): ProjectSideNavItem[] => {
   const navLinks = useNavLinks();
-  const getLinkProps = useGetLinkProps();
+  return useFormattedSideNavItems(navLinks);
+};
 
-  const securitySideNavItems = useMemo(
+/**
+ * Returns all the formatted SideNavItems, including external links
+ */
+export const useFormattedSideNavItems = (
+  navLinks: ProjectNavigationLink[]
+): ProjectSideNavItem[] => {
+  const getKibanaLinkProps = useGetLinkProps();
+
+  const getLinkProps = useCallback<GetLinkProps>(
+    (link) => {
+      if (link.externalUrl) {
+        return {
+          href: link.externalUrl,
+          openInNewTab: true,
+        };
+      } else {
+        return getKibanaLinkProps({ id: link.id });
+      }
+    },
+    [getKibanaLinkProps]
+  );
+
+  return useMemo(
     () =>
-      navLinks.reduce<SolutionSideNavItem[]>((items, navLink) => {
-        if (navLink.disabled) {
-          return items;
-        }
-        if (isGetStartedNavItem(navLink.id)) {
-          items.push(formatGetStartedLink(navLink, getLinkProps));
-        } else {
+      navLinks.reduce<ProjectSideNavItem[]>((items, navLink) => {
+        if (!navLink.disabled) {
           items.push(formatLink(navLink, getLinkProps));
         }
         return items;
       }, []),
     [getLinkProps, navLinks]
   );
-
-  const sideNavItems = useAddExternalSideNavItems(securitySideNavItems);
-
-  return sideNavItems;
-};
-
-/**
- * @param securitySideNavItems the sideNavItems for Security pages
- * @returns sideNavItems with Security and external links
- */
-const useAddExternalSideNavItems = (securitySideNavItems: SolutionSideNavItem[]) => {
-  const sideNavItemsWithExternals = useMemo(
-    () => [
-      ...securitySideNavItems,
-      // TODO: add external links. e.g.:
-      // {
-      //   id: 'ml',
-      //   label: 'Machine Learning Jobs',
-      //   ...getLinkProps({ appId: 'ml', path: '/jobs' }),
-      //   links: [...]
-      // },
-    ],
-    [securitySideNavItems]
-  );
-
-  return sideNavItemsWithExternals;
-};
-
-/**
- * Returns the selected item id, which is the root item in the links hierarchy
- */
-export const useSideNavSelectedId = (sideNavItems: SolutionSideNavItem[]): string => {
-  const { http } = useKibana().services;
-  const { pathname } = useLocation();
-
-  const selectedId: string = useMemo(() => {
-    const [rootNavItem] = findItemsByPath(sideNavItems, http.basePath.prepend(pathname));
-    return rootNavItem?.id ?? '';
-  }, [sideNavItems, pathname, http]);
-
-  return selectedId;
 };

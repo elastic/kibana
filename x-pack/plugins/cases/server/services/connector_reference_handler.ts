@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { NONE_CONNECTOR_ID } from '../../common/api';
+import { NONE_CONNECTOR_ID } from '../../common/constants';
 
 interface Reference {
   soReference?: SavedObjectReference;

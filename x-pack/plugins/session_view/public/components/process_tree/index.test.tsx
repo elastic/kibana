@@ -36,6 +36,7 @@ describe('ProcessTree component', () => {
     onJumpToOutput: jest.fn(),
     updatedAlertsStatus: {},
     onShowAlertDetails: jest.fn(),
+    trackEvent: jest.fn(),
   };
 
   beforeEach(() => {

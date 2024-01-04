@@ -73,7 +73,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: webhookConnector.id,
           group: 'default',
           params: {
-            body: `payload {{alertId}} - ${template}`,
+            body: `payload {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(webhookSimulatorURL, rule.id));
@@ -84,18 +84,20 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
         // const EscapableStrings
         const template =
-          '{{context.escapableBacktic}} -- {{context.escapableBold}} -- {{context.escapableBackticBold}} -- {{context.escapableHtml}}';
+          '{{context.escapableBacktic}} -- {{context.escapableBold}} -- {{context.escapableBackticBold}} -- {{context.escapableHtml}} -- {{context.escapableLink}}';
 
         const rule = await createRule({
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
 
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
-        expect(body).to.be("back'tic -- `*bold*` -- `'*bold*'` -- &lt;&amp;&gt;");
+        expect(body).to.be(
+          "back'tic -- `*bold*` -- `'*bold*'` -- &lt;&amp;&gt; -- https://te_st.com/"
+        );
       });
 
       it('should handle context variable object expansion', async () => {
@@ -106,7 +108,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -121,7 +123,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
 
@@ -155,7 +157,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: webhookConnector.id,
           group: 'default',
           params: {
-            body: `payload {{alertId}} - ${template}`,
+            body: `payload {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(webhookSimulatorURL, rule.id));
@@ -173,7 +175,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: webhookConnector.id,
           group: 'default',
           params: {
-            body: `payload {{alertId}} - ${template}`,
+            body: `payload {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(webhookSimulatorURL, rule.id));
@@ -192,7 +194,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -209,7 +211,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
           id: slackConnector.id,
           group: 'default',
           params: {
-            message: `message {{alertId}} - ${template}`,
+            message: `message {{rule.id}} - ${template}`,
           },
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
@@ -227,7 +229,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         id: slackConnector.id,
         group: 'default',
         params: {
-          message: `message {{alertId}} - ${template}`,
+          message: `message {{rule.id}} - ${template}`,
         },
       });
       const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));

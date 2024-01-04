@@ -12,11 +12,12 @@ import {
   FilterStateStore,
   buildEsQuery,
 } from '@kbn/es-query';
-import { flow, get, isEmpty, isString } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
+import { prepareKQLParam } from '../../../../common/utils/kql';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
-import { DataProviderType } from '../../../../common/types/timeline/api';
+import { DataProviderType } from '../../../../common/api/timeline';
 import { EXISTS_OPERATOR } from '../../../../common/types/timeline';
 
 export type PrimitiveOrArrayOfPrimitives =
@@ -34,33 +35,6 @@ export interface CombineQueries {
   kqlQuery: Query;
   kqlMode: string;
 }
-
-export const escapeQueryValue = (
-  val: PrimitiveOrArrayOfPrimitives = ''
-): PrimitiveOrArrayOfPrimitives => {
-  if (isString(val)) {
-    if (isEmpty(val)) {
-      return '""';
-    }
-    return `"${escapeKuery(val)}"`;
-  }
-
-  return val;
-};
-
-const escapeWhitespace = (val: string) =>
-  val.replace(/\t/g, '\\t').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
-
-// See the SpecialCharacter rule in kuery.peg
-const escapeSpecialCharacters = (val: string) => val.replace(/["]/g, '\\$&'); // $& means the whole matched string
-
-// See the Keyword rule in kuery.peg
-// I do not think that we need that anymore since we are doing a full match_phrase all the time now => return `"${escapeKuery(val)}"`;
-// const escapeAndOr = (val: string) => val.replace(/(\s+)(and|or)(\s+)/gi, '$1\\$2$3');
-
-// const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
-
-export const escapeKuery = flow(escapeSpecialCharacters, escapeWhitespace);
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
@@ -161,9 +135,9 @@ const buildQueryMatch = (
         : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
-            isNumber(dataProvider.queryMatch.value)
+            Array.isArray(dataProvider.queryMatch.value)
               ? dataProvider.queryMatch.value
-              : escapeQueryValue(dataProvider.queryMatch.value)
+              : prepareKQLParam(dataProvider.queryMatch.value)
           }`
       : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
       ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
@@ -259,7 +233,7 @@ export const convertToBuildEsQuery = ({
 
 export const combineQueries = ({
   config,
-  dataProviders,
+  dataProviders = [],
   indexPattern,
   browserFields,
   filters = [],

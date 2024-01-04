@@ -16,7 +16,7 @@ import {
 const mapAttributesSchema = schema.object(
   {
     title: schema.string(),
-    description: schema.maybe(schema.string()),
+    description: schema.maybe(schema.nullable(schema.string())),
     mapStateJSON: schema.maybe(schema.string()),
     layerListJSON: schema.maybe(schema.string()),
     uiStateJSON: schema.maybe(schema.string()),
@@ -67,7 +67,7 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: createOptionsSchema, // same schema as "create"
+        schema: createOptionsSchema, // same as create
       },
       data: {
         schema: mapAttributesSchema,

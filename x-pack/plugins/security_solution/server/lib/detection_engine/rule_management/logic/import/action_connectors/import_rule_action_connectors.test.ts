@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import {
   getImportRulesSchemaMock,
   webHookConnector,
-} from '../../../../../../../common/detection_engine/rule_management/model/import/rule_to_import.mock';
+} from '../../../../../../../common/api/detection_engine/rule_management/import_rules/rule_to_import.mock';
 import { importRuleActionConnectors } from './import_rule_action_connectors';
 import { coreMock } from '@kbn/core/server/mocks';
 
@@ -419,6 +419,7 @@ describe('importRuleActionConnectors', () => {
           },
         ],
         description: 'some description',
+        immutable: false,
         language: 'kuery',
         name: 'Query with a rule id',
         query: 'user.name: root or user.name: admin',
@@ -529,6 +530,7 @@ describe('importRuleActionConnectors', () => {
           },
         ],
         description: 'some description',
+        immutable: false,
         language: 'kuery',
         name: 'Query with a rule id',
         query: 'user.name: root or user.name: admin',
@@ -547,6 +549,7 @@ describe('importRuleActionConnectors', () => {
           },
         ],
         description: 'some description',
+        immutable: false,
         language: 'kuery',
         name: 'Query with a rule id',
         id: '0abc78e0-7031-11ed-b076-53cc4d57aaf1',

@@ -38,7 +38,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
       <EuiDescriptionList
         compressed
         type="column"
-        className="descriptionList-20_80"
+        columnWidths={[1, 4]}
         listItems={[
           {
             title: (
@@ -59,7 +59,7 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
         <EuiDescriptionList
           compressed
           type="column"
-          className="descriptionList-20_80"
+          columnWidths={[1, 4]}
           listItems={[
             {
               title: (
@@ -152,7 +152,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
           <EuiDescriptionList
             compressed
             type="column"
-            className="descriptionList-20_80"
+            columnWidths={[1, 4]}
             listItems={[{ title: <ConsoleCodeBlock>{title}</ConsoleCodeBlock>, description }]}
             descriptionProps={additionalProps}
             titleProps={additionalProps}
@@ -191,7 +191,7 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
       <EuiDescriptionList
         compressed
         type="column"
-        className="descriptionList-20_80"
+        columnWidths={[1, 4]}
         listItems={[
           {
             title: (

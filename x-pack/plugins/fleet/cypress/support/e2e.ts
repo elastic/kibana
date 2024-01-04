@@ -23,6 +23,7 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
+import { request } from '../tasks/common';
 import './commands';
 
 declare global {
@@ -40,7 +41,7 @@ function getBySel(selector: string, ...args: any[]) {
 }
 
 function getKibanaVersion() {
-  return cy.request('/api/status').then(({ body }) => {
+  return request<{ version: { number: string } }>({ url: '/api/status' }).then(({ body }) => {
     return body.version.number;
   });
 }

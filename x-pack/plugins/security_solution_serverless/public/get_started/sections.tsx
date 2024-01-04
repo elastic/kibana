@@ -5,105 +5,151 @@
  * 2.0.
  */
 import React from 'react';
+
+import type { Step, StepId } from './types';
 import {
   SectionId,
-  GetMoreFromElasticSecurityCardId,
-  GetSetUpCardId,
-  IntroductionSteps,
+  QuickStartSectionCardsId,
+  OverviewSteps,
   type Section,
+  AddIntegrationsSteps,
+  ViewDashboardSteps,
+  AddAndValidateYourDataCardsId,
+  GetStartedWithAlertsCardsId,
+  CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
+  ViewAlertsSteps,
 } from './types';
 import * as i18n from './translations';
-import respond from './images/respond.svg';
-import protect from './images/protect.svg';
-import { ProductLine } from '../../common/product';
 
-export const introductionSteps = [
+import { AddIntegrationButton } from './step_links/add_integration_button';
+import { AlertsButton } from './step_links/alerts_link';
+import { AddElasticRulesButton } from './step_links/add_elastic_rules_button';
+import { DashboardButton } from './step_links/dashboard_button';
+import overviewVideo from './images/overview_video.svg';
+import { Video } from './card_step/content/video';
+import { OverviewVideoDescription } from './card_step/content/overview_video_description';
+import { ManageProjectsButton } from './step_links/manage_projects_button';
+import { EnableRuleImage } from './card_step/content/enable_rule_image';
+import {
+  autoCheckAddIntegrationsStepCompleted,
+  autoCheckPrebuildRuleStepCompleted,
+} from './card_step/helpers';
+import { ViewDashboardImage } from './card_step/content/view_dashboard_image';
+import { AddIntegrationsImage } from './card_step/content/add_integration_image';
+import { CreateProjectImage } from './card_step/content/create_project_step_image';
+import { ViewAlertsImage } from './card_step/content/view_alerts_image';
+
+export const createProjectSteps = [
   {
-    id: IntroductionSteps.watchOverviewVideo,
-    title: i18n.WATCH_OVERVIEW_VIDEO_TITLE,
-    description: [
-      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION1,
-      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION2,
-      i18n.WATCH_OVERVIEW_VIDEO_DESCRIPTION3,
-    ],
-    splitPanel: (
-      <iframe
-        allowFullScreen
-        className="vidyard_iframe"
-        frameBorder="0"
-        height="100%"
-        referrerPolicy="no-referrer"
-        sandbox="allow-scripts allow-same-origin"
-        scrolling="no"
-        src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
-        title={i18n.WATCH_OVERVIEW_VIDEO_HEADER}
-        width="100%"
-      />
-    ),
-    timeInMinutes: 3,
-    badges: [
-      { id: 'analytics', name: i18n.PRODUCT_BADGE_ANALYTICS },
-      { id: 'cloud', name: i18n.PRODUCT_BADGE_CLOUD },
-      { id: 'edr', name: i18n.PRODUCT_BADGE_EDR },
-    ],
+    id: CreateProjectSteps.createFirstProject,
+    title: i18n.CREATE_PROJECT_TITLE,
+    icon: { type: 'addDataApp', size: 'xl' as const },
+    description: [i18n.CREATE_PROJECT_DESCRIPTION, <ManageProjectsButton />],
+    splitPanel: <CreateProjectImage />,
+  },
+];
+export const overviewVideoSteps = [
+  {
+    icon: { type: overviewVideo, size: 'xl' as const },
+    title: i18n.WATCH_VIDEO_TITLE,
+    id: OverviewSteps.getToKnowElasticSecurity,
+    description: [<OverviewVideoDescription />],
+    splitPanel: <Video />,
+  },
+];
+
+export const addIntegrationsSteps: Array<Step<AddIntegrationsSteps.connectToDataSources>> = [
+  {
+    icon: { type: 'fleetApp', size: 'xl' as const },
+    id: AddIntegrationsSteps.connectToDataSources,
+    title: i18n.ADD_INTEGRATIONS_TITLE,
+    description: [i18n.ADD_INTEGRATIONS_DESCRIPTION, <AddIntegrationButton />],
+    splitPanel: <AddIntegrationsImage />,
+    autoCheckIfStepCompleted: autoCheckAddIntegrationsStepCompleted,
+  },
+];
+
+export const viewDashboardSteps = [
+  {
+    id: ViewDashboardSteps.analyzeData,
+    icon: { type: 'dashboardApp', size: 'xl' as const },
+    title: i18n.VIEW_DASHBOARDS,
+    description: [i18n.VIEW_DASHBOARDS_DESCRIPTION, <DashboardButton />],
+    splitPanel: <ViewDashboardImage />,
+  },
+];
+
+export const enablePrebuildRuleSteps: Array<Step<EnablePrebuiltRulesSteps.enablePrebuiltRules>> = [
+  {
+    title: i18n.ENABLE_RULES,
+    icon: { type: 'advancedSettingsApp', size: 'xl' as const },
+    id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
+    description: [i18n.ENABLE_RULES_DESCRIPTION, <AddElasticRulesButton />],
+    splitPanel: <EnableRuleImage />,
+    autoCheckIfStepCompleted: autoCheckPrebuildRuleStepCompleted,
+  },
+];
+
+export const viewAlertSteps = [
+  {
+    icon: { type: 'watchesApp', size: 'xl' as const },
+    title: i18n.VIEW_ALERTS_TITLE,
+    id: ViewAlertsSteps.viewAlerts,
+    description: [i18n.VIEW_ALERTS_DESCRIPTION, <AlertsButton />],
+    splitPanel: <ViewAlertsImage />,
   },
 ];
 
 export const sections: Section[] = [
   {
-    id: SectionId.getSetUp,
-    title: i18n.GET_SET_UP_TITLE,
+    id: SectionId.quickStart,
+    title: i18n.SECTION_1_TITLE,
     cards: [
       {
-        title: i18n.INTRODUCTION_TITLE,
-        icon: { type: 'securityApp', size: 'xl' },
-        id: GetSetUpCardId.introduction,
-        steps: introductionSteps,
-        timeInMins: introductionSteps.reduce(
-          (totalMin, { timeInMinutes }) => totalMin + timeInMinutes,
-          0
-        ),
-        stepsLeft: introductionSteps.length,
+        id: QuickStartSectionCardsId.createFirstProject,
+        steps: createProjectSteps,
+        hideSteps: true,
       },
       {
-        icon: { type: 'agentApp', size: 'xl' },
-        title: i18n.BRING_IN_YOUR_DATA_TITLE,
-        id: GetSetUpCardId.bringInYourData,
-      },
-      {
-        icon: { type: 'advancedSettingsApp', size: 'xl' },
-        title: i18n.ACTIVATE_AND_CREATE_RULES_TITLE,
-        id: GetSetUpCardId.activateAndCreateRules,
-      },
-      {
-        icon: { type: protect, size: 'xl' },
-        title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
-        id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-        productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
+        id: QuickStartSectionCardsId.watchTheOverviewVideo,
+        steps: overviewVideoSteps,
       },
     ],
   },
   {
-    id: SectionId.getMoreFromElasticSecurity,
-    title: i18n.GET_MORE_TITLE,
+    id: SectionId.addAndValidateYourData,
+    title: i18n.SECTION_2_TITLE,
     cards: [
       {
-        icon: { type: 'advancedSettingsApp', size: 'xl' },
-        title: i18n.MASTER_THE_INVESTIGATION_TITLE,
-        id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
+        id: AddAndValidateYourDataCardsId.addIntegrations,
+        steps: addIntegrationsSteps,
       },
       {
-        icon: { type: respond, size: 'xl' },
-        title: i18n.RESPOND_TO_THREATS_TITLE,
-        id: GetMoreFromElasticSecurityCardId.respondToThreats,
+        id: AddAndValidateYourDataCardsId.viewDashboards,
+        steps: viewDashboardSteps,
+      },
+    ],
+  },
+  {
+    id: SectionId.getStartedWithAlerts,
+    title: i18n.SECTION_3_TITLE,
+    cards: [
+      {
+        id: GetStartedWithAlertsCardsId.enablePrebuiltRules,
+        steps: enablePrebuildRuleSteps,
       },
       {
-        icon: { type: 'spacesApp', size: 'xl' },
-        title: i18n.OPTIMIZE_YOUR_WORKSPACE_TITLE,
-        id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
+        id: GetStartedWithAlertsCardsId.viewAlerts,
+        steps: viewAlertSteps,
       },
     ],
   },
 ];
 
 export const getSections = () => sections;
+
+export const getCardById = (stepId: StepId) => {
+  const cards = sections.flatMap((s) => s.cards);
+  return cards.find((c) => c.steps?.find((step) => stepId === step.id));
+};

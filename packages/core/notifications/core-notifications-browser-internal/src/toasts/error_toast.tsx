@@ -20,16 +20,18 @@ import {
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { CoreContextProvider } from '@kbn/core-theme-browser-internal';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 interface ErrorToastProps {
   title: string;
   error: Error;
   toastMessage: string;
   openModal: OverlayStart['openModal'];
+  analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
 }
@@ -55,9 +57,10 @@ export function showErrorDialog({
   title,
   error,
   openModal,
+  analytics,
   i18n,
   theme,
-}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'i18n' | 'theme'>) {
+}: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'analytics' | 'i18n' | 'theme'>) {
   let text = '';
 
   if (isRequestError(error)) {
@@ -71,7 +74,7 @@ export function showErrorDialog({
 
   const modal = openModal(
     mount(
-      <CoreContextProvider i18n={i18n} theme={theme}>
+      <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -94,7 +97,7 @@ export function showErrorDialog({
             />
           </EuiButton>
         </EuiModalFooter>
-      </CoreContextProvider>
+      </KibanaRenderContextProvider>
     )
   );
 }
@@ -104,6 +107,7 @@ export function ErrorToast({
   error,
   toastMessage,
   openModal,
+  analytics,
   i18n,
   theme,
 }: ErrorToastProps) {
@@ -115,7 +119,7 @@ export function ErrorToast({
           size="s"
           color="danger"
           data-test-subj="errorToastBtn"
-          onClick={() => showErrorDialog({ title, error, openModal, i18n, theme })}
+          onClick={() => showErrorDialog({ title, error, openModal, analytics, i18n, theme })}
         >
           <FormattedMessage
             id="core.toasts.errorToast.seeFullError"

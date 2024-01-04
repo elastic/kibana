@@ -19,7 +19,7 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { importTimelines } from './helpers';
-import { ImportTimelinesPayloadSchemaRt } from '../../../schemas/timelines/import_timelines_schema';
+import { ImportTimelinesPayloadSchemaRt } from '../../../../../../common/api/timeline';
 import { buildFrameworkRequest } from '../../../utils/common';
 
 export { importTimelines } from './helpers';
@@ -29,12 +29,9 @@ export const importTimelinesRoute = (
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${TIMELINE_IMPORT_URL}`,
-      validate: {
-        body: buildRouteValidationWithExcess(ImportTimelinesPayloadSchemaRt),
-      },
       options: {
         tags: ['access:securitySolution'],
         body: {
@@ -42,43 +39,51 @@ export const importTimelinesRoute = (
           output: 'stream',
         },
       },
-    },
-    async (context, request, response) => {
-      try {
-        const siemResponse = buildSiemResponse(response);
-        const savedObjectsClient = (await context.core).savedObjects.client;
-        if (!savedObjectsClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+      access: 'public',
+    })
+    .addVersion(
+      {
+        validate: {
+          request: { body: buildRouteValidationWithExcess(ImportTimelinesPayloadSchemaRt) },
+        },
+        version: '2023-10-31',
+      },
+      async (context, request, response) => {
+        try {
+          const siemResponse = buildSiemResponse(response);
+          const savedObjectsClient = (await context.core).savedObjects.client;
+          if (!savedObjectsClient) {
+            return siemResponse.error({ statusCode: 404 });
+          }
 
-        const { file, isImmutable } = request.body;
-        const { filename } = file.hapi;
-        const fileExtension = extname(filename).toLowerCase();
+          const { file, isImmutable } = request.body;
+          const { filename } = file.hapi;
+          const fileExtension = extname(filename).toLowerCase();
 
-        if (fileExtension !== '.ndjson') {
+          if (fileExtension !== '.ndjson') {
+            return siemResponse.error({
+              statusCode: 400,
+              body: `Invalid file extension ${fileExtension}`,
+            });
+          }
+          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+
+          const res = await importTimelines(
+            file as unknown as Readable,
+            config.maxTimelineImportExportSize,
+            frameworkRequest,
+            isImmutable === 'true'
+          );
+          if (typeof res !== 'string') return response.ok({ body: res ?? {} });
+          else throw res;
+        } catch (err) {
+          const error = transformError(err);
+          const siemResponse = buildSiemResponse(response);
           return siemResponse.error({
-            statusCode: 400,
-            body: `Invalid file extension ${fileExtension}`,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-
-        const res = await importTimelines(
-          file as unknown as Readable,
-          config.maxTimelineImportExportSize,
-          frameworkRequest,
-          isImmutable === 'true'
-        );
-        if (typeof res !== 'string') return response.ok({ body: res ?? {} });
-        else throw res;
-      } catch (err) {
-        const error = transformError(err);
-        const siemResponse = buildSiemResponse(response);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

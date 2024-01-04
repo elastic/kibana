@@ -17,6 +17,7 @@ import { useLinkProps } from '../use_link_props';
  * @param {function} pushToQueryparams A function to update the hash value in the URL to control panel state
  * @param {string} translatedErrorMessage The message to display in the panel when something goes wrong
  */
+// eslint-disable-next-line react/display-name
 export const PanelContentError = memo(function ({
   id,
   translatedErrorMessage,

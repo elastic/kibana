@@ -23,6 +23,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/safer-lodash-set",
     "@kbn/storybook",
+    "@kbn/shared-ux-link-redirect-app",
   ],
   "exclude": [
     "target/**/*",

@@ -6,7 +6,7 @@
  */
 
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { APMRouteHandlerResources } from '../typings';
+import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import {
   getApmPackagePolicy,

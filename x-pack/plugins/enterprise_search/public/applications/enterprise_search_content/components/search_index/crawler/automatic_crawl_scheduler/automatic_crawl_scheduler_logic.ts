@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ConnectorScheduling } from '../../../../../../../common/types/connectors';
+import { ConnectorScheduling } from '@kbn/search-connectors';
 
 import { CrawlerIndex } from '../../../../../../../common/types/indices';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
@@ -32,7 +32,10 @@ export interface AutomaticCrawlSchedulerLogicValues {
   useConnectorSchedule: CrawlSchedule['useConnectorSchedule'];
 }
 
-const DEFAULT_VALUES: Pick<AutomaticCrawlSchedulerLogicValues, 'crawlFrequency' | 'crawlUnit'> = {
+export const DEFAULT_VALUES: Pick<
+  AutomaticCrawlSchedulerLogicValues,
+  'crawlFrequency' | 'crawlUnit'
+> = {
   crawlFrequency: 24,
   crawlUnit: CrawlUnits.hours,
 };

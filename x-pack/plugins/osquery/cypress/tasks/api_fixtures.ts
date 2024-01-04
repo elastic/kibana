@@ -8,7 +8,7 @@
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { Case } from '@kbn/cases-plugin/common';
 import { API_VERSIONS } from '../../common/constants';
@@ -18,6 +18,7 @@ import type { PackSavedObject, PackItem } from '../../public/packs/types';
 import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
 import { request } from './common';
+import { ServerlessRoleName } from '../support/roles';
 
 export const savedQueryFixture = {
   id: generateRandomStringName(1)[0],
@@ -86,6 +87,7 @@ export const cleanupSavedQuery = (id: string) => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
@@ -102,6 +104,7 @@ export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+
     url: `/s/${space}/api/osquery/packs`,
   }).then((response) => response.body.data);
 
@@ -112,6 +115,7 @@ export const cleanupPack = (id: string, space = 'default') => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
@@ -119,6 +123,7 @@ export const loadLiveQuery = (
   payload = {
     agent_all: true,
     query: 'select * from uptime;',
+    kuery: '',
   }
 ) =>
   request<{
@@ -132,8 +137,10 @@ export const loadLiveQuery = (
     },
   }).then((response) => response.body.data);
 
-export const loadRule = (includeResponseActions = false) =>
-  request<RuleResponse>({
+export const loadRule = (includeResponseActions = false) => {
+  cy.login(ServerlessRoleName.SOC_MANAGER);
+
+  return request<RuleResponse>({
     method: 'POST',
     body: {
       type: 'query',
@@ -148,7 +155,30 @@ export const loadRule = (includeResponseActions = false) =>
         'winlogbeat-*',
         '-*elastic-cloud-logs-*',
       ],
-      filters: [],
+      filters: [
+        {
+          meta: {
+            type: 'custom',
+            disabled: false,
+            negate: false,
+            alias: null,
+            key: 'query',
+            value: '{"bool":{"must_not":{"wildcard":{"host.name":"dev-fleet-server.*"}}}}',
+          },
+          query: {
+            bool: {
+              must_not: {
+                wildcard: {
+                  'host.name': 'dev-fleet-server.*',
+                },
+              },
+            },
+          },
+          $state: {
+            store: 'appState',
+          },
+        },
+      ],
       language: 'kuery',
       query: '_id:*',
       author: [],
@@ -196,7 +226,11 @@ export const loadRule = (includeResponseActions = false) =>
         : {}),
     } as RuleCreateProps,
     url: `/api/detection_engine/rules`,
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
   }).then((response) => response.body);
+};
 
 export const cleanupRule = (id: string) => {
   request({
@@ -205,6 +239,7 @@ export const cleanupRule = (id: string) => {
     headers: {
       'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
+    failOnStatusCode: false,
   });
 };
 
@@ -229,6 +264,7 @@ export const cleanupCase = (id: string) => {
     method: 'DELETE',
     url: '/api/cases',
     qs: { ids: JSON.stringify([id]) },
+    failOnStatusCode: false,
   });
 };
 
@@ -262,8 +298,18 @@ export const loadAgentPolicy = () =>
       monitoring_enabled: ['logs', 'metrics'],
       inactivity_timeout: 1209600,
     },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
     url: '/api/fleet/agent_policies',
   }).then((response) => response.body.item);
 
 export const cleanupAgentPolicy = (agentPolicyId: string) =>
-  request({ method: 'POST', body: { agentPolicyId }, url: '/api/fleet/agent_policies/delete' });
+  request({
+    method: 'POST',
+    body: { agentPolicyId },
+    headers: {
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
+    },
+    url: '/api/fleet/agent_policies/delete',
+  });

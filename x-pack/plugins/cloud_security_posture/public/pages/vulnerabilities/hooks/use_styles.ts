@@ -19,6 +19,9 @@ export const useStyles = () => {
   `;
 
   const gridStyle = css`
+    & .euiDataGrid__content {
+      background: transparent;
+    }
     & .euiDataGridHeaderCell__icon {
       display: none;
     }
@@ -30,20 +33,28 @@ export const useStyles = () => {
         font-weight: ${euiTheme.font.weight.bold};
       }
     }
+    & .euiDataGrid__leftControls {
+      > .euiButtonEmpty:hover:not(:disabled),
+      .euiButtonEmpty:focus {
+        text-decoration: none;
+        cursor: default;
+      }
+    }
     & .euiButtonIcon {
       color: ${euiTheme.colors.primary};
     }
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
     }
-    & .euiDataGridRowCell__expandActions > [data-test-subj='euiDataGridCellExpandButton'] {
+    & .euiDataGridRowCell__actions > [data-test-subj='euiDataGridCellExpandButton'] {
       display: none;
     }
-    & .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
+    & .euiDataGridRowCell__actions--overlay {
       padding: 0;
     }
 
-    & .euiDataGridRowCell__expandFlex {
+    & .euiDataGridRowCell__contentWrapper {
+      display: flex;
       align-items: center;
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
@@ -60,6 +71,8 @@ export const useStyles = () => {
 
   const groupBySelector = css`
     width: 188px;
+    display: inline-block;
+    margin-left: 8px;
   `;
 
   return {

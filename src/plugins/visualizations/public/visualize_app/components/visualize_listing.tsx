@@ -31,11 +31,10 @@ import {
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import {
-  type UserContentCommonSchema,
-  TableListViewProps,
-} from '@kbn/content-management-table-list-view';
+import { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
@@ -49,17 +48,17 @@ import { getNoItemsMessage, getCustomColumn } from '../utils';
 import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
 import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
 
-interface VisualizeUserContent extends VisualizationListItem, UserContentCommonSchema {
-  type: string;
-  attributes: {
-    title: string;
-    description?: string;
-    editApp: string;
-    editUrl: string;
-    readOnly: boolean;
-    error?: string;
+type VisualizeUserContent = VisualizationListItem &
+  UserContentCommonSchema & {
+    type: string;
+    attributes: {
+      id: string;
+      title: string;
+      description?: string;
+      readOnly: boolean;
+      error?: string;
+    };
   };
-}
 
 const toTableListViewSavedObject = (savedObject: Record<string, unknown>): VisualizeUserContent => {
   return {
@@ -67,19 +66,17 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
     updatedAt: savedObject.updatedAt as string,
     references: savedObject.references as Array<{ id: string; type: string; name: string }>,
     type: savedObject.savedObjectType as string,
-    editUrl: savedObject.editUrl as string,
-    editApp: savedObject.editApp as string,
     icon: savedObject.icon as string,
     stage: savedObject.stage as VisualizationStage,
     savedObjectType: savedObject.savedObjectType as string,
     typeTitle: savedObject.typeTitle as string,
     title: (savedObject.title as string) ?? '',
     error: (savedObject.error as string) ?? '',
+    editor: savedObject.editor as any,
     attributes: {
+      id: savedObject.id as string,
       title: (savedObject.title as string) ?? '',
       description: savedObject.description as string,
-      editApp: savedObject.editApp as string,
-      editUrl: savedObject.editUrl as string,
       readOnly: savedObject.readOnly as boolean,
       error: savedObject.error as string,
     },
@@ -93,7 +90,7 @@ type CustomTableViewProps = Pick<
   | 'editItem'
   | 'contentEditor'
   | 'emptyPrompt'
-  | 'showEditActionForItem'
+  | 'itemIsEditable'
 >;
 
 const useTableListViewProps = (
@@ -109,6 +106,7 @@ const useTableListViewProps = (
       overlays,
       toastNotifications,
       visualizeCapabilities,
+      contentManagement,
     },
   } = useKibana<VisualizeServices>();
 
@@ -119,7 +117,13 @@ const useTableListViewProps = (
   }, [closeNewVisModal]);
 
   const editItem = useCallback(
-    ({ attributes: { editUrl, editApp } }: VisualizeUserContent) => {
+    async ({ attributes: { id }, editor }: VisualizeUserContent) => {
+      if (!('editApp' in editor || 'editUrl' in editor)) {
+        await editor.onEdit(id);
+        return;
+      }
+
+      const { editApp, editUrl } = editor;
       if (editApp) {
         application.navigateToApp(editApp, { path: editUrl });
         return;
@@ -176,11 +180,16 @@ const useTableListViewProps = (
             description: args.description ?? '',
             tags: args.tags,
           },
-          { overlays, savedObjectsTagging }
+          {
+            overlays,
+            savedObjectsTagging,
+            typesService: getTypes(),
+            contentManagement,
+          }
         );
       }
     },
-    [overlays, savedObjectsTagging]
+    [overlays, savedObjectsTagging, contentManagement]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -251,8 +260,7 @@ const useTableListViewProps = (
     editItem,
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
-    showEditActionForItem: ({ attributes: { readOnly } }) =>
-      visualizeCapabilities.save && !readOnly,
+    itemIsEditable: ({ attributes: { readOnly } }) => visualizeCapabilities.save && !readOnly,
   };
 
   return props;
@@ -270,6 +278,7 @@ export const VisualizeListing = () => {
       uiSettings,
       kbnUrlStateStorage,
       listingViewRegistry,
+      serverless,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -298,13 +307,20 @@ export const VisualizeListing = () => {
   useMount(() => {
     // Reset editor state for all apps if the visualize listing page is loaded.
     stateTransferService.clearEditorState();
-    chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
-          defaultMessage: 'Visualize Library',
-        }),
-      },
-    ]);
+    if (serverless?.setBreadcrumbs) {
+      // reset any deeper context breadcrumbs
+      // "Visualization" breadcrumb is set automatically by the serverless navigation
+      serverless.setBreadcrumbs([]);
+    } else {
+      chrome.setBreadcrumbs([
+        {
+          text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
+            defaultMessage: 'Visualize Library',
+          }),
+        },
+      ]);
+    }
+
     chrome.docTitle.change(
       i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
     );
@@ -370,8 +386,19 @@ export const VisualizeListing = () => {
             entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
               defaultMessage: 'visualizations',
             })}
-            getDetailViewLink={({ attributes: { editApp, editUrl, error } }) =>
-              getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
+            onClickTitle={(item) => {
+              tableViewProps.editItem?.(item);
+            }}
+            getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
+              readOnly || (editor && 'onEdit' in editor)
+                ? undefined
+                : getVisualizeListItemLink(
+                    application,
+                    kbnUrlStateStorage,
+                    editor.editApp,
+                    editor.editUrl,
+                    error
+                  )
             }
             tableCaption={visualizeLibraryTitle}
             {...tableViewProps}

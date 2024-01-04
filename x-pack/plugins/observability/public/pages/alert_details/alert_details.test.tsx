@@ -13,6 +13,9 @@ import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
+import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { Subset } from '../../typings';
 import { render } from '../../utils/test_helper';
@@ -22,8 +25,6 @@ import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { AlertDetails } from './alert_details';
 import { ConfigSchema } from '../../plugin';
 import { alert, alertWithNoData } from './mock/alert';
-import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
-import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -45,6 +46,8 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const useKibanaMock = useKibana as jest.Mock;
 
+const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
@@ -55,6 +58,8 @@ const mockKibana = () => {
           prepend: jest.fn(),
         },
       },
+      observabilityAIAssistant: mockObservabilityAIAssistant,
+      theme: {},
       triggersActionsUi: {
         ruleTypeRegistry,
       },
@@ -75,16 +80,6 @@ jest.mock('../../hooks/use_fetch_rule', () => {
   };
 });
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../hooks/use_get_user_cases_permissions', () => ({
-  useGetUserCasesPermissions: () => ({
-    all: true,
-    create: true,
-    delete: true,
-    push: true,
-    read: true,
-    update: true,
-  }),
-}));
 
 const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
@@ -99,7 +94,6 @@ const params = {
 const config: Subset<ConfigSchema> = {
   unsafe: {
     alertDetails: {
-      logs: { enabled: true },
       metrics: { enabled: true },
       uptime: { enabled: true },
     },
@@ -138,7 +132,7 @@ describe('Alert details', () => {
 
     expect(alertDetails.queryByTestId('alertDetails')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();
-    expect(alertDetails.queryByTestId('page-title-container')).toBeTruthy();
+    expect(alertDetails.queryByTestId('alertDetailsPageTitle')).toBeTruthy();
     expect(alertDetails.queryByTestId('alert-summary-container')).toBeTruthy();
   });
 

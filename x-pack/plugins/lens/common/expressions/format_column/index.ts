@@ -15,6 +15,8 @@ export interface FormatColumnArgs {
   compact?: boolean;
   pattern?: string;
   parentFormat?: string;
+  fromUnit?: string;
+  toUnit?: string;
 }
 
 export const formatColumn: FormatColumnExpressionFunction = {
@@ -49,6 +51,14 @@ export const formatColumn: FormatColumnExpressionFunction = {
       help: '',
     },
     pattern: {
+      types: ['string'],
+      help: '',
+    },
+    fromUnit: {
+      types: ['string'],
+      help: '',
+    },
+    toUnit: {
       types: ['string'],
       help: '',
     },

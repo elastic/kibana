@@ -5,62 +5,40 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
+  EuiCallOut,
+  EuiCode,
   EuiForm,
+  EuiFormRow,
+  EuiLink,
   EuiRadio,
   EuiSelect,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
-  EuiFormRow,
-  EuiCallOut,
-  EuiLink,
-  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 import type { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import type { EndpointPreset } from './constants';
+import { ENDPOINT_INTEGRATION_CONFIG_KEY, endpointPresetsMapping } from './constants';
+import { HelpTextWithPadding } from './components/help_text_with_padding';
+import { EndpointEventCollectionPreset } from './components/endpoint_event_collection_preset';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import {
   ALL_EVENTS,
   CLOUD_SECURITY,
-  EDR_COMPLETE,
-  NGAV,
-  EDR_ESSENTIAL,
+  DATA_COLLECTION_HELP_TEXT,
   ENDPOINT,
   INTERACTIVE_ONLY,
-  NGAV_NOTE,
-  EDR_NOTE,
-  DATA_COLLECTION,
 } from './translations';
+import { useGetProtectionsUnavailableComponent } from '../../policy_settings_form/hooks/use_get_protections_unavailable_component';
 
 const PREFIX = 'endpoint_policy_create_extension';
-
-const ENDPOINT_INTEGRATION_CONFIG_KEY = 'ENDPOINT_INTEGRATION_CONFIG';
 
 const environmentMapping = {
   cloud: CLOUD_SECURITY,
   endpoint: ENDPOINT,
-};
-
-const endpointPresetsMapping = {
-  NGAV: {
-    label: NGAV,
-    note: NGAV_NOTE,
-  },
-  EDREssential: {
-    label: EDR_ESSENTIAL,
-    note: EDR_NOTE,
-  },
-  EDRComplete: {
-    label: EDR_COMPLETE,
-    note: EDR_NOTE,
-  },
-  DataCollection: {
-    label: DATA_COLLECTION,
-    note: null,
-  },
 };
 
 const cloudEventMapping = {
@@ -68,7 +46,6 @@ const cloudEventMapping = {
   ALL_EVENTS,
 };
 
-type EndpointPreset = keyof typeof endpointPresetsMapping;
 type CloudEvent = keyof typeof cloudEventMapping;
 type Environment = keyof typeof environmentMapping;
 
@@ -76,10 +53,6 @@ const environmentOptions: Array<{ value: Environment; text: string }> = [
   { value: 'endpoint', text: ENDPOINT },
   { value: 'cloud', text: CLOUD_SECURITY },
 ];
-
-const HelpTextWithPadding = styled.div`
-  padding-left: ${(props) => props.theme.eui.euiSizeL};
-`;
 
 /**
  * Exports Endpoint-specific package policy instructions
@@ -89,6 +62,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
   ({ newPolicy, onChange }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEnterprise = useLicense().isEnterprise();
+    const showEndpointEventCollectionOnlyPreset = Boolean(useGetProtectionsUnavailableComponent());
 
     const [endpointPreset, setEndpointPreset] = useState<EndpointPreset>('EDRComplete');
     const [selectedCloudEvent, setSelectedCloudEvent] = useState<CloudEvent>('INTERACTIVE_ONLY');
@@ -105,63 +79,77 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
     // only during 1st component render (thus why the eslint disabled rule below).
     // Default values for config are endpoint + NGAV
     useEffect(() => {
-      if (newPolicy.inputs.length === 0) {
-        onChange({
-          isValid: false,
-          updatedPolicy: {
-            ...newPolicy,
-            name: '',
-            inputs: [
-              {
-                enabled: true,
-                streams: [],
-                type: ENDPOINT_INTEGRATION_CONFIG_KEY,
-                config: {
-                  _config: {
-                    value: {
-                      type: 'endpoint',
-                      endpointConfig: {
-                        preset: 'NGAV',
+      // When ONLY Data collection is allowed, the updates to the policy are handled by the
+      // EndpointEventCollectionPreset component
+      if (
+        !showEndpointEventCollectionOnlyPreset ||
+        (showEndpointEventCollectionOnlyPreset && selectedEnvironment === 'cloud')
+      ) {
+        if (newPolicy.inputs.length === 0) {
+          onChange({
+            isValid: false,
+            updatedPolicy: {
+              ...newPolicy,
+              name: '',
+              inputs: [
+                {
+                  enabled: true,
+                  streams: [],
+                  type: ENDPOINT_INTEGRATION_CONFIG_KEY,
+                  config: {
+                    _config: {
+                      value: {
+                        type: 'endpoint',
+                        endpointConfig: {
+                          preset: 'NGAV',
+                        },
                       },
                     },
                   },
                 },
-              },
-            ],
-          },
-        });
-      } else {
-        onChange({
-          isValid: true,
-          updatedPolicy: {
-            ...newPolicy,
-            inputs: [
-              {
-                ...newPolicy.inputs[0],
-                config: {
-                  _config: {
-                    value: {
-                      type: selectedEnvironment,
-                      ...(selectedEnvironment === 'cloud'
-                        ? {
-                            eventFilters: {
-                              nonInteractiveSession: selectedCloudEvent === 'INTERACTIVE_ONLY',
-                            },
-                          }
-                        : {
-                            endpointConfig: {
-                              preset: endpointPreset,
-                            },
-                          }),
+              ],
+            },
+          });
+        } else {
+          onChange({
+            isValid: true,
+            updatedPolicy: {
+              ...newPolicy,
+              inputs: [
+                {
+                  ...newPolicy.inputs[0],
+                  config: {
+                    _config: {
+                      value: {
+                        type: selectedEnvironment,
+                        ...(selectedEnvironment === 'cloud'
+                          ? {
+                              eventFilters: {
+                                nonInteractiveSession: selectedCloudEvent === 'INTERACTIVE_ONLY',
+                              },
+                            }
+                          : {
+                              endpointConfig: {
+                                preset: endpointPreset,
+                              },
+                            }),
+                      },
                     },
                   },
                 },
-              },
-            ],
-          },
-        });
+              ],
+            },
+          });
+        }
       }
-    }, [selectedEnvironment, selectedCloudEvent, endpointPreset, onChange, newPolicy]);
+    }, [
+      selectedEnvironment,
+      selectedCloudEvent,
+      endpointPreset,
+      onChange,
+      newPolicy,
+      showEndpointEventCollectionOnlyPreset,
+    ]);
 
     const onChangeEnvironment = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedEnvironment(e?.target?.value as Environment);
@@ -243,94 +231,93 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
             fullWidth={true}
           />
         </EuiFormRow>
+
         {selectedEnvironment === 'endpoint' ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              fullWidth
-              helpText={
-                <HelpTextWithPadding>
-                  <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointDataCollection"
-                    defaultMessage="Augment your existing anti-virus solution with advanced data collection and detection"
-                  />
-                </HelpTextWithPadding>
-              }
-            >
-              <EuiRadio {...getEndpointPresetsProps('DataCollection')} />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              fullWidth
-              helpText={
-                <HelpTextWithPadding>
-                  <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointNGAV"
-                    defaultMessage="Machine learning malware, ransomware, memory threat, malicious behavior, and credential theft preventions, plus process telemetry"
-                  />
-                </HelpTextWithPadding>
-              }
-            >
-              <EuiRadio {...getEndpointPresetsProps('NGAV')} />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              fullWidth
-              helpText={
-                <HelpTextWithPadding>
-                  <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDREssential"
-                    defaultMessage="Everything in NGAV, plus file and network telemetry"
-                  />
-                </HelpTextWithPadding>
-              }
-            >
-              <EuiRadio {...getEndpointPresetsProps('EDREssential')} />
-            </EuiFormRow>
-            <EuiSpacer size="s" />
-            <EuiFormRow
-              fullWidth
-              helpText={
-                <HelpTextWithPadding>
-                  <FormattedMessage
-                    id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDRComplete"
-                    defaultMessage="Everything in Essential EDR, plus full telemetry"
-                  />
-                </HelpTextWithPadding>
-              }
-            >
-              <EuiRadio {...getEndpointPresetsProps('EDRComplete')} />
-            </EuiFormRow>
-            {showNote && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiCallOut iconType="iInCircle">
-                  <EuiText size="s" data-test-subj="create-ensdpoint-policy-license-note">
-                    <p>
-                      {endpointPresetsMapping[endpointPreset].note}{' '}
-                      <FormattedMessage
-                        id="xpack.securitySolution.createPackagePolicy.stepConfigure.seeDocumentation"
-                        defaultMessage="See {documentation} for more information."
-                        values={{
-                          documentation: (
-                            <EuiLink
-                              href="https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html"
-                              target="_blank"
-                            >
-                              <FormattedMessage
-                                id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.seeDocumentationLink"
-                                defaultMessage="documentation"
-                              />
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
-                  </EuiText>
-                </EuiCallOut>
-              </>
-            )}
-          </>
+          !showEndpointEventCollectionOnlyPreset ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                fullWidth
+                helpText={<HelpTextWithPadding>{DATA_COLLECTION_HELP_TEXT}</HelpTextWithPadding>}
+              >
+                <EuiRadio {...getEndpointPresetsProps('DataCollection')} />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  <HelpTextWithPadding>
+                    <FormattedMessage
+                      id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointNGAV"
+                      defaultMessage="Machine learning malware, ransomware, memory threat, malicious behavior, and credential theft preventions, plus process telemetry"
+                    />
+                  </HelpTextWithPadding>
+                }
+              >
+                <EuiRadio {...getEndpointPresetsProps('NGAV')} />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  <HelpTextWithPadding>
+                    <FormattedMessage
+                      id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDREssential"
+                      defaultMessage="Everything in NGAV, plus file and network telemetry"
+                    />
+                  </HelpTextWithPadding>
+                }
+              >
+                <EuiRadio {...getEndpointPresetsProps('EDREssential')} />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  <HelpTextWithPadding>
+                    <FormattedMessage
+                      id="xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointEDRComplete"
+                      defaultMessage="Everything in Essential EDR, plus full telemetry"
+                    />
+                  </HelpTextWithPadding>
+                }
+              >
+                <EuiRadio {...getEndpointPresetsProps('EDRComplete')} />
+              </EuiFormRow>
+
+              {showNote && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiCallOut iconType="iInCircle">
+                    <EuiText size="s" data-test-subj="create-ensdpoint-policy-license-note">
+                      <p>
+                        {endpointPresetsMapping[endpointPreset].note}{' '}
+                        <FormattedMessage
+                          id="xpack.securitySolution.createPackagePolicy.stepConfigure.seeDocumentation"
+                          defaultMessage="See {documentation} for more information."
+                          values={{
+                            documentation: (
+                              <EuiLink
+                                href="https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html"
+                                target="_blank"
+                              >
+                                <FormattedMessage
+                                  id="xpack.securitySolution.endpoint.ingestManager.createPackagePolicy.seeDocumentationLink"
+                                  defaultMessage="documentation"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </p>
+                    </EuiText>
+                  </EuiCallOut>
+                </>
+              )}
+            </>
+          ) : (
+            <EndpointEventCollectionPreset onChange={onChange} newPolicy={newPolicy} />
+          )
         ) : (
           <>
             <EuiSpacer size="m" />

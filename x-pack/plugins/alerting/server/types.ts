@@ -22,12 +22,17 @@ import {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { Alert, type FieldMap } from '@kbn/alerts-as-data-utils';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
-import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
+import {
+  RulesSettingsClient,
+  RulesSettingsFlappingClient,
+  RulesSettingsQueryDelayClient,
+} from './rules_settings_client';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
@@ -134,6 +139,7 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
+  getTimeRange: (timeWindow?: string) => { dateStart: string; dateEnd: string };
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -164,16 +170,6 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
-export interface GetSummarizedAlertsFnOpts {
-  start?: Date;
-  end?: Date;
-  executionUuid?: string;
-  ruleId: string;
-  spaceId: string;
-  excludedAlertInstanceIds: string[];
-  alertsFilter?: AlertsFilter | null;
-}
-
 export type AlertHit = Alert & {
   _id: string;
   _index: string;
@@ -182,6 +178,9 @@ export interface SummarizedAlertsChunk {
   count: number;
   data: AlertHit[];
 }
+
+export type ScopedQueryAlerts = Record<string, string[]>;
+
 export interface SummarizedAlerts {
   new: SummarizedAlertsChunk;
   ongoing: SummarizedAlertsChunk;
@@ -190,7 +189,6 @@ export interface SummarizedAlerts {
 export interface CombinedSummarizedAlerts extends SummarizedAlerts {
   all: SummarizedAlertsChunk;
 }
-export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
   rule: Pick<SanitizedRule<Params>, 'id'> &
     Omit<Partial<SanitizedRule<Params>>, 'viewInAppRelativeUrl'>;
@@ -207,7 +205,11 @@ interface ComponentTemplateSpec {
   fieldMap: FieldMap;
 }
 
-export interface IRuleTypeAlerts {
+export type FormatAlert<AlertData extends RuleAlertData> = (
+  alert: Partial<AlertData>
+) => Partial<AlertData>;
+
+export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**
    * Specifies the target alerts-as-data resource
    * for this rule type. All alerts created with the same
@@ -256,6 +258,11 @@ export interface IRuleTypeAlerts {
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
+
+  /**
+   * Optional function to format each alert in summarizedAlerts right after fetching them.
+   */
+  formatAlert?: FormatAlert<AlertData>;
 }
 
 export interface RuleType<
@@ -288,6 +295,7 @@ export interface RuleType<
     WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>,
     AlertData
   >;
+  category: string;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];
@@ -304,8 +312,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  getSummarizedAlerts?: GetSummarizedAlertsFn;
-  alerts?: IRuleTypeAlerts;
+  alerts?: IRuleTypeAlerts<AlertData>;
   /**
    * Determines whether framework should
    * automatically make recovery determination. Defaults to true.
@@ -321,48 +328,8 @@ export type UntypedRuleType = RuleType<
   AlertInstanceContext
 >;
 
-export interface RawAlertsFilter extends AlertsFilter {
-  query?: {
-    kql: string;
-    filters: Filter[];
-    dsl: string;
-  };
-  timeframe?: AlertsFilterTimeframe;
-}
-
-export interface RawRuleAction extends SavedObjectAttributes {
-  uuid: string;
-  group: string;
-  actionRef: string;
-  actionTypeId: string;
-  params: RuleActionParams;
-  frequency?: {
-    summary: boolean;
-    notifyWhen: RuleNotifyWhenType;
-    throttle: string | null;
-  };
-  alertsFilter?: RawAlertsFilter;
-}
-
 export interface RuleMeta extends SavedObjectAttributes {
   versionApiKeyLastmodified?: string;
-}
-
-// note that the `error` property is "null-able", as we're doing a partial
-// update on the rule when we update this data, but need to ensure we
-// delete any previous error if the current status has no error
-export interface RawRuleExecutionStatus extends SavedObjectAttributes {
-  status: RuleExecutionStatuses;
-  lastExecutionDate: string;
-  lastDuration?: number;
-  error: null | {
-    reason: RuleExecutionStatusErrorReasons;
-    message: string;
-  };
-  warning: null | {
-    reason: RuleExecutionStatusWarningReasons;
-    message: string;
-  };
 }
 
 export type PartialRule<Params extends RuleTypeParams = never> = Pick<Rule<Params>, 'id'> &
@@ -383,6 +350,103 @@ export type PartialRuleWithLegacyId<Params extends RuleTypeParams = never> = Pic
 > &
   Partial<Omit<RuleWithLegacyId<Params>, 'id'>>;
 
+export interface AlertingPlugin {
+  setup: PluginSetupContract;
+  start: PluginStartContract;
+}
+
+export interface AlertsConfigType {
+  healthCheck: {
+    interval: string;
+  };
+}
+
+export interface AlertsConfigType {
+  invalidateApiKeysTask: {
+    interval: string;
+    removalDelay: string;
+  };
+}
+
+export interface InvalidatePendingApiKey {
+  apiKeyId: string;
+  createdAt: string;
+}
+
+export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
+
+export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
+export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
+export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
+
+export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
+
+export interface PublicMetricsSetters {
+  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
+  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
+  setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
+  setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
+  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
+}
+
+export interface PublicLastRunSetters {
+  addLastRunError: (outcome: string) => void;
+  addLastRunWarning: (outcomeMsg: string) => void;
+  setLastRunOutcomeMessage: (warning: string) => void;
+}
+
+export type PublicRuleMonitoringService = PublicMetricsSetters;
+
+export type PublicRuleResultService = PublicLastRunSetters;
+
+export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
+export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
+
+export interface RawRuleAlertsFilter extends AlertsFilter {
+  query?: {
+    kql: string;
+    filters: Filter[];
+    dsl: string;
+  };
+  timeframe?: AlertsFilterTimeframe;
+}
+
+export interface RawRuleAction extends SavedObjectAttributes {
+  uuid: string;
+  group: string;
+  actionRef: string;
+  actionTypeId: string;
+  params: RuleActionParams;
+  frequency?: {
+    summary: boolean;
+    notifyWhen: RuleNotifyWhenType;
+    throttle: string | null;
+  };
+  alertsFilter?: RawRuleAlertsFilter;
+}
+
+// note that the `error` property is "null-able", as we're doing a partial
+// update on the rule when we update this data, but need to ensure we
+// delete any previous error if the current status has no error
+export interface RawRuleExecutionStatus extends SavedObjectAttributes {
+  status: RuleExecutionStatuses;
+  lastExecutionDate: string;
+  lastDuration?: number;
+  error: null | {
+    reason: RuleExecutionStatusErrorReasons;
+    message: string;
+  };
+  warning: null | {
+    reason: RuleExecutionStatusWarningReasons;
+    message: string;
+  };
+}
+
+/**
+ * @deprecated in favor of Rule
+ */
 export interface RawRule extends SavedObjectAttributes {
   enabled: boolean;
   name: string;
@@ -417,55 +481,4 @@ export interface RawRule extends SavedObjectAttributes {
   running?: boolean | null;
 }
 
-export interface AlertingPlugin {
-  setup: PluginSetupContract;
-  start: PluginStartContract;
-}
-
-export interface AlertsConfigType {
-  healthCheck: {
-    interval: string;
-  };
-}
-
-export interface AlertsConfigType {
-  invalidateApiKeysTask: {
-    interval: string;
-    removalDelay: string;
-  };
-}
-
-export interface InvalidatePendingApiKey {
-  apiKeyId: string;
-  createdAt: string;
-}
-
-export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
-
-export type RulesClientApi = PublicMethodsOf<RulesClient>;
-
-export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
-export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
-
-export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
-
-export interface PublicMetricsSetters {
-  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
-  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
-  setLastRunMetricsTotalAlertsDetected: (totalAlertDetected: number) => void;
-  setLastRunMetricsTotalAlertsCreated: (totalAlertCreated: number) => void;
-  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
-}
-
-export interface PublicLastRunSetters {
-  addLastRunError: (outcome: string) => void;
-  addLastRunWarning: (outcomeMsg: string) => void;
-  setLastRunOutcomeMessage: (warning: string) => void;
-}
-
-export type PublicRuleMonitoringService = PublicMetricsSetters;
-
-export type PublicRuleResultService = PublicLastRunSetters;
-
-export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
-export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
+export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

@@ -8,10 +8,10 @@ import { ColumnarViewModel } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { compact, range, sum, uniqueId } from 'lodash';
+import { describeFrameType, FrameType } from '@kbn/profiling-utils';
+import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import { createColumnarViewModel } from '../../../common/columnar_view_model';
-import { ElasticFlameGraph } from '../../../common/flamegraph';
 import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
-import { describeFrameType, FrameType } from '../../../common/profiling';
 import { ComparisonMode } from '../../components/normalization_menu';
 import { getInterpolationValue } from './get_interpolation_value';
 
@@ -24,6 +24,22 @@ const nullColumnarViewModel = {
   size0: new Float32Array(),
   size1: new Float32Array(),
 };
+
+interface ComparisonNode {
+  FileID: string;
+  FrameType: number;
+  ExeFileName: string;
+  AddressOrLine: number;
+  FunctionName: string;
+  SourceFileName: string;
+  SourceLine: number;
+  CountInclusive: number;
+  CountExclusive: number;
+  SelfAnnualCO2Kgs: number;
+  TotalAnnualCO2Kgs: number;
+  SelfAnnualCostUSD: number;
+  TotalAnnualCostUSD: number;
+}
 
 export function getFlamegraphModel({
   primaryFlamegraph,
@@ -46,11 +62,10 @@ export function getFlamegraphModel({
 }): {
   key: string;
   viewModel: ColumnarViewModel;
-  comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }>;
+  comparisonNodesById: Record<string, ComparisonNode>;
   legendItems: Array<{ label: string; color: string }>;
 } {
-  const comparisonNodesById: Record<string, { CountInclusive: number; CountExclusive: number }> =
-    {};
+  const comparisonNodesById: Record<string, ComparisonNode> = {};
 
   if (!primaryFlamegraph || !primaryFlamegraph.Label || primaryFlamegraph.Label.length === 0) {
     return {
@@ -65,21 +80,7 @@ export function getFlamegraphModel({
 
   let legendItems: Array<{ label: string; color: string }>;
 
-  if (!comparisonFlamegraph) {
-    const usedFrameTypes = new Set([...primaryFlamegraph.FrameType]);
-    legendItems = compact(
-      Object.entries(FRAME_TYPE_COLOR_MAP).map(([frameTypeKey, colors]) => {
-        const frameType = Number(frameTypeKey) as FrameType;
-
-        return usedFrameTypes.has(frameType)
-          ? {
-              color: `#${colors[0].toString(16)}`,
-              label: describeFrameType(frameType),
-            }
-          : undefined;
-      })
-    );
-  } else {
+  if (comparisonFlamegraph) {
     const positiveChangeInterpolator = d3.interpolateRgb(colorNeutral, colorSuccess);
 
     const negativeChangeInterpolator = d3.interpolateRgb(colorNeutral, colorDanger);
@@ -111,6 +112,17 @@ export function getFlamegraphModel({
 
     comparisonFlamegraph.ID.forEach((nodeID, index) => {
       comparisonNodesById[nodeID] = {
+        FileID: comparisonFlamegraph.FileID[index],
+        FrameType: comparisonFlamegraph.FrameType[index],
+        ExeFileName: comparisonFlamegraph.ExeFilename[index],
+        AddressOrLine: comparisonFlamegraph.AddressOrLine[index],
+        FunctionName: comparisonFlamegraph.FunctionName[index],
+        SourceFileName: comparisonFlamegraph.SourceFilename[index],
+        SourceLine: comparisonFlamegraph.SourceLine[index],
+        SelfAnnualCO2Kgs: comparisonFlamegraph.SelfAnnualCO2KgsItems[index],
+        TotalAnnualCO2Kgs: comparisonFlamegraph.TotalAnnualCO2KgsItems[index],
+        SelfAnnualCostUSD: comparisonFlamegraph.SelfAnnualCostsUSDItems[index],
+        TotalAnnualCostUSD: comparisonFlamegraph.TotalAnnualCostsUSDItems[index],
         CountInclusive: comparisonFlamegraph.CountInclusive[index],
         CountExclusive: comparisonFlamegraph.CountExclusive[index],
       };
@@ -162,6 +174,20 @@ export function getFlamegraphModel({
       const rgba = rgbToRGBA(Number(nodeColor.replace('#', '0x')));
       viewModel.color.set(rgba, 4 * index);
     });
+  } else {
+    const usedFrameTypes = new Set([...primaryFlamegraph.FrameType]);
+    legendItems = compact(
+      Object.entries(FRAME_TYPE_COLOR_MAP).map(([frameTypeKey, colors]) => {
+        const frameType = Number(frameTypeKey) as FrameType;
+
+        return usedFrameTypes.has(frameType)
+          ? {
+              color: `#${colors[0].toString(16)}`,
+              label: describeFrameType(frameType),
+            }
+          : undefined;
+      })
+    );
   }
 
   return {

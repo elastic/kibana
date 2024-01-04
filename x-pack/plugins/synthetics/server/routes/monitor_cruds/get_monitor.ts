@@ -12,7 +12,7 @@ import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { isStatusEnabled } from '../../../common/runtime_types/monitor_management/alert_config';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   MonitorOverviewItem,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -44,19 +44,26 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       if (!decrypted) {
         return mapSavedObjectToMonitor(
-          await savedObjectsClient.get<EncryptedSyntheticsMonitor>(syntheticsMonitorType, monitorId)
+          await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+            syntheticsMonitorType,
+            monitorId
+          )
         );
       } else {
         // only user with write permissions can decrypt the monitor
         const canSave =
-          (await coreStart?.capabilities.resolveCapabilities(request)).uptime.save ?? false;
+          (
+            await coreStart?.capabilities.resolveCapabilities(request, {
+              capabilityPath: 'uptime.*',
+            })
+          ).uptime.save ?? false;
         if (!canSave) {
           return response.forbidden();
         }
 
         const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
 
-        return getSyntheticsMonitor({
+        return await getSyntheticsMonitor({
           monitorId,
           encryptedSavedObjectsClient,
           savedObjectsClient,
@@ -88,7 +95,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       locations: queriedLocations,
     } = request.query as MonitorsQuery;
 
-    const filtersStr = await getMonitorFilters({
+    const { filtersStr } = await getMonitorFilters({
       ...request.query,
       context: routeContext,
     });
@@ -123,9 +130,9 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
   },
 });
 
-function getOverviewConfigsPerLocation(
-  attributes: EncryptedSyntheticsMonitor,
-  queriedLocations: string | string[] | undefined
+export function getOverviewConfigsPerLocation(
+  attributes: EncryptedSyntheticsMonitorAttributes,
+  queriedLocations?: string | string[]
 ) {
   const id = attributes[ConfigKey.MONITOR_QUERY_ID];
   const configId = attributes[ConfigKey.CONFIG_ID];
@@ -149,6 +156,7 @@ function getOverviewConfigsPerLocation(
     configId,
     location,
     name: attributes[ConfigKey.NAME],
+    schedule: attributes[ConfigKey.SCHEDULE].number,
     tags: attributes[ConfigKey.TAGS],
     isEnabled: attributes[ConfigKey.ENABLED],
     type: attributes[ConfigKey.MONITOR_TYPE],

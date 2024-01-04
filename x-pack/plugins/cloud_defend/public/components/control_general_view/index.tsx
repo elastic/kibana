@@ -19,14 +19,17 @@ import {
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import {
-  getInputFromPolicy,
-  getYamlFromSelectorsAndResponses,
-  getSelectorsAndResponsesFromYaml,
   getDefaultSelectorByType,
   getDefaultResponseByType,
   getTotalsByType,
 } from '../../common/utils';
-import { SelectorType, Selector, Response, ViewDeps } from '../../types';
+import {
+  getInputFromPolicy,
+  getYamlFromSelectorsAndResponses,
+  getSelectorsAndResponsesFromYaml,
+} from '../../../common/utils/helpers';
+import { ViewDeps } from '../../types';
+import { SelectorType, Selector, Response } from '../../../common';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';

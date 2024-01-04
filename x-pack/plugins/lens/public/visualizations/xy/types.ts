@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
-import type { PaletteOutput } from '@kbn/coloring';
+import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
   LegendConfig,
   AxisExtentConfig,
@@ -21,10 +21,7 @@ import type {
   FillStyle,
   YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
-import {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-} from '@kbn/event-annotation-plugin/common';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import {
   IconChartArea,
   IconChartLine,
@@ -106,6 +103,7 @@ export interface XYDataLayerConfig {
   xScaleType?: XScaleType;
   isHistogram?: boolean;
   columnToLabel?: string;
+  colorMapping?: ColorMapping.Config;
 }
 
 export interface XYReferenceLineLayerConfig {
@@ -121,6 +119,13 @@ export interface XYByValueAnnotationLayerConfig {
   annotations: EventAnnotationConfig[];
   indexPatternId: string;
   ignoreGlobalFilters: boolean;
+  // populated only when the annotation has been forked from the
+  // version saved in the library (persisted as XYPersistedLinkedByValueAnnotationLayerConfig)
+  cachedMetadata?: {
+    title: string;
+    description: string;
+    tags: string[];
+  };
 }
 
 export type XYPersistedByValueAnnotationLayerConfig = Omit<
@@ -210,6 +215,7 @@ export interface XYState {
   labelsOrientation?: LabelsOrientationConfig;
   curveType?: XYCurveType;
   fillOpacity?: number;
+  minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
   valuesInLegend?: boolean;

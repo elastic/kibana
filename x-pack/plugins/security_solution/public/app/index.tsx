@@ -7,17 +7,14 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Routes, Route } from '@kbn/shared-ux-router';
-
-import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
 import type { RenderAppProps } from './types';
+import { AppRoutes } from './app_routes';
 
 export const renderApp = ({
   element,
   history,
   onAppLeave,
-  setHeaderActionMenu,
   services,
   store,
   usageCollection,
@@ -31,19 +28,11 @@ export const renderApp = ({
       history={history}
       onAppLeave={onAppLeave}
       services={services}
-      setHeaderActionMenu={setHeaderActionMenu}
       store={store}
       theme$={theme$}
     >
       <ApplicationUsageTrackingProvider>
-        <Routes>
-          {subPluginRoutes.map((route, index) => {
-            return <Route key={`route-${index}`} {...route} />;
-          })}
-          <Route>
-            <NotFoundPage />
-          </Route>
-        </Routes>
+        <AppRoutes subPluginRoutes={subPluginRoutes} services={services} />
       </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element

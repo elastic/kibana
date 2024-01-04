@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import { useSymbolIDs } from './use_symbol_ids';
 import { usePaintServerIDs } from './use_paint_server_ids';
 
@@ -66,6 +64,7 @@ const hoveredProcessBackgroundTitle = i18n.translate(
  * PaintServers: Where color palettes, gradients, patterns and other similar concerns
  * are exposed to the component
  */
+// eslint-disable-next-line react/display-name
 const PaintServers = memo(({ id, isDarkMode }: { id: string; isDarkMode: boolean }) => {
   const paintServerIDs = usePaintServerIDs({ id });
   return (
@@ -165,6 +164,7 @@ const PaintServers = memo(({ id, isDarkMode }: { id: string; isDarkMode: boolean
 /**
  * Defs entries that define shapes, masks and other spatial elements
  */
+// eslint-disable-next-line react/display-name
 const SymbolsAndShapes = memo(({ id, isDarkMode }: { id: string; isDarkMode: boolean }) => {
   const symbolIDs = useSymbolIDs({ id });
   const paintServerIDs = usePaintServerIDs({ id });
@@ -433,8 +433,9 @@ const SymbolsAndShapes = memo(({ id, isDarkMode }: { id: string; isDarkMode: boo
  *  2. Separation of concerns between creative assets and more functional areas of the app
  *  3. `<use>` elements can be handled by compositor (faster)
  */
+// eslint-disable-next-line react/display-name
 export const SymbolDefinitions = memo(({ id }: { id: string }) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const isDarkMode = useDarkMode();
   return (
     <HiddenSVG>
       <defs>

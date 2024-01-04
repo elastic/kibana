@@ -31,12 +31,12 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   CreateRuleExceptionsRequestBodyDecoded,
   CreateRuleExceptionsRequestParamsDecoded,
-} from '../../../../../../common/detection_engine/rule_exceptions';
+} from '../../../../../../common/api/detection_engine/rule_exceptions';
 import {
   CREATE_RULE_EXCEPTIONS_URL,
   CreateRuleExceptionsRequestBody,
   CreateRuleExceptionsRequestParams,
-} from '../../../../../../common/detection_engine/rule_exceptions';
+} from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { readRules } from '../../../rule_management/logic/crud/read_rules';
 import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
@@ -47,71 +47,83 @@ import { buildSiemResponse } from '../../../routes/utils';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: CREATE_RULE_EXCEPTIONS_URL,
-      validate: {
-        params: buildRouteValidation<
-          typeof CreateRuleExceptionsRequestParams,
-          CreateRuleExceptionsRequestParamsDecoded
-        >(CreateRuleExceptionsRequestParams),
-        body: buildRouteValidation<
-          typeof CreateRuleExceptionsRequestBody,
-          CreateRuleExceptionsRequestBodyDecoded
-        >(CreateRuleExceptionsRequestBody),
-      },
+      access: 'public',
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: buildRouteValidation<
+              typeof CreateRuleExceptionsRequestParams,
+              CreateRuleExceptionsRequestParamsDecoded
+            >(CreateRuleExceptionsRequestParams),
+            body: buildRouteValidation<
+              typeof CreateRuleExceptionsRequestBody,
+              CreateRuleExceptionsRequestBodyDecoded
+            >(CreateRuleExceptionsRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const ctx = await context.resolve([
-          'core',
-          'securitySolution',
-          'alerting',
-          'licensing',
-          'lists',
-        ]);
-        const rulesClient = ctx.alerting.getRulesClient();
-        const listsClient = ctx.securitySolution.getExceptionListClient();
+        try {
+          const ctx = await context.resolve([
+            'core',
+            'securitySolution',
+            'alerting',
+            'licensing',
+            'lists',
+          ]);
+          const rulesClient = ctx.alerting.getRulesClient();
+          const listsClient = ctx.securitySolution.getExceptionListClient();
 
-        const { items } = request.body;
-        const { id: ruleId } = request.params;
+          const { items } = request.body;
+          const { id: ruleId } = request.params;
 
-        // Check that the rule they're trying to add an exception list to exists
-        const rule = await readRules({
-          rulesClient,
-          ruleId: undefined,
-          id: ruleId,
-        });
+          // Check that the rule they're trying to add an exception list to exists
+          const rule = await readRules({
+            rulesClient,
+            ruleId: undefined,
+            id: ruleId,
+          });
 
-        if (rule == null) {
+          if (rule == null) {
+            return siemResponse.error({
+              statusCode: 500,
+              body: `Unable to add exception to rule - rule with id:"${ruleId}" not found`,
+            });
+          }
+
+          const createdItems = await createRuleExceptions({
+            items,
+            rule,
+            listsClient,
+            rulesClient,
+          });
+
+          const [validated, errors] = validate(createdItems, t.array(exceptionListItemSchema));
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
+        } catch (err) {
+          const error = transformError(err);
           return siemResponse.error({
-            statusCode: 500,
-            body: `Unable to add exception to rule - rule with id:"${ruleId}" not found`,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        const createdItems = await createRuleExceptions({ items, rule, listsClient, rulesClient });
-
-        const [validated, errors] = validate(createdItems, t.array(exceptionListItemSchema));
-        if (errors != null) {
-          return siemResponse.error({ body: errors, statusCode: 500 });
-        } else {
-          return response.ok({ body: validated ?? {} });
-        }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };
 
 export const createRuleExceptions = async ({

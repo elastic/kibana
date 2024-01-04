@@ -53,3 +53,7 @@ export const FLEET_SERVER_INDICES = [
 // Nodes that can be queried by datastreams API
 // Warm and cold nodes have been excluded because of performance issues
 export const DATA_TIERS = ['data_hot'];
+
+export const FLEET_ENROLLMENT_API_PREFIX = 'fleet-enrollment-api-keys';
+
+export * from './mappings';

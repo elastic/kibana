@@ -24,7 +24,7 @@ import type { FieldValueQueryBar } from '../../../../../detections/components/ru
 
 import type { FormSchema } from '../../../../../shared_imports';
 import { Form, UseField, useForm, useFormData } from '../../../../../shared_imports';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 import * as i18n from '../translations';
 import { getEqlOptions } from './selectors';
 
@@ -60,6 +60,7 @@ const HiddenUseField = styled(UseField)`
   display: none;
 `;
 
+// eslint-disable-next-line react/display-name
 export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string }) => {
   const dispatch = useDispatch();
   const isInit = useRef(true);

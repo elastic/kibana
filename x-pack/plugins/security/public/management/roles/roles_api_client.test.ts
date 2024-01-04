@@ -7,8 +7,8 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
-import type { Role } from '../../../common/model';
 import { RolesAPIClient } from './roles_api_client';
+import type { Role } from '../../../common';
 
 describe('RolesAPIClient', () => {
   async function saveRole(role: Role) {

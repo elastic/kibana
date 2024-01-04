@@ -5,66 +5,99 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import {
-  PluginInitializerContext,
-  Plugin,
-  CoreSetup,
-  DEFAULT_APP_CATEGORIES,
-  Logger,
-} from '@kbn/core/server';
-import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import {
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  SavedObjectsClient,
+} from '@kbn/core/server';
+import { LogExplorerLocatorParams, LOG_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import { i18n } from '@kbn/i18n';
+import {
+  ApmRuleType,
+  ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import {
-  kubernetesGuideId,
-  kubernetesGuideConfig,
-} from '../common/guided_onboarding/kubernetes_guide_config';
+import { SloOrphanSummaryCleanupTask } from './services/slo/tasks/orphan_summary_cleanup_task';
 import { ObservabilityConfig } from '.';
+import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import {
+  kubernetesGuideConfig,
+  kubernetesGuideId,
+} from '../common/guided_onboarding/kubernetes_guide_config';
+import { AlertsLocatorDefinition } from '../common/locators/alerts';
+import {
+  AnnotationsAPI,
   bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
-  AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
-import { uiSettings } from './ui_settings';
-import { registerRoutes } from './routes/register_routes';
-import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { compositeSlo, slo, SO_COMPOSITE_SLO_TYPE, SO_SLO_TYPE } from './saved_objects';
-import { AlertsLocatorDefinition } from '../common/locators/alerts';
-import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
-import { registerRuleTypes } from './lib/rules/register_rule_types';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
-import { OpenAIService } from './services/openai';
+import { registerRuleTypes } from './lib/rules/register_rule_types';
+import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
+import { registerRoutes } from './routes/register_routes';
+import { slo, SO_SLO_TYPE } from './saved_objects';
 import { threshold } from './saved_objects/threshold';
+import { DefaultResourceInstaller, DefaultSLOInstaller } from './services/slo';
+
+import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: PluginSetupContract;
   features: FeaturesSetup;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  cloud?: CloudSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 interface PluginStart {
   alerting: PluginStartContract;
+  taskManager: TaskManagerStartContract;
+  spaces?: SpacesPluginStart;
 }
+
+const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
+
+const o11yRuleTypes = [
+  SLO_BURN_RATE_RULE_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  ...Object.values(ApmRuleType),
+];
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
+  private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -78,6 +111,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
+    const logExplorerLocator =
+      plugins.share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -152,6 +187,36 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.casesSettingsSubFeatureName', {
+            defaultMessage: 'Case Settings',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_settings',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.casesSettingsSubFeatureDetails',
+                    {
+                      defaultMessage: 'Edit Case Settings',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  cases: {
+                    settings: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.settings,
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 
@@ -171,11 +236,61 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
+    if (config.createO11yGenericFeatureId) {
+      plugins.features.registerKibanaFeature({
+        id: observabilityFeatureId,
+        name: i18n.translate('xpack.observability.nameFeatureTitle', {
+          defaultMessage: 'Observability',
+        }),
+        order: 1000,
+        category: DEFAULT_APP_CATEGORIES.observability,
+        app: [observabilityFeatureId],
+        catalogue: [observabilityFeatureId],
+        alerting: o11yRuleTypes,
+        privileges: {
+          all: {
+            app: [observabilityFeatureId],
+            catalogue: [observabilityFeatureId],
+            api: ['rac'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            alerting: {
+              rule: {
+                all: o11yRuleTypes,
+              },
+              alert: {
+                all: o11yRuleTypes,
+              },
+            },
+            ui: ['read', 'write'],
+          },
+          read: {
+            app: [observabilityFeatureId],
+            catalogue: [observabilityFeatureId],
+            api: ['rac'],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            alerting: {
+              rule: {
+                read: o11yRuleTypes,
+              },
+              alert: {
+                read: o11yRuleTypes,
+              },
+            },
+            ui: ['read'],
+          },
+        },
+      });
+    }
+
     const { ruleDataService } = plugins.ruleRegistry;
 
-    const savedObjectTypes = config.compositeSlo.enabled
-      ? [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE]
-      : [SO_SLO_TYPE];
+    const savedObjectTypes = [SO_SLO_TYPE];
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
       name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
@@ -185,7 +300,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       category: DEFAULT_APP_CATEGORIES.observability,
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
-      alerting: [SLO_BURN_RATE_RULE_TYPE_ID],
+      alerting: sloRuleTypes,
       privileges: {
         all: {
           app: [sloFeatureId, 'kibana'],
@@ -197,10 +312,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           alerting: {
             rule: {
-              all: [SLO_BURN_RATE_RULE_TYPE_ID],
+              all: sloRuleTypes,
             },
             alert: {
-              all: [SLO_BURN_RATE_RULE_TYPE_ID],
+              all: sloRuleTypes,
             },
           },
           ui: ['read', 'write'],
@@ -215,10 +330,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           alerting: {
             rule: {
-              read: [SLO_BURN_RATE_RULE_TYPE_ID],
+              read: sloRuleTypes,
             },
             alert: {
-              read: [SLO_BURN_RATE_RULE_TYPE_ID],
+              read: sloRuleTypes,
             },
           },
           ui: ['read'],
@@ -227,42 +342,47 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     });
 
     core.savedObjects.registerType(slo);
-    if (config.compositeSlo.enabled) {
-      core.savedObjects.registerType(compositeSlo);
-    }
     core.savedObjects.registerType(threshold);
 
-    registerRuleTypes(
-      plugins.alerting,
-      this.logger,
-      ruleDataService,
-      core.http.basePath,
-      config,
-      alertsLocator
-    );
+    registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, ruleDataService, {
+      alertsLocator,
+      logExplorerLocator,
+    });
     registerSloUsageCollector(plugins.usageCollection);
-
-    const openAIService = config.aiAssistant?.enabled
-      ? new OpenAIService(config.aiAssistant)
-      : undefined;
 
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
         core,
+        config,
         dependencies: {
+          pluginsSetup: {
+            ...plugins,
+            core,
+          },
+          spaces: pluginStart.spaces,
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
-          getOpenAIClient: () => openAIService?.client,
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
       });
-    });
 
+      const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
+
+      const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
+      const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);
+      sloInstaller.install();
+    });
     /**
      * Register a config for the observability guide
      */
-    plugins.guidedOnboarding.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+    plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+
+    this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
+      plugins.taskManager,
+      this.logger,
+      config
+    );
 
     return {
       getAlertDetailsConfig() {
@@ -272,14 +392,16 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },
-      getOpenAIClient() {
-        return openAIService?.client;
-      },
       alertsLocator,
     };
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: PluginStart) {
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
+
+    this.sloOrphanCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
+  }
 
   public stop() {}
 }

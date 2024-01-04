@@ -18,7 +18,7 @@ import {
 import { MonitorErrorEvent } from '../../telemetry/types';
 import {
   MonitorFields,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   ConfigKey,
   ServiceLocationErrors,
   SourceType,
@@ -67,7 +67,7 @@ export function formatTelemetryEvent({
   deletedAt,
   errors,
 }: {
-  monitor: SavedObject<EncryptedSyntheticsMonitor>;
+  monitor: SavedObject<EncryptedSyntheticsMonitorAttributes>;
   stackVersion: string;
   isInlineScript: boolean;
   lastUpdatedAt?: string;
@@ -108,8 +108,8 @@ export function formatTelemetryEvent({
 }
 
 export function formatTelemetryUpdateEvent(
-  currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>,
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
+  currentMonitor: SavedObjectsUpdateResponse<EncryptedSyntheticsMonitorAttributes>,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
   stackVersion: string,
   isInlineScript: boolean,
   errors?: ServiceLocationErrors | null
@@ -123,7 +123,7 @@ export function formatTelemetryUpdateEvent(
 
   return formatTelemetryEvent({
     stackVersion,
-    monitor: currentMonitor as SavedObject<EncryptedSyntheticsMonitor>,
+    monitor: currentMonitor as SavedObject<EncryptedSyntheticsMonitorAttributes>,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
     isInlineScript,
@@ -132,7 +132,7 @@ export function formatTelemetryUpdateEvent(
 }
 
 export function formatTelemetryDeleteEvent(
-  previousMonitor: SavedObject<EncryptedSyntheticsMonitor>,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
   stackVersion: string,
   deletedAt: string,
   isInlineScript: boolean,
@@ -146,7 +146,7 @@ export function formatTelemetryDeleteEvent(
 
   return formatTelemetryEvent({
     stackVersion,
-    monitor: previousMonitor as SavedObject<EncryptedSyntheticsMonitor>,
+    monitor: previousMonitor as SavedObject<EncryptedSyntheticsMonitorAttributes>,
     durationSinceLastUpdated,
     lastUpdatedAt: previousMonitor.updated_at,
     deletedAt,

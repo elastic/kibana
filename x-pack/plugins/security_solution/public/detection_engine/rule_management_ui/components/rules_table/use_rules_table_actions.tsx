@@ -9,7 +9,7 @@ import type { DefaultItemAction } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -26,8 +26,10 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 
 export const useRulesTableActions = ({
   showExceptionsDuplicateConfirmation,
+  confirmDeletion,
 }: {
   showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  confirmDeletion: () => Promise<boolean>;
 }): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
@@ -73,7 +75,7 @@ export const useRulesTableActions = ({
           return;
         }
         const result = await executeBulkAction({
-          type: BulkActionType.duplicate,
+          type: BulkActionTypeEnum.duplicate,
           ids: [rule.id],
           duplicatePayload: {
             include_exceptions:
@@ -114,9 +116,14 @@ export const useRulesTableActions = ({
       icon: 'trash',
       name: i18n.DELETE_RULE,
       onClick: async (rule: Rule) => {
+        if ((await confirmDeletion()) === false) {
+          // User has canceled deletion
+          return;
+        }
+
         startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
         await executeBulkAction({
-          type: BulkActionType.delete,
+          type: BulkActionTypeEnum.delete,
           ids: [rule.id],
         });
       },

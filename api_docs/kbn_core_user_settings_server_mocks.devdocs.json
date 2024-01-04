@@ -66,7 +66,7 @@
             "label": "createSetupContract",
             "description": [],
             "signature": [
-              "() => { setUserProfileSettings: jest.Mock<any, any>; getUserSettingDarkMode: jest.Mock<any, any>; }"
+              "() => { setUserProfileSettings: jest.Mock<any, any, any>; getUserSettingDarkMode: jest.Mock<any, any, any>; }"
             ],
             "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
             "deprecated": false,

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import type { BrowserField } from '../../../../common/containers/source';
+
+import { CUSTOM_QUERY_REQUIRED, EQL_QUERY_REQUIRED, ESQL_QUERY_REQUIRED } from './translations';
+
+import { isEqlRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * Filters out fields, that are not supported in terms aggregation.
@@ -18,4 +24,19 @@ export const getTermsAggregationFields = (fields: BrowserField[]): BrowserField[
   const allowedTypesSet = new Set(['string', 'number', 'ip', 'boolean']);
 
   return fields.filter((field) => field.aggregatable === true && allowedTypesSet.has(field.type));
+};
+
+/**
+ * return query is required message depends on a rule type
+ */
+export const getQueryRequiredMessage = (ruleType: Type) => {
+  if (isEsqlRule(ruleType)) {
+    return ESQL_QUERY_REQUIRED;
+  }
+
+  if (isEqlRule(ruleType)) {
+    return EQL_QUERY_REQUIRED;
+  }
+
+  return CUSTOM_QUERY_REQUIRED;
 };

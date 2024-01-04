@@ -11,16 +11,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, visualBuilder, timeToVisualize, dashboard, header, common, visChart } =
-    getPageObjects([
-      'visualBuilder',
-      'visualize',
-      'timeToVisualize',
-      'dashboard',
-      'header',
-      'common',
-      'visChart',
-    ]);
+  const { visualize, visualBuilder, timeToVisualize, dashboard, common, visChart } = getPageObjects(
+    ['visualBuilder', 'visualize', 'timeToVisualize', 'dashboard', 'header', 'common', 'visChart']
+  );
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -173,7 +166,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
 
-        describe('Clicking on the chart', () => {
+        describe('Clicking on the chart', function () {
+          this.tags('skipFirefox');
           const act = async (visName: string, clickCoordinates: { x: number; y: number }) => {
             await testSubjects.click('visualizeSaveButton');
 
@@ -201,7 +195,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           const cleanup = async () => {
             const discardDashboardPromptButton = 'discardDashboardPromptButton';
-            await common.navigateToApp('dashboard');
+            await dashboard.navigateToApp();
             if (await testSubjects.exists(discardDashboardPromptButton)) {
               await dashboard.clickUnsavedChangesDiscard(discardDashboardPromptButton, true);
             }
@@ -225,14 +219,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             const expectedFilterPills = ['0, win 7'];
             await visualBuilder.setMetricsGroupByTerms('bytes');
             await visChart.waitForVisualizationRenderingStabilized();
-            await header.waitUntilLoadingHasFinished();
             await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
             await visChart.waitForVisualizationRenderingStabilized();
-            await header.waitUntilLoadingHasFinished();
             await visualBuilder.clickSeriesOption();
             await visualBuilder.setChartType('Bar');
             await visChart.waitForVisualizationRenderingStabilized();
-            await header.waitUntilLoadingHasFinished();
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setIntervalValue('1w');
 

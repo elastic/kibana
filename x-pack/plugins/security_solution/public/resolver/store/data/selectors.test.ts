@@ -6,7 +6,7 @@
  */
 
 import * as selectors from './selectors';
-import type { DataState, AnalyzerState } from '../../types';
+import type { DataState, AnalyzerById } from '../../types';
 import type { Reducer, AnyAction } from 'redux';
 import { dataReducer } from './reducer';
 import { createStore } from 'redux';
@@ -99,19 +99,17 @@ describe('data state', () => {
    * Get state, given an ordered collection of actions.
    */
   const state: () => DataState = () => {
-    const testReducer: Reducer<AnalyzerState, AnyAction> = (
+    const testReducer: Reducer<AnalyzerById, AnyAction> = (
       analyzerState = {
-        analyzerById: {
-          [id]: EMPTY_RESOLVER,
-        },
+        [id]: EMPTY_RESOLVER,
       },
       action
-    ): AnalyzerState => dataReducer(analyzerState, action);
+    ): AnalyzerById => dataReducer(analyzerState, action);
     const store = createStore(testReducer, undefined);
     for (const action of actions) {
       store.dispatch(action);
     }
-    return store.getState().analyzerById[id].data;
+    return store.getState()[id].data;
   };
 
   /**

@@ -6,17 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { ComponentRegistry } from './component_registry';
+import type {
+  SectionRegistrySetup,
+  SectionRegistryStart,
+} from '@kbn/management-settings-section-registry';
 
-const register = jest.fn();
-const get = jest.fn();
-const componentType = ComponentRegistry.componentType;
+const addGlobalSection = jest.fn();
+const addSpaceSection = jest.fn();
+const getGlobalSections = jest.fn();
+const getSpacesSections = jest.fn();
 
 export const advancedSettingsMock = {
-  createSetupContract() {
-    return { component: { register, componentType } };
+  createSetupContract(): SectionRegistrySetup {
+    return { addGlobalSection, addSpaceSection };
   },
-  createStartContract() {
-    return { component: { get, componentType } };
+  createStartContract(): SectionRegistryStart {
+    return { getGlobalSections, getSpacesSections };
   },
 };

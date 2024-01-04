@@ -6,6 +6,7 @@
  */
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -35,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     const DEFAULT_NUM_FAILURE_RETRIES = '5';
@@ -225,9 +226,107 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
+        before(async () => {
+          // Add explicit mapping for destination index https://github.com/elastic/elasticsearch/issues/67148
+          if (testData.type === 'latest') {
+            const destIndexMappings: MappingTypeMapping = {
+              properties: {
+                customer_id: {
+                  type: 'long',
+                },
+                day_of_week_i: {
+                  type: 'long',
+                },
+                order_date: {
+                  type: 'date',
+                },
+                order_id: {
+                  type: 'long',
+                },
+                products: {
+                  properties: {
+                    _id: {
+                      type: 'text',
+                      fields: {
+                        keyword: {
+                          type: 'keyword',
+                          ignore_above: 256,
+                        },
+                      },
+                    },
+                    base_price: {
+                      type: 'float',
+                    },
+                    base_unit_price: {
+                      type: 'float',
+                    },
+                    created_on: {
+                      type: 'date',
+                    },
+                    discount_amount: {
+                      type: 'float',
+                    },
+                    discount_percentage: {
+                      type: 'float',
+                    },
+                    min_price: {
+                      type: 'float',
+                    },
+                    price: {
+                      type: 'float',
+                    },
+                    product_id: {
+                      type: 'long',
+                    },
+                    product_name: {
+                      type: 'text',
+                      fields: {
+                        keyword: {
+                          type: 'keyword',
+                          ignore_above: 256,
+                        },
+                      },
+                    },
+                    quantity: {
+                      type: 'long',
+                    },
+                    tax_amount: {
+                      type: 'float',
+                    },
+                    taxful_price: {
+                      type: 'float',
+                    },
+                    taxless_price: {
+                      type: 'float',
+                    },
+                    unit_discount_amount: {
+                      type: 'float',
+                    },
+                  },
+                },
+                taxful_total_price: {
+                  type: 'float',
+                },
+                taxless_total_price: {
+                  type: 'float',
+                },
+                total_quantity: {
+                  type: 'long',
+                },
+                total_unique_products: {
+                  type: 'long',
+                },
+              },
+            };
+
+            await transform.api.createIndices(testData.destinationIndex, {
+              mappings: destIndexMappings,
+            });
+          }
+        });
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await transform.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the wizard for the source data', async () => {
@@ -341,9 +440,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.assertTransformDescriptionValue('');
           await transform.wizard.setTransformDescription(testData.transformDescription);
 
-          await transform.testExecution.logTestStep('inputs the destination index');
+          await transform.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
+          await transform.wizard.assertDestIndexSameAsIdSwitchExists();
+          await transform.wizard.assertDestIndexSameAsIdCheckState(true);
+
+          await transform.testExecution.logTestStep('should input the destination index');
+          await transform.wizard.setDestIndexSameAsIdCheckState(false);
           await transform.wizard.assertDestinationIndexInputExists();
-          await transform.wizard.assertDestinationIndexValue('');
+          await transform.wizard.assertDestinationIndexValue(testData.transformId);
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('displays the create data view switch');

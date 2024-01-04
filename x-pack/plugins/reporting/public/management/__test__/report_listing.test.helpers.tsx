@@ -18,9 +18,12 @@ import {
   notificationServiceMock,
   coreMock,
 } from '@kbn/core/public/mocks';
-import type { LocatorPublic, SharePluginSetup } from '@kbn/share-plugin/public';
 
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { LocatorPublic, SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ILicense } from '@kbn/licensing-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { mockJobs } from '../../../common/test';
 
@@ -31,6 +34,7 @@ import { InternalApiClientProvider, ReportingAPIClient } from '../../lib/reporti
 import { Job } from '../../lib/job';
 
 import { ListingProps as Props, ReportListing } from '..';
+import { ReportDiagnostic } from '../components';
 
 export interface TestDependencies {
   http: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -41,17 +45,43 @@ export interface TestDependencies {
   toasts: NotificationsSetup['toasts'];
   ilmLocator: LocatorPublic<SerializableRecord>;
   uiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
+  reportDiagnostic: typeof ReportDiagnostic;
+  data: DataPublicPluginStart;
+  share: SharePluginStart;
 }
 
-const mockPollConfig = {
-  jobCompletionNotifier: {
-    interval: 5000,
-    intervalErrorMultiplier: 3,
+export const mockConfig = {
+  csv: {
+    scroll: {
+      duration: '10m',
+      size: 500,
+    },
   },
-  jobsRefresh: {
-    interval: 5000,
-    intervalErrorMultiplier: 3,
+  poll: {
+    jobCompletionNotifier: {
+      interval: 5000,
+      intervalErrorMultiplier: 3,
+    },
+    jobsRefresh: {
+      interval: 5000,
+      intervalErrorMultiplier: 3,
+    },
   },
+  export_types: {
+    pdf: {
+      enabled: true,
+    },
+    png: {
+      enabled: true,
+    },
+    csv: {
+      enabled: true,
+    },
+  },
+  roles: {
+    enabled: false,
+  },
+  statefulSettings: { enabled: true },
 };
 
 const validCheck = {
@@ -67,7 +97,7 @@ const license$ = {
   },
 } as Observable<ILicense>;
 
-const createTestBed = registerTestBed(
+export const createTestBed = registerTestBed(
   ({
     http,
     application,
@@ -76,18 +106,21 @@ const createTestBed = registerTestBed(
     urlService,
     toasts,
     uiSettings,
+    data,
+    share,
     ...rest
   }: Partial<Props> & TestDependencies) => (
-    <KibanaContextProvider services={{ http, application, uiSettings }}>
+    <KibanaContextProvider services={{ http, application, uiSettings, data, share }}>
       <InternalApiClientProvider apiClient={reportingAPIClient}>
         <IlmPolicyStatusContextProvider>
           <ReportListing
             license$={l$}
-            pollConfig={mockPollConfig}
+            config={mockConfig}
             redirect={jest.fn()}
             navigateToUrl={jest.fn()}
             urlService={urlService}
             toasts={toasts}
+            apiClient={reportingAPIClient}
             {...rest}
           />
         </IlmPolicyStatusContextProvider>
@@ -114,6 +147,10 @@ export const setup = async (props?: Partial<Props>) => {
     getUrl: jest.fn(),
   } as unknown as LocatorPublic<SerializableRecord>;
 
+  const reportDiagnostic = () => (
+    <ReportDiagnostic apiClient={reportingAPIClient} clientConfig={mockConfig} />
+  );
+
   const testDependencies: TestDependencies = {
     http: httpService,
     application: applicationServiceMock.createStartContract(),
@@ -127,6 +164,9 @@ export const setup = async (props?: Partial<Props>) => {
         get: () => ilmLocator,
       },
     } as unknown as SharePluginSetup['url'],
+    reportDiagnostic,
+    data: dataPluginMock.createStartContract(),
+    share: sharePluginMock.createStartContract(),
   };
 
   const testBed = createTestBed({ ...testDependencies, ...props });
@@ -143,7 +183,7 @@ export const setup = async (props?: Partial<Props>) => {
       flyout: {
         open: async (jobId: string) => {
           await act(async () => {
-            find(`viewReportingLink${jobId}`).simulate('click');
+            find(`viewReportingLink-${jobId}`).simulate('click');
           });
           component.update();
         },
@@ -162,6 +202,7 @@ export const setup = async (props?: Partial<Props>) => {
         });
         component.update();
       },
+      hasScreenshotDiagnosticLink: () => exists('screenshotDiagnosticLink'),
     },
   };
 

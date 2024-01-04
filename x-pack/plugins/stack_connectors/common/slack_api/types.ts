@@ -15,6 +15,7 @@ import {
   SlackApiSecretsSchema,
   SlackApiParamsSchema,
   SlackApiConfigSchema,
+  ValidChannelIdSubActionParamsSchema,
 } from './schema';
 
 export type SlackApiSecrets = TypeOf<typeof SlackApiSecretsSchema>;
@@ -22,6 +23,7 @@ export type SlackApiConfig = TypeOf<typeof SlackApiConfigSchema>;
 
 export type PostMessageParams = TypeOf<typeof PostMessageParamsSchema>;
 export type PostMessageSubActionParams = TypeOf<typeof PostMessageSubActionParamsSchema>;
+export type ValidChannelIdSubActionParams = TypeOf<typeof ValidChannelIdSubActionParamsSchema>;
 export type SlackApiParams = TypeOf<typeof SlackApiParamsSchema>;
 export type SlackApiConnectorType = ConnectorType<
   SlackApiConfig,
@@ -55,25 +57,34 @@ export interface SlackAPiResponse {
   };
 }
 
-export interface ChannelsResponse {
+export interface ChannelResponse {
   id: string;
   name: string;
   is_channel: boolean;
   is_archived: boolean;
   is_private: boolean;
 }
-export interface GetChannelsResponse extends SlackAPiResponse {
-  channels?: ChannelsResponse[];
+
+export interface ValidChannelResponse extends SlackAPiResponse {
+  channel?: ChannelResponse;
 }
 
 export interface PostMessageResponse extends SlackAPiResponse {
   channel?: string;
 }
 
+export interface ValidChannelRouteResponse {
+  validChannels: Array<{ id: string; name: string }>;
+  invalidChannels: string[];
+}
+
 export interface SlackApiService {
-  getChannels: () => Promise<ConnectorTypeExecutorResult<GetChannelsResponse | void>>;
+  validChannelId: (
+    channelId: string
+  ) => Promise<ConnectorTypeExecutorResult<ValidChannelResponse | void>>;
   postMessage: ({
     channels,
+    channelIds,
     text,
   }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }

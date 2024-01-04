@@ -115,17 +115,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // adding a11y tests for the new data grid
     it('a11y test on single document view', async () => {
       await testSubjects.click('docTableExpandToggleColumn');
-      await PageObjects.discover.clickDocViewerTab(0);
+      await PageObjects.discover.clickDocViewerTab('doc_view_table');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on JSON view of the document', async () => {
-      await PageObjects.discover.clickDocViewerTab(1);
+      await PageObjects.discover.clickDocViewerTab('doc_view_source');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for actions on a field', async () => {
-      await PageObjects.discover.clickDocViewerTab(0);
+      await PageObjects.discover.clickDocViewerTab('doc_view_table');
       if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
         await testSubjects.click('openFieldActionsButton-Cancelled');
       } else {
@@ -179,14 +179,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('unifiedHistogramChartOptionsToggle');
     });
 
-    // https://github.com/elastic/kibana/issues/148567
-    it.skip('a11y test for data grid sort panel', async () => {
+    it('a11y test for data grid sort panel', async () => {
       await testSubjects.click('dataGridColumnSortingButton');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);
     });
-    // https://github.com/elastic/kibana/issues/148567
-    it.skip('a11y test for setting row height for display panel', async () => {
+
+    it('a11y test for setting row height for display panel', async () => {
       await testSubjects.click('dataGridDisplaySelectorPopover');
       await a11y.testAppSnapshot();
       await browser.pressKeys(browser.keys.ESCAPE);

@@ -15,7 +15,6 @@ import { CoreStart } from '@kbn/core/public';
 import type { InfraClientStartDeps } from '../types';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
-import { hostLensFormulas } from '../common/visualizations';
 
 jest.mock('@kbn/kibana-react-plugin/public');
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -31,7 +30,16 @@ const mockDataView = {
   metaFields: [],
 } as unknown as jest.Mocked<DataView>;
 
-const normalizedLoad1m = hostLensFormulas.normalizedLoad1m;
+const normalizedLoad1m = {
+  label: 'Normalized Load',
+  value: 'average(system.load.1) / max(system.load.cores)',
+  format: {
+    id: 'percent',
+    params: {
+      decimals: 0,
+    },
+  },
+};
 
 const lensPluginMockStart = lensPluginMock.createStartContract();
 const mockUseKibana = () => {
@@ -55,13 +63,19 @@ describe('useHostTable hook', () => {
         layers: [
           {
             data: [normalizedLoad1m],
-            layerType: 'data',
             options: {
+              buckets: {
+                type: 'date_histogram',
+              },
               breakdown: {
-                size: 10,
-                sourceField: 'host.name',
+                field: 'host.name',
+                type: 'top_values',
+                params: {
+                  size: 10,
+                },
               },
             },
+            layerType: 'data',
           },
           {
             data: [
@@ -189,6 +203,7 @@ describe('useHostTable hook', () => {
   it('should return extra actions', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useLensAttributes({
+        title: 'Chart',
         visualizationType: 'lnsXY',
         layers: [
           {

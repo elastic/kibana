@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-export type {
-  HostsLensFormulas,
-  HostsLensMetricChartFormulas,
-  HostsLensLineChartFormulas,
-  LensAttributes,
-  FormulaConfig,
-  Chart,
-  LensVisualizationState,
-} from './types';
-
-export { hostLensFormulas } from './constants';
-
-export * from './lens/visualization_types';
-
-export { LensAttributesBuilder } from './lens/lens_attributes_builder';
+export { METRICS_TOOLTIP } from './translations';
+export {
+  HOST_METRICS_DOC_HREF,
+  HOST_METRICS_DOTTED_LINES_DOC_HREF,
+  KPI_CHART_HEIGHT,
+} from './constants';

@@ -1,0 +1,11 @@
+summary: Update some properties for a data view.
+value:
+  {
+    "data_view": {
+      "title": "kibana_sample_data_ecommerce",
+      "timeFieldName": "order_date",
+      "allowNoIndex": false,
+      "name": "Kibana Sample Data eCommerce"
+    },
+    "refresh_fields": true
+}

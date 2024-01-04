@@ -1,0 +1,11 @@
+title: Connector request properties for a D3 Security connector
+description: Defines properties for connectors when type is `.d3security`.
+type: object
+required:
+  - url
+properties:
+  url:
+    type: string
+    description: >
+      The D3 Security API request URL.
+      If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.

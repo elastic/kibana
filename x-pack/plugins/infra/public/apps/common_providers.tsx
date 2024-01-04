@@ -9,8 +9,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
-import { CoPilotService } from '@kbn/observability-plugin/public/typings/co_pilot';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -24,13 +23,13 @@ export const CommonInfraProviders: React.FC<{
   appName: string;
   storage: Storage;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
-  observabilityCopilot: CoPilotService;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
 }> = ({
   children,
   triggersActionsUI,
-  observabilityCopilot,
+  observabilityAIAssistant: { service: observabilityAIAssistantService },
   setHeaderActionMenu,
   appName,
   storage,
@@ -42,11 +41,9 @@ export const CommonInfraProviders: React.FC<{
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
-          <CoPilotContextProvider value={observabilityCopilot}>
-            <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-              <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
-            </HeaderActionMenuProvider>
-          </CoPilotContextProvider>
+          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+            <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
+          </HeaderActionMenuProvider>
         </DataUIProviders>
       </EuiThemeProvider>
     </TriggersActionsProvider>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-plugin/common/constants/categorization_job';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
 import type { PickFieldsConfig, DatafeedConfig, Detector } from './types';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -209,8 +209,8 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
-      await ml.testResources.createIndexPatternIfNeeded('ft_categorization_small', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createDataViewIfNeeded('ft_categorization_small', '@timestamp');
 
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -220,8 +220,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
-      await ml.testResources.deleteIndexPatternByTitle('ft_categorization_small');
+      await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
+      await ml.testResources.deleteDataViewByTitle('ft_categorization_small');
     });
 
     describe('from multi-metric job creation wizard', function () {

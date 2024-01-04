@@ -10,7 +10,7 @@ import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_se
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';

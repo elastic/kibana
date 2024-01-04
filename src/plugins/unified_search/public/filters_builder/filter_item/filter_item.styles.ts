@@ -22,6 +22,10 @@ export const cursorOrCss = css`
 
 export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
   min-width: calc(${euiTheme.size.xl} * 5);
+  flex-grow: 1;
+  .euiFormRow {
+    max-width: 800px;
+  }
 `;
 
 export const operationCss = (euiTheme: EuiThemeComputed) => css`

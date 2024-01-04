@@ -8,6 +8,7 @@
 import { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { TopNComparisonFunctionSortField } from '@kbn/profiling-utils';
 import { NormalizationMode } from '../../components/normalization_menu';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { RedirectTo } from '../../components/redirect_to';
@@ -51,6 +52,12 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
           comparisonKuery: query.kuery,
           normalizationMode:
             'normalizationMode' in query ? query.normalizationMode : NormalizationMode.Time,
+          comparisonSortField:
+            'comparisonSortField' in query
+              ? query.comparisonSortField
+              : TopNComparisonFunctionSortField.ComparisonRank,
+          comparisonSortDirection:
+            'comparisonSortDirection' in query ? query.comparisonSortDirection : 'asc',
         },
       }),
     },

@@ -7,11 +7,11 @@
  */
 
 import { CharStreams } from 'antlr4ts';
-import { monaco } from '../../monaco_imports';
-import { AutocompleteListener } from '../lib/autocomplete/autocomplete_listener';
+import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
 import { getParser, ROOT_STATEMENT } from '../lib/antlr_facade';
-import { ANTLREErrorListener } from '../../common/error_listener';
+import { AstListener } from '../lib/ast/ast_factory';
+import { ESQLErrorListener } from '../lib/monaco/esql_error_listener';
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private readonly _ctx: monaco.worker.IWorkerContext;
@@ -33,7 +33,7 @@ export class ESQLWorker implements BaseWorkerDefinition {
     const inputStream = this.getModelCharStream(modelUri);
 
     if (inputStream) {
-      const errorListener = new ANTLREErrorListener();
+      const errorListener = new ESQLErrorListener();
       const parser = getParser(inputStream, errorListener);
 
       parser[ROOT_STATEMENT]();
@@ -43,24 +43,21 @@ export class ESQLWorker implements BaseWorkerDefinition {
     return [];
   }
 
-  public async provideAutocompleteSuggestions(
-    modelUri: string,
-    meta: {
-      word: string;
-      line: number;
-      index: number;
+  async getAst(text: string | undefined) {
+    if (!text) {
+      return { ast: [], errors: [] };
     }
-  ) {
-    const inputStream = this.getModelCharStream(modelUri);
+    const inputStream = CharStreams.fromString(text);
+    const errorListener = new ESQLErrorListener();
+    const parserListener = new AstListener();
+    const parser = getParser(inputStream, errorListener, parserListener);
 
-    if (inputStream) {
-      const errorListener = new ANTLREErrorListener();
-      const parseListener = new AutocompleteListener();
-      const parser = getParser(inputStream, errorListener, parseListener);
+    parser[ROOT_STATEMENT]();
 
-      parser[ROOT_STATEMENT]();
-
-      return parseListener.getAutocompleteSuggestions();
-    }
+    const { ast } = parserListener.getAst();
+    return {
+      ast,
+      errors: errorListener.getErrors(),
+    };
   }
 }

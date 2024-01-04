@@ -5,21 +5,31 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { map } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import type {
+  GetLiveQueryResultsRequestQuerySchema,
+  GetLiveQueryResultsRequestParamsSchema,
+} from '../../../common/api';
+import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type {
   ActionDetailsRequestOptions,
   ActionDetailsStrategyResponse,
+  ResultsRequestOptions,
+  ResultsStrategyResponse,
 } from '../../../common/search_strategy';
-import { OsqueryQueries } from '../../../common/search_strategy';
-import { createFilter, generateTablePaginationOptions } from '../../../common/utils/build_query';
+import { Direction, OsqueryQueries } from '../../../common/search_strategy';
+import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getActionResponses } from './utils';
+import {
+  getLiveQueryResultsRequestParamsSchema,
+  getLiveQueryResultsRequestQuerySchema,
+} from '../../../common/api';
 
 export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerContext>) => {
   router.versioned
@@ -33,25 +43,14 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: schema.object(
-              {
-                filterQuery: schema.maybe(schema.string()),
-                page: schema.maybe(schema.number()),
-                pageSize: schema.maybe(schema.number()),
-                sort: schema.maybe(schema.string()),
-                sortOrder: schema.maybe(
-                  schema.oneOf([schema.literal('asc'), schema.literal('desc')])
-                ),
-              },
-              { unknowns: 'allow' }
-            ),
-            params: schema.object(
-              {
-                id: schema.string(),
-                actionId: schema.string(),
-              },
-              { unknowns: 'allow' }
-            ),
+            query: buildRouteValidation<
+              typeof getLiveQueryResultsRequestQuerySchema,
+              GetLiveQueryResultsRequestQuerySchema
+            >(getLiveQueryResultsRequestQuerySchema),
+            params: buildRouteValidation<
+              typeof getLiveQueryResultsRequestParamsSchema,
+              GetLiveQueryResultsRequestParamsSchema
+            >(getLiveQueryResultsRequestParamsSchema),
           },
         },
       },
@@ -64,7 +63,7 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
             search.search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(
               {
                 actionId: request.params.id,
-                filterQuery: createFilter(request.query.filterQuery),
+                kuery: request.query.kuery,
                 factoryQueryType: OsqueryQueries.actionDetails,
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
@@ -82,19 +81,21 @@ export const getLiveQueryResultsRoute = (router: IRouter<DataRequestHandlerConte
           );
 
           const res = await lastValueFrom(
-            search.search<{}>(
+            search.search<ResultsRequestOptions, ResultsStrategyResponse>(
               {
                 actionId: request.params.actionId,
                 factoryQueryType: OsqueryQueries.results,
-                filterQuery: createFilter(request.query.filterQuery),
+                kuery: request.query.kuery,
                 pagination: generateTablePaginationOptions(
                   request.query.page ?? 0,
                   request.query.pageSize ?? 100
                 ),
-                sort: {
-                  direction: request.query.sortOrder ?? 'desc',
-                  field: request.query.sort ?? '@timestamp',
-                },
+                sort: [
+                  {
+                    direction: request.query.sortOrder ?? Direction.desc,
+                    field: request.query.sort ?? '@timestamp',
+                  },
+                ],
               },
               { abortSignal, strategy: 'osquerySearchStrategy' }
             )

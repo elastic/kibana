@@ -23,6 +23,7 @@ export const DetailPanelDescriptionList = ({ listItems }: DetailPanelDescription
   return (
     <EuiDescriptionList
       type="column"
+      columnWidths={[2, 3]}
       listItems={listItems}
       css={styles.descriptionList}
       titleProps={{ style: styles.tabListTitle }}

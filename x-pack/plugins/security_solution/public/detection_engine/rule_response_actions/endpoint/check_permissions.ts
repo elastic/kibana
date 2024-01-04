@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
+import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import { getRbacControl } from '../../../management/components/endpoint_responder/lib/console_commands_definition';
 import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
 import { useUserPrivileges } from '../../../common/components/user_privileges';

@@ -6,46 +6,57 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { CoverageOverviewRequestBody } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
+import type { IKibanaResponse } from '@kbn/core/server';
+import type { CoverageOverviewResponse } from '../../../../../../../common/api/detection_engine';
+import {
+  CoverageOverviewRequestBody,
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+} from '../../../../../../../common/api/detection_engine';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
-import { buildSiemResponse } from '../../../../routes/utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildSiemResponse } from '../../../../routes/utils';
 import { handleCoverageOverviewRequest } from './handle_coverage_overview_request';
 
 export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
-      validate: {
-        body: buildRouteValidation(CoverageOverviewRequestBody),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: buildRouteValidation(CoverageOverviewRequestBody),
+          },
+        },
+      },
+      async (context, request, response): Promise<IKibanaResponse<CoverageOverviewResponse>> => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const ctx = await context.resolve(['alerting']);
+        try {
+          const ctx = await context.resolve(['alerting']);
 
-        const responseData = await handleCoverageOverviewRequest({
-          params: request.body,
-          deps: { rulesClient: ctx.alerting.getRulesClient() },
-        });
+          const responseData = await handleCoverageOverviewRequest({
+            params: request.body,
+            deps: { rulesClient: ctx.alerting.getRulesClient() },
+          });
 
-        return response.ok({
-          body: responseData,
-        });
-      } catch (err) {
-        const error = transformError(err);
+          return response.ok({
+            body: responseData,
+          });
+        } catch (err) {
+          const error = transformError(err);
 
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

@@ -12,7 +12,8 @@ import { BETA_LABEL } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TelemetryContextProvider } from './telemetry/telemetry_context';
-import { SolutionSideNavItem, LinkCategories, LinkCategoryType } from './types';
+import type { SolutionSideNavItem } from './types';
+import { type LinkCategories, LinkCategoryType } from '@kbn/security-solution-navigation';
 
 const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {
@@ -105,7 +106,7 @@ describe('SolutionSideNavPanel', () => {
 
     mockCategories.forEach((mockCategory) => {
       if (!mockCategory.label) return; // omit separator categories
-      if (mockCategory.linkIds.length) {
+      if (mockCategory.linkIds?.length) {
         expect(result.getByText(mockCategory.label)).toBeInTheDocument();
       } else {
         expect(result.queryByText(mockCategory.label)).not.toBeInTheDocument();
@@ -117,7 +118,7 @@ describe('SolutionSideNavPanel', () => {
     const result = renderNavPanel({ categories: mockCategories });
     mockCategories.forEach((mockCategory) => {
       if (mockCategory.type !== LinkCategoryType.separator) return; // omit non-separator categories
-      mockCategory.linkIds.forEach((linkId) => {
+      mockCategory.linkIds?.forEach((linkId) => {
         expect(result.queryByTestId(`solutionSideNavPanelLink-${linkId}`)).toBeInTheDocument();
       });
     });

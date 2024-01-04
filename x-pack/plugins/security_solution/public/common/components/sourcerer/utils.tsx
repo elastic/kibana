@@ -8,7 +8,7 @@
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../common/api/timeline';
 import { Blockquote } from './helpers';
 import * as i18n from './translations';
 
@@ -43,28 +43,30 @@ export const CurrentPatternsMessage = ({
 
   if (timelineType === TimelineType.template) {
     return (
+      <span data-test-subj="sourcerer-current-patterns-message">
+        <FormattedMessage
+          id="xpack.securitySolution.indexPatterns.timelineTemplate.currentPatterns"
+          defaultMessage="The active index patterns in this timeline template are{tooltip}: {callout}"
+          values={{
+            tooltip,
+            callout: <Blockquote>{activePatterns.join(', ')}</Blockquote>,
+          }}
+        />
+      </span>
+    );
+  }
+
+  return (
+    <span data-test-subj="sourcerer-current-patterns-message">
       <FormattedMessage
-        data-test-subj="sourcerer-current-patterns-message"
-        id="xpack.securitySolution.indexPatterns.timelineTemplate.currentPatterns"
-        defaultMessage="The active index patterns in this timeline template are{tooltip}: {callout}"
+        id="xpack.securitySolution.indexPatterns.timeline.currentPatterns"
+        defaultMessage="The active index patterns in this timeline are{tooltip}: {callout}"
         values={{
           tooltip,
           callout: <Blockquote>{activePatterns.join(', ')}</Blockquote>,
         }}
       />
-    );
-  }
-
-  return (
-    <FormattedMessage
-      data-test-subj="sourcerer-current-patterns-message"
-      id="xpack.securitySolution.indexPatterns.timeline.currentPatterns"
-      defaultMessage="The active index patterns in this timeline are{tooltip}: {callout}"
-      values={{
-        tooltip,
-        callout: <Blockquote>{activePatterns.join(', ')}</Blockquote>,
-      }}
-    />
+    </span>
   );
 };
 
@@ -147,25 +149,27 @@ export const DeprecatedMessage = ({
 }) => {
   if (timelineType === TimelineType.template) {
     return (
+      <span data-test-subj="sourcerer-deprecated-message">
+        <FormattedMessage
+          id="xpack.securitySolution.indexPatterns.timelineTemplate.toggleToNewSourcerer"
+          defaultMessage="We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}."
+          values={{
+            link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
+          }}
+        />
+      </span>
+    );
+  }
+  return (
+    <span data-test-subj="sourcerer-deprecated-message">
       <FormattedMessage
-        data-test-subj="sourcerer-deprecated-message"
-        id="xpack.securitySolution.indexPatterns.timelineTemplate.toggleToNewSourcerer"
-        defaultMessage="We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}."
+        id="xpack.securitySolution.indexPatterns.timeline.toggleToNewSourcerer"
+        defaultMessage="We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}."
         values={{
           link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
         }}
       />
-    );
-  }
-  return (
-    <FormattedMessage
-      data-test-subj="sourcerer-deprecated-message"
-      id="xpack.securitySolution.indexPatterns.timeline.toggleToNewSourcerer"
-      defaultMessage="We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}."
-      values={{
-        link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
-      }}
-    />
+    </span>
   );
 };
 
@@ -178,24 +182,26 @@ export const MissingPatternsMessage = ({
 }) => {
   if (timelineType === TimelineType.template) {
     return (
+      <span data-test-subj="sourcerer-missing-patterns-message">
+        <FormattedMessage
+          id="xpack.securitySolution.indexPatterns.missingPatterns.timelineTemplate.description"
+          defaultMessage="We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view {link}."
+          values={{
+            link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
+          }}
+        />
+      </span>
+    );
+  }
+  return (
+    <span data-test-subj="sourcerer-missing-patterns-message">
       <FormattedMessage
-        data-test-subj="sourcerer-missing-patterns-message"
-        id="xpack.securitySolution.indexPatterns.missingPatterns.timelineTemplate.description"
-        defaultMessage="We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view {link}."
+        id="xpack.securitySolution.indexPatterns.missingPatterns.timeline.description"
+        defaultMessage="We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view {link}."
         values={{
           link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
         }}
       />
-    );
-  }
-  return (
-    <FormattedMessage
-      data-test-subj="sourcerer-missing-patterns-message"
-      id="xpack.securitySolution.indexPatterns.missingPatterns.timeline.description"
-      defaultMessage="We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view {link}."
-      values={{
-        link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
-      }}
-    />
+    </span>
   );
 };

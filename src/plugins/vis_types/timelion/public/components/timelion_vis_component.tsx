@@ -26,6 +26,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
@@ -112,8 +113,6 @@ export const TimelionVisComponent = ({
   const chartRef = useRef<Chart>(null);
   const chart = seriesList.list;
   const chartsService = getCharts();
-
-  const chartTheme = chartsService.theme.useChartsTheme();
   const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
@@ -215,10 +214,10 @@ export const TimelionVisComponent = ({
           externalPointerEvents={{
             tooltip: { visible: syncTooltips, placement: Placement.Right },
           }}
-          theme={chartTheme}
           baseTheme={chartBaseTheme}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}
+          locale={i18n.getLocale()}
         />
 
         <Axis

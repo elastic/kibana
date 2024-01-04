@@ -15,9 +15,9 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import type { Note } from '../../../../../common/types/timeline/note/api';
-import type { PinnedEvent } from '../../../../../common/types/timeline/pinned_event/api';
 import type {
+  Note,
+  PinnedEvent,
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
   PageInfoTimeline,
@@ -32,8 +32,8 @@ import type {
   TimelineSavedObject,
   SavedTimeline,
   TimelineWithoutExternalRefs,
-} from '../../../../../common/types/timeline/api';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+} from '../../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
@@ -584,6 +584,63 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
       ])
     )
   );
+};
+
+export const copyTimeline = async (
+  request: FrameworkRequest,
+  timeline: SavedTimeline,
+  timelineId: string
+): Promise<ResponseTimeline> => {
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
+
+  // Fetch all objects that need to be copied
+  const [notes, pinnedEvents] = await Promise.all([
+    note.getNotesByTimelineId(request, timelineId),
+    pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
+  ]);
+
+  const isImmutable = timeline.status === TimelineStatus.immutable;
+  const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
+
+  const timelineResponse = await createTimeline({
+    savedObjectsClient,
+    timeline,
+    timelineId: null,
+    userInfo,
+  });
+
+  const newTimelineId = timelineResponse.timeline.savedObjectId;
+
+  const copiedNotes = Promise.all(
+    notes.map((_note) => {
+      return note.persistNote({
+        request,
+        noteId: null,
+        note: {
+          ..._note,
+          timelineId: newTimelineId,
+        },
+        overrideOwner: false,
+      });
+    })
+  );
+
+  const copiedPinnedEvents = pinnedEvents.map((_pinnedEvent) => {
+    return pinnedEvent.persistPinnedEventOnTimeline(
+      request,
+      null,
+      _pinnedEvent.eventId,
+      newTimelineId
+    );
+  });
+
+  await Promise.all([copiedNotes, copiedPinnedEvents]);
+
+  return {
+    code: 200,
+    message: 'success',
+    timeline: await getSavedTimeline(request, newTimelineId),
+  };
 };
 
 const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {

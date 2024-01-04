@@ -33,7 +33,6 @@ describe('Legacy Alert Actions factory', () => {
         defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
         defaultRecoverySubjectMessage: MonitorStatusTranslations.defaultRecoverySubjectMessage,
       },
-      isLegacy: true,
     });
     expect(resp).toEqual([
       {
@@ -81,7 +80,6 @@ describe('Legacy Alert Actions factory', () => {
         defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
         defaultRecoverySubjectMessage: MonitorStatusTranslations.defaultRecoverySubjectMessage,
       },
-      isLegacy: true,
       defaultEmail: {
         to: ['test@email.com'],
       },
@@ -147,7 +145,6 @@ describe('Legacy Alert Actions factory', () => {
         defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
         defaultRecoverySubjectMessage: MonitorStatusTranslations.defaultRecoverySubjectMessage,
       },
-      isLegacy: true,
     });
     expect(resp).toEqual([
       {
@@ -209,7 +206,6 @@ describe('Legacy Alert Actions factory', () => {
         defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
         defaultRecoverySubjectMessage: MonitorStatusTranslations.defaultRecoverySubjectMessage,
       },
-      isLegacy: true,
     });
     expect(resp).toEqual([
       {

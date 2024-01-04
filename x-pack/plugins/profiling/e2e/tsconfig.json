@@ -22,5 +22,6 @@
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/cypress-config",
+    "@kbn/observability-plugin",
   ]
 }

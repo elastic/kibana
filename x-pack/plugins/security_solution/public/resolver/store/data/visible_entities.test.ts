@@ -8,7 +8,7 @@
 import type { Store, AnyAction, Reducer } from 'redux';
 import { createStore } from 'redux';
 import { analyzerReducer } from '../reducer';
-import type { AnalyzerState } from '../../types';
+import type { AnalyzerById } from '../../types';
 import type { ResolverNode } from '../../../../common/endpoint/types';
 import { visibleNodesAndEdgeLines } from '../selectors';
 import { mock as mockResolverTree } from '../../models/resolver_tree';
@@ -28,7 +28,7 @@ describe('resolver visible entities', () => {
   let nodeE: ResolverNode;
   let nodeF: ResolverNode;
   let nodeG: ResolverNode;
-  let store: Store<AnalyzerState, AnyAction>;
+  let store: Store<AnalyzerById, AnyAction>;
 
   beforeEach(() => {
     /*
@@ -95,14 +95,12 @@ describe('resolver visible entities', () => {
       stats: { total: 0, byCategory: {} },
       timestamp: 0,
     });
-    const testReducer: Reducer<AnalyzerState, AnyAction> = (
+    const testReducer: Reducer<AnalyzerById, AnyAction> = (
       analyzerState = {
-        analyzerById: {
-          [id]: EMPTY_RESOLVER,
-        },
+        [id]: EMPTY_RESOLVER,
       },
       action
-    ): AnalyzerState => analyzerReducer(analyzerState, action);
+    ): AnalyzerById => analyzerReducer(analyzerState, action);
     store = createStore(testReducer, undefined);
   });
   describe('when rendering a large tree with a small viewport', () => {
@@ -121,15 +119,11 @@ describe('resolver visible entities', () => {
       store.dispatch(userSetRasterSize({ id, dimensions: [300, 200] }));
     });
     it('the visibleProcessNodePositions list should only include 2 nodes', () => {
-      const { processNodePositions } = visibleNodesAndEdgeLines(store.getState().analyzerById[id])(
-        0
-      );
+      const { processNodePositions } = visibleNodesAndEdgeLines(store.getState()[id])(0);
       expect([...processNodePositions.keys()].length).toEqual(2);
     });
     it('the visibleEdgeLineSegments list should only include one edge line', () => {
-      const { connectingEdgeLineSegments } = visibleNodesAndEdgeLines(
-        store.getState().analyzerById[id]
-      )(0);
+      const { connectingEdgeLineSegments } = visibleNodesAndEdgeLines(store.getState()[id])(0);
       expect(connectingEdgeLineSegments.length).toEqual(1);
     });
   });
@@ -149,15 +143,11 @@ describe('resolver visible entities', () => {
       store.dispatch(userSetRasterSize({ id, dimensions: [2000, 2000] }));
     });
     it('the visibleProcessNodePositions list should include all process nodes', () => {
-      const { processNodePositions } = visibleNodesAndEdgeLines(store.getState().analyzerById[id])(
-        0
-      );
+      const { processNodePositions } = visibleNodesAndEdgeLines(store.getState()[id])(0);
       expect([...processNodePositions.keys()].length).toEqual(5);
     });
     it('the visibleEdgeLineSegments list include all lines', () => {
-      const { connectingEdgeLineSegments } = visibleNodesAndEdgeLines(
-        store.getState().analyzerById[id]
-      )(0);
+      const { connectingEdgeLineSegments } = visibleNodesAndEdgeLines(store.getState()[id])(0);
       expect(connectingEdgeLineSegments.length).toEqual(4);
     });
   });

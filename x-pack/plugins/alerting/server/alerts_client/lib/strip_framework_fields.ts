@@ -6,11 +6,16 @@
  */
 
 import { omit } from 'lodash';
-import { ALERT_REASON, ALERT_WORKFLOW_STATUS, TAGS } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_WORKFLOW_STATUS, TAGS, ALERT_URL } from '@kbn/rule-data-utils';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { RuleAlertData } from '../../types';
 
-const allowedFrameworkFields = new Set<string>([ALERT_REASON, ALERT_WORKFLOW_STATUS, TAGS]);
+const allowedFrameworkFields = new Set<string>([
+  ALERT_REASON,
+  ALERT_WORKFLOW_STATUS,
+  TAGS,
+  ALERT_URL,
+]);
 
 /**
  * Remove framework fields from the alert payload reported by

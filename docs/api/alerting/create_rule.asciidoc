@@ -9,7 +9,7 @@ Create {kib} rules.
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification].
 ====
 
 [[create-rule-api-request]]
@@ -29,17 +29,6 @@ features, *{observability}*, and *Security* features. If the rule has `actions`,
 you must also have `read` privileges for the *Management* >
 *{connectors-feature}* feature. For more details, refer to
 <<kibana-feature-privileges>>.
-
-=== {api-description-title}
-
-[WARNING]
-====
-* This API supports only
-<<token-api-authentication,token-based authentication>>.
-* When you create a rule, it identifies which roles you have at that point in time.
-Thereafter, when the rule performs queries, it uses those security privileges.
-If a user with different privileges updates the rule, its behavior might change.
-====
 
 [[create-rule-api-path-params]]
 === {api-path-parms-title}

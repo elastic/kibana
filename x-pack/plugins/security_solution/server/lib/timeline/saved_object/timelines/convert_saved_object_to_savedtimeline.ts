@@ -16,8 +16,8 @@ import {
   SavedObjectTimelineType,
   SavedObjectTimelineStatus,
 } from '../../../../../common/types/timeline/saved_object';
-import type { TimelineSavedObject } from '../../../../../common/types/timeline/api';
-import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline/api';
+import type { TimelineSavedObject } from '../../../../../common/api/timeline';
+import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
 const TimelineSavedObjectWithDraftRuntime = intersection([
@@ -81,6 +81,7 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
               ? savedTimeline.attributes.sort
               : [savedTimeline.attributes.sort]
             : [],
+        savedSearchId: savedTimeline.attributes.savedSearchId,
       };
 
       return {

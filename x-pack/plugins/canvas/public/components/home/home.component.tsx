@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { WorkpadCreate } from './workpad_create';
@@ -35,6 +35,7 @@ export const Home = ({ activeTab = 'workpads' }: Props) => {
           {
             label: strings.getMyWorkpadsTabLabel(),
             id: 'myWorkpads',
+            'data-test-subj': 'workpadListing',
             isSelected: tab === 'workpads',
             onClick: () => setTab('workpads'),
           },
@@ -48,7 +49,9 @@ export const Home = ({ activeTab = 'workpads' }: Props) => {
         ],
       }}
     >
-      {tab === 'workpads' ? <MyWorkpads /> : <WorkpadTemplates />}
+      <KibanaPageTemplate.Section>
+        {tab === 'workpads' ? <MyWorkpads /> : <WorkpadTemplates />}
+      </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };

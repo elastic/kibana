@@ -15,8 +15,8 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
-} from '../../common';
-import { dataViewMock } from '../__mocks__/data_view';
+} from '@kbn/discover-utils';
+import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
 describe('getSharingData', () => {
@@ -76,7 +76,7 @@ describe('getSharingData', () => {
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(searchSourceMock, {}, services);
-    expect(getSearchSource()).toMatchInlineSnapshot(`
+    expect(getSearchSource({})).toMatchInlineSnapshot(`
       Object {
         "fields": Array [
           Object {
@@ -121,7 +121,7 @@ describe('getSharingData', () => {
       },
       services
     );
-    expect(getSearchSource()).toMatchInlineSnapshot(`
+    expect(getSearchSource({})).toMatchInlineSnapshot(`
       Object {
         "index": "the-data-view-id",
         "sort": Array [
@@ -151,7 +151,7 @@ describe('getSharingData', () => {
       },
       services
     );
-    expect(getSearchSource().fields).toStrictEqual([
+    expect(getSearchSource({}).fields).toStrictEqual([
       { field: 'cool-timefield', include_unmapped: 'true' },
       { field: 'cool-field-1', include_unmapped: 'true' },
       { field: 'cool-field-2', include_unmapped: 'true' },
@@ -159,6 +159,38 @@ describe('getSharingData', () => {
       { field: 'cool-field-4', include_unmapped: 'true' },
       { field: 'cool-field-5', include_unmapped: 'true' },
       { field: 'cool-field-6', include_unmapped: 'true' },
+    ]);
+  });
+
+  test('getSearchSource supports nested fields', async () => {
+    const index = buildDataViewMock({
+      name: 'the-data-view',
+      timeFieldName: 'cool-timefield',
+      fields: [
+        ...dataViewMock.fields,
+        {
+          name: 'cool-field-2.field',
+          type: 'keyword',
+          subType: {
+            nested: {
+              path: 'cool-field-2.field.path',
+            },
+          },
+        },
+      ] as DataView['fields'],
+    });
+    const searchSourceMock = createSearchSourceMock({ index });
+    const { getSearchSource } = await getSharingData(
+      searchSourceMock,
+      {
+        columns: ['cool-field-1', 'cool-field-2'],
+      },
+      services
+    );
+    expect(getSearchSource({}).fields).toStrictEqual([
+      { field: 'cool-timefield', include_unmapped: 'true' },
+      { field: 'cool-field-1', include_unmapped: 'true' },
+      { field: 'cool-field-2.*', include_unmapped: 'true' },
     ]);
   });
 

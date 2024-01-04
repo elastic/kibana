@@ -5,7 +5,13 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFilterButton, EuiFilterGroup, EuiFilterSelectItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFilterSelectItem,
+  EuiPopover,
+  useEuiTheme,
+} from '@elastic/eui';
 
 export const JobIdFilter: React.FC<{
   selectedJobIds: string[];
@@ -14,6 +20,7 @@ export const JobIdFilter: React.FC<{
   onSelect: (jobIds: string[]) => void;
   title: string;
 }> = ({ selectedJobIds, onSelect, title, jobIds, jobNameById }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
@@ -62,7 +69,10 @@ export const JobIdFilter: React.FC<{
         closePopover={closePopover}
         panelPaddingSize="none"
       >
-        <div className="euiFilterSelect__items">
+        {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+            instead of EuiFilterSelectItem (which is pending deprecation).
+            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
+        <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
           {jobIds.map((id) => (
             <EuiFilterSelectItem
               data-test-subj={`job-id-filter-item-${id}`}

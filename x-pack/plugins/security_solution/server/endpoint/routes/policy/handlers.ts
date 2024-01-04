@@ -11,7 +11,7 @@ import { policyIndexPattern } from '../../../../common/endpoint/constants';
 import type {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
-} from '../../../../common/endpoint/schema/policy';
+} from '../../../../common/api/endpoint';
 import type { EndpointAppContext } from '../../types';
 import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
 import type { GetAgentSummaryResponse } from '../../../../common/endpoint/types';

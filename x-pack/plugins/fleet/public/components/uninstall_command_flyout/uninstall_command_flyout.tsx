@@ -106,13 +106,26 @@ const ErrorFetchingUninstallToken = ({ error }: { error: RequestError | null }) 
 const UninstallCommandsByTokenId = ({ uninstallTokenId }: { uninstallTokenId: string }) => {
   const { isLoading, error, data } = useGetUninstallToken(uninstallTokenId);
   const token = data?.item.token;
+  const policyId = data?.item.policy_id;
 
   return isLoading ? (
     <Loading size="l" />
   ) : error || !token ? (
     <ErrorFetchingUninstallToken error={error} />
   ) : (
-    <UninstallCommandsPerPlatform token={token} />
+    <>
+      <UninstallCommandsPerPlatform token={token} />
+
+      <EuiSpacer size="l" />
+
+      <EuiText data-test-subj="uninstall-command-flyout-policy-id-hint">
+        <FormattedMessage
+          id="xpack.fleet.agentUninstallCommandFlyout.validForPolicyId"
+          defaultMessage="Valid for the following agent policy:"
+        />{' '}
+        <EuiCode>{policyId}</EuiCode>
+      </EuiText>
+    </>
   );
 };
 
@@ -129,14 +142,29 @@ const UninstallCommandsByPolicyId = ({ policyId }: { policyId: string }) => {
   );
 };
 
-export interface UninstallCommandFlyoutProps {
+interface BaseProps {
   target: UninstallCommandTarget;
-  policyId: string;
   onClose: () => void;
 }
 
+interface PropsWithPolicyId extends BaseProps {
+  policyId: string;
+  uninstallTokenId?: never;
+}
+interface PropsWithTokenId extends BaseProps {
+  uninstallTokenId: string;
+  policyId?: never;
+}
+
+export type UninstallCommandFlyoutProps = PropsWithPolicyId | PropsWithTokenId;
+
+/** Flyout to show uninstall commands.
+ *
+ * Provide EITHER `policyId` OR `tokenId` for showing the token.
+ */
 export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFlyoutProps> = ({
   policyId,
+  uninstallTokenId,
   onClose,
   target,
 }) => {
@@ -160,17 +188,11 @@ export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFly
 
         <EuiSpacer size="l" />
 
-        <UninstallCommandsByPolicyId policyId={policyId} />
-
-        <EuiSpacer size="l" />
-
-        <EuiText data-test-subj="uninstall-command-flyout-policy-id-hint">
-          <FormattedMessage
-            id="xpack.fleet.agentUninstallCommandFlyout.validForPolicyId"
-            defaultMessage="Valid for the following agent policy:"
-          />{' '}
-          <EuiCode>{policyId}</EuiCode>
-        </EuiText>
+        {uninstallTokenId ? (
+          <UninstallCommandsByTokenId uninstallTokenId={uninstallTokenId} />
+        ) : policyId ? (
+          <UninstallCommandsByPolicyId policyId={policyId} />
+        ) : null}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

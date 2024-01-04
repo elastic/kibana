@@ -24,12 +24,7 @@ export const MSearchApp = (props: {
     <ContentClientProvider contentClient={props.contentClient}>
       <I18nProvider>
         <TableListViewKibanaProvider
-          core={{
-            application: props.core.application,
-            notifications: props.core.notifications,
-            overlays: props.core.overlays,
-            http: props.core.http,
-          }}
+          core={props.core}
           toMountPoint={toMountPoint}
           FormattedRelative={FormattedRelative}
           savedObjectsTagging={props.savedObjectsTagging.getTaggingApi()}

@@ -51,7 +51,7 @@ export interface GetPackagesResponse {
   response?: PackageList;
 }
 
-interface InstalledPackage {
+export interface InstalledPackage {
   name: string;
   version: string;
   status: EpmPackageInstallStatus;
@@ -209,3 +209,19 @@ export interface GetBulkAssetsRequest {
 export interface GetBulkAssetsResponse {
   items: SimpleSOAssetType[];
 }
+
+export interface GetInputsTemplatesRequest {
+  params: {
+    pkgName: string;
+    pkgVersion: string;
+  };
+  query: {
+    format: 'json' | 'yml' | 'yaml';
+  };
+}
+
+export type GetInputsTemplatesResponse =
+  | string
+  | {
+      inputs: any;
+    };

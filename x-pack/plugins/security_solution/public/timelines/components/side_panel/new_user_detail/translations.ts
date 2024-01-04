@@ -46,31 +46,17 @@ export const OBSERVED_DATA_TITLE = i18n.translate(
   }
 );
 
-export const HIDE_OBSERVED_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.hideObservedDataButton',
+export const ENTRA_DATA_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.EntraDataPanelTitle',
   {
-    defaultMessage: 'Hide observed data',
+    defaultMessage: 'Entra ID data',
   }
 );
 
-export const SHOW_OBSERVED_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.showObservedDataButton',
+export const OKTA_DATA_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.hideOktaDataPanelTitle',
   {
-    defaultMessage: 'Show observed data',
-  }
-);
-
-export const HIDE_AZURE_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.hideManagedDataButton',
-  {
-    defaultMessage: 'Hide Azure AD data',
-  }
-);
-
-export const SHOW_AZURE_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.showManagedDataButton',
-  {
-    defaultMessage: 'Show Azure AD data',
+    defaultMessage: 'Okta data',
   }
 );
 
@@ -138,35 +124,10 @@ export const IP_ADDRESSES = i18n.translate(
   }
 );
 
-export const FULL_NAME = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.fullNameLabel',
-  {
-    defaultMessage: 'Full name',
-  }
-);
-
-export const FIRST_NAME = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.firstNameLabel',
-  {
-    defaultMessage: 'First name',
-  }
-);
-
-export const LAST_NAME = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.lastNameLabel',
-  {
-    defaultMessage: 'Last name',
-  }
-);
-
-export const PHONE = i18n.translate('xpack.securitySolution.timeline.userDetails.phoneLabel', {
-  defaultMessage: 'Phone',
-});
-
 export const NO_ACTIVE_INTEGRATION_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noActiveIntegrationTitle',
   {
-    defaultMessage: 'You don’t have any active integrations',
+    defaultMessage: 'You don’t have any active asset repository integrations',
   }
 );
 
@@ -174,25 +135,25 @@ export const NO_ACTIVE_INTEGRATION_TEXT = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noActiveIntegrationText',
   {
     defaultMessage:
-      'External integrations can provide additional metadata and help you manage users.',
+      'Additional metadata from integrations may help you to manage and identify risky entities.',
   }
 );
 
 export const ADD_EXTERNAL_INTEGRATION_BUTTON = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.addExternalIntegrationButton',
   {
-    defaultMessage: 'Add external integrations',
+    defaultMessage: 'Add asset repository integrations',
   }
 );
 
-export const NO_AZURE_DATA_TITLE = i18n.translate(
+export const NO_MANAGED_DATA_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noAzureDataTitle',
   {
     defaultMessage: 'No metadata found for this user',
   }
 );
 
-export const NO_AZURE_DATA_TEXT = i18n.translate(
+export const NO_MANAGED_DATA_TEXT = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noAzureDataText',
   {
     defaultMessage:

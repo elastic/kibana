@@ -7,6 +7,7 @@
 
 import type { CellAction, CellActionExecutionContext, CellActionFactory } from '@kbn/cell-actions';
 import type { QueryOperator } from '../../common/types';
+export { EsqlInTimelineTrigger, EsqlInTimelineAction } from './constants';
 export interface AndFilter {
   field: string;
   value: string | string[];
@@ -61,6 +62,7 @@ export interface SecurityCellActions {
   showTopN: CellActionFactory;
   copyToClipboard: CellActionFactory;
   toggleColumn: CellActionFactory;
+  toggleUserAssetField: CellActionFactory;
 }
 
 // All security cell actions names

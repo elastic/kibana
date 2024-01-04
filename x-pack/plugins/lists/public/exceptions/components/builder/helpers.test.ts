@@ -11,7 +11,6 @@ import {
   EntryMatch,
   EntryMatchAny,
   EntryNested,
-  ExceptionListType,
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -26,6 +25,7 @@ import {
   FormattedBuilderEntry,
   OperatorOption,
   doesNotExistOperator,
+  doesNotMatchOperator,
   existsOperator,
   filterExceptionItems,
   getCorrespondingKeywordField,
@@ -51,6 +51,7 @@ import {
   isNotOperator,
   isOneOfOperator,
   isOperator,
+  matchesOperator,
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
@@ -168,24 +169,13 @@ const mockEndpointFields = [
 export const getEndpointField = (name: string): DataViewFieldBase =>
   mockEndpointFields.find((field) => field.name === name) as DataViewFieldBase;
 
-const filterIndexPatterns = (patterns: DataViewBase, type: ExceptionListType): DataViewBase => {
-  return type === 'endpoint'
-    ? {
-        ...patterns,
-        fields: patterns.fields.filter(({ name }) =>
-          ['file.path.caseless', 'file.Ext.code_signature.status'].includes(name)
-        ),
-      }
-    : patterns;
-};
-
 describe('Exception builder helpers', () => {
   describe('#getFilteredIndexPatterns', () => {
     describe('list type detections', () => {
       test('it returns nested fields that match parent value when "item.nested" is "child"', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [{ ...getField('nestedField.child'), name: 'child' }],
           id: '1234',
@@ -197,7 +187,7 @@ describe('Exception builder helpers', () => {
       test('it returns only parent nested field when "item.nested" is "parent" and nested parent field is not undefined', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase & { fields: Array<Partial<FieldSpec>> } = {
           fields: [{ ...getField('nestedField.child'), esTypes: ['nested'], name: 'nestedField' }],
           id: '1234',
@@ -212,7 +202,7 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field: undefined,
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [
             { ...getField('nestedField.child') },
@@ -224,10 +214,10 @@ describe('Exception builder helpers', () => {
         expect(output).toEqual(expected);
       });
 
-      test('it returns all fields unfiletered if "item.nested" is not "child" or "parent"', () => {
+      test('it returns all fields unfiltered if "item.nested" is not "child" or "parent"', () => {
         const payloadIndexPattern = getMockIndexPattern();
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'detection');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [...fields],
           id: '1234',
@@ -265,7 +255,7 @@ describe('Exception builder helpers', () => {
           },
           value: 'some value',
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
           fields: [{ ...getEndpointField('file.Ext.code_signature.status'), name: 'status' }],
           id: '1234',
@@ -284,7 +274,7 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field,
         };
-        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem, 'endpoint');
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const fieldsExpected: FieldSpec[] = [
           {
             aggregatable: false,
@@ -315,53 +305,13 @@ describe('Exception builder helpers', () => {
           ...getMockNestedParentBuilderEntry(),
           field: undefined,
         };
-        const output = getFilteredIndexPatterns(
-          payloadIndexPattern,
-          payloadItem,
-          'endpoint',
-          filterIndexPatterns
-        );
+        const output = getFilteredIndexPatterns(payloadIndexPattern, payloadItem);
         const expected: DataViewBase = {
-          fields: [getEndpointField('file.Ext.code_signature.status')],
-          id: '1234',
-          title: 'logstash-*',
-        };
-        expect(output).toEqual(expected);
-      });
-
-      test('it returns all fields that matched those in "exceptionable_fields.json" with no further filtering if "item.nested" is not "child" or "parent"', () => {
-        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-        const output = getFilteredIndexPatterns(
-          payloadIndexPattern,
-          payloadItem,
-          'endpoint',
-          filterIndexPatterns
-        );
-        const fieldsExpected: FieldSpec[] = [
-          {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['keyword'],
-            name: 'file.path.caseless',
-            readFromDocValues: false,
-            scripted: false,
-            searchable: true,
-            type: 'string',
-          },
-          {
-            aggregatable: false,
-            count: 0,
-            esTypes: ['text'],
-            name: 'file.Ext.code_signature.status',
-            readFromDocValues: false,
-            scripted: false,
-            searchable: true,
-            subType: { nested: { path: 'file.Ext.code_signature' } },
-            type: 'string',
-          },
-        ];
-        const expected: DataViewBase = {
-          fields: fieldsExpected,
+          fields: [
+            { ...getField('nestedField.child') },
+            { ...getField('nestedField.nestedChild.doublyNestedChild') },
+            getEndpointField('file.Ext.code_signature.status'),
+          ],
           id: '1234',
           title: 'logstash-*',
         };
@@ -561,25 +511,57 @@ describe('Exception builder helpers', () => {
       expect(output).toEqual(expected);
     });
 
-    test('it returns "isOperator" and "isOneOfOperator" if item is nested and "listType" is "endpoint"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'endpoint', false);
-      const expected: OperatorOption[] = [isOperator, isOneOfOperator];
-      expect(output).toEqual(expected);
-    });
+    describe('"endpoint" list type', () => {
+      test('it returns operators "is", "isOneOf", "matches" and "doesNotMatch" if item is nested and field supports "matches"', () => {
+        const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
+        const output = getOperatorOptions(payloadItem, 'endpoint', false);
+        const expected: OperatorOption[] = [
+          isOperator,
+          isOneOfOperator,
+          matchesOperator,
+          doesNotMatchOperator,
+        ];
+        expect(output).toEqual(expected);
+      });
 
-    test('it returns "isOperator" and "isOneOfOperator" if "listType" is "endpoint"', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'endpoint', false);
-      const expected: OperatorOption[] = [isOperator, isOneOfOperator];
-      expect(output).toEqual(expected);
-    });
+      test('it returns operators "is" and "isOneOf" if item is nested and field does not support "matches"', () => {
+        const payloadItem: FormattedBuilderEntry = {
+          ...getMockNestedBuilderEntry(),
+          field: getField('ip'),
+        };
+        const output = getOperatorOptions(payloadItem, 'endpoint', false);
+        const expected: OperatorOption[] = [isOperator, isOneOfOperator];
+        expect(output).toEqual(expected);
+      });
 
-    test('it returns "isOperator" if "listType" is "endpoint" and field type is boolean', () => {
-      const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const output = getOperatorOptions(payloadItem, 'endpoint', true);
-      const expected: OperatorOption[] = [isOperator];
-      expect(output).toEqual(expected);
+      test('it returns operators "is", "isOneOf", "matches" and "doesNotMatch" if field supports "matches"', () => {
+        const payloadItem: FormattedBuilderEntry = {
+          ...getMockBuilderEntry(),
+          field: getField('@tags'),
+        };
+        const output = getOperatorOptions(payloadItem, 'endpoint', false);
+        const expected: OperatorOption[] = [
+          isOperator,
+          isOneOfOperator,
+          matchesOperator,
+          doesNotMatchOperator,
+        ];
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns "isOperator" and "isOneOfOperator" if field does not support "matches"', () => {
+        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+        const output = getOperatorOptions(payloadItem, 'endpoint', false);
+        const expected: OperatorOption[] = [isOperator, isOneOfOperator];
+        expect(output).toEqual(expected);
+      });
+
+      test('it returns "isOperator" and field type is boolean', () => {
+        const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
+        const output = getOperatorOptions(payloadItem, 'endpoint', true);
+        const expected: OperatorOption[] = [isOperator];
+        expect(output).toEqual(expected);
+      });
     });
 
     test('it returns "isOperator", "isOneOfOperator", and "existsOperator" if item is nested and "listType" is "detection"', () => {

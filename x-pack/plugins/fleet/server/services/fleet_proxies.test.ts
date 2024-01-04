@@ -4,17 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { loggerMock } from '@kbn/logging-mocks';
 
+import type { Logger } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { FLEET_PROXY_SAVED_OBJECT_TYPE } from '../constants';
 
+import { appContextService } from './app_context';
+
 import { deleteFleetProxy } from './fleet_proxies';
 import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 jest.mock('./output');
+jest.mock('./download_source');
 jest.mock('./fleet_server_host');
+jest.mock('./app_context');
 
 const mockedListFleetServerHostsForProxyId = listFleetServerHostsForProxyId as jest.MockedFunction<
   typeof listFleetServerHostsForProxyId
@@ -25,20 +33,39 @@ const mockedUpdateFleetServerHost = updateFleetServerHost as jest.MockedFunction
 >;
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
+  typeof downloadSourceService
+>;
 
 const PROXY_IDS = {
   PRECONFIGURED: 'test-preconfigured',
   RELATED_PRECONFIGURED: 'test-related-preconfigured',
 };
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
+let mockedLogger: jest.Mocked<Logger>;
 
 describe('Fleet proxies service', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   const soClientMock = savedObjectsClientMock.create();
   const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
 
   beforeEach(() => {
+    mockedDownloadSourceService.listAllForProxyId.mockReset();
     mockedOutputService.update.mockReset();
     soClientMock.delete.mockReset();
     mockedUpdateFleetServerHost.mockReset();
+    mockedDownloadSourceService.listAllForProxyId.mockImplementation(async () => ({
+      items: [],
+      total: 0,
+    }));
     mockedOutputService.listAllForProxyId.mockImplementation(async (_, proxyId) => {
       if (proxyId === PROXY_IDS.RELATED_PRECONFIGURED) {
         return {
@@ -138,7 +165,7 @@ describe('Fleet proxies service', () => {
       expect(soClientMock.delete).toBeCalled();
     });
 
-    it('should not allow to delete proxy wiht related preconfigured saved object', async () => {
+    it('should not allow to delete proxy with related preconfigured saved object', async () => {
       await expect(() =>
         deleteFleetProxy(soClientMock, esClientMock, PROXY_IDS.RELATED_PRECONFIGURED)
       ).rejects.toThrowError(

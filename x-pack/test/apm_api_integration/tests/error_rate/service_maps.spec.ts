@@ -39,10 +39,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ? {
                   documentType: ApmDocumentType.TransactionMetric,
                   rollupInterval: RollupInterval.OneMinute,
+                  useDurationSummary: true,
                 }
               : {
                   documentType: ApmDocumentType.TransactionEvent,
                   rollupInterval: RollupInterval.None,
+                  useDurationSummary: false,
                 }),
           },
         },
@@ -138,7 +140,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => synthtraceEsClient.clean());
 
-      describe('compare latency value between service inventory and service maps', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/172772
+      describe.skip('compare latency value between service inventory and service maps', () => {
         before(async () => {
           [errorTransactionValues, errorRateMetricValues] = await Promise.all([
             getErrorRateValues('transaction'),

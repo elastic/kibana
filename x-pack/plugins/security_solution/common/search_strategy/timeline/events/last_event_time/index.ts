@@ -10,7 +10,7 @@ export { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 export type {
   LastTimeDetails,
   TimelineEventsLastEventTimeStrategyResponse,
-  TimelineKpiStrategyRequest,
+  TimelineKpiRequestOptionsInput,
   TimelineKpiStrategyResponse,
-  TimelineEventsLastEventTimeRequestOptions,
+  TimelineEventsLastEventTimeRequestOptionsInput,
 } from '@kbn/timelines-plugin/common';

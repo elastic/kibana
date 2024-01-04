@@ -13,10 +13,11 @@ import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_c
 import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
 import { Waterfall } from './waterfall';
 import {
-  IWaterfall,
+  type IWaterfall,
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
 import { WaterfallLegends } from './waterfall_legends';
+import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning';
 
 interface Props {
   waterfallItemId?: string;
@@ -38,7 +39,7 @@ export function WaterfallContainer({
   if (!waterfall) {
     return null;
   }
-  const { legends, items } = waterfall;
+  const { legends, items, orphanTraceItemsCount } = waterfall;
 
   // Service colors are needed to color the dot in the error popover
   const serviceLegends = legends.filter(
@@ -108,7 +109,21 @@ export function WaterfallContainer({
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem>
-        <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <WaterfallLegends
+              legends={legendsWithFallbackLabel}
+              type={colorBy}
+            />
+          </EuiFlexItem>
+          {orphanTraceItemsCount > 0 ? (
+            <EuiFlexItem grow={false}>
+              <OrphanTraceItemsWarning
+                orphanTraceItemsCount={orphanTraceItemsCount}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <Waterfall

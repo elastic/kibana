@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getColorLabel } from './utils';
+import { TopNFunctions } from '@kbn/profiling-utils';
+import { getColorLabel, getTotalCount } from './utils';
 
 describe('Top N functions: Utils', () => {
   describe('getColorLabel', () => {
@@ -12,14 +13,14 @@ describe('Top N functions: Utils', () => {
       expect(getColorLabel(-10)).toEqual({
         color: 'success',
         label: '10.00%',
-        icon: 'sortDown',
+        icon: 'sortUp',
       });
     });
 
     it('returns correct value when percentage is 0', () => {
       expect(getColorLabel(0)).toEqual({
-        color: 'danger',
-        label: '<0.01',
+        color: 'text',
+        label: '0%',
         icon: undefined,
       });
     });
@@ -28,8 +29,24 @@ describe('Top N functions: Utils', () => {
       expect(getColorLabel(10)).toEqual({
         color: 'danger',
         label: '10.00%',
-        icon: 'sortUp',
+        icon: 'sortDown',
       });
+    });
+
+    it('returns correct value when percentage is Infinity', () => {
+      expect(getColorLabel(Infinity)).toEqual({
+        color: 'text',
+        label: undefined,
+        icon: undefined,
+      });
+    });
+  });
+  describe('getTotalCount', () => {
+    it('returns default value', () => {
+      expect(getTotalCount()).toEqual(0);
+    });
+    it('returns value from topNFunctions', () => {
+      expect(getTotalCount({ TotalCount: 10 } as TopNFunctions)).toEqual(10);
     });
   });
 });

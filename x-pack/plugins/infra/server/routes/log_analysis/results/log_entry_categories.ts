@@ -15,6 +15,9 @@ import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) => {
+  if (!framework.config.featureFlags.logsUIEnabled) {
+    return;
+  }
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -38,6 +41,7 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
             categoryCount,
             histograms,
             logView,
+            idFormat,
             timeRange: { startTime, endTime },
             datasets,
             sort,
@@ -50,6 +54,7 @@ export const initGetLogEntryCategoriesRoute = ({ framework }: InfraBackendLibs) 
           const { data: topLogEntryCategories, timing } = await getTopLogEntryCategories(
             { infra: await infraMlContext.infra },
             logView,
+            idFormat,
             startTime,
             endTime,
             categoryCount,

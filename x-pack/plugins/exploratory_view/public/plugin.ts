@@ -33,10 +33,10 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
@@ -59,7 +59,6 @@ export interface ExploratoryViewPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
 
-  guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
@@ -70,6 +69,7 @@ export interface ExploratoryViewPublicPluginsStart {
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
 }
 
 export type ExploratoryViewPublicSetup = ReturnType<Plugin['setup']>;

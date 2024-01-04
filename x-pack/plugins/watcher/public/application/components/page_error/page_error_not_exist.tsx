@@ -7,13 +7,14 @@
 
 import React from 'react';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export function PageErrorNotExist({ id }: { id?: string }) {
   return (
-    <EuiEmptyPrompt
+    <EuiPageTemplate.EmptyPrompt
       iconType="warning"
+      color="danger"
       title={
         <h1>
           <FormattedMessage

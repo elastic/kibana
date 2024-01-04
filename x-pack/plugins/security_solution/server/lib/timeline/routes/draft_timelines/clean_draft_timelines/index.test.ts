@@ -6,7 +6,7 @@
  */
 
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { TimelineType } from '../../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../../common/api/timeline';
 
 import {
   serverMock,
@@ -35,7 +35,6 @@ describe('clean draft timelines', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
 
     server = serverMock.create();

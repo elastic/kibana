@@ -21,14 +21,14 @@ import { assertUnreachable } from '../../../../../common/utility_types';
 import type {
   IndexPatternArray,
   RuleQuery,
-} from '../../../../../common/detection_engine/rule_schema';
-import type { SavedIdOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
+import type { SavedIdOrUndefined } from '../../../../../common/api/detection_engine';
 import type { PartialFilter } from '../../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getQueryFilter } from './get_query_filter';
 
-interface GetFilterArgs {
+export interface GetFilterArgs {
   type: Type;
   filters: unknown | undefined;
   language: LanguageOrUndefined;
@@ -131,6 +131,9 @@ export const getFilter = async ({
     }
     case 'eql': {
       throw new BadRequestError('Unsupported Rule of type "eql" supplied to getFilter');
+    }
+    case 'esql': {
+      throw new BadRequestError('Unsupported Rule of type "esql" supplied to getFilter');
     }
     default: {
       return assertUnreachable(type);

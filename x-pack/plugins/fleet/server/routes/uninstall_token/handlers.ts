@@ -34,7 +34,12 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
   try {
     const { page = 1, perPage = 20, policyId } = request.query;
 
-    const body = await uninstallTokenService.getTokenMetadata(policyId?.trim(), page, perPage);
+    const body = await uninstallTokenService.getTokenMetadata(
+      policyId?.trim(),
+      page,
+      perPage,
+      'policy-elastic-agent-on-cloud'
+    );
 
     return response.ok({ body });
   } catch (error) {

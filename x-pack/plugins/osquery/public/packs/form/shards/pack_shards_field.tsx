@@ -13,9 +13,9 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, last, reject } from 'lodash';
+import { convertShardsToArray, convertShardsToObject } from '../../../../common/utils/converters';
+import type { ShardsArray } from '../../../../common/utils/converters';
 import { useAgentPolicies } from '../../../agent_policies';
-import type { ShardsArray } from '../../../../common/schemas/common';
-import { convertShardsToArray, convertShardsToObject } from '../../../../common/schemas/common';
 import { ShardsForm } from './shards_form';
 
 export const defaultShardData = {

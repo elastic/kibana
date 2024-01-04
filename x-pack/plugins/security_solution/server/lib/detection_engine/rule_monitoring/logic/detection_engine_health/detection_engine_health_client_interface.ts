@@ -12,7 +12,7 @@ import type {
   RuleHealthSnapshot,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * Calculates health of the Detection Engine overall and detection rules individually.

@@ -61,15 +61,5 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(isFieldForAggregationValid).to.be(true);
       expect(await testSubjects.exists('visualization-error-text')).to.be(false);
     });
-
-    it('should show an error when using an unsupported tsdb field type', async () => {
-      await visualBuilder.selectAggType('Average');
-      await visualBuilder.setFieldForAggregation('bytes_counter');
-      // this is still returning true
-      const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
-      expect(isFieldForAggregationValid).to.be(true);
-      // but an error should appear in visualization
-      expect(await testSubjects.exists('visualization-error-text')).to.be(true);
-    });
   });
 }

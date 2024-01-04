@@ -18,9 +18,9 @@ import {
 } from '../../../../common/components/event_details/table/use_action_cell_data_provider';
 import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
-import { updateProviders } from '../../../../timelines/store/timeline/actions';
+import { updateProviders } from '../../../../timelines/store/actions';
 import { sourcererSelectors } from '../../../../common/store';
 import type { TimeRange } from '../../../../common/store/inputs/model';
 

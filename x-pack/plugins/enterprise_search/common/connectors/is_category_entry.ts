@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ConnectorConfigProperties, ConnectorConfigCategoryProperties } from '../types/connectors';
+import {
+  ConnectorConfigProperties,
+  ConnectorConfigCategoryProperties,
+} from '@kbn/search-connectors';
 
 export function isCategoryEntry(
   input:

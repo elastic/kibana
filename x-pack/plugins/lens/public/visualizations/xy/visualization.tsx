@@ -6,29 +6,27 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
-import {
-  EventAnnotationServiceType,
-  getAnnotationAccessor,
-} from '@kbn/event-annotation-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { isEqual } from 'lodash';
-import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { getColorsFromMapping } from '@kbn/coloring';
+import useObservable from 'react-use/lib/useObservable';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -36,6 +34,7 @@ import {
   isOperationFromTheSameGroup,
   nonNullable,
   renewIDs,
+  getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
@@ -87,6 +86,7 @@ import {
 import {
   checkXAccessorCompatibility,
   defaultSeriesType,
+  getAnnotationLayerTitle,
   getAnnotationsLayers,
   getAxisName,
   getDataLayers,
@@ -258,7 +258,7 @@ export const getXyVisualization = ({
   initialize(
     addNewLayer,
     state,
-    _mainPalette?,
+    mainPalette?,
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
@@ -280,6 +280,9 @@ export const getXyVisualization = ({
             seriesType: defaultSeriesType,
             showGridlines: false,
             layerType: LayerTypes.DATA,
+            palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+            colorMapping:
+              mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
           },
         ],
       }
@@ -331,7 +334,7 @@ export const getXyVisualization = ({
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     if (layer && isByReferenceAnnotationsLayer(layer)) {
-      return { title: `Delete "${layer.__lastSaved.title}"` };
+      return { title: `Delete "${getAnnotationLayerTitle(layer)}"` };
     }
   },
 
@@ -340,15 +343,8 @@ export const getXyVisualization = ({
     return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
   },
 
-  renderLayerSettings(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <LayerSettings {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  LayerSettingsComponent(props) {
+    return <LayerSettings {...props} />;
   },
   onIndexPatternChange(state, indexPatternId, layerId) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
@@ -427,6 +423,22 @@ export const getXyVisualization = ({
         }
       ).length < 2;
 
+    const canUseColorMapping = layer.colorMapping ? true : false;
+    let colors: string[] = [];
+    if (canUseColorMapping) {
+      kibanaTheme.theme$
+        .subscribe({
+          next(theme) {
+            colors = getColorsFromMapping(theme.darkMode, layer.colorMapping);
+          },
+        })
+        .unsubscribe();
+    } else {
+      colors = paletteService
+        .get(dataLayer.palette?.name || 'default')
+        .getCategoricalColors(10, dataLayer.palette?.params);
+    }
+
     return {
       groups: [
         {
@@ -458,11 +470,7 @@ export const getXyVisualization = ({
                 {
                   columnId: dataLayer.splitAccessor,
                   triggerIconType: dataLayer.collapseFn ? 'aggregate' : 'colorBy',
-                  palette: dataLayer.collapseFn
-                    ? undefined
-                    : paletteService
-                        .get(dataLayer.palette?.name || 'default')
-                        .getCategoricalColors(10, dataLayer.palette?.params),
+                  palette: dataLayer.collapseFn ? undefined : colors,
                 },
               ]
             : [],
@@ -472,6 +480,7 @@ export const getXyVisualization = ({
           requiredMinDimensionCount:
             dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor ? 1 : 0,
           enableDimensionEditor: true,
+          isBreakdownDimension: true,
         },
       ],
     };
@@ -479,7 +488,13 @@ export const getXyVisualization = ({
 
   getMainPalette: (state) => {
     if (!state || state.layers.length === 0) return;
-    return getFirstDataLayer(state.layers)?.palette;
+    const firstDataLayer = getFirstDataLayer(state.layers);
+
+    return firstDataLayer?.colorMapping
+      ? { type: 'colorMapping', value: firstDataLayer.colorMapping }
+      : firstDataLayer?.palette
+      ? { type: 'legacyPalette', value: firstDataLayer.palette }
+      : undefined;
   },
 
   getDropProps(dropProps) {
@@ -622,101 +637,50 @@ export const getXyVisualization = ({
     };
   },
 
-  renderLayerPanel(domElement, props) {
+  LayerPanelComponent(props) {
     const { onChangeIndexPattern, ...otherProps } = props;
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <KibanaContextProvider
-            services={{
-              appName: 'lens',
-              storage,
-              uiSettings: core.uiSettings,
-              data,
-              fieldFormats,
-              savedObjects: core.savedObjects,
-              docLinks: core.docLinks,
-              http: core.http,
-              unifiedSearch,
-            }}
-          >
-            <LayerHeaderContent
-              {...otherProps}
-              onChangeIndexPattern={(indexPatternId) => {
-                // TODO: should it trigger an action as in the datasource?
-                onChangeIndexPattern(indexPatternId);
-              }}
-            />
-          </KibanaContextProvider>
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
+
+    return (
+      <LayerHeaderContent
+        {...otherProps}
+        onChangeIndexPattern={(indexPatternId) => {
+          // TODO: should it trigger an action as in the datasource?
+          onChangeIndexPattern(indexPatternId);
+        }}
+      />
     );
   },
 
-  renderLayerHeader(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <LayerHeader {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  LayerHeaderComponent(props) {
+    return <LayerHeader {...props} />;
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />;
   },
 
-  renderDimensionEditor(domElement, props) {
+  DimensionEditorComponent(props) {
     const allProps = {
       ...props,
       datatableUtilities: data.datatableUtilities,
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
+
+    const darkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} />
+      <DataDimensionEditor {...allProps} darkMode={darkMode} />
     );
 
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <KibanaContextProvider
-            services={{
-              appName: 'lens',
-              storage,
-              uiSettings: core.uiSettings,
-              data,
-              fieldFormats,
-              savedObjects: core.savedObjects,
-              docLinks: core.docLinks,
-              http: core.http,
-              unifiedSearch,
-            }}
-          >
-            {dimensionEditor}
-          </KibanaContextProvider>
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+    return dimensionEditor;
   },
 
-  renderDimensionEditorDataExtra(domElement, props) {
+  DimensionEditorDataExtraComponent(props) {
     const allProps = {
       ...props,
       datatableUtilities: data.datatableUtilities,
@@ -725,34 +689,13 @@ export const getXyVisualization = ({
     };
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     if (isReferenceLayer(layer)) {
-      return;
+      return null;
     }
     if (isAnnotationsLayer(layer)) {
-      return;
+      return null;
     }
 
-    render(
-      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-        <I18nProvider>
-          <KibanaContextProvider
-            services={{
-              appName: 'lens',
-              storage,
-              uiSettings: core.uiSettings,
-              data,
-              fieldFormats,
-              savedObjects: core.savedObjects,
-              docLinks: core.docLinks,
-              http: core.http,
-              unifiedSearch,
-            }}
-          >
-            <DataDimensionEditorDataSectionExtra {...allProps} />
-          </KibanaContextProvider>
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+    return <DataDimensionEditorDataSectionExtra {...allProps} />;
   },
   getAddLayerButtonComponent: (props) => {
     return (
@@ -986,7 +929,7 @@ export const getXyVisualization = ({
       state?.layers.filter(isAnnotationsLayer).map(({ indexPatternId }) => indexPatternId) ?? []
     );
   },
-  renderDimensionTrigger({ columnId, label }) {
+  DimensionTriggerComponent({ columnId, label }) {
     if (label) {
       return <DimensionTrigger id={columnId} label={label || defaultAnnotationLabel} />;
     }
@@ -1206,7 +1149,10 @@ function getNotifiableFeatures(
   fieldFormats: FieldFormatsStart
 ): UserMessage[] {
   const annotationsWithIgnoreFlag = getAnnotationsLayers(state.layers).filter(
-    (layer) => layer.ignoreGlobalFilters
+    (layer) =>
+      layer.ignoreGlobalFilters &&
+      // If all annotations are manual, do not report it
+      layer.annotations.some((annotation) => annotation.type !== 'manual')
   );
   if (!annotationsWithIgnoreFlag.length) {
     return [];

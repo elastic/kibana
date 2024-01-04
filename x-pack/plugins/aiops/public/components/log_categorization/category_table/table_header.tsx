@@ -8,9 +8,12 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  type QueryMode,
+  QUERY_MODE,
+} from '../../../../common/api/log_categorization/get_category_query';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import { getLabels } from './labels';
-import { QueryMode, QUERY_MODE } from '../use_discover_links';
 
 interface Props {
   categoriesCount: number;
@@ -33,7 +36,7 @@ export const TableHeader: FC<Props> = ({
           <EuiText size="s" data-test-subj="aiopsLogPatternsFoundCount">
             <FormattedMessage
               id="xpack.aiops.logCategorization.counts"
-              defaultMessage="{count} patterns found"
+              defaultMessage="{count} {count, plural, one {pattern} other {patterns}} found"
               values={{ count: categoriesCount }}
             />
             {selectedCategoriesCount > 0 ? (
@@ -51,6 +54,7 @@ export const TableHeader: FC<Props> = ({
           <>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverIncludeButton"
                 size="s"
                 onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}
                 iconType="plusInCircle"
@@ -61,6 +65,7 @@ export const TableHeader: FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="aiopsLogPatternAnalysisOpenInDiscoverExcludeButton"
                 size="s"
                 onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}
                 iconType="minusInCircle"

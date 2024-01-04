@@ -151,6 +151,9 @@ export type OptionsListServiceFactory = KibanaPluginServiceFactory<
   OptionsListServiceRequiredServices
 >;
 
-export const optionsListServiceFactory: OptionsListServiceFactory = (core, requiredServices) => {
-  return new OptionsListService(core.coreStart, requiredServices);
+export const optionsListServiceFactory: OptionsListServiceFactory = (
+  startParams,
+  requiredServices
+) => {
+  return new OptionsListService(startParams.coreStart, requiredServices);
 };

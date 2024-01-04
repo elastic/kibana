@@ -6,14 +6,13 @@
  */
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
 } from '@elastic/eui';
+import { sloEditLocatorID } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { CreateSLOInput } from '@kbn/slo-schema';
-import { encode } from '@kbn/rison';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -26,13 +25,6 @@ interface Props {
   transactionType?: string;
   transactionName?: string;
 }
-type RecursivePartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer U>
-    ? Array<RecursivePartial<U>>
-    : T[P] extends object | undefined
-    ? RecursivePartial<T[P]>
-    : T[P];
-};
 
 export function SloCallout({
   dismissCallout,
@@ -41,21 +33,35 @@ export function SloCallout({
   transactionType,
   transactionName,
 }: Props) {
-  const { core } = useApmPluginContext();
-  const { basePath } = core.http;
-
-  const sloInput: RecursivePartial<CreateSLOInput> = {
-    indicator: {
-      type: 'sli.apm.transactionErrorRate',
-      params: {
-        service: serviceName,
-        environment: environment === ENVIRONMENT_ALL.value ? '*' : environment,
-        transactionName: transactionName ?? '',
-        transactionType: transactionType ?? '',
+  const {
+    plugins: {
+      share: {
+        url: { locators },
       },
     },
+  } = useApmPluginContext();
+
+  const locator = locators.get(sloEditLocatorID);
+
+  const handleClick = () => {
+    locator?.navigate(
+      {
+        indicator: {
+          type: 'sli.apm.transactionErrorRate',
+          params: {
+            service: serviceName,
+            environment:
+              environment === ENVIRONMENT_ALL.value ? '*' : environment,
+            transactionName,
+            transactionType,
+          },
+        },
+      },
+      {
+        replace: false,
+      }
+    );
   };
-  const sloParams = `?_a=${encode(sloInput)}`;
 
   return (
     <EuiCallOut
@@ -76,27 +82,20 @@ export function SloCallout({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiLink
-                data-test-subj="apmCreateSloLink"
-                href={basePath.prepend(
-                  `/app/observability/slos/create${sloParams}`
-                )}
+              <EuiButton
+                data-test-subj="apmSloCalloutCreateSloButton"
+                onClick={() => {
+                  handleClick();
+                  dismissCallout();
+                }}
               >
-                <EuiButton
-                  data-test-subj="apmSloCalloutCreateSloButton"
-                  onClick={() => {
-                    dismissCallout();
-                  }}
-                >
-                  {i18n.translate('xpack.apm.slo.callout.createButton', {
-                    defaultMessage: 'Create SLO',
-                  })}
-                </EuiButton>
-              </EuiLink>
+                {i18n.translate('xpack.apm.slo.callout.createButton', {
+                  defaultMessage: 'Create SLO',
+                })}
+              </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton
-                color="text"
+              <EuiButtonEmpty
                 data-test-subj="apmSloDismissButton"
                 onClick={() => {
                   dismissCallout();
@@ -105,7 +104,7 @@ export function SloCallout({
                 {i18n.translate('xpack.apm.slo.callout.dimissButton', {
                   defaultMessage: 'Hide this',
                 })}
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

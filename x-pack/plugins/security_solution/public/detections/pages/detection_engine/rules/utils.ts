@@ -9,9 +9,9 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { DEFAULT_THREAT_MATCH_QUERY } from '../../../../../common/constants';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
 import { DataSourceType, GroupByOptions, RuleStep } from './types';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/rule_schema';
 import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [
@@ -73,6 +73,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
     unit: 'm',
   },
   suppressionMissingFields: DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  enableThresholdSuppression: false,
 };
 
 export const stepAboutDefaultValue: AboutStepRule = {
@@ -83,6 +84,7 @@ export const stepAboutDefaultValue: AboutStepRule = {
   isBuildingBlock: false,
   severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
   riskScore: { value: 21, mapping: [], isMappingChecked: false },
+  investigationFields: [],
   references: [''],
   falsePositives: [''],
   license: '',
@@ -131,4 +133,9 @@ const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
 export const defaultCustomQuery = {
   forNormalRules: stepDefineDefaultValue.queryBar,
   forThreatMatchRules: threatQueryBarDefaultValue,
+  forEsqlRules: {
+    query: { query: '', language: 'esql' },
+    filters: [],
+    saved_id: null,
+  },
 };

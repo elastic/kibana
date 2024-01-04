@@ -18,7 +18,7 @@ import { UptimeUrlParams } from '../../../lib/helper/url_params';
 const SAMPLE_ES_FILTERS = `{"bool":{"should":[{"match_phrase":{"monitor.id":"NodeServer"}}],"minimum_should_match":1}}`;
 
 // FLAKY: https://github.com/elastic/kibana/issues/112677
-describe.skip('useQueryBar', () => {
+describe('useQueryBar', () => {
   let DEFAULT_URL_PARAMS: UptimeUrlParams;
   let wrapper: any;
   let useUrlParamsSpy: jest.SpyInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;

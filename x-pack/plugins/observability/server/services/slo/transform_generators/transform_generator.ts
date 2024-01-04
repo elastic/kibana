@@ -5,55 +5,81 @@
  * 2.0.
  */
 
-import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-
+import {
+  MappingRuntimeFields,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO } from '../../../domain/models';
 
 export abstract class TransformGenerator {
   public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
 
-  public buildCommonRuntimeMappings(slo: SLO) {
+  public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
+    const mustIncludeAllInstanceId = slo.groupBy === ALL_VALUE || slo.groupBy === '';
+
     return {
       'slo.id': {
-        type: 'keyword' as MappingRuntimeFieldType,
+        type: 'keyword',
         script: {
           source: `emit('${slo.id}')`,
         },
       },
       'slo.revision': {
-        type: 'long' as MappingRuntimeFieldType,
+        type: 'long',
         script: {
           source: `emit(${slo.revision})`,
         },
       },
+      ...(mustIncludeAllInstanceId && {
+        'slo.instanceId': {
+          type: 'keyword',
+          script: {
+            source: `emit('${ALL_VALUE}')`,
+          },
+        },
+      }),
     };
   }
 
   public buildDescription(slo: SLO): string {
-    return `Rolled-up SLI data for SLO: ${slo.name}`;
+    return `Rolled-up SLI data for SLO: ${slo.name} [id: ${slo.id}, revision: ${slo.revision}]`;
   }
 
-  public buildGroupBy(slo: SLO, sourceIndexTimestampField: string | undefined = '@timestamp') {
+  public buildCommonGroupBy(
+    slo: SLO,
+    sourceIndexTimestampField: string | undefined = '@timestamp',
+    extraGroupByFields = {}
+  ) {
     let fixedInterval = '1m';
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       fixedInterval = slo.objective.timesliceWindow!.format();
     }
 
+    const groupings =
+      slo.groupBy !== '' && slo.groupBy !== ALL_VALUE
+        ? [slo.groupBy].flat().reduce(
+            (acc, field) => {
+              return {
+                ...acc,
+                [`slo.groupings.${field}`]: {
+                  terms: {
+                    field,
+                  },
+                },
+              };
+            },
+            { 'slo.instanceId': { terms: { field: slo.groupBy } } }
+          )
+        : { 'slo.instanceId': { terms: { field: 'slo.instanceId' } } };
+
     return {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
-        },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
-      // timestamp field defined in the destination index
+      'slo.id': { terms: { field: 'slo.id' } },
+      'slo.revision': { terms: { field: 'slo.revision' } },
+      ...groupings,
+      ...extraGroupByFields,
+      // @timestamp field defined in the destination index
       '@timestamp': {
         date_histogram: {
           field: sourceIndexTimestampField, // timestamp field defined in the source index

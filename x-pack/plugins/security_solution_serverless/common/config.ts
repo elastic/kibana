@@ -32,3 +32,25 @@ export const productTypes = schema.arrayOf<SecurityProductType>(productType, {
   defaultValue: [],
 });
 export type SecurityProductTypes = TypeOf<typeof productTypes>;
+
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  productTypes,
+  /**
+   * For internal use. A list of string values (comma delimited) that will enable experimental
+   * type of functionality that is not yet released. Valid values for this settings need to
+   * be defined in:
+   * `x-pack/plugins/security_solution_serverless/common/experimental_features.ts`
+   * under the `allowedExperimentalValues` object
+   *
+   * @example
+   * xpack.securitySolutionServerless.enableExperimental:
+   *   - someCrazyFeature
+   *   - someEvenCrazierFeature
+   */
+  enableExperimental: schema.arrayOf(schema.string(), {
+    defaultValue: () => [],
+  }),
+});
+
+export type ServerlessSecurityConfigSchema = TypeOf<typeof configSchema>;

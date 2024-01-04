@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { AlertInstanceContext } from '@kbn/alerting-plugin/common';
-import { Alert } from '@kbn/alerting-plugin/server';
+import { Alert, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState } from './common';
 import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
@@ -94,6 +96,7 @@ export const getCertSummary = (
 
 export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
   id: CLIENT_ALERT_TYPES.TLS_LEGACY,
+  category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
   name: tlsTranslations.legacyAlertFactoryName,
   validate: {
@@ -119,7 +122,7 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
       savedObjectsClient,
       scopedClusterClient.asCurrentUser,
       {
-        isLegacyAlert: true,
+        stackVersion: '8.9.0',
       }
     );
     const { certs, total }: CertResult = await libs.requests.getCerts({
@@ -166,4 +169,6 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
 
     return { state: updateState(state, foundCerts) };
   },
+  getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
+    observabilityPaths.ruleDetails(rule.id),
 });

@@ -10,6 +10,7 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { AwsCredentialsType } from '../../../../common/types_old';
 
 const AssumeRoleDescription = (
   <div>
@@ -69,13 +70,6 @@ const AWS_FIELD_LABEL = {
   }),
 };
 
-export type AwsCredentialsType =
-  | 'assume_role'
-  | 'direct_access_keys'
-  | 'temporary_keys'
-  | 'shared_credentials'
-  | 'cloud_formation';
-
 export type AwsCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
 
 export interface AwsOptionValue {
@@ -98,20 +92,33 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AwsCred
     });
 
 export type AwsOptions = Record<AwsCredentialsType, AwsOptionValue>;
-
-export const getAwsCredentialsFormManualOptions = (): Array<{
+export type AwsCredentialsTypeOptions = Array<{
   value: AwsCredentialsType;
   text: string;
-}> => {
+}>;
+
+const getAwsCredentialsTypeSelectorOptions = (
+  filterFn: ({ value }: { value: AwsCredentialsType }) => boolean
+): AwsCredentialsTypeOptions => {
   return Object.entries(getAwsCredentialsFormOptions())
     .map(([key, value]) => ({
       value: key as AwsCredentialsType,
       text: value.label,
     }))
-    .filter(({ value }) => value !== 'cloud_formation');
+    .filter(filterFn);
 };
 
+export const getAwsCredentialsFormManualOptions = (): AwsCredentialsTypeOptions =>
+  getAwsCredentialsTypeSelectorOptions(({ value }) => value !== 'cloud_formation');
+
+export const getAwsCredentialsFormAgentlessOptions = (): AwsCredentialsTypeOptions =>
+  getAwsCredentialsTypeSelectorOptions(
+    ({ value }) => value === 'direct_access_keys' || value === 'temporary_keys'
+  );
+
+export const DEFAULT_AWS_CREDENTIALS_TYPE = 'cloud_formation';
 export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE = 'assume_role';
+export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = 'direct_access_keys';
 
 export const getAwsCredentialsFormOptions = (): AwsOptions => ({
   assume_role: {

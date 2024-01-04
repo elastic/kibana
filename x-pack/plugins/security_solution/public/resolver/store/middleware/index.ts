@@ -31,23 +31,15 @@ const resolverActions = [
 /**
  * Helper function to determine if analyzer is active (resolver middleware should be run)
  * analyzer is considered active if: action is not clean up
- * @param state analyzerbyId state
+ * @param state analyzer state
  * @param action dispatched action
  * @returns boolean of whether the analyzer of id has an store in redux
  */
 function isAnalyzerActive(action: AnyAction): boolean {
   // middleware shouldn't run after clear resolver
-  return !Actions.clearResolver.match(action);
+  return !Actions.clearResolver.match(action) && resolverActions.includes(action.type);
 }
 
-/**
- * Helper function to check whether an action is a resolver action
- * @param action dispatched action
- * @returns boolean of whether the action is a resolver action
- */
-function isResolverAction(action: AnyAction): boolean {
-  return resolverActions.includes(action.type);
-}
 /**
  * The `redux` middleware that the application uses to trigger side effects.
  * All data fetching should be done here.
@@ -64,7 +56,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: Da
     return async (action: AnyAction) => {
       next(action);
 
-      if (action.payload?.id && isAnalyzerActive(action) && isResolverAction(action)) {
+      if (action.payload?.id && isAnalyzerActive(action)) {
         resolverTreeFetcher(action.payload.id);
         relatedEventsFetcher(action.payload.id);
         nodeDataFetcher(action.payload.id);

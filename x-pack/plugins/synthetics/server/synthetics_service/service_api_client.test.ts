@@ -109,8 +109,6 @@ describe('checkAccountAccessStatus', () => {
     (axios as jest.MockedFunction<typeof axios>).mockReset();
   });
 
-  afterEach(() => jest.restoreAllMocks());
-
   it('includes a header with the kibana version', async () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
@@ -150,8 +148,6 @@ describe('callAPI', () => {
     (axios as jest.MockedFunction<typeof axios>).mockReset();
     jest.clearAllMocks();
   });
-
-  afterEach(() => jest.restoreAllMocks());
 
   const logger = loggerMock.create();
 
@@ -235,7 +231,7 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { rejectUnauthorized: true, path: null },
+        options: { rejectUnauthorized: true, path: null, noDelay: true },
       }),
       method: 'POST',
       url: 'https://service.dev/monitors',
@@ -255,7 +251,7 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { rejectUnauthorized: true, path: null },
+        options: { rejectUnauthorized: true, path: null, noDelay: true },
       }),
       method: 'POST',
       url: 'https://qa.service.elstc.co/monitors',
@@ -275,7 +271,7 @@ describe('callAPI', () => {
         'x-kibana-version': '8.7.0',
       },
       httpsAgent: expect.objectContaining({
-        options: { rejectUnauthorized: true, path: null },
+        options: { rejectUnauthorized: true, path: null, noDelay: true },
       }),
       method: 'POST',
       url: 'https://qa.service.stg.co/monitors',
@@ -351,6 +347,7 @@ describe('callAPI', () => {
         options: {
           rejectUnauthorized: true,
           path: null,
+          noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
         },
@@ -404,6 +401,7 @@ describe('callAPI', () => {
         options: {
           rejectUnauthorized: true,
           path: null,
+          noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
         },
@@ -463,6 +461,7 @@ describe('callAPI', () => {
         options: {
           rejectUnauthorized: true,
           path: null,
+          noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
         },

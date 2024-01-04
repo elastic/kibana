@@ -70,7 +70,7 @@ export function createScenarios(
 
   const openCanvasWorkpad = async (title: string) => {
     log.debug(`Opening saved canvas workpad: ${title}`);
-    await PageObjects.common.navigateToApp('canvas');
+    await PageObjects.canvas.goToListingPage();
     await PageObjects.canvas.loadFirstWorkpad(title);
   };
 

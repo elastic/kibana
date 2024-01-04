@@ -11,6 +11,10 @@ export interface ElasticsearchResponseError {
   meta?: {
     body?: {
       error?: {
+        caused_by?: {
+          reason?: string;
+          type?: string;
+        };
         type: string;
       };
     };
@@ -18,6 +22,8 @@ export interface ElasticsearchResponseError {
   };
   name: 'ResponseError';
 }
+
+const MISSING_ALIAS_ERROR = new RegExp(/^alias \[.+\] missing/);
 
 export const isIndexNotFoundException = (error: ElasticsearchResponseError) =>
   error?.meta?.body?.error?.type === 'index_not_found_exception';
@@ -45,3 +51,19 @@ export const isVersionConflictEngineException = (error: ElasticsearchResponseErr
 
 export const isInvalidSearchApplicationNameException = (error: ElasticsearchResponseError) =>
   error.meta?.body?.error?.type === 'invalid_alias_name_exception';
+
+export const isMissingAliasException = (error: ElasticsearchResponseError) =>
+  error.meta?.statusCode === 404 &&
+  typeof error.meta?.body?.error === 'string' &&
+  MISSING_ALIAS_ERROR.test(error.meta?.body?.error);
+
+export const isAccessControlDisabledException = (error: Error) => {
+  return error.message === ErrorCode.ACCESS_CONTROL_DISABLED;
+};
+
+export const isExpensiveQueriesNotAllowedException = (error: ElasticsearchResponseError) => {
+  return (
+    error.meta?.statusCode === 400 &&
+    error.meta?.body?.error?.caused_by?.reason?.includes('search.allow_expensive_queries')
+  );
+};

@@ -6,13 +6,18 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiPopover, EuiHeaderLink } from '@elastic/eui';
+import {
+  DeploymentDetailsKibanaProvider,
+  DeploymentDetails as DeploymentDetailsComponent,
+} from '@kbn/cloud/deployment_details';
 
 import { useStartServices } from '../../hooks';
 
-import { DeploymentDetails as Component } from './deployment_details.component';
-
 export const DeploymentDetails = () => {
-  const { share, cloud, docLinks } = useStartServices();
+  const [isOpen, setIsOpen] = React.useState(false);
+  const { share, cloud, docLinks, application } = useStartServices();
 
   // If the cloud plugin isn't enabled, we can't display the flyout.
   if (!cloud) {
@@ -21,16 +26,36 @@ export const DeploymentDetails = () => {
 
   const { isCloudEnabled, cloudId } = cloud;
 
-  // If cloud isn't enabled or we don't have a cloudId we can't display the flyout.
+  // If cloud isn't enabled or we don't have a cloudId we don't render the button.
   if (!isCloudEnabled || !cloudId) {
     return null;
   }
 
-  const managementUrl = share.url.locators
-    .get('MANAGEMENT_APP_LOCATOR')
-    ?.useUrl({ sectionId: 'security', appId: 'api_keys' });
+  const button = (
+    <EuiHeaderLink onClick={() => setIsOpen(!isOpen)} isActive>
+      {i18n.translate('xpack.fleet.integrations.connectionDetailsButton', {
+        defaultMessage: 'Connection details',
+      })}
+    </EuiHeaderLink>
+  );
 
-  const learnMoreUrl = docLinks.links.fleet.apiKeysLearnMore;
-
-  return <Component {...{ cloudId, managementUrl, learnMoreUrl }} />;
+  return (
+    <DeploymentDetailsKibanaProvider
+      core={{ application }}
+      share={share}
+      cloud={cloud}
+      docLinks={docLinks}
+    >
+      <EuiPopover
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        button={button}
+        anchorPosition="downCenter"
+      >
+        <div style={{ width: 450 }}>
+          <DeploymentDetailsComponent />
+        </div>
+      </EuiPopover>
+    </DeploymentDetailsKibanaProvider>
+  );
 };

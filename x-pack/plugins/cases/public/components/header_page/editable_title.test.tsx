@@ -35,14 +35,16 @@ describe('EditableTitle', () => {
     expect(renderResult.getByText('Test title')).toBeInTheDocument();
   });
 
-  it('does not show the edit icon when the user does not have edit permissions', () => {
+  it('inline edit defaults to readOnly when the user does not have the edit permissions', () => {
     const wrapper = mount(
       <TestProviders permissions={readCasesPermissions()}>
         <EditableTitle {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').exists()).toBeFalsy();
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').prop('disabled')
+    ).toBe(true);
   });
 
   it('shows the edit title input field', () => {
@@ -52,7 +54,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     expect(wrapper.find('[data-test-subj="editable-title-input-field"]').first().exists()).toBe(
@@ -67,12 +69,12 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="editable-title-submit-btn"]').first().exists()).toBe(
-      true
-    );
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-submit-btn"]').first().exists()
+    ).toBe(true);
   });
 
   it('shows the cancel button', () => {
@@ -82,27 +84,12 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="editable-title-cancel-btn"]').first().exists()).toBe(
-      true
-    );
-  });
-
-  it('DOES NOT shows the edit icon when in edit mode', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
-
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
-    wrapper.update();
-
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
-      false
-    );
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').first().exists()
+    ).toBe(true);
   });
 
   it('switch to non edit mode when canceled', () => {
@@ -112,11 +99,13 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
     wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').simulate('click');
 
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(true);
   });
 
   it('should change the title', () => {
@@ -128,7 +117,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
@@ -152,18 +141,21 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
       .find('input[data-test-subj="editable-title-input-field"]')
+
       .simulate('change', { target: { value: newTitle } });
     wrapper.update();
 
     wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').simulate('click');
     wrapper.update();
 
-    expect(wrapper.find('h1[data-test-subj="header-page-title"]').text()).toEqual(title);
+    expect(wrapper.find('button[data-test-subj="editable-title-header-value"]').text()).toEqual(
+      title
+    );
   });
 
   it('submits the title', () => {
@@ -175,11 +167,12 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
       .find('input[data-test-subj="editable-title-input-field"]')
+      .last()
       .simulate('change', { target: { value: newTitle } });
 
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
@@ -187,7 +180,36 @@ describe('EditableTitle', () => {
 
     expect(submitTitle).toHaveBeenCalled();
     expect(submitTitle.mock.calls[0][0]).toEqual(newTitle);
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(true);
+  });
+
+  it('trims the title before submit', () => {
+    const newTitle = 'new test title with spaces          ';
+
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
+    wrapper.update();
+
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .last()
+      .simulate('change', { target: { value: newTitle } });
+
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+
+    expect(submitTitle).toHaveBeenCalled();
+    expect(submitTitle.mock.calls[0][0]).toEqual(newTitle.trim());
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(true);
   });
 
   it('does not submit the title when the length is longer than 160 characters', () => {
@@ -199,7 +221,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
@@ -213,9 +235,9 @@ describe('EditableTitle', () => {
     );
 
     expect(submitTitle).not.toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
-      false
-    );
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(false);
   });
 
   it('does not submit the title is empty', () => {
@@ -225,11 +247,12 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     wrapper
       .find('input[data-test-subj="editable-title-input-field"]')
+
       .simulate('change', { target: { value: '' } });
 
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
@@ -237,9 +260,9 @@ describe('EditableTitle', () => {
     expect(wrapper.find('.euiFormErrorText').text()).toBe('A name is required.');
 
     expect(submitTitle).not.toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
-      false
-    );
+    expect(
+      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
+    ).toBe(false);
   });
 
   it('does not show an error after a previous edit error was displayed', () => {
@@ -252,7 +275,7 @@ describe('EditableTitle', () => {
       </TestProviders>
     );
 
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     // simualte a long title
@@ -269,6 +292,7 @@ describe('EditableTitle', () => {
     // write a shorter one
     wrapper
       .find('input[data-test-subj="editable-title-input-field"]')
+
       .simulate('change', { target: { value: shortTitle } });
     wrapper.update();
 
@@ -277,7 +301,7 @@ describe('EditableTitle', () => {
     wrapper.update();
 
     // edit again
-    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
     wrapper.update();
 
     // no error should appear

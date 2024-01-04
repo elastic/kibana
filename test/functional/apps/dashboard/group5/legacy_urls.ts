@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
       await PageObjects.dashboard.saveDashboard('legacyTest', { waitDialogIsClosed: true });
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('resolves markdown link from dashboard', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await dashboardAddPanel.addVisualization('legacy url markdown');
         (await find.byLinkText('abc')).click();

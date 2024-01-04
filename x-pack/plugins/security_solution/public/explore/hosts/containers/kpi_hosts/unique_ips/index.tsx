@@ -10,14 +10,12 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import type { KpiUniqueIpsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type {
-  HostsKpiUniqueIpsRequestOptions,
-  HostsKpiUniqueIpsStrategyResponse,
-} from '../../../../../../common/search_strategy';
+import type { HostsKpiUniqueIpsStrategyResponse } from '../../../../../../common/search_strategy';
 import { HostsKpiQueries } from '../../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../../common/typed_json';
 
@@ -57,7 +55,7 @@ export const useHostsKpiUniqueIps = ({
   const [loading, setLoading] = useState(false);
 
   const [hostsKpiUniqueIpsRequest, setHostsKpiUniqueIpsRequest] =
-    useState<HostsKpiUniqueIpsRequestOptions | null>(null);
+    useState<KpiUniqueIpsRequestOptionsInput | null>(null);
 
   const [hostsKpiUniqueIpsResponse, setHostsKpiUniqueIpsResponse] = useState<HostsKpiUniqueIpsArgs>(
     {
@@ -77,7 +75,7 @@ export const useHostsKpiUniqueIps = ({
   const { addError, addWarning } = useAppToasts();
 
   const hostsKpiUniqueIpsSearch = useCallback(
-    (request: HostsKpiUniqueIpsRequestOptions | null) => {
+    (request: KpiUniqueIpsRequestOptionsInput | null) => {
       if (request == null || skip) {
         return;
       }
@@ -86,7 +84,7 @@ export const useHostsKpiUniqueIps = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
-          .search<HostsKpiUniqueIpsRequestOptions, HostsKpiUniqueIpsStrategyResponse>(request, {
+          .search<KpiUniqueIpsRequestOptionsInput, HostsKpiUniqueIpsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
@@ -129,7 +127,7 @@ export const useHostsKpiUniqueIps = ({
 
   useEffect(() => {
     setHostsKpiUniqueIpsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: KpiUniqueIpsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: HostsKpiQueries.kpiUniqueIps,

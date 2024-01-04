@@ -10,7 +10,7 @@ import produce from 'immer';
 import type { Reducer, AnyAction } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
 import type { ReducerBuilder } from 'typescript-fsa-reducers';
-import type { ResolverState, AnalyzerState } from '../types';
+import type { ResolverState, AnalyzerById } from '../types';
 import { scaleToZoom } from './camera/scale_to_zoom';
 import { analyzerReducer } from './reducer';
 
@@ -57,12 +57,12 @@ export function immerCase<S, P>(
     );
 }
 
-export const initialAnalyzerState: AnalyzerState = { analyzerById: {} };
+export const initialAnalyzerState: AnalyzerById = {};
 
-export function mockReducer(id: string): Reducer<AnalyzerState, AnyAction> {
-  const testReducer: Reducer<AnalyzerState, AnyAction> = (
-    state = { analyzerById: { [id]: EMPTY_RESOLVER } },
+export function mockReducer(id: string): Reducer<AnalyzerById, AnyAction> {
+  const testReducer: Reducer<AnalyzerById, AnyAction> = (
+    state = { [id]: EMPTY_RESOLVER },
     action
-  ): AnalyzerState => analyzerReducer(state, action);
+  ): AnalyzerById => analyzerReducer(state, action);
   return testReducer;
 }

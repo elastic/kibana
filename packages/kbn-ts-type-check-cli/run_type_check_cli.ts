@@ -124,6 +124,9 @@ run(
           '--pretty',
           ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
         ],
+        env: {
+          NODE_OPTIONS: '--max-old-space-size=8192',
+        },
         cwd: REPO_ROOT,
         wait: true,
       });

@@ -10,6 +10,7 @@ import { FlyoutHeaderPanel } from '../header';
 
 interface FlyoutBottomBarProps {
   showTimelineHeaderPanel: boolean;
+
   timelineId: string;
 }
 

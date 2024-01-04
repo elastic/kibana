@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ESRE_PLUGIN } from '../../../../../common/constants';
+import { AI_SEARCH_PLUGIN } from '../../../../../common/constants';
 import elserIllustration from '../../../../assets/images/elser.svg';
 import nlpIllustration from '../../../../assets/images/nlp.svg';
 import { docLinks } from '../../../shared/doc_links';
@@ -89,7 +89,11 @@ export const VectorSearchGuide: React.FC = () => {
               id="xpack.enterpriseSearch.vectorSearch.guide.description"
               defaultMessage="Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases."
             />{' '}
-            <EuiLink href={docLinks.knnSearch} target="_blank">
+            <EuiLink
+              href={docLinks.knnSearch}
+              target="_blank"
+              data-test-subj="vector-search-documentation-link"
+            >
               <FormattedMessage
                 id="xpack.enterpriseSearch.vectorSearch.guide.descriptionLink"
                 defaultMessage="Learn more about vector search."
@@ -202,7 +206,7 @@ export const VectorSearchGuide: React.FC = () => {
           <EuiFlexGroup gutterSize="l" direction="column">
             <EuiCard
               onClick={() =>
-                application.navigateToApp(ESRE_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1'))
+                application.navigateToApp(AI_SEARCH_PLUGIN.URL.replace(/^(?:\/app\/)?(.*)$/, '$1'))
               }
               layout="horizontal"
               titleSize="s"

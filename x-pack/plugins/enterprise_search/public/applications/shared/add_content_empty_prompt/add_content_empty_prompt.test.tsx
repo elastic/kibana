@@ -21,7 +21,7 @@ describe('AddContentEmptyPrompt', () => {
   });
 
   it('renders', () => {
-    expect(wrapper.find('h2').text()).toEqual('Add content to Enterprise Search');
+    expect(wrapper.find('h2').text()).toEqual('Add content to Search');
     expect(wrapper.find(EuiLinkTo).prop('to')).toEqual(
       '/app/enterprise_search/content/search_indices/new_index'
     );

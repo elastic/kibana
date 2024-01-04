@@ -23,6 +23,7 @@ export const MonitorSelector = () => {
 
   const button = (
     <EuiButtonIcon
+      data-test-subj="syntheticsMonitorSelectorButton"
       size="s"
       iconType="arrowDown"
       onClick={onButtonClick}

@@ -117,9 +117,7 @@ export class Simulator {
       {
         ...mockGlobalState,
         analyzer: {
-          analyzerById: {
-            [resolverComponentInstanceID]: EMPTY_RESOLVER,
-          },
+          [resolverComponentInstanceID]: EMPTY_RESOLVER,
         },
       },
       SUB_PLUGINS_REDUCER,

@@ -7,8 +7,11 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import {
+  type ControlEmbeddable,
   ControlGroupAPI,
   ControlGroupRenderer,
+  type ControlInput,
+  type ControlOutput,
   type ControlGroupInput,
 } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -17,6 +20,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { Subscription } from 'rxjs';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '../../hooks/use_control_panels_url_state';
+import { ControlTitle } from './controls_title';
 
 interface Props {
   dataView: DataView | undefined;
@@ -55,6 +59,16 @@ export const ControlsContent: React.FC<Props> = ({
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupAPI) => {
       if (!controlGroup) return;
+
+      controlGroup.untilAllChildrenReady().then(() => {
+        controlGroup.getChildIds().map((id) => {
+          const embeddable: ControlEmbeddable<ControlInput, ControlOutput> =
+            controlGroup.children[id];
+          embeddable.renderPrepend = () => (
+            <ControlTitle title={embeddable.getTitle()} embeddableId={id} />
+          );
+        });
+      });
 
       subscriptions.current.add(
         controlGroup.onFiltersPublished$.subscribe((newFilters) => {

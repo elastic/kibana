@@ -15,7 +15,12 @@ export const AlertsLink = () => {
 
   return (
     <EuiToolTip content={VIEW_ALERTS}>
-      <EuiButtonIcon aria-label={VIEW_ALERTS} href={alertUrl} iconType="inspect" />
+      <EuiButtonIcon
+        data-test-subj="syntheticsAlertsLinkButton"
+        aria-label={VIEW_ALERTS}
+        href={alertUrl}
+        iconType="inspect"
+      />
     </EuiToolTip>
   );
 };

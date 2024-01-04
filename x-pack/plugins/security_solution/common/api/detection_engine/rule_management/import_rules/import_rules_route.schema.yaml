@@ -1,0 +1,109 @@
+openapi: 3.0.0
+info:
+  title: Import Rules API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules/_import:
+    summary: Imports rules from an `.ndjson` file
+    post:
+      operationId: ImportRules
+      x-codegen-enabled: true
+      summary: Import rules
+      description: Imports rules from an `.ndjson` file, including actions and exception lists.
+      tags:
+        - Import/Export API
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The `.ndjson` file containing the rules.
+      parameters:
+        - name: overwrite
+          in: query
+          required: false
+          description: Determines whether existing rules with the same `rule_id` are overwritten.
+          schema:
+            type: boolean
+            default: false
+        - name: overwrite_exceptions
+          in: query
+          required: false
+          description: Determines whether existing exception lists with the same `list_id` are overwritten.
+          schema:
+            type: boolean
+            default: false
+        - name: overwrite_action_connectors
+          in: query
+          required: false
+          description: Determines whether existing actions with the same `kibana.alert.rule.actions.id` are overwritten.
+          schema:
+            type: boolean
+            default: false
+        - name: as_new_list
+          in: query
+          required: false
+          description: Generates a new list ID for each imported exception list.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - exceptions_success
+                  - exceptions_success_count
+                  - exceptions_errors
+                  - rules_count
+                  - success
+                  - success_count
+                  - errors
+                  - action_connectors_errors
+                  - action_connectors_warnings
+                  - action_connectors_success
+                  - action_connectors_success_count
+                properties:
+                  exceptions_success:
+                    type: boolean
+                  exceptions_success_count:
+                    type: integer
+                    minimum: 0
+                  exceptions_errors:
+                    type: array
+                    items:
+                      $ref: '../../model/error_schema.schema.yaml#/components/schemas/ErrorSchema'
+                  rules_count:
+                    type: integer
+                    minimum: 0
+                  success:
+                    type: boolean
+                  success_count:
+                    type: integer
+                    minimum: 0
+                  errors:
+                    type: array
+                    items:
+                      $ref: '../../model/error_schema.schema.yaml#/components/schemas/ErrorSchema'
+                  action_connectors_errors:
+                    type: array
+                    items:
+                      $ref: '../../model/error_schema.schema.yaml#/components/schemas/ErrorSchema'
+                  action_connectors_warnings:
+                    type: array
+                    items:
+                      $ref: '../../model/warning_schema.schema.yaml#/components/schemas/WarningSchema'
+                  action_connectors_success:
+                    type: boolean
+                  action_connectors_success_count:
+                    type: integer
+                    minimum: 0

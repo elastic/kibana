@@ -9,26 +9,21 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiSelect,
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmPluginStartDeps } from '../../../../plugin';
 import {
   TraceSearchQuery,
   TraceSearchType,
 } from '../../../../../common/trace_explorer';
-import { useApmDataView } from '../../../../hooks/use_apm_data_view';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { EQLCodeEditorSuggestionType } from '../../../shared/eql_code_editor/constants';
-import { LazilyLoadedEQLCodeEditor } from '../../../shared/eql_code_editor/lazily_loaded_code_editor';
+
+import { EQLCodeEditor } from '../../../shared/monaco_code_editor';
 
 interface Props {
   query: TraceSearchQuery;
-  message?: string;
   error: boolean;
   onQueryChange: (query: TraceSearchQuery) => void;
   onQueryCommit: () => void;
@@ -54,70 +49,32 @@ export function TraceSearchBox({
   query,
   onQueryChange,
   onQueryCommit,
-  message,
-  error,
   loading,
 }: Props) {
-  const { unifiedSearch, core, data, dataViews } = useApmPluginContext();
-  const { notifications, http, docLinks, uiSettings } = core;
   const {
-    services: { storage },
-  } = useKibana<ApmPluginStartDeps>();
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
+  } = useApmPluginContext();
 
-  const { dataView } = useApmDataView();
+  const { dataView } = useAdHocApmDataView();
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="row">
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiFlexGroup direction="row" gutterSize="s">
               <EuiFlexItem grow>
                 {query.type === TraceSearchType.eql ? (
-                  <LazilyLoadedEQLCodeEditor
+                  <EQLCodeEditor
                     value={query.query}
-                    onChange={(value) => {
+                    onChange={(value: string) => {
                       onQueryChange({
                         ...query,
                         query: value,
                       });
                     }}
-                    onBlur={() => {
-                      onQueryCommit();
-                    }}
-                    getSuggestions={async (request) => {
-                      switch (request.type) {
-                        case EQLCodeEditorSuggestionType.EventType:
-                          return ['transaction', 'span', 'error'];
-
-                        case EQLCodeEditorSuggestionType.Field:
-                          return (
-                            dataView?.fields.map((field) => field.name) ?? []
-                          );
-
-                        case EQLCodeEditorSuggestionType.Value:
-                          const field = dataView?.getFieldByName(request.field);
-
-                          if (!dataView || !field) {
-                            return [];
-                          }
-
-                          const suggestions: string[] =
-                            await unifiedSearch.autocomplete.getValueSuggestions(
-                              {
-                                field,
-                                indexPattern: dataView,
-                                query: request.value,
-                                useTimeRange: true,
-                                method: 'terms_agg',
-                              }
-                            );
-
-                          return suggestions.slice(0, 15);
-                      }
-                    }}
-                    width="100%"
-                    height="100px"
                   />
                 ) : (
                   <form>
@@ -146,16 +103,6 @@ export function TraceSearchBox({
                           defaultMessage: 'APM',
                         }
                       )}
-                      deps={{
-                        unifiedSearch,
-                        notifications,
-                        http,
-                        docLinks,
-                        uiSettings,
-                        data,
-                        dataViews,
-                        storage,
-                      }}
                     />
                   </form>
                 )}
@@ -176,33 +123,21 @@ export function TraceSearchBox({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup
-              direction="row"
-              gutterSize="s"
-              alignItems="center"
-              justifyContent="flexEnd"
+          <EuiFlexItem style={{ alignSelf: 'flex-end' }}>
+            <EuiButton
+              size="s"
+              data-test-subj="apmTraceSearchBoxSearchButton"
+              isLoading={loading}
+              onClick={() => {
+                onQueryCommit();
+              }}
+              iconType="search"
+              style={{ width: '100px' }}
             >
-              <EuiFlexItem>
-                <EuiText color={error ? 'danger' : 'subdued'} size="xs">
-                  {message}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="apmTraceSearchBoxSearchButton"
-                  isLoading={loading}
-                  onClick={() => {
-                    onQueryCommit();
-                  }}
-                  iconType="search"
-                >
-                  {i18n.translate('xpack.apm.traceSearchBox.refreshButton', {
-                    defaultMessage: 'Search',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+              {i18n.translate('xpack.apm.traceSearchBox.refreshButton', {
+                defaultMessage: 'Search',
+              })}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

@@ -13,8 +13,20 @@ import { Props, SelectSystemPrompt } from '.';
 import { TEST_IDS } from '../../../constants';
 
 const props: Props = {
+  allSystemPrompts: [
+    {
+      id: 'default-system-prompt',
+      content: 'default',
+      name: 'default',
+      promptType: 'system',
+      isDefault: true,
+      isNewConversationDefault: true,
+    },
+  ],
   conversation: undefined,
+  isSettingsModalVisible: false,
   selectedPrompt: undefined,
+  setIsSettingsModalVisible: jest.fn(),
 };
 
 const mockUseAssistantContext = {
@@ -36,6 +48,10 @@ const mockUseAssistantContext = {
     },
   ],
   setAllSystemPrompts: jest.fn(),
+  knowledgeBase: {
+    isEnabledRAGAlerts: false,
+    isEnabledKnowledgeBase: false,
+  },
 };
 jest.mock('../../../../assistant_context', () => {
   const original = jest.requireActual('../../../../assistant_context');

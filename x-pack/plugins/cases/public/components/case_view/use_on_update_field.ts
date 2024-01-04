@@ -8,9 +8,7 @@
 import { useCallback, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import type { CaseConnector } from '../../../common/api';
-import type { CaseAttributes } from '../../../common/api/cases/case';
-import type { CaseStatuses } from '../../../common/api/cases/status';
+import type { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/types/domain';
 import type { CaseUI, UpdateByKey, UpdateKey } from '../../containers/types';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
@@ -93,6 +91,12 @@ export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
           const assigneesUpdate = getTypedPayload<CaseAttributes['assignees']>(value);
           if (!deepEqual(caseData.assignees, value)) {
             callUpdate('assignees', assigneesUpdate);
+          }
+          break;
+        case 'customFields':
+          const customFields = getTypedPayload<CaseAttributes['customFields']>(value);
+          if (!deepEqual(caseData.customFields, value)) {
+            callUpdate('customFields', customFields);
           }
           break;
         default:

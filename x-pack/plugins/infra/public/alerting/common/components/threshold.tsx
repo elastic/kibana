@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { Comparator } from '../../../../common/alerting/metrics';
 
 export interface ChartProps {
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 
@@ -51,7 +51,7 @@ export const Threshold = ({
       data-test-subj={`threshold-${threshold}-${value}`}
     >
       <Chart>
-        <Settings theme={theme} baseTheme={baseTheme} />
+        <Settings theme={theme} baseTheme={baseTheme} locale={i18n.getLocale()} />
         <Metric
           id={id}
           data={[

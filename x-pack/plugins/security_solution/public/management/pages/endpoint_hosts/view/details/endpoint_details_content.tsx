@@ -34,14 +34,6 @@ import { EndpointPolicyLink } from '../../../../components/endpoint_policy_link'
 import { OutOfDate } from '../components/out_of_date';
 
 const EndpointDetailsContentStyled = styled.div`
-  dl dt {
-    max-width: 27%;
-  }
-
-  dl dd {
-    max-width: 73%;
-  }
-
   .policyLineText {
     padding-right: 5px;
   }
@@ -239,7 +231,9 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
       <EndpointDetailsContentStyled>
         <EuiSpacer size="s" />
         <EuiDescriptionList
-          compressed={true}
+          columnWidths={[1, 3]}
+          compressed
+          rowGutterSize="m"
           type="column"
           listItems={detailsResults}
           data-test-subj="endpointDetailsList"

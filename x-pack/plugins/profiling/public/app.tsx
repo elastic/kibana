@@ -13,7 +13,6 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
 import { CheckSetup } from './components/check_setup';
 import { ProfilingDependenciesContextProvider } from './components/contexts/profiling_dependencies/profiling_dependencies_context';
 import { RouteBreadcrumbsContextProvider } from './components/contexts/route_breadcrumbs_context';
@@ -25,6 +24,7 @@ import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from '
 import { ProfilingHeaderActionMenu } from './components/profiling_header_action_menu';
 import { RouterErrorBoundary } from './routing/router_error_boundary';
 import { LicenseProvider } from './components/contexts/license/license_context';
+import { ProfilingSetupStatusContextProvider } from './components/contexts/profiling_setup_status/profiling_setup_status_context';
 
 interface Props {
   profilingFetchServices: Services;
@@ -79,18 +79,16 @@ function App({
     };
   }, [coreStart, coreSetup, pluginsStart, pluginsSetup, profilingFetchServices]);
 
-  const coPilotService = pluginsSetup.observability.getCoPilotService();
-
   return (
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
         <i18nCore.Context>
-          <CoPilotContextProvider value={coPilotService}>
-            <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
-              <RouterProvider router={profilingRouter as any} history={history}>
-                <RouterErrorBoundary>
-                  <TimeRangeContextProvider>
-                    <ProfilingDependenciesContextProvider value={profilingDependencies}>
+          <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
+            <RouterProvider router={profilingRouter as any} history={history}>
+              <RouterErrorBoundary>
+                <TimeRangeContextProvider>
+                  <ProfilingDependenciesContextProvider value={profilingDependencies}>
+                    <ProfilingSetupStatusContextProvider>
                       <LicenseProvider>
                         <>
                           <CheckSetup>
@@ -106,12 +104,12 @@ function App({
                           />
                         </>
                       </LicenseProvider>
-                    </ProfilingDependenciesContextProvider>
-                  </TimeRangeContextProvider>
-                </RouterErrorBoundary>
-              </RouterProvider>
-            </RedirectAppLinks>
-          </CoPilotContextProvider>
+                    </ProfilingSetupStatusContextProvider>
+                  </ProfilingDependenciesContextProvider>
+                </TimeRangeContextProvider>
+              </RouterErrorBoundary>
+            </RouterProvider>
+          </RedirectAppLinks>
         </i18nCore.Context>
       </KibanaContextProvider>
     </KibanaThemeProvider>

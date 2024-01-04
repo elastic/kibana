@@ -25,6 +25,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
+            category: 'test',
             producer: 'myApp',
             minimumLicenseRequired: 'basic',
             isExportable: true,
@@ -32,6 +33,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myApp: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -60,6 +64,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
+            category: 'test',
             producer: 'myApp',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -67,6 +72,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -97,6 +105,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
+            category: 'test',
             producer: 'myApp',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -105,6 +114,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -114,6 +126,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myOtherAppAlertType',
             name: 'myOtherAppAlertType',
+            category: 'test',
             producer: 'alerts',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -122,6 +135,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -131,6 +147,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'mySecondAppAlertType',
             name: 'mySecondAppAlertType',
+            category: 'test',
             producer: 'myApp',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -139,6 +156,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -169,6 +189,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
+            category: 'test',
             producer: 'myApp',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -177,6 +198,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -186,6 +210,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myOtherAppAlertType',
             name: 'myOtherAppAlertType',
+            category: 'test',
             producer: 'alerts',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -194,6 +219,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -225,6 +253,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
+            category: 'test',
             producer: 'myApp',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -233,6 +262,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -242,6 +274,7 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myOtherAppAlertType',
             name: 'myOtherAppAlertType',
+            category: 'test',
             producer: 'alerts',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -250,6 +283,9 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -278,11 +314,15 @@ describe('asKqlFiltersByRuleTypeAndConsumer', () => {
           recoveryActionGroup: RecoveredActionGroup,
           id: 'myAppAlertType',
           name: 'myAppAlertType',
+          category: 'test',
           producer: 'myApp',
           minimumLicenseRequired: 'basic',
           isExportable: true,
           authorizedConsumers: {},
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ]),
       {
@@ -310,6 +350,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
+            category: 'test',
             producer: 'myApp',
             minimumLicenseRequired: 'basic',
             isExportable: true,
@@ -317,6 +358,9 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myApp: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -372,6 +416,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
+            category: 'test',
             producer: 'myApp',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -379,6 +424,9 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myOtherApp: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -441,6 +489,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myAppAlertType',
             name: 'myAppAlertType',
+            category: 'test',
             producer: 'myApp',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -449,6 +498,9 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -458,6 +510,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'myOtherAppAlertType',
             name: 'myOtherAppAlertType',
+            category: 'test',
             producer: 'alerts',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -466,6 +519,9 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
           {
             actionGroups: [],
@@ -475,6 +531,7 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
             recoveryActionGroup: RecoveredActionGroup,
             id: 'mySecondAppAlertType',
             name: 'mySecondAppAlertType',
+            category: 'test',
             producer: 'myApp',
             authorizedConsumers: {
               alerts: { read: true, all: true },
@@ -483,6 +540,9 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
               myAppWithSubFeature: { read: true, all: true },
             },
             enabledInLicense: true,
+            hasAlertsMappings: false,
+            hasFieldsForAAD: false,
+            validLegacyConsumers: [],
           },
         ]),
         {
@@ -641,11 +701,15 @@ describe('asEsDslFiltersByRuleTypeAndConsumer', () => {
           recoveryActionGroup: RecoveredActionGroup,
           id: 'myAppAlertType',
           name: 'myAppAlertType',
+          category: 'test',
           producer: 'myApp',
           minimumLicenseRequired: 'basic',
           isExportable: true,
           authorizedConsumers: {},
           enabledInLicense: true,
+          hasAlertsMappings: false,
+          hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ]),
       {

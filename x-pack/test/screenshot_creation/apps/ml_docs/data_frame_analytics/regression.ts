@@ -41,12 +41,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('regression job', function () {
     before(async () => {
       await ml.api.createAndRunDFAJob(regressionJobConfig as DataFrameAnalyticsConfig);
-      await ml.testResources.createIndexPatternIfNeeded(regressionJobConfig.dest!.index!);
+      await ml.testResources.createDataViewIfNeeded(regressionJobConfig.dest!.index!);
     });
 
     after(async () => {
       await ml.api.deleteDataFrameAnalyticsJobES(regressionJobConfig.id as string);
-      await ml.testResources.deleteIndexPatternByTitle(regressionJobConfig.dest!.index!);
+      await ml.testResources.deleteDataViewByTitle(regressionJobConfig.dest!.index!);
       await ml.api.deleteIndices(regressionJobConfig.dest!.index!);
       await ml.api.cleanMlIndices();
     });

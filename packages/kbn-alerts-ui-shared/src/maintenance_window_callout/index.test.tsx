@@ -9,15 +9,16 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, waitFor, cleanup } from '@testing-library/react';
-import {
-  MaintenanceWindowStatus,
-  MAINTENANCE_WINDOW_FEATURE_ID,
-} from '@kbn/alerting-plugin/common';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
-import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
+import { render, waitFor, cleanup, screen } from '@testing-library/react';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import { MaintenanceWindowCallout } from '.';
 import { fetchActiveMaintenanceWindows } from './api';
+import {
+  RECURRING_RUNNING_MAINTENANCE_WINDOW,
+  RUNNING_MAINTENANCE_WINDOW_1,
+  RUNNING_MAINTENANCE_WINDOW_2,
+  UPCOMING_MAINTENANCE_WINDOW,
+} from './mock';
 
 jest.mock('./api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
@@ -30,49 +31,6 @@ const TestProviders: React.FC<{}> = ({ children }) => {
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </I18nProvider>
   );
-};
-
-const RUNNING_MAINTENANCE_WINDOW_1: Partial<MaintenanceWindow> = {
-  title: 'Running maintenance window 1',
-  id: '63057284-ac31-42ba-fe22-adfe9732e5ae',
-  status: MaintenanceWindowStatus.Running,
-  events: [{ gte: '2023-04-20T16:27:30.753Z', lte: '2023-04-20T16:57:30.753Z' }],
-};
-
-const RUNNING_MAINTENANCE_WINDOW_2: Partial<MaintenanceWindow> = {
-  title: 'Running maintenance window 2',
-  id: '45894340-df98-11ed-ac81-bfcb4982b4fd',
-  status: MaintenanceWindowStatus.Running,
-  events: [{ gte: '2023-04-20T16:47:42.871Z', lte: '2023-04-20T17:11:32.192Z' }],
-};
-
-const RECURRING_RUNNING_MAINTENANCE_WINDOW: Partial<AsApiContract<MaintenanceWindow>> = {
-  title: 'Recurring running maintenance window',
-  id: 'e2228300-e9ad-11ed-ba37-db17c6e6182b',
-  status: MaintenanceWindowStatus.Running,
-  events: [
-    { gte: '2023-05-03T12:27:18.569Z', lte: '2023-05-03T12:57:18.569Z' },
-    { gte: '2023-05-10T12:27:18.569Z', lte: '2023-05-10T12:57:18.569Z' },
-  ],
-  expiration_date: '2024-05-03T12:27:35.088Z',
-  r_rule: {
-    dtstart: '2023-05-03T12:27:18.569Z',
-    tzid: 'Europe/Amsterdam',
-    freq: 3,
-    interval: 1,
-    count: 2,
-    byweekday: ['WE'],
-  },
-};
-
-const UPCOMING_MAINTENANCE_WINDOW: Partial<MaintenanceWindow> = {
-  title: 'Upcoming maintenance window',
-  id: '5eafe070-e030-11ed-ac81-bfcb4982b4fd',
-  status: MaintenanceWindowStatus.Upcoming,
-  events: [
-    { gte: '2023-04-21T10:36:14.028Z', lte: '2023-04-21T10:37:00.000Z' },
-    { gte: '2023-04-28T10:36:14.028Z', lte: '2023-04-28T10:37:00.000Z' },
-  ],
 };
 
 const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
@@ -121,7 +79,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
+    expect(await findAllByText('One or more maintenance windows are running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -136,7 +94,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
+    expect(await findAllByText('One or more maintenance windows are running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -148,8 +106,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
-    // @ts-expect-error Jest types are incomplete in packages
-    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
+    expect(await findByText('One or more maintenance windows are running')).toBeInTheDocument();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -161,7 +118,7 @@ describe('MaintenanceWindowCallout', () => {
     const { container } = render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
       wrapper: TestProviders,
     });
-    // @ts-expect-error Jest types are incomplete in packages
+
     expect(container).toBeEmptyDOMElement();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -172,9 +129,88 @@ describe('MaintenanceWindowCallout', () => {
     const { container } = render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
       wrapper: TestProviders,
     });
-    // @ts-expect-error Jest types are incomplete in packages
+
     expect(container).toBeEmptyDOMElement();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should be visible if there is a "running" maintenance window that matches the specified category', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    const { findByText } = render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['observability']}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(
+      await findByText('A maintenance window is running for Observability rules')
+    ).toBeInTheDocument();
+  });
+
+  it('should NOT be visible if there is a "running" maintenance window that does not match the specified category', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    const { container } = render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['securitySolution']}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should be visible if there is a "running" maintenance window with a category, and no categories are specified', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    const { findByText } = render(
+      <MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />,
+      { wrapper: TestProviders }
+    );
+
+    expect(
+      await findByText('A maintenance window is running for Observability rules')
+    ).toBeInTheDocument();
+  });
+
+  it('should only display the specified categories in the callout title for a maintenance window that matches muliple categories', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability', 'securitySolution', 'management'],
+      },
+    ]);
+
+    const { findByText } = render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['observability', 'management']}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(
+      await findByText('A maintenance window is running for Observability and Stack rules')
+    ).toBeInTheDocument();
   });
 
   it('should see an error toast if there was an error while fetching maintenance windows', async () => {
@@ -212,7 +248,7 @@ describe('MaintenanceWindowCallout', () => {
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledTimes(1);
       expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledWith(mockError, {
         title: 'Failed to check if maintenance windows are active',
-        toastMessage: 'Rule notifications are stopped while the maintenance window is running.',
+        toastMessage: 'Rule notifications are stopped while maintenance windows are running.',
       });
     });
   });
@@ -234,11 +270,11 @@ describe('MaintenanceWindowCallout', () => {
     const { container } = render(<MaintenanceWindowCallout kibanaServices={servicesMock} />, {
       wrapper: TestProviders,
     });
-    // @ts-expect-error Jest types are incomplete in packages
+
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('should work as expected if window maintenance privilege is READ ', async () => {
+  it('should work as expected if window maintenance privilege is READ', async () => {
     const servicesMock = {
       ...kibanaServicesMock,
       application: {
@@ -255,7 +291,59 @@ describe('MaintenanceWindowCallout', () => {
     const { findByText } = render(<MaintenanceWindowCallout kibanaServices={servicesMock} />, {
       wrapper: TestProviders,
     });
-    // @ts-expect-error Jest types are incomplete in packages
-    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
+
+    expect(await findByText('One or more maintenance windows are running')).toBeInTheDocument();
+  });
+
+  it('should display the callout if the category ids contains the specified category', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['observability'],
+      },
+    ]);
+
+    render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['securitySolution']}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('maintenanceWindowCallout')).not.toBeInTheDocument();
+    });
+
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      {
+        ...RUNNING_MAINTENANCE_WINDOW_1,
+        categoryIds: ['securitySolution'],
+      },
+    ]);
+
+    render(
+      <MaintenanceWindowCallout
+        kibanaServices={kibanaServicesMock}
+        categories={['securitySolution']}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
+    });
+
+    render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('maintenanceWindowCallout')).toBeInTheDocument();
+    });
   });
 });

@@ -187,20 +187,55 @@ export const ALERT_TAGS_MENU_SEARCH_NO_TAGS_FOUND = i18n.translate(
 export const ALERT_TAGS_MENU_EMPTY = i18n.translate(
   'xpack.securitySolution.bulkActions.alertTagsMenuEmptyMessage',
   {
-    defaultMessage: 'No tag options exist, add tag options in Advanced Settings.',
+    defaultMessage: 'No alert tag options exist, add tag options in Kibana Advanced Settings.',
   }
 );
 
-export const ALERT_TAGS_UPDATE_BUTTON_MESSAGE = i18n.translate(
-  'xpack.securitySolution.bulkActions.alertTagsUpdateButtonMessage',
+export const ALERT_TAGS_APPLY_BUTTON_MESSAGE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertTagsApplyButtonMessage',
   {
-    defaultMessage: 'Update tags',
+    defaultMessage: 'Apply tags',
   }
 );
 
 export const ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
   'xpack.securitySolution.bulkActions.alertTagsContextMenuItemTitle',
   {
-    defaultMessage: 'Manage alert tags',
+    defaultMessage: 'Apply alert tags',
+  }
+);
+
+export const ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertTagsContextMenuItemTooltip',
+  {
+    defaultMessage: 'Change alert tag options in Kibana Advanced Settings.',
+  }
+);
+
+export const UPDATE_ALERT_ASSIGNEES_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.securitySolution.bulkActions.updateAlertAssigneesSuccessToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Successfully updated assignees for {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const UPDATE_ALERT_ASSIGNEES_FAILURE = i18n.translate(
+  'xpack.securitySolution.bulkActions.updateAlertAssigneesFailedToastMessage',
+  {
+    defaultMessage: 'Failed to update alert assignees.',
+  }
+);
+
+export const ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertAssigneesContextMenuItemTitle',
+  {
+    defaultMessage: 'Assign alert',
+  }
+);
+
+export const REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.removeAlertAssignessContextMenuTitle',
+  {
+    defaultMessage: 'Unassign alert',
   }
 );

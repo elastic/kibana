@@ -33,10 +33,17 @@ const ANALYZE_MESSAGE = i18n.translate(
 
 export function UXActionMenu({
   appMountParameters,
+  isDev,
 }: {
   appMountParameters: AppMountParameters;
+  isDev: boolean;
 }) {
-  const { http, application } = useKibanaServices();
+  const {
+    http,
+    application,
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useKibanaServices();
+
   const { urlParams } = useLegacyUrlParams();
   const { rangeTo, rangeFrom, serviceName } = urlParams;
 
@@ -78,13 +85,16 @@ export function UXActionMenu({
           color="primary"
           iconType="indexOpen"
           iconSide="left"
-          href={application.getUrlForApp('/home#/tutorial/apm')}
+          href={application.getUrlForApp('/apm/tutorial')}
         >
           {i18n.translate('xpack.ux.addDataButtonLabel', {
             defaultMessage: 'Add data',
           })}
         </EuiHeaderLink>
-        <UxInspectorHeaderLink />
+        <UxInspectorHeaderLink isDev={isDev} />
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <ObservabilityAIAssistantActionMenuItem />
+        ) : null}
       </EuiHeaderLinks>
     </HeaderMenuPortal>
   );

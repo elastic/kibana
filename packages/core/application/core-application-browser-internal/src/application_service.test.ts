@@ -65,6 +65,7 @@ describe('#setup()', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });
@@ -515,6 +516,7 @@ describe('#start()', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });
@@ -1145,7 +1147,7 @@ describe('#start()', () => {
         removeListenerSpy = jest.spyOn(window, 'removeEventListener');
       });
       afterEach(() => {
-        jest.restoreAllMocks();
+        jest.clearAllMocks();
       });
 
       it('calls `navigateToApp` with `skipAppLeave` option', async () => {
@@ -1227,12 +1229,13 @@ describe('#stop()', () => {
       overlays: overlayServiceMock.createStartContract(),
       theme: themeServiceMock.createStartContract(),
       customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('removes the beforeunload listener', async () => {

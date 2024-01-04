@@ -6,9 +6,18 @@
  */
 
 import React, { VFC } from 'react';
-import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
 import { EuiComboBoxOptionOption, EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { IndicatorBarchartLegendAction } from './legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../utils/dates';
 import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
@@ -50,10 +59,13 @@ export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
     <EuiThemeProvider>
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
         <Settings
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={LEGACY_LIGHT_THEME}
           showLegend
           legendPosition={Position.Right}
           legendSize={DEFAULT_LEGEND_SIZE}
           legendAction={({ label }) => <IndicatorBarchartLegendAction field={field} data={label} />}
+          locale={i18n.getLocale()}
         />
         <Axis
           id={`${ID}TimeAxis`}

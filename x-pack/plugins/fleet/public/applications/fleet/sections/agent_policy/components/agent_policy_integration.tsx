@@ -102,7 +102,6 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
             updateAgentPolicy={updateAgentPolicy}
             validation={validation}
             isEditing={isEditing}
-            onDelete={onDelete}
           />
         </StyledEuiAccordion>
       </>

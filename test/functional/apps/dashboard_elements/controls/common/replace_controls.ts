@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
 
-  const { dashboardControls, timePicker, common, dashboard } = getPageObjects([
+  const { dashboardControls, timePicker, dashboard } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
@@ -26,9 +26,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Replace Controls';
 
-  const changeFieldType = async (controlId: string, newField: string, expectedType?: string) => {
+  const changeFieldType = async (controlId: string, newField: string, type: string) => {
     await dashboardControls.editExistingControl(controlId);
-    await dashboardControls.controlsEditorSetfield(newField, expectedType);
+    await dashboardControls.controlsEditorSetfield(newField);
+    await dashboardControls.controlsEditorSetControlType(type);
     await dashboardControls.controlEditorSave();
   };
 
@@ -50,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let controlId: string;
 
     before(async () => {
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();

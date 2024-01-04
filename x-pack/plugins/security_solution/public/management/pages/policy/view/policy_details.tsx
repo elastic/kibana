@@ -8,14 +8,10 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
-import {
-  EuiCallOut,
-  EuiLoadingSpinner,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
-} from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import { policyDetails, agentStatusSummary, apiError } from '../store/policy_details/selectors';
-import { AgentsSummary } from './agents_summary';
+import { AgentsSummary } from './components/agents_summary';
 import { PolicyTabs } from './tabs';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
@@ -60,7 +56,7 @@ export const PolicyDetails = React.memo(() => {
         },
       ],
     };
-  }, [getAppUrl, routeState.backLink]);
+  }, [getAppUrl, routeState?.backLink]);
 
   const headerRightContent = (
     <AgentsSummary
@@ -78,23 +74,23 @@ export const PolicyDetails = React.memo(() => {
   const pageBody: React.ReactNode = useMemo(() => {
     if (policyApiError) {
       return (
-        <EuiPageTemplate template="centeredContent">
+        <EuiPageTemplate.Section grow={false} alignment="center">
           <EuiCallOut color="danger" title={policyApiError?.error}>
             <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
           </EuiCallOut>
-        </EuiPageTemplate>
+        </EuiPageTemplate.Section>
       );
     }
 
     if (!policyItem) {
       return (
-        <EuiPageTemplate template="centeredContent">
+        <EuiPageTemplate.Section grow={false} alignment="center">
           <EuiLoadingSpinner
             className="essentialAnimation"
             size="xl"
             data-test-subj="policyDetailsLoading"
           />
-        </EuiPageTemplate>
+        </EuiPageTemplate.Section>
       );
     }
 

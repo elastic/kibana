@@ -18,6 +18,7 @@ get:
         application/json:
           schema:
             type: array
+            maxItems: 10000
             items: 
               type: object
               properties:
@@ -27,7 +28,7 @@ get:
                 title:
                   type: string
                   description: The case title.
-            example:
+            examples:
               - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
                 title: security_case
     '401':
@@ -36,7 +37,3 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601s

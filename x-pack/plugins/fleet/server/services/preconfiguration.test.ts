@@ -30,7 +30,7 @@ import {
 } from './preconfiguration';
 import { packagePolicyService } from './package_policy';
 import { getBundledPackages } from './epm/packages/bundled_packages';
-import type { InstallPackageParams } from './epm/packages/install';
+import { installPackage, type InstallPackageParams } from './epm/packages/install';
 
 jest.mock('./agent_policy_update');
 jest.mock('./output');
@@ -122,10 +122,18 @@ function getPutPreconfiguredPackagesMock() {
 
 jest.mock('./epm/registry', () => ({
   ...jest.requireActual('./epm/registry'),
-  async fetchFindLatestPackageOrThrow(packageName: string): Promise<RegistrySearchResult> {
+  async fetchFindLatestPackageOrThrow(
+    packageName: string,
+    options?: { prerelease?: boolean }
+  ): Promise<RegistrySearchResult> {
+    let latestVersion = '1.0.0';
+    if (options?.prerelease && packageName === 'test_package') {
+      latestVersion = '3.0.1-beta.1';
+    }
+
     return {
       name: packageName,
-      version: '1.0.0',
+      version: latestVersion,
       description: '',
       release: 'experimental',
       title: '',
@@ -136,44 +144,46 @@ jest.mock('./epm/registry', () => ({
 }));
 
 jest.mock('./epm/packages/install', () => ({
-  async installPackage(args: InstallPackageParams): Promise<InstallResult | undefined> {
-    if (args.installSource === 'registry') {
-      const [pkgName, pkgVersion] = args.pkgkey.split('-');
-      const installError = mockInstallPackageErrors.get(pkgName);
-      if (installError) {
+  installPackage: jest.fn(
+    async (args: InstallPackageParams): Promise<InstallResult | undefined> => {
+      if (args.installSource === 'registry') {
+        const [pkgName, pkgVersion] = args.pkgkey.split('-');
+        const installError = mockInstallPackageErrors.get(pkgName);
+        if (installError) {
+          return {
+            error: new Error(installError),
+            installType: 'install',
+            installSource: 'registry',
+          };
+        }
+
+        const installedPackage = mockInstalledPackages.get(pkgName);
+        if (installedPackage) {
+          if (installedPackage.version === pkgVersion) return installedPackage;
+        }
+
+        const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
+        mockInstalledPackages.set(pkgName, packageInstallation);
+
         return {
-          error: new Error(installError),
+          status: 'installed',
           installType: 'install',
           installSource: 'registry',
         };
+      } else if (args.installSource === 'upload') {
+        const { archiveBuffer } = args;
+
+        // Treat the buffer value passed in tests as the package's name for simplicity
+        const pkgName = archiveBuffer.toString('utf8');
+
+        // Just install every bundled package at version '1.0.0'
+        const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
+        mockInstalledPackages.set(pkgName, packageInstallation);
+
+        return { status: 'installed', installType: 'install', installSource: 'upload' };
       }
-
-      const installedPackage = mockInstalledPackages.get(pkgName);
-      if (installedPackage) {
-        if (installedPackage.version === pkgVersion) return installedPackage;
-      }
-
-      const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
-      mockInstalledPackages.set(pkgName, packageInstallation);
-
-      return {
-        status: 'installed',
-        installType: 'install',
-        installSource: 'registry',
-      };
-    } else if (args.installSource === 'upload') {
-      const { archiveBuffer } = args;
-
-      // Treat the buffer value passed in tests as the package's name for simplicity
-      const pkgName = archiveBuffer.toString('utf8');
-
-      // Just install every bundled package at version '1.0.0'
-      const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
-      mockInstalledPackages.set(pkgName, packageInstallation);
-
-      return { status: 'installed', installType: 'install', installSource: 'upload' };
     }
-  },
+  ),
   ensurePackagesCompletedInstall() {
     return [];
   },
@@ -366,6 +376,49 @@ describe('policy preconfiguration', () => {
       expect(policies[0].id).toBe('test-id');
       expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
       expect(nonFatalErrors.length).toBe(0);
+    });
+
+    it('should install prelease packages if needed', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: 'latest', prerelease: true }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(policies.length).toEqual(0);
+      expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.1-beta.1']));
+      expect(nonFatalErrors.length).toBe(0);
+    });
+
+    it('should pass skipDatastreamRollover flag if configured', async () => {
+      const soClient = getPutPreconfiguredPackagesMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
+        soClient,
+        esClient,
+        [] as PreconfiguredAgentPolicy[],
+        [{ name: 'test_package', version: 'latest', skipDataStreamRollover: true }],
+        mockDefaultOutput,
+        mockDefaultDownloadService,
+        DEFAULT_SPACE_ID
+      );
+
+      expect(policies.length).toEqual(0);
+      expect(packages).toEqual(expect.arrayContaining(['test_package-1.0.0']));
+      expect(nonFatalErrors.length).toBe(0);
+      expect(jest.mocked(installPackage)).toBeCalledWith(
+        expect.objectContaining({
+          skipDataStreamRollover: true,
+        })
+      );
     });
 
     it('should not add new package policy to existing non managed policies', async () => {
@@ -763,13 +816,13 @@ describe('policy preconfiguration', () => {
         {
           name: 'test_package',
           version: '1.0.0',
-          buffer: Buffer.from('test_package'),
+          getBuffer: () => Promise.resolve(Buffer.from('test_package')),
         },
 
         {
           name: 'test_package_2',
           version: '1.0.0',
-          buffer: Buffer.from('test_package_2'),
+          getBuffer: () => Promise.resolve(Buffer.from('test_package_2')),
         },
       ]);
 
@@ -807,7 +860,7 @@ describe('policy preconfiguration', () => {
             {
               name: 'test_package',
               version: '1.0.0',
-              buffer: Buffer.from('test_package'),
+              getBuffer: () => Promise.resolve(Buffer.from('test_package')),
             },
           ]);
 
@@ -848,7 +901,7 @@ describe('policy preconfiguration', () => {
             {
               name: 'test_package',
               version: '1.0.0',
-              buffer: Buffer.from('test_package'),
+              getBuffer: () => Promise.resolve(Buffer.from('test_package')),
             },
           ]);
 

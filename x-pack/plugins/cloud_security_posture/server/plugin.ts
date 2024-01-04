@@ -18,6 +18,7 @@ import type {
   PostDeletePackagePoliciesResponse,
   PackagePolicy,
   NewPackagePolicy,
+  UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import type {
   TaskManagerSetupContract,
@@ -25,6 +26,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
+import { cleanupCredentials } from '../common/utils/helpers';
 import type {
   CspServerPluginSetup,
   CspServerPluginStart,
@@ -33,7 +35,7 @@ import type {
   CspServerPluginStartServices,
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
-import { setupSavedObjects } from './saved_objects';
+import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
@@ -47,6 +49,8 @@ import {
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
+import { CloudSecurityPostureConfig } from './config';
+import { CspBenchmarkRule, CspSettings } from '../common/types/latest';
 
 export class CspPlugin
   implements
@@ -58,6 +62,7 @@ export class CspPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: CloudSecurityPostureConfig;
   private isCloudEnabled?: boolean;
 
   /**
@@ -67,15 +72,17 @@ export class CspPlugin
    */
   #isInitialized: boolean = false;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<CloudSecurityPostureConfig>) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get();
   }
 
   public setup(
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
-    setupSavedObjects(core.savedObjects);
+    core.savedObjects.registerType<CspBenchmarkRule>(cspBenchmarkRule);
+    core.savedObjects.registerType<CspSettings>(cspSettings);
 
     setupRoutes({
       core,
@@ -118,6 +125,34 @@ export class CspPlugin
             if (!isSingleEnabledInput(packagePolicy.inputs)) {
               throw new Error('Only one enabled input is allowed per policy');
             }
+          }
+
+          return packagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyCreate',
+        async (
+          packagePolicy: NewPackagePolicy,
+          soClient: SavedObjectsClientContract
+        ): Promise<NewPackagePolicy> => {
+          if (isCspPackage(packagePolicy.package?.name)) {
+            return cleanupCredentials(packagePolicy);
+          }
+
+          return packagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyUpdate',
+        async (
+          packagePolicy: UpdatePackagePolicy,
+          soClient: SavedObjectsClientContract
+        ): Promise<UpdatePackagePolicy> => {
+          if (isCspPackage(packagePolicy.package?.name)) {
+            return cleanupCredentials(packagePolicy);
           }
 
           return packagePolicy;
@@ -173,7 +208,7 @@ export class CspPlugin
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
-    await initializeCspIndices(esClient, this.logger);
+    await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
     this.#isInitialized = true;

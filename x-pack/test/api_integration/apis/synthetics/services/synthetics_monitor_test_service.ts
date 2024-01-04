@@ -7,21 +7,43 @@
 
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { EncryptedSyntheticsSavedMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synthetics/state/monitor_management/api';
 import { v4 as uuidv4 } from 'uuid';
+import expect from '@kbn/expect';
+import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
 export class SyntheticsMonitorTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
   private getService: FtrProviderContext['getService'];
+  private supertestWithoutAuth: ReturnType<typeof KibanaSupertestProvider>;
+  public apiKey: string | undefined = '';
 
   constructor(getService: FtrProviderContext['getService']) {
     this.supertest = getService('supertest');
+    this.supertest = getService('supertest');
     this.getService = getService;
+    this.supertestWithoutAuth = getService('supertestWithoutAuth');
   }
+
+  generateProjectAPIKey = async (accessToPublicLocations = true) => {
+    const res = await this.supertest
+      .get(
+        SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY +
+          '?accessToElasticManagedLocations=' +
+          accessToPublicLocations
+      )
+      .set('kbn-xsrf', 'true')
+      .expect(200);
+    const result = res.body as ProjectAPIKeyResponse;
+    expect(result).to.have.property('apiKey');
+    const apiKey = result.apiKey?.encoded;
+    expect(apiKey).to.not.be.empty();
+    this.apiKey = apiKey;
+    return apiKey;
+  };
 
   async getMonitor(monitorId: string, decrypted: boolean = true, space?: string) {
     let url =
@@ -40,7 +62,7 @@ export class SyntheticsMonitorTestService {
       .send(monitor)
       .expect(200);
 
-    return res.body as SavedObject<MonitorFields>;
+    return res.body as EncryptedSyntheticsSavedMonitor;
   }
 
   async inspectMonitor(monitor: any, hideParams: boolean = true) {
@@ -63,12 +85,22 @@ export class SyntheticsMonitorTestService {
   }
 
   async addProjectMonitors(project: string, monitors: any) {
-    const { body } = await this.supertest
-      .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project))
-      .set('kbn-xsrf', 'true')
-      .send({ monitors })
-      .expect(200);
-    return body;
+    if (this.apiKey) {
+      return this.supertestWithoutAuth
+        .put(
+          SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+        )
+        .set('kbn-xsrf', 'true')
+        .set('authorization', `ApiKey ${this.apiKey}`)
+        .send({ monitors });
+    } else {
+      return this.supertest
+        .put(
+          SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+        )
+        .set('kbn-xsrf', 'true')
+        .send({ monitors });
+    }
   }
 
   async deleteMonitorByJourney(

@@ -485,7 +485,7 @@ const InsightEditorComponent = ({
                   filters={filtersStub}
                   onChange={onChange}
                   dataView={dataView}
-                  maxDepth={2}
+                  maxDepth={1}
                 />
               ) : (
                 <></>
@@ -541,13 +541,17 @@ const exampleInsight = `${insightPrefix}{
   ]
 }}`;
 
-export const plugin = ({ licenseIsPlatinum }: { licenseIsPlatinum: boolean }) => {
+export const plugin = ({
+  insightsUpsellingMessage,
+}: {
+  insightsUpsellingMessage: string | null;
+}) => {
   return {
     name: 'insights',
     button: {
-      label: licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INIGHT_UPSELL,
+      label: insightsUpsellingMessage ?? i18n.INVESTIGATE,
       iconType: 'timelineWithArrow',
-      isDisabled: !licenseIsPlatinum,
+      isDisabled: !!insightsUpsellingMessage,
     },
     helpText: (
       <div>

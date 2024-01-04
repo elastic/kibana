@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LatestTaskStateSchema } from './task_state';
+
 export interface ScoreByPolicyTemplateBucket {
   score_by_policy_template: {
     buckets: Array<{
@@ -19,6 +21,20 @@ export interface ScoreByPolicyTemplateBucket {
           passed_findings: { doc_count: number };
           failed_findings: { doc_count: number };
           total_findings: { value: number };
+        }>;
+      };
+      score_by_benchmark_id: {
+        buckets: Array<{
+          key: string; // benchmark id
+          doc_count: number;
+          benchmark_versions: {
+            buckets: Array<{
+              key: string; // benchmark version
+              passed_findings: { doc_count: number };
+              failed_findings: { doc_count: number };
+              total_findings: { value: number };
+            }>;
+          };
         }>;
       };
     }>;
@@ -62,11 +78,6 @@ export interface VulnSeverityAggs {
   };
 }
 
-export type TaskHealthStatus = 'ok' | 'warning' | 'error';
-
 export interface FindingsStatsTaskResult {
-  state: {
-    runs: number;
-    health_status: TaskHealthStatus;
-  };
+  state: LatestTaskStateSchema;
 }

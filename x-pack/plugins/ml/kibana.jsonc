@@ -7,15 +7,13 @@
     "id": "ml",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "ml"
-    ],
+    "configPath": ["xpack", "ml"],
     "requiredPlugins": [
       "aiops",
       "charts",
       "cloud",
       "data",
+      "dataViewEditor",
       "dataViews",
       "dataVisualizer",
       "discover",
@@ -30,7 +28,9 @@
       "uiActions",
       "unifiedSearch",
       "savedObjectsManagement",
-      "savedSearch"
+      "savedSearch",
+      "contentManagement",
+      "presentationUtil"
     ],
     "optionalPlugins": [
       "alerting",
@@ -55,11 +55,8 @@
       "lens",
       "maps",
       "savedObjectsFinder",
-      "usageCollection",
-      "unifiedSearch"
+      "usageCollection"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }

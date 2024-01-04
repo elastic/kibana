@@ -38,13 +38,13 @@ export function parseCURL(text) {
   const EscapedQuotes = /^((?:[^\\"']|\\.)+)/;
 
   const LooksLikeCurl = /^\s*curl\s+/;
-  const CurlVerb = /-X ?(GET|HEAD|POST|PUT|DELETE)/;
+  const CurlVerb = /-X ?(GET|HEAD|POST|PUT|DELETE|PATCH)/;
 
   const HasProtocol = /[\s"']https?:\/\//;
   const CurlRequestWithProto = /[\s"']https?:\/\/[^\/ ]+\/+([^\s"']+)/;
   const CurlRequestWithoutProto = /[\s"'][^\/ ]+\/+([^\s"']+)/;
   const CurlData = /^.+\s(--data|-d)\s*/;
-  const SenseLine = /^\s*(GET|HEAD|POST|PUT|DELETE)\s+\/?(.+)/;
+  const SenseLine = /^\s*(GET|HEAD|POST|PUT|DELETE|PATCH)\s+\/?(.+)/;
 
   if (lines.length > 0 && ExecutionComment.test(lines[0])) {
     lines.shift();

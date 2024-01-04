@@ -8,7 +8,7 @@
 import React from 'react';
 
 import {
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiText,
   EuiSteps,
   EuiCode,
@@ -27,7 +27,7 @@ interface Props {
 }
 
 export const SetupInstructions: React.FC<Props> = ({ productName }) => (
-  <EuiPageContent>
+  <EuiPageSection>
     <EuiSteps
       headingElement="h2"
       steps={[
@@ -126,5 +126,5 @@ export const SetupInstructions: React.FC<Props> = ({ productName }) => (
         },
       ]}
     />
-  </EuiPageContent>
+  </EuiPageSection>
 );

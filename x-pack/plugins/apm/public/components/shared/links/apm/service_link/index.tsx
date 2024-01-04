@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TypeOf } from '@kbn/typed-react-router-config';
@@ -16,7 +17,6 @@ import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent'
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
 import { truncate, unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
-import { AgentIcon } from '../../../agent_icon';
 import { PopoverTooltip } from '../../../popover_tooltip';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
 import { OTHER_SERVICE_NAME, MaxGroupsMessage } from '../max_groups_message';
@@ -88,7 +88,7 @@ export function ServiceLink({
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <AgentIcon agentName={agentName} />
+              <AgentIcon agentName={agentName} size="l" />
             </EuiFlexItem>
             <EuiFlexItem className="eui-textTruncate">
               <span className="eui-textTruncate">{serviceName}</span>

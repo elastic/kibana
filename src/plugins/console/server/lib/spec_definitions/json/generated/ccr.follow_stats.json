@@ -1,11 +1,21 @@
 {
   "ccr.follow_stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
-      "{indices}/_ccr/stats"
+      "{index}/_ccr/stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-get-follow-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ccr-get-follow-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

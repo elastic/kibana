@@ -9,7 +9,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import * as i18n from '../translations';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { exportSelectedTimeline } from '../../../containers/api';
 import { downloadBlob } from '../../../../common/utils/download_blob';

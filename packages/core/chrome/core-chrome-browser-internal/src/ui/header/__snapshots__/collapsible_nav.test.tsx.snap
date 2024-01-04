@@ -30,7 +30,7 @@ Array [
           class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children"
         >
           <span
-            class="euiThemeProvider emotion-euiColorMode-dark-colorClassName"
+            class="euiThemeProvider emotion-euiColorMode-dark"
           >
             <ul
               class="euiListGroup emotion-euiListGroup-none"
@@ -105,11 +105,11 @@ Array [
       </div>
     </div>
     <div
-      class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-light"
+      class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-light"
       data-test-subj="collapsibleNavGroup-recentlyViewed"
     >
       <div
-        class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+        class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
       >
         <button
           aria-controls="generated-id"
@@ -141,7 +141,7 @@ Array [
           aria-controls="generated-id"
           aria-expanded="true"
           aria-labelledby="generated-id"
-          class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
+          class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
           tabindex="-1"
           type="button"
         >
@@ -157,61 +157,60 @@ Array [
         aria-labelledby="generated-id"
         class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
         id="generated-id"
-        role="region"
+        role="group"
+        style="block-size: 0;"
         tabindex="-1"
       >
-        <div>
+        <div
+          class="euiAccordion__children emotion-euiAccordion__children"
+        >
           <div
-            class=" emotion-euiAccordion__children"
+            class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
           >
-            <div
-              class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
+            <ul
+              aria-label="Recently viewed links"
+              class="euiListGroup kbnCollapsibleNav__recentsListGroup emotion-euiListGroup-none"
+              style="max-inline-size: none;"
             >
-              <ul
-                aria-label="Recently viewed links"
-                class="euiListGroup kbnCollapsibleNav__recentsListGroup emotion-euiListGroup-none"
-                style="max-inline-size: none;"
+              <li
+                class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
               >
-                <li
-                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                <a
+                  aria-label="recent 1"
+                  class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
+                  data-test-subj="collapsibleNavAppLink--recent"
+                  href="http://localhost/recent%201"
+                  rel="noreferrer"
+                  title="recent 1"
                 >
-                  <a
-                    aria-label="recent 1"
-                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
-                    data-test-subj="collapsibleNavAppLink--recent"
-                    href="http://localhost/recent%201"
-                    rel="noreferrer"
+                  <span
+                    class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                     title="recent 1"
                   >
-                    <span
-                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                      title="recent 1"
-                    >
-                      recent 1
-                    </span>
-                  </a>
-                </li>
-                <li
-                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                    recent 1
+                  </span>
+                </a>
+              </li>
+              <li
+                class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+              >
+                <a
+                  aria-label="recent 2"
+                  class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
+                  data-test-subj="collapsibleNavAppLink--recent"
+                  href="http://localhost/recent%202"
+                  rel="noreferrer"
+                  title="recent 2"
                 >
-                  <a
-                    aria-label="recent 2"
-                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
-                    data-test-subj="collapsibleNavAppLink--recent"
-                    href="http://localhost/recent%202"
-                    rel="noreferrer"
+                  <span
+                    class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
                     title="recent 2"
                   >
-                    <span
-                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                      title="recent 2"
-                    >
-                      recent 2
-                    </span>
-                  </a>
-                </li>
-              </ul>
-            </div>
+                    recent 2
+                  </span>
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -223,11 +222,11 @@ Array [
       class="euiFlexItem kbnCollapsibleNav__solutions emotion-euiFlexItem-grow-1"
     >
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-kibana"
       >
         <div
-          class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
         >
           <button
             aria-controls="generated-id"
@@ -266,7 +265,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
             type="button"
           >
@@ -282,84 +281,83 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
+          style="block-size: 0;"
           tabindex="-1"
         >
-          <div>
+          <div
+            class="euiAccordion__children emotion-euiAccordion__children"
+          >
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
             >
-              <div
-                class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
+              <ul
+                aria-label="Primary navigation links, Analytics"
+                class="euiListGroup emotion-euiListGroup-none"
+                style="max-inline-size: none;"
               >
-                <ul
-                  aria-label="Primary navigation links, Analytics"
-                  class="euiListGroup emotion-euiListGroup-none"
-                  style="max-inline-size: none;"
+                <li
+                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                 >
-                  <li
-                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                  <a
+                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
+                    data-test-subj="collapsibleNavAppLink"
+                    href="discover"
+                    rel="noreferrer"
                   >
-                    <a
-                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
-                      data-test-subj="collapsibleNavAppLink"
-                      href="discover"
-                      rel="noreferrer"
+                    <span
+                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
+                      title="discover"
                     >
-                      <span
-                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                        title="discover"
-                      >
-                        discover
-                      </span>
-                    </a>
-                  </li>
-                  <li
-                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                      discover
+                    </span>
+                  </a>
+                </li>
+                <li
+                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                >
+                  <a
+                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
+                    data-test-subj="collapsibleNavAppLink"
+                    href="visualize"
+                    rel="noreferrer"
                   >
-                    <a
-                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
-                      data-test-subj="collapsibleNavAppLink"
-                      href="visualize"
-                      rel="noreferrer"
+                    <span
+                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
+                      title="visualize"
                     >
-                      <span
-                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                        title="visualize"
-                      >
-                        visualize
-                      </span>
-                    </a>
-                  </li>
-                  <li
-                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                      visualize
+                    </span>
+                  </a>
+                </li>
+                <li
+                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                >
+                  <a
+                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
+                    data-test-subj="collapsibleNavAppLink"
+                    href="dashboard"
+                    rel="noreferrer"
                   >
-                    <a
-                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
-                      data-test-subj="collapsibleNavAppLink"
-                      href="dashboard"
-                      rel="noreferrer"
+                    <span
+                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
+                      title="dashboard"
                     >
-                      <span
-                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                        title="dashboard"
-                      >
-                        dashboard
-                      </span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
+                      dashboard
+                    </span>
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-observability"
       >
         <div
-          class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
         >
           <button
             aria-controls="generated-id"
@@ -398,7 +396,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
             type="button"
           >
@@ -414,67 +412,66 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
+          style="block-size: 0;"
           tabindex="-1"
         >
-          <div>
+          <div
+            class="euiAccordion__children emotion-euiAccordion__children"
+          >
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
             >
-              <div
-                class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
+              <ul
+                aria-label="Primary navigation links, Observability"
+                class="euiListGroup emotion-euiListGroup-none"
+                style="max-inline-size: none;"
               >
-                <ul
-                  aria-label="Primary navigation links, Observability"
-                  class="euiListGroup emotion-euiListGroup-none"
-                  style="max-inline-size: none;"
+                <li
+                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                 >
-                  <li
-                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                  <a
+                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
+                    data-test-subj="collapsibleNavAppLink"
+                    href="metrics"
+                    rel="noreferrer"
                   >
-                    <a
-                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
-                      data-test-subj="collapsibleNavAppLink"
-                      href="metrics"
-                      rel="noreferrer"
+                    <span
+                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
+                      title="metrics"
                     >
-                      <span
-                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                        title="metrics"
-                      >
-                        metrics
-                      </span>
-                    </a>
-                  </li>
-                  <li
-                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                      metrics
+                    </span>
+                  </a>
+                </li>
+                <li
+                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                >
+                  <a
+                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
+                    data-test-subj="collapsibleNavAppLink"
+                    href="logs"
+                    rel="noreferrer"
                   >
-                    <a
-                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
-                      data-test-subj="collapsibleNavAppLink"
-                      href="logs"
-                      rel="noreferrer"
+                    <span
+                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
+                      title="logs"
                     >
-                      <span
-                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                        title="logs"
-                      >
-                        logs
-                      </span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
+                      logs
+                    </span>
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-securitySolution"
       >
         <div
-          class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
         >
           <button
             aria-controls="generated-id"
@@ -513,7 +510,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
             type="button"
           >
@@ -529,50 +526,49 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
+          style="block-size: 0;"
           tabindex="-1"
         >
-          <div>
+          <div
+            class="euiAccordion__children emotion-euiAccordion__children"
+          >
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
             >
-              <div
-                class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
+              <ul
+                aria-label="Primary navigation links, Security"
+                class="euiListGroup emotion-euiListGroup-none"
+                style="max-inline-size: none;"
               >
-                <ul
-                  aria-label="Primary navigation links, Security"
-                  class="euiListGroup emotion-euiListGroup-none"
-                  style="max-inline-size: none;"
+                <li
+                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                 >
-                  <li
-                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                  <a
+                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
+                    data-test-subj="collapsibleNavAppLink"
+                    href="siem"
+                    rel="noreferrer"
                   >
-                    <a
-                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
-                      data-test-subj="collapsibleNavAppLink"
-                      href="siem"
-                      rel="noreferrer"
+                    <span
+                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
+                      title="siem"
                     >
-                      <span
-                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                        title="siem"
-                      >
-                        siem
-                      </span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
+                      siem
+                    </span>
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiCollapsibleNavGroup-isCollapsible-none"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none"
         data-test-subj="collapsibleNavGroup-management"
       >
         <div
-          class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+          class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
         >
           <button
             aria-controls="generated-id"
@@ -611,7 +607,7 @@ Array [
             aria-controls="generated-id"
             aria-expanded="true"
             aria-labelledby="generated-id"
-            class="euiButtonIcon euiAccordion__iconButton euiAccordion__iconButton-isOpen euiAccordion__iconButton--right emotion-euiButtonIcon-xs-empty-text-euiAccordion__iconButton-isOpen-arrowRight"
+            class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
             type="button"
           >
@@ -627,40 +623,39 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
+          style="block-size: 0;"
           tabindex="-1"
         >
-          <div>
+          <div
+            class="euiAccordion__children emotion-euiAccordion__children"
+          >
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
             >
-              <div
-                class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children-withHeading"
+              <ul
+                aria-label="Primary navigation links, Management"
+                class="euiListGroup emotion-euiListGroup-none"
+                style="max-inline-size: none;"
               >
-                <ul
-                  aria-label="Primary navigation links, Management"
-                  class="euiListGroup emotion-euiListGroup-none"
-                  style="max-inline-size: none;"
+                <li
+                  class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
                 >
-                  <li
-                    class="euiListGroupItem emotion-euiListGroupItem-subdued-s"
+                  <a
+                    class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
+                    data-test-subj="collapsibleNavAppLink"
+                    href="monitoring"
+                    rel="noreferrer"
                   >
-                    <a
-                      class="euiListGroupItem__button emotion-euiListGroupItem__inner-s-subdued-isClickable"
-                      data-test-subj="collapsibleNavAppLink"
-                      href="monitoring"
-                      rel="noreferrer"
+                    <span
+                      class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
+                      title="monitoring"
                     >
-                      <span
-                        class="euiListGroupItem__label emotion-euiListGroupItem__label-truncate"
-                        title="monitoring"
-                      >
-                        monitoring
-                      </span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
+                      monitoring
+                    </span>
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -738,6 +733,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   }
   basePath={
     BasePath {
+      "assetsHrefBase": "/test",
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
@@ -923,6 +919,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   }
   basePath={
     BasePath {
+      "assetsHrefBase": "/test",
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],

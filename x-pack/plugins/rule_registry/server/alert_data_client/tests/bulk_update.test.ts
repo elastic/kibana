@@ -31,6 +31,8 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
+  getRuleList: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';
@@ -334,10 +336,10 @@ describe('bulkUpdate()', () => {
             status: 'closed',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
-                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
-                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
-                Error: Error: Unauthorized for fake.rule and apm"
-              `);
+          "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
+           Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
+          Error: Error: Unauthorized for fake.rule and apm"
+        `);
 
         expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
           message: `Failed attempt to update alert [id=${fakeAlertId}]`,
@@ -401,10 +403,10 @@ describe('bulkUpdate()', () => {
             status: 'closed',
           })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`
-                "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
-                 Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
-                Error: Error: Unauthorized for fake.rule and apm"
-              `);
+          "queryAndAuditAllAlerts threw an error: Unable to retrieve alerts with query \\"kibana.alert.status: active\\" and operation update 
+           Error: Unable to retrieve alert details for alert with id of \\"null\\" or with query \\"kibana.alert.status: active\\" and operation update 
+          Error: Error: Unauthorized for fake.rule and apm"
+        `);
 
         expect(auditLogger.log).toHaveBeenCalledTimes(2);
         expect(auditLogger.log).toHaveBeenNthCalledWith(1, {

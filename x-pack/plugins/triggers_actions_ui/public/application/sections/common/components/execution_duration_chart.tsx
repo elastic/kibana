@@ -18,7 +18,15 @@ import {
   EuiLoadingChart,
 } from '@elastic/eui';
 import { euiLightVars as lightEuiTheme } from '@kbn/ui-theme';
-import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  CurveType,
+  LineSeries,
+  Settings,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
 import { assign, fill } from 'lodash';
 import moment from 'moment';
 import { formatMillisForDisplay } from '../../../lib/execution_duration_utils';
@@ -106,13 +114,15 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
           <>
             <Chart data-test-subj="executionDurationChart" size={{ height: 80 }}>
               <Settings
-                // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                 theme={{
                   lineSeriesStyle: {
                     point: { visible: false },
                     line: { stroke: lightEuiTheme.euiColorAccent },
                   },
                 }}
+                // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                baseTheme={LEGACY_LIGHT_THEME}
+                locale={i18n.getLocale()}
               />
               <BarSeries
                 id="executionDuration"

@@ -38,25 +38,25 @@
             "section": "def-common.ScopedHistory",
             "text": "ScopedHistory"
           },
-          "<unknown>, [basePath: string]>; createHref: jest.MockInstance<string, [location: ",
+          "<unknown>, [basePath: string], unknown>; createHref: jest.MockInstance<string, [location: ",
           "LocationDescriptorObject",
-          "<unknown>, options?: { prependBasePath?: boolean | undefined; } | undefined]>; length: number; action: ",
+          "<unknown>, options?: { prependBasePath?: boolean | undefined; } | undefined], unknown>; length: number; action: ",
           "Action",
           "; location: ",
           "Location",
           "<unknown>; push: jest.MockInstance<void, [location: ",
           "LocationDescriptor",
-          "<unknown>, state?: unknown]>; replace: jest.MockInstance<void, [location: ",
+          "<unknown>, state?: unknown], unknown>; replace: jest.MockInstance<void, [location: ",
           "LocationDescriptor",
-          "<unknown>, state?: unknown]>; go: jest.MockInstance<void, [n: number]>; goBack: jest.MockInstance<void, []>; goForward: jest.MockInstance<void, []>; block: jest.MockInstance<",
+          "<unknown>, state?: unknown], unknown>; go: jest.MockInstance<void, [n: number], unknown>; goBack: jest.MockInstance<void, [], unknown>; goForward: jest.MockInstance<void, [], unknown>; block: jest.MockInstance<",
           "UnregisterCallback",
           ", [prompt?: string | boolean | ",
           "TransitionPromptHook",
-          "<unknown> | undefined]>; listen: jest.MockInstance<",
+          "<unknown> | undefined], unknown>; listen: jest.MockInstance<",
           "UnregisterCallback",
           ", [listener: ",
           "LocationListener",
-          "<unknown>]>; } & ",
+          "<unknown>], unknown>; } & ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -174,7 +174,7 @@
             "label": "createInternalStartContract",
             "description": [],
             "signature": [
-              "() => jest.Mocked<",
+              "(currentAppId?: string | undefined) => jest.Mocked<",
               "InternalApplicationStart",
               ">"
             ],
@@ -182,7 +182,22 @@
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
-            "children": []
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-application-browser-mocks",
+                "id": "def-common.applicationServiceMock.createInternalStartContract.$1",
+                "type": "string",
+                "tags": [],
+                "label": "currentAppId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-application-browser-mocks",

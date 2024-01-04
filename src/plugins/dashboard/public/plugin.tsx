@@ -51,6 +51,8 @@ import type {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -66,9 +68,9 @@ import {
   SEARCH_SESSION_ID,
 } from './dashboard_constants';
 import { DashboardMountContextProps } from './dashboard_app/types';
-import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { addPanelMenuTrigger } from './triggers';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -107,6 +109,8 @@ export interface DashboardStartDependencies {
   usageCollection?: UsageCollectionStart;
   visualizations: VisualizationsStart;
   customBranding: CustomBrandingStart;
+  serverless?: ServerlessPluginStart;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 export interface DashboardSetup {
@@ -146,10 +150,22 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
+    {
+      share,
+      embeddable,
+      home,
+      urlForwarding,
+      data,
+      contentManagement,
+      uiActions,
+    }: DashboardSetupDependencies
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
+
+    // this trigger enables external consumers to register actions for
+    // adding items to the add panel menu
+    uiActions.registerTrigger(addPanelMenuTrigger);
 
     if (share) {
       this.locator = share.url.locators.create(
@@ -218,9 +234,6 @@ export class DashboardPlugin
         dashboardContainerFactory.type,
         dashboardContainerFactory
       );
-
-      const placeholderFactory = new PlaceholderEmbeddableFactory();
-      embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
     });
 
     this.stopUrlTracking = () => {
@@ -229,7 +242,7 @@ export class DashboardPlugin
 
     const app: App = {
       id: DASHBOARD_APP_ID,
-      title: 'Dashboard',
+      title: 'Dashboards',
       order: 2500,
       euiIconType: 'logoKibana',
       defaultPath: `#${LANDING_PAGE_PATH}`,
@@ -282,7 +295,7 @@ export class DashboardPlugin
 
     if (home) {
       home.featureCatalogue.register({
-        id: LEGACY_DASHBOARD_APP_ID,
+        id: DASHBOARD_APP_ID,
         title: dashboardAppTitle,
         subtitle: i18n.translate('dashboard.featureCatalogue.dashboardSubtitle', {
           defaultMessage: 'Analyze data in dashboards.',
@@ -291,7 +304,7 @@ export class DashboardPlugin
           defaultMessage: 'Display and share a collection of visualizations and saved searches.',
         }),
         icon: 'dashboardApp',
-        path: `/app/dashboards#${LANDING_PAGE_PATH}`,
+        path: `/app/${DASHBOARD_APP_ID}#${LANDING_PAGE_PATH}`,
         showOnHomePage: false,
         category: 'data',
         solutionId: 'kibana',

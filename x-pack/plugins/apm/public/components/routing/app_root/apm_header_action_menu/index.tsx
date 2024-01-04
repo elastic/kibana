@@ -23,7 +23,12 @@ import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
 
 export function ApmHeaderActionMenu() {
-  const { core, plugins, config } = useApmPluginContext();
+  const {
+    core,
+    plugins,
+    config,
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useApmPluginContext();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;
@@ -77,7 +82,7 @@ export function ApmHeaderActionMenu() {
       )}
       <EuiHeaderLink
         color="primary"
-        href={kibanaHref('/app/home#/tutorial/apm')}
+        href={kibanaHref('/app/apm/tutorial')}
         iconType="indexOpen"
         data-test-subj="apmAddDataHeaderLink"
       >
@@ -96,6 +101,9 @@ export function ApmHeaderActionMenu() {
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
+      {ObservabilityAIAssistantActionMenuItem ? (
+        <ObservabilityAIAssistantActionMenuItem />
+      ) : null}
     </EuiHeaderLinks>
   );
 }

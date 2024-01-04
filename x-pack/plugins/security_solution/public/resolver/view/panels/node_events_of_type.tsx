@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useCallback, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -37,6 +35,7 @@ import { userRequestedAdditionalRelatedEvents } from '../../store/data/action';
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.
  */
+// eslint-disable-next-line react/display-name
 export const NodeEventsInCategory = memo(function ({
   id,
   nodeID,
@@ -46,14 +45,12 @@ export const NodeEventsInCategory = memo(function ({
   nodeID: string;
   eventCategory: string;
 }) {
-  const node = useSelector((state: State) =>
-    selectors.graphNodeForID(state.analyzer.analyzerById[id])(nodeID)
-  );
+  const node = useSelector((state: State) => selectors.graphNodeForID(state.analyzer[id])(nodeID));
   const isLoading = useSelector((state: State) =>
-    selectors.isLoadingNodeEventsInCategory(state.analyzer.analyzerById[id])
+    selectors.isLoadingNodeEventsInCategory(state.analyzer[id])
   );
   const hasError = useSelector((state: State) =>
-    selectors.hadErrorLoadingNodeEventsInCategory(state.analyzer.analyzerById[id])
+    selectors.hadErrorLoadingNodeEventsInCategory(state.analyzer[id])
   );
 
   return (
@@ -104,6 +101,7 @@ export const NodeEventsInCategory = memo(function ({
 /**
  * Rendered for each event in the list.
  */
+// eslint-disable-next-line react/display-name
 const NodeEventsListItem = memo(function ({
   id,
   event,
@@ -178,18 +176,16 @@ const NodeEventList = memo(function NodeEventList({
   eventCategory: string;
   nodeID: string;
 }) {
-  const events = useSelector((state: State) =>
-    selectors.nodeEventsInCategory(state.analyzer.analyzerById[id])
-  );
+  const events = useSelector((state: State) => selectors.nodeEventsInCategory(state.analyzer[id]));
   const dispatch = useDispatch();
   const handleLoadMore = useCallback(() => {
     dispatch(userRequestedAdditionalRelatedEvents({ id }));
   }, [dispatch, id]);
   const isLoading = useSelector((state: State) =>
-    selectors.isLoadingMoreNodeEventsInCategory(state.analyzer.analyzerById[id])
+    selectors.isLoadingMoreNodeEventsInCategory(state.analyzer[id])
   );
   const hasMore = useSelector((state: State) =>
-    selectors.lastRelatedEventResponseContainsCursor(state.analyzer.analyzerById[id])
+    selectors.lastRelatedEventResponseContainsCursor(state.analyzer[id])
   );
   return (
     <>
@@ -223,6 +219,7 @@ const NodeEventList = memo(function NodeEventList({
 /**
  * Renders `Breadcrumbs`.
  */
+// eslint-disable-next-line react/display-name
 const NodeEventsInCategoryBreadcrumbs = memo(function ({
   id,
   nodeName,
@@ -235,11 +232,11 @@ const NodeEventsInCategoryBreadcrumbs = memo(function ({
   nodeID: string;
 }) {
   const eventCount = useSelector((state: State) =>
-    selectors.totalRelatedEventCountForNode(state.analyzer.analyzerById[id])(nodeID)
+    selectors.totalRelatedEventCountForNode(state.analyzer[id])(nodeID)
   );
 
   const eventsInCategoryCount = useSelector((state: State) =>
-    selectors.relatedEventCountOfTypeForNode(state.analyzer.analyzerById[id])(nodeID, eventCategory)
+    selectors.relatedEventCountOfTypeForNode(state.analyzer[id])(nodeID, eventCategory)
   );
 
   const nodesLinkNavProps = useLinkProps(id, {

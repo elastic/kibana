@@ -6,9 +6,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { Plugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { Plugin } = await import('./plugin');
+  return new Plugin(initializerContext);
+};
 
 export { config } from '../common/config';

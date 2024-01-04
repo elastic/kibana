@@ -175,7 +175,7 @@ export function FieldValueSelection({
         isOpen={isPopoverOpen || forceOpen}
         closePopover={closePopover}
         anchorPosition={anchorPosition}
-        style={{ width: '100%' }}
+        display="block"
       >
         <EuiSelectable
           searchable
@@ -290,11 +290,8 @@ export default FieldValueSelection;
 
 const Wrapper = styled.div`
   &&& {
-    div.euiPopover__anchor {
+    .euiButton {
       width: 100%;
-      .euiButton {
-        width: 100%;
-      }
     }
   }
 `;

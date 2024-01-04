@@ -11,6 +11,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -113,6 +114,7 @@ export const configSchema = schema.object({
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
+  enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
 
   /**
    * The Max number of Bytes allowed for the `upload` endpoint response action
@@ -121,12 +123,25 @@ export const configSchema = schema.object({
     defaultValue: 26214400, // 25MB,
     max: 104857600, // 100MB,
   }),
+  /**
+   * Defines the settings for a specific offering of the Security Solution app.
+   * They override the default values.
+   * @example
+   * xpack.securitySolution.offeringSettings: {
+   *  "ILMEnabled": false,
+   * }
+   */
+  offeringSettings: schema.recordOf(schema.string(), schema.boolean(), {
+    defaultValue: {},
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
-export type ConfigType = ConfigSchema & {
+export type ConfigType = Omit<ConfigSchema, 'offeringSettings'> & {
   experimentalFeatures: ExperimentalFeatures;
+  settings: ConfigSettings;
+  enableUiSettingsValidations: boolean;
 };
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
@@ -146,8 +161,20 @@ ${invalid.map((key) => `      - ${key}`).join('\n')}
 `);
   }
 
+  const { invalid: invalidConfigSettings, settings } = parseConfigSettings(
+    pluginConfig.offeringSettings
+  );
+
+  if (invalidConfigSettings.length) {
+    logger.warn(`Unsupported "xpack.securitySolution.offeringSettings" values detected.
+The following configuration values are no longer supported and should be removed from the kibana configuration file:
+${invalidConfigSettings.map((key) => `      - ${key}`).join('\n')}
+`);
+  }
+
   return {
     ...pluginConfig,
     experimentalFeatures,
+    settings,
   };
 };

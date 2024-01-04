@@ -64,6 +64,19 @@ jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
 }));
 
+jest.mock('../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled() {
+    return true;
+  },
+}));
+
+jest.mock('../../hooks/use_rule_aad_template_fields', () => ({
+  useRuleTypeAadTemplateFields: () => ({
+    isLoading: false,
+    fields: [],
+  }),
+}));
+
 describe('action_type_form', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -402,6 +415,59 @@ describe('action_type_form', () => {
     ]);
   });
 
+  it('clears the default message when the user toggles the "Use template fields from alerts index" switch ', async () => {
+    const setActionParamsProperty = jest.fn();
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: '.pagerduty',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateParams: (): Promise<GenericValidationResult<unknown>> => {
+        const validationResult = { errors: {} };
+        return Promise.resolve(validationResult);
+      },
+      actionConnectorFields: null,
+      actionParamsFields: mockedActionParamsFields,
+      defaultActionParams: {
+        dedupKey: '{{rule.id}}:{{alert.id}}',
+        eventAction: 'resolve',
+      },
+    });
+    actionTypeRegistry.get.mockReturnValue(actionType);
+
+    const wrapper = render(
+      <IntlProvider locale="en">
+        {getActionTypeForm({
+          index: 1,
+          ruleTypeId: 'test',
+          setActionParamsProperty,
+          actionItem: {
+            id: '123',
+            actionTypeId: '.pagerduty',
+            group: 'recovered',
+            params: {
+              eventAction: 'recovered',
+              dedupKey: '232323',
+              summary: '2323',
+              source: 'source',
+              severity: '1',
+              timestamp: new Date().toISOString(),
+              component: 'test',
+              group: 'group',
+              class: 'test class',
+            },
+          },
+        })}
+      </IntlProvider>
+    );
+
+    expect(wrapper.getByTestId('mustacheAutocompleteSwitch')).toBeTruthy();
+
+    await act(async () => {
+      wrapper.getByTestId('mustacheAutocompleteSwitch').click();
+    });
+    expect(setActionParamsProperty).toHaveBeenCalledWith('dedupKey', '', 1);
+  });
+
   describe('Customize notify when options', () => {
     it('should not have "On status changes" notify when option for summary actions', async () => {
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
@@ -523,13 +589,15 @@ function getActionTypeForm({
   onAddConnector,
   onDeleteAction,
   onConnectorSelected,
+  setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
-  hasSummary = true,
+  hasAlertsMappings = true,
   messageVariables = { context: [], state: [], params: [] },
   summaryMessageVariables = { context: [], state: [], params: [] },
   notifyWhenSelectOptions,
   defaultNotifyWhenValue,
+  ruleTypeId,
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
@@ -541,12 +609,14 @@ function getActionTypeForm({
   onDeleteAction?: () => void;
   onConnectorSelected?: (id: string) => void;
   setActionFrequencyProperty?: () => void;
+  setActionParamsProperty?: () => void;
   setActionAlertsFilterProperty?: () => void;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   messageVariables?: ActionVariables;
   summaryMessageVariables?: ActionVariables;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
+  ruleTypeId?: string;
 }) {
   const actionConnectorDefault = {
     actionTypeId: '.pagerduty',
@@ -628,19 +698,20 @@ function getActionTypeForm({
       onDeleteAction={onDeleteAction ?? jest.fn()}
       onConnectorSelected={onConnectorSelected ?? jest.fn()}
       defaultActionGroupId={defaultActionGroupId ?? 'default'}
-      setActionParamsProperty={jest.fn()}
+      setActionParamsProperty={setActionParamsProperty ?? jest.fn()}
       setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
       setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? jest.fn()}
       index={index ?? 1}
       actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
       actionTypeRegistry={actionTypeRegistry}
-      hasSummary={hasSummary}
+      hasAlertsMappings={hasAlertsMappings}
       messageVariables={messageVariables}
       summaryMessageVariables={summaryMessageVariables}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
       defaultNotifyWhenValue={defaultNotifyWhenValue}
       producerId="infrastructure"
       featureId="infrastructure"
+      ruleTypeId={ruleTypeId}
     />
   );
 }

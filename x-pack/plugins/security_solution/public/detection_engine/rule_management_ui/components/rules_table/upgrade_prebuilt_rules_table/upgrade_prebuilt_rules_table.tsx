@@ -29,6 +29,7 @@ const NO_ITEMS_MESSAGE = (
     title={<h3>{i18n.NO_RULES_AVAILABLE_FOR_UPGRADE}</h3>}
     titleSize="s"
     body={i18n.NO_RULES_AVAILABLE_FOR_UPGRADE_BODY}
+    data-test-subj="noPrebuiltRulesAvailableForUpgrade"
   />
 );
 

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
-import { CommentType } from '@kbn/cases-plugin/common/api';
+import type { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
+import { i18n } from '@kbn/i18n';
 import { APP_ID } from '../../../../../common';
 import type {
   ImmutableObject,
@@ -34,7 +35,7 @@ export const updateCases = async ({
   if (createActionPayload.alert_ids && createActionPayload.alert_ids.length > 0) {
     const newIDs: string[][] = await Promise.all(
       createActionPayload.alert_ids.map(async (alertID: string) => {
-        const cases: CasesByAlertId = await casesClient.cases.getCasesByAlertID({
+        const cases: GetRelatedCasesByAlertResponse = await casesClient.cases.getCasesByAlertID({
           alertID,
           options: { owner: APP_ID },
         });
@@ -55,8 +56,8 @@ export const updateCases = async ({
     }));
 
     const attachments = caseIDs.map(() => ({
-      type: CommentType.actions,
-      comment: createActionPayload.comment || '',
+      type: AttachmentType.actions,
+      comment: createActionPayload.comment || EMPTY_COMMENT,
       actions: {
         targets,
         type: createActionPayload.command,
@@ -74,3 +75,10 @@ export const updateCases = async ({
     );
   }
 };
+
+export const EMPTY_COMMENT = i18n.translate(
+  'xpack.securitySolution.endpoint.updateCases.emptyComment',
+  {
+    defaultMessage: 'No comment provided',
+  }
+);

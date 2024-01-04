@@ -5,43 +5,30 @@
  * 2.0.
  */
 
-import type { ClosureType, ConfigurationAttributes } from '../../../common/types/domain';
-import type { CaseUser } from '../types';
 import type {
+  ClosureType,
   ActionConnector,
   ActionTypeConnector,
-  ActionType,
   CaseConnector,
-  CaseField,
-  ThirdPartyField,
-} from '../../../common/api';
+  ConnectorMappingTarget,
+  ConnectorMappingSource,
+  ConnectorMappingActionType,
+  CustomFieldsConfiguration,
+} from '../../../common/types/domain';
 
 export type {
   ActionConnector,
   ActionTypeConnector,
-  ActionType,
   CaseConnector,
-  CaseField,
+  ConnectorMappingActionType,
+  ConnectorMappingSource,
+  ConnectorMappingTarget,
   ClosureType,
-  ThirdPartyField,
+  CustomFieldsConfiguration,
 };
 
 export interface CaseConnectorMapping {
-  actionType: ActionType;
-  source: CaseField;
+  actionType: ConnectorMappingActionType;
+  source: ConnectorMappingSource;
   target: string;
-}
-
-export interface CaseConfigure {
-  id: string;
-  closureType: ClosureType;
-  connector: ConfigurationAttributes['connector'];
-  createdAt: string;
-  createdBy: CaseUser;
-  error: string | null;
-  mappings: CaseConnectorMapping[];
-  updatedAt: string;
-  updatedBy: CaseUser;
-  version: string;
-  owner: string;
 }

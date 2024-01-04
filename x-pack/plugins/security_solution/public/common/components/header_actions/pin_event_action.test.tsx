@@ -12,14 +12,14 @@ import { PinEventAction } from './pin_event_action';
 import { useUserPrivileges } from '../user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../user_privileges/endpoint/mocks';
 import { TestProviders } from '../../mock';
-import { TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../common/api/timeline';
 
 jest.mock('../user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 describe('PinEventAction', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('isDisabled', () => {

@@ -14,9 +14,6 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/logging",
-    "@kbn/core-http-server",
-    "@kbn/core-http-common",
     "@kbn/ml-is-populated-object",
   ],
   "exclude": [

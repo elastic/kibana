@@ -19,12 +19,15 @@ import {
   UpdateViewParams,
 } from '../../common/saved_views';
 import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
-import { CreateMetricsExplorerViewAttributesRequestPayload } from '../../common/http_api/latest';
+import {
+  CreateMetricsExplorerViewAttributesRequestPayload,
+  UpdateMetricsExplorerViewAttributesRequestPayload,
+} from '../../common/http_api/latest';
 import { MetricsExplorerView } from '../../common/metrics_explorer_views';
-import { useKibanaContextForPlugin } from './use_kibana';
 import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
+import { useKibanaContextForPlugin } from './use_kibana';
 
 export type UseMetricsExplorerViewsResult = SavedViewResult<
   MetricsExplorerView,
@@ -41,6 +44,11 @@ const queryKeys = {
 
 export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
   const { metricsExplorerViews } = useKibanaContextForPlugin().services;
+
+  if (metricsExplorerViews === undefined) {
+    throw new Error('MetricsExplorerViews service has not been initialized.');
+  }
+
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
 
   const queryClient = useQueryClient();
@@ -133,7 +141,7 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
   const { mutateAsync: updateViewById, isLoading: isUpdatingView } = useMutation<
     MetricsExplorerView,
     ServerError,
-    UpdateViewParams<CreateMetricsExplorerViewAttributesRequestPayload>
+    UpdateViewParams<UpdateMetricsExplorerViewAttributesRequestPayload>
   >({
     mutationFn: ({ id, attributes }) =>
       metricsExplorerViews.client.updateMetricsExplorerView(id, attributes),

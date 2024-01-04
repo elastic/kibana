@@ -29,7 +29,7 @@ import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
   DataFilters,
-  ESSearchSourceResponseMeta,
+  DataRequestMeta,
   MapExtent,
   Timeslice,
   VectorSourceRequestMeta,
@@ -43,11 +43,9 @@ export interface SourceStatus {
   isDeprecated?: boolean;
 }
 
-export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
-
 export interface GeoJsonWithMeta {
   data: FeatureCollection;
-  meta?: GeoJsonFetchMeta;
+  meta?: DataRequestMeta;
 }
 
 export interface BoundsRequestMeta {
@@ -113,7 +111,6 @@ export interface IVectorSource extends ISource {
    */
   getSyncMeta(dataFilters: DataFilters): object | null;
 
-  createField({ fieldName }: { fieldName: string }): IField;
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
@@ -136,19 +133,16 @@ export interface IVectorSource extends ISource {
     mbFeature,
     onClose,
   }: GetFeatureActionsArgs): TooltipFeatureAction[];
+
+  /*
+   * Provide unique ids for managing source requests in Inspector
+   */
+  getInspectorRequestIds(): string[];
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   isMvt() {
     return false;
-  }
-
-  createField({ fieldName }: { fieldName: string }): IField {
-    throw new Error('Not implemented');
-  }
-
-  getFieldByName(fieldName: string): IField | null {
-    return this.createField({ fieldName });
   }
 
   isFilterByMapBounds() {
@@ -174,6 +168,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [];
   }
 
+  getFieldByName(fieldName: string): IField | null {
+    throw new Error('Must implement VectorSource#getFieldByName');
+  }
+
   async getLeftJoinFields(): Promise<IField[]> {
     return [];
   }
@@ -185,7 +183,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
-    throw new Error('Should implement VectorSource#getGeoJson');
+    throw new Error('Should implement VectorSource#getGeoJsonWithMeta');
   }
 
   hasTooltipProperties() {
@@ -291,5 +289,9 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
           },
         ]
       : [];
+  }
+
+  getInspectorRequestIds(): string[] {
+    return [];
   }
 }

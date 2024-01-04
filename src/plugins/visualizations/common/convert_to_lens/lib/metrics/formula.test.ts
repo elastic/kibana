@@ -19,14 +19,18 @@ const mockIsStdDevAgg = jest.fn();
 const mockGetFieldByName = jest.fn();
 const originalGetFieldByName = stubLogstashDataView.getFieldByName;
 
-jest.mock('../utils', () => ({
-  getFieldNameFromField: jest.fn((field) => field),
-  getMetricFromParentPipelineAgg: jest.fn(() => mockGetMetricFromParentPipelineAgg()),
-  isPercentileAgg: jest.fn(() => mockIsPercentileAgg()),
-  isPercentileRankAgg: jest.fn(() => mockIsPercentileRankAgg()),
-  isPipeline: jest.fn(() => mockIsPipeline()),
-  isStdDevAgg: jest.fn(() => mockIsStdDevAgg()),
-}));
+jest.mock('../utils', () => {
+  const utils = jest.requireActual('../utils');
+  return {
+    ...utils,
+    getFieldNameFromField: jest.fn((field) => field),
+    getMetricFromParentPipelineAgg: jest.fn(() => mockGetMetricFromParentPipelineAgg()),
+    isPercentileAgg: jest.fn(() => mockIsPercentileAgg()),
+    isPercentileRankAgg: jest.fn(() => mockIsPercentileRankAgg()),
+    isPipeline: jest.fn(() => mockIsPipeline()),
+    isStdDevAgg: jest.fn(() => mockIsStdDevAgg()),
+  };
+});
 
 const dataView = stubLogstashDataView;
 const visType = 'heatmap';

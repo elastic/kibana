@@ -9,6 +9,7 @@
 import { apm, ApmFields, Instance } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -16,7 +17,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   const { numServices = 3 } = scenarioOpts || {};
 
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = 'Azure-AWS-Transaction';
 
       const successfulTimestamps = range.ratePerMinute(60);
@@ -176,7 +177,10 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
         return successfulTraceEvents;
       };
 
-      return logger.perf('generating_apm_events', () => instances.flatMap(instanceSpans));
+      return withClient(
+        apmEsClient,
+        logger.perf('generating_apm_events', () => instances.flatMap(instanceSpans))
+      );
     },
   };
 };

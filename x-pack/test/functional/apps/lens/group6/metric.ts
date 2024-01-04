@@ -108,14 +108,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const trendLineData = await inspector.getTableDataWithId('inspectorTableChooser1');
       expect(trendLineData).to.eql(inspectorTrendlineData);
       await inspector.close();
-      await PageObjects.lens.openDimensionEditor(
-        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
-      );
-
-      await testSubjects.click('lnsMetric_supporting_visualization_none');
-      await PageObjects.lens.closeDimensionEditor();
-
-      await PageObjects.lens.waitForVisualization('mtrVis');
     });
 
     it('should enable metric with breakdown', async () => {
@@ -136,7 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 19,755',
           value: '19,755',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          trendlineColor: 'rgba(245, 247, 250, 1)',
+          showingTrendline: true,
           showingBar: false,
         },
         {
@@ -145,7 +138,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 18,994',
           value: '18,994',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          trendlineColor: 'rgba(245, 247, 250, 1)',
+          showingTrendline: true,
           showingBar: false,
         },
         {
@@ -154,7 +148,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 17,246',
           value: '17,246',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          trendlineColor: 'rgba(245, 247, 250, 1)',
+          showingTrendline: true,
           showingBar: false,
         },
         {
@@ -163,7 +158,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 15,687',
           value: '15,687',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          trendlineColor: 'rgba(245, 247, 250, 1)',
+          showingTrendline: true,
           showingBar: false,
         },
         {
@@ -172,7 +168,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 15,614.333',
           value: '15,614.333',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          trendlineColor: 'rgba(245, 247, 250, 1)',
+          showingTrendline: true,
           showingBar: false,
         },
         {
@@ -181,11 +178,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 5,722.775',
           value: '5,722.775',
           color: 'rgba(245, 247, 250, 1)',
-          showingTrendline: false,
+          trendlineColor: 'rgba(245, 247, 250, 1)',
+          showingTrendline: true,
           showingBar: false,
         },
       ];
       expect(data).to.eql(expectedData);
+
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
+
+      await testSubjects.click('lnsMetric_supporting_visualization_none');
+      await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
     });
 
     it('should enable bar with max dimension', async () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '..';
 import { defineGetFieldsRoutes } from './get_fields';
+import type { RouteDefinitionParams } from '..';
 
 export function defineIndicesRoutes(params: RouteDefinitionParams) {
   defineGetFieldsRoutes(params);

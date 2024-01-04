@@ -6,34 +6,47 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiProvider } from '@elastic/eui';
-import createCache from '@emotion/cache';
+import { Subject } from 'rxjs';
+import React, { useEffect } from 'react';
+import { action } from '@storybook/addon-actions';
 import type { DecoratorFn } from '@storybook/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import 'core_styles';
+import { BehaviorSubject } from 'rxjs';
+import { CoreTheme } from '@kbn/core-theme-browser';
+import { I18nStart } from '@kbn/core-i18n-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+
+const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
+
+const i18n: I18nStart = {
+  Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+};
+
+const analytics: AnalyticsServiceStart = {
+  reportEvent: action('Report telemetry event'),
+  optIn: action('Opt in'),
+  telemetryCounter$: new Subject(),
+};
 
 /**
- * Storybook decorator using the EUI provider. Uses the value from
- * `globals` provided by the Storybook theme switcher.
+ * Storybook decorator using the `KibanaContextProvider`. Uses the value from
+ * `globals` provided by the Storybook theme switcher to set the `colorMode`.
  */
-const EuiProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
+const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
-  const globalCache = createCache({
-    key: 'eui',
-    container: document.querySelector(`meta[name="eui-global"]`) as HTMLElement,
-  });
-  const emotionCache = createCache({
-    key: 'css',
-    container: document.querySelector(`meta[name="emotion"]`) as HTMLElement,
-  });
-  emotionCache.compat = true;
+
+  useEffect(() => {
+    theme$.next({ darkMode: colorMode === 'dark' });
+  }, [colorMode]);
 
   return (
-    <EuiProvider colorMode={colorMode} cache={{ default: emotionCache, global: globalCache }}>
+    <KibanaRootContextProvider {...{ theme: { theme$ }, analytics, i18n }}>
       {storyFn()}
-    </EuiProvider>
+    </KibanaRootContextProvider>
   );
 };
 
-export const decorators = [EuiProviderDecorator];
+export const decorators = [KibanaContextDecorator];

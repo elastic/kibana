@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { SyntheticEvent } from 'react';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { METRIC_TYPE } from '@kbn/analytics';
 import type { Dispatch } from 'redux';
 import { SecurityPageName } from '../../../../app/types';
 import type { RouteSpyState } from '../../../utils/route/types';
-import { timelineActions } from '../../../../timelines/store/timeline';
+import { timelineActions } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types/timeline';
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';
-import { TELEMETRY_EVENT, track } from '../../../lib/telemetry';
-import { useNavigateTo, type NavigateTo } from '../../../lib/kibana';
+import type { TelemetryClientStart } from '../../../lib/telemetry';
+import { useKibana, useNavigateTo, type NavigateTo } from '../../../lib/kibana';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { updateBreadcrumbsNav } from '../../../breadcrumbs';
 import { getAncestorLinksInfo } from '../../../links';
@@ -26,6 +26,7 @@ import { getTrailingBreadcrumbs } from './trailing_breadcrumbs';
 
 export const useBreadcrumbsNav = () => {
   const dispatch = useDispatch();
+  const { telemetry } = useKibana().services;
   const [routeProps] = useRouteSpy();
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
@@ -40,10 +41,10 @@ export const useBreadcrumbsNav = () => {
     const trailingBreadcrumbs = getTrailingBreadcrumbs(routeProps, getSecuritySolutionUrl);
 
     updateBreadcrumbsNav({
-      leading: addOnClicksHandlers(leadingBreadcrumbs, dispatch, navigateTo),
-      trailing: addOnClicksHandlers(trailingBreadcrumbs, dispatch, navigateTo),
+      leading: addOnClicksHandlers(leadingBreadcrumbs, dispatch, navigateTo, telemetry),
+      trailing: addOnClicksHandlers(trailingBreadcrumbs, dispatch, navigateTo, telemetry),
     });
-  }, [routeProps, getSecuritySolutionUrl, dispatch, navigateTo]);
+  }, [routeProps, getSecuritySolutionUrl, dispatch, navigateTo, telemetry]);
 };
 
 const getLeadingBreadcrumbs = (
@@ -66,22 +67,36 @@ const getLeadingBreadcrumbs = (
 const addOnClicksHandlers = (
   breadcrumbs: ChromeBreadcrumb[],
   dispatch: Dispatch,
-  navigateTo: NavigateTo
+  navigateTo: NavigateTo,
+  telemetry: TelemetryClientStart
 ): ChromeBreadcrumb[] =>
   breadcrumbs.map((breadcrumb) => ({
     ...breadcrumb,
     ...(breadcrumb.href &&
       !breadcrumb.onClick && {
-        onClick: createOnClickHandler(breadcrumb.href, dispatch, navigateTo),
+        onClick: createOnClickHandler(
+          breadcrumb.href,
+          dispatch,
+          navigateTo,
+          telemetry,
+          breadcrumb.text
+        ),
       }),
   }));
 
 const createOnClickHandler =
-  (href: string, dispatch: Dispatch, navigateTo: NavigateTo): ChromeBreadcrumb['onClick'] =>
-  (ev) => {
+  (
+    href: string,
+    dispatch: Dispatch,
+    navigateTo: NavigateTo,
+    telemetry: TelemetryClientStart,
+    title: React.ReactNode
+  ) =>
+  (ev: SyntheticEvent) => {
     ev.preventDefault();
-    const trackedPath = href.split('?')[0];
-    track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.BREADCRUMB}${trackedPath}`);
+    if (typeof title === 'string') {
+      telemetry.reportBreadcrumbClicked({ title });
+    }
     dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
     navigateTo({ url: href });
   };

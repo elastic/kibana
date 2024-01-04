@@ -71,11 +71,11 @@ Object {
         data-test-subj="ExceptionItemCardCommentsContainer"
       >
         <div
-          class="euiAccordion"
+          class="euiAccordion emotion-euiAccordion"
           data-test-subj="exceptionItemCardComments"
         >
           <div
-            class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+            class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
           >
             <button
               aria-controls="exceptionItemCardComments"
@@ -98,152 +98,15 @@ Object {
           </div>
           <div
             aria-labelledby="generated-id"
-            class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
+            class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
             id="exceptionItemCardComments"
-            role="region"
+            inert=""
+            role="group"
+            style="block-size: 0;"
             tabindex="-1"
           >
-            <div>
-              <div
-                class=" emotion-euiAccordion__children"
-              >
-                <div
-                  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
-                  data-test-subj="accordionContentPanel"
-                >
-                  <ol
-                    class="euiTimeline euiCommentList emotion-euiTimeline-l"
-                    data-test-subj="accordionCommentList"
-                    role="list"
-                  >
-                    <li
-                      class="euiComment emotion-euiTimelineItem-top"
-                    >
-                      <div
-                        class="emotion-euiTimelineItemIcon-top"
-                      >
-                        <div
-                          class="emotion-euiTimelineItemIcon__content"
-                        >
-                          <div
-                            aria-label=""
-                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
-                            role="img"
-                            title=""
-                          >
-                            <span
-                              class="euiAvatar__icon"
-                              data-euiicon-type="userAvatar"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        class="emotion-euiTimelineItemEvent-top"
-                      >
-                        <div
-                          class="euiCommentEvent emotion-euiCommentEvent-custom"
-                          data-type="custom"
-                        >
-                          <div
-                            class="euiCommentEvent__body emotion-euiCommentEvent__body-custom"
-                          >
-                            <p>
-                              some old comment
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                    <li
-                      class="euiComment emotion-euiTimelineItem-top"
-                    >
-                      <div
-                        class="emotion-euiTimelineItemIcon-top"
-                      >
-                        <div
-                          class="emotion-euiTimelineItemIcon__content"
-                        >
-                          <div
-                            aria-label=""
-                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
-                            role="img"
-                            title=""
-                          >
-                            <span
-                              class="euiAvatar__icon"
-                              data-euiicon-type="userAvatar"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        class="emotion-euiTimelineItemEvent-top"
-                      >
-                        <div
-                          class="euiCommentEvent emotion-euiCommentEvent-custom"
-                          data-type="custom"
-                        >
-                          <div
-                            class="euiCommentEvent__body emotion-euiCommentEvent__body-custom"
-                          >
-                            <p>
-                              some old comment
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                  </ol>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
-      data-test-subj="ExceptionItemCardCommentsContainer"
-    >
-      <div
-        class="euiAccordion"
-        data-test-subj="exceptionItemCardComments"
-      >
-        <div
-          class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
-        >
-          <button
-            aria-controls="exceptionItemCardComments"
-            aria-expanded="false"
-            class="euiAccordion__button emotion-euiAccordion__button"
-            id="generated-id"
-            type="button"
-          >
-            <span
-              class="euiAccordion__buttonContent"
-            >
-              <div
-                class="euiText emotion-EuiText"
-                data-test-subj="ExceptionItemCardCommentsContainerTextButton"
-              >
-                Show comments (2)
-              </div>
-            </span>
-          </button>
-        </div>
-        <div
-          aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper"
-          id="exceptionItemCardComments"
-          role="region"
-          tabindex="-1"
-        >
-          <div>
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiAccordion__children emotion-euiAccordion__children"
             >
               <div
                 class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
@@ -280,7 +143,7 @@ Object {
                       class="emotion-euiTimelineItemEvent-top"
                     >
                       <div
-                        class="euiCommentEvent emotion-euiCommentEvent-custom"
+                        class="euiCommentEvent emotion-euiCommentEvent"
                         data-type="custom"
                       >
                         <div
@@ -319,7 +182,7 @@ Object {
                       class="emotion-euiTimelineItemEvent-top"
                     >
                       <div
-                        class="euiCommentEvent emotion-euiCommentEvent-custom"
+                        class="euiCommentEvent emotion-euiCommentEvent"
                         data-type="custom"
                       >
                         <div
@@ -334,6 +197,143 @@ Object {
                   </li>
                 </ol>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      data-test-subj="ExceptionItemCardCommentsContainer"
+    >
+      <div
+        class="euiAccordion emotion-euiAccordion"
+        data-test-subj="exceptionItemCardComments"
+      >
+        <div
+          class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+        >
+          <button
+            aria-controls="exceptionItemCardComments"
+            aria-expanded="false"
+            class="euiAccordion__button emotion-euiAccordion__button"
+            id="generated-id"
+            type="button"
+          >
+            <span
+              class="euiAccordion__buttonContent"
+            >
+              <div
+                class="euiText emotion-EuiText"
+                data-test-subj="ExceptionItemCardCommentsContainerTextButton"
+              >
+                Show comments (2)
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          aria-labelledby="generated-id"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+          id="exceptionItemCardComments"
+          inert=""
+          role="group"
+          style="block-size: 0;"
+          tabindex="-1"
+        >
+          <div
+            class="euiAccordion__children emotion-euiAccordion__children"
+          >
+            <div
+              class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+              data-test-subj="accordionContentPanel"
+            >
+              <ol
+                class="euiTimeline euiCommentList emotion-euiTimeline-l"
+                data-test-subj="accordionCommentList"
+                role="list"
+              >
+                <li
+                  class="euiComment emotion-euiTimelineItem-top"
+                >
+                  <div
+                    class="emotion-euiTimelineItemIcon-top"
+                  >
+                    <div
+                      class="emotion-euiTimelineItemIcon__content"
+                    >
+                      <div
+                        aria-label=""
+                        class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
+                        role="img"
+                        title=""
+                      >
+                        <span
+                          class="euiAvatar__icon"
+                          data-euiicon-type="userAvatar"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="emotion-euiTimelineItemEvent-top"
+                  >
+                    <div
+                      class="euiCommentEvent emotion-euiCommentEvent"
+                      data-type="custom"
+                    >
+                      <div
+                        class="euiCommentEvent__body emotion-euiCommentEvent__body-custom"
+                      >
+                        <p>
+                          some old comment
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li
+                  class="euiComment emotion-euiTimelineItem-top"
+                >
+                  <div
+                    class="emotion-euiTimelineItemIcon-top"
+                  >
+                    <div
+                      class="emotion-euiTimelineItemIcon__content"
+                    >
+                      <div
+                        aria-label=""
+                        class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
+                        role="img"
+                        title=""
+                      >
+                        <span
+                          class="euiAvatar__icon"
+                          data-euiicon-type="userAvatar"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="emotion-euiTimelineItemEvent-top"
+                  >
+                    <div
+                      class="euiCommentEvent emotion-euiCommentEvent"
+                      data-type="custom"
+                    >
+                      <div
+                        class="euiCommentEvent__body emotion-euiCommentEvent__body-custom"
+                      >
+                        <p>
+                          some old comment
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ol>
             </div>
           </div>
         </div>
@@ -404,11 +404,11 @@ Object {
         data-test-subj="ExceptionItemCardCommentsContainer"
       >
         <div
-          class="euiAccordion euiAccordion-isOpen"
+          class="euiAccordion euiAccordion-isOpen emotion-euiAccordion"
           data-test-subj="exceptionItemCardComments"
         >
           <div
-            class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
+            class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
           >
             <button
               aria-controls="exceptionItemCardComments"
@@ -433,150 +433,12 @@ Object {
             aria-labelledby="generated-id"
             class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
             id="exceptionItemCardComments"
-            role="region"
+            role="group"
+            style="block-size: 0;"
             tabindex="-1"
           >
-            <div>
-              <div
-                class=" emotion-euiAccordion__children"
-              >
-                <div
-                  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
-                  data-test-subj="accordionContentPanel"
-                >
-                  <ol
-                    class="euiTimeline euiCommentList emotion-euiTimeline-l"
-                    data-test-subj="accordionCommentList"
-                    role="list"
-                  >
-                    <li
-                      class="euiComment emotion-euiTimelineItem-top"
-                    >
-                      <div
-                        class="emotion-euiTimelineItemIcon-top"
-                      >
-                        <div
-                          class="emotion-euiTimelineItemIcon__content"
-                        >
-                          <div
-                            aria-label=""
-                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
-                            role="img"
-                            title=""
-                          >
-                            <span
-                              class="euiAvatar__icon"
-                              data-euiicon-type="userAvatar"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        class="emotion-euiTimelineItemEvent-top"
-                      >
-                        <div
-                          class="euiCommentEvent emotion-euiCommentEvent-custom"
-                          data-type="custom"
-                        >
-                          <div
-                            class="euiCommentEvent__body emotion-euiCommentEvent__body-custom"
-                          >
-                            <p>
-                              some old comment
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                    <li
-                      class="euiComment emotion-euiTimelineItem-top"
-                    >
-                      <div
-                        class="emotion-euiTimelineItemIcon-top"
-                      >
-                        <div
-                          class="emotion-euiTimelineItemIcon__content"
-                        >
-                          <div
-                            aria-label=""
-                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
-                            role="img"
-                            title=""
-                          >
-                            <span
-                              class="euiAvatar__icon"
-                              data-euiicon-type="userAvatar"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        class="emotion-euiTimelineItemEvent-top"
-                      >
-                        <div
-                          class="euiCommentEvent emotion-euiCommentEvent-custom"
-                          data-type="custom"
-                        >
-                          <div
-                            class="euiCommentEvent__body emotion-euiCommentEvent__body-custom"
-                          >
-                            <p>
-                              some old comment
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                  </ol>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>,
-  "container": <div>
-    <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
-      data-test-subj="ExceptionItemCardCommentsContainer"
-    >
-      <div
-        class="euiAccordion euiAccordion-isOpen"
-        data-test-subj="exceptionItemCardComments"
-      >
-        <div
-          class="euiAccordion__triggerWrapper emotion-euiAccordion__triggerWrapper"
-        >
-          <button
-            aria-controls="exceptionItemCardComments"
-            aria-expanded="true"
-            class="euiAccordion__button emotion-euiAccordion__button"
-            id="generated-id"
-            type="button"
-          >
-            <span
-              class="euiAccordion__buttonContent"
-            >
-              <div
-                class="euiText emotion-EuiText"
-                data-test-subj="ExceptionItemCardCommentsContainerTextButton"
-              >
-                Show comments (2)
-              </div>
-            </span>
-          </button>
-        </div>
-        <div
-          aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
-          id="exceptionItemCardComments"
-          role="region"
-          tabindex="-1"
-        >
-          <div>
             <div
-              class=" emotion-euiAccordion__children"
+              class="euiAccordion__children emotion-euiAccordion__children"
             >
               <div
                 class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
@@ -613,7 +475,7 @@ Object {
                       class="emotion-euiTimelineItemEvent-top"
                     >
                       <div
-                        class="euiCommentEvent emotion-euiCommentEvent-custom"
+                        class="euiCommentEvent emotion-euiCommentEvent"
                         data-type="custom"
                       >
                         <div
@@ -652,7 +514,7 @@ Object {
                       class="emotion-euiTimelineItemEvent-top"
                     >
                       <div
-                        class="euiCommentEvent emotion-euiCommentEvent-custom"
+                        class="euiCommentEvent emotion-euiCommentEvent"
                         data-type="custom"
                       >
                         <div
@@ -667,6 +529,142 @@ Object {
                   </li>
                 </ol>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      data-test-subj="ExceptionItemCardCommentsContainer"
+    >
+      <div
+        class="euiAccordion euiAccordion-isOpen emotion-euiAccordion"
+        data-test-subj="exceptionItemCardComments"
+      >
+        <div
+          class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+        >
+          <button
+            aria-controls="exceptionItemCardComments"
+            aria-expanded="true"
+            class="euiAccordion__button emotion-euiAccordion__button"
+            id="generated-id"
+            type="button"
+          >
+            <span
+              class="euiAccordion__buttonContent"
+            >
+              <div
+                class="euiText emotion-EuiText"
+                data-test-subj="ExceptionItemCardCommentsContainerTextButton"
+              >
+                Show comments (2)
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          aria-labelledby="generated-id"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          id="exceptionItemCardComments"
+          role="group"
+          style="block-size: 0;"
+          tabindex="-1"
+        >
+          <div
+            class="euiAccordion__children emotion-euiAccordion__children"
+          >
+            <div
+              class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+              data-test-subj="accordionContentPanel"
+            >
+              <ol
+                class="euiTimeline euiCommentList emotion-euiTimeline-l"
+                data-test-subj="accordionCommentList"
+                role="list"
+              >
+                <li
+                  class="euiComment emotion-euiTimelineItem-top"
+                >
+                  <div
+                    class="emotion-euiTimelineItemIcon-top"
+                  >
+                    <div
+                      class="emotion-euiTimelineItemIcon__content"
+                    >
+                      <div
+                        aria-label=""
+                        class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
+                        role="img"
+                        title=""
+                      >
+                        <span
+                          class="euiAvatar__icon"
+                          data-euiicon-type="userAvatar"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="emotion-euiTimelineItemEvent-top"
+                  >
+                    <div
+                      class="euiCommentEvent emotion-euiCommentEvent"
+                      data-type="custom"
+                    >
+                      <div
+                        class="euiCommentEvent__body emotion-euiCommentEvent__body-custom"
+                      >
+                        <p>
+                          some old comment
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li
+                  class="euiComment emotion-euiTimelineItem-top"
+                >
+                  <div
+                    class="emotion-euiTimelineItemIcon-top"
+                  >
+                    <div
+                      class="emotion-euiTimelineItemIcon__content"
+                    >
+                      <div
+                        aria-label=""
+                        class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
+                        role="img"
+                        title=""
+                      >
+                        <span
+                          class="euiAvatar__icon"
+                          data-euiicon-type="userAvatar"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="emotion-euiTimelineItemEvent-top"
+                  >
+                    <div
+                      class="euiCommentEvent emotion-euiCommentEvent"
+                      data-type="custom"
+                    >
+                      <div
+                        class="euiCommentEvent__body emotion-euiCommentEvent__body-custom"
+                      >
+                        <p>
+                          some old comment
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ol>
             </div>
           </div>
         </div>

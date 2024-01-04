@@ -8,6 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { getSecurityGetStartedComponent } from './get_started';
+import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
@@ -16,8 +17,13 @@ import type {
   ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './upselling';
-import { createServices } from './common/services';
-import { setServerlessNavigation } from './navigation';
+import { createServices } from './common/services/create_services';
+import { setupNavigation, startNavigation } from './navigation';
+import { setRoutes } from './pages/routes';
+import {
+  parseExperimentalConfigValue,
+  type ExperimentalFeatures,
+} from '../common/experimental_features';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -29,16 +35,25 @@ export class SecuritySolutionServerlessPlugin
     >
 {
   private config: ServerlessSecurityPublicConfig;
+  private experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityPublicConfig>();
+    this.experimentalFeatures = {} as ExperimentalFeatures;
   }
 
   public setup(
-    _core: CoreSetup,
+    core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
-    registerUpsellings(setupDeps.securitySolution.upselling, this.config.productTypes);
+    const { securitySolution } = setupDeps;
+
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental,
+      securitySolution.experimentalFeatures
+    ).features;
+
+    setupNavigation(core, setupDeps);
     return {};
   }
 
@@ -49,11 +64,17 @@ export class SecuritySolutionServerlessPlugin
     const { securitySolution } = startDeps;
     const { productTypes } = this.config;
 
-    const services = createServices(core, startDeps);
+    const services = createServices(core, startDeps, this.experimentalFeatures);
 
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
+    registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
-    setServerlessNavigation(services);
+    securitySolution.setComponents({
+      GetStarted: getSecurityGetStartedComponent(services, productTypes),
+      DashboardsLandingCallout: getDashboardsLandingCallout(services),
+    });
+
+    startNavigation(services);
+    setRoutes(services);
 
     return {};
   }

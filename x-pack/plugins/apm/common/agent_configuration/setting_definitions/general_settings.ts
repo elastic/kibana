@@ -337,6 +337,26 @@ export const generalSettings: RawSettingDefinition[] = [
     excludeAgents: ['nodejs', 'rum-js', 'js-base'],
   },
 
+  {
+    key: 'context_propagation_only',
+    type: 'boolean',
+    defaultValue: 'false',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.context_propagation_only.label',
+      {
+        defaultMessage: 'Context Propagation Only',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.context_propagation_only.description',
+      {
+        defaultMessage:
+          'When set to true, disables log sending, metrics and trace collection. Trace context propagation and log correlation will stay active.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
   // SERVER_TIMEOUT
   {
     key: 'server_timeout',

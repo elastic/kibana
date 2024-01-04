@@ -17,7 +17,425 @@
     "objects": []
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.RandomSampler",
+        "type": "Class",
+        "tags": [],
+        "label": "RandomSampler",
+        "description": [
+          "\nClass that helps manage random sampling settings\nAutomatically calculates the probability if only total doc count is provided\nElse, use the probability that was explicitly set"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nInitial values"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-random-sampler-utils",
+                "id": "def-common.RandomSampler.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "randomSamplerMode",
+                "description": [
+                  "- random sampler mode"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ml-random-sampler-utils",
+                    "scope": "common",
+                    "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                    "section": "def-common.RandomSamplerOption",
+                    "text": "RandomSamplerOption"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/ml-random-sampler-utils",
+                "id": "def-common.RandomSampler.Unnamed.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "setRandomSamplerMode",
+                "description": [
+                  "- callback to be called when random sampler mode is set"
+                ],
+                "signature": [
+                  "((mode: ",
+                  {
+                    "pluginId": "@kbn/ml-random-sampler-utils",
+                    "scope": "common",
+                    "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                    "section": "def-common.RandomSamplerOption",
+                    "text": "RandomSamplerOption"
+                  },
+                  ") => void) | undefined"
+                ],
+                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/ml-random-sampler-utils",
+                "id": "def-common.RandomSampler.Unnamed.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "randomSamplerProbability",
+                "description": [
+                  "- initial value for random sampler probability"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ml-random-sampler-utils",
+                    "scope": "common",
+                    "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                    "section": "def-common.RandomSamplerProbability",
+                    "text": "RandomSamplerProbability"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/ml-random-sampler-utils",
+                "id": "def-common.RandomSampler.Unnamed.$4",
+                "type": "Function",
+                "tags": [],
+                "label": "setRandomSamplerProbability",
+                "description": [
+                  "- initial setter for random sampler probability"
+                ],
+                "signature": [
+                  "((prob: ",
+                  {
+                    "pluginId": "@kbn/ml-random-sampler-utils",
+                    "scope": "common",
+                    "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                    "section": "def-common.RandomSamplerProbability",
+                    "text": "RandomSamplerProbability"
+                  },
+                  ") => void) | undefined"
+                ],
+                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.setDocCount",
+            "type": "Function",
+            "tags": [],
+            "label": "setDocCount",
+            "description": [
+              "\nSet total doc count\nIf probability is not explicitly set, this doc count is used for calculating the suggested probability for sampling"
+            ],
+            "signature": [
+              "(docCount: number) => void"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-random-sampler-utils",
+                "id": "def-common.RandomSampler.setDocCount.$1",
+                "type": "number",
+                "tags": [],
+                "label": "docCount",
+                "description": [
+                  "- total document count"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.getDocCount",
+            "type": "Function",
+            "tags": [],
+            "label": "getDocCount",
+            "description": [
+              "\nGet doc count"
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.setMode",
+            "type": "Function",
+            "tags": [],
+            "label": "setMode",
+            "description": [
+              "\nSet and save in storage what mode of random sampling to use"
+            ],
+            "signature": [
+              "(mode: ",
+              {
+                "pluginId": "@kbn/ml-random-sampler-utils",
+                "scope": "common",
+                "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                "section": "def-common.RandomSamplerOption",
+                "text": "RandomSamplerOption"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-random-sampler-utils",
+                "id": "def-common.RandomSampler.setMode.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "mode",
+                "description": [
+                  "- mode to use when wrapping/unwrapping random sampling aggs"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ml-random-sampler-utils",
+                    "scope": "common",
+                    "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                    "section": "def-common.RandomSamplerOption",
+                    "text": "RandomSamplerOption"
+                  }
+                ],
+                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.getMode$",
+            "type": "Function",
+            "tags": [],
+            "label": "getMode$",
+            "description": [
+              "\nObservable to get currently set mode of random sampling"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/ml-random-sampler-utils",
+                "scope": "common",
+                "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                "section": "def-common.RandomSamplerOption",
+                "text": "RandomSamplerOption"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.getMode",
+            "type": "Function",
+            "tags": [],
+            "label": "getMode",
+            "description": [
+              "\nHelper to get currently set mode of random sampling"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/ml-random-sampler-utils",
+                "scope": "common",
+                "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                "section": "def-common.RandomSamplerOption",
+                "text": "RandomSamplerOption"
+              }
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.setProbability",
+            "type": "Function",
+            "tags": [],
+            "label": "setProbability",
+            "description": [
+              "\nHelper to set the probability to use for random sampling requests"
+            ],
+            "signature": [
+              "(probability: ",
+              {
+                "pluginId": "@kbn/ml-random-sampler-utils",
+                "scope": "common",
+                "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                "section": "def-common.RandomSamplerProbability",
+                "text": "RandomSamplerProbability"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-random-sampler-utils",
+                "id": "def-common.RandomSampler.setProbability.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "probability",
+                "description": [
+                  "- numeric value 0 < probability < 1 to use for random sampling"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ml-random-sampler-utils",
+                    "scope": "common",
+                    "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                    "section": "def-common.RandomSamplerProbability",
+                    "text": "RandomSamplerProbability"
+                  }
+                ],
+                "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.getProbability$",
+            "type": "Function",
+            "tags": [],
+            "label": "getProbability$",
+            "description": [
+              "\nObservability to get the probability to use for random sampling requests"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/ml-random-sampler-utils",
+                "scope": "common",
+                "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                "section": "def-common.RandomSamplerProbability",
+                "text": "RandomSamplerProbability"
+              },
+              ">"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.getProbability",
+            "type": "Function",
+            "tags": [],
+            "label": "getProbability",
+            "description": [
+              "\nObservability to get the probability to use for random sampling requests"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/ml-random-sampler-utils",
+                "scope": "common",
+                "docId": "kibKbnMlRandomSamplerUtilsPluginApi",
+                "section": "def-common.RandomSamplerProbability",
+                "text": "RandomSamplerProbability"
+              }
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-random-sampler-utils",
+            "id": "def-common.RandomSampler.createRandomSamplerWrapper",
+            "type": "Function",
+            "tags": [],
+            "label": "createRandomSamplerWrapper",
+            "description": [
+              "\nHelper to return factory to extend any ES aggregations with the random sampling probability\nReturns wrapper = {wrap, unwrap}\nWhere {wrap} extends the ES aggregations with the random sampling probability\nAnd {unwrap} accesses the original ES aggregations directly"
+            ],
+            "signature": [
+              "() => { wrap: <T extends Record<string, ",
+              "AggregationsAggregationContainer",
+              ">>(aggs: T) => Record<string, ",
+              "AggregationsAggregationContainer",
+              "> | T; unwrap: <T extends Record<string, ",
+              "AggregationsAggregate",
+              ">>(responseAggs: T) => T | T[string]; probability: number; }"
+            ],
+            "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "@kbn/ml-random-sampler-utils",
@@ -109,6 +527,105 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.DEFAULT_PROBABILITY",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_PROBABILITY",
+        "description": [
+          "\nDefault probability to use"
+        ],
+        "signature": [
+          "0.001"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.MIN_SAMPLER_PROBABILITY",
+        "type": "number",
+        "tags": [],
+        "label": "MIN_SAMPLER_PROBABILITY",
+        "description": [
+          "\nDefault recommended minimum probability for default sampling"
+        ],
+        "signature": [
+          "0.00001"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.RANDOM_SAMPLER_PROBABILITIES",
+        "type": "Array",
+        "tags": [],
+        "label": "RANDOM_SAMPLER_PROBABILITIES",
+        "description": [
+          "\nList of default probabilities to use for random sampler"
+        ],
+        "signature": [
+          "number[]"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.RANDOM_SAMPLER_STEP",
+        "type": "number",
+        "tags": [],
+        "label": "RANDOM_SAMPLER_STEP",
+        "description": [
+          "\nDefault step minimum probability for default sampling"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.RandomSamplerOption",
+        "type": "Type",
+        "tags": [],
+        "label": "RandomSamplerOption",
+        "description": [
+          "\nDefault option for random sampler type"
+        ],
+        "signature": [
+          "\"off\" | \"on_automatic\" | \"on_manual\""
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.RandomSamplerProbability",
+        "type": "Type",
+        "tags": [],
+        "label": "RandomSamplerProbability",
+        "description": [
+          "\nType for the random sampler probability"
+        ],
+        "signature": [
+          "number | null"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
         "id": "def-common.RandomSamplerWrapper",
         "type": "Type",
         "tags": [],
@@ -131,6 +648,24 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ml-random-sampler-utils",
+        "id": "def-common.RANDOM_SAMPLER_OPTION",
+        "type": "Object",
+        "tags": [],
+        "label": "RANDOM_SAMPLER_OPTION",
+        "description": [
+          "\nDefault options for random sampler"
+        ],
+        "signature": [
+          "{ readonly ON_AUTOMATIC: \"on_automatic\"; readonly ON_MANUAL: \"on_manual\"; readonly OFF: \"off\"; }"
+        ],
+        "path": "x-pack/packages/ml/random_sampler_utils/src/random_sampler_manager.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

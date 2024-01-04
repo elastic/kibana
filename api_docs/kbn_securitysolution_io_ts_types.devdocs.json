@@ -414,7 +414,7 @@
         "label": "TimeDuration",
         "description": [],
         "signature": [
-          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "({ allowedUnits }: TimeDurationType) => ",
           "Type",
           "<string, string, unknown>"
         ],
@@ -425,9 +425,9 @@
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-types",
             "id": "def-common.TimeDuration.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{ allowedUnits, allowedDurations }",
+            "label": "{ allowedUnits }",
             "description": [],
             "signature": [
               "TimeDurationType"
@@ -696,7 +696,7 @@
         "label": "TimeDurationC",
         "description": [],
         "signature": [
-          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "({ allowedUnits }: TimeDurationType) => ",
           "Type",
           "<string, string, unknown>"
         ],
@@ -708,12 +708,12 @@
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-types",
             "id": "def-common.TimeDurationC.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "__0",
             "description": [],
             "signature": [
-              "TimeDurationWithAllowedDurations | TimeDurationWithAllowedUnits"
+              "TimeDurationType"
             ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
             "deprecated": false,
@@ -1056,6 +1056,22 @@
         "signature": [
           "KeyofC",
           "<{ equals: null; }>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.operatorExcluded",
+        "type": "Object",
+        "tags": [],
+        "label": "operatorExcluded",
+        "description": [],
+        "signature": [
+          "KeyofC",
+          "<{ excluded: null; }>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,

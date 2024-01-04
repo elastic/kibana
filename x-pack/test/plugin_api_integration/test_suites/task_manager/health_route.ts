@@ -307,5 +307,33 @@ export default function ({ getService }: FtrProviderContext) {
         'number'
       );
     });
+
+    it('should exclude disabled tasks', async () => {
+      const interval = '9s';
+      await scheduleTask({
+        enabled: false,
+        taskType: 'taskToDisable',
+        schedule: { interval },
+      });
+
+      const timestamp = new Date();
+
+      const health = await retry.try(async () => {
+        const result = await getHealth();
+        expect(new Date(result.stats.runtime.timestamp).getTime()).to.be.greaterThan(
+          timestamp.getTime()
+        );
+        expect(new Date(result.stats.workload.timestamp).getTime()).to.be.greaterThan(
+          timestamp.getTime()
+        );
+        return result;
+      });
+
+      expect(health.stats.runtime.value.execution.duration.taskToDisable).to.eql(undefined);
+      expect(health.stats.workload.value.task_types.taskToDisable).to.eql(undefined);
+      expect(health.stats.workload.value.schedule.find(([val]) => val === interval)).to.eql(
+        undefined
+      );
+    });
   });
 }

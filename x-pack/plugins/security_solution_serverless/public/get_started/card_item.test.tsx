@@ -7,68 +7,53 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CardItem } from './card_item';
-import type { CardId, StepId } from './types';
-import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
-import type { EuiThemeComputed } from '@elastic/eui';
+import type { ExpandedCardSteps, StepId } from './types';
+
+import { QuickStartSectionCardsId, SectionId, OverviewSteps } from './types';
 jest.mock('./card_step');
 
 describe('CardItemComponent', () => {
-  const finishedSteps = {} as Record<CardId, Set<StepId>>;
-
+  const finishedSteps = new Set([]) as Set<StepId>;
   const onStepClicked = jest.fn();
-  const mockEuiTheme = { size: { xxs: '4px' }, base: 16 } as EuiThemeComputed;
+  const toggleTaskCompleteStatus = jest.fn();
+  const expandedCardSteps = {
+    [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+      isExpanded: false,
+      expandedSteps: [] as StepId[],
+    },
+  } as ExpandedCardSteps;
+
   it('should render card', () => {
-    const { getByText, queryByText } = render(
+    const { getByTestId } = render(
       <CardItem
-        cardId={GetSetUpCardId.introduction}
-        sectionId={SectionId.getSetUp}
-        euiTheme={mockEuiTheme}
-        shadow=""
-        stepsLeft={1}
-        timeInMins={30}
-        onStepClicked={onStepClicked}
+        activeStepIds={[OverviewSteps.getToKnowElasticSecurity]}
+        cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
+        expandedCardSteps={expandedCardSteps}
         finishedSteps={finishedSteps}
+        toggleTaskCompleteStatus={toggleTaskCompleteStatus}
+        onStepClicked={onStepClicked}
+        sectionId={SectionId.quickStart}
       />
     );
 
-    const cardTitle = getByText('introduction');
+    const cardTitle = getByTestId(QuickStartSectionCardsId.watchTheOverviewVideo);
     expect(cardTitle).toBeInTheDocument();
-
-    const step = getByText('1 step left');
-    expect(step).toBeInTheDocument();
-
-    const time = getByText('• About 30 mins');
-    expect(time).toBeInTheDocument();
-
-    const step1 = queryByText('Step 1');
-    expect(step1).not.toBeInTheDocument();
   });
 
-  it('should not render steps left information when all steps done', () => {
-    const mockFinishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
-    } as Record<CardId, Set<StepId>>;
-
-    const { getByText, queryByText } = render(
+  it('should not render card when no active steps', () => {
+    const { queryByText } = render(
       <CardItem
-        cardId={GetSetUpCardId.introduction}
-        sectionId={SectionId.getSetUp}
-        euiTheme={mockEuiTheme}
-        shadow=""
-        stepsLeft={0}
-        timeInMins={0}
+        activeStepIds={[]}
+        cardId={QuickStartSectionCardsId.watchTheOverviewVideo}
+        expandedCardSteps={expandedCardSteps}
+        finishedSteps={new Set([])}
+        toggleTaskCompleteStatus={toggleTaskCompleteStatus}
         onStepClicked={onStepClicked}
-        finishedSteps={mockFinishedSteps}
+        sectionId={SectionId.quickStart}
       />
     );
 
-    const cardTitle = getByText('introduction');
-    expect(cardTitle).toBeInTheDocument();
-
-    const step = queryByText('1 step left');
-    expect(step).not.toBeInTheDocument();
-
-    const time = queryByText('• About 30 mins');
-    expect(time).not.toBeInTheDocument();
+    const cardTitle = queryByText('Introduction');
+    expect(cardTitle).not.toBeInTheDocument();
   });
 });

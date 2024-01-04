@@ -7,37 +7,49 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  RULES_PATH,
-  RULES_CREATE_PATH,
+  COVERAGE_OVERVIEW_PATH,
   EXCEPTIONS_PATH,
-  RULES_LANDING_PATH,
   RULES_ADD_PATH,
+  RULES_CREATE_PATH,
+  RULES_LANDING_PATH,
+  RULES_PATH,
+  SERVER_APP_ID,
 } from '../../common/constants';
-import { ADD_RULES, CREATE_NEW_RULE, EXCEPTIONS, RULES, SIEM_RULES } from '../app/translations';
+import {
+  ADD_RULES,
+  COVERAGE_OVERVIEW,
+  CREATE_NEW_RULE,
+  EXCEPTIONS,
+  RULES,
+  SIEM_RULES,
+} from '../app/translations';
 import { SecurityPageName } from '../app/types';
 import { benchmarksLink } from '../cloud_security_posture/links';
 import type { LinkItem } from '../common/links';
 import { IconConsoleCloud } from '../common/icons/console_cloud';
 import { IconRollup } from '../common/icons/rollup';
+import { IconDashboards } from '../common/icons/dashboards';
 
 export const links: LinkItem = {
   id: SecurityPageName.rulesLanding,
   title: RULES,
   path: RULES_LANDING_PATH,
   hideTimeline: true,
+  skipUrlState: true,
+  globalNavPosition: 2,
+  capabilities: [`${SERVER_APP_ID}.show`],
   links: [
     {
       id: SecurityPageName.rules,
       title: SIEM_RULES,
       description: i18n.translate('xpack.securitySolution.appLinks.rulesDescription', {
-        defaultMessage:
-          "Create and manage rules to check for suspicious source events, and create alerts when a rule's conditions are met.",
+        defaultMessage: 'Create and manage detection rules for threat detection and monitoring.',
       }),
       landingIcon: IconRollup,
       path: RULES_PATH,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.rules', {
-          defaultMessage: 'Rules',
+          defaultMessage: 'SIEM Rules',
         }),
       ],
       links: [
@@ -53,7 +65,7 @@ export const links: LinkItem = {
           title: CREATE_NEW_RULE,
           path: RULES_CREATE_PATH,
           skipUrlState: true,
-          hideTimeline: true,
+          hideTimeline: false,
         },
       ],
     },
@@ -66,6 +78,7 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
+      capabilities: [`${SERVER_APP_ID}.showEndpointExceptions`],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [
@@ -75,19 +88,41 @@ export const links: LinkItem = {
       ],
     },
     benchmarksLink,
+    {
+      id: SecurityPageName.coverageOverview,
+      title: COVERAGE_OVERVIEW,
+      landingIcon: IconDashboards,
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.coverageOverviewDashboardDescription',
+        {
+          defaultMessage: 'Review and maintain your protections MITRE ATT&CK® coverage.',
+        }
+      ),
+      path: COVERAGE_OVERVIEW_PATH,
+      capabilities: [`${SERVER_APP_ID}.show`],
+      globalSearchKeywords: [
+        i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
+          defaultMessage: 'MITRE ATT&CK Coverage',
+        }),
+      ],
+    },
   ],
   categories: [
     {
-      label: i18n.translate('xpack.securitySolution.appLinks.category.siemRules', {
-        defaultMessage: 'Security Detection Rules',
+      label: i18n.translate('xpack.securitySolution.appLinks.category.management', {
+        defaultMessage: 'Management',
       }),
-      linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
+      linkIds: [
+        SecurityPageName.rules,
+        SecurityPageName.cloudSecurityPostureBenchmarks,
+        SecurityPageName.exceptions,
+      ],
     },
     {
-      label: i18n.translate('xpack.securitySolution.appLinks.category.cspRules', {
-        defaultMessage: 'Cloud Security Rules',
+      label: i18n.translate('xpack.securitySolution.appLinks.category.discover', {
+        defaultMessage: 'Discover',
       }),
-      linkIds: [SecurityPageName.cloudSecurityPostureBenchmarks],
+      linkIds: [SecurityPageName.coverageOverview],
     },
   ],
 };

@@ -7,12 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ALL_VALUE,
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   BudgetingMethod,
+  HistogramIndicator,
   IndicatorType,
   KQLCustomIndicator,
   MetricCustomIndicator,
+  TimesliceMetricIndicator,
   TimeWindow,
 } from '@kbn/slo-schema';
 import {
@@ -22,6 +25,8 @@ import {
   INDICATOR_APM_LATENCY,
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
+  INDICATOR_HISTOGRAM,
+  INDICATOR_TIMESLICE_METRIC,
 } from '../../utils/slo/labels';
 import { CreateSLOForm } from './types';
 
@@ -36,6 +41,14 @@ export const SLI_OPTIONS: Array<{
   {
     value: 'sli.metric.custom',
     text: INDICATOR_CUSTOM_METRIC,
+  },
+  {
+    value: 'sli.metric.timeslice',
+    text: INDICATOR_TIMESLICE_METRIC,
+  },
+  {
+    value: 'sli.histogram.custom',
+    text: INDICATOR_HISTOGRAM,
   },
   {
     value: 'sli.apm.transactionDuration',
@@ -118,6 +131,38 @@ export const CUSTOM_METRIC_DEFAULT_VALUES: MetricCustomIndicator = {
   },
 };
 
+export const TIMESLICE_METRIC_DEFAULT_VALUES: TimesliceMetricIndicator = {
+  type: 'sli.metric.timeslice' as const,
+  params: {
+    index: '',
+    filter: '',
+    metric: {
+      metrics: [{ name: 'A', aggregation: 'avg' as const, field: '' }],
+      equation: 'A',
+      comparator: 'GT',
+      threshold: 0,
+    },
+    timestampField: '',
+  },
+};
+
+export const HISTOGRAM_DEFAULT_VALUES: HistogramIndicator = {
+  type: 'sli.histogram.custom' as const,
+  params: {
+    index: '',
+    timestampField: '',
+    filter: '',
+    good: {
+      field: '',
+      aggregation: 'value_count' as const,
+    },
+    total: {
+      field: '',
+      aggregation: 'value_count' as const,
+    },
+  },
+};
+
 export const APM_LATENCY_DEFAULT_VALUES: APMTransactionDurationIndicator = {
   type: 'sli.apm.transactionDuration' as const,
   params: {
@@ -156,6 +201,7 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
   objective: {
     target: 99,
   },
+  groupBy: ALL_VALUE,
 };
 
 export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
@@ -171,4 +217,59 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
   objective: {
     target: 99,
   },
+  groupBy: ALL_VALUE,
 };
+
+export const COMPARATOR_GT = i18n.translate(
+  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.gtLabel',
+  {
+    defaultMessage: 'Greater than',
+  }
+);
+
+export const COMPARATOR_GTE = i18n.translate(
+  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.gteLabel',
+  {
+    defaultMessage: 'Greater than or equal to',
+  }
+);
+
+export const COMPARATOR_LT = i18n.translate(
+  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.ltLabel',
+  {
+    defaultMessage: 'Less than',
+  }
+);
+
+export const COMPARATOR_LTE = i18n.translate(
+  'xpack.observability.slo.sloEdit.sliType.timesliceMetric.lteLabel',
+  {
+    defaultMessage: 'Less than or equal to',
+  }
+);
+
+export const COMPARATOR_MAPPING = {
+  GT: COMPARATOR_GT,
+  GTE: COMPARATOR_GTE,
+  LT: COMPARATOR_LT,
+  LTE: COMPARATOR_LTE,
+};
+
+export const COMPARATOR_OPTIONS = [
+  {
+    text: COMPARATOR_GT,
+    value: 'GT' as const,
+  },
+  {
+    text: COMPARATOR_GTE,
+    value: 'GTE' as const,
+  },
+  {
+    text: COMPARATOR_LT,
+    value: 'LT' as const,
+  },
+  {
+    text: COMPARATOR_LTE,
+    value: 'LTE' as const,
+  },
+];

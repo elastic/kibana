@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const CUSTOM_QUERY_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldRequiredError',
@@ -14,17 +16,17 @@ export const CUSTOM_QUERY_REQUIRED = i18n.translate(
   }
 );
 
-export const SAVED_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError',
-  {
-    defaultMessage: 'Failed to load the saved query. Select a new one or add a custom query.',
-  }
-);
-
 export const EQL_QUERY_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
   {
     defaultMessage: 'An EQL query is required.',
+  }
+);
+
+export const ESQL_QUERY_REQUIRED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryFieldRequiredError',
+  {
+    defaultMessage: 'An ES|QL query is required.',
   }
 );
 
@@ -178,3 +180,47 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
     defaultMessage: 'Do not suppress alerts for events with missing fields',
   }
 );
+
+export const ESQL_QUERY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryLabel',
+  {
+    defaultMessage: 'ES|QL query',
+  }
+);
+
+export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionOptions.perRuleExecutionLabel',
+  {
+    defaultMessage: 'Per rule execution',
+  }
+);
+
+export const ALERT_SUPPRESSION_PER_TIME_PERIOD = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionOptions.perTimePeriodLabel',
+  {
+    defaultMessage: 'Per time period',
+  }
+);
+
+export const THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.Su.perRuleExecutionWarning',
+  {
+    defaultMessage: 'Per rule execution option is not available for Threshold rule type',
+  }
+);
+
+export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined) =>
+  fields?.length ? (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionForFieldsLabel"
+      defaultMessage="Suppress alerts by selected fields: {fieldsString} (Technical Preview)"
+      values={{ fieldsString: <strong>{fields.join(', ')}</strong> }}
+    />
+  ) : (
+    i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionLabel',
+      {
+        defaultMessage: 'Suppress alerts (Technical Preview)',
+      }
+    )
+  );

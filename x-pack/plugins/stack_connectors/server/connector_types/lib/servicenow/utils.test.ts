@@ -27,6 +27,8 @@ jest.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => ({
 
 jest.mock('axios', () => ({
   create: jest.fn(),
+  AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
+  AxiosError: jest.requireActual('axios').AxiosError,
 }));
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = {
@@ -226,7 +228,7 @@ describe('utils', () => {
       const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
         .calls[0][0];
       expect(await mockRequestCallback({ headers: {} })).toEqual({
-        headers: { Authorization: 'Bearer tokentokentoken' },
+        headers: new axios.AxiosHeaders({ Authorization: 'Bearer tokentokentoken' }),
       });
 
       expect(getOAuthJwtAccessToken as jest.Mock).toHaveBeenCalledWith({

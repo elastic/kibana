@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export type { ReportDocument } from '../../../common/types';
 export { Report } from './report';
 export { SavedReport } from './saved_report';
 export { ReportingStore } from './store';

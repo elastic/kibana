@@ -48,13 +48,18 @@ export interface DataViewsServerPluginStart {
    * Returns a DataViews service instance
    */
   dataViewsServiceFactory: ServiceFactory;
+  /**
+   *
+   */
+  getScriptedFieldsEnabled: () => boolean;
 }
 
 /**
  * DataViews server plugin setup api
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataViewsServerPluginSetup {}
+export interface DataViewsServerPluginSetup {
+  enableRollups: () => void;
+}
 
 /**
  * Data Views server setup dependencies

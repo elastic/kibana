@@ -12,10 +12,10 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { defineCreateApiKeyRoutes } from './create';
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineCreateApiKeyRoutes } from './create';
 
 describe('Create API Key route', () => {
   function getMockContext(
@@ -77,6 +77,7 @@ describe('Create API Key route', () => {
         api_key: 'abc123',
         id: 'key_id',
         name: 'my api key',
+        encoded: 'encoded123',
       });
 
       const payload = {
@@ -104,6 +105,7 @@ describe('Create API Key route', () => {
         api_key: 'abc123',
         id: 'key_id',
         name: 'my api key',
+        encoded: 'encoded123',
       });
     });
 

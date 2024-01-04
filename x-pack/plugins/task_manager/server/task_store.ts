@@ -345,7 +345,7 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     try {
-      await this.savedObjectsRepository.delete('task', id);
+      await this.savedObjectsRepository.delete('task', id, { refresh: false });
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -361,7 +361,7 @@ export class TaskStore {
   public async bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
     try {
       const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: 'task' }));
-      return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete);
+      return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete, { refresh: false });
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -383,7 +383,7 @@ export class TaskStore {
       throw e;
     }
     const taskInstance = savedObjectToConcreteTaskInstance(result);
-    return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+    return taskInstance;
   }
 
   /**
@@ -407,9 +407,7 @@ export class TaskStore {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
       const taskInstance = savedObjectToConcreteTaskInstance(task);
-      const validatedTaskInstance =
-        this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
-      return asOk(validatedTaskInstance);
+      return asOk(taskInstance);
     });
   }
 
@@ -454,7 +452,6 @@ export class TaskStore {
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map((doc) => savedObjectToConcreteTaskInstance(doc))
-          .map((doc) => this.taskValidator.getValidatedTaskInstanceFromReading(doc))
           .filter((doc): doc is ConcreteTaskInstance => !!doc),
       };
     } catch (e) {
@@ -477,7 +474,7 @@ export class TaskStore {
       index: this.index,
       ignore_unavailable: true,
       track_total_hits: true,
-      body: ensureAggregationOnlyReturnsTaskObjects({
+      body: ensureAggregationOnlyReturnsEnabledTaskObjects({
         query,
         aggs,
         runtime_mappings,
@@ -595,11 +592,11 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
   };
 }
 
-function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): AggregationOpts {
+function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): AggregationOpts {
   const originalQuery = opts.query;
   const filterToOnlyTasks = {
     bool: {
-      filter: [{ term: { type: 'task' } }],
+      filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
     },
   };
   const query = originalQuery

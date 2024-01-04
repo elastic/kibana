@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+
 export const inventoryThresholdAlert = [
   {
     field: 'kibana.alert.workflow_status',
@@ -115,3 +117,8 @@ export const inventoryThresholdAlert = [
     value: '.internal.alerts-observability.metrics.alerts-default-000001',
   },
 ];
+
+export const inventoryThresholdAlertEs = inventoryThresholdAlert.reduce(
+  (acc, d) => ({ ...acc, [d.field]: d.value }),
+  {}
+) as EcsFieldsResponse;

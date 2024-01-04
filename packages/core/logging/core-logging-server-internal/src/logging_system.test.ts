@@ -23,11 +23,12 @@ let system: LoggingSystem;
 beforeEach(() => {
   mockConsoleLog = jest.spyOn(global.console, 'log').mockReturnValue(undefined);
   jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
+  jest.spyOn(process, 'uptime').mockReturnValue(10);
   system = new LoggingSystem();
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
   mockCreateWriteStream.mockClear();
   mockStreamWrite.mockClear();
   mockGetFlattenedObject.mockClear();

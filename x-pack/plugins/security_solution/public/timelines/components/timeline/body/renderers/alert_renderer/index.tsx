@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { AlertField } from './alert_field';
 import type { RowRenderer } from '../../../../../../../common/types';
-import { RowRendererId } from '../../../../../../../common/types/timeline/api';
+import { RowRendererId } from '../../../../../../../common/api/timeline';
 import {
   ID,
   DESTINATION_IP,

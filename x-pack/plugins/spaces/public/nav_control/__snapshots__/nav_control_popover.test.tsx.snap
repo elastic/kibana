@@ -1,169 +1,48 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NavControlPopover renders without crashing 1`] = `
-<NavControlPopoverUI
-  anchorPosition="downRight"
-  capabilities={
-    Object {
-      "catalogue": Object {},
-      "management": Object {},
-      "navLinks": Object {},
-      "spaces": Object {
-        "manage": true,
-      },
-    }
-  }
-  navigateToApp={[MockFunction]}
-  navigateToUrl={[MockFunction]}
-  serverBasePath="/server-base-path"
-  spacesManager={
-    Object {
-      "copySavedObjects": [MockFunction],
-      "createSpace": [MockFunction],
-      "deleteSpace": [MockFunction],
-      "disableLegacyUrlAliases": [MockFunction],
-      "getActiveSpace": [MockFunction],
-      "getShareSavedObjectPermissions": [MockFunction],
-      "getShareableReferences": [MockFunction],
-      "getSpace": [MockFunction],
-      "getSpaces": [MockFunction],
-      "onActiveSpaceChange$": Observable {
-        "_subscribe": [Function],
-      },
-      "redirectToSpaceSelector": [MockFunction],
-      "resolveCopySavedObjectsErrors": [MockFunction],
-      "updateSavedObjectsSpaces": [MockFunction],
-      "updateSpace": [MockFunction],
-    }
-  }
-  theme={
-    Object {
-      "colorMode": "LIGHT",
-      "euiTheme": Object {
-        "animation": Object {
-          "bounce": "cubic-bezier(.34, 1.61, .7, 1)",
-          "extraFast": "90ms",
-          "extraSlow": "500ms",
-          "fast": "150ms",
-          "normal": "250ms",
-          "resistance": "cubic-bezier(.694, .0482, .335, 1)",
-          "slow": "350ms",
-        },
-        "base": 16,
-        "border": Object {
-          "color": "#D3DAE6",
-          "editable": "2px dotted #D3DAE6",
-          "radius": Object {
-            "medium": "6px",
-            "small": "4px",
-          },
-          "thick": "2px solid #D3DAE6",
-          "thin": "1px solid #D3DAE6",
-          "width": Object {
-            "thick": "2px",
-            "thin": "1px",
-          },
-        },
-        "breakpoint": Object {
-          "l": 992,
-          "m": 768,
-          "s": 575,
-          "xl": 1200,
-          "xs": 0,
-        },
-        "colors": Object {
-          "accent": "#F04E98",
-          "accentText": "#ba3d76",
-          "body": "#f7f8fc",
-          "danger": "#BD271E",
-          "dangerText": "#bd271e",
-          "darkShade": "#69707D",
-          "darkestShade": "#343741",
-          "disabled": "#ABB4C4",
-          "disabledText": "#a2abba",
-          "emptyShade": "#FFF",
-          "fullShade": "#000",
-          "ghost": "#FFF",
-          "highlight": "#fff9e8",
-          "ink": "#000",
-          "lightShade": "#D3DAE6",
-          "lightestShade": "#F1F4FA",
-          "link": "#006bb8",
-          "mediumShade": "#98A2B3",
-          "primary": "#07C",
-          "primaryText": "#006bb8",
-          "shadow": "#000",
-          "subduedText": "#646a77",
-          "success": "#00BFB3",
-          "successText": "#007871",
-          "text": "#343741",
-          "title": "#1a1c21",
-          "warning": "#FEC514",
-          "warningText": "#83650a",
-        },
-        "focus": Object {
-          "color": "currentColor",
-          "width": "2px",
-        },
-        "font": Object {
-          "baseline": 4,
-          "body": Object {
-            "scale": "s",
-            "weight": "regular",
-          },
-          "family": "'Inter', BlinkMacSystemFont, Helvetica, Arial, sans-serif",
-          "familyCode": "'Roboto Mono', Menlo, Courier, monospace",
-          "familySerif": "Georgia, Times, Times New Roman, serif",
-          "featureSettings": "'calt' 1, 'kern' 1, 'liga' 1",
-          "lineHeightMultiplier": 1.5,
-          "scale": Object {
-            "l": 1.375,
-            "m": 1,
-            "s": 0.875,
-            "xl": 1.6875,
-            "xs": 0.75,
-            "xxl": 2.125,
-            "xxs": 0.6875,
-            "xxxs": 0.5625,
-          },
-          "title": Object {
-            "weight": "bold",
-          },
-          "weight": Object {
-            "bold": 700,
-            "light": 300,
-            "medium": 500,
-            "regular": 400,
-            "semiBold": 600,
-          },
-        },
-        "levels": Object {
-          "content": 0,
-          "flyout": 1000,
-          "header": 1000,
-          "mask": 6000,
-          "maskBelowHeader": 1000,
-          "menu": 2000,
-          "modal": 8000,
-          "navigation": 6000,
-          "toast": 9000,
-        },
-        "size": Object {
-          "base": "16px",
-          "l": "24px",
-          "m": "12px",
-          "s": "8px",
-          "xl": "32px",
-          "xs": "4px",
-          "xxl": "40px",
-          "xxs": "2px",
-          "xxxl": "48px",
-          "xxxxl": "64px",
-        },
-        "themeName": "EUI_THEME_AMSTERDAM",
-      },
-      "modifications": Object {},
-    }
-  }
-/>
+<body>
+  <div>
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
+      id="spcMenuPopover"
+    >
+      <button
+        aria-controls="headerSpacesMenuContent"
+        aria-describedby="spacesNavDetails"
+        aria-expanded="false"
+        aria-haspopup="true"
+        aria-label="Spaces navigation"
+        class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
+        data-test-subj="spacesNavSelector"
+        title="loading spaces navigation"
+        type="button"
+      >
+        <span
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+        >
+          <span
+            class="eui-textTruncate euiButtonEmpty__text"
+          >
+            <span
+              class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
+            >
+              <span
+                aria-label="Loading"
+                class="euiLoadingSpinner eui-alignMiddle emotion-euiLoadingSpinner-m"
+                role="progressbar"
+              />
+              <p
+                hidden=""
+                id="spacesNavDetails"
+              >
+                loading spaces navigation is the currently selected space. Click this button to open a popover that allows you to select the active space.
+              </p>
+            </span>
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</body>
 `;

@@ -9,13 +9,14 @@ import expect from '@kbn/expect';
 import { SavedObject } from '@kbn/core/server';
 import { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getConsumerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
   TaskManagerDoc,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -122,7 +123,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: response.body.id,
       });
     });
@@ -157,12 +158,19 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                   message: 'something important happened!',
                 },
               },
+              {
+                id: 'system-connector-test.system-action',
+                group: 'default',
+                params: {},
+              },
             ],
           })
         );
 
       expect(response.status).to.eql(200);
+
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
+
       expect(response.body).to.eql({
         id: response.body.id,
         name: 'abc',
@@ -183,6 +191,13 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               message: 'something important happened!',
             },
             uuid: response.body.actions[1].uuid,
+          },
+          {
+            id: 'system-connector-test.system-action',
+            group: 'default',
+            connector_type_id: 'test.system-action',
+            params: {},
+            uuid: response.body.actions[2].uuid,
           },
         ],
         enabled: true,
@@ -238,9 +253,17 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           },
           uuid: rawActions[1].uuid,
         },
+        {
+          actionRef: 'system_action:system-connector-test.system-action',
+          actionTypeId: 'test.system-action',
+          group: 'default',
+          params: {},
+          uuid: rawActions[2].uuid,
+        },
       ]);
 
       const references = esResponse.body._source?.references ?? [];
+
       expect(references.length).to.eql(1);
       expect(references[0]).to.eql({
         id: createdAction.id,
@@ -291,7 +314,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: response.body.id,
       });
     });
@@ -358,7 +381,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: customId,
       });
     });
@@ -377,7 +400,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       await checkAAD({
         supertest,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: customId,
       });
     });
@@ -422,7 +445,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(403);
       expect(response.body).to.eql({
         error: 'Forbidden',
-        message: getConsumerUnauthorizedErrorMessage(
+        message: getUnauthorizedErrorMessage(
           'create',
           'test.noop',
           'some consumer patrick invented'
@@ -534,7 +557,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         await checkAAD({
           supertest,
           spaceId: Spaces.space1.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: response.body.id,
         });
       });

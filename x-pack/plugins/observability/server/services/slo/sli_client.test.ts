@@ -7,6 +7,7 @@
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 import { Duration, DurationUnit } from '../../domain/models';
 import { createSLO } from './fixtures/slo';
@@ -26,11 +27,18 @@ const commonEsResponse = {
   },
 };
 
+const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
+
 describe('SummaryClient', () => {
   let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    jest.useFakeTimers().setSystemTime(TEST_DATE);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   describe('fetchSLIDataFrom', () => {
@@ -50,11 +58,11 @@ describe('SummaryClient', () => {
             [LONG_WINDOW]: {
               buckets: [
                 {
-                  key: '2022-11-08T13:53:00.000Z-2022-11-08T14:53:00.000Z',
-                  from: 1667915580000,
-                  from_as_string: '2022-11-08T13:53:00.000Z',
-                  to: 1667919180000,
-                  to_as_string: '2022-11-08T14:53:00.000Z',
+                  key: '2022-12-31T22:54:00.000Z-2022-12-31T23:54:00.000Z',
+                  from: 1672527240000,
+                  from_as_string: '2022-12-31T22:54:00.000Z',
+                  to: 1672530840000,
+                  to_as_string: '2022-12-31T23:54:00.000Z',
                   doc_count: 60,
                   total: {
                     value: 32169,
@@ -68,11 +76,11 @@ describe('SummaryClient', () => {
             [SHORT_WINDOW]: {
               buckets: [
                 {
-                  key: '2022-11-08T14:48:00.000Z-2022-11-08T14:53:00.000Z',
-                  from: 1667918880000,
-                  from_as_string: '2022-11-08T14:48:00.000Z',
-                  to: 1667919180000,
-                  to_as_string: '2022-11-08T14:53:00.000Z',
+                  key: '2022-12-31T23:49:00.000Z-2022-12-31T23:54:00.000Z',
+                  from: 1672530540000,
+                  from_as_string: '2022-12-31T23:49:00.000Z',
+                  to: 1672530840000,
+                  to_as_string: '2022-12-31T23:54:00.000Z',
                   doc_count: 5,
                   total: {
                     value: 2211,
@@ -87,14 +95,19 @@ describe('SummaryClient', () => {
         });
         const summaryClient = new DefaultSLIClient(esClientMock);
 
-        const result = await summaryClient.fetchSLIDataFrom(slo, lookbackWindows);
+        const result = await summaryClient.fetchSLIDataFrom(slo, ALL_VALUE, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
             [LONG_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-1h/m', to: 'now/m' }],
+                ranges: [
+                  {
+                    from: '2022-12-31T22:54:00.000Z',
+                    to: '2022-12-31T23:54:00.000Z',
+                  },
+                ],
               },
               aggs: {
                 good: { sum: { field: 'slo.numerator' } },
@@ -104,7 +117,12 @@ describe('SummaryClient', () => {
             [SHORT_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-5m/m', to: 'now/m' }],
+                ranges: [
+                  {
+                    from: '2022-12-31T23:49:00.000Z',
+                    to: '2022-12-31T23:54:00.000Z',
+                  },
+                ],
               },
               aggs: {
                 good: { sum: { field: 'slo.numerator' } },
@@ -140,11 +158,11 @@ describe('SummaryClient', () => {
             [LONG_WINDOW]: {
               buckets: [
                 {
-                  key: '2022-11-08T13:53:00.000Z-2022-11-08T14:53:00.000Z',
-                  from: 1667915580000,
-                  from_as_string: '2022-11-08T13:53:00.000Z',
-                  to: 1667919180000,
-                  to_as_string: '2022-11-08T14:53:00.000Z',
+                  key: '2022-12-31T22:36:00.000Z-2022-12-31T23:36:00.000Z',
+                  from: 1672526160000,
+                  from_as_string: '2022-12-31T22:36:00.000Z',
+                  to: 1672529760000,
+                  to_as_string: '2022-12-31T23:36:00.000Z',
                   doc_count: 60,
                   total: {
                     value: 32169,
@@ -158,11 +176,11 @@ describe('SummaryClient', () => {
             [SHORT_WINDOW]: {
               buckets: [
                 {
-                  key: '2022-11-08T14:48:00.000Z-2022-11-08T14:53:00.000Z',
-                  from: 1667918880000,
-                  from_as_string: '2022-11-08T14:48:00.000Z',
-                  to: 1667919180000,
-                  to_as_string: '2022-11-08T14:53:00.000Z',
+                  key: '2022-12-31T23:31:00.000Z-2022-12-31T23:36:00.000Z',
+                  from: 1672529460000,
+                  from_as_string: '2022-12-31T23:31:00.000Z',
+                  to: 1672529760000,
+                  to_as_string: '2022-12-31T23:36:00.000Z',
                   doc_count: 5,
                   total: {
                     value: 2211,
@@ -177,14 +195,19 @@ describe('SummaryClient', () => {
         });
         const summaryClient = new DefaultSLIClient(esClientMock);
 
-        const result = await summaryClient.fetchSLIDataFrom(slo, lookbackWindows);
+        const result = await summaryClient.fetchSLIDataFrom(slo, ALL_VALUE, lookbackWindows);
 
         expect(esClientMock?.search?.mock?.lastCall?.[0]).toMatchObject({
           aggs: {
             [LONG_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-1h/m', to: 'now/m' }],
+                ranges: [
+                  {
+                    from: '2022-12-31T22:36:00.000Z',
+                    to: '2022-12-31T23:36:00.000Z',
+                  },
+                ],
               },
               aggs: {
                 good: {
@@ -202,7 +225,12 @@ describe('SummaryClient', () => {
             [SHORT_WINDOW]: {
               date_range: {
                 field: '@timestamp',
-                ranges: [{ from: 'now-5m/m', to: 'now/m' }],
+                ranges: [
+                  {
+                    from: '2022-12-31T23:31:00.000Z',
+                    to: '2022-12-31T23:36:00.000Z',
+                  },
+                ],
               },
               aggs: {
                 good: {

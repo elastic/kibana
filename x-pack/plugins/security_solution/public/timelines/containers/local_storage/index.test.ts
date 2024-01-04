@@ -15,6 +15,7 @@ import {
   getAllDataTablesInStorage,
   addTableInStorage,
   migrateAlertTableStateToTriggerActionsState,
+  migrateTriggerActionsVisibleColumnsAlertTable88xTo89,
 } from '.';
 
 import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
@@ -22,6 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTableModel, DataTableState } from '@kbn/securitysolution-data-table';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { v88xAlertOrignalData, v89xAlertsOriginalData } from './test.data';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -788,7 +790,7 @@ describe('SiemLocalStorage', () => {
     });
   });
 
-  describe('Trigger Actions Alert Table Migration', () => {
+  describe('Trigger Actions Alert Table Migration -> Migration from 8.7', () => {
     const legacyDataTableState: DataTableState['dataTable']['tableById'] = {
       'alerts-page': {
         queryFields: [],
@@ -1261,17 +1263,66 @@ describe('SiemLocalStorage', () => {
           ],
           sort: [{ '@timestamp': { order: 'desc' } }],
           visibleColumns: [
-            '@timestamp',
-            'kibana.alert.rule.name',
-            'kibana.alert.severity',
-            'kibana.alert.risk_score',
-            'kibana.alert.reason',
-            'host.name',
-            'user.name',
-            'process.name',
-            'file.name',
-            'source.ip',
-            'destination.ip',
+            {
+              columnHeaderType: 'not-filtered',
+              id: '@timestamp',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Rule',
+              id: 'kibana.alert.rule.name',
+              initialWidth: 180,
+              linkField: 'kibana.alert.rule.uuid',
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Severity',
+              id: 'kibana.alert.severity',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Risk Score',
+              id: 'kibana.alert.risk_score',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Reason',
+              id: 'kibana.alert.reason',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'host.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'user.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'process.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'file.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'source.ip',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'destination.ip',
+              initialWidth: 180,
+            },
           ],
         },
       },
@@ -1344,17 +1395,66 @@ describe('SiemLocalStorage', () => {
             { 'kibana.alert.rule.name': { order: 'desc' } },
           ],
           visibleColumns: [
-            '@timestamp',
-            'kibana.alert.rule.name',
-            'kibana.alert.severity',
-            'kibana.alert.risk_score',
-            'kibana.alert.reason',
-            'host.name',
-            'user.name',
-            'process.name',
-            'file.name',
-            'source.ip',
-            'destination.ip',
+            {
+              columnHeaderType: 'not-filtered',
+              id: '@timestamp',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Rule',
+              id: 'kibana.alert.rule.name',
+              initialWidth: 180,
+              linkField: 'kibana.alert.rule.uuid',
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Severity',
+              id: 'kibana.alert.severity',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Risk Score',
+              id: 'kibana.alert.risk_score',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              displayAsText: 'Reason',
+              id: 'kibana.alert.reason',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'host.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'user.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'process.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'file.name',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'source.ip',
+              initialWidth: 180,
+            },
+            {
+              columnHeaderType: 'not-filtered',
+              id: 'destination.ip',
+              initialWidth: 180,
+            },
           ],
         },
       },
@@ -1385,6 +1485,46 @@ describe('SiemLocalStorage', () => {
           }
         }
       }
+    });
+  });
+
+  describe('should migrate Alert Table visible columns from v8.8.x', () => {
+    // PR: https://github.com/elastic/kibana/pull/161054
+    beforeEach(() => storage.clear());
+    it('should migrate correctly when upgrading from 8.8.x -> 8.9', () => {
+      Object.keys(v88xAlertOrignalData).forEach((k) => {
+        storage.set(k, v88xAlertOrignalData[k as keyof typeof v88xAlertOrignalData]);
+      });
+
+      migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+
+      Object.keys(v89xAlertsOriginalData).forEach((k) => {
+        const expectedResult = v89xAlertsOriginalData[k as keyof typeof v89xAlertsOriginalData];
+        expect(storage.get(k)).toMatchObject(expectedResult);
+      });
+    });
+    it('should be a no-op when reinstalling from 8.9 when data is already present.', () => {
+      Object.keys(v89xAlertsOriginalData).forEach((k) => {
+        storage.set(k, v89xAlertsOriginalData[k as keyof typeof v89xAlertsOriginalData]);
+      });
+
+      migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+
+      Object.keys(v89xAlertsOriginalData).forEach((k) => {
+        const expectedResult = v89xAlertsOriginalData[k as keyof typeof v89xAlertsOriginalData];
+        expect(storage.get(k)).toMatchObject(expectedResult);
+      });
+    });
+
+    it('should be a no-op when installing 8.9 for the first time', () => {
+      migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+
+      expect(
+        storage.get('detection-engine-alert-table-securitySolution-alerts-page-gridView')
+      ).toBeNull();
+      expect(
+        storage.get('detection-engine-alert-table-securitySolution-rule-details-gridView')
+      ).toBeNull();
     });
   });
 });

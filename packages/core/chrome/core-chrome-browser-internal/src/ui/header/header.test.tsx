@@ -28,7 +28,6 @@ function mockProps() {
     breadcrumbs$: new BehaviorSubject([]),
     breadcrumbsAppendExtension$: new BehaviorSubject(undefined),
     homeHref: '/',
-    isVisible$: new BehaviorSubject(true),
     customBranding$: new BehaviorSubject({}),
     kibanaDocLink: '/docs',
     docLinks: docLinksServiceMock.createStartContract(),
@@ -58,7 +57,6 @@ describe('Header', () => {
   });
 
   it('renders', () => {
-    const isVisible$ = new BehaviorSubject(false);
     const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
     const isLocked$ = new BehaviorSubject(false);
     const navLinks$ = new BehaviorSubject([
@@ -81,7 +79,6 @@ describe('Header', () => {
     const component = mountWithIntl(
       <Header
         {...mockProps()}
-        isVisible$={isVisible$}
         breadcrumbs$={breadcrumbs$}
         navLinks$={navLinks$}
         recentlyAccessed$={recentlyAccessed$}
@@ -92,10 +89,6 @@ describe('Header', () => {
         helpMenuLinks$={of([])}
       />
     );
-    expect(component.find('EuiHeader').exists()).toBeFalsy();
-
-    act(() => isVisible$.next(true));
-    component.update();
     expect(component.find('EuiHeader').exists()).toBeTruthy();
     expect(component.find('nav[aria-label="Primary"]').exists()).toBeFalsy();
 

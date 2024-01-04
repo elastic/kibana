@@ -9,7 +9,7 @@
 import { flatten } from 'lodash';
 import { CoreSetup } from '@kbn/core/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { escapeQuotes } from './lib/escape_kuery';
+import { escapeQuotes } from '@kbn/es-query';
 import { KqlQuerySuggestionProvider } from './types';
 import type { UnifiedSearchPublicPluginStart } from '../../../types';
 import { QuerySuggestion, QuerySuggestionTypes } from '../query_suggestion_provider';

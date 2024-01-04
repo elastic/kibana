@@ -11,6 +11,7 @@ import {
   KibanaContextProvider,
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
 import type { SecuritySolutionEssPluginStartDeps } from '../types';
 
 export type Services = CoreStart & SecuritySolutionEssPluginStartDeps;
@@ -18,7 +19,11 @@ export type Services = CoreStart & SecuritySolutionEssPluginStartDeps;
 export const KibanaServicesProvider: React.FC<{
   services: Services;
 }> = ({ services, children }) => {
-  return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+  return (
+    <KibanaContextProvider services={services}>
+      <NavigationProvider core={services}>{children}</NavigationProvider>
+    </KibanaContextProvider>
+  );
 };
 
 export const useKibana = () => useKibanaReact<Services>();
@@ -28,4 +33,17 @@ export const createServices = (
   pluginsStart: SecuritySolutionEssPluginStartDeps
 ): Services => {
   return { ...core, ...pluginsStart };
+};
+
+export const withServicesProvider = <T extends object>(
+  Component: React.ComponentType<T>,
+  services: Services
+) => {
+  return function WithServicesProvider(props: T) {
+    return (
+      <KibanaServicesProvider services={services}>
+        <Component {...props} />
+      </KibanaServicesProvider>
+    );
+  };
 };

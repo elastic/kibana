@@ -41,14 +41,16 @@
       "screenshotMode",
       "security",
       "spaces",
-      "usageCollection"
+      "usageCollection",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "usageCollection",
       "unifiedSearch",
-      "fieldFormats"
+      "fieldFormats",
+      "textBasedLanguages"
     ],
     "extraPublicDirs": [
       "common"

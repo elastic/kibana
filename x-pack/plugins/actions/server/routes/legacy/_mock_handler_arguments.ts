@@ -9,15 +9,16 @@ import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { ActionType } from '../../../common';
-import { ActionsClientMock, actionsClientMock } from '../../actions_client.mock';
 import { ActionsRequestHandlerContext } from '../../types';
+import { actionsClientMock } from '../../mocks';
+import { ActionsClientMock } from '../../actions_client/actions_client.mock';
+import { ConnectorType } from '../../application/connector/types';
 
 export function mockHandlerArguments(
   {
     actionsClient = actionsClientMock.create(),
     listTypes: listTypesRes = [],
-  }: { actionsClient?: ActionsClientMock; listTypes?: ActionType[] },
+  }: { actionsClient?: ActionsClientMock; listTypes?: ConnectorType[] },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {

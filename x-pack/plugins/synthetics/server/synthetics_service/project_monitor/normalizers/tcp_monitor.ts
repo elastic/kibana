@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   TCPFields,
   TLSVersion,
@@ -33,7 +33,7 @@ export const getNormalizeTCPFields = ({
   namespace,
   version,
 }: NormalizedProjectProps): NormalizerResult<TCPFields> => {
-  const defaultFields = DEFAULT_FIELDS[DataStream.TCP];
+  const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.TCP];
   const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
@@ -62,7 +62,7 @@ export const getNormalizeTCPFields = ({
   const normalizedFields = {
     ...yamlConfig,
     ...commonFields,
-    [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
+    [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.TCP,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
     [ConfigKey.HOSTS]:
       getOptionalArrayField(monitor[ConfigKey.HOSTS]) || defaultFields[ConfigKey.HOSTS],
@@ -70,7 +70,7 @@ export const getNormalizeTCPFields = ({
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
     [ConfigKey.METADATA]: {
-      ...DEFAULT_FIELDS[DataStream.TCP][ConfigKey.METADATA],
+      ...DEFAULT_FIELDS[MonitorTypeEnum.TCP][ConfigKey.METADATA],
       is_tls_enabled: getHasTLSFields(monitor),
     },
   };

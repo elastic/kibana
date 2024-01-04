@@ -121,7 +121,7 @@ export class DetectionsPageObject extends FtrService {
 
   async preview(): Promise<void> {
     await this.common.clickAndValidate(
-      'queryPreviewButton',
+      'previewSubmitButton',
       'queryPreviewCustomHistogram',
       undefined,
       500

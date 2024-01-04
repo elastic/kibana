@@ -10,11 +10,13 @@ import { EuiSteps, EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { InspectMonitorPortal } from './inspect_monitor_portal';
 import { ConfigKey, FormMonitorType, StepMap } from '../types';
+import { serializeNestedFormField } from '../form/formatter';
 import { AdvancedConfig } from '../advanced';
 import { MonitorTypePortal } from './monitor_type_portal';
 import { ReadOnlyCallout } from './read_only_callout';
 
 export const MonitorSteps = ({
+  canUsePublicLocations,
   stepMap,
   projectId,
   isEditFlow = false,
@@ -22,21 +24,19 @@ export const MonitorSteps = ({
 }: {
   stepMap: StepMap;
   readOnly?: boolean;
+  canUsePublicLocations?: boolean;
   isEditFlow?: boolean;
   projectId?: string;
 }) => {
-  const { watch } = useFormContext();
+  const { watch, formState } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
   const steps = stepMap[type];
 
   return (
     <>
-      {readOnly ? (
-        <>
-          <ReadOnlyCallout projectId={projectId} />
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
+      {isEditFlow && (
+        <ReadOnlyCallout projectId={projectId} canUsePublicLocations={canUsePublicLocations} />
+      )}
       {isEditFlow ? (
         steps.map((step) => (
           <div key={step.title}>
@@ -55,7 +55,10 @@ export const MonitorSteps = ({
       )}
       <AdvancedConfig readOnly={readOnly} />
       <MonitorTypePortal monitorType={type} />
-      <InspectMonitorPortal />
+      <InspectMonitorPortal
+        isValid={formState.isValid}
+        monitorFields={serializeNestedFormField(watch())}
+      />
     </>
   );
 };

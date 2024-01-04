@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { isEmpty, pickBy, some, isBoolean } from 'lodash';
+import { isEmpty, pickBy, some, isBoolean, isNumber } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
+import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
 import type { SavedQuerySavedObject } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
-import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
-import { createSavedQueryRequestSchema } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray } from '../utils';
+import { createSavedQueryRequestSchema } from '../../../common/api';
 
 export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -50,6 +50,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           interval,
           snapshot,
           removed,
+          timeout,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           ecs_mapping,
         } = request.body;
@@ -80,13 +81,14 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               interval,
               snapshot,
               removed,
+              timeout,
               ecs_mapping: convertECSMappingToArray(ecs_mapping),
               created_by: currentUser,
               created_at: new Date().toISOString(),
               updated_by: currentUser,
               updated_at: new Date().toISOString(),
             },
-            (value) => !isEmpty(value) || isBoolean(value)
+            (value) => !isEmpty(value) || isBoolean(value) || isNumber(value)
           )
         );
 
@@ -102,6 +104,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             snapshot: attributes.snapshot,
             version: attributes.version,
             interval: attributes.interval,
+            timeout: attributes.timeout,
             platform: attributes.platform,
             query: attributes.query,
             updated_at: attributes.updated_at,
@@ -109,7 +112,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             saved_object_id: savedQuerySO.id,
             ecs_mapping,
           },
-          (value) => !isEmpty(value)
+          (value) => !isEmpty(value) || isNumber(value)
         );
 
         return response.ok({

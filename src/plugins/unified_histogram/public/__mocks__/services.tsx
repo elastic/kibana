@@ -33,7 +33,9 @@ export const unifiedHistogramServicesMock = {
         suggestions: jest.fn(() => allSuggestionsMock),
       };
     }),
-    EditLensConfigPanelApi: jest.fn().mockResolvedValue(<span>Lens Config Panel Component</span>),
+    EditLensConfigPanelApi: jest
+      .fn()
+      .mockResolvedValue(() => <span>Lens Config Panel Component</span>),
   },
   storage: {
     get: jest.fn(),

@@ -28,7 +28,6 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { EnrollmentToken } from '../common';
 import { DocLink } from './doc_link';
 import { getCommandLineSnippet } from './get_command_line_snippet';
 import { SubmitErrorCallout } from './submit_error_callout';
@@ -38,6 +37,7 @@ import { useForm } from './use_form';
 import { useKibana } from './use_kibana';
 import { useVerification } from './use_verification';
 import { useVisibility } from './use_visibility';
+import type { EnrollmentToken } from '../common';
 
 export interface EnrollmentTokenFormValues {
   token: string;

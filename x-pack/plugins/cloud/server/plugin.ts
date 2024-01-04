@@ -14,6 +14,7 @@ import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
 import { decodeCloudId, DecodedCloudId } from '../common/decode_cloud_id';
+import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 
 interface PluginsSetup {
@@ -25,7 +26,11 @@ interface PluginsSetup {
  */
 export interface CloudSetup {
   /**
-   * The deployment's Cloud ID. Only available when running on Elastic Cloud.
+   * This is the ID of the Cloud deployment to which the Kibana instance belongs.
+   *
+   * @example `eastus2.azure.elastic-cloud.com:9243$59ef636c6917463db140321484d63cfa$a8b109c08adc43279ef48f29af1a3911`
+   *
+   * @note The `cloudId` is a concatenation of the deployment name and a hash. Users can update the deployment name, changing the `cloudId`. However, the changed `cloudId` will not be re-injected into `kibana.yml`. If you need the current `cloudId` the best approach is to split the injected `cloudId` on the semi-colon, and replace the first element with the `persistent.cluster.metadata.display_name` value as provided by a call to `GET _cluster/settings`.
    */
   cloudId?: string;
   /**
@@ -41,15 +46,27 @@ export interface CloudSetup {
    */
   kibanaUrl?: string;
   /**
-   * {host} from the deployment url https://<deploymentId>.<application>.<host><?:port>
+   * This is the URL to the "projects" interface on cloud.
+   *
+   * @example `https://cloud.elastic.co/projects`
+   */
+  projectsUrl?: string;
+  /**
+   * This is the URL of the Cloud interface.
+   *
+   * @example `https://cloud.elastic.co` (on the ESS production environment)
+   */
+  baseUrl?: string;
+  /**
+   * {host} of the deployment url https://<deploymentId>.<application>.<host><?:port>
    */
   cloudHost?: string;
   /**
-   * {port} from the deployment url https://<deploymentId>.<application>.<host><?:port>
+   * {port} of the deployment url https://<deploymentId>.<application>.<host><?:port>
    */
   cloudDefaultPort?: string;
   /**
-   * `true` when running on Elastic Cloud.
+   * This is set to `true` for both ESS and ECE deployments.
    */
   isCloudEnabled: boolean;
   /**
@@ -71,6 +88,35 @@ export interface CloudSetup {
     url?: string;
     secretToken?: string;
   };
+  /**
+   * `true` when running on Serverless Elastic Cloud
+   * Note that `isCloudEnabled` will always be true when `isServerlessEnabled` is.
+   */
+  isServerlessEnabled: boolean;
+  /**
+   * Serverless configuration.
+   *
+   * @note We decided to place any cloud URL values at the top level of this object
+   *       even if they contain serverless specific values. All other serverless
+   *       config should live in this object.
+   */
+  serverless: {
+    /**
+     * The serverless projectId.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectId?: string;
+    /**
+     * The serverless project name.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectName?: string;
+    /**
+     * The serverless project type.
+     * Will always be present if `isServerlessEnabled` is `true`
+     */
+    projectType?: string;
+  };
 }
 
 /**
@@ -78,9 +124,21 @@ export interface CloudSetup {
  */
 export interface CloudStart {
   /**
-   * `true` when running on Elastic Cloud.
+   * This is set to `true` for both ESS and ECE deployments.
    */
   isCloudEnabled: boolean;
+  /**
+   * This is the URL to the "projects" interface on cloud.
+   *
+   * @example `https://cloud.elastic.co/projects`
+   */
+  projectsUrl?: string;
+  /**
+   * This is the URL of the Cloud interface.
+   *
+   * @example `https://cloud.elastic.co` (on the ESS production environment)
+   */
+  baseUrl?: string;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
@@ -94,11 +152,19 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
 
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
+    const projectId = this.config.serverless?.project_id;
+    const projectType = this.config.serverless?.project_type;
+    const isServerlessEnabled = !!projectId;
+    const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
+
     registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
     registerCloudUsageCollector(usageCollection, {
       isCloudEnabled,
       trialEndDate: this.config.trial_end_date,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
+      deploymentId,
+      projectId,
+      projectType,
     });
 
     let decodedId: DecodedCloudId | undefined;
@@ -107,9 +173,10 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     }
 
     return {
+      ...this.getCloudUrls(),
       cloudId: this.config.id,
       instanceSizeMb: readInstanceSizeMb(),
-      deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
+      deploymentId,
       elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       cloudHost: decodedId?.host,
@@ -121,12 +188,28 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,
       },
+      isServerlessEnabled,
+      serverless: {
+        projectId,
+        projectName: this.config.serverless?.project_name,
+        projectType,
+      },
     };
   }
 
-  public start() {
+  public start(): CloudStart {
     return {
+      ...this.getCloudUrls(),
       isCloudEnabled: getIsCloudEnabled(this.config.id),
+    };
+  }
+
+  private getCloudUrls() {
+    const { base_url: baseUrl } = this.config;
+    const projectsUrl = getFullCloudUrl(baseUrl, this.config.projects_url);
+    return {
+      baseUrl,
+      projectsUrl,
     };
   }
 }

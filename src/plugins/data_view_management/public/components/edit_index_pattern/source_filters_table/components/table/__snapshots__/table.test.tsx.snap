@@ -4,6 +4,7 @@ exports[`Table editing should show a save button 1`] = `
 <div>
   <EuiButtonIcon
     aria-label="Edit"
+    data-test-subj="edit_filter-tim*"
     iconType="pencil"
     onClick={[Function]}
     size="s"
@@ -91,6 +92,7 @@ exports[`Table should render normally 1`] = `
     }
   }
   responsive={true}
+  searchFormat="eql"
   sorting={true}
   tableLayout="fixed"
 />

@@ -28,9 +28,16 @@ export const CALLOUT_TITLE = i18n.translate(
   }
 );
 
-export const RESET = i18n.translate(
-  'xpack.elasticAssistant.dataAnonymization.settings.anonymizationSettings.resetButton',
+export const SETTINGS_TITLE = i18n.translate(
+  'xpack.elasticAssistant.dataAnonymization.settings.anonymizationSettings.settingsTitle',
   {
-    defaultMessage: 'Reset',
+    defaultMessage: 'Anonymization',
+  }
+);
+export const SETTINGS_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.dataAnonymization.settings.anonymizationSettings.settingsDescription',
+  {
+    defaultMessage:
+      "When adding Prompt Context throughout the Security App that may contain sensitive information, you can choose which fields are sent, and whether to enable anonymization for these fields. This will replace the field's value with a random string before sending the conversation. Helpful defaults are provided below.",
   }
 );

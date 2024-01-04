@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { FlyoutPanel } from './types';
+import { FlyoutPanelProps } from './types';
 import { Action, ActionType } from './actions';
 
 export interface State {
   /**
    * Panel to render in the left section
    */
-  left: FlyoutPanel | undefined;
+  left: FlyoutPanelProps | undefined;
   /**
    * Panel to render in the right section
    */
-  right: FlyoutPanel | undefined;
+  right: FlyoutPanelProps | undefined;
   /**
    * Panels to render in the preview section
    */
-  preview: FlyoutPanel[];
+  preview: FlyoutPanelProps[];
 }
 
 export const initialState: State = {
@@ -90,7 +90,7 @@ export function reducer(state: State, action: Action) {
      * Navigates to the previous preview panel by removing the last entry in the array of preview panels.
      */
     case ActionType.previousPreviewPanel: {
-      const p: FlyoutPanel[] = [...state.preview];
+      const p: FlyoutPanelProps[] = [...state.preview];
       p.pop();
       return { ...state, preview: p };
     }

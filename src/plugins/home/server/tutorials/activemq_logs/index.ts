@@ -38,7 +38,7 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-activemq.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/activemq.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/activemq.svg'),
     artifacts: {
       dashboards: [
         {
@@ -54,7 +54,7 @@ export function activemqLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/activemq_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/activemq_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

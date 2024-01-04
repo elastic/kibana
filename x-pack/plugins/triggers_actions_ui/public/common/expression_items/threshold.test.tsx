@@ -23,35 +23,39 @@ describe('threshold expression', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="comparatorOptionsComboBox"]')).toMatchInlineSnapshot(`
-    <EuiSelect
-      data-test-subj="comparatorOptionsComboBox"
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "text": "Is above",
-            "value": ">",
-          },
-          Object {
-            "text": "Is above or equals",
-            "value": ">=",
-          },
-          Object {
-            "text": "Is below",
-            "value": "<",
-          },
-          Object {
-            "text": "Is below or equals",
-            "value": "<=",
-          },
-          Object {
-            "text": "Is between",
-            "value": "between",
-          },
-        ]
-      }
-      value="between"
-    />
+      <EuiSelect
+        data-test-subj="comparatorOptionsComboBox"
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "Is above",
+              "value": ">",
+            },
+            Object {
+              "text": "Is above or equals",
+              "value": ">=",
+            },
+            Object {
+              "text": "Is below",
+              "value": "<",
+            },
+            Object {
+              "text": "Is below or equals",
+              "value": "<=",
+            },
+            Object {
+              "text": "Is between",
+              "value": "between",
+            },
+            Object {
+              "text": "Not between",
+              "value": "notBetween",
+            },
+          ]
+        }
+        value="between"
+      />
     `);
   });
 
@@ -111,6 +115,23 @@ describe('threshold expression', () => {
     expect(onChangeSelectedThresholdComparator).toHaveBeenCalled();
   });
 
+  it('renders threshold unit correctly', async () => {
+    const wrapper = mountWithIntl(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        threshold={[10]}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={jest.fn()}
+        onChangeSelectedThresholdComparator={jest.fn()}
+        unit="%"
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="thresholdPopover"]').last().text()).toMatchInlineSnapshot(
+      `"Is above 10%"`
+    );
+  });
+
   it('renders the correct number of threshold inputs', async () => {
     const wrapper = mountWithIntl(
       <ThresholdExpression
@@ -154,13 +175,13 @@ describe('threshold expression', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="alertThresholdInput"]')).toMatchInlineSnapshot(`
-    <EuiFieldNumber
-      data-test-subj="alertThresholdInput"
-      isInvalid={false}
-      min={0}
-      onChange={[Function]}
-      value={0}
-    />
-    `);
+          <EuiFieldNumber
+            data-test-subj="alertThresholdInput"
+            isInvalid={false}
+            min={0}
+            onChange={[Function]}
+            value={0}
+          />
+        `);
   });
 });

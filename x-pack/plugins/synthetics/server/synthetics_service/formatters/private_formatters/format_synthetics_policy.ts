@@ -7,24 +7,29 @@
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
+import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
-import { ConfigKey, DataStream, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
 import { replaceStringWithParams } from '../formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
+export interface ProcessorFields {
+  location_name: string;
+  location_id: string;
+  'monitor.project.name': string;
+  'monitor.project.id': string;
+  'monitor.id': string;
+  test_run_id: string;
+  run_once: boolean;
+  space_id: string;
+}
+
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
-  monitorType: DataStream,
-  config: Partial<
-    MonitorFields & {
-      location_name: string;
-      location_id: string;
-      'monitor.project.name': string;
-      'monitor.project.id': string;
-    }
-  >,
+  monitorType: MonitorTypeEnum,
+  config: Partial<MonitorFields & ProcessorFields>,
   params: Record<string, string>,
   isLegacy?: boolean
 ) => {
@@ -63,6 +68,11 @@ export const formatSyntheticsPolicy = (
       }
     }
   });
+
+  const processorItem = dataStream?.vars?.processors;
+  if (processorItem) {
+    processorItem.value = processorsFormatter(config as MonitorFields & ProcessorFields);
+  }
 
   // TODO: remove this once we remove legacy support
   const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];

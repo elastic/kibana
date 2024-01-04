@@ -8,8 +8,11 @@
 import { useCallback } from 'react';
 import type { BulkActionSummary } from '..';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { BulkActionEditPayload } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  BulkActionEditPayload,
+  BulkActionType,
+} from '../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { explainBulkEditSuccess, explainBulkSuccess, summarizeBulkSuccess } from './translations';
 
 interface ShowBulkSuccessToastProps {
@@ -24,7 +27,7 @@ export function useShowBulkSuccessToast() {
   return useCallback(
     ({ actionType, summary, editPayload }: ShowBulkSuccessToastProps) => {
       const text =
-        actionType === BulkActionType.edit
+        actionType === BulkActionTypeEnum.edit
           ? explainBulkEditSuccess(editPayload ?? [], summary)
           : explainBulkSuccess(actionType, summary);
 

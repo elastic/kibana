@@ -12,9 +12,9 @@ import type {
   ExportedTimelines,
   ExportedNotes,
   ExportTimelineNotFoundError,
-} from '../../../../../../common/types/timeline/api';
-import type { Note } from '../../../../../../common/types/timeline/note/api';
-import type { PinnedEvent } from '../../../../../../common/types/timeline/pinned_event/api';
+  Note,
+  PinnedEvent,
+} from '../../../../../../common/api/timeline';
 
 import type { FrameworkRequest } from '../../../../framework';
 import * as noteLib from '../../../saved_object/notes';

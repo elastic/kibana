@@ -6,7 +6,7 @@
  */
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { LIGHT_THEME } from '@elastic/charts';
+import { LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import {
   ALERT_CONTEXT,
@@ -18,9 +18,8 @@ import moment from 'moment';
 import { useTheme } from '@emotion/react';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { get, identity } from 'lodash';
-import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
@@ -32,7 +31,7 @@ import {
 } from '../../../../../common/alerting/logs/log_threshold';
 import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
-import { ExplainLogRateSpikes } from './components/explain_log_rate_spike';
+import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
 import { useLicense } from '../../../../hooks/use_license';
 
@@ -44,7 +43,7 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const { observability, logsShared } = useKibanaContextForPlugin().services;
+  const { logsShared } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
@@ -70,7 +69,7 @@ const AlertDetailsAppSection = ({
   });
 
   const { hasAtLeast } = useLicense();
-  const hasLicenseForExplainLogSpike = hasAtLeast('platinum');
+  const hasLicenseForLogRateAnalysis = hasAtLeast('platinum');
 
   useEffect(() => {
     /**
@@ -126,7 +125,7 @@ const AlertDetailsAppSection = ({
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme: LIGHT_THEME }}
+                chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id={'threshold-ratio-chart'}
                 threshold={rule.params.count.value}
@@ -193,7 +192,7 @@ const AlertDetailsAppSection = ({
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                chartProps={{ theme, baseTheme: LIGHT_THEME }}
+                chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id="logCountThreshold"
                 threshold={rule.params.count.value}
@@ -237,19 +236,17 @@ const AlertDetailsAppSection = ({
     );
   };
 
-  const getExplainLogRateSpikesSection = () => {
-    return hasLicenseForExplainLogSpike ? <ExplainLogRateSpikes rule={rule} alert={alert} /> : null;
+  const getLogRateAnalysisSection = () => {
+    return hasLicenseForLogRateAnalysis ? <LogRateAnalysis rule={rule} alert={alert} /> : null;
   };
 
   return (
-    <CoPilotContextProvider value={observability.getCoPilotService()}>
-      <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
-        {getLogRatioChart()}
-        {getLogCountChart()}
-        {getExplainLogRateSpikesSection()}
-        {getLogsHistoryChart()}
-      </EuiFlexGroup>
-    </CoPilotContextProvider>
+    <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
+      {getLogRatioChart()}
+      {getLogCountChart()}
+      {getLogRateAnalysisSection()}
+      {getLogsHistoryChart()}
+    </EuiFlexGroup>
   );
 };
 

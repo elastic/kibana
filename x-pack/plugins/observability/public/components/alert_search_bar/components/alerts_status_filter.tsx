@@ -8,7 +8,7 @@
 import { EuiButtonGroup, EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ALL_ALERTS, ACTIVE_ALERTS, RECOVERED_ALERTS } from '../constants';
+import { ALL_ALERTS, ACTIVE_ALERTS, RECOVERED_ALERTS, UNTRACKED_ALERTS } from '../constants';
 import { AlertStatusFilterProps } from '../types';
 import { AlertStatus } from '../../../../common/typings';
 
@@ -30,6 +30,12 @@ const options: EuiButtonGroupOptionProps[] = [
     label: RECOVERED_ALERTS.label,
     value: RECOVERED_ALERTS.query,
     'data-test-subj': 'alert-status-filter-recovered-button',
+  },
+  {
+    id: UNTRACKED_ALERTS.status,
+    label: UNTRACKED_ALERTS.label,
+    value: UNTRACKED_ALERTS.query,
+    'data-test-subj': 'alert-status-filter-untracked-button',
   },
 ];
 

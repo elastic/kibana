@@ -18,6 +18,8 @@ export enum InfraTelemetryEventTypes {
   HOST_FLYOUT_FILTER_REMOVED = 'Host Flyout Filter Removed',
   HOST_FLYOUT_FILTER_ADDED = 'Host Flyout Filter Added',
   HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED = 'Host View Total Host Count Retrieved',
+  ASSET_DETAILS_FLYOUT_VIEWED = 'Asset Details Flyout Viewed',
+  ASSET_DETAILS_PAGE_VIEWED = 'Asset Details Page Viewed',
 }
 
 export interface HostsViewQuerySubmittedParams {
@@ -39,13 +41,25 @@ export interface HostFlyoutFilterActionParams {
 
 export interface HostsViewQueryHostsCountRetrievedParams {
   total: number;
+  with_query: boolean;
+  with_filters: boolean;
+}
+
+export interface AssetDetailsFlyoutViewedParams {
+  assetType: string;
+  componentName: string;
+  tabId?: string;
+}
+export interface AssetDetailsPageViewedParams extends AssetDetailsFlyoutViewedParams {
+  integrations?: string[];
 }
 
 export type InfraTelemetryEventParams =
   | HostsViewQuerySubmittedParams
   | HostEntryClickedParams
   | HostFlyoutFilterActionParams
-  | HostsViewQueryHostsCountRetrievedParams;
+  | HostsViewQueryHostsCountRetrievedParams
+  | AssetDetailsFlyoutViewedParams;
 
 export interface ITelemetryClient {
   reportHostEntryClicked(params: HostEntryClickedParams): void;
@@ -53,6 +67,8 @@ export interface ITelemetryClient {
   reportHostFlyoutFilterAdded(params: HostFlyoutFilterActionParams): void;
   reportHostsViewTotalHostCountRetrieved(params: HostsViewQueryHostsCountRetrievedParams): void;
   reportHostsViewQuerySubmitted(params: HostsViewQuerySubmittedParams): void;
+  reportAssetDetailsFlyoutViewed(params: AssetDetailsFlyoutViewedParams): void;
+  reportAssetDetailsPageViewed(params: AssetDetailsPageViewedParams): void;
 }
 
 export type InfraTelemetryEvent =
@@ -75,4 +91,12 @@ export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED;
       schema: RootSchema<HostsViewQueryHostsCountRetrievedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED;
+      schema: RootSchema<AssetDetailsFlyoutViewedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED;
+      schema: RootSchema<AssetDetailsPageViewedParams>;
     };

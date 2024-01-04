@@ -6,7 +6,7 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import type { QueryOperator } from '@kbn/timelines-plugin/common';
-import { DataProviderType } from '../../../../../../common/types/timeline/api';
+import { DataProviderType } from '../../../../../../common/api/timeline';
 import { useInsightQuery } from './use_insight_query';
 import { TestProviders } from '../../../../mock';
 import type { UseInsightQuery, UseInsightQueryResult } from './use_insight_query';

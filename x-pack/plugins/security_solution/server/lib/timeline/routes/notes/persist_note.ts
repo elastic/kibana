@@ -17,7 +17,7 @@ import type { ConfigType } from '../../../..';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { persistNoteSchema } from '../../schemas/notes';
+import { persistNoteSchema } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
 
 export const persistNoteRoute = (
@@ -25,44 +25,49 @@ export const persistNoteRoute = (
   _: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.patch(
-    {
+  router.versioned
+    .patch({
       path: NOTE_URL,
-      validate: {
-        body: buildRouteValidationWithExcess(persistNoteSchema),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+      access: 'public',
+    })
+    .addVersion(
+      {
+        validate: {
+          request: { body: buildRouteValidationWithExcess(persistNoteSchema) },
+        },
+        version: '2023-10-31',
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const { note } = request.body;
-        const noteId = request.body?.noteId ?? null;
+        try {
+          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const { note } = request.body;
+          const noteId = request.body?.noteId ?? null;
 
-        const res = await persistNote({
-          request: frameworkRequest,
-          noteId,
-          note: {
-            ...note,
-            timelineId: note.timelineId || null,
-          },
-          overrideOwner: true,
-        });
+          const res = await persistNote({
+            request: frameworkRequest,
+            noteId,
+            note: {
+              ...note,
+              timelineId: note.timelineId || null,
+            },
+            overrideOwner: true,
+          });
 
-        return response.ok({
-          body: { data: { persistNote: res } },
-        });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return response.ok({
+            body: { data: { persistNote: res } },
+          });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

@@ -188,6 +188,7 @@ describe('mappingFromFieldMap', () => {
       dynamic: 'strict',
       properties: {
         '@timestamp': {
+          ignore_malformed: false,
           type: 'date',
         },
         event: {
@@ -241,6 +242,11 @@ describe('mappingFromFieldMap', () => {
                 },
                 reason: {
                   type: 'keyword',
+                  fields: {
+                    text: {
+                      type: 'match_only_text',
+                    },
+                  },
                 },
                 rule: {
                   properties: {
@@ -305,6 +311,9 @@ describe('mappingFromFieldMap', () => {
                 workflow_tags: {
                   type: 'keyword',
                 },
+                workflow_assignee_ids: {
+                  type: 'keyword',
+                },
               },
             },
             space_ids: {
@@ -362,6 +371,7 @@ describe('mappingFromFieldMap', () => {
                 },
                 system_status: { type: 'keyword' },
                 workflow_reason: { type: 'keyword' },
+                workflow_status_updated_at: { type: 'date' },
                 workflow_user: { type: 'keyword' },
               },
             },

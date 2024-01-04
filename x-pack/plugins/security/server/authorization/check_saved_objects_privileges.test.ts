@@ -6,10 +6,13 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import type {
+  CheckPrivileges,
+  CheckPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 
-import type { SpacesService } from '../plugin';
 import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
-import type { CheckPrivileges, CheckPrivilegesWithRequest } from './types';
+import type { SpacesService } from '../plugin';
 
 let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
 let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;

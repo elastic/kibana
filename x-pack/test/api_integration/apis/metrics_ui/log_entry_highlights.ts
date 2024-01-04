@@ -19,6 +19,7 @@ import {
   logEntriesHighlightsResponseRT,
 } from '@kbn/logs-shared-plugin/common';
 
+import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const KEY_BEFORE_START = {
@@ -112,14 +113,14 @@ export default function ({ getService }: FtrProviderContext) {
 
           // Entries fall within range
           // @kbn/expect doesn't have a `lessOrEqualThan` or `moreOrEqualThan` comparators
-          expect(firstEntry.cursor.time >= KEY_BEFORE_START.time).to.be(true);
-          expect(lastEntry.cursor.time <= KEY_AFTER_END.time).to.be(true);
+          expect(firstEntry.cursor.time >= moment(KEY_BEFORE_START.time).toISOString()).to.be(true);
+          expect(lastEntry.cursor.time <= moment(KEY_AFTER_END.time).toISOString()).to.be(true);
 
           // All entries contain the highlights
           entries.forEach((entry) => {
             entry.columns.forEach((column) => {
               if ('message' in column && 'highlights' in column.message[0]) {
-                expect(column.message[0].highlights).to.eql(['message', 'of', 'document', '0']);
+                expect(column.message[0].highlights).to.eql(['message of document 0']);
               }
             });
           });
