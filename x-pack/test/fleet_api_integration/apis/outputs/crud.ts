@@ -117,6 +117,22 @@ export default function (providerContext: FtrProviderContext) {
     return agentResponse._id;
   };
 
+  const clearAgents = async () => {
+    try {
+      await es.deleteByQuery({
+        index: '.fleet-agents',
+        refresh: true,
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+      });
+    } catch (err) {
+      // index doesn't exist
+    }
+  };
+
   describe('fleet_outputs_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
@@ -1365,25 +1381,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should store secrets if fleet server meets minimum version', async function () {
+        await clearAgents();
         await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
-        await es.index({
-          index: '.fleet-agents',
-          refresh: true,
-          body: {
-            access_api_key_id: 'api-key-3',
-            active: true,
-            policy_id: fleetServerPolicyId,
-            type: 'PERMANENT',
-            local_metadata: {
-              host: { hostname: 'server_3' },
-              elastic: { agent: { version: '8.12.0' } },
-            },
-            user_provided_metadata: {},
-            enrolled_at: '2022-06-21T12:14:25Z',
-            last_checkin: '2022-06-27T12:28:29Z',
-            tags: ['tag1'],
-          },
-        });
 
         const res = await supertest
           .post(`/api/fleet/outputs`)
@@ -1414,24 +1413,34 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should not store secrets if fleet server does not meet minimum version', async function () {
         await disableOutputSecrets();
-        await es.index({
-          index: '.fleet-agents',
-          refresh: true,
-          body: {
-            access_api_key_id: 'api-key-3',
-            active: true,
-            policy_id: fleetServerPolicyId,
-            type: 'PERMANENT',
-            local_metadata: {
-              host: { hostname: 'server_3' },
-              elastic: { agent: { version: '7.0.0' } },
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '7.0.0');
+
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Logstash Output',
+            type: 'logstash',
+            hosts: ['test.fr:443'],
+            ssl: {
+              certificate: 'CERTIFICATE',
+              certificate_authorities: ['CA1', 'CA2'],
             },
-            user_provided_metadata: {},
-            enrolled_at: '2022-06-21T12:14:25Z',
-            last_checkin: '2022-06-27T12:28:29Z',
-            tags: ['tag1'],
-          },
-        });
+            config_yaml: 'shipper: {}',
+            secrets: { ssl: { key: 'KEY' } },
+          })
+          .expect(200);
+
+        expect(Object.keys(res.body.item)).not.to.contain('secrets');
+        expect(Object.keys(res.body.item)).to.contain('ssl');
+        expect(Object.keys(res.body.item.ssl)).to.contain('key');
+        expect(res.body.item.ssl.key).to.equal('KEY');
+      });
+
+      it('should not store secrets if there is no fleet server', async function () {
+        await disableOutputSecrets();
+        await clearAgents();
 
         const res = await supertest
           .post(`/api/fleet/outputs`)
@@ -1578,6 +1587,7 @@ export default function (providerContext: FtrProviderContext) {
 
         it('should delete secrets when deleting an output', async function () {
           // Output secrets require at least one Fleet server on 8.12.0 or higher (and none under 8.12.0).
+          await clearAgents();
           await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
           const res = await supertest
             .post(`/api/fleet/outputs`)
