@@ -5398,11 +5398,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-containers@link:packages/presentation/kbn-presentation-containers":
+"@kbn/presentation-containers@link:packages/presentation/presentation_containers":
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-library@link:packages/presentation/kbn-presentation-library":
+"@kbn/presentation-library@link:packages/presentation/presentation_library":
   version "0.0.0"
   uid ""
 
@@ -5410,7 +5410,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/presentation-publishing@link:packages/presentation/kbn-presentation-publishing":
+"@kbn/presentation-publishing@link:packages/presentation/presentation_publishing":
   version "0.0.0"
   uid ""
 

@@ -92,6 +92,7 @@ export type {
   EmbeddableStartDependencies,
 } from './plugin';
 export type { EnhancementRegistryDefinition } from './types';
+export type { EmbeddableComponentFactory } from './registry/types';
 export { CreateEmbeddableComponent } from './registry/create_embeddable_component';
 
 export function plugin(initializerContext: PluginInitializerContext) {
