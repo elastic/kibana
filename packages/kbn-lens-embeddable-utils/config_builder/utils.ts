@@ -78,13 +78,13 @@ export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
 };
 
 export function isFormulaValue(value: unknown): value is FormulaValueConfig {
-  if (value && typeof value === 'object' && 'value' in value) {
+  if (value && typeof value === 'object' && 'formula' in value) {
     return true;
   }
   return false;
 }
 
-export function isPersistedIndexPatternLayer(
+export function isPersistedStateLayer(
   layer: unknown
 ): layer is PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] {
   if (layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer)) {

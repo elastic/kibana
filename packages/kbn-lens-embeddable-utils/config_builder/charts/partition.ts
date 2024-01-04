@@ -77,7 +77,7 @@ function buildFormulaLayer(
       ...getFormulaColumn(
         ACCESSOR,
         {
-          ...(typeof layer.value === 'string' ? { value: layer.value } : layer.value),
+          ...(typeof layer.value === 'string' ? { formula: layer.value } : layer.value),
         },
         dataView,
         formulaAPI
@@ -115,7 +115,7 @@ function getValueColumns(layer: LensTreeMapConfig) {
           return getValueColumn(`${ACCESSOR}_breakdown_${i}`, b as string);
         })
       : []),
-    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.value : layer.value),
+    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.formula : layer.value),
   ];
 }
 

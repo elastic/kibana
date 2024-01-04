@@ -38,16 +38,22 @@ const ACCESSOR = 'metric_formula_accessor';
 function buildVisualizationState(config: LensXYConfig): XYState {
   return {
     legend: {
-      isVisible: config.legend?.show || true,
-      position: config.legend?.position || 'left',
+      isVisible: config.legend?.show ?? true,
+      position: config.legend?.position ?? 'left',
     },
     preferredSeriesType: 'line',
     valueLabels: 'hide',
-    fittingFunction: 'None',
+    fittingFunction: config?.fittingFunction ?? 'None',
+    emphasizeFitting: config?.emphasizeFitting ?? false,
     axisTitlesVisibilitySettings: {
-      x: true,
-      yLeft: true,
+      x: config.axisTitleVisibility?.showXAxisTitle ?? true,
+      yLeft: config.axisTitleVisibility?.showYAxisTitle ?? true,
       yRight: true,
+    },
+    yLeftExtent: {
+      mode: config.yBounds?.mode ?? 'full',
+      lowerBound: config.yBounds?.lowerBound,
+      upperBound: config.yBounds?.upperBound,
     },
     tickLabelsVisibilitySettings: {
       x: true,
@@ -123,7 +129,7 @@ function buildVisualizationState(config: LensXYConfig): XYState {
             xAccessor: `${ACCESSOR}${i}_x`,
             ...(layer.breakdown
               ? {
-                  splitAccessor: `${ACCESSOR}${i}_y}`,
+                  splitAccessor: `${ACCESSOR}${i}_y`,
                 }
               : {}),
             accessors: [`${ACCESSOR}${i}`],
@@ -148,7 +154,7 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
     getValueColumn(`${ACCESSOR}${i}_x`, layer.xAxis as string),
     getValueColumn(
       `${ACCESSOR}${i}`,
-      isFormulaValue(layer.value) ? layer.value.value : layer.value,
+      isFormulaValue(layer.value) ? layer.value.formula : layer.value,
       'number'
     ),
   ];
@@ -164,7 +170,7 @@ function buildFormulaLayer(
     const resultLayer = {
       ...getFormulaColumn(
         `${ACCESSOR}${i}`,
-        isFormulaValue(layer.value) ? layer.value : { value: layer.value },
+        isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
         dataView,
         formulaAPI
       ),
@@ -195,7 +201,7 @@ function buildFormulaLayer(
     return {
       ...getFormulaColumn(
         `${ACCESSOR}${i}`,
-        isFormulaValue(layer.value) ? layer.value : { value: layer.value },
+        isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
         dataView,
         formulaAPI
       ),

@@ -44,7 +44,7 @@ function buildVisualizationState(config: LensMetricConfig): MetricVisualizationS
     layerType: 'data',
     metricAccessor: ACCESSOR,
     color: layer.seriesColor,
-    // subtitle: layer.subtitle,
+    subtitle: layer.subtitle,
     showBar: false,
 
     ...(layer.querySecondaryMetric
@@ -123,7 +123,7 @@ function buildFormulaLayer(
     [DEFAULT_LAYER_ID]: {
       ...getFormulaColumn(
         ACCESSOR,
-        isFormulaValue(layer.value) ? layer.value : { value: layer.value },
+        isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
         dataView,
         formulaAPI
       ),
@@ -134,7 +134,7 @@ function buildFormulaLayer(
             linkToLayers: [DEFAULT_LAYER_ID],
             ...getFormulaColumn(
               `${ACCESSOR}_trendline`,
-              isFormulaValue(layer.value) ? layer.value : { value: layer.value },
+              isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
               dataView,
               formulaAPI,
               baseLayer
@@ -166,7 +166,7 @@ function buildFormulaLayer(
       columnName,
       isFormulaValue(layer.querySecondaryMetric)
         ? layer.querySecondaryMetric
-        : { value: layer.querySecondaryMetric },
+        : { formula: layer.querySecondaryMetric },
       dataView,
       formulaAPI
     );
@@ -181,7 +181,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('max');
     const formulaColumn = getFormulaColumn(
       columnName,
-      isFormulaValue(layer.queryMaxValue) ? layer.queryMaxValue : { value: layer.queryMaxValue },
+      isFormulaValue(layer.queryMaxValue) ? layer.queryMaxValue : { formula: layer.queryMaxValue },
       dataView,
       formulaAPI
     );
@@ -203,12 +203,12 @@ function getValueColumns(layer: LensMetricConfig) {
     ...(layer.breakdown
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown as string)]
       : []),
-    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.value : layer.value),
+    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.formula : layer.value),
     ...(layer.queryMaxValue
       ? [
           getValueColumn(
             getAccessorName('max'),
-            isFormulaValue(layer.queryMaxValue) ? layer.queryMaxValue.value : layer.queryMaxValue
+            isFormulaValue(layer.queryMaxValue) ? layer.queryMaxValue.formula : layer.queryMaxValue
           ),
         ]
       : []),
@@ -217,7 +217,7 @@ function getValueColumns(layer: LensMetricConfig) {
           getValueColumn(
             getAccessorName('secondary'),
             isFormulaValue(layer.querySecondaryMetric)
-              ? layer.querySecondaryMetric.value
+              ? layer.querySecondaryMetric.formula
               : layer.querySecondaryMetric
           ),
         ]

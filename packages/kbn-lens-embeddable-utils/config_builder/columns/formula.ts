@@ -17,11 +17,11 @@ export function getFormulaColumn(
   formulaAPI: FormulaPublicApi,
   baseLayer?: PersistedIndexPatternLayer
 ): PersistedIndexPatternLayer {
-  const { value, ...rest } = config;
+  const { formula, ...rest } = config;
   const formulaLayer = formulaAPI.insertOrReplaceFormulaColumn(
     id,
-    { formula: value, ...rest },
-    baseLayer || { columnOrder: [], columns: {} },
+    { formula, ...rest },
+    baseLayer ?? { columnOrder: [], columns: {} },
     dataView
   );
 

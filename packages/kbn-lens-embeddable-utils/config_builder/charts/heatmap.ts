@@ -72,7 +72,7 @@ function buildFormulaLayer(
   const defaultLayer = {
     ...getFormulaColumn(
       ACCESSOR,
-      isFormulaValue(layer.value) ? layer.value : { value: layer.value },
+      isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
       dataView,
       formulaAPI
     ),
@@ -109,7 +109,7 @@ function getValueColumns(layer: LensHeatmapConfig) {
   return [
     ...(layer.breakdown ? [getValueColumn(getAccessorName('y'), layer.breakdown as string)] : []),
     getValueColumn(getAccessorName('x'), layer.xAxis as string),
-    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.value : layer.value),
+    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.formula : layer.value),
   ];
 }
 
