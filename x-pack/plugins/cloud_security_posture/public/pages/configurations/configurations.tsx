@@ -50,7 +50,11 @@ export const Configurations = () => {
           path={findingsNavigation.findings_default.path}
           render={() => (
             <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
-              <LatestFindingsContainer dataView={dataViewQuery.data!} />
+              <LatestFindingsContainer
+                dataView={dataViewQuery.data!}
+                dataViewRefetch={dataViewQuery.refetch}
+                dataViewIsRefetching={dataViewQuery.isRefetching}
+              />
             </TrackApplicationView>
           )}
         />
