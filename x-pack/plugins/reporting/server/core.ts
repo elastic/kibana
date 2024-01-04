@@ -159,7 +159,7 @@ export class ReportingCore {
 
     const { taskManager } = startDeps;
     const { executeTask } = this;
-    // enable this instance to generate reports and to monitor for pending reports
+    // enable this instance to generate reports
     await Promise.all([executeTask.init(taskManager)]);
   }
 

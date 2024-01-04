@@ -394,7 +394,7 @@ export class ExecuteReportTask implements ReportingTask {
             const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
             errorLogger(this.logger, errorMessage);
 
-            // Throw so Task manager can reschedule
+            // Throw so Task manager can clean up the failed task
             throw new Error(errorMessage);
           }
 
