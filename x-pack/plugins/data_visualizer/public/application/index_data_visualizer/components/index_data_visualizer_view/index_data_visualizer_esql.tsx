@@ -8,11 +8,10 @@
 import { css } from '@emotion/react';
 import React, { FC, useEffect, useMemo, useState, useCallback, useRef, useReducer } from 'react';
 import type { Required } from 'utility-types';
-import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { useTimefilter } from '@kbn/ml-date-picker';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { AggregateQuery } from '@kbn/es-query';
-import { from, Subscription, Observable, lastValueFrom } from 'rxjs';
-import { useTrackedPromise } from '@kbn/use-tracked-promise';
+import { Subscription, lastValueFrom } from 'rxjs';
 
 import {
   useEuiBreakpoint,
@@ -36,23 +35,18 @@ import {
   FROZEN_TIER_PREFERENCE,
 } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
-
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { search } from '@kbn/content-management-plugin/server/rpc/procedures/search';
-import { aggAvg } from '@kbn/data-plugin/common';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { debounce } from 'lodash';
 import { SupportedFieldType } from '../../../../../common/types';
 import { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
   DataStatsFetchProgress,
   FieldStats,
-  FieldStatsCommonRequestParams,
-  OverallStatsSearchStrategyParams,
   StringFieldStats,
 } from '../../../../../common/types/field_stats';
 import { getInitialProgress, getReducer } from '../../progress_utils';
@@ -730,6 +724,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const { uiSettings, data } = services;
   const euiTheme = useCurrentEuiTheme();
 
+  const [editableQuery, setEditableQuery] = useState<AggregateQuery>({ esql: '' });
+
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
 
@@ -1215,27 +1211,24 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
         <EuiSpacer size="m" />
+        <TextBasedLangEditor
+          query={query}
+          onTextLangQueryChange={debounce((q: AggregateQuery) => {
+            setEditableQuery(q);
+          }, 1000)}
+          onTextLangQuerySubmit={(q: AggregateQuery) => {
+            setQuery(q);
+          }}
+          expandCodeEditor={() => false}
+          isCodeEditorExpanded={true}
+          detectTimestamp={true}
+          hideMinimizeButton={true}
+          hideRunQueryText={true}
+        />
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder grow={false}>
-              <EuiFlexItem>
-                <TextBasedLangEditor
-                  query={query}
-                  onTextLangQueryChange={(q: AggregateQuery) => {
-                    setQuery(q);
-                    // setParam('esqlQuery', q);
-                    // refreshTimeFields(q);
-                  }}
-                  expandCodeEditor={() => false}
-                  isCodeEditorExpanded={true}
-                  onTextLangQuerySubmit={() => {}}
-                  detectTimestamp={true}
-                  hideMinimizeButton={true}
-                  hideRunQueryText={true}
-                />
-              </EuiFlexItem>
-
               {/* <SearchPanel
                 dataView={currentDataView}
                 searchString={searchString}

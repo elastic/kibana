@@ -277,7 +277,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     setGlobalState
   );
 
-  console.log(`--@@NON ESQL configs`, configs);
   useEffect(
     () => {
       switch (savedRandomSamplerPreference) {
