@@ -122,6 +122,6 @@ journey('ProjectMonitorReadOnly', async ({ page, params }) => {
   });
 
   after(async () => {
-    // await cleanTestMonitors(params);
+    await cleanTestMonitors(params);
   });
 });
