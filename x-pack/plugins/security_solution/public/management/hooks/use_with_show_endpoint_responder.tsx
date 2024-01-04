@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { isResponseActionSupported } from '../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ActionLogButton,
@@ -17,6 +18,8 @@ import { useConsoleManager } from '../components/console';
 import type { HostMetadata } from '../../../common/endpoint/types';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 import { RESPONDER_PAGE_TITLE } from './translations';
+import { getCommandKey } from '../components/endpoint_response_actions_list/components/hooks';
+import type { ConsoleResponseActionCommands } from '../../../common/endpoint/service/response_actions/constants';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
@@ -49,7 +52,15 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
                 endpointAgentId,
                 endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
                 endpointPrivileges,
-              }),
+              }).filter((command) =>
+                command.name !== 'status'
+                  ? isResponseActionSupported(
+                      'endpoint',
+                      getCommandKey(command.name as ConsoleResponseActionCommands),
+                      'manual'
+                    )
+                  : true
+              ),
               'data-test-subj': 'endpointResponseActionsConsole',
               storagePrefix: 'xpack.securitySolution.Responder',
               TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,

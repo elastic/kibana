@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { ResponseActionAgentType } from '../../endpoint/service/response_actions/constants';
+
 export interface SentinelOneAgentInfo {
   agent: {
     id: string;
-    type: string;
+    type: ResponseActionAgentType;
   };
   host: {
     name: string;
