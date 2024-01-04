@@ -27,12 +27,19 @@ const useKibanaMock = useKibana as jest.Mock;
 const useFetchRuleMock = useFetchRule as jest.Mock;
 const mockCases = casesPluginMock.createStartContract();
 
+const mockHttp = {
+  basePath: {
+    prepend: (url: string) => `wow${url}`,
+  },
+};
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract(),
       triggersActionsUi: triggersActionsUiMock.createStart(),
       cases: mockCases,
+      http: mockHttp,
     },
   });
 };
