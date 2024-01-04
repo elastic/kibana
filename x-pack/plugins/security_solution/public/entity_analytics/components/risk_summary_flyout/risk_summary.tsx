@@ -44,13 +44,17 @@ interface TableItem {
 }
 const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
+const ALERTS_FIELDS: string[] = [];
 
 export const RiskSummary = React.memo(
   ({ riskScoreData, queryId, openDetailsPanel }: RiskSummaryProps) => {
     const { data: userRisk } = riskScoreData;
     const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
     const { euiTheme } = useEuiTheme();
-    const { data: alertsData } = useRiskContributingAlerts({ riskScore: userRiskData, fields: [] });
+    const { data: alertsData } = useRiskContributingAlerts({
+      riskScore: userRiskData,
+      fields: ALERTS_FIELDS,
+    });
 
     const lensAttributes = useMemo(() => {
       return getRiskScoreSummaryAttributes({
