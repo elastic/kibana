@@ -10,11 +10,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { RiskInputsTab } from './tabs/risk_inputs';
-import type { UserRiskScore } from '../../../../common/search_strategy';
+import type { UserRiskScore, HostRiskScore } from '../../../../common/search_strategy';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 
-export const getRiskInputTab = (riskScore: UserRiskScore) => ({
+export const getRiskInputTab = (riskScore: UserRiskScore | HostRiskScore) => ({
   id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
   name: (

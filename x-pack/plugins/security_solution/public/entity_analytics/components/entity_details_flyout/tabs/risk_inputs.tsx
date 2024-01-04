@@ -15,10 +15,10 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { ActionColumn } from '../components/action_column';
 import { RiskInputsUtilityBar } from '../components/utility_bar';
 import { useRiskContributingAlerts } from '../../../hooks/use_risk_contributing_alerts';
-import type { UserRiskScore } from '../../../../../common/search_strategy';
+import type { UserRiskScore, HostRiskScore } from '../../../../../common/search_strategy';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
-  riskScore: UserRiskScore;
+  riskScore: UserRiskScore | HostRiskScore;
 }
 
 export interface AlertRawData {
