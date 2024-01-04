@@ -998,19 +998,11 @@ class OutputService {
       updateData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
-      if (
-        originalOutput.type === outputType.Logstash &&
-        data.type === outputType.Logstash &&
-        updateData.type === outputType.Logstash
-      ) {
+      if (data.type === outputType.Logstash && updateData.type === outputType.Logstash) {
         if (!data.ssl?.key && data.secrets?.ssl?.key) {
           updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
         }
-      } else if (
-        originalOutput.type === outputType.Kafka &&
-        data.type === outputType.Kafka &&
-        updateData.type === outputType.Kafka
-      ) {
+      } else if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         if (!data.password && data.secrets?.password) {
           updateData.password = data.secrets?.password as string;
         }
@@ -1018,7 +1010,6 @@ class OutputService {
           updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
         }
       } else if (
-        originalOutput.type === outputType.RemoteElasticsearch &&
         data.type === outputType.RemoteElasticsearch &&
         updateData.type === outputType.RemoteElasticsearch
       ) {
