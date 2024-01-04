@@ -59,8 +59,8 @@ const valueParsers = {
 };
 type ValueParserName = keyof typeof valueParsers;
 
-// This custom hook uses redux-toolkit to provide a generic framework to manage form state
-// and apply it to a final possibly nested configuration object suitable for passing on
+// The edit transform flyout uses a generic framework based on redux-toolkit to manage its form state
+// that supports applying its tate to a nested configuration object suitable for passing on
 // directly to an API call. For now this is only used for the transform edit form.
 // Once we apply the functionality to other places, e.g. the transform creation wizard,
 // the generic framework code in this file should be moved to a dedicated location.
