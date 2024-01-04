@@ -43,12 +43,12 @@ export const applyCriticalityToScore = ({
     return score;
   }
 
-  return bayesianUpdate({ max: RISK_SCORING_NORMALIZATION_MAX, modifiers: [modifier], score });
+  return bayesianUpdate({ max: RISK_SCORING_NORMALIZATION_MAX, modifier, score });
 };
 
 /**
- * Updates a score with the given modifiers using bayesian inference.
- * @param modifiers - The modifiers to be applied to the score.
+ * Updates a score with the given modifier using bayesian inference.
+ * @param modifier - The modifier to be applied to the score.
  * @param score - The score to modifiers are applied
  * @param max - The maximum value of the score.
  *
@@ -56,15 +56,13 @@ export const applyCriticalityToScore = ({
  */
 export const bayesianUpdate = ({
   max,
-  modifiers,
+  modifier,
   score,
 }: {
   max: number;
-  modifiers: number[];
+  modifier: number;
   score: number;
 }) => {
-  const modifier = modifiers.reduce((acc, curr) => acc * curr, 1);
-
   const priorProbability = score / (max - score);
   const newProbability = priorProbability * modifier;
   return (max * newProbability) / (1 + newProbability);
