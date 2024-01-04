@@ -54,7 +54,7 @@ export const HighCountCard: FC<CardProps> = ({ onClick, isSelected }) => (
       title={i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.title',
         {
-          defaultMessage: 'High Count',
+          defaultMessage: 'High count',
         }
       )}
       description={
