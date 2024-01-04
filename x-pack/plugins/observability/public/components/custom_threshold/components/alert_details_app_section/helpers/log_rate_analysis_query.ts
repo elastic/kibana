@@ -23,11 +23,11 @@ const getKuery = (
     metrics.length === 1 && metrics[0].aggType === 'count' && metrics[0].filter;
 
   if (filter && isOneCountConditionWithFilter) {
-    query = `${filter} and ${metrics[0].filter}`;
+    query = `(${filter}) and (${metrics[0].filter})`;
   } else if (isOneCountConditionWithFilter) {
-    query = metrics[0].filter!;
+    query = `(${metrics[0].filter!})`;
   } else if (filter) {
-    query = filter;
+    query = `(${filter})`;
   }
 
   if (groupBy) {

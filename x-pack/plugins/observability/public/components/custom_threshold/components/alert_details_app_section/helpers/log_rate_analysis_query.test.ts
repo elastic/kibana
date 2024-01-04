@@ -19,7 +19,13 @@ describe('buildEsQuery', () => {
     },
     criteria: [
       {
-        metrics: [{ name: 'A', aggType: Aggregators.COUNT, filter: 'host.name: host-1' }],
+        metrics: [
+          {
+            name: 'A',
+            aggType: Aggregators.COUNT,
+            filter: 'host.name: host-1 or host.name: host-2',
+          },
+        ],
         timeSize: 1,
         timeUnit: 'm',
         threshold: [90],
@@ -42,11 +48,12 @@ describe('buildEsQuery', () => {
     },
   };
   const testData: Array<{
+    title: string;
     params: CustomThresholdRuleTypeParams;
     alert: any;
   }> = [
-    // With optional filer, count filter and group by
     {
+      title: 'rule with optional filer, count filter and group by',
       params: mockedParams,
       alert: {
         fields: {
@@ -54,18 +61,18 @@ describe('buildEsQuery', () => {
         },
       },
     },
-    // With optional filer, count filter and multiple group by
     {
+      title: 'rule with optional filer, count filter and multiple group by',
       params: mockedParams,
       alert: mockedAlertWithMultipleGroups,
     },
-    // With optional filer, count filter and WITHOUT group by
     {
+      title: 'rule with optional filer, count filter and WITHOUT group by',
       params: mockedParams,
       alert: {},
     },
-    // With multiple metrics
     {
+      title: 'rule with multiple metrics',
       params: {
         ...mockedParams,
         criteria: [
@@ -85,7 +92,7 @@ describe('buildEsQuery', () => {
     },
   ];
 
-  test.each(testData)('should generate correct es query for %j', ({ alert, params }) => {
+  test.each(testData)('should generate correct es query for $title', ({ alert, params }) => {
     expect(getLogRateAnalysisEQQuery(alert, params)).toMatchSnapshot();
   });
 });
