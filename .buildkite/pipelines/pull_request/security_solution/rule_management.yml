@@ -2,7 +2,12 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      queue:
+        provider: gcp
+        preemptible: true
+        image: family/kibana-ubuntu-2004
+        imageProject: elastic-images-qa
+        machineType: n2-standard-4
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 8
@@ -14,7 +19,12 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
     label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      queue:
+        provider: gcp
+        preemptible: true
+        image: family/kibana-ubuntu-2004
+        imageProject: elastic-images-qa
+        machineType: n2-standard-4
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 4
@@ -26,7 +36,12 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      queue:
+        provider: gcp
+        preemptible: true
+        image: family/kibana-ubuntu-2004
+        imageProject: elastic-images-qa
+        machineType: n2-standard-4
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 8
@@ -38,7 +53,12 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      queue:
+        provider: gcp
+        preemptible: true
+        image: family/kibana-ubuntu-2004
+        imageProject: elastic-images-qa
+        machineType: n2-standard-4
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
