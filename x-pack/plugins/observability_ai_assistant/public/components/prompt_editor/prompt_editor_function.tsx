@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
+import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
-import usePrevious from 'react-use/lib/usePrevious';
 import { EuiCode, EuiPanel } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { type Message, MessageRole } from '../../../common';
 
@@ -41,8 +41,8 @@ export function PromptEditorFunction({
     initialJson: functionPayload,
   });
 
-  const handleChangeFunctionPayload = (params: string) => {
-    recalculateFunctionEditorLineCount();
+  const handleChangePayload = (args: string) => {
+    recalculateLineCount();
 
     onChange({
       role: MessageRole.Assistant,
@@ -50,12 +50,12 @@ export function PromptEditorFunction({
       function_call: {
         name: functionName,
         trigger: MessageRole.User,
-        arguments: params,
+        arguments: args,
       },
     });
   };
 
-  const recalculateFunctionEditorLineCount = useCallback(() => {
+  const recalculateLineCount = useCallback(() => {
     const newLineCount = model?.getLineCount() || 0;
     if (newLineCount !== functionEditorLineCount) {
       setFunctionEditorLineCount(newLineCount + 1);
@@ -63,8 +63,8 @@ export function PromptEditorFunction({
   }, [functionEditorLineCount, model]);
 
   useEffect(() => {
-    recalculateFunctionEditorLineCount();
-  }, [model, recalculateFunctionEditorLineCount]);
+    recalculateLineCount();
+  }, [model, recalculateLineCount]);
 
   useEffect(() => {
     if (previousPayload === undefined && initialJsonString) {
@@ -95,10 +95,14 @@ export function PromptEditorFunction({
           { defaultMessage: 'payloadEditor' }
         )}
         data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
+        editorDidMount={(editor) => {
+          editor.focus();
+          onFocus();
+        }}
         fullWidth
         height={'180px'}
-        languageId="json"
         isCopyable
+        languageId="json"
         languageConfiguration={{
           autoClosingPairs: [
             {
@@ -106,10 +110,6 @@ export function PromptEditorFunction({
               close: '}',
             },
           ],
-        }}
-        editorDidMount={(editor) => {
-          editor.focus();
-          onFocus();
         }}
         options={{
           accessibilitySupport: 'off',
@@ -136,7 +136,7 @@ export function PromptEditorFunction({
         }}
         transparentBackground
         value={functionPayload || ''}
-        onChange={handleChangeFunctionPayload}
+        onChange={handleChangePayload}
       />
     </EuiPanel>
   );
