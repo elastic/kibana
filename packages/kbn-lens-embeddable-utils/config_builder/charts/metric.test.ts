@@ -114,6 +114,7 @@ test('generates metric chart config', async () => {
           "layerType": "data",
           "metricAccessor": "metric_formula_accessor",
           "showBar": false,
+          "subtitle": undefined,
         },
       },
       "title": "test",

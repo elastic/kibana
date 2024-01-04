@@ -136,6 +136,7 @@ test('generates metric chart config', async () => {
             "yLeft": true,
             "yRight": true,
           },
+          "emphasizeFitting": false,
           "fittingFunction": "None",
           "gridlinesVisibilitySettings": Object {
             "x": true,
@@ -169,6 +170,11 @@ test('generates metric chart config', async () => {
             "yRight": true,
           },
           "valueLabels": "hide",
+          "yLeftExtent": Object {
+            "lowerBound": undefined,
+            "mode": "full",
+            "upperBound": undefined,
+          },
         },
       },
       "title": "test",
