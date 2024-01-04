@@ -6,7 +6,51 @@
  * Side Public License, v 1.
  */
 
-import { getHasApiKeys$ } from './get_has_api_keys';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { HasApiKeysResponse, getHasApiKeys$ } from './get_has_api_keys';
 
-let foo = getHasApiKeys$;
-foo = foo;
+describe('getHasApiKeys$', () => {
+  let mockHttp: HttpSetup;
+  beforeEach(() => {
+    mockHttp = httpServiceMock.createSetupContract({ basePath: '/test' });
+  });
+
+  it('should return the correct sequence of states', (done) => {
+    const httpGetSpy = jest.spyOn(mockHttp, 'get');
+    httpGetSpy.mockResolvedValue({ hasApiKeys: true });
+    const source$ = getHasApiKeys$(mockHttp);
+
+    const emittedValues: HasApiKeysResponse[] = [];
+
+    source$.subscribe({
+      next: (value) => emittedValues.push(value),
+      complete: () => {
+        expect(emittedValues).toEqual([
+          { error: null, hasApiKeys: null, isLoading: true },
+          { error: null, hasApiKeys: true, isLoading: false },
+        ]);
+        done();
+      },
+    });
+  });
+
+  it('should forward the error', (done) => {
+    const httpGetSpy = jest.spyOn(mockHttp, 'get');
+    httpGetSpy.mockRejectedValue('something bad');
+    const source$ = getHasApiKeys$(mockHttp);
+
+    const emittedValues: HasApiKeysResponse[] = [];
+
+    source$.subscribe({
+      next: (value) => emittedValues.push(value),
+      complete: () => {
+        expect(emittedValues).toEqual([
+          { error: null, hasApiKeys: null, isLoading: true },
+          { error: 'something bad', hasApiKeys: null, isLoading: false },
+        ]);
+        done();
+      },
+    });
+  });
+});

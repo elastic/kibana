@@ -7,15 +7,15 @@
  */
 
 import { AnalyticsNoDataPageServices } from '@kbn/shared-ux-page-analytics-no-data-types';
-import { Observable, catchError, from, map, startWith, throwError } from 'rxjs';
+import { of, Observable, catchError, from, map, startWith } from 'rxjs';
 
-interface HasApiKeysEndpointResponseData {
+export interface HasApiKeysEndpointResponseData {
   hasApiKeys: boolean;
 }
 
 export interface HasApiKeysResponse {
   hasApiKeys: boolean | null;
-  loading: boolean;
+  isLoading: boolean;
   error: Error | null;
 }
 
@@ -27,28 +27,28 @@ export const getHasApiKeys$ = ({
   get: AnalyticsNoDataPageServices['getHttp'];
 }): Observable<HasApiKeysResponse> => {
   return from(get<HasApiKeysEndpointResponseData>(HAS_API_KEYS_ENDPOINT_PATH)).pipe(
-    startWith({
-      loading: true,
-      hasApiKeys: null,
-      error: null,
-    }),
     map((responseData) => {
       return {
-        loading: false,
+        isLoading: false,
         hasApiKeys: responseData.hasApiKeys,
         error: null,
       };
+    }),
+    startWith({
+      isLoading: true,
+      hasApiKeys: null,
+      error: null,
     }),
     // catch any errors
     catchError((error) => {
       // eslint-disable-next-line no-console
       console.error('Could not determine whether user has API keys:', error);
 
-      return throwError(() => ({
-        responseData: null,
-        loading: false,
+      return of({
+        hasApiKeys: null,
+        isLoading: false,
         error,
-      }));
+      });
     })
   );
 };
