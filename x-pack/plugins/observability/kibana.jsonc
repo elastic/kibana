@@ -58,7 +58,8 @@
       "unifiedSearch",
       "stackAlerts",
       "spaces",
-      "embeddable"
+      "embeddable",
+      "ingestPipelines"
     ],
     "extraPublicDirs": [
       "common"
