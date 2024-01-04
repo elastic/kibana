@@ -116,7 +116,7 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
-              implementation: require('node-sass'),
+              implementation: require('sass-embedded'),
               sourceMap: !isProd,
             },
           },
@@ -153,10 +153,9 @@ module.exports = {
                   path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
                 )};\n${content}`;
               },
-              implementation: require('node-sass'),
-              webpackImporter: false,
+              implementation: require('sass-embedded'),
               sassOptions: {
-                outputStyle: 'nested',
+                outputStyle: 'expanded',
                 includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
               },
             },

@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           endobj
           8 0 obj
           <<
-          /Length 149
+          /Length 158
           /Filter /FlateDecode
           >>
           "
@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           endobj
           9 0 obj
           <<
-          /Length 270
+          /Length 268
           /Filter /FlateDecode
           >>
           "
@@ -192,14 +192,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           endobj
           21 0 obj
           <<
-          /Length 250
+          /Length 254
           /Filter /FlateDecode
           >>
           "
         `);
 
         const contentLength = parseInt(res.get('content-length'), 10);
-        expect(contentLength >= 20725 && contentLength <= 20726).to.be(true); // contentLength can be between 20725 and 20726
+        expect(contentLength >= 20723 && contentLength <= 20724).to.be(true); // contentLength can be between 20723 and 20724
       });
 
       it('downloaded PDF base64 string is correct without borders and logo', async function () {
@@ -261,7 +261,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         endobj
         6 0 obj
         <<
-        /Length 45
+        /Length 47
         /Filter /FlateDecode
         >>
         "
@@ -348,7 +348,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         "
         `);
 
-        expect(res.get('content-length')).to.be('1598');
+        expect(res.get('content-length')).to.be('1600');
       });
     });
   });

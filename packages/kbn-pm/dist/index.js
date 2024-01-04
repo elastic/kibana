@@ -5369,7 +5369,14 @@ function innerSubscribe(result, innerSubscriber) {
     if (result instanceof _Observable__WEBPACK_IMPORTED_MODULE_2__["Observable"]) {
         return result.subscribe(innerSubscriber);
     }
-    return Object(_util_subscribeTo__WEBPACK_IMPORTED_MODULE_3__["subscribeTo"])(result)(innerSubscriber);
+    var subscription;
+    try {
+        subscription = Object(_util_subscribeTo__WEBPACK_IMPORTED_MODULE_3__["subscribeTo"])(result)(innerSubscriber);
+    }
+    catch (error) {
+        innerSubscriber.error(error);
+    }
+    return subscription;
 }
 //# sourceMappingURL=innerSubscribe.js.map
 
@@ -8910,7 +8917,6 @@ const BootstrapCommand = {
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['clean']);
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline, {
         env: {
-          SASS_BINARY_SITE: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
           RE2_DOWNLOAD_MIRROR: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2'
         }
       });
@@ -65542,7 +65548,7 @@ function shareReplay(configOrBufferSize, windowTime, scheduler) {
             bufferSize: configOrBufferSize,
             windowTime: windowTime,
             refCount: false,
-            scheduler: scheduler
+            scheduler: scheduler,
         };
     }
     return function (source) { return source.lift(shareReplayOperator(config)); };
@@ -65562,7 +65568,9 @@ function shareReplayOperator(_a) {
             subject = new _ReplaySubject__WEBPACK_IMPORTED_MODULE_0__["ReplaySubject"](bufferSize, windowTime, scheduler);
             innerSub = subject.subscribe(this);
             subscription = source.subscribe({
-                next: function (value) { subject.next(value); },
+                next: function (value) {
+                    subject.next(value);
+                },
                 error: function (err) {
                     hasError = true;
                     subject.error(err);
@@ -65573,6 +65581,9 @@ function shareReplayOperator(_a) {
                     subject.complete();
                 },
             });
+            if (isComplete) {
+                subscription = undefined;
+            }
         }
         else {
             innerSub = subject.subscribe(this);
@@ -65580,6 +65591,7 @@ function shareReplayOperator(_a) {
         this.add(function () {
             refCount--;
             innerSub.unsubscribe();
+            innerSub = undefined;
             if (subscription && !isComplete && useRefCount && refCount === 0) {
                 subscription.unsubscribe();
                 subscription = undefined;

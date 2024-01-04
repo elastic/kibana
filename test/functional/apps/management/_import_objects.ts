@@ -486,7 +486,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const errorText = await PageObjects.savedObjects.getImportErrorText();
 
-        expect(errorText).to.contain(`Unexpected token T in JSON at position 0`);
+        expect(errorText).to.contain('is not valid JSON');
       });
     });
   });

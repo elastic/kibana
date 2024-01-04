@@ -71,8 +71,6 @@ export const BootstrapCommand: ICommand = {
       await runBazel(['clean']);
       await runBazel(['run', '@nodejs//:yarn'], runOffline, {
         env: {
-          SASS_BINARY_SITE:
-            'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
           RE2_DOWNLOAD_MIRROR:
             'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
         },

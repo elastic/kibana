@@ -1,4 +1,4 @@
-$borderRadius: $euiBorderRadius / 2;
+$borderRadius: calc($euiBorderRadius / 2);
 
 .ml-explorer {
   width: 100%;
