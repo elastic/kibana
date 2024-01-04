@@ -6,22 +6,23 @@
  */
 
 import React, { useMemo, createElement } from 'react';
-import { ApmPluginStartDeps } from '../../plugin';
 import {
   KibanaEnvironmentContext,
   type KibanaEnvContext,
 } from './kibana_environment_context';
 
-export const useKibanaEnvironmentContextProvider = (
-  plugins: ApmPluginStartDeps
-) => {
+export const useKibanaEnvironmentContextProvider = ({
+  kibanaVersion,
+  isCloudEnv,
+  isServerlessEnv,
+}: KibanaEnvContext) => {
   const value = useMemo(
     () => ({
-      kibanaVersion: plugins.kibanaVersion,
-      isCloudEnv: plugins.isCloudEnv,
-      isServerlessEnv: plugins.isServerlessEnv,
+      kibanaVersion,
+      isCloudEnv,
+      isServerlessEnv,
     }),
-    [plugins]
+    [kibanaVersion, isCloudEnv, isServerlessEnv]
   );
 
   const Provider: React.FC<{ kibanaEnvironment?: KibanaEnvContext }> = ({

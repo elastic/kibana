@@ -55,9 +55,9 @@ export function ApmAppRoot({
   pluginsStart: ApmPluginStartDeps;
   apmServices: ApmServices;
 }) {
-  const { appMountParameters, core } = apmPluginContextValue;
+  const { appMountParameters, kibanaEnvironment, core } = apmPluginContextValue;
   const KibanaEnvironmentContextProvider =
-    useKibanaEnvironmentContextProvider(pluginsStart);
+    useKibanaEnvironmentContextProvider(kibanaEnvironment);
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 
@@ -76,7 +76,9 @@ export function ApmAppRoot({
           <KibanaContextProvider
             services={{ ...core, ...pluginsStart, storage, ...apmServices }}
           >
-            <KibanaEnvironmentContextProvider kibanaEnvironment={pluginsStart}>
+            <KibanaEnvironmentContextProvider
+              kibanaEnvironment={kibanaEnvironment}
+            >
               <i18nCore.Context>
                 <TimeRangeIdContextProvider>
                   <RouterProvider history={history} router={apmRouter as any}>

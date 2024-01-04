@@ -141,9 +141,6 @@ export interface ApmPluginStartDeps {
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
-  kibanaVersion?: string;
-  isCloudEnv: boolean;
-  isServerlessEnv: boolean;
   uiSettings: IUiSettingsClient;
 }
 
@@ -420,12 +417,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           pluginsSetup: pluginSetupDeps as ApmPluginSetupDeps,
           appMountParameters,
           config,
-          pluginsStart: {
-            ...pluginsStart,
+          kibanaEnvironment: {
             isCloudEnv,
             isServerlessEnv,
             kibanaVersion: this.kibanaVersion,
-          } as ApmPluginStartDeps,
+          },
+          pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
           apmServices: {
             telemetry,
