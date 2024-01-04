@@ -11,7 +11,7 @@ import * as d3Brush from 'd3-brush';
 import * as d3Scale from 'd3-scale';
 import * as d3Selection from 'd3-selection';
 import * as d3Transition from 'd3-transition';
-import './single_brush.scss';
+import { useEuiTheme } from '@elastic/eui';
 
 const { brush, brushSelection, brushX } = d3Brush;
 const { scaleLinear } = d3Scale;
@@ -178,6 +178,8 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
   const snapTimestampsRef = useRef(snapTimestamps);
 
   const { min: baselineMin, max: baselineMax } = windowParameters;
+  const { euiTheme } = useEuiTheme();
+  const handleFillColor = euiTheme.colors.darkShade;
 
   useEffect(() => {
     if (d3BrushContainer.current && width > 0) {
@@ -298,6 +300,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
 
         mlBrushSelection
           .selectAll('.handle')
+          .attr('fill', handleFillColor)
           .attr('rx', BRUSH_HANDLE_ROUNDED_CORNER)
           .attr('ry', BRUSH_HANDLE_ROUNDED_CORNER);
 
@@ -311,7 +314,17 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
 
       drawBrushes();
     }
-  }, [min, max, width, baselineMin, baselineMax, snapTimestamps, onChange, brushId]);
+  }, [
+    min,
+    max,
+    width,
+    baselineMin,
+    baselineMax,
+    snapTimestamps,
+    onChange,
+    brushId,
+    handleFillColor,
+  ]);
 
   return (
     <>
