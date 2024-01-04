@@ -7,6 +7,7 @@
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
 import type { SentinelOneAgentInfo } from '../../../../common/types';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import {
@@ -37,7 +38,7 @@ const getSentinelOneAgentInfo = (
 ): SentinelOneAgentInfo => {
   return {
     agent: {
-      id: getFieldValue({ category: 'observer', field: 'observer.serial_number' }, eventData),
+      id: getSentinelOneAgentId(eventData) || '',
       type: getFieldValue(
         { category: 'event', field: 'event.module' },
         eventData
