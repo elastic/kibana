@@ -10,11 +10,7 @@ import { TransformPivotConfig } from '../../../../../../common/types/transform';
 import {
   applyFormStateToTransformConfig,
   formReducerFactory,
-  frequencyValidator,
   getDefaultState,
-  integerAboveZeroValidator,
-  retentionPolicyMaxAgeValidator,
-  stringValidator,
 } from './use_edit_transform_flyout';
 
 const getTransformConfigMock = (): TransformPivotConfig => ({
@@ -230,113 +226,5 @@ describe('Transform: formReducerFactory()', () => {
     expect(state3.formFields.frequency.errorMessages).toStrictEqual([
       'The frequency value is not valid.',
     ]);
-  });
-});
-
-describe('Transform: stringValidator()', () => {
-  it('should allow an empty string for optional fields', () => {
-    expect(stringValidator('')).toHaveLength(0);
-  });
-
-  it('should not allow an empty string for required fields', () => {
-    expect(stringValidator('', false)).toHaveLength(1);
-  });
-});
-
-describe('Transform: frequencyValidator()', () => {
-  const transformFrequencyValidator = (arg: string) => frequencyValidator(arg).length === 0;
-
-  it('should fail when the input is not an integer and valid time unit.', () => {
-    expect(transformFrequencyValidator('0')).toBe(false);
-    expect(transformFrequencyValidator('0.1s')).toBe(false);
-    expect(transformFrequencyValidator('1.1m')).toBe(false);
-    expect(transformFrequencyValidator('10.1asdf')).toBe(false);
-  });
-
-  it('should only allow s/m/h as time unit.', () => {
-    expect(transformFrequencyValidator('1ms')).toBe(false);
-    expect(transformFrequencyValidator('1s')).toBe(true);
-    expect(transformFrequencyValidator('1m')).toBe(true);
-    expect(transformFrequencyValidator('1h')).toBe(true);
-    expect(transformFrequencyValidator('1d')).toBe(false);
-  });
-
-  it('should only allow values above 0 and up to 1 hour.', () => {
-    expect(transformFrequencyValidator('0s')).toBe(false);
-    expect(transformFrequencyValidator('1s')).toBe(true);
-    expect(transformFrequencyValidator('3599s')).toBe(true);
-    expect(transformFrequencyValidator('3600s')).toBe(true);
-    expect(transformFrequencyValidator('3601s')).toBe(false);
-    expect(transformFrequencyValidator('10000s')).toBe(false);
-
-    expect(transformFrequencyValidator('0m')).toBe(false);
-    expect(transformFrequencyValidator('1m')).toBe(true);
-    expect(transformFrequencyValidator('59m')).toBe(true);
-    expect(transformFrequencyValidator('60m')).toBe(true);
-    expect(transformFrequencyValidator('61m')).toBe(false);
-    expect(transformFrequencyValidator('100m')).toBe(false);
-
-    expect(transformFrequencyValidator('0h')).toBe(false);
-    expect(transformFrequencyValidator('1h')).toBe(true);
-    expect(transformFrequencyValidator('2h')).toBe(false);
-  });
-});
-
-describe('Transform: retentionPolicyMaxAgeValidator()', () => {
-  const transformRetentionPolicyMaxAgeValidator = (arg: string) =>
-    retentionPolicyMaxAgeValidator(arg).length === 0;
-
-  it('should only allow values equal or above 60s.', () => {
-    expect(transformRetentionPolicyMaxAgeValidator('0nanos')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('59999999999nanos')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('60000000000nanos')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('60000000001nanos')).toBe(true);
-
-    expect(transformRetentionPolicyMaxAgeValidator('0micros')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('59999999micros')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('60000000micros')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('60000001micros')).toBe(true);
-
-    expect(transformRetentionPolicyMaxAgeValidator('0ms')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('59999ms')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('60000ms')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('60001ms')).toBe(true);
-
-    expect(transformRetentionPolicyMaxAgeValidator('0s')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('1s')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('59s')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('60s')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('61s')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('10000s')).toBe(true);
-
-    expect(transformRetentionPolicyMaxAgeValidator('0m')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('1m')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('100m')).toBe(true);
-
-    expect(transformRetentionPolicyMaxAgeValidator('0h')).toBe(false);
-    expect(transformRetentionPolicyMaxAgeValidator('1h')).toBe(true);
-    expect(transformRetentionPolicyMaxAgeValidator('2h')).toBe(true);
-  });
-});
-
-describe('Transform: integerAboveZeroValidator()', () => {
-  it('should only allow integers above zero', () => {
-    // integerAboveZeroValidator() returns an array of error messages so
-    // an array with a length of 0 means a successful validation.
-
-    // invalid
-    expect(integerAboveZeroValidator('a-string')).toHaveLength(1);
-    expect(integerAboveZeroValidator('0s')).toHaveLength(1);
-    expect(integerAboveZeroValidator('1m')).toHaveLength(1);
-    expect(integerAboveZeroValidator('1.')).toHaveLength(1);
-    expect(integerAboveZeroValidator('1..')).toHaveLength(1);
-    expect(integerAboveZeroValidator('1.0')).toHaveLength(1);
-    expect(integerAboveZeroValidator(-1)).toHaveLength(1);
-    expect(integerAboveZeroValidator(0)).toHaveLength(1);
-    expect(integerAboveZeroValidator(0.1)).toHaveLength(1);
-
-    // valid
-    expect(integerAboveZeroValidator(1)).toHaveLength(0);
-    expect(integerAboveZeroValidator('1')).toHaveLength(0);
   });
 });

@@ -653,3 +653,15 @@ export interface ClusterDetails {
   _shards?: estypes.ShardStatistics;
   failures?: estypes.ShardFailure[];
 }
+
+export interface ESQLColumn {
+  name: string;
+  type: string;
+}
+
+export type ESQLRow = unknown[];
+
+export interface ESQLSearchReponse {
+  columns: ESQLColumn[];
+  values: ESQLRow[];
+}

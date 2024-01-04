@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
+import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver, BrowserConfig } from './webdriver';
 import { Browsers } from './browsers';
@@ -37,6 +37,10 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
         // Avoid duplicating NoSuchSessionError error output on each hook
         // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
         log.error('WebDriver session is no longer valid');
+      } else if (error instanceof NoSuchWindowError) {
+        // Avoid duplicating NoSuchWindowError error output on each hook
+        // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors
+        log.error('Browser window is already closed');
       } else {
         throw error;
       }
