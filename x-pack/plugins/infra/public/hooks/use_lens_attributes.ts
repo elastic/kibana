@@ -29,13 +29,13 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   const { value: attributes, error } = useAsync(async () => {
     const { formula: formulaAPI } = await lens.stateHelperApi();
     if (!dataViews || !formulaAPI) {
-      return null;
+      return undefined;
     }
 
     const builder = new LensConfigBuilder(formulaAPI, dataViews);
 
-    return (await builder.build(params)) as LensAttributes;
-  });
+    return builder.build(params) as Promise<LensAttributes>;
+  }, [params.chartType, params.dataset, dataViews]);
 
   const injectFilters = useCallback(
     ({ filters, query }: { filters: Filter[]; query: Query }): LensAttributes | null => {
@@ -107,26 +107,21 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   );
 
   const getFormula = () => {
-    // const firstDataLayer = [
-    //   ...('layers' in params
-    //     ? Array.isArray(params.layers)
-    //       ? params.layers
-    //       : [params.layers]
-    //     : [params.value]),
-    // ].find((p) => p. === 'data');
+    if (params.chartType === 'xy') {
+      return typeof params.layers[0].value === 'string'
+        ? params.layers[0].value
+        : params.layers[0].value.formula;
+    }
 
-    // if (!firstDataLayer) {
-    //   return '';
-    // }
-
-    // const mainFormulaConfig = Array.isArray(firstDataLayer.data)
-    //   ? firstDataLayer.data[0]
-    //   : firstDataLayer.data;
-
-    return 'formula';
+    return typeof params.value === 'string' ? params.value : params.value.formula;
   };
 
-  return { formula: getFormula(), attributes, getExtraActions, error };
+  return {
+    formula: getFormula(),
+    attributes: attributes as LensAttributes | null,
+    getExtraActions,
+    error,
+  };
 };
 
 const getOpenInLensAction = (onExecute: () => void): Action => {

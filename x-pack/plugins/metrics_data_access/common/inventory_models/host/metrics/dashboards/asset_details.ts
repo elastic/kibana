@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataView } from '@kbn/data-views-plugin/common';
-import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import {
   createBasicCharts,
@@ -15,82 +13,65 @@ import {
   diskIOReadWrite,
   diskThroughputReadWrite,
   memoryUsageBreakdown,
+  normalizedLoad1m,
   loadBreakdown,
   rxTx,
 } from '../charts';
 
 export const assetDetails = {
   get: ({
-    metricsDataView,
-    logsDataView,
+    metricsDataViewId,
+    logsDataViewId,
   }: {
-    metricsDataView?: DataView;
-    logsDataView?: DataView;
+    metricsDataViewId?: string;
+    logsDataViewId?: string;
   }) => {
-    const commonVisualOptions: XYVisualOptions = {
-      showDottedLine: true,
-      missingValues: 'Linear',
-    };
-
-    const legend: XYVisualOptions = {
-      legend: {
-        isVisible: true,
-        position: 'bottom',
+    const { cpuUsage, memoryUsage } = createBasicCharts({
+      formFormulas: ['cpuUsage', 'memoryUsage'],
+      chartConfig: {
+        chartType: 'xy',
+        emphasizeFitting: true,
+        fittingFunction: 'Linear',
+        ...(metricsDataViewId
+          ? {
+              dataset: {
+                index: metricsDataViewId,
+              },
+            }
+          : {}),
       },
-    };
-
-    const { cpuUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({
-      visualizationType: 'lnsXY',
-      formulaIds: ['cpuUsage', 'memoryUsage', 'normalizedLoad1m'],
-      dataView: metricsDataView,
-      visualOptions: commonVisualOptions,
     });
 
     const { logRate } = createBasicCharts({
-      visualizationType: 'lnsXY',
-      formulaIds: ['logRate'],
-      dataView: logsDataView,
-      visualOptions: commonVisualOptions,
+      formFormulas: ['logRate'],
+      chartConfig: {
+        chartType: 'xy',
+        emphasizeFitting: true,
+        fittingFunction: 'Linear',
+        ...(logsDataViewId
+          ? {
+              dataset: {
+                index: logsDataViewId,
+              },
+            }
+          : {}),
+      },
     });
 
     return createDashboardModel({
       charts: [
         cpuUsage,
-        {
-          ...cpuUsageBreakdown.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
+        cpuUsageBreakdown.get({ dataViewId: metricsDataViewId }),
         memoryUsage,
-        {
-          ...memoryUsageBreakdown.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
-        normalizedLoad1m,
-        {
-          ...loadBreakdown.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
+        memoryUsageBreakdown.get({ dataViewId: metricsDataViewId }),
+        normalizedLoad1m.get({ dataViewId: metricsDataViewId }),
+        loadBreakdown.get({ dataViewId: metricsDataViewId }),
         logRate,
-        {
-          ...diskSpaceUsageAvailable.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
-        {
-          ...diskUsageByMountPoint.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
-        {
-          ...diskThroughputReadWrite.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
-        {
-          ...diskIOReadWrite.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
-        {
-          ...rxTx.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
+        diskSpaceUsageAvailable.get({ dataViewId: metricsDataViewId }),
+        diskUsageByMountPoint.get({ dataViewId: metricsDataViewId }),
+        diskThroughputReadWrite.get({ dataViewId: metricsDataViewId }),
+        diskIOReadWrite.get({ dataViewId: metricsDataViewId }),
+        rxTx.get({ dataViewId: metricsDataViewId }),
       ],
     });
   },

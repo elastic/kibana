@@ -6,18 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
 export const cpuUsageBreakdown = {
-  get: ({ dataView }: ChartArgs): LensXYConfig => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
+    id: 'cpuUsageBreakdown',
     chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.cpuUsage', {
       defaultMessage: 'CPU Usage',
     }),
     layers: [
-      formulas.cpuUsageUser,
+      formulas.cpuUsageIowait,
       formulas.cpuUsageIrq,
       formulas.cpuUsageNice,
       formulas.cpuUsageSoftirq,
@@ -30,11 +31,29 @@ export const cpuUsageBreakdown = {
       xAxis: '@timestamp',
       value: formula,
     })),
+    emphasizeFitting: true,
+    fittingFunction: 'Linear',
+    legend: {
+      position: 'bottom',
+      show: true,
+    },
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };
 
 export const normalizedLoad1m = {
-  get: ({ dataView }: ChartArgs): LensXYConfig => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
+    id: 'normalizedLoad1m',
     chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.normalizedLoad1m', {
       defaultMessage: 'Normalized Load',
@@ -43,20 +62,54 @@ export const normalizedLoad1m = {
       { seriesType: 'line', type: 'series', xAxis: '@timestamp', value: formulas.normalizedLoad1m },
       { type: 'reference', value: '1', color: '#6092c0' },
     ],
+    emphasizeFitting: true,
+    fittingFunction: 'Linear',
+    legend: {
+      show: false,
+    },
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };
 
 export const loadBreakdown = {
-  get: ({ dataView }: ChartArgs): LensXYConfig => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
+    id: 'loadBreakdown',
     chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
       defaultMessage: 'Load',
     }),
-    layers: ['formulas.load1m', formulas.load5m, formulas.load15m].map((formula) => ({
+    layers: [formulas.load1m, formulas.load5m, formulas.load15m].map((formula) => ({
       seriesType: 'area',
       type: 'series',
       xAxis: '@timestamp',
       value: formula,
     })),
+    emphasizeFitting: true,
+    fittingFunction: 'Linear',
+    legend: {
+      position: 'bottom',
+      show: true,
+    },
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };

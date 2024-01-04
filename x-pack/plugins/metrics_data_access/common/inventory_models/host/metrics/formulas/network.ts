@@ -12,8 +12,23 @@ export const rx: FormulaValueConfig = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.rx', {
     defaultMessage: 'Network Inbound (RX)',
   }),
-  value:
+  formula:
     "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
+  format: {
+    id: 'bits',
+    params: {
+      decimals: 1,
+    },
+  },
+  timeScale: 's',
+};
+
+export const tx: FormulaValueConfig = {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.tx', {
+    defaultMessage: 'Network Outbound (TX)',
+  }),
+  formula:
+    "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
   format: {
     id: 'bits',
     params: {

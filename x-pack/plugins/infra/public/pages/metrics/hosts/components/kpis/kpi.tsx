@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import useAsync from 'react-use/lib/useAsync';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../../components/lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
@@ -15,17 +16,25 @@ import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 
-export const Kpi = ({
-  height,
-  dataView,
-  ...chartProps
-}: LensConfig & { height: number; dataView: DataView }) => {
+export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number; id: string }) => {
+  const {
+    services: { dataViews },
+  } = useKibanaContextForPlugin();
   const { searchCriteria } = useUnifiedSearchContext();
   const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
   const { isRequestRunning: hostCountLoading } = useHostCountContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
+
+  const { value: dataView } = useAsync(async () => {
+    if (!chartProps.dataset) {
+      return undefined;
+    }
+    if ('index' in chartProps.dataset) {
+      return dataViews.get(chartProps.dataset.index, false);
+    }
+  }, [chartProps.dataset]);
 
   const filters = shouldUseSearchCriteria
     ? searchCriteria.filters
@@ -48,15 +57,17 @@ export const Kpi = ({
   });
 
   const tooltipContent = useMemo(
-    () => <TooltipContent description={METRICS_TOOLTIP.cpuUsage} />,
-    []
+    () =>
+      id in METRICS_TOOLTIP ? (
+        <TooltipContent description={METRICS_TOOLTIP[id as keyof typeof METRICS_TOOLTIP]} />
+      ) : undefined,
+    [id]
   );
 
   return (
     <LensChart
       {...chartProps}
-      id={`hostsViewKPI-1`}
-      dataView={dataView}
+      id={`hostsViewKPI-${id}}`}
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
       loading={loading}

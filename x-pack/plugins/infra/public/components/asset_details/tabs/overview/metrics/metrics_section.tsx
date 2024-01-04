@@ -36,15 +36,15 @@ export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateR
   const dashboards = useMemo(
     () => ({
       hosts: value?.assetDetails.get({
-        metricsDataView,
-        logsDataView,
+        metricsDataViewId: metricsDataView?.id,
+        logsDataViewId: logsDataView?.id,
       }),
       kubernetes: value?.assetDetailsKubernetesNode.get({
-        metricsDataView,
+        metricsDataViewId: metricsDataView?.id,
       }),
     }),
 
-    [logsDataView, metricsDataView, value?.assetDetails, value?.assetDetailsKubernetesNode]
+    [logsDataView?.id, metricsDataView?.id, value?.assetDetails, value?.assetDetailsKubernetesNode]
   );
 
   return (
@@ -85,10 +85,10 @@ export const MetricsSectionCompact = ({
   const charts = useMemo(
     () =>
       value?.assetDetailsFlyout.get({
-        metricsDataView,
-        logsDataView,
+        metricsDataViewId: metricsDataView?.id,
+        logsDataViewId: logsDataView?.id,
       }).charts ?? [],
-    [metricsDataView, logsDataView, value?.assetDetailsFlyout]
+    [logsDataView?.id, metricsDataView?.id, value?.assetDetailsFlyout]
   );
 
   return (

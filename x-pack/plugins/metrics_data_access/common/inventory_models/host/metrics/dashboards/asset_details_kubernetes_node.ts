@@ -4,26 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { formulas } from '../../../kubernetes/node/metrics';
 
 export const assetDetailsKubernetesNode = {
-  get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    // const commonVisualOptions: XYVisualOptions = {
-    //   showDottedLine: true,
-    //   missingValues: 'Linear',
-    //   legend: {
-    //     isVisible: true,
-    //     position: 'bottom',
-    //   },
-    // };
-
+  get: ({ metricsDataViewId }: { metricsDataViewId?: string }) => {
     return createDashboardModel({
       dependsOn: ['kubernetes.node'],
       charts: [
         {
+          id: 'nodeCpuCapacity',
           chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeCpuCapacity',
@@ -37,8 +28,22 @@ export const assetDetailsKubernetesNode = {
             xAxis: '@timestamp',
             value: formula,
           })),
+          emphasizeFitting: true,
+          fittingFunction: 'Linear',
+          legend: {
+            show: true,
+            position: 'bottom',
+          },
+          ...(metricsDataViewId
+            ? {
+                dataset: {
+                  index: metricsDataViewId,
+                },
+              }
+            : {}),
         },
         {
+          id: 'nodeMemoryCapacity',
           chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeMemoryCapacity',
@@ -52,8 +57,22 @@ export const assetDetailsKubernetesNode = {
             xAxis: '@timestamp',
             value: formula,
           })),
+          emphasizeFitting: true,
+          fittingFunction: 'Linear',
+          legend: {
+            show: true,
+            position: 'bottom',
+          },
+          ...(metricsDataViewId
+            ? {
+                dataset: {
+                  index: metricsDataViewId,
+                },
+              }
+            : {}),
         },
         {
+          id: 'nodeDiskCapacity',
           chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeDiskCapacity',
@@ -67,8 +86,22 @@ export const assetDetailsKubernetesNode = {
             xAxis: '@timestamp',
             value: formula,
           })),
+          emphasizeFitting: true,
+          fittingFunction: 'Linear',
+          legend: {
+            show: true,
+            position: 'bottom',
+          },
+          ...(metricsDataViewId
+            ? {
+                dataset: {
+                  index: metricsDataViewId,
+                },
+              }
+            : {}),
         },
         {
+          id: 'nodePodCapacity',
           chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodePodCapacity',
@@ -82,6 +115,19 @@ export const assetDetailsKubernetesNode = {
             xAxis: '@timestamp',
             value: formula,
           })),
+          emphasizeFitting: true,
+          fittingFunction: 'Linear',
+          legend: {
+            show: true,
+            position: 'bottom',
+          },
+          ...(metricsDataViewId
+            ? {
+                dataset: {
+                  index: metricsDataViewId,
+                },
+              }
+            : {}),
         },
       ],
     });

@@ -8,15 +8,17 @@
 import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils/config_builder';
 
-export const nodeDiskUsed: FormulaValueConfig = {
+export const nodePodCapacity: FormulaValueConfig = {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.capacity', {
+    defaultMessage: 'Capacity',
+  }),
+  formula:
+    "last_value(kubernetes.node.pod.allocatable.total,  kql='kubernetes.node.pod.allocatable.total: *')",
+};
+
+export const nodePodUsed: FormulaValueConfig = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.used', {
     defaultMessage: 'Used',
   }),
-  value: 'average(kubernetes.node.fs.used.bytes)',
-  format: {
-    id: 'bytes',
-    params: {
-      decimals: 1,
-    },
-  },
+  formula: 'unique_count(kubernetes.pod.uid)',
 };

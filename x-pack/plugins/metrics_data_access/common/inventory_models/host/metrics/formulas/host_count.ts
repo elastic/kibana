@@ -12,7 +12,7 @@ export const hostCount: FormulaValueConfig = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.hostCount.hostsLabel', {
     defaultMessage: 'Hosts',
   }),
-  value: 'unique_count(host.name)',
+  formula: 'unique_count(host.name)',
   format: {
     id: 'number',
     params: {

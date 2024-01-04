@@ -6,12 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
 export const rxTx = {
-  get: ({ dataView }: ChartArgs): LensXYConfig => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
+    id: 'rxTx',
     chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network', {
       defaultMessage: 'Network',
@@ -35,5 +36,27 @@ export const rxTx = {
       xAxis: '@timestamp',
       value: formula,
     })),
+    emphasizeFitting: true,
+    fittingFunction: 'Linear',
+    legend: {
+      show: true,
+      position: 'bottom',
+    },
+    yBounds: {
+      mode: 'custom',
+      lowerBound: 0,
+      upperBound: 1,
+    },
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };

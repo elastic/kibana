@@ -5,32 +5,14 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-// import { XYChartModel, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
-import { createBasicCharts } from '../charts';
+import { createBasicCharts, normalizedLoad1m } from '../charts';
 
 export const hostsView = {
-  get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    // const commonVisualOptions: XYChartModel['visualOptions'] = {
-    //   showDottedLine: true,
-    //   missingValues: 'Linear',
-    // };
-
-    // const layerOptions: XYLayerOptions = {
-    //   breakdown: {
-    //     type: 'top_values',
-    //     field: 'host.name',
-    //     params: {
-    //       size: 20,
-    //     },
-    //   },
-    // };
-
+  get: ({ metricsDataViewId = '' }: { metricsDataViewId?: string }) => {
     const {
       memoryUsage,
       memoryFree,
-      diskUsage,
       diskSpaceAvailable,
       diskIORead,
       diskIOWrite,
@@ -39,13 +21,9 @@ export const hostsView = {
       rx,
       tx,
     } = createBasicCharts({
-      chartType: 'xy',
-      formulaIds: [
-        'cpuUsage',
+      formFormulas: [
         'memoryUsage',
-        'normalizedLoad1m',
         'memoryFree',
-        'diskUsage',
         'diskSpaceAvailable',
         'diskIORead',
         'diskIOWrite',
@@ -54,29 +32,59 @@ export const hostsView = {
         'rx',
         'tx',
       ],
-      options: {
-        dataset: {
-          timeFieldName: metricsDataView?.getTimeField()?.displayName ?? '@timestamp',
-          index: metricsDataView?.getIndexPattern() ?? 'metrics-*',
+      chartConfig: {
+        chartType: 'xy',
+        layerConfig: {
+          breakdown: {
+            field: 'host.name',
+            type: 'topValues',
+            size: 20,
+          },
         },
+        emphasizeFitting: true,
+        fittingFunction: 'Linear',
+        ...(metricsDataViewId
+          ? {
+              dataset: {
+                index: metricsDataViewId,
+              },
+            }
+          : {}),
       },
     });
 
-    const { cpuUsage, normalizedLoad1m } = createBasicCharts({
-      chartType: 'xy',
-      formulaIds: ['cpuUsage', 'normalizedLoad1m'],
-      options: {
-        dataset: {
-          timeFieldName: metricsDataView?.getTimeField()?.displayName ?? '@timestamp',
-          index: metricsDataView?.getIndexPattern() ?? 'metrics-*',
+    const { cpuUsage, diskUsage } = createBasicCharts({
+      formFormulas: ['cpuUsage', 'diskUsage'],
+      chartConfig: {
+        chartType: 'xy',
+        layerConfig: {
+          breakdown: {
+            field: 'host.name',
+            type: 'topValues',
+            size: 20,
+          },
         },
+        yBounds: {
+          mode: 'custom',
+          lowerBound: 0,
+          upperBound: 1,
+        },
+        emphasizeFitting: true,
+        fittingFunction: 'Linear',
+        ...(metricsDataViewId
+          ? {
+              dataset: {
+                index: metricsDataViewId,
+              },
+            }
+          : {}),
       },
     });
 
     return createDashboardModel({
       charts: [
         cpuUsage,
-        normalizedLoad1m,
+        normalizedLoad1m.get({ dataViewId: metricsDataViewId }),
         memoryUsage,
         memoryFree,
         diskUsage,

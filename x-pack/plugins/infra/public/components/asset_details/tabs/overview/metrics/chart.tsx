@@ -5,9 +5,11 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+
 import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import type { TimeRange } from '@kbn/es-query';
+import useAsync from 'react-use/lib/useAsync';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { METRIC_CHART_HEIGHT } from '../../../../../common/visualizations/constants';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../../../lens';
@@ -17,24 +19,36 @@ import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export type ChartProps = LensConfig &
   Pick<LensChartProps, 'overrides'> & {
+    id: string;
     filterFieldName: string;
     dateRange: TimeRange;
     assetName: string;
-    dataView: DataView;
     ['data-test-subj']: string;
   };
 
 export const Chart = ({
+  id,
   filterFieldName,
   overrides,
   dateRange,
   assetName,
-  dataView,
   ...props
 }: ChartProps) => {
+  const {
+    services: { dataViews },
+  } = useKibanaContextForPlugin();
   const { setDateRange } = useDatePickerContext();
   const { searchSessionId } = useLoadingStateContext();
   const { ['data-test-subj']: dataTestSubj, ...chartProps } = { ...props };
+
+  const { value: dataView } = useAsync(async () => {
+    if (!chartProps.dataset) {
+      return undefined;
+    }
+    if ('index' in chartProps.dataset) {
+      return dataViews.get(chartProps.dataset.index, false);
+    }
+  }, [chartProps.dataset]);
 
   const filters = useMemo(() => {
     return [
@@ -75,9 +89,8 @@ export const Chart = ({
   return (
     <LensChart
       {...chartProps}
-      id={`${dataTestSubj}`}
+      id={`${dataTestSubj}${id}`}
       borderRadius="m"
-      dataView={dataView}
       dateRange={dateRange}
       height={METRIC_CHART_HEIGHT}
       searchSessionId={searchSessionId}

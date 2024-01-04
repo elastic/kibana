@@ -12,7 +12,21 @@ export const nodeCpuCapacity: FormulaValueConfig = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.capacity', {
     defaultMessage: 'Capacity',
   }),
-  value: 'max(kubernetes.node.cpu.allocatable.cores) * 1000000000',
+  formula: 'max(kubernetes.node.cpu.allocatable.cores) * 1000000000',
+  format: {
+    id: 'number',
+    params: {
+      decimals: 1,
+      compact: true,
+    },
+  },
+};
+
+export const nodeCpuUsed: FormulaValueConfig = {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.used', {
+    defaultMessage: 'Used',
+  }),
+  formula: 'average(kubernetes.node.cpu.usage.nanocores)',
   format: {
     id: 'number',
     params: {

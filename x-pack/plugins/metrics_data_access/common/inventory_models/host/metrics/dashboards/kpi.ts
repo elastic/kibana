@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-// import type { MetricLayerOptions } from '@kbn/lens-embeddable-utils';
+import { LensMetricConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts } from '../charts';
 
@@ -15,17 +14,27 @@ const AVERAGE = i18n.translate('xpack.metricsData.assetDetails.overview.kpi.subt
 });
 
 export const kpi = {
-  get: ({ metricsDataView, options }: { metricsDataView?: DataView; options?: any }) => {
+  get: ({
+    metricsDataViewId = '',
+    options,
+  }: {
+    metricsDataViewId?: string;
+    options?: Pick<LensMetricConfig, 'subtitle' | 'seriesColor'>;
+  }) => {
     const { cpuUsage, diskUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({
-      chartType: 'metric',
-      formulaIds: ['cpuUsage', 'diskUsage', 'memoryUsage', 'normalizedLoad1m'],
-      options: {
+      formFormulas: ['cpuUsage', 'diskUsage', 'memoryUsage', 'normalizedLoad1m'],
+      chartConfig: {
+        chartType: 'metric',
         trendLine: true,
-        label: AVERAGE,
-        dataset: {
-          timeFieldName: metricsDataView?.getTimeField()?.displayName ?? '@timestamp',
-          index: metricsDataView?.getIndexPattern() ?? 'metrics-*',
-        },
+        subtitle: options?.subtitle ?? AVERAGE,
+        seriesColor: options?.seriesColor,
+        ...(metricsDataViewId
+          ? {
+              dataset: {
+                index: metricsDataViewId,
+              },
+            }
+          : {}),
       },
     });
 

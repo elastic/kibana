@@ -12,7 +12,7 @@ export const logRate: FormulaValueConfig = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.logRate', {
     defaultMessage: 'Log Rate',
   }),
-  value: 'differences(cumulative_sum(count()))',
+  formula: 'differences(cumulative_sum(count()))',
   format: {
     id: 'number',
     params: {

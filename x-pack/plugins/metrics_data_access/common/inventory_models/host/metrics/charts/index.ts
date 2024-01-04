@@ -9,43 +9,57 @@ import { ChartType, ChartTypeLensConfig } from '@kbn/lens-embeddable-utils/confi
 import type { HostFormulaNames } from '../formulas';
 import { formulas } from '../formulas';
 
+type Args<T extends ChartType> = T extends 'xy'
+  ? Omit<Partial<ChartTypeLensConfig<'xy'>>, 'layers'> & {
+      layerConfig?: Partial<ChartTypeLensConfig<'xy'>['layers'][number]>;
+    }
+  : Omit<Partial<ChartTypeLensConfig<T>>, 'value' | 'title'>;
+
 export const createBasicCharts = <T extends ChartType>({
-  formulaIds,
-  chartType,
-  options,
+  formFormulas,
+  chartConfig,
 }: {
-  formulaIds: HostFormulaNames[];
-  chartType: T;
-  options?: Partial<ChartTypeLensConfig<T>>;
-}): Record<HostFormulaNames, ChartTypeLensConfig<T>> => {
-  return formulaIds.reduce((acc, curr) => {
+  formFormulas: HostFormulaNames[];
+  chartConfig: Args<T>;
+}): Record<HostFormulaNames, ChartTypeLensConfig<T> & { id: string }> => {
+  return formFormulas.reduce((acc, curr) => {
     const chart =
-      chartType === 'xy'
+      chartConfig.chartType === 'xy'
         ? ({
-            ...options,
-            chartType,
+            ...chartConfig,
+            id: curr,
+            title: formulas[curr].label ?? '',
+            legend: {
+              show: false,
+              position: 'bottom',
+              ...chartConfig.legend,
+            },
+            axisTitleVisibility: {
+              showXAxisTitle: false,
+              showYAxisTitle: false,
+            },
             layers: [
               {
                 seriesType: 'line',
                 type: 'series',
                 xAxis: '@timestamp',
                 value: formulas[curr],
+                ...chartConfig.layerConfig,
               },
             ],
           } as ChartTypeLensConfig<'xy'>)
-        : ({
-            ...options,
+        : {
+            ...chartConfig,
+            id: curr,
             title: formulas[curr].label ?? '',
             value: formulas[curr],
-            xAxis: '@timestamp',
-            chartType,
-          } as ChartTypeLensConfig<T>);
+          };
 
     return {
       ...acc,
       [curr]: chart,
     };
-  }, {} as Record<HostFormulaNames, ChartTypeLensConfig<T>>);
+  }, {} as Record<HostFormulaNames, ChartTypeLensConfig<T> & { id: HostFormulaNames }>);
 };
 
 // custom charts

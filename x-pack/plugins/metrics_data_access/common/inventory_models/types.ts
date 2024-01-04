@@ -423,7 +423,8 @@ export interface DashboardFn {
   get: (...args: any[]) => LensConfig;
 }
 
+export type LensConfigWithId = LensConfig & { id: string };
 export interface DashboardModel {
-  charts: LensConfig[];
+  charts: LensConfigWithId[];
   dependsOn?: string[];
 }

@@ -23,7 +23,7 @@ export const MetricsGrid = () => {
   });
 
   const charts = useMemo(
-    () => dashboards?.hostsView.get({ metricsDataView: dataView }).charts ?? [],
+    () => dashboards?.hostsView.get({ metricsDataViewId: dataView?.id }).charts ?? [],
     [dataView, dashboards]
   );
 
@@ -48,7 +48,7 @@ export const MetricsGrid = () => {
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
         {charts.map((chartProp, index) => (
           <EuiFlexItem key={index} grow={false}>
-            <Chart {...chartProp} dataView={dataView} />
+            <Chart {...chartProp} />
           </EuiFlexItem>
         ))}
       </EuiFlexGrid>

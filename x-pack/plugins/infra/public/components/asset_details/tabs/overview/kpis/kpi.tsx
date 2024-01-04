@@ -9,24 +9,40 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import useAsync from 'react-use/lib/useAsync';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export const Kpi = ({
+  id,
   height,
   assetName,
   dateRange,
-  dataView,
   ...chartProps
 }: LensConfig & {
+  id: string;
   height: number;
   dataView?: DataView;
   assetName: string;
   dateRange: TimeRange;
 }) => {
+  const {
+    services: { dataViews },
+  } = useKibanaContextForPlugin();
   const { searchSessionId } = useLoadingStateContext();
+
+  const { value: dataView } = useAsync(async () => {
+    if (!chartProps.dataset) {
+      return undefined;
+    }
+    if ('index' in chartProps.dataset) {
+      return dataViews.get(chartProps.dataset.index, false);
+    }
+  }, [chartProps.dataset]);
+
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
@@ -38,15 +54,17 @@ export const Kpi = ({
   }, [dataView, assetName]);
 
   const tooltipContent = useMemo(
-    () => <TooltipContent description={METRICS_TOOLTIP.cpuUsage} />,
-    []
+    () =>
+      id in METRICS_TOOLTIP ? (
+        <TooltipContent description={METRICS_TOOLTIP[id as keyof typeof METRICS_TOOLTIP]} />
+      ) : undefined,
+    [id]
   );
 
   return (
     <LensChart
       {...chartProps}
-      id={`infraAssetDetailsKPI1`}
-      dataView={dataView}
+      id={`infraAssetDetailsKPI${id}`}
       dateRange={dateRange}
       height={height}
       filters={filters}
