@@ -59,7 +59,7 @@ export const useObservedHost = (
   return useMemo(
     () => ({
       details: hostDetails,
-      isLoading: isLoading && loadingLastSeen && loadingFirstSeen,
+      isLoading: isLoading || loadingLastSeen || loadingFirstSeen,
       firstSeen: {
         date: firstSeen,
         isLoading: loadingFirstSeen,

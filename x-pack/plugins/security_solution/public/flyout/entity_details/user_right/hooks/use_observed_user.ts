@@ -58,7 +58,7 @@ export const useObservedUser = (
   return useMemo(
     () => ({
       details: observedUserDetails,
-      isLoading: loadingObservedUser && loadingLastSeen && loadingFirstSeen,
+      isLoading: loadingObservedUser || loadingLastSeen || loadingFirstSeen,
       firstSeen: {
         date: firstSeen,
         isLoading: loadingFirstSeen,

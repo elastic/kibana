@@ -29,15 +29,13 @@ export const policyFields: EntityTableRows<ObservedEntityData<HostItem>> = [
     label: i18n.POLICY_STATUS,
     render: (hostData: ObservedEntityData<HostItem>) => {
       const appliedPolicy = hostData.details.endpoint?.hostInfo?.metadata.Endpoint.policy.applied;
+      const policyColor =
+        appliedPolicy?.status === HostPolicyResponseActionStatus.failure
+          ? 'danger'
+          : appliedPolicy?.status;
+
       return appliedPolicy?.status ? (
-        <EuiHealth
-          aria-label={appliedPolicy?.status}
-          color={
-            appliedPolicy?.status === HostPolicyResponseActionStatus.failure
-              ? 'danger'
-              : appliedPolicy?.status
-          }
-        >
+        <EuiHealth aria-label={appliedPolicy?.status} color={policyColor}>
           {appliedPolicy?.status}
         </EuiHealth>
       ) : (

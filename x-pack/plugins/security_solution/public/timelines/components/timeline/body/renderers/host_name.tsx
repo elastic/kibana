@@ -50,7 +50,7 @@ const HostNameComponent: React.FC<Props> = ({
   title,
   value,
 }) => {
-  const isNewHostDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
+  const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
   const { openRightPanel } = useExpandableFlyoutContext();
 
   const dispatch = useDispatch();
@@ -69,7 +69,7 @@ const HostNameComponent: React.FC<Props> = ({
       if (eventContext && isInTimelineContext) {
         const { timelineID, tabType } = eventContext;
 
-        if (isNewHostDetailsFlyoutEnable && !isTimelineScope(timelineID)) {
+        if (isNewHostDetailsFlyoutEnabled && !isTimelineScope(timelineID)) {
           openRightPanel({
             id: HostPanelKey,
             params: {
@@ -107,7 +107,7 @@ const HostNameComponent: React.FC<Props> = ({
       onClick,
       eventContext,
       isInTimelineContext,
-      isNewHostDetailsFlyoutEnable,
+      isNewHostDetailsFlyoutEnabled,
       openRightPanel,
       hostName,
       contextId,

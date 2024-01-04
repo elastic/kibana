@@ -65,7 +65,9 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
         );
       }
 
-      if (render) return render(data);
+      if (render) {
+        return render(data);
+      }
 
       return getEmptyTagValue();
     },

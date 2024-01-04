@@ -63,7 +63,9 @@ export const useObservedUserItems = (
     [mlCapabilities]
   );
 
-  if (!userData.details) return [];
+  if (!userData.details) {
+    return [];
+  }
 
   return fields;
 };

@@ -20,17 +20,16 @@ export const useObservedHostFields = (
 ): EntityTableRows<ObservedEntityData<HostItem>> => {
   const mlCapabilities = useMlCapabilities();
 
-  const fields: EntityTableRows<ObservedEntityData<HostItem>> = useMemo(
-    () => [
+  return useMemo(() => {
+    if (hostData == null) {
+      return [];
+    }
+
+    return [
       ...basicHostFields,
       ...getAnomaliesFields(mlCapabilities),
       ...cloudFields,
       ...policyFields,
-    ],
-    [mlCapabilities]
-  );
-
-  if (!hostData.details) return [];
-
-  return fields;
+    ];
+  }, [hostData, mlCapabilities]);
 };
