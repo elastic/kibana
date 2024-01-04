@@ -15,6 +15,7 @@ import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { InstancesSortField } from '@kbn/apm-plugin/common/instances';
+import { sum } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -75,167 +76,354 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Instances main statistics when data is loaded',
     { config: 'basic', archives: [] },
     () => {
-      const serviceName = 'synth-node-1';
-      before(async () => {
-        const range = timerange(start, end);
-        const transactionName = 'foo';
-        const instances = Array(3)
-          .fill(0)
-          .map((_, idx) => {
-            const index = idx + 1;
-            return {
-              instance: apm
-                .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
-                .instance(`instance-${index}`),
-              duration: index * 1000,
-              rate: index * 10,
-              errorRate: 5,
-            };
+      describe('with transactions and system metrics', () => {
+        const serviceName = 'synth-node-1';
+        before(async () => {
+          const range = timerange(start, end);
+          const transactionName = 'foo';
+          const instances = Array(3)
+            .fill(0)
+            .map((_, idx) => {
+              const index = idx + 1;
+              return {
+                instance: apm
+                  .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+                  .instance(`instance-${index}`),
+                duration: index * 1000,
+                rate: index * 10,
+                errorRate: 5,
+              };
+            });
+
+          return synthtrace.index(
+            instances.flatMap(({ instance, duration, rate, errorRate }) => {
+              const successfulTraceEvents = range
+                .interval('1m')
+                .rate(rate)
+                .generator((timestamp) =>
+                  instance
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(duration)
+                    .success()
+                );
+              const failedTraceEvents = range
+                .interval('1m')
+                .rate(errorRate)
+                .generator((timestamp) =>
+                  instance
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(duration)
+                    .failure()
+                    .errors(
+                      instance
+                        .error({ message: '[ResponseError] index_not_found_exception' })
+                        .timestamp(timestamp + 50)
+                    )
+                );
+              const metricsets = range
+                .interval('30s')
+                .rate(1)
+                .generator((timestamp) =>
+                  instance
+                    .appMetrics({
+                      'system.memory.actual.free': 800,
+                      'system.memory.total': 1000,
+                      'system.cpu.total.norm.pct': 0.6,
+                      'system.process.cpu.total.norm.pct': 0.7,
+                    })
+                    .timestamp(timestamp)
+                );
+              return [successfulTraceEvents, failedTraceEvents, metricsets];
+            })
+          );
+        });
+
+        after(() => {
+          return synthtrace.clean();
+        });
+
+        describe('test order of items', () => {
+          (
+            [
+              {
+                field: 'throughput',
+                direction: 'asc',
+                expectedServiceNodeNames: ['instance-1', 'instance-2', 'instance-3'],
+                expectedValues: [15, 25, 35],
+              },
+              {
+                field: 'throughput',
+                direction: 'desc',
+                expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
+                expectedValues: [35, 25, 15],
+              },
+              {
+                field: 'latency',
+                direction: 'asc',
+                expectedServiceNodeNames: ['instance-1', 'instance-2', 'instance-3'],
+                expectedValues: [1000000, 2000000, 3000000],
+              },
+              {
+                field: 'latency',
+                direction: 'desc',
+                expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
+                expectedValues: [3000000, 2000000, 1000000],
+              },
+              {
+                field: 'errorRate',
+                direction: 'asc',
+                expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
+                expectedValues: [0.1429, 0.2, 0.3333],
+              },
+              {
+                field: 'errorRate',
+                direction: 'desc',
+                expectedServiceNodeNames: ['instance-1', 'instance-2', 'instance-3'],
+                expectedValues: [0.3333, 0.2, 0.1429],
+              },
+              {
+                field: 'serviceNodeName',
+                direction: 'asc',
+                expectedServiceNodeNames: ['instance-1', 'instance-2', 'instance-3'],
+              },
+              {
+                field: 'serviceNodeName',
+                direction: 'desc',
+                expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
+              },
+            ] as Array<{
+              field: InstancesSortField;
+              direction: 'asc' | 'desc';
+              expectedServiceNodeNames: string[];
+              expectedValues?: number[];
+            }>
+          ).map(({ field, direction, expectedServiceNodeNames, expectedValues }) =>
+            describe(`fetch instances main statistics ordered by ${field} ${direction}`, () => {
+              let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+
+              before(async () => {
+                instancesMainStats = await getServiceOverviewInstancesMainStatistics({
+                  serviceName,
+                  sortField: field,
+                  sortDirection: direction,
+                });
+              });
+
+              it('returns ordered instance main stats', () => {
+                expect(instancesMainStats.map((item) => item.serviceNodeName)).to.eql(
+                  expectedServiceNodeNames
+                );
+                if (expectedValues) {
+                  expect(
+                    instancesMainStats.map((item) => {
+                      const value = item[field];
+                      if (typeof value === 'number') {
+                        return roundNumber(value);
+                      }
+                      return value;
+                    })
+                  ).to.eql(expectedValues);
+                }
+              });
+
+              it('returns system metrics', () => {
+                expect(instancesMainStats.map((item) => roundNumber(item.cpuUsage))).to.eql([
+                  0.7, 0.7, 0.7,
+                ]);
+                expect(instancesMainStats.map((item) => roundNumber(item.memoryUsage))).to.eql([
+                  0.2, 0.2, 0.2,
+                ]);
+              });
+            })
+          );
+        });
+      });
+
+      describe('with transactions only', () => {
+        const serviceName = 'synth-node-1';
+        before(async () => {
+          const range = timerange(start, end);
+          const transactionName = 'foo';
+          const instances = Array(3)
+            .fill(0)
+            .map((_, idx) => {
+              const index = idx + 1;
+              return {
+                instance: apm
+                  .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+                  .instance(`instance-${index}`),
+                duration: index * 1000,
+                rate: index * 10,
+                errorRate: 5,
+              };
+            });
+
+          return synthtrace.index(
+            instances.flatMap(({ instance, duration, rate, errorRate }) => {
+              const successfulTraceEvents = range
+                .interval('1m')
+                .rate(rate)
+                .generator((timestamp) =>
+                  instance
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(duration)
+                    .success()
+                );
+              const failedTraceEvents = range
+                .interval('1m')
+                .rate(errorRate)
+                .generator((timestamp) =>
+                  instance
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(duration)
+                    .failure()
+                    .errors(
+                      instance
+                        .error({ message: '[ResponseError] index_not_found_exception' })
+                        .timestamp(timestamp + 50)
+                    )
+                );
+              return [successfulTraceEvents, failedTraceEvents];
+            })
+          );
+        });
+
+        after(() => {
+          return synthtrace.clean();
+        });
+
+        describe(`Fetch main statistics`, () => {
+          let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+
+          before(async () => {
+            instancesMainStats = await getServiceOverviewInstancesMainStatistics({
+              serviceName,
+            });
           });
 
-        return synthtrace.index(
-          instances.flatMap(({ instance, duration, rate, errorRate }) => {
-            const successfulTraceEvents = range
-              .interval('1m')
-              .rate(rate)
-              .generator((timestamp) =>
-                instance
-                  .transaction({ transactionName })
-                  .timestamp(timestamp)
-                  .duration(duration)
-                  .success()
-              );
-            const failedTraceEvents = range
-              .interval('1m')
-              .rate(errorRate)
-              .generator((timestamp) =>
-                instance
-                  .transaction({ transactionName })
-                  .timestamp(timestamp)
-                  .duration(duration)
-                  .failure()
-                  .errors(
-                    instance
-                      .error({ message: '[ResponseError] index_not_found_exception' })
-                      .timestamp(timestamp + 50)
-                  )
-              );
-            const metricsets = range
-              .interval('30s')
-              .rate(1)
-              .generator((timestamp) =>
-                instance
-                  .appMetrics({
-                    'system.memory.actual.free': 800,
-                    'system.memory.total': 1000,
-                    'system.cpu.total.norm.pct': 0.6,
-                    'system.process.cpu.total.norm.pct': 0.7,
-                  })
-                  .timestamp(timestamp)
-              );
-            return [successfulTraceEvents, failedTraceEvents, metricsets];
-          })
-        );
+          it('returns instances name', () => {
+            expect(instancesMainStats.map((item) => item.serviceNodeName)).to.eql([
+              'instance-3',
+              'instance-2',
+              'instance-1',
+            ]);
+          });
+
+          it('returns throughput', () => {
+            expect(sum(instancesMainStats.map((item) => item.throughput))).to.greaterThan(0);
+          });
+
+          it('returns latency', () => {
+            expect(sum(instancesMainStats.map((item) => item.latency))).to.greaterThan(0);
+          });
+
+          it('returns errorRate', () => {
+            expect(sum(instancesMainStats.map((item) => item.errorRate))).to.greaterThan(0);
+          });
+
+          it('does not return cpu usage', () => {
+            expect(
+              instancesMainStats.map((item) => item.cpuUsage).filter((value) => value !== undefined)
+            ).to.eql([]);
+          });
+
+          it('does not return memory usage', () => {
+            expect(
+              instancesMainStats
+                .map((item) => item.memoryUsage)
+                .filter((value) => value !== undefined)
+            ).to.eql([]);
+          });
+        });
       });
 
-      after(() => {
-        return synthtrace.clean();
-      });
+      describe('with system metrics only', () => {
+        const serviceName = 'synth-node-1';
+        before(async () => {
+          const range = timerange(start, end);
+          const instances = Array(3)
+            .fill(0)
+            .map((_, idx) =>
+              apm
+                .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+                .instance(`instance-${idx + 1}`)
+            );
 
-      describe('test order of items', () => {
-        (
-          [
-            {
-              field: 'throughput',
-              direction: 'asc',
-              expectedServiceNodeNames: ['instance-1', 'instance-2', 'instance-3'],
-              expectedValues: [15, 25, 35],
-            },
-            {
-              field: 'throughput',
-              direction: 'desc',
-              expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
-              expectedValues: [35, 25, 15],
-            },
-            {
-              field: 'latency',
-              direction: 'asc',
-              expectedServiceNodeNames: ['instance-1', 'instance-2', 'instance-3'],
-              expectedValues: [1000000, 2000000, 3000000],
-            },
-            {
-              field: 'latency',
-              direction: 'desc',
-              expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
-              expectedValues: [3000000, 2000000, 1000000],
-            },
-            {
-              field: 'errorRate',
-              direction: 'asc',
-              expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
-              expectedValues: [0.1429, 0.2, 0.3333],
-            },
-            {
-              field: 'errorRate',
-              direction: 'desc',
-              expectedServiceNodeNames: ['instance-1', 'instance-2', 'instance-3'],
-              expectedValues: [0.3333, 0.2, 0.1429],
-            },
-            {
-              field: 'serviceNodeName',
-              direction: 'asc',
-              expectedServiceNodeNames: ['instance-1', 'instance-2', 'instance-3'],
-            },
-            {
-              field: 'serviceNodeName',
-              direction: 'desc',
-              expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
-            },
-          ] as Array<{
-            field: InstancesSortField;
-            direction: 'asc' | 'desc';
-            expectedServiceNodeNames: string[];
-            expectedValues?: number[];
-          }>
-        ).map(({ field, direction, expectedServiceNodeNames, expectedValues }) =>
-          describe(`fetch instances main statistics ordered by ${field} ${direction}`, () => {
-            let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+          return synthtrace.index(
+            instances.map((instance) => {
+              const metricsets = range
+                .interval('30s')
+                .rate(1)
+                .generator((timestamp) =>
+                  instance
+                    .appMetrics({
+                      'system.memory.actual.free': 800,
+                      'system.memory.total': 1000,
+                      'system.cpu.total.norm.pct': 0.6,
+                      'system.process.cpu.total.norm.pct': 0.7,
+                    })
+                    .timestamp(timestamp)
+                );
+              return metricsets;
+            })
+          );
+        });
 
-            before(async () => {
-              instancesMainStats = await getServiceOverviewInstancesMainStatistics({
-                serviceName,
-                sortField: field,
-                sortDirection: direction,
-              });
+        after(() => {
+          return synthtrace.clean();
+        });
+
+        describe(`Fetch main statistics`, () => {
+          let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+
+          before(async () => {
+            instancesMainStats = await getServiceOverviewInstancesMainStatistics({
+              serviceName,
             });
+          });
 
-            it('returns ordered instance main stats', () => {
-              expect(instancesMainStats.map((item) => item.serviceNodeName)).to.eql(
-                expectedServiceNodeNames
-              );
-              if (expectedValues) {
-                expect(
-                  instancesMainStats.map((item) => {
-                    const value = item[field];
-                    if (typeof value === 'number') {
-                      return roundNumber(value);
-                    }
-                    return value;
-                  })
-                ).to.eql(expectedValues);
-              }
-            });
+          it('returns instances name', () => {
+            expect(instancesMainStats.map((item) => item.serviceNodeName)).to.eql([
+              'instance-1',
+              'instance-2',
+              'instance-3',
+            ]);
+          });
 
-            it('returns system metrics', () => {
-              expect(instancesMainStats.map((item) => roundNumber(item.cpuUsage))).to.eql([
-                0.7, 0.7, 0.7,
-              ]);
-              expect(instancesMainStats.map((item) => roundNumber(item.memoryUsage))).to.eql([
-                0.2, 0.2, 0.2,
-              ]);
-            });
-          })
-        );
+          it('does not return throughput', () => {
+            expect(
+              instancesMainStats
+                .map((item) => item.throughput)
+                .filter((value) => value !== undefined)
+            ).to.eql([]);
+          });
+
+          it('does not return latency', () => {
+            expect(
+              instancesMainStats.map((item) => item.latency).filter((value) => value !== undefined)
+            ).to.eql([]);
+          });
+
+          it('does not return errorRate', () => {
+            expect(
+              instancesMainStats
+                .map((item) => item.errorRate)
+                .filter((value) => value !== undefined)
+            ).to.eql([]);
+          });
+
+          it('returns cpu usage', () => {
+            expect(sum(instancesMainStats.map((item) => item.cpuUsage))).to.greaterThan(0);
+          });
+
+          it('returns memory usage', () => {
+            expect(sum(instancesMainStats.map((item) => item.memoryUsage))).to.greaterThan(0);
+          });
+        });
       });
     }
   );

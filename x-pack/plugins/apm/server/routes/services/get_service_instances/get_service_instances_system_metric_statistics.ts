@@ -136,7 +136,7 @@ export async function getServiceInstancesSystemMetricStatistics<
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
-              ...(serviceNodeIds
+              ...(serviceNodeIds?.length
                 ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
                 : []),
               {
@@ -158,7 +158,7 @@ export async function getServiceInstancesSystemMetricStatistics<
               field: SERVICE_NODE_NAME,
               missing: SERVICE_NODE_NAME_MISSING,
               ...(size ? { size } : {}),
-              ...(serviceNodeIds ? { include: serviceNodeIds } : {}),
+              ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
             },
             aggs: subAggs,
           },

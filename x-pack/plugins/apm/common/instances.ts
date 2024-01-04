@@ -11,8 +11,6 @@ export const instancesSortFieldRt = t.keyof({
   latency: null,
   throughput: null,
   errorRate: null,
-  cpuUsage: null,
-  memoryUsage: null,
 });
 
 export type InstancesSortField = t.TypeOf<typeof instancesSortFieldRt>;
