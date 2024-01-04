@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ActionLogButton,
@@ -17,12 +16,9 @@ import {
 import { useConsoleManager } from '../components/console';
 import type { HostMetadata } from '../../../common/endpoint/types';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
+import { RESPONDER_PAGE_TITLE } from './translations';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
-
-const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_overlay.pageTitle', {
-  defaultMessage: 'Response console',
-});
 
 export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConsole => {
   const consoleManager = useConsoleManager();

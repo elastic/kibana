@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
 import { HeaderSentinelOneInfo } from '../components/endpoint_responder/components/header_info/sentinel_one/header_sentinel_one_info';
 
 import { useUserPrivileges } from '../../common/components/user_privileges';
@@ -18,10 +17,7 @@ import {
 import { useConsoleManager } from '../components/console';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 import type { SentinelOneAgentInfo } from '../../../common/types';
-
-const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_overlay.pageTitle', {
-  defaultMessage: 'Response console',
-});
+import { RESPONDER_PAGE_TITLE } from './translations';
 
 type ShowResponseActionsConsole = (agentInfo: SentinelOneAgentInfo) => void;
 export const useWithShowResponder = (): ShowResponseActionsConsole => {
