@@ -19,7 +19,7 @@ import { RiskCategories } from '../../../../common/entity_analytics/risk_engine'
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 
 const userRiskScore: UserRiskScore = {
-  '@timestamp': '626569200000',
+  '@timestamp': '1989-11-08T23:00:00.000Z',
   user: {
     name: 'test',
     risk: {
@@ -40,11 +40,11 @@ const userRiskScore: UserRiskScore = {
     },
   },
   alertsCount: 0,
-  oldestAlertTimestamp: '626569200000',
+  oldestAlertTimestamp: '1989-11-08T23:00:00.000Z',
 };
 
 const hostRiskScore: HostRiskScore = {
-  '@timestamp': '626569200000',
+  '@timestamp': '1989-11-08T23:00:00.000Z',
   host: {
     name: 'test',
     risk: {
@@ -65,7 +65,7 @@ const hostRiskScore: HostRiskScore = {
     },
   },
   alertsCount: 0,
-  oldestAlertTimestamp: '626569200000',
+  oldestAlertTimestamp: '1989-11-08T23:00:00.000Z',
 };
 
 export const mockUserRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
