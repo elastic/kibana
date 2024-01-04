@@ -246,11 +246,7 @@ export const uiSettings: Record<string, UiSettings> = {
     description: i18n.translate(
       'xpack.observability.enableInfrastructureProfilingIntegrationDescription',
       {
-        defaultMessage:
-          '{betaLabel} Enable Universal Profiling integration in the Infrastructure app.',
-        values: {
-          betaLabel: `<em>[${betaLabel}]</em>`,
-        },
+        defaultMessage: 'Enable Universal Profiling integration in the Infrastructure app.',
       }
     ),
     schema: schema.boolean(),
