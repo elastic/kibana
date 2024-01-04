@@ -1,0 +1,79 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { HeaderSentinelOneInfo } from '../components/endpoint_responder/components/header_info/sentinel_one/header_sentinel_one_info';
+
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import {
+  ActionLogButton,
+  getEndpointConsoleCommands,
+  OfflineCallout,
+} from '../components/endpoint_responder';
+import { useConsoleManager } from '../components/console';
+import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
+import type { SentinelOneAgentInfo } from '../../../common/types';
+
+const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_overlay.pageTitle', {
+  defaultMessage: 'Response console',
+});
+
+type ShowResponseActionsConsole = (agentInfo: SentinelOneAgentInfo) => void;
+export const useWithShowResponder = (): ShowResponseActionsConsole => {
+  const consoleManager = useConsoleManager();
+  const endpointPrivileges = useUserPrivileges().endpointPrivileges;
+
+  return useCallback(
+    (agentInfo: SentinelOneAgentInfo) => {
+      // If no authz, just exit and log something to the console
+      if (!endpointPrivileges.canAccessResponseConsole) {
+        window.console.error(
+          new Error(`Access denied to ${agentInfo.agent.type} response actions console`)
+        );
+        return;
+      }
+
+      const endpointAgentId = agentInfo.agent.id;
+      const endpointRunningConsole = consoleManager.getOne(endpointAgentId);
+
+      if (endpointRunningConsole) {
+        endpointRunningConsole.show();
+      } else {
+        consoleManager
+          .register({
+            id: endpointAgentId,
+            meta: {
+              sentinel_one: agentInfo,
+            },
+            consoleProps: {
+              commands: getEndpointConsoleCommands({
+                endpointAgentId,
+                endpointCapabilities: [],
+                endpointPrivileges,
+              }),
+              'data-test-subj': 'agentResponseActionsConsole',
+              storagePrefix: 'xpack.securitySolution.Responder',
+              TitleComponent: () => <HeaderSentinelOneInfo agentInfo={agentInfo} />,
+            },
+            PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
+            ActionComponents: endpointPrivileges.canReadActionsLogManagement
+              ? [ActionLogButton]
+              : undefined,
+            PageBodyComponent: () => (
+              <>
+                <OfflineCallout endpointId={endpointAgentId} />
+                <MissingEncryptionKeyCallout />
+              </>
+            ),
+          })
+          .show();
+      }
+    },
+    [endpointPrivileges, consoleManager]
+  );
+};

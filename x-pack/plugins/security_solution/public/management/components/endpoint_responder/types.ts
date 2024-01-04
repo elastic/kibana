@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SentinelOneAgentInfo } from '../../hooks/sentinel_one/use_get_sentinel_one_details';
+import type { SentinelOneAgentInfo } from '../../../../common/types';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import type { CommandResponseActionApiState } from './hooks/use_console_action_submitter';
 import type { ManagedConsoleExtensionComponentProps } from '../console';
