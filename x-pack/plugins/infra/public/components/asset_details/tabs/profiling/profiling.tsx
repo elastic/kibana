@@ -18,6 +18,7 @@ import { useProfilingStatusData } from '../../hooks/use_profiling_status_data';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
+import { Threads } from './threads';
 
 export function Profiling() {
   const { activeTabId } = useTabSwitcherContext();
@@ -47,6 +48,18 @@ export function Profiling() {
         <>
           <EuiSpacer />
           <Functions />
+        </>
+      ),
+    },
+    {
+      id: 'threads',
+      name: i18n.translate('xpack.infra.tabs.profiling.threadsTabName', {
+        defaultMessage: 'Threads',
+      }),
+      content: (
+        <>
+          <EuiSpacer />
+          <Threads />
         </>
       ),
     },

@@ -51,7 +51,7 @@ const mockRequest: KibanaRequest<unknown, unknown, RequestBody> = {
       },
       subAction: 'invokeAI',
     },
-    assistantLangChain: true,
+    isEnabledKnowledgeBase: true,
   },
 } as KibanaRequest<unknown, unknown, RequestBody>;
 

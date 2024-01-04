@@ -9,6 +9,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { EuiCode, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { type Message, MessageRole } from '../../../common';
 
@@ -17,6 +18,11 @@ export interface Props {
   functionPayload?: string;
   onChange: (message: Message['message']) => void;
 }
+
+const functionNameClassName = css`
+  display: inline-block;
+`;
+
 export function ChatPromptEditorFunction({ functionName, functionPayload, onChange }: Props) {
   const [functionEditorLineCount, setFunctionEditorLineCount] = useState<number>(0);
 
@@ -67,8 +73,8 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
   }, [functionName, functionPayload, initialJsonString, onChange, previousPayload]);
 
   return (
-    <EuiPanel paddingSize="none">
-      <EuiCode>{functionName}</EuiCode>
+    <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
+      <EuiCode className={functionNameClassName}>{functionName}</EuiCode>
       <CodeEditor
         aria-label={i18n.translate(
           'xpack.observabilityAiAssistant.chatPromptEditor.codeEditor.payloadEditorLabel',

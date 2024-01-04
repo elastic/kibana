@@ -19,7 +19,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import type { CspBenchmarkRule } from '../../../common/types/latest';
+import type { CspBenchmarkRule, PageUrlParams } from '../../../common/types/latest';
 interface RulesPageData {
   rules_page: CspBenchmarkRule[];
   all_rules: CspBenchmarkRule[];
@@ -54,14 +54,13 @@ const getPage = (data: CspBenchmarkRule[], { page, perPage }: RulesQuery) =>
 
 const MAX_ITEMS_PER_PAGE = 10000;
 
-export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
-
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
+    ruleNumber: undefined,
     search: '',
     page: 0,
     perPage: pageSize || 10,
@@ -70,11 +69,13 @@ export const RulesContainer = () => {
   const { data, status, error } = useFindCspBenchmarkRule(
     {
       section: rulesQuery.section,
+      ruleNumber: rulesQuery.ruleNumber,
       search: rulesQuery.search,
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
     },
-    params.packagePolicyId
+    params.benchmarkId,
+    params.benchmarkVersion
   );
 
   const rulesPageData = useMemo(
@@ -88,14 +89,20 @@ export const RulesContainer = () => {
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
     },
-    params.packagePolicyId
+    params.benchmarkId,
+    params.benchmarkVersion
   );
 
   const sectionList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.section),
     [allRules.data]
   );
+  const ruleNumberList = useMemo(
+    () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
+    [allRules.data]
+  );
   const cleanedSectionList = [...new Set(sectionList)];
+  const cleanedRuleNumberList = [...new Set(ruleNumberList)];
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
@@ -104,7 +111,11 @@ export const RulesContainer = () => {
           onSectionChange={(value) =>
             setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
           }
+          onRuleNumberChange={(value) =>
+            setRulesQuery((currentQuery) => ({ ...currentQuery, ruleNumber: value }))
+          }
           sectionSelectOptions={cleanedSectionList}
+          ruleNumberSelectOptions={cleanedRuleNumberList}
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
           searchValue={rulesQuery.search || ''}
           totalRulesCount={rulesPageData.all_rules.length}

@@ -5760,7 +5760,7 @@
               "AlertsTableConfigurationRegistryWithActions",
               ")[]; register: (objectType: ",
               "AlertsTableConfigurationRegistry",
-              ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
+              ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; getAlertConfigIdPerRuleTypes: (ruleTypeIds: string[]) => string; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/app.tsx",
             "deprecated": false,
@@ -6218,7 +6218,7 @@
           "AlertsTableConfigurationRegistryWithActions",
           ")[]; register: (objectType: ",
           "AlertsTableConfigurationRegistry",
-          ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; }"
+          ") => void; has: (id: string) => boolean; getActions: (id: string) => { toggleColumn: (columnId: string) => void; }; getAlertConfigIdPerRuleTypes: (ruleTypeIds: string[]) => string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
