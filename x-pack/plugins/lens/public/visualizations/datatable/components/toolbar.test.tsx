@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { getButtonGroupInputValue } from '@kbn/test-jest-helpers2';
+import { getButtonGroupInputValue } from '@kbn/test-eui-helpers';
 import { DataTableToolbar } from './toolbar';
 import { DatatableVisualizationState } from '../visualization';
 import { FramePublicAPI, VisualizationToolbarProps } from '../../../types';

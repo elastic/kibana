@@ -6186,7 +6186,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-jest-helpers2@link:packages/kbn-test-jest-helpers2":
+"@kbn/test-eui-helpers@link:packages/kbn-test-eui-helpers":
   version "0.0.0"
   uid ""
 

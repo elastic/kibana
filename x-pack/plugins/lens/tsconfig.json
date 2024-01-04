@@ -100,7 +100,7 @@
     "@kbn/discover-utils",
     "@kbn/lens-formula-docs",
     "@kbn/visualization-utils",
-    "@kbn/test-jest-helpers2"
+    "@kbn/test-eui-helpers"
   ],
   "exclude": [
     "target/**/*"
