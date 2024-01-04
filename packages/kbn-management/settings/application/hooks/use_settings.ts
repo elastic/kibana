@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { useServices } from '../services';
 
 /**
@@ -16,14 +17,16 @@ import { useServices } from '../services';
  * normalizes them to a predictable format, {@link UiSettingMetadata}, and returns
  * them as an observed collection.
  */
-export const useSettings = () => {
-  const { getAllowlistedSettings, subscribeToUpdates } = useServices();
+export const useSettings = (scope: UiSettingsScope) => {
+  const { getSpaceSettings, getGlobalSettings, subscribeToUpdates } = useServices();
 
-  const [settings, setSettings] = useState(getAllowlistedSettings());
+  const scopeSettings = scope === 'namespace' ? getSpaceSettings() : getGlobalSettings();
+
+  const [settings, setSettings] = useState(scopeSettings);
 
   useEffectOnce(() => {
     const subscription = subscribeToUpdates(() => {
-      setSettings(getAllowlistedSettings());
+      setSettings(scopeSettings);
     });
 
     return () => {

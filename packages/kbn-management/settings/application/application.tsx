@@ -7,22 +7,20 @@
  */
 import React, { useState } from 'react';
 
-import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, Query } from '@elastic/eui';
-import { i18n as i18nLib } from '@kbn/i18n';
-
-import { Form } from '@kbn/management-settings-components-form';
+import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, Query, EuiTabs } from '@elastic/eui';
 import { categorizeFields } from '@kbn/management-settings-utilities';
 
+import { CategorizedFields } from '@kbn/management-settings-types';
+import { i18nTexts } from './i18n_texts';
+import { Tab } from './tab';
+import { TabContent } from './tab_content';
 import { useFields } from './hooks/use_fields';
 import { QueryInput, QueryInputProps } from './query_input';
-import { EmptyState } from './empty_state';
 import { useServices } from './services';
 
-const title = i18nLib.translate('management.settings.advancedSettingsLabel', {
-  defaultMessage: 'Advanced Settings',
-});
-
 export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
+export const SPACE_SETTINGS_TAB_ID = 'space-settings';
+export const GLOBAL_SETTINGS_TAB_ID = 'global-settings';
 
 function addQueryParam(url: string, param: string, value: string) {
   const urlObj = new URL(url);
@@ -43,6 +41,14 @@ function getQueryParam(url: string) {
   return '';
 }
 
+function getCategoryCounts(categorizedFields: CategorizedFields) {
+  const categoryCounts: { [category: string]: number } = {};
+  Object.entries(categorizedFields).forEach(
+    ([category, value]) => (categoryCounts[category] = value.count)
+  );
+  return categoryCounts;
+}
+
 /**
  * Component for displaying the {@link SettingsApplication} component.
  */
@@ -52,9 +58,6 @@ export const SettingsApplication = () => {
   const queryParam = getQueryParam(window.location.href);
   const [query, setQuery] = useState<Query>(Query.parse(queryParam));
 
-  const allFields = useFields();
-  const filteredFields = useFields(query);
-
   const onQueryChange: QueryInputProps['onQueryChange'] = (newQuery = Query.parse('')) => {
     setQuery(newQuery);
 
@@ -62,36 +65,91 @@ export const SettingsApplication = () => {
     addUrlToHistory(search);
   };
 
-  const categorizedFields = categorizeFields(allFields);
-  const categories = Object.keys(categorizedFields);
-  const categoryCounts: { [category: string]: number } = {};
-  for (const category of categories) {
-    categoryCounts[category] = categorizedFields[category].count;
+  const spaceAllFields = useFields('namespace');
+  const spaceCategorizedFields = categorizeFields(spaceAllFields);
+  const spaceCategoryCounts = getCategoryCounts(spaceCategorizedFields);
+  const spaceFilteredFields = useFields('namespace', query);
+
+  const globalAllFields = useFields('global');
+  const globalCategorizedFields = categorizeFields(globalAllFields);
+  const globalCategoryCounts = getCategoryCounts(globalCategorizedFields);
+  const globalFilteredFields = useFields('global', query);
+
+  const globalSettingsEnabled = globalAllFields.length > 0;
+
+  const tabs = [
+    {
+      id: SPACE_SETTINGS_TAB_ID,
+      name: i18nTexts.defaultSpaceTabTitle,
+      content: (
+        <TabContent
+          isGlobal={false}
+          fields={spaceFilteredFields}
+          query={query}
+          onClearQuery={() => onQueryChange()}
+          callOutEnabled={globalSettingsEnabled}
+          categoryCounts={spaceCategoryCounts}
+        />
+      ),
+    },
+  ];
+  if (globalSettingsEnabled) {
+    tabs.push({
+      id: GLOBAL_SETTINGS_TAB_ID,
+      name: i18nTexts.globalTabTitle,
+      content: (
+        <TabContent
+          isGlobal={true}
+          fields={globalFilteredFields}
+          query={query}
+          onClearQuery={() => onQueryChange()}
+          callOutEnabled={true}
+          categoryCounts={globalCategoryCounts}
+        />
+      ),
+    });
   }
+
+  const [selectedTabId, setSelectedTabId] = useState(SPACE_SETTINGS_TAB_ID);
+  const selectedTabContent = tabs.find((obj) => obj.id === selectedTabId)?.content;
+
+  const onSelectedTabChanged = (id: string) => {
+    setSelectedTabId(id);
+  };
+
+  const queryCategories =
+    selectedTabId === SPACE_SETTINGS_TAB_ID
+      ? Object.keys(spaceCategorizedFields)
+      : Object.keys(globalCategorizedFields);
 
   return (
     <div>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiText>
-            <h1 data-test-subj={DATA_TEST_SUBJ_SETTINGS_TITLE}>{title}</h1>
+            <h1 data-test-subj={DATA_TEST_SUBJ_SETTINGS_TITLE}>
+              {i18nTexts.advancedSettingsTitle}
+            </h1>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryInput {...{ categories, query, onQueryChange }} />
+          <QueryInput {...{ categories: queryCategories, query, onQueryChange }} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xxl" />
-      {filteredFields.length ? (
-        <Form
-          fields={filteredFields}
-          categoryCounts={categoryCounts}
-          isSavingEnabled={true}
-          onClearQuery={() => onQueryChange()}
-        />
-      ) : (
-        <EmptyState {...{ queryText: query?.text, onClearQuery: () => onQueryChange() }} />
+      <EuiSpacer size="m" />
+      {globalSettingsEnabled && (
+        <EuiTabs>
+          {tabs.map((tab, index) => (
+            <Tab
+              id={tab.id}
+              name={tab.name}
+              onSelectedTabChanged={() => onSelectedTabChanged(tab.id)}
+              isSelected={tab.id === selectedTabId}
+            />
+          ))}
+        </EuiTabs>
       )}
+      {selectedTabContent}
     </div>
   );
 };

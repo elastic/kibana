@@ -32,9 +32,12 @@ const createRootMock = () => {
   };
 };
 
-export const createSettingsApplicationServicesMock = (): SettingsApplicationServices => ({
+export const createSettingsApplicationServicesMock = (
+  hasGlobalSettings?: boolean
+): SettingsApplicationServices => ({
   ...createFormServicesMock(),
-  getAllowlistedSettings: () => getSettingsMock(),
+  getSpaceSettings: () => getSettingsMock(),
+  getGlobalSettings: () => (hasGlobalSettings === false ? {} : getSettingsMock()),
   isCustomSetting: () => false,
   isOverriddenSetting: () => false,
   subscribeToUpdates: () => new Subscription(),

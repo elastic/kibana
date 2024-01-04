@@ -26,13 +26,14 @@ export default {
 } as ComponentMeta<typeof Component>;
 
 export const SettingsApplication: Story = () => {
-  const { getAllowListedSettings } = useApplicationStory();
+  const { getSpaceSettings, getGlobalSettings } = useApplicationStory();
 
   return (
     <SettingsApplicationProvider
       showDanger={action('showDanger')}
       links={{ deprecationKey: 'link/to/deprecation/docs' }}
-      getAllowlistedSettings={getAllowListedSettings}
+      getSpaceSettings={getSpaceSettings}
+      getGlobalSettings={getGlobalSettings}
       isCustomSetting={() => false}
       isOverriddenSetting={() => false}
       saveChanges={action('saveChanges')}

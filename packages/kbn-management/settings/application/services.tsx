@@ -21,7 +21,8 @@ import { Subscription } from 'rxjs';
 import { ScopedHistory } from '@kbn/core-application-browser';
 
 export interface Services {
-  getAllowlistedSettings: () => Record<string, UiSettingMetadata>;
+  getSpaceSettings: () => Record<string, UiSettingMetadata>;
+  getGlobalSettings: () => Record<string, UiSettingMetadata>;
   subscribeToUpdates: (fn: () => void) => Subscription;
   isCustomSetting: (key: string) => boolean;
   isOverriddenSetting: (key: string) => boolean;
@@ -33,6 +34,10 @@ export type SettingsApplicationServices = Services & FormServices;
 export interface KibanaDependencies {
   settings: {
     client: Pick<
+      IUiSettingsClient,
+      'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$' | 'validateValue'
+    >;
+    globalClient: Pick<
       IUiSettingsClient,
       'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$' | 'validateValue'
     >;
@@ -59,7 +64,8 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
     showReloadPagePrompt,
     links,
     showDanger,
-    getAllowlistedSettings,
+    getSpaceSettings,
+    getGlobalSettings,
     subscribeToUpdates,
     isCustomSetting,
     isOverriddenSetting,
@@ -69,7 +75,8 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
   return (
     <SettingsApplicationContext.Provider
       value={{
-        getAllowlistedSettings,
+        getSpaceSettings,
+        getGlobalSettings,
         subscribeToUpdates,
         isCustomSetting,
         isOverriddenSetting,
@@ -93,20 +100,29 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
   ...dependencies
 }) => {
   const { docLinks, notifications, theme, i18n, settings, history } = dependencies;
-  const { client } = settings;
+  const { client, globalClient } = settings;
 
-  const getAllowlistedSettings = () => {
+  const getSpaceSettings = () => {
     const rawSettings = Object.fromEntries(
       Object.entries(client.getAll()).filter(
         ([settingId, settingDef]) => !settingDef.readonly && !client.isCustom(settingId)
       )
     );
+    return normalizeSettings(rawSettings);
+  };
 
+  const getGlobalSettings = () => {
+    const rawSettings = Object.fromEntries(
+      Object.entries(globalClient.getAll()).filter(
+        ([settingId, settingDef]) => !settingDef.readonly && !client.isCustom(settingId)
+      )
+    );
     return normalizeSettings(rawSettings);
   };
 
   const services: Services = {
-    getAllowlistedSettings,
+    getSpaceSettings,
+    getGlobalSettings,
     isCustomSetting: (key: string) => client.isCustom(key),
     isOverriddenSetting: (key: string) => client.isOverridden(key),
     subscribeToUpdates: (fn: () => void) => client.getUpdate$().subscribe(fn),
