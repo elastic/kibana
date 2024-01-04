@@ -30,10 +30,11 @@ export class RetryService extends FtrService {
   public async try<T>(
     block: () => Promise<T>,
     onFailureBlock?: () => Promise<T>,
-    retryDelay?: number
+    retryDelay?: number,
+    timeout?: number
   ) {
     return await retryForSuccess(this.log, {
-      timeout: this.config.get('timeouts.try'),
+      timeout: timeout ?? this.config.get('timeouts.try'),
       methodName: 'retry.try',
       block,
       onFailureBlock,
