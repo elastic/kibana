@@ -141,12 +141,12 @@ export function ChatBody({
       : '100%'};
   `;
 
-  const [isEditing, setIsEditing] = useState(false);
-
   const [stickToBottom, setStickToBottom] = useState(true);
 
   const isAtBottom = (parent: HTMLElement) =>
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
+
+  const [isEditing, setIsEditing] = useState(false);
 
   const [promptEditorHeight, setPromptEditorHeight] = useState<number>(0);
 
@@ -258,8 +258,12 @@ export function ChatBody({
                   currentUser={currentUser}
                   chatState={state}
                   hasConnector={!!connectors.connectors?.length}
-                  onEditing={(editing) => setIsEditing(editing)}
+                  onEditing={(editing) => {
+                    setStickToBottom(false);
+                    setIsEditing(editing);
+                  }}
                   onEdit={(editedMessage, newMessage) => {
+                    setStickToBottom(true);
                     const indexOf = messages.indexOf(editedMessage);
                     next(messages.slice(0, indexOf).concat(newMessage));
                   }}
