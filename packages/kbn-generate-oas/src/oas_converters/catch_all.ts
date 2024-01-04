@@ -9,7 +9,10 @@
 import type { OpenAPIConverter } from '../type';
 
 export const catchAllConverter: OpenAPIConverter = {
-  extractParameterObjects: () => {
+  convertPathParameters: () => {
+    return [];
+  },
+  convertQuery: () => {
     return [];
   },
   convert: () => {

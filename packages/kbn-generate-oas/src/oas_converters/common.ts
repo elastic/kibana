@@ -5,3 +5,23 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+const trimTrailingStar = (str: string) => str.replace(/\*$/, '');
+
+export const validatePathParameters = (pathParameters: string[], schemaKeys: string[]) => {
+  if (pathParameters.length !== schemaKeys.length) {
+    throw new Error(
+      `Schema expects [${schemaKeys.join(', ')}], but path contains [${pathParameters.join(', ')}]`
+    );
+  }
+
+  for (let pathParameter of pathParameters) {
+    pathParameter = trimTrailingStar(pathParameter);
+    if (!schemaKeys.includes(pathParameter)) {
+      throw new Error(
+        `Path expects key "${pathParameter}" from schema but it was not found. Existing schema keys are: ${schemaKeys.join(
+          ', '
+        )}`
+      );
+    }
+  }
+};

@@ -6,5 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { zodConverter } from './zod';
-export { catchAllConverter } from './catch_all';
+import { OpenAPIConverter } from '../type';
+
+import { zodConverter } from './zod';
+import { kbnConfigSchemaConverter } from './kbn_config_schema';
+import { catchAllConverter } from './catch_all';
+
+const CONVERTERS: OpenAPIConverter[] = [kbnConfigSchemaConverter, zodConverter, catchAllConverter];
+export const getConverter = (schema: unknown): OpenAPIConverter => {
+  return CONVERTERS.find((c) => c.is(schema))!;
+};

@@ -21,13 +21,7 @@ import {
   getVersionedContentString,
 } from './util';
 
-import { catchAllConverter, zodConverter } from './oas_converters';
-import type { OpenAPIConverter } from './type';
-
-const converters: OpenAPIConverter[] = [zodConverter, catchAllConverter];
-const getConverter = (schema: unknown): OpenAPIConverter => {
-  return converters.find((c) => c.is(schema))!;
-};
+import { getConverter } from './oas_converters';
 
 export const openApiVersion = '3.0.0';
 
@@ -152,33 +146,40 @@ const getOpenApiPathsObject = (appRouter: CoreVersionedRouter): OpenAPIV3.PathsO
     );
     const handler = route.handlers.find(({ options: { version: v } }) => v === version);
     const schemas = handler ? extractValidationSchemaFromHandler(handler) : undefined;
-    if (handler && schemas) {
-      const params = schemas.request?.params as any;
-      if (params) {
-        const converter = getConverter(params);
-        pathObjects = converter.extractParameterObjects(params, pathParams, 'path') ?? [];
+
+    try {
+      if (handler && schemas) {
+        const params = schemas.request?.params as unknown;
+        if (params) {
+          const converter = getConverter(params);
+          pathObjects = converter.convertPathParameters(params, pathParams);
+        }
+        const query = schemas.request?.query as unknown;
+        if (query) {
+          const converter = getConverter(query);
+          queryObjects = converter.convertQuery(query);
+        }
       }
-      const query = schemas.request?.query as any;
-      if (query) {
-        const converter = getConverter(query);
-        queryObjects = converter.extractParameterObjects(query, pathParams, 'query') ?? [];
-      }
+
+      const path: OpenAPIV3.PathItemObject = {
+        [route.method]: {
+          requestBody: hasBody
+            ? {
+                content: extractRequestBody(route),
+              }
+            : undefined,
+          responses: extractResponses(route),
+          parameters: pathObjects.concat(queryObjects),
+          operationId: getOperationId(route.path),
+        },
+      };
+
+      paths[route.path] = { ...paths[route.path], ...path };
+    } catch (e) {
+      // Enrich the error message with a bit more context
+      e.message = `Error generating OpenAPI for route '${route.path}' using version '${version}': ${e.message}`;
+      throw e;
     }
-
-    const path: OpenAPIV3.PathItemObject = {
-      [route.method]: {
-        requestBody: hasBody
-          ? {
-              content: extractRequestBody(route),
-            }
-          : undefined,
-        responses: extractResponses(route),
-        parameters: pathObjects.concat(queryObjects),
-        operationId: getOperationId(route.path),
-      },
-    };
-
-    paths[route.path] = { ...paths[route.path], ...path };
   }
   return paths;
 };

@@ -10,12 +10,19 @@ import { z } from '@kbn/zod';
 import type { OpenAPIV3 } from 'openapi-types';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { OpenAPIConverter } from '../type';
+import { validatePathParameters } from './common';
 
-// Most of file copied from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
+// Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
 
 const instanceofZodType = (type: any): type is z.ZodTypeAny => {
   return !!type?._def?.typeName;
 };
+
+function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAny {
+  if (!instanceofZodType(schema)) {
+    throw new Error('Zod validator expected');
+  }
+}
 
 const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
   type: z.ZodTypeAny,
@@ -128,79 +135,66 @@ const instanceofZodTypeCoercible = (_type: z.ZodTypeAny): _type is ZodTypeCoerci
   );
 };
 
-const extractParameterObjects = (
-  schema: unknown,
-  pathParameters: string[],
-  inType: 'path' | 'query'
-): OpenAPIV3.ParameterObject[] | undefined => {
-  if (!instanceofZodType(schema)) {
-    throw new Error('Zod validator expected');
-  }
+const convertObjectMembersToParameterObjects = (
+  shape: z.ZodRawShape,
+  isRequired: boolean,
+  isPathParameter = false
+): OpenAPIV3.ParameterObject[] => {
+  return Object.entries(shape).map(([shapeKey, subShape]) => {
+    const isSubShapeRequired = !subShape.isOptional();
 
-  const isRequired = !schema.isOptional();
-  const unwrappedSchema = unwrapZodType(schema, true);
-
-  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
-    return undefined;
-  }
-
-  if (!instanceofZodTypeObject(unwrappedSchema)) {
-    throw new Error('Input parser must be a ZodObject');
-  }
-
-  const shape = unwrappedSchema.shape;
-  const shapeKeys = Object.keys(shape);
-
-  for (const pathParameter of pathParameters) {
-    if (!shapeKeys.includes(pathParameter)) {
-      throw new Error(`Input parser expects key from path: "${pathParameter}"`);
+    if (!instanceofZodTypeLikeString(subShape)) {
+      if (zodSupportsCoerce) {
+        if (!instanceofZodTypeCoercible(subShape)) {
+          throw new Error(
+            `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`
+          );
+        }
+      } else {
+        throw new Error(`Input parser key: "${shapeKey}" must be ZodString`);
+      }
     }
+
+    const { description, ...openApiSchemaObject } = convert(subShape);
+
+    return {
+      name: shapeKey,
+      in: isPathParameter ? 'path' : 'query',
+      required: isPathParameter || (isRequired && isSubShapeRequired),
+      schema: openApiSchemaObject,
+      description,
+    };
+  });
+};
+
+const convertQuery = (schema: unknown): OpenAPIV3.ParameterObject[] => {
+  assertInstanceOfZodType(schema);
+  const unwrappedSchema = unwrapZodType(schema, true);
+  if (!instanceofZodTypeObject(unwrappedSchema)) {
+    throw new Error('Query schema must be an _object_ schema validator!');
   }
+  const shape = unwrappedSchema.shape;
+  const isRequired = !schema.isOptional();
+  return convertObjectMembersToParameterObjects(shape, isRequired);
+};
 
-  return shapeKeys
-    .filter((shapeKey) => {
-      const isPathParameter = pathParameters.includes(shapeKey);
-      if (inType === 'path') {
-        return isPathParameter;
-      } else if (inType === 'query') {
-        return !isPathParameter;
-      }
-      return true;
-    })
-    .map((shapeKey) => {
-      let shapeSchema = shape[shapeKey]!;
-      const isShapeRequired = !shapeSchema.isOptional();
-      const isPathParameter = pathParameters.includes(shapeKey);
-
-      if (!instanceofZodTypeLikeString(shapeSchema)) {
-        if (zodSupportsCoerce) {
-          if (!instanceofZodTypeCoercible(shapeSchema)) {
-            throw new Error(
-              `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`
-            );
-          }
-        } else {
-          throw new Error(`Input parser key: "${shapeKey}" must be ZodString`);
-        }
-      }
-
-      if (instanceofZodTypeOptional(shapeSchema)) {
-        if (isPathParameter) {
-          throw new Error(`Path parameter: "${shapeKey}" must not be optional`);
-        }
-        shapeSchema = shapeSchema.unwrap();
-      }
-
-      const { description, ...openApiSchemaObject } = convert(shapeSchema);
-
-      return {
-        name: shapeKey,
-        in: isPathParameter ? 'path' : 'query',
-        required: isPathParameter || (isRequired && isShapeRequired),
-        schema: openApiSchemaObject,
-        description,
-      };
-    });
+const convertPathParameters = (
+  schema: unknown,
+  pathParameters: string[]
+): OpenAPIV3.ParameterObject[] => {
+  assertInstanceOfZodType(schema);
+  const unwrappedSchema = unwrapZodType(schema, true);
+  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
+    return [];
+  }
+  if (!instanceofZodTypeObject(unwrappedSchema)) {
+    throw new Error('Parameters schema must be an _object_ schema validator!');
+  }
+  const shape = unwrappedSchema.shape;
+  const schemaKeys = Object.keys(shape);
+  validatePathParameters(pathParameters, schemaKeys);
+  const isRequired = !schema.isOptional();
+  return convertObjectMembersToParameterObjects(shape, isRequired, true);
 };
 
 const convert = (schema: z.ZodTypeAny): OpenAPIV3.SchemaObject => {
@@ -211,7 +205,8 @@ const convert = (schema: z.ZodTypeAny): OpenAPIV3.SchemaObject => {
 const is = instanceofZodType;
 
 export const zodConverter: OpenAPIConverter = {
-  extractParameterObjects,
+  convertPathParameters,
+  convertQuery,
   convert,
   is,
 };

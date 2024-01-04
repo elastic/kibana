@@ -9,11 +9,9 @@
 import type { OpenAPIV3 } from 'openapi-types';
 
 export interface OpenAPIConverter {
-  extractParameterObjects(
-    schema: unknown,
-    pathParameters: string[],
-    inType: 'path' | 'query'
-  ): OpenAPIV3.ParameterObject[] | undefined;
+  convertPathParameters(schema: unknown, pathParameters: string[]): OpenAPIV3.ParameterObject[];
+
+  convertQuery(schema: unknown): OpenAPIV3.ParameterObject[];
 
   convert(schema: unknown): OpenAPIV3.BaseSchemaObject;
 
