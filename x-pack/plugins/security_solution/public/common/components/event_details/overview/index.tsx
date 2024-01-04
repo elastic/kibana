@@ -30,7 +30,7 @@ import { OverviewCardWithActions, OverviewCard } from './overview_card';
 import { StatusPopoverButton } from './status_popover_button';
 import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
-import { isNotNull } from '../../../../timelines/store/timeline/helpers';
+import { isNotNull } from '../../../../timelines/store/helpers';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;

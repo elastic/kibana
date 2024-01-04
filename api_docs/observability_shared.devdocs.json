@@ -385,7 +385,7 @@
           {
             "parentPluginId": "observabilityShared",
             "id": "def-public.EmbeddableFunctions.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
@@ -450,6 +450,39 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableStackTraces",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableStackTraces",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_stack_traces.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableStackTraces.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_stack_traces.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.getContextMenuItemsFromActions",
         "type": "Function",
         "tags": [],
@@ -461,8 +494,8 @@
             "pluginId": "uiActions",
             "scope": "public",
             "docId": "kibUiActionsPluginApi",
-            "section": "def-public.UiActionsStart",
-            "text": "UiActionsStart"
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
           },
           "; triggerId: ",
           {
@@ -2812,6 +2845,23 @@
         ],
         "signature": [
           "\"EMBEDDABLE_PROFILING_SEARCH_BAR\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_STACK_TRACES",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_STACK_TRACES",
+        "description": [
+          "Profiling threads embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_STACK_TRACES\""
         ],
         "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
         "deprecated": false,

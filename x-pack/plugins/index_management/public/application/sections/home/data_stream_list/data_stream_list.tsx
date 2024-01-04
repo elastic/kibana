@@ -128,7 +128,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
-              defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
+              defaultMessage="Data streams store time-series data across multiple indices and can be created from index templates. {learnMoreLink}"
               values={{
                 learnMoreLink: (
                   <EuiLink

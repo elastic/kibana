@@ -70,7 +70,8 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ esClient, logger });
     });
 
-    describe('Rule creation', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/173653
+    describe.skip('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
           name: 'Index Connector: Slo Burn rate API test',

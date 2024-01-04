@@ -12,12 +12,12 @@ import { useDispatch } from 'react-redux';
 
 import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
 import { TimelineType, TimelineStatus } from '../../../../../common/api/timeline';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import * as i18n from './translations';
 import { useCreateTimelineButton } from './use_create_timeline';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
 import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../tour/step_config';
 
 const NotesCountBadge = styled(EuiBadge)`

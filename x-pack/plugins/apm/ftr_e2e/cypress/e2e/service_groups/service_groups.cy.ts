@@ -82,7 +82,7 @@ describe('Service groups', () => {
 
       it('creates a service group', () => {
         cy.getByTestSubj('apmCreateServiceGroupButton').click();
-        cy.getByTestSubj('apmGroupNameInput').type('go services');
+        cy.getByTestSubj('apmGroupNameInput').type('go services{enter}');
         cy.contains('Select services').click();
         cy.getByTestSubj('headerFilterKuerybar').type('agent.name:"go"{enter}');
         cy.contains('synth-go-1');

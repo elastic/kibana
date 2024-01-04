@@ -7,17 +7,19 @@
 
 import React from 'react';
 
-/*
- * Mocking AutoSizer of the react-virtualized because it does not render children in JS DOM.
- * This seems related to not being able to properly discover height and width.
- */
-jest.mock('react-virtualized', () => {
-  const original = jest.requireActual('react-virtualized');
-
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
-    AutoSizer: ({ children }: { children: any }) => (
-      <div>{children({ height: 500, width: 500 })}</div>
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: any) => {
+          props.onChange(e.jsonContent);
+        }}
+      />
     ),
   };
 });

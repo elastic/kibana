@@ -29,7 +29,7 @@ export const Configurations = () => {
   const noFindingsForPostureType =
     getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
-  if (!hasConfigurationFindings) return <NoFindingsStates posturetype={noFindingsForPostureType} />;
+  if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
 
   return (
     <CloudPosturePage query={dataViewQuery}>
@@ -50,7 +50,11 @@ export const Configurations = () => {
           path={findingsNavigation.findings_default.path}
           render={() => (
             <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
-              <LatestFindingsContainer dataView={dataViewQuery.data!} />
+              <LatestFindingsContainer
+                dataView={dataViewQuery.data!}
+                dataViewRefetch={dataViewQuery.refetch}
+                dataViewIsRefetching={dataViewQuery.isRefetching}
+              />
             </TrackApplicationView>
           )}
         />

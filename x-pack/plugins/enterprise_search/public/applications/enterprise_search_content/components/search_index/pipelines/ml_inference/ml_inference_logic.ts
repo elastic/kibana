@@ -119,7 +119,7 @@ export interface MLInferencePipelineOption {
   indexFields: string[];
 }
 
-interface MLInferenceProcessorsActions {
+export interface MLInferenceProcessorsActions {
   addSelectedFieldsToMapping: (isTextExpansionModelSelected: boolean) => {
     isTextExpansionModelSelected: boolean;
   };
@@ -133,6 +133,7 @@ interface MLInferenceProcessorsActions {
   >['apiSuccess'];
   attachPipeline: () => void;
   clearFetchedPipeline: FetchPipelineApiLogicActions['apiReset'];
+  clearModelPlaceholderFlag: (modelId: string) => { modelId: string };
   createApiError: Actions<
     CreateMlInferencePipelineApiLogicArgs,
     CreateMlInferencePipelineResponse
@@ -222,13 +223,13 @@ export const MLInferenceLogic = kea<
     }),
     attachPipeline: true,
     clearFormErrors: true,
+    clearModelPlaceholderFlag: (modelId: string) => ({ modelId }),
     createPipeline: true,
     onAddInferencePipelineStepChange: (step: AddInferencePipelineSteps) => ({ step }),
     removeFieldFromMapping: (fieldName: string) => ({ fieldName }),
     selectExistingPipeline: (pipelineName: string) => ({ pipelineName }),
     selectFields: (fieldNames: string[]) => ({ fieldNames }),
     setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => ({ step }),
-    setFormErrors: (inputErrors: AddInferencePipelineFormErrors) => ({ inputErrors }),
     setIndexName: (indexName: string) => ({ indexName }),
     setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => ({
       configuration,
@@ -299,6 +300,19 @@ export const MLInferenceLogic = kea<
         pipelineName,
       });
     },
+    clearModelPlaceholderFlag: ({ modelId }) => {
+      const {
+        addInferencePipelineModal: { configuration },
+      } = values;
+
+      // Don't change the flag if the user clicked away from the selected model
+      if (modelId !== configuration.modelID) return;
+
+      actions.setInferencePipelineConfiguration({
+        ...configuration,
+        isModelPlaceholderSelected: false,
+      });
+    },
     createPipeline: () => {
       const {
         addInferencePipelineModal: { configuration, indexName },
@@ -361,6 +375,9 @@ export const MLInferenceLogic = kea<
         });
         // Continue to the next step so we don't have to save it to state, we will change
         // back to the Configuration step if we find a pipeline with the same name
+
+        // Re-fetch ML model list to include those that were deployed in this step
+        actions.makeMLModelsRequest(undefined);
       }
       actions.setAddInferencePipelineStep(step);
     },

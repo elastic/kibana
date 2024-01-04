@@ -30,7 +30,7 @@ import {
   INGESTION_METHOD_IDS,
 } from '../../../../../common/constants';
 
-import apiLogo from '../../../../assets/images/api_cloud.svg';
+import apiLogo from '../../../../assets/images/api_image.png';
 import fileUploadLogo from '../../../../assets/images/file_upload_logo.svg';
 import sampleDataLogo from '../../../../assets/images/sample_data_logo.svg';
 import connectorLogo from '../../../../assets/images/search_connector.svg';

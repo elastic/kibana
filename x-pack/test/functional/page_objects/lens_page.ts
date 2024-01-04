@@ -912,8 +912,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         `[data-test-subj^="lnsXY_axisSide_groups_"]`
       );
       for (const axisSideGroup of axisSideGroups) {
-        const input = await axisSideGroup.findByTagName('input');
-        const isSelected = await input.isSelected();
+        const ariaPressed = await axisSideGroup.getAttribute('aria-pressed');
+        const isSelected = ariaPressed === 'true';
         if (isSelected) {
           return axisSideGroup?.getVisibleText();
         }
@@ -922,15 +922,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** Counts the visible warnings in the config panel */
     async getWorkspaceErrorCount() {
-      const moreButton = await testSubjects.exists('workspace-more-errors-button');
-      if (moreButton) {
-        await retry.try(async () => {
-          await testSubjects.click('workspace-more-errors-button');
-          await testSubjects.missingOrFail('workspace-more-errors-button');
-        });
+      const workspaceErrorsExists = await testSubjects.exists('lnsWorkspaceErrors');
+      if (!workspaceErrorsExists) {
+        return 0;
       }
-      const errors = await testSubjects.findAll('workspace-error-message');
-      return errors?.length ?? 0;
+
+      const paginationControlExists = await testSubjects.exists(
+        'lnsWorkspaceErrorsPaginationControl'
+      );
+      if (!paginationControlExists) {
+        // pagination control only displayed when there are multiple errors
+        return 1;
+      }
+
+      const paginationControl = await testSubjects.find('lnsWorkspaceErrorsPaginationControl');
+      const paginationItems = await paginationControl.findAllByCssSelector('.euiPagination__item');
+      return paginationItems.length;
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
@@ -1439,7 +1446,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async assertFocusedField(name: string) {
       const input = await find.activeElement();
-      const fieldAncestor = await input.findByXpath('./../../..');
+      const fieldAncestor = await input.findByXpath('./../..');
       const focusedElementText = await fieldAncestor.getVisibleText();
       const dataTestSubj = await fieldAncestor.getAttribute('data-test-subj');
       expect(focusedElementText).to.eql(name);

@@ -14,7 +14,6 @@ import {
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -24,7 +23,12 @@ import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
 
 export function ApmHeaderActionMenu() {
-  const { core, plugins, config } = useApmPluginContext();
+  const {
+    core,
+    plugins,
+    config,
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useApmPluginContext();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;
@@ -97,7 +101,9 @@ export function ApmHeaderActionMenu() {
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />
-      <ObservabilityAIAssistantActionMenuItem />
+      {ObservabilityAIAssistantActionMenuItem ? (
+        <ObservabilityAIAssistantActionMenuItem />
+      ) : null}
     </EuiHeaderLinks>
   );
 }

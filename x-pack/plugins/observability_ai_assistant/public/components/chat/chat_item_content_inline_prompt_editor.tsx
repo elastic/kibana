@@ -6,48 +6,70 @@
  */
 
 import React from 'react';
+import { EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { MessageText } from '../message_panel/message_text';
 import { ChatPromptEditor } from './chat_prompt_editor';
-import { type Message, MessageRole } from '../../../common';
+import type { Message } from '../../../common';
 import type { ChatActionClickHandler } from './types';
 import type { TelemetryEventTypeWithPayload } from '../../analytics';
 
 interface Props {
-  content: string | undefined;
-  functionCall:
-    | {
-        name: string;
-        arguments?: string | undefined;
-        trigger: MessageRole;
-      }
-    | undefined;
-  loading: boolean;
   editing: boolean;
+  loading: boolean;
+  role: Message['message']['role'];
+  content: Message['message']['content'];
+  functionCall: Message['message']['function_call'];
   onActionClick: ChatActionClickHandler;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onSubmit: (message: Message) => void;
 }
+
+const textContainerClassName = css`
+  padding: 4px 0;
+`;
+
+const editorContainerClassName = css`
+  padding: 12px 0;
+`;
+
 export function ChatItemContentInlinePromptEditor({
-  content,
-  functionCall,
   editing,
   loading,
+  functionCall,
+  content,
+  role,
   onActionClick,
   onSendTelemetry,
   onSubmit,
 }: Props) {
   return !editing ? (
-    <MessageText content={content || ''} loading={loading} onActionClick={onActionClick} />
+    <EuiPanel
+      paddingSize="none"
+      hasBorder={false}
+      hasShadow={false}
+      className={textContainerClassName}
+    >
+      <MessageText content={content || ''} loading={loading} onActionClick={onActionClick} />
+    </EuiPanel>
   ) : (
-    <ChatPromptEditor
-      disabled={false}
-      loading={false}
-      initialPrompt={content}
-      initialFunctionPayload={functionCall?.arguments}
-      initialSelectedFunctionName={functionCall?.name}
-      trigger={functionCall?.trigger}
-      onSubmit={onSubmit}
-      onSendTelemetry={onSendTelemetry}
-    />
+    <EuiPanel
+      paddingSize="none"
+      hasBorder={false}
+      hasShadow={false}
+      className={editorContainerClassName}
+    >
+      <ChatPromptEditor
+        disabled={false}
+        hidden={false}
+        loading={false}
+        initialFunctionCall={functionCall}
+        initialContent={content}
+        initialRole={role}
+        onChangeHeight={() => {}}
+        onSubmit={onSubmit}
+        onSendTelemetry={onSendTelemetry}
+      />
+    </EuiPanel>
   );
 }
