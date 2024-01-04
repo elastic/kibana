@@ -83,7 +83,7 @@ export function Profiling() {
           <EuiText size="xs">
             <FormattedMessage
               id="xpack.infra.profiling.functionsInfoPopoverBody"
-              defaultMessage="The TopN functions view shows the most frequently sampled functions, broken down by CPU time, annualized CO2, and annualized cost estimates. You can use this view to identify the most expensive line of code on your host. {learnMoreLink}"
+              defaultMessage="Identify the most expensive lines of code on your host by looking at the most frequently sampled functions, broken down by CPU time, annualized CO2, and annualized cost estimates. {learnMoreLink}"
               values={{
                 learnMoreLink: (
                   <EuiLink
