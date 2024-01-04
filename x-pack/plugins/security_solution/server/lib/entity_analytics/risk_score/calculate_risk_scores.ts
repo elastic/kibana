@@ -72,13 +72,13 @@ const formatForResponse = ({
     modifier: criticalityModifier,
   });
   const calculatedLevel = getRiskLevel(normalizedScoreWithCriticality);
-  const categoryFiveScore =
+  const categoryTwoScore =
     normalizedScoreWithCriticality - bucket.risk_details.value.normalized_score;
-  const categoryFiveCount = criticalityModifier ? 1 : 0;
+  const categoryTwoCount = criticalityModifier ? 1 : 0;
 
   const newFields = {
-    category_2_score: categoryFiveScore,
-    category_2_count: categoryFiveCount,
+    category_2_score: categoryTwoScore,
+    category_2_count: categoryTwoCount,
     criticality_level: criticality?.criticality_level,
     criticality_modifier: criticalityModifier,
   };
