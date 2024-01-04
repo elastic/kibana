@@ -94,6 +94,16 @@ describe('LensEditConfigurationFlyout', () => {
     expect(navigateToLensEditorSpy).toHaveBeenCalled();
   });
 
+  it('should display the header title correctly for a newly created panel', async () => {
+    renderConfigFlyout({
+      displayFlyoutHeader: true,
+      isNewPanel: true,
+    });
+    expect(screen.getByTestId('inlineEditingFlyoutLabel').textContent).toBe(
+      'Create ES|QL visualization'
+    );
+  });
+
   it('should call the closeFlyout callback if cancel button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
 
@@ -164,6 +174,13 @@ describe('LensEditConfigurationFlyout', () => {
       },
     });
     expect(screen.queryByTestId('TextBasedLangEditor')).toBeNull();
+  });
+
+  it('should not display the suggestions if hidesSuggestions prop is true', async () => {
+    renderConfigFlyout({
+      hidesSuggestions: true,
+    });
+    expect(screen.queryByTestId('InlineEditingSuggestions')).toBeNull();
   });
 
   it('should display the suggestions if canEditTextBasedQuery prop is true', async () => {

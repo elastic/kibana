@@ -67,6 +67,7 @@ import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/pu
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
 
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -123,6 +124,7 @@ export interface ObservabilityPublicPluginsSetup {
   uiActions: UiActionsSetup;
   licensing: LicensingPluginSetup;
   serverless?: ServerlessPluginSetup;
+  presentationUtil?: PresentationUtilPluginStart;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -153,6 +155,7 @@ export interface ObservabilityPublicPluginsStart {
   serverless?: ServerlessPluginStart;
   uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;
+  presentationUtil?: PresentationUtilPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

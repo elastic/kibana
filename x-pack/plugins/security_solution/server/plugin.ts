@@ -211,6 +211,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
       cloud: plugins.cloud,
+      loggerFactory: this.pluginContext.logger,
     });
 
     initUsageCollectors({

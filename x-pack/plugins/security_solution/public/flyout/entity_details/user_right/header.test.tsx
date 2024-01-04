@@ -24,7 +24,7 @@ const mockProps = {
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
-describe('UserDetailsContent', () => {
+describe('UserPanelHeader', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>

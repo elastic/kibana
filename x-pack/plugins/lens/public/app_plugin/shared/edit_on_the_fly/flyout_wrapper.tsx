@@ -32,6 +32,7 @@ export const FlyoutWrapper = ({
   displayFlyoutHeader,
   language,
   attributesChanged,
+  isNewPanel,
   onCancel,
   navigateToLensEditor,
   onApply,
@@ -49,12 +50,17 @@ export const FlyoutWrapper = ({
         >
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
+              <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
                 <h2>
-                  {i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                    defaultMessage: 'Edit {lang} visualization',
-                    values: { lang: language },
-                  })}
+                  {isNewPanel
+                    ? i18n.translate('xpack.lens.config.createVisualizationLabel', {
+                        defaultMessage: 'Create {lang} visualization',
+                        values: { lang: language },
+                      })
+                    : i18n.translate('xpack.lens.config.editVisualizationLabel', {
+                        defaultMessage: 'Edit {lang} visualization',
+                        values: { lang: language },
+                      })}
                   <EuiToolTip
                     content={
                       language
@@ -147,7 +153,7 @@ export const FlyoutWrapper = ({
                 aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
                   defaultMessage: 'Apply changes',
                 })}
-                disabled={!attributesChanged}
+                disabled={Boolean(isNewPanel) ? false : !attributesChanged}
                 iconType="check"
                 data-test-subj="applyFlyoutButton"
               >

@@ -70,6 +70,9 @@ export const useStyles = () => {
     & .unifiedDataTable__cellValue {
       font-family: ${euiTheme.font.family};
     }
+    & .unifiedDataTable__inner .euiDataGrid__controls {
+      border-top: none;
+    }
   `;
 
   const groupBySelector = css`

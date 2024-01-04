@@ -12,7 +12,6 @@ import {
   EuiComment,
   EuiErrorBoundary,
   EuiPanel,
-  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ChatItemActions } from './chat_item_actions';
@@ -27,7 +26,7 @@ import type { Feedback } from '../feedback_buttons';
 import type { ChatActionClickHandler } from './types';
 import type { TelemetryEventTypeWithPayload } from '../../analytics';
 
-export interface ChatItemProps extends ChatTimelineItem {
+export interface ChatItemProps extends Omit<ChatTimelineItem, 'message'> {
   onActionClick: ChatActionClickHandler;
   onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
@@ -36,7 +35,16 @@ export interface ChatItemProps extends ChatTimelineItem {
   onStopGeneratingClick: () => void;
 }
 
+const moreCompactHeaderClassName = css`
+  .euiCommentEvent__header > .euiPanel {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+`;
+
 const normalMessageClassName = css`
+  ${moreCompactHeaderClassName}
+
   .euiCommentEvent__body {
     padding: 0;
   }
@@ -69,14 +77,13 @@ const noPanelMessageClassName = css`
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
   content,
+  function_call: functionCall,
+  role,
   currentUser,
   display: { collapsed },
   element,
   error,
   loading,
-  message: {
-    message: { function_call: functionCall, role },
-  },
   title,
   onActionClick,
   onEditSubmit,
@@ -93,10 +100,13 @@ export function ChatItem({
   const actions = [canCopy, collapsed, canCopy].filter(Boolean);
 
   const noBodyMessageClassName = css`
+    ${moreCompactHeaderClassName}
+
     .euiCommentEvent__body {
       padding: 0;
       height: ${expanded ? 'fit-content' : '0px'};
       overflow: hidden;
+      border: none;
     }
   `;
 
@@ -115,9 +125,9 @@ export function ChatItem({
     setEditing(!editing);
   };
 
-  const handleInlineEditSubmit = (message: Message) => {
+  const handleInlineEditSubmit = (newMessage: Message) => {
     handleToggleEdit();
-    return onEditSubmit(message);
+    return onEditSubmit(newMessage);
   };
 
   const handleCopyToClipboard = () => {
@@ -127,10 +137,11 @@ export function ChatItem({
   let contentElement: React.ReactNode =
     content || loading || error ? (
       <ChatItemContentInlinePromptEditor
-        content={content}
         editing={editing}
-        functionCall={functionCall}
         loading={loading}
+        functionCall={functionCall}
+        content={content}
+        role={role}
         onSubmit={handleInlineEditSubmit}
         onActionClick={onActionClick}
         onSendTelemetry={onSendTelemetry}
@@ -145,7 +156,6 @@ export function ChatItem({
         forceState={expanded ? 'open' : 'closed'}
         onToggle={handleToggleExpand}
       >
-        <EuiSpacer size="s" />
         {contentElement}
       </EuiAccordion>
     );

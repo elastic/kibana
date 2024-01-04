@@ -43,6 +43,7 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('integration disabled', () => (
@@ -57,6 +58,7 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('no managed data', () => (
@@ -71,6 +73,7 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('no observed data', () => (
@@ -105,6 +108,7 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ))
   .add('loading', () => (
@@ -143,5 +147,6 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
     />
   ));

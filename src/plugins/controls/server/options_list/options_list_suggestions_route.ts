@@ -112,12 +112,8 @@ export const setupOptionsListSuggestionsRoute = (
     const validationBuilder = getValidationAggregationBuilder();
 
     const suggestionAggregation: any = suggestionBuilder.buildAggregation(request) ?? {};
-    const builtValidationAggregation = validationBuilder.buildAggregation(request);
-    const validationAggregations = builtValidationAggregation
-      ? {
-          validation: builtValidationAggregation,
-        }
-      : {};
+    const validationAggregation: any = validationBuilder.buildAggregation(request);
+
     const body: SearchRequest['body'] = {
       size: 0,
       ...timeoutSettings,
@@ -128,7 +124,7 @@ export const setupOptionsListSuggestionsRoute = (
       },
       aggs: {
         ...suggestionAggregation,
-        ...validationAggregations,
+        ...validationAggregation,
       },
       runtime_mappings: {
         ...runtimeFieldMap,
@@ -145,7 +141,7 @@ export const setupOptionsListSuggestionsRoute = (
      */
     const results = suggestionBuilder.parse(rawEsResult, request);
     const totalCardinality = results.totalCardinality;
-    const invalidSelections = validationBuilder.parse(rawEsResult);
+    const invalidSelections = validationBuilder.parse(rawEsResult, request);
     return {
       suggestions: results.suggestions,
       totalCardinality,

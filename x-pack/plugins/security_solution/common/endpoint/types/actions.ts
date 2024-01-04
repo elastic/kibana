@@ -17,6 +17,7 @@ import type {
 import type {
   ResponseActionStatus,
   ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
 } from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
@@ -104,7 +105,7 @@ interface EndpointActionFields<
 interface ActionRequestFields {
   expiration: string;
   type: 'INPUT_ACTION';
-  input_type: 'endpoint';
+  input_type: ResponseActionAgentType;
 }
 
 interface ActionResponseFields {
