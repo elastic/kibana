@@ -60,7 +60,6 @@ import {
   RuleFilterArray,
   AlertSuppression,
   SavedQueryId,
-  AlertSuppression,
   KqlQueryLanguage,
 } from './common_attributes.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
