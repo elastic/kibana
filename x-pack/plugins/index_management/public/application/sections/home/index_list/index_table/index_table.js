@@ -679,6 +679,7 @@ export class IndexTable extends Component {
                             loadIndices={loadIndices}
                             filter={filter}
                             resetFilter={() => filterChanged('')}
+                            extensionsService={extensionsService}
                           />
                         </EuiTableRowCell>
                       </EuiTableRow>

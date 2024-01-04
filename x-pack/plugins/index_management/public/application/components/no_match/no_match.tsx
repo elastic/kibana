@@ -8,16 +8,19 @@
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ExtensionsService } from '../../../services';
 import { CreateIndexButton } from '../../sections/home/index_list/create_index/create_index_button';
 
 export const NoMatch = ({
   loadIndices,
   filter,
   resetFilter,
+  extensionsService,
 }: {
   loadIndices: () => void;
   filter: string;
   resetFilter: () => void;
+  extensionsService: ExtensionsService;
 }) => {
   if (filter) {
     return (
@@ -49,6 +52,10 @@ export const NoMatch = ({
         }
       />
     );
+  }
+
+  if (extensionsService.emptyListContent) {
+    return extensionsService.emptyListContent.renderContent();
   }
 
   return (
