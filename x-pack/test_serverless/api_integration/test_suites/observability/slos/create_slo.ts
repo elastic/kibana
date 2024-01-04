@@ -17,13 +17,12 @@ import {
 } from '@kbn/observability-plugin/common/slo/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-interface ExpectedTransformBase {
+interface ExpectedTransforms {
   count: number;
   typeOfVersion: string;
   typeOfCreateTime: string;
+  results: Record<string, { id: string; destIndex: string }>;
 }
-
-type ExpectedTransforms = ExpectedTransformBase & Record<string, { id: string; destIndex: string }>;
 
 function assertTransformsResponseBody(
   body: GetTransformsResponseSchema,
@@ -33,7 +32,7 @@ function assertTransformsResponseBody(
   expect(body.transforms).to.have.length(expectedTransforms.count);
 
   body.transforms.forEach((transform, index) => {
-    const expectedTransform = expectedTransforms[`transform${index}`];
+    const expectedTransform = expectedTransforms.results[`transform${index}`];
     expect(transform.id).to.eql(expectedTransform.id);
     expect(transform.dest.index).to.eql(expectedTransform.destIndex);
     expect(typeof transform.version).to.eql(expectedTransforms.typeOfVersion);
@@ -142,12 +141,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('creates the rollup and summary transforms', async () => {
-        const expectedTransforms = {
+        const expectedTransforms: ExpectedTransforms = {
           count: 2,
-          transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3' },
-          transform1: {
-            id: 'slo-summary-my-custom-id1-1',
-            destIndex: '.slo-observability.summary-v3',
+          results: {
+            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3' },
+            transform1: {
+              id: 'slo-summary-my-custom-id1-1',
+              destIndex: '.slo-observability.summary-v3',
+            },
           },
           typeOfVersion: 'string',
           typeOfCreateTime: 'number',
@@ -287,27 +288,29 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Total transforms', () => {
       it('returns all the transforms for above created SLOs', async () => {
-        const expectedTransforms = {
+        const expectedTransforms: ExpectedTransforms = {
           count: 8,
-          transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3' },
-          transform1: { id: 'slo-my-custom-id2-1', destIndex: '.slo-observability.sli-v3' },
-          transform2: { id: 'slo-my-custom-id3-1', destIndex: '.slo-observability.sli-v3' },
-          transform3: { id: 'slo-my-custom-id4-1', destIndex: '.slo-observability.sli-v3' },
-          transform4: {
-            id: 'slo-summary-my-custom-id1-1',
-            destIndex: '.slo-observability.summary-v3',
-          },
-          transform5: {
-            id: 'slo-summary-my-custom-id2-1',
-            destIndex: '.slo-observability.summary-v3',
-          },
-          transform6: {
-            id: 'slo-summary-my-custom-id3-1',
-            destIndex: '.slo-observability.summary-v3',
-          },
-          transform7: {
-            id: 'slo-summary-my-custom-id4-1',
-            destIndex: '.slo-observability.summary-v3',
+          results: {
+            transform0: { id: 'slo-my-custom-id1-1', destIndex: '.slo-observability.sli-v3' },
+            transform1: { id: 'slo-my-custom-id2-1', destIndex: '.slo-observability.sli-v3' },
+            transform2: { id: 'slo-my-custom-id3-1', destIndex: '.slo-observability.sli-v3' },
+            transform3: { id: 'slo-my-custom-id4-1', destIndex: '.slo-observability.sli-v3' },
+            transform4: {
+              id: 'slo-summary-my-custom-id1-1',
+              destIndex: '.slo-observability.summary-v3',
+            },
+            transform5: {
+              id: 'slo-summary-my-custom-id2-1',
+              destIndex: '.slo-observability.summary-v3',
+            },
+            transform6: {
+              id: 'slo-summary-my-custom-id3-1',
+              destIndex: '.slo-observability.summary-v3',
+            },
+            transform7: {
+              id: 'slo-summary-my-custom-id4-1',
+              destIndex: '.slo-observability.summary-v3',
+            },
           },
           typeOfVersion: 'string',
           typeOfCreateTime: 'number',
