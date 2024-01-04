@@ -23,16 +23,14 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { ToastsSetup } from '@kbn/core-notifications-browser';
-import { ThemeServiceSetup } from '@kbn/core-theme-browser';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useEffect, useState } from 'react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common/layout';
 import useMountedState from 'react-use/lib/useMountedState';
-import { JobParamsProviderOptions } from '.';
+import type { JobParamsProviderOptions } from '.';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
@@ -101,7 +99,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     props;
 
   const isSaved = Boolean(objectId);
-  const [, setIsStale] = useState(false);
+  const [isStale, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [selectedRadio, setSelectedRadio] = useState<string>('printablePdfV2');
   const [usePrintLayout, setPrintLayout] = useState(false);
@@ -183,13 +181,13 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
+              id="xpack.reporting.modalContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in {path}."
               values={{
                 path: (
                   <a href={apiClient.getManagementLink()}>
                     <FormattedMessage
-                      id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      id="xpack.reporting.modalContent.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
                       defaultMessage="Stack Management &gt; Reporting"
                     />
                   </a>
@@ -320,7 +318,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   };
 
   const saveWarningMessageWithButton =
-    objectId === undefined || objectId === '' ? (
+    objectId === undefined || objectId === '' || !isSaved || props.isDirty || isStale ? (
       <EuiFormRow
         helpText={
           <FormattedMessage
@@ -337,7 +335,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           isLoading={Boolean(createReportingJob)}
         >
           <FormattedMessage
-            id="xpack.reporting.generateButtonLabel"
+            id="xpack.reporting.modalContent.generateButtonLabel"
             defaultMessage="Generate export"
           />
         </EuiButton>

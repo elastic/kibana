@@ -155,7 +155,17 @@ class ReportingPanelContentUi extends Component<Props, State> {
             )}
           </EuiCopy>
         </EuiFlexItem>
-        <EuiFlexItem grow={0}>{isUnsaved ? (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved />) : (<ErrorUnsavedWorkPanel />)) : (exceedsMaxLength ? (<ErrorUrlTooLongPanel isUnsaved={false} />) : null)}</EuiFlexItem>
+        <EuiFlexItem grow={0}>
+          {isUnsaved ? (
+            exceedsMaxLength ? (
+              <ErrorUrlTooLongPanel isUnsaved />
+            ) : (
+              <ErrorUnsavedWorkPanel />
+            )
+          ) : exceedsMaxLength ? (
+            <ErrorUrlTooLongPanel isUnsaved={false} />
+          ) : null}
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -220,7 +230,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.reporting.panelContent.howToCallGenerationDescription"
+                id="xpack.reporting.modalContent.howToCallGenerationDescription"
                 defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
               />
             </p>
@@ -331,7 +341,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       .catch((error) => {
         this.props.toasts.addError(error, {
           title: intl.formatMessage({
-            id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
+            id: 'xpack.reporting.modalContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
           toastMessage: (
