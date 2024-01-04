@@ -21,6 +21,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
 import type {
   PluginSetup,
@@ -336,6 +337,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         package: 'endpoint',
         view: 'package-detail-assets',
         Component: LazyEndpointCustomAssetsExtension,
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'endpoint-agent-tamper-protection',
+        Component: getLazyEndpointAgentTamperProtectionExtension(registerOptions),
       });
     }
 
