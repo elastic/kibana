@@ -5,14 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSwitch,
-  EuiSpacer,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { i18n } from '@kbn/i18n';
