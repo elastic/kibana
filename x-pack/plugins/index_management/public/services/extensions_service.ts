@@ -28,7 +28,9 @@ export interface IndexBadge {
 }
 
 export interface EmptyListContent {
-  renderContent: () => ReturnType<FunctionComponent>;
+  renderContent: (args: {
+    createIndexButton: ReturnType<FunctionComponent>;
+  }) => ReturnType<FunctionComponent>;
 }
 
 export interface ExtensionsSetup {
