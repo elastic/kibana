@@ -178,6 +178,9 @@ export class ExecuteReportTask implements ReportingTask {
         err = mapToReportingError(error);
         err.stack = error.stack;
       } else {
+        if (report.error && report.error instanceof Error) {
+          errorLogger(this.logger, 'Error executing report', report.error);
+        }
         err = new QueueTimeoutError(
           `Max attempts reached (${maxAttempts}). Queue timeout reached.`
         );
