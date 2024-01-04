@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { EmbeddedMap } from './embedded_map';
@@ -17,11 +18,13 @@ export function GeoMap({
   end,
   kuery,
   filters,
+  dataView,
 }: {
   start: string;
   end: string;
   kuery?: string;
   filters: Filter[];
+  dataView?: DataView;
 }) {
   const [selectedMap, selectMap] = useState(MapTypes.Http);
 
@@ -40,6 +43,7 @@ export function GeoMap({
           end={end}
           kuery={kuery}
           filters={filters}
+          dataView={dataView}
         />
       </div>
     </>
