@@ -111,6 +111,5 @@ export const isResponseActionSupported = (
   actionName: ResponseActionsApiCommandNames,
   actionType: ResponseActionType
 ): boolean => {
-  console.log('agentType %s, actionName %s, actionType %s,', agentType, actionName, actionType);
   return RESPONSE_ACTIONS_SUPPORT_MAP[actionName][actionType][agentType];
 };
