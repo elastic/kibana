@@ -13,9 +13,6 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmPluginStartDeps } from '../../../../plugin';
 import {
   TraceSearchQuery,
   TraceSearchType,
@@ -54,11 +51,11 @@ export function TraceSearchBox({
   onQueryCommit,
   loading,
 }: Props) {
-  const { unifiedSearch, core, data, dataViews } = useApmPluginContext();
-  const { notifications, http, docLinks, uiSettings } = core;
   const {
-    services: { storage },
-  } = useKibana<ApmPluginStartDeps>();
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
+  } = useApmPluginContext();
 
   const { dataView } = useApmDataView();
 
@@ -106,16 +103,6 @@ export function TraceSearchBox({
                           defaultMessage: 'APM',
                         }
                       )}
-                      deps={{
-                        unifiedSearch,
-                        notifications,
-                        http,
-                        docLinks,
-                        uiSettings,
-                        data,
-                        dataViews,
-                        storage,
-                      }}
                     />
                   </form>
                 )}
