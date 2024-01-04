@@ -154,6 +154,7 @@ exports[`should only render permalink panel when there are no other panels 1`] =
                 "sortOrder": 0,
               },
             ],
+            "title": "Share this dashboard",
           },
         ]
       }

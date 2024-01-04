@@ -166,7 +166,16 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
 
     // needed for dashboard in serverless where there is only one panel
     if (menuItems.length === 1) {
-      panels.push({ id: 1, items: menuItems });
+      panels.push({
+        id: 1,
+        title: i18n.translate('share.contextMenuTitle', {
+          defaultMessage: 'Share this {objectType}',
+          values: {
+            objectType: objectTypeTitle || objectType,
+          },
+        }),
+        items: menuItems,
+      });
     } else if (menuItems.length > 1) {
       const topLevelMenuPanel = {
         id: panels.length + 1,
