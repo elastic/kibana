@@ -33,16 +33,18 @@ export const useStyles = () => {
 
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
-      // Vertically center content
-      display: flex;
-      align-items: center;
 
-      // Stretch content to full-width
+      // Vertically center content
       .euiDataGridRowCell__content {
-        flex-grow: 1;
+        display: flex;
+        align-items: center;
       }
     }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
+      text-align: left;
+    }
+    & .euiDataGridHeaderCell--numeric .euiDataGridHeaderCell__content {
+      flex-grow: 0;
       text-align: left;
     }
     & .euiDataGrid__controls {
@@ -57,7 +59,7 @@ export const useStyles = () => {
       font-size: ${euiTheme.size.m};
       font-weight: ${euiTheme.font.weight.bold};
       border-right: ${euiTheme.border.thin};
-      margin-right: ${euiTheme.size.s};
+      margin-inline: ${euiTheme.size.s};
       padding-right: ${euiTheme.size.m};
     }
     & .euiDataGrid__rightControls {

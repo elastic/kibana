@@ -85,10 +85,7 @@
 .euiDataGridHeader {
 
   .euiDataGridHeaderCell__content {
-    @include euiTextTruncate;
-    overflow: hidden;
     white-space: pre-wrap;
-    flex-grow: 1;
   }
 
   .euiDataGridHeaderCell__popover {
