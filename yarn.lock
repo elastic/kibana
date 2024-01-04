@@ -4195,7 +4195,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/data-stream@link:packages/kbn-data-stream":
+"@kbn/data-stream-adapter@link:packages/kbn-data-stream-adapter":
   version "0.0.0"
   uid ""
 

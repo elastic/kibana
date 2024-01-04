@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldMap } from '@kbn/data-stream';
+import type { FieldMap } from '@kbn/data-stream-adapter';
 
 export const resultsFieldMap: FieldMap = {
   'meta.batchId': { type: 'keyword', required: true },

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SpaceDataStream } from '@kbn/data-stream';
-import { ecsFieldMap } from '@kbn/data-stream/ecs';
+import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+import { ecsFieldMap } from '@kbn/data-stream-adapter/ecs';
 import { resultsFieldMap } from './results_field_map';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -20,10 +20,10 @@ const ECS_COMPONENT_TEMPLATE_NAME = '.kibana-dqa-dashboard-ecs-mappings';
 export type CreateResultsDataStream = (params: {
   kibanaVersion: string;
   namespace?: string;
-}) => SpaceDataStream;
+}) => DataStreamSpacesAdapter;
 
 export const createResultsDataStream: CreateResultsDataStream = ({ kibanaVersion }) => {
-  const resultsDataStream = new SpaceDataStream(RESULTS_DATA_STREAM_NAME, {
+  const resultsDataStream = new DataStreamSpacesAdapter(RESULTS_DATA_STREAM_NAME, {
     kibanaVersion,
     totalFieldsLimit: TOTAL_FIELDS_LIMIT,
   });

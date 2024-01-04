@@ -46,7 +46,7 @@ export const postResultsRoute = (
           const esClient = (await context.core).elasticsearch.client.asInternalUser;
           const outcome = await esClient.index({ index, body: document });
 
-          return response.ok({ body: { outcome: outcome.result } });
+          return response.ok({ body: { result: outcome.result } });
         } catch (err) {
           logger.error(JSON.stringify(err));
 

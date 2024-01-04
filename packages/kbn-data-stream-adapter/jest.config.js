@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-data-stream'],
+  roots: ['<rootDir>/packages/kbn-data-stream-adapter'],
 };

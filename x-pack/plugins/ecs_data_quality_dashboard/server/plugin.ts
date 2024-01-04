@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
-import type { SpaceDataStream } from '@kbn/data-stream';
+import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type {
   EcsDataQualityDashboardPluginSetup,
@@ -27,7 +27,7 @@ import {
   getIndexMappingsRoute,
   getIndexStatsRoute,
   getUnallowedFieldValuesRoute,
-  resultsRoute,
+  resultsRoutes,
 } from './routes';
 import { createResultsDataStream } from './lib/data_stream/results_data_stream';
 
@@ -35,7 +35,7 @@ export class EcsDataQualityDashboardPlugin
   implements Plugin<EcsDataQualityDashboardPluginSetup, EcsDataQualityDashboardPluginStart>
 {
   private readonly logger: Logger;
-  private readonly resultsDataStream: SpaceDataStream;
+  private readonly resultsDataStream: DataStreamSpacesAdapter;
   private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -64,12 +64,12 @@ export class EcsDataQualityDashboardPlugin
       const spaceId = plugins.spaces.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       return {
         spaceId,
-        getResultsIndexName: async () => {
-          const indexName = await this.resultsDataStream.getSpaceIndexName(spaceId);
-          if (indexName) {
-            return indexName;
+        getResultsIndexName: async (): Promise<string> => {
+          let indexName = await this.resultsDataStream.getSpaceIndexName(spaceId);
+          if (!indexName) {
+            indexName = await this.resultsDataStream.installSpace(spaceId);
           }
-          return this.resultsDataStream.installSpace(spaceId);
+          return indexName;
         },
       };
     });
@@ -81,7 +81,7 @@ export class EcsDataQualityDashboardPlugin
     getIndexStatsRoute(router, this.logger);
     getUnallowedFieldValuesRoute(router, this.logger);
     getILMExplainRoute(router, this.logger);
-    resultsRoute(router, this.logger);
+    resultsRoutes(router, this.logger);
     return {};
   }
 

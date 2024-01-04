@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { DataStream } from './src/data_stream';
-export { SpaceDataStream } from './src/space_data_stream';
+export { DataStreamAdapter } from './src/data_stream_adapter';
+export { DataStreamSpacesAdapter } from './src/data_stream_spaces_adapter';
 export type {
-  DataStreamParams,
+  DataStreamAdapterParams,
   SetComponentTemplateParams,
   SetIndexTemplateParams,
   InstallParams,
-} from './src/data_stream';
+} from './src/data_stream_adapter';
 export * from './src/field_maps/types';

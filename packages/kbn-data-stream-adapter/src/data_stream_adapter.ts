@@ -21,7 +21,7 @@ import { createOrUpdateIndexTemplate } from './create_or_update_index_template';
 import { installWithTimeout } from './install_with_timeout';
 import { getComponentTemplate, getIndexTemplate } from './resource_installer_utils';
 
-export interface DataStreamParams {
+export interface DataStreamAdapterParams {
   kibanaVersion: string;
   totalFieldsLimit?: number;
 }
@@ -53,21 +53,17 @@ export interface InstallParams {
 
 const DEFAULT_FIELDS_LIMIT = 2500;
 
-export class DataStream {
+export class DataStreamAdapter {
   protected readonly kibanaVersion: string;
   protected readonly totalFieldsLimit: number;
   protected componentTemplates: ClusterPutComponentTemplateRequest[] = [];
   protected indexTemplates: IndicesPutIndexTemplateRequest[] = [];
   protected installed: boolean;
 
-  constructor(protected readonly name: string, options: DataStreamParams) {
+  constructor(protected readonly name: string, options: DataStreamAdapterParams) {
     this.installed = false;
     this.kibanaVersion = options.kibanaVersion;
     this.totalFieldsLimit = options.totalFieldsLimit ?? DEFAULT_FIELDS_LIMIT;
-  }
-
-  public getName() {
-    return this.name;
   }
 
   public setComponentTemplate(params: SetComponentTemplateParams) {

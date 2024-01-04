@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
-import { createOrUpdateDataStream } from './create_or_update_data_stream';
+import { createDataStream, updateDataStreams } from './create_or_update_data_stream';
 import { createOrUpdateIndexTemplate } from './create_or_update_index_template';
-import { DataStream, type DataStreamParams, type InstallParams } from './data_stream';
+import {
+  DataStreamAdapter,
+  type DataStreamAdapterParams,
+  type InstallParams,
+} from './data_stream_adapter';
 
-export class SpaceDataStream extends DataStream {
+export class DataStreamSpacesAdapter extends DataStreamAdapter {
   private installedSpaceDataStreamName: Map<string, Promise<string>>;
   private _installSpace?: (spaceId: string) => Promise<string>;
 
-  constructor(private readonly prefix: string, options: DataStreamParams) {
+  constructor(private readonly prefix: string, options: DataStreamAdapterParams) {
     super(`${prefix}-*`, options); // make indexTemplate `indexPatterns` match all data stream space names
     this.installedSpaceDataStreamName = new Map();
   }
@@ -37,7 +41,7 @@ export class SpaceDataStream extends DataStream {
             logger,
             totalFieldsLimit: this.totalFieldsLimit,
           }),
-          `${componentTemplate.name} component template`
+          `create or update ${componentTemplate.name} component template`
         )
       )
     );
@@ -47,11 +51,23 @@ export class SpaceDataStream extends DataStream {
       this.indexTemplates.map((indexTemplate) =>
         installFn(
           createOrUpdateIndexTemplate({ template: indexTemplate, esClient, logger }),
-          `${indexTemplate.name} index template`
+          `create or update ${indexTemplate.name} index template`
         )
       )
     );
 
+    // Update existing space data streams
+    await installFn(
+      updateDataStreams({
+        name: `${this.prefix}-*`,
+        esClient,
+        logger,
+        totalFieldsLimit: this.totalFieldsLimit,
+      }),
+      `update space data streams`
+    );
+
+    // define function to install data stream for spaces on demand
     this._installSpace = async (spaceId: string) => {
       const existingInstallPromise = this.installedSpaceDataStreamName.get(spaceId);
       if (existingInstallPromise) {
@@ -59,21 +75,13 @@ export class SpaceDataStream extends DataStream {
       }
       const name = `${this.prefix}-${spaceId}`;
       const installPromise = installFn(
-        createOrUpdateDataStream({
-          name,
-          esClient,
-          logger,
-          totalFieldsLimit: this.totalFieldsLimit,
-        }),
-        `${name} data stream`
+        createDataStream({ name, esClient, logger }),
+        `create ${name} data stream`
       ).then(() => name);
 
       this.installedSpaceDataStreamName.set(spaceId, installPromise);
       return installPromise;
     };
-
-    // Always install default space data stream
-    await this._installSpace('default');
   }
 
   public async installSpace(spaceId: string): Promise<string> {

@@ -7,7 +7,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EcsVersion } from '@kbn/ecs';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
   getTotalDocsCount,
@@ -16,7 +15,6 @@ import {
   getTotalIndicesChecked,
   getTotalSameFamily,
   getTotalSizeInBytes,
-  onPatternRollupUpdated,
   postResult,
   updateResultOnCheckCompleted,
 } from './helpers';
@@ -30,8 +28,6 @@ import {
   getIncompatibleValuesFields,
   getSameFamilyFields,
 } from '../data_quality_panel/tabs/incompatible_tab/helpers';
-
-const storage = new Storage(localStorage);
 
 interface Props {
   ilmPhases: string[];
@@ -59,22 +55,12 @@ interface UseResultsRollup {
 
 export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRollup => {
   const { httpFetch } = useDataQualityContext();
-  const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>(
-    // storage.get('data_quality_pattern_index_names') || {}
-    {}
-  );
-  const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>(
-    storage.get('data_quality_pattern_rollups') || {}
-  );
+  const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
+  const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
 
   const updatePatternRollups = useCallback(
     (updateRollups: (current: Record<string, PatternRollup>) => Record<string, PatternRollup>) => {
-      console.log('updatePatternRollup');
-      setPatternRollups((current) => {
-        const updated = updateRollups(current);
-        storage.set('data_quality_pattern_rollups', updated);
-        return updated;
-      });
+      setPatternRollups((current) => updateRollups(current));
     },
     []
   );
@@ -99,11 +85,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
 
   const updatePatternIndexNames = useCallback(
     ({ indexNames, pattern }: { indexNames: string[]; pattern: string }) => {
-      setPatternIndexNames((current) => {
-        const updated = { ...current, [pattern]: indexNames };
-        // storage.set('data_quality_pattern_index_names', updated);
-        return updated;
-      });
+      setPatternIndexNames((current) => ({ ...current, [pattern]: indexNames }));
     },
     []
   );
@@ -121,8 +103,6 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
       requestTime,
       isLastCheck,
     }) => {
-      console.log('onCheckCompleted');
-
       setPatternRollups((currentPatternRollups) => {
         const updatedRollups = updateResultOnCheckCompleted({
           error,
@@ -134,7 +114,6 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
           pattern,
           patternRollups: currentPatternRollups,
         });
-        storage.set('data_quality_pattern_rollups', updatedRollups);
 
         const updatedRollup = updatedRollups[pattern];
         const { stats, results, ilmExplain } = updatedRollup;
@@ -209,7 +188,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
 
   useEffect(() => {
     // reset all state
-    setPatternRollups(storage.get('data_quality_pattern_rollups') || {});
+    setPatternRollups({});
     setPatternIndexNames({});
   }, [ilmPhases, patterns]);
 

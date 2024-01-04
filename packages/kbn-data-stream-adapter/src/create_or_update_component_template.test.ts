@@ -15,7 +15,7 @@ const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const ComponentTemplate = {
+const componentTemplate = {
   name: 'test-mappings',
   _meta: {
     managed: true,
@@ -47,11 +47,11 @@ describe('createOrUpdateComponentTemplate', () => {
     await createOrUpdateComponentTemplate({
       logger,
       esClient: clusterClient,
-      template: ComponentTemplate,
+      template: componentTemplate,
       totalFieldsLimit: 2500,
     });
 
-    expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledWith(ComponentTemplate);
+    expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledWith(componentTemplate);
   });
 
   it(`should retry on transient ES errors`, async () => {
@@ -62,7 +62,7 @@ describe('createOrUpdateComponentTemplate', () => {
     await createOrUpdateComponentTemplate({
       logger,
       esClient: clusterClient,
-      template: ComponentTemplate,
+      template: componentTemplate,
       totalFieldsLimit: 2500,
     });
 
@@ -77,7 +77,7 @@ describe('createOrUpdateComponentTemplate', () => {
       createOrUpdateComponentTemplate({
         logger,
         esClient: clusterClient,
-        template: ComponentTemplate,
+        template: componentTemplate,
         totalFieldsLimit: 2500,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
@@ -95,7 +95,7 @@ describe('createOrUpdateComponentTemplate', () => {
       createOrUpdateComponentTemplate({
         logger,
         esClient: clusterClient,
-        template: ComponentTemplate,
+        template: componentTemplate,
         totalFieldsLimit: 2500,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
@@ -170,7 +170,7 @@ describe('createOrUpdateComponentTemplate', () => {
     await createOrUpdateComponentTemplate({
       logger,
       esClient: clusterClient,
-      template: ComponentTemplate,
+      template: componentTemplate,
       totalFieldsLimit: 2500,
     });
 
@@ -276,7 +276,7 @@ describe('createOrUpdateComponentTemplate', () => {
     await createOrUpdateComponentTemplate({
       logger,
       esClient: clusterClient,
-      template: ComponentTemplate,
+      template: componentTemplate,
       totalFieldsLimit: 2500,
     });
 
@@ -367,7 +367,7 @@ describe('createOrUpdateComponentTemplate', () => {
     await createOrUpdateComponentTemplate({
       logger,
       esClient: clusterClient,
-      template: ComponentTemplate,
+      template: componentTemplate,
       totalFieldsLimit: 2500,
     });
 

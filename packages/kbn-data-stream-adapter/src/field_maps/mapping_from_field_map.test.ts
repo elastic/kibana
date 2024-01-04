@@ -243,6 +243,11 @@ describe('mappingFromFieldMap', () => {
                   type: 'date',
                 },
                 reason: {
+                  fields: {
+                    text: {
+                      type: 'match_only_text',
+                    },
+                  },
                   type: 'keyword',
                 },
                 rule: {
@@ -300,6 +305,9 @@ describe('mappingFromFieldMap', () => {
                   type: 'keyword',
                 },
                 uuid: {
+                  type: 'keyword',
+                },
+                workflow_assignee_ids: {
                   type: 'keyword',
                 },
                 workflow_status: {
@@ -365,6 +373,7 @@ describe('mappingFromFieldMap', () => {
                 },
                 system_status: { type: 'keyword' },
                 workflow_reason: { type: 'keyword' },
+                workflow_status_updated_at: { type: 'date' },
                 workflow_user: { type: 'keyword' },
               },
             },
