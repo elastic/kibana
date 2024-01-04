@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const ESQL_SEARCH_STRATEGY = 'esql';
-export const ESQL_ASYNC_SEARCH_STRATEGY = 'esql_async';
+export { esqlAsyncSearchStrategyProvider } from './esql_async_search_strategy';
+export * from './types';

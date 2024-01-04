@@ -14,6 +14,7 @@ import type {
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../types';
 
 export const SQL_SEARCH_STRATEGY = 'sql';
+export const SQL_ASYNC_SEARCH_STRATEGY = 'sql_async';
 
 export type SqlRequestParams = (
   | Omit<SqlQueryRequest, 'keep_alive' | 'keep_on_completion'>

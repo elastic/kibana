@@ -23,14 +23,13 @@ import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import type { NowProviderPublicContract } from '../../../public';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import { UiSettingsCommon } from '../..';
+import { SQL_ASYNC_SEARCH_STRATEGY, UiSettingsCommon } from '../..';
 import {
   ISearchGeneric,
   KibanaContext,
   SqlRequestParams,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
-  SQL_SEARCH_STRATEGY,
 } from '..';
 
 type Input = KibanaContext | null;
@@ -200,7 +199,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
 
           return search<SqlSearchStrategyRequest, SqlSearchStrategyResponse>(
             { params },
-            { abortSignal, strategy: SQL_SEARCH_STRATEGY }
+            { abortSignal, strategy: SQL_ASYNC_SEARCH_STRATEGY }
           ).pipe(
             catchError((error) => {
               if (!error.attributes) {
