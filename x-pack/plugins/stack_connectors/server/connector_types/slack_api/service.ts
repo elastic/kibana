@@ -16,6 +16,7 @@ import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@k
 import { SLACK_CONNECTOR_NAME } from './translations';
 import type {
   PostMessageSubActionParams,
+  PostBlockkitSubActionParams,
   SlackApiService,
   PostMessageResponse,
   SlackAPiResponse,
@@ -218,7 +219,7 @@ export const createExternalService = (
     channels,
     channelIds = [],
     text,
-  }: PostMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+  }: PostBlockkitSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
     try {
       const channelToUse = getChannelToUse({ channels, channelIds });
       const blockJson = JSON.parse(text);

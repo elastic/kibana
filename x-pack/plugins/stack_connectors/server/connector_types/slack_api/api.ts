@@ -7,6 +7,7 @@
 
 import type {
   PostMessageSubActionParams,
+  PostBlockkitSubActionParams,
   SlackApiService,
   ValidChannelIdSubActionParams,
 } from '../../../common/slack_api/types';
@@ -32,7 +33,7 @@ const postBlockkitHandler = async ({
   params: { channelIds, channels, text },
 }: {
   externalService: SlackApiService;
-  params: PostMessageSubActionParams;
+  params: PostBlockkitSubActionParams;
 }) => await externalService.postBlockkit({ channelIds, channels, text });
 
 export const api = {
