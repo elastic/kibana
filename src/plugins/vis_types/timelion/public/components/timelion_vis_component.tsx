@@ -113,8 +113,6 @@ export const TimelionVisComponent = ({
   const chartRef = useRef<Chart>(null);
   const chart = seriesList.list;
   const chartsService = getCharts();
-
-  const chartTheme = chartsService.theme.useChartsTheme();
   const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
@@ -216,7 +214,6 @@ export const TimelionVisComponent = ({
           externalPointerEvents={{
             tooltip: { visible: syncTooltips, placement: Placement.Right },
           }}
-          theme={chartTheme}
           baseTheme={chartBaseTheme}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}

@@ -31,7 +31,7 @@ import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
   BenchmarksQueryParams,
   DEFAULT_BENCHMARKS_PER_PAGE,
-} from '../../common/schemas/benchmark';
+} from '../../common/types/benchmarks/v1';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 

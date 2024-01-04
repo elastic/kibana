@@ -1,0 +1,5 @@
+COALESCE
+
+Returns the first non-null value.
+ROW a=null, b="b"
+| EVAL COALESCE(a, b)

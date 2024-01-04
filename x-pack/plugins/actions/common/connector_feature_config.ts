@@ -26,11 +26,19 @@ export const CasesConnectorFeatureId = 'cases';
 export const UptimeConnectorFeatureId = 'uptime';
 export const SecurityConnectorFeatureId = 'siem';
 export const GenerativeAIConnectorFeatureId = 'generativeAI';
+export const GenerativeAIForObservabilityConnectorFeatureId = 'generativeAIForObservability';
 
 const compatibilityGenerativeAI = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.generativeAI',
   {
     defaultMessage: 'Generative AI',
+  }
+);
+
+const compatibilityGenerativeAIForObservability = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.generativeAIForObservability',
+  {
+    defaultMessage: 'Generative AI For Observability',
   }
 );
 
@@ -86,12 +94,19 @@ export const GenerativeAIFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityGenerativeAI,
 };
 
+export const GenerativeAIForObservabilityFeature: ConnectorFeatureConfig = {
+  id: GenerativeAIForObservabilityConnectorFeatureId,
+  name: compatibilityGenerativeAIForObservability,
+  compatibility: compatibilityGenerativeAIForObservability,
+};
+
 const AllAvailableConnectorFeatures = {
   [AlertingConnectorFeature.id]: AlertingConnectorFeature,
   [CasesConnectorFeature.id]: CasesConnectorFeature,
   [UptimeConnectorFeature.id]: UptimeConnectorFeature,
   [SecuritySolutionFeature.id]: SecuritySolutionFeature,
   [GenerativeAIFeature.id]: GenerativeAIFeature,
+  [GenerativeAIForObservabilityFeature.id]: GenerativeAIForObservabilityFeature,
 };
 
 export function areValidFeatures(ids: string[]) {

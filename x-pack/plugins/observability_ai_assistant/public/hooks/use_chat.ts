@@ -53,7 +53,7 @@ export interface UseChatProps {
 
 export function useChat({
   initialMessages,
-  initialConversationId: initialConversationIdFromProps,
+  initialConversationId,
   chatService,
   connectorId,
   onConversationUpdate,
@@ -68,7 +68,9 @@ export function useChat({
 
   useOnce(initialMessages);
 
-  const initialConversationId = useOnce(initialConversationIdFromProps);
+  useOnce(initialConversationId);
+
+  const [conversationId, setConversationId] = useState(initialConversationId);
 
   const [messages, setMessages] = useState<Message[]>(initialMessages);
 
@@ -127,7 +129,7 @@ export function useChat({
         messages: getWithSystemMessage(nextMessages, systemMessage),
         persist,
         signal: abortControllerRef.current.signal,
-        conversationId: initialConversationId,
+        conversationId,
       });
 
       function getPendingMessages() {
@@ -188,6 +190,9 @@ export function useChat({
               break;
 
             case StreamingChatResponseEventType.ConversationCreate:
+              setConversationId(event.conversation.id);
+              onConversationUpdateRef.current?.(event);
+              break;
             case StreamingChatResponseEventType.ConversationUpdate:
               onConversationUpdateRef.current?.(event);
               break;
@@ -220,7 +225,7 @@ export function useChat({
       systemMessage,
       handleError,
       persist,
-      initialConversationId,
+      conversationId,
     ]
   );
 

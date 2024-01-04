@@ -7,13 +7,26 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { NoDataPagePluginSetup, NoDataPagePluginStart } from './types';
+import type {
+  NoDataPagePublicSetup,
+  NoDataPagePublicSetupDependencies,
+  NoDataPagePublicStart,
+  NoDataPagePublicStartDependencies,
+} from './types';
 import type { NoDataPageConfig } from '../config';
 
-export class NoDataPagePlugin implements Plugin<NoDataPagePluginSetup> {
+export class NoDataPagePlugin
+  implements
+    Plugin<
+      NoDataPagePublicSetup,
+      NoDataPagePublicStart,
+      NoDataPagePublicSetupDependencies,
+      NoDataPagePublicStartDependencies
+    >
+{
   constructor(private initializerContext: PluginInitializerContext<NoDataPageConfig>) {}
 
-  public setup(core: CoreSetup): NoDataPagePluginSetup {
+  public setup(_core: CoreSetup): NoDataPagePublicSetup {
     return {
       getAnalyticsNoDataPageFlavor: () => {
         return this.initializerContext.config.get().analyticsNoDataPageFlavor;
@@ -21,7 +34,7 @@ export class NoDataPagePlugin implements Plugin<NoDataPagePluginSetup> {
     };
   }
 
-  public start(core: CoreStart): NoDataPagePluginStart {
+  public start(_core: CoreStart): NoDataPagePublicStart {
     return {
       getAnalyticsNoDataPageFlavor: () => {
         return this.initializerContext.config.get().analyticsNoDataPageFlavor;

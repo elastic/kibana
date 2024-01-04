@@ -26,15 +26,6 @@
       ]
     },
     {
-      "label": "Operations",
-      "items": [
-        {
-          "id": "kibDevDocsOpsOverview",
-          "label": "Overview"
-        }
-      ]
-    },
-    {
       "label": "Contributing",
       "items": [
         {
@@ -150,9 +141,6 @@
           "id": "kibDevTutorialExpressions"
         },
         {
-          "id": "kibDevDocsKPTTutorial"
-        },
-        {
           "id": "kibDevTutorialDataSearchAndSessions",
           "label": "data.search"
         },
@@ -178,23 +166,12 @@
         },
         {
           "id": "kibDevTutorialAdvancedSettings"
-        },
-        {
-          "id": "kibDevSharePluginReadme"
-        },
-        {
-          "id": "kibDevTutorialScreenshotting"
-        },
-        {
-          "id": "kibDevTutorialsContentManagementOnboarding"
-        },
-        {
-          "id": "kibDevTutorialsServerlessProjectNavigation"
         }
       ]
     },
     {
       "label": "Serverless",
+      "pageId": "ktServerlessReleaseOverview",
       "items": [
         {
           "id": "ktServerlessReleaseOverview"
@@ -204,6 +181,61 @@
         },
         {
           "id": "ktCustomServerlessImage"
+        },
+        {
+          "id": "kibDevTutorialsServerlessProjectNavigation"
+        }
+      ]
+    },
+    {
+      "label": "Operations",
+      "items": [
+        {
+          "id": "kibDevDocsOpsOverview",
+          "label": "Overview"
+        }
+      ]
+    },
+    {
+      "label": "Shared UX",
+      "pageId": "kibDevDocsSharedUxOverview",
+      "items": [
+        {
+          "label": "Serverless Project Navigation",
+          "id": "kibDevTutorialsServerlessProjectNavigation"
+        },
+        {
+          "id": "kibDevTutorialFileService",
+          "label": "File service"
+        },
+        {
+          "id": "kibDevSharePluginReadme",
+          "label": "Sharing"
+        },
+        {
+          "label": "Content Management",
+          "id": "kibContentManagement",
+          "items": [
+            {
+              "id": "kibDevTutorialsContentManagementOnboarding"
+            }
+          ]
+        },
+        {
+          "id": "kibDevTutorialScreenshotting",
+          "label": "Screenshotting"
+        },
+        {
+          "id": "kibDevTutorialAdvancedSettings",
+          "label": "Advanced Settings"
+        },
+        {
+          "id": "kibDevDocsKPTTutorial",
+          "label": "Kibana Page Template"
+        },
+        {
+          "id": "kibDevReactKibanaContext",
+          "label": "Kibana React Contexts"
         }
       ]
     },

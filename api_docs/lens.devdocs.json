@@ -502,7 +502,7 @@
             "signature": [
               "(startDependencies: ",
               "LensPluginStartDependencies",
-              ") => Promise<JSX.Element | null>"
+              ", isNewPanel?: boolean | undefined, deletePanel?: (() => void) | undefined) => Promise<JSX.Element | null>"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -522,6 +522,36 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.openConfingPanel.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isNewPanel",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Embeddable.openConfingPanel.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "deletePanel",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8880,7 +8910,7 @@
               "CustomXDomain",
               " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
               "LegendStrategy",
-              " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>> & Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>>) | undefined"
+              " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onResize?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>> & Partial<Record<\"chart\", { description?: string | undefined; title?: string | undefined; }>>) | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
             "deprecated": false,
@@ -10891,7 +10921,7 @@
           "CustomXDomain",
           " | undefined>; ariaDescription?: string | undefined; ariaDescribedBy?: string | undefined; ariaLabelledBy?: string | undefined; ariaTableCaption?: string | undefined; legendAction?: \"ignore\" | undefined; legendStrategy?: ",
           "LegendStrategy",
-          " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>> | Partial<Record<\"gauge\", { id: string; subtype: ",
+          " | undefined; onLegendItemClick?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; debugState?: boolean | undefined; onProjectionClick?: \"ignore\" | undefined; onElementClick?: \"ignore\" | undefined; onElementOver?: \"ignore\" | undefined; onElementOut?: \"ignore\" | undefined; onBrushEnd?: \"ignore\" | undefined; onResize?: \"ignore\" | undefined; onWillRender?: \"ignore\" | undefined; onProjectionAreaChange?: \"ignore\" | undefined; onAnnotationClick?: \"ignore\" | undefined; pointerUpdateDebounce?: number | undefined; roundHistogramBrushValues?: boolean | undefined; noResults?: React.ReactChild | React.ComponentType<{}> | undefined; legendSort?: \"ignore\" | undefined; }>> | Partial<Record<\"gauge\", { id: string; subtype: ",
           "GoalSubtype",
           "; target?: number | undefined; bands?: number | number[] | undefined; ticks?: number | number[] | undefined; domain: ",
           {

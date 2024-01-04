@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { parse } from 'url';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
@@ -424,7 +424,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should have an option to open the chart in lens', async () => {
-          await pageObjects.infraHostsView.clickAndValidateMetriChartActionOptions();
+          await retry.try(async () => {
+            await pageObjects.infraHostsView.clickAndValidateMetricChartActionOptions();
+          });
         });
       });
 

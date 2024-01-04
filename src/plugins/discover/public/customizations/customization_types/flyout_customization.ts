@@ -7,7 +7,7 @@
  */
 import { EuiFlyoutProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { type ComponentType } from 'react';
 
 export interface FlyoutDefaultActionItem {
@@ -25,14 +25,8 @@ export interface FlyoutActionItem {
   enabled: boolean;
 }
 
-export interface FlyoutContentActions {
-  addFilter?: DocViewFilterFn;
-  addColumn: (column: string) => void;
-  removeColumn: (column: string) => void;
-}
-
 export interface FlyoutContentProps {
-  actions: FlyoutContentActions;
+  actions: Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'>;
   doc: DataTableRecord;
   renderDefaultContent: () => React.ReactNode;
 }
@@ -46,4 +40,5 @@ export interface FlyoutCustomization {
     getActionItems?: () => FlyoutActionItem[];
   };
   Content?: ComponentType<FlyoutContentProps>;
+  docViewsRegistry?: DocViewRenderProps['docViewsRegistry'];
 }

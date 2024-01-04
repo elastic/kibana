@@ -1,0 +1,7 @@
+TAN
+
+
+Tangent trigonometric function. Input expected in radians.
+ROW a=1.8
+| EVAL tan=TAN(a)
+Supported types:

@@ -3414,6 +3414,10 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/has_active.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/anonymous_access/get_capabilities.ts"
               },
               {
@@ -4406,7 +4410,7 @@
               },
               {
                 "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -4419,6 +4423,14 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/connectors_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/mapping_routes.ts"
               },
               {
                 "plugin": "snapshotRestore",
@@ -5515,6 +5527,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/server/routes/api_keys/get.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/routes/api_keys/has_active.test.ts"
               },
               {
                 "plugin": "security",
@@ -6817,6 +6833,10 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
               },
               {
                 "plugin": "serverlessSearch",
@@ -13382,6 +13402,10 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/detection_engine/get_detection_engine_alerts_count_by_rule_tags.ts"
               },
               {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/get_states/get_states.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_index_mappings.ts"
               },
@@ -14686,6 +14710,10 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
+              },
+              {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",

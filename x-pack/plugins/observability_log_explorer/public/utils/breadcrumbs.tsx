@@ -7,14 +7,14 @@
 
 import { EuiBreadcrumb } from '@elastic/eui';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import { useEffect } from 'react';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import {
   LOGS_APP_ID,
-  OBSERVABILITY_LOG_EXPLORER,
+  OBSERVABILITY_LOG_EXPLORER_APP_ID,
   OBSERVABILITY_OVERVIEW_APP_ID,
 } from '@kbn/deeplinks-observability';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { useEffect } from 'react';
 import {
   logExplorerAppTitle,
   logsAppTitle,
@@ -28,7 +28,7 @@ export const useBreadcrumbs = (
 ) => {
   const observabilityLinkProps = useLinkProps({ app: OBSERVABILITY_OVERVIEW_APP_ID });
   const logsLinkProps = useLinkProps({ app: LOGS_APP_ID });
-  const logExplorerLinkProps = useLinkProps({ app: OBSERVABILITY_LOG_EXPLORER });
+  const logExplorerLinkProps = useLinkProps({ app: OBSERVABILITY_LOG_EXPLORER_APP_ID });
 
   useEffect(() => {
     setBreadcrumbs(

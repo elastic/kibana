@@ -1,0 +1,10 @@
+RTRIM
+
+
+Removes trailing whitespaces from strings.
+ROW message = "   some text  ",  color = " red "
+| EVAL message = RTRIM(message)
+| EVAL color = RTRIM(color)
+| EVAL message = CONCAT("'", message, "'")
+| EVAL color = CONCAT("'", color, "'")
+Supported types:

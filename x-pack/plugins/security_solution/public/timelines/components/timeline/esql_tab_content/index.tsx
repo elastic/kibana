@@ -25,11 +25,11 @@ import { useDiscoverState } from './use_discover_state';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
 import { EmbeddedDiscoverContainer } from './styles';
-import { timelineSelectors } from '../../../store/timeline';
+import { timelineSelectors } from '../../../store';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
 import { savedSearchComparator } from './utils';
-import { setIsDiscoverSavedSearchLoaded } from '../../../store/timeline/actions';
+import { setIsDiscoverSavedSearchLoaded } from '../../../store/actions';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`

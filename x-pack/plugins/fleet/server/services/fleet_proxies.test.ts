@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { loggerMock } from '@kbn/logging-mocks';
 
+import type { Logger } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { FLEET_PROXY_SAVED_OBJECT_TYPE } from '../constants';
+
+import { appContextService } from './app_context';
 
 import { deleteFleetProxy } from './fleet_proxies';
 import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
@@ -17,6 +22,7 @@ import { downloadSourceService } from './download_source';
 jest.mock('./output');
 jest.mock('./download_source');
 jest.mock('./fleet_server_host');
+jest.mock('./app_context');
 
 const mockedListFleetServerHostsForProxyId = listFleetServerHostsForProxyId as jest.MockedFunction<
   typeof listFleetServerHostsForProxyId
@@ -35,8 +41,19 @@ const PROXY_IDS = {
   PRECONFIGURED: 'test-preconfigured',
   RELATED_PRECONFIGURED: 'test-related-preconfigured',
 };
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
+let mockedLogger: jest.Mocked<Logger>;
 
 describe('Fleet proxies service', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   const soClientMock = savedObjectsClientMock.create();
   const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
 

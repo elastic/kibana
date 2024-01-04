@@ -67,7 +67,8 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
               <EuiButton
                 data-test-subj="serverlessSearchConnectorLinkElasticsearchRunWithDockerButton"
                 iconType={`${assetBasePath}/docker.svg`}
-                href={docLinks.connectors}
+                href={docLinks.connectorsRunWithDocker}
+                target="_blank"
                 fill
               >
                 {i18n.translate('xpack.serverlessSearch.connectors.runWithDockerLink', {
@@ -81,7 +82,8 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
               <EuiButton
                 data-test-subj="serverlessSearchConnectorLinkElasticsearchRunFromSourceButton"
                 iconType={`${assetBasePath}/github_white.svg`}
-                href="https://github.com/elastic/connectors"
+                href={docLinks.connectorsRunFromSource}
+                target="_blank"
                 fill
               >
                 {i18n.translate('xpack.serverlessSearch.connectors.runFromSourceLink', {
@@ -110,7 +112,7 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
                   <strong>connector_id</strong>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} data-test-subj="serverlessSearchConnectorConnectorId">
                 <EuiCode>{connectorId}</EuiCode>
               </EuiFlexItem>
             </EuiFlexGroup>

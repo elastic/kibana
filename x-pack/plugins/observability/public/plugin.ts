@@ -11,6 +11,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
+  App,
   AppDeepLink,
   AppMountParameters,
   AppNavLinkStatus,
@@ -62,10 +63,11 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
 
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -121,6 +123,8 @@ export interface ObservabilityPublicPluginsSetup {
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   licensing: LicensingPluginSetup;
+  serverless?: ServerlessPluginSetup;
+  presentationUtil?: PresentationUtilPluginStart;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -151,6 +155,7 @@ export interface ObservabilityPublicPluginsStart {
   serverless?: ServerlessPluginStart;
   uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;
+  presentationUtil?: PresentationUtilPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -270,7 +275,8 @@ export class Plugin
     };
 
     const appUpdater$ = this.appUpdater$;
-    const app = {
+
+    const app: App = {
       appRoute: OBSERVABILITY_BASE_PATH,
       category,
       deepLinks: this.deepLinks,
@@ -296,6 +302,7 @@ export class Plugin
         'user',
         'experience',
       ],
+      searchable: !Boolean(pluginsSetup.serverless),
     };
 
     coreSetup.application.register(app);
@@ -369,13 +376,17 @@ export class Plugin
         map((value) => {
           const deepLinks = value(app)?.deepLinks ?? [];
 
-          const overviewLink = {
-            label: i18n.translate('xpack.observability.overviewLinkTitle', {
-              defaultMessage: 'Overview',
-            }),
-            app: observabilityAppId,
-            path: OVERVIEW_PATH,
-          };
+          const overviewLink = !Boolean(pluginsSetup.serverless)
+            ? [
+                {
+                  label: i18n.translate('xpack.observability.overviewLinkTitle', {
+                    defaultMessage: 'Overview',
+                  }),
+                  app: observabilityAppId,
+                  path: OVERVIEW_PATH,
+                },
+              ]
+            : [];
 
           // Reformat the visible links to be NavigationEntry objects instead of
           // AppDeepLink objects.
@@ -395,15 +406,13 @@ export class Plugin
               path: link.path ?? '',
             }));
 
-          const sections = [
+          return [
             {
               label: '',
               sortKey: 100,
-              entries: [overviewLink, ...otherLinks],
+              entries: [...overviewLink, ...otherLinks],
             },
           ];
-
-          return sections;
         })
       )
     );

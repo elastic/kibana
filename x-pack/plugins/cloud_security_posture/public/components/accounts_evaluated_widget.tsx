@@ -52,8 +52,8 @@ export const AccountsEvaluatedWidget = ({
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const filterBenchmarksById = (benchmarkId: string) => {
-    return benchmarkAssets?.filter((obj) => obj?.meta.benchmarkId === benchmarkId) || [];
+  const getBenchmarkById = (benchmarkId: string) => {
+    return benchmarkAssets?.find((obj) => obj?.meta.benchmarkId === benchmarkId);
   };
 
   const navToFindings = useNavigateFindings();
@@ -67,7 +67,7 @@ export const AccountsEvaluatedWidget = ({
   };
 
   const benchmarkElements = benchmarks.map((benchmark) => {
-    const cloudAssetAmount = filterBenchmarksById(benchmark.type).length;
+    const cloudAssetAmount = getBenchmarkById(benchmark.type)?.meta?.assetCount || 0;
 
     return (
       cloudAssetAmount > 0 && (
@@ -85,7 +85,7 @@ export const AccountsEvaluatedWidget = ({
             transition: ${euiTheme.animation.normal} ease-in;
             border-bottom: ${euiTheme.border.thick};
             border-color: transparent;
-
+            text-wrap: nowrap;
             :hover {
               cursor: pointer;
               border-color: ${euiTheme.colors.darkestShade};

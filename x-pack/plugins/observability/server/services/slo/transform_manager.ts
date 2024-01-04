@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SLO, IndicatorTypes } from '../../domain/models';
 import { SecurityException } from '../../errors';
 import { retryTransientEsErrors } from '../../utils/retry';
@@ -16,6 +17,7 @@ type TransformId = string;
 
 export interface TransformManager {
   install(slo: SLO): Promise<TransformId>;
+  inspect(slo: SLO): TransformPutTransformRequest;
   preview(transformId: TransformId): Promise<void>;
   start(transformId: TransformId): Promise<void>;
   stop(transformId: TransformId): Promise<void>;
@@ -51,6 +53,16 @@ export class DefaultTransformManager implements TransformManager {
     }
 
     return transformParams.transform_id;
+  }
+
+  inspect(slo: SLO): TransformPutTransformRequest {
+    const generator = this.generators[slo.indicator.type];
+    if (!generator) {
+      this.logger.error(`No transform generator found for indicator type [${slo.indicator.type}]`);
+      throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
+    }
+
+    return generator.getTransformParams(slo);
   }
 
   async preview(transformId: string): Promise<void> {

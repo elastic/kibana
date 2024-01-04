@@ -160,10 +160,6 @@ describe('utils', () => {
       expect(constructAssigneesFilter([])).toEqual({});
     });
 
-    it('returns none if the assignees are null', () => {
-      expect(constructAssigneesFilter(null)).toEqual({ assignees: 'none' });
-    });
-
     it('returns none for null values in the assignees array', () => {
       expect(constructAssigneesFilter([null, '123'])).toEqual({ assignees: ['none', '123'] });
     });

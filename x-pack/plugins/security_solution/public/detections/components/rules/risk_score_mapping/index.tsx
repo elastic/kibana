@@ -51,6 +51,7 @@ interface RiskScoreFieldProps {
   idAria: string;
   indices: DataViewBase;
   isDisabled: boolean;
+  isActive: boolean;
   placeholder?: string;
 }
 
@@ -60,6 +61,7 @@ export const RiskScoreField = ({
   idAria,
   indices,
   isDisabled,
+  isActive,
   placeholder,
 }: RiskScoreFieldProps) => {
   const { value, isMappingChecked, mapping } = field.value;
@@ -147,29 +149,39 @@ export const RiskScoreField = ({
   return (
     <EuiFlexGroup direction={'column'}>
       <EuiFlexItem>
-        <EuiFormRow
-          label={riskScoreLabel}
-          labelAppend={field.labelAppend}
-          helpText={field.helpText}
-          error={'errorMessage'}
-          isInvalid={false}
-          fullWidth
-          data-test-subj={`${dataTestSubj}-defaultRisk`}
-          describedByIds={idAria ? [idAria] : undefined}
-        >
-          <EuiRange
-            value={value}
-            onChange={handleDefaultRiskScoreChange}
-            max={100}
-            min={0}
-            showRange
-            showInput
-            fullWidth={false}
-            showTicks
-            tickInterval={25}
-            data-test-subj={`${dataTestSubj}-defaultRiskRange`}
-          />
-        </EuiFormRow>
+        {
+          // TODO: https://github.com/elastic/kibana/issues/161456
+          // The About step page contains EuiRange component which does not work properly within memoized parents.
+          // EUI team suggested not to memoize EuiRange/EuiDualRange: https://github.com/elastic/eui/issues/6846
+          // Workaround: We force EuiRange re-rendering by removing/adding it into the DOM.
+          // NOTE: We should remove this workaround once EUI team fixed EuiRange.
+          // Related ticket: https://github.com/elastic/kibana/issues/160561
+        }
+        {isActive && (
+          <EuiFormRow
+            label={riskScoreLabel}
+            labelAppend={field.labelAppend}
+            helpText={field.helpText}
+            error={'errorMessage'}
+            isInvalid={false}
+            fullWidth
+            data-test-subj={`${dataTestSubj}-defaultRisk`}
+            describedByIds={idAria ? [idAria] : undefined}
+          >
+            <EuiRange
+              value={value}
+              onChange={handleDefaultRiskScoreChange}
+              max={100}
+              min={0}
+              showRange
+              showInput
+              fullWidth={false}
+              showTicks
+              tickInterval={25}
+              data-test-subj={`${dataTestSubj}-defaultRiskRange`}
+            />
+          </EuiFormRow>
+        )}
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFormRow

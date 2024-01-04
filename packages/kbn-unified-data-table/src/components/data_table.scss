@@ -54,6 +54,11 @@
   .euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight {
     background-color: transparent; // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
   }
+
+  .euiDataGridRowCell__autoHeight,
+  .euiDataGridRowCell__lineCountHeight {
+    white-space: pre-wrap;
+  }
 }
 
 .unifiedDataTable__table {
