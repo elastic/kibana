@@ -27,11 +27,23 @@ export const useDashboardMenuItems = ({
   isLabsShown,
   setIsLabsShown,
   showResetChange,
+  confirmSaveForSharedDashboard,
+  updateSpacesForReferences,
 }: {
   redirectTo: DashboardRedirect;
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   showResetChange?: boolean;
+  updateSpacesForReferences: () => void;
+  confirmSaveForSharedDashboard: ({
+    onSave,
+    onCancel,
+    onClone,
+  }: {
+    onSave: () => void;
+    onClone: () => void;
+    onCancel?: () => void;
+  }) => void;
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -43,6 +55,7 @@ export const useDashboardMenuItems = ({
     dashboardBackup,
     settings: { uiSettings },
     dashboardCapabilities: { showWriteControls },
+    spaces: { spacesApi },
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
@@ -94,23 +107,6 @@ export const useDashboardMenuItems = ({
   );
 
   /**
-   * Save the dashboard without any UI or popups.
-   */
-  const quickSaveDashboard = useCallback(() => {
-    setIsSaveInProgress(true);
-    dashboard
-      .runQuickSave()
-      .then(() => setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE));
-  }, [dashboard]);
-
-  /**
-   * Show the dashboard's save modal
-   */
-  const saveDashboardAs = useCallback(() => {
-    dashboard.runSaveAs().then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboard]);
-
-  /**
    * Clone the dashboard
    */
   const clone = useCallback(() => {
@@ -121,6 +117,37 @@ export const useDashboardMenuItems = ({
       maybeRedirect(result);
     });
   }, [maybeRedirect, dashboard]);
+
+  /**
+   * Save the dashboard without any UI or popups.
+   */
+  const quickSaveDashboard = useCallback(() => {
+    confirmSaveForSharedDashboard({
+      onSave: () => {
+        setIsSaveInProgress(true);
+        dashboard.runQuickSave().then(() => {
+          updateSpacesForReferences();
+          setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE);
+        });
+      },
+      onClone: clone,
+    });
+  }, [clone, confirmSaveForSharedDashboard, dashboard, updateSpacesForReferences]);
+
+  /**
+   * Show the dashboard's save modal
+   */
+  const saveDashboardAs = useCallback(() => {
+    confirmSaveForSharedDashboard({
+      onSave: () => {
+        dashboard.runSaveAs().then((result) => {
+          updateSpacesForReferences();
+          maybeRedirect(result);
+        });
+      },
+      onClone: clone,
+    });
+  }, [confirmSaveForSharedDashboard, clone, dashboard, updateSpacesForReferences, maybeRedirect]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:
@@ -194,7 +221,9 @@ export const useDashboardMenuItems = ({
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
         disableButton: disableTopNav || !(hasRunMigrations || hasUnsavedChanges),
-        run: () => quickSaveDashboard(),
+        run: () => {
+          quickSaveDashboard();
+        },
       } as TopNavMenuData,
 
       saveAs: {
@@ -205,7 +234,9 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardSaveMenuItem',
         iconType: Boolean(lastSavedId) ? undefined : 'save',
         label: Boolean(lastSavedId) ? topNavStrings.saveAs.label : topNavStrings.quickSave.label,
-        run: () => saveDashboardAs(),
+        run: () => {
+          saveDashboardAs();
+        },
       } as TopNavMenuData,
 
       switchToViewMode: {
@@ -241,19 +272,19 @@ export const useDashboardMenuItems = ({
       } as TopNavMenuData,
     };
   }, [
-    quickSaveDashboard,
+    disableTopNav,
     isSaveInProgress,
     hasRunMigrations,
     hasUnsavedChanges,
-    dashboardBackup,
-    saveDashboardAs,
-    setIsLabsShown,
-    disableTopNav,
-    resetChanges,
-    isLabsShown,
     lastSavedId,
     showShare,
     dashboard,
+    setIsLabsShown,
+    isLabsShown,
+    dashboardBackup,
+    quickSaveDashboard,
+    saveDashboardAs,
+    resetChanges,
     clone,
   ]);
 

@@ -6,23 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import {
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
   controlGroupInputToRawControlGroupAttributes,
-  generateNewControlIds,
 } from '@kbn/controls-plugin/common';
-import { isFilterPinned } from '@kbn/es-query';
-import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 
-import {
-  extractReferences,
-  DashboardContainerInput,
-  convertPanelMapToSavedPanels,
-} from '../../../../common';
+import { DashboardContainerInput } from '../../../../common';
 import {
   SaveDashboardProps,
   SaveDashboardReturn,
@@ -30,12 +22,10 @@ import {
 } from '../types';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
-import { convertDashboardVersionToNumber } from './dashboard_versioning';
-import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
-import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 import { dashboardContentManagementCache } from '../dashboard_content_management_service';
-import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
+import { DashboardCrudTypes } from '../../../../common/content_management';
 import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
+import { getAttributesAndReferences } from './get_attributes_and_references';
 
 export const serializeControlGroupInput = (
   controlGroupInput: DashboardContainerInput['controlGroupInput']
@@ -81,107 +71,17 @@ export const saveDashboardState = async ({
   savedObjectsTagging,
   notifications: { toasts },
 }: SaveDashboardStateProps): Promise<SaveDashboardReturn> => {
-  const {
-    search: dataSearchService,
-    query: {
-      timefilter: { timefilter },
-    },
-  } = data;
-
-  const {
-    tags,
-    query,
-    title,
-    filters,
-    version,
-    timeRestore,
-    description,
-
-    // Dashboard options
-    useMargins,
-    syncColors,
-    syncCursor,
-    syncTooltips,
-    hidePanelTitles,
-  } = currentState;
-
-  let { panels, controlGroupInput } = currentState;
-  if (saveOptions.saveAsCopy) {
-    panels = generateNewPanelIds(panels);
-    controlGroupInput = generateNewControlIds(controlGroupInput);
-  }
-
-  /**
-   * Stringify filters and query into search source JSON
-   */
-  const { searchSourceJSON, searchSourceReferences } = await (async () => {
-    const searchSource = await dataSearchService.searchSource.create();
-    searchSource.setField(
-      'filter', // save only unpinned filters
-      filters.filter((filter) => !isFilterPinned(filter))
-    );
-    searchSource.setField('query', query);
-
-    const rawSearchSourceFields = searchSource.getSerializedFields();
-    const [fields, references] = extractSearchSourceReferences(rawSearchSourceFields);
-    return { searchSourceReferences: references, searchSourceJSON: JSON.stringify(fields) };
-  })();
-
-  /**
-   * Stringify options and panels
-   */
-  const optionsJSON = JSON.stringify({
-    useMargins,
-    syncColors,
-    syncCursor,
-    syncTooltips,
-    hidePanelTitles,
-  });
-  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, true));
-
-  /**
-   * Parse global time filter settings
-   */
-  const { from, to } = timefilter.getTime();
-  const timeFrom = timeRestore ? convertTimeToUTCString(from) : undefined;
-  const timeTo = timeRestore ? convertTimeToUTCString(to) : undefined;
-  const refreshInterval = timeRestore
-    ? (pick(timefilter.getRefreshInterval(), [
-        'display',
-        'pause',
-        'section',
-        'value',
-      ]) as RefreshInterval)
-    : undefined;
-
-  const rawDashboardAttributes: DashboardAttributes = {
-    version: convertDashboardVersionToNumber(version ?? LATEST_DASHBOARD_CONTAINER_VERSION),
-    controlGroupInput: serializeControlGroupInput(controlGroupInput),
-    kibanaSavedObjectMeta: { searchSourceJSON },
-    description: description ?? '',
-    refreshInterval,
-    timeRestore,
-    optionsJSON,
-    panelsJSON,
-    timeFrom,
-    title,
-    timeTo,
-  };
-
   /**
    * Extract references from raw attributes and tags into the references array.
    */
-  const { attributes, references: dashboardReferences } = extractReferences(
-    {
-      attributes: rawDashboardAttributes,
-      references: searchSourceReferences,
-    },
-    { embeddablePersistableStateService: embeddable }
-  );
-
-  const references = savedObjectsTagging.updateTagsReferences
-    ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
-    : dashboardReferences;
+  const { attributes, references } = await getAttributesAndReferences({
+    currentState,
+    lastSavedId,
+    saveOptions,
+    data,
+    embeddable,
+    savedObjectsTagging,
+  });
 
   /**
    * Save the saved object using the content management

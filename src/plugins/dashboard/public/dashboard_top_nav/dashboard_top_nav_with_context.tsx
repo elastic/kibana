@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import React from 'react';
 import { DashboardAPIContext } from '../dashboard_app/dashboard_app';
 import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../services/plugin_services';
 import {
   InternalDashboardTopNav,
   InternalDashboardTopNavProps,
@@ -17,11 +19,22 @@ export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
   dashboardContainer: DashboardContainer;
 }
 
-export const DashboardTopNavWithContext = (props: DashboardTopNavProps) => (
-  <DashboardAPIContext.Provider value={props.dashboardContainer}>
-    <InternalDashboardTopNav {...props} />
-  </DashboardAPIContext.Provider>
-);
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
+
+export const DashboardTopNavWithContext = (props: DashboardTopNavProps) => {
+  const {
+    spaces: { spacesApi },
+  } = pluginServices.getServices();
+  const SpacesContextWrapper =
+    spacesApi?.ui.components.getSpacesContextProvider ?? getEmptyFunctionComponent;
+  return (
+    <SpacesContextWrapper>
+      <DashboardAPIContext.Provider value={props.dashboardContainer}>
+        <InternalDashboardTopNav {...props} />
+      </DashboardAPIContext.Provider>
+    </SpacesContextWrapper>
+  );
+};
 
 // eslint-disable-next-line import/no-default-export
 export default DashboardTopNavWithContext;

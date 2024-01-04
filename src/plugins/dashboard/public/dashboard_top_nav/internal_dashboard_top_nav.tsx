@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import UseUnmount from 'react-use/lib/useUnmount';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import useUnmount from 'react-use/lib/useUnmount';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   withSuspense,
@@ -20,6 +20,9 @@ import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { MountPoint } from '@kbn/core/public';
+import { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -37,7 +40,11 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
+import { ConfirmShareModal } from './confirm_share_modal';
+import { canSaveToSharedObject } from './can_save_to_shared_object';
 
+const ALL_SPACES_ID = '*';
+const UNKNOWN_SPACE = '?';
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
   embedSettings?: DashboardEmbedSettings;
@@ -75,6 +82,7 @@ export function InternalDashboardTopNav({
       setIsVisible: setChromeVisibility,
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
+      theme: { theme$ },
     },
     serverless,
     settings: { uiSettings },
@@ -82,7 +90,12 @@ export function InternalDashboardTopNav({
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
+    spaces: { spacesApi },
+    overlays: { openModal },
+    dashboardContentManagement: { getAttributesAndReferences },
   } = pluginServices.getServices();
+  const { spacesManager } = spacesApi?.ui.useSpaces() ?? {};
+
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
@@ -97,6 +110,7 @@ export function InternalDashboardTopNav({
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
   const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
+  const namespaces = dashboard.select((state) => state.componentState.namespaces);
   const managed = dashboard.select((state) => state.componentState.managed);
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
@@ -266,14 +280,104 @@ export function InternalDashboardTopNav({
     viewMode,
   ]);
 
+  const confirmSaveForSharedDashboard = useCallback(
+    async ({
+      onSave,
+      onClone,
+      onCancel,
+    }: {
+      onSave: () => void;
+      onClone: () => void;
+      onCancel?: () => void;
+    }) => {
+      const sharedWithAllSpaces = namespaces?.includes(ALL_SPACES_ID);
+      const isShared = namespaces && (namespaces.length > 1 || sharedWithAllSpaces);
+
+      // Skip confirm modal, and just save
+      if (!spacesApi || !spacesManager || !lastSavedId || !isShared) {
+        onSave();
+        return;
+      }
+
+      const modalTitle = i18n.translate('dashboard.topNav.confirmSaveModalTitle', {
+        defaultMessage: `Save '{title}'?`,
+        values: { title },
+      });
+
+      const { references } = await getAttributesAndReferences({
+        currentState: dashboard.getExplicitInput(),
+        lastSavedId,
+        saveOptions: {},
+      });
+
+      const canSave = await canSaveToSharedObject({
+        savedObjectTarget: { type: 'dashboard', id: lastSavedId, namespaces },
+        references,
+        spacesManager,
+      });
+
+      const session = openModal(
+        toMountPoint(
+          <ConfirmShareModal
+            onClone={onClone}
+            onSave={onSave}
+            onCancel={onCancel}
+            onClose={() => session.close()}
+            title={modalTitle}
+            spacesApi={spacesApi}
+            canSave={canSave}
+            namespaces={namespaces}
+            noun="dashboard"
+          />,
+          {
+            theme$,
+          }
+        ),
+        {
+          maxWidth: 400,
+          'data-test-subj': 'copyToDashboardPanel',
+        }
+      );
+    },
+    [
+      namespaces,
+      spacesApi,
+      lastSavedId,
+      title,
+      getAttributesAndReferences,
+      dashboard,
+      spacesManager,
+      openModal,
+      theme$,
+    ]
+  );
+
+  const updateSpacesForReferences = useCallback(async () => {
+    if (!spacesManager || !lastSavedId || !namespaces || namespaces.length < 2) return;
+
+    const shareableReferences = await spacesManager.getShareableReferences([
+      { id: lastSavedId, type: 'dashboard' },
+    ]);
+    const objects = shareableReferences.objects.map(
+      ({ id, type }: SavedObjectReferenceWithContext) => ({ id, type })
+    );
+
+    if (namespaces?.includes('?')) {
+      // User doesn't have any access to one of the shared spaces
+    }
+    spacesManager.updateSavedObjectsSpaces(objects, namespaces, []);
+  }, [lastSavedId, namespaces, spacesManager]);
+
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     redirectTo,
     isLabsShown,
     setIsLabsShown,
     showResetChange,
+    updateSpacesForReferences,
+    confirmSaveForSharedDashboard,
   });
 
-  UseUnmount(() => {
+  useUnmount(() => {
     dashboard.clearOverlays();
   });
 

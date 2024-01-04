@@ -25,6 +25,7 @@ import { DashboardInitializerContextService } from '../initializer_context/types
 import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
 import { DashboardBackupServiceType } from '../dashboard_backup/types';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
+import { DashboardAttributesAndReferences } from '@kbn/dashboard-plugin/common/types';
 
 export interface DashboardContentManagementRequiredServices {
   data: DashboardDataService;
@@ -46,6 +47,7 @@ export interface DashboardContentManagementService {
   updateDashboardMeta: (
     props: Pick<DashboardContainerInput, 'id' | 'title' | 'description' | 'tags'>
   ) => Promise<void>;
+  getAttributesAndReferences:(props: SaveDashboardProps)=> Promise<DashboardAttributesAndReferences>}
 }
 
 /**
