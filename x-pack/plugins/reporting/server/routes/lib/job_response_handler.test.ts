@@ -111,7 +111,6 @@ describe('deleteJobResponseHandler', () => {
 
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
-      body: 'Some error.',
     });
   });
 });
