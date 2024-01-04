@@ -16,7 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useApmDataView } from '../../../hooks/use_apm_data_view';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { getBoolFilter } from '../get_bool_filter';
 import { Typeahead } from './typeahead';
@@ -71,7 +71,7 @@ export function KueryBar(props: {
   };
 
   const example = examples[processorEvent || 'defaults'];
-  const { dataView } = useApmDataView();
+  const { dataView } = useAdHocApmDataView();
 
   const placeholder =
     props.placeholder ??
