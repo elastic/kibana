@@ -121,7 +121,7 @@ const RulesPageComponent: React.FC = () => {
 
       <RulesTableContextProvider>
         <SecuritySolutionPageWrapper>
-          <HeaderPage title={i18n.PAGE_TITLE}>
+          <HeaderPage title={'This title should hopefully have changed!'}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
                 <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
