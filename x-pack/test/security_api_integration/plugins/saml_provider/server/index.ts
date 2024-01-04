@@ -8,8 +8,8 @@
 import type { PluginInitializer, Plugin } from '@kbn/core/server';
 import { initRoutes } from './init_routes';
 
-export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> => ({
-  setup: (core) => initRoutes(core),
+export const plugin: PluginInitializer<void, void> = async (context): Promise<Plugin> => ({
+  setup: (core) => initRoutes(context, core),
   start: () => {},
   stop: () => {},
 });

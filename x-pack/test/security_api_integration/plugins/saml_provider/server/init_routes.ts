@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 import {
   getSAMLResponse,
   getSAMLRequestId,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
 
-export function initRoutes(core: CoreSetup) {
+export function initRoutes(pluginContext: PluginInitializerContext, core: CoreSetup) {
   const serverInfo = core.http.getServerInfo();
   core.http.resources.register(
     {
@@ -60,16 +60,18 @@ export function initRoutes(core: CoreSetup) {
   );
 
   // [HACK]: Incredible hack to workaround absence of the Mock IDP plugin in production build used for testing.
-  core.http.resources.register(
-    {
-      path: '/mock_idp/login',
-      validate: false,
-      options: { authRequired: false },
-    },
-    async (context, request, response) => {
-      return response.redirected({ headers: { location: 'https://cloud.elastic.co/projects' } });
-    }
-  );
+  if (pluginContext.env.mode.prod) {
+    core.http.resources.register(
+      {
+        path: '/mock_idp/login',
+        validate: false,
+        options: { authRequired: false },
+      },
+      async (context, request, response) => {
+        return response.redirected({ headers: { location: 'https://cloud.elastic.co/projects' } });
+      }
+    );
+  }
 
   let attemptsCounter = 0;
   core.http.resources.register(
