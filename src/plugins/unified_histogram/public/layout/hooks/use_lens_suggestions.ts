@@ -113,7 +113,6 @@ export const useLensSuggestions = ({
         query: {
           esql: esqlQuery,
         },
-        table,
       };
       const sug = lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
       if (sug.length) {
@@ -123,7 +122,7 @@ export const useLensSuggestions = ({
     }
     histogramQuery.current = undefined;
     return undefined;
-  }, [currentSuggestion, dataView, query, timeRange, data, table, lensSuggestionsApi]);
+  }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
   useEffect(() => {
     const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });

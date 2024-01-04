@@ -44,7 +44,7 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
-  table: Datatable;
+  table?: Datatable;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'

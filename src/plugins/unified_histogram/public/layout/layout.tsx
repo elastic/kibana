@@ -176,7 +176,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
 
-  table: Datatable;
+  table?: Datatable;
 }
 
 export const UnifiedHistogramLayout = ({
