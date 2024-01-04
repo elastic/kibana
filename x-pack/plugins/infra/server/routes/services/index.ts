@@ -33,7 +33,7 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
             return invalidResponse;
           }
           if (validatedFilters) {
-            q.filters = validatedFilters;
+            q.validatedFilters = validatedFilters;
           }
           return validate(q, res);
         },
@@ -41,10 +41,10 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       const [{ savedObjects }] = await libs.getStartServices();
-      const { from, to, filters } = request.query;
+      const { from, to, validatedFilters } = request.query;
 
       try {
-        if (!filters) {
+        if (!validatedFilters) {
           throw Boom.badRequest('Invalid filters');
         }
         const client = createSearchClient(requestContext, framework, request);
@@ -53,7 +53,7 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
         const services = await getServices(client, apmIndices, {
           from,
           to,
-          filters,
+          filters: validatedFilters,
         });
         return response.ok({
           body: ServicesAPIResponseRT.encode(services),

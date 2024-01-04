@@ -15,7 +15,8 @@ export function validateStringAssetFilters(
   res: RouteValidationResultFactory
 ): ValidateStringAssetFiltersReturn {
   try {
-    const parsedFilters = JSON.parse(q.stringFilters);
+    if (!q.filters) return [res.badRequest(new Error(`filters is required`))];
+    const parsedFilters = JSON.parse(q.filters);
     const validationResult = servicesFiltersRT.decode(parsedFilters);
     if (isLeft(validationResult)) {
       return [res.badRequest(new Error(`Invalid asset filters - ${q.filters}`))];

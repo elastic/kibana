@@ -28,10 +28,10 @@ export const servicesFiltersRT = rt.exact(
 export type ServicesFilter = rt.TypeOf<typeof servicesFiltersRT>;
 
 export const GetServicesRequestQueryRT = rt.intersection([
-  rt.strict({ from: assetDateRT, to: assetDateRT, stringFilters: rt.string }),
+  rt.strict({ from: assetDateRT, to: assetDateRT, filters: rt.string }),
   rt.partial({
     size: sizeRT,
-    filters: servicesFiltersRT,
+    validatedFilters: servicesFiltersRT,
   }),
 ]);
 
