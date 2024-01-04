@@ -8,7 +8,7 @@
   &--selected {
     &::before {
       content: '';
-      background-color: rgba($euiPageBackgroundColor, .7);
+      background-color: rgba($euiColorEmptyShade, .7);
       height: 100%;
       left: 0;
       position: absolute;
