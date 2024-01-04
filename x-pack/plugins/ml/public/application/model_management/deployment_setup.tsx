@@ -92,6 +92,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
             id,
             label: id,
             value,
+            'data-test-subj': `mlModelsStartDeploymentModalThreadsPerAllocation_${id}`,
           };
         }),
     [maxSingleMlNodeProcessors]
@@ -215,6 +216,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                       defaultMessage: 'low',
                     }
                   ),
+                  'data-test-subj': 'mlModelsStartDeploymentModalLowPriority',
                 },
                 {
                   id: 'normal',
@@ -225,6 +227,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                       defaultMessage: 'normal',
                     }
                   ),
+                  'data-test-subj': 'mlModelsStartDeploymentModalNormalPriority',
                 },
               ]}
               data-test-subj={'mlModelsStartDeploymentModalPriority'}
