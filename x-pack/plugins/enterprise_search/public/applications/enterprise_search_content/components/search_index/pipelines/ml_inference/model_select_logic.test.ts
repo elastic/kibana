@@ -71,6 +71,15 @@ describe('ModelSelectLogic', () => {
 
         expect(ModelSelectLogic.actions.startPollingModels).toHaveBeenCalled();
       });
+      it('sets selected model as non-placeholder', () => {
+        jest.spyOn(ModelSelectLogic.actions, 'clearModelPlaceholderFlagFromMLInferenceLogic');
+
+        ModelSelectLogic.actions.createModelSuccess(CREATE_MODEL_API_RESPONSE);
+
+        expect(
+          ModelSelectLogic.actions.clearModelPlaceholderFlagFromMLInferenceLogic
+        ).toHaveBeenCalledWith(CREATE_MODEL_API_RESPONSE.modelId);
+      });
     });
 
     describe('fetchModels', () => {

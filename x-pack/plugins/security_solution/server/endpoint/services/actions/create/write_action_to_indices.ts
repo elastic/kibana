@@ -179,20 +179,18 @@ const createFailedActionResponseEntry = async ({
   }
 };
 
-const addRuleInfoToAction = (
-  payload: CreateActionPayload
-):
-  | {
-      rule: { id: string; name: string };
-    }
-  | undefined => {
+export const addRuleInfoToAction = (
+  payload: Pick<CreateActionPayload, 'rule_id' | 'rule_name'>
+): Pick<LogsEndpointAction, 'rule'> => {
   if (payload.rule_id && payload.rule_name) {
     return { rule: { id: payload.rule_id, name: payload.rule_name } };
   }
+
+  return {};
 };
 
-const getActionParameters = (
-  action: CreateActionPayload
+export const getActionParameters = (
+  action: Pick<CreateActionPayload, 'command' | 'parameters'>
 ): ResponseActionsExecuteParameters | Readonly<{}> | undefined => {
   // set timeout to 4h (if not specified or when timeout is specified as 0) when command is `execute`
   if (action.command === 'execute') {
@@ -205,4 +203,8 @@ const getActionParameters = (
 
   // for all other commands return the parameters as is
   return action.parameters ?? undefined;
+};
+
+export const getActionRequestExpiration = (): string => {
+  return moment().add(2, 'weeks').toISOString();
 };

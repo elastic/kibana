@@ -150,7 +150,7 @@ export const BenchmarksSection = ({
       </EuiFlexGroup>
       {benchmarks.map((benchmark) => (
         <EuiFlexGroup
-          key={benchmark.meta.benchmarkId}
+          key={`${benchmark.meta.benchmarkId}_${benchmark.meta.benchmarkVersion}`}
           css={css`
             // card height with 3 items in risk table
             height: 200px;

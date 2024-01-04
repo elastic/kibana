@@ -27,7 +27,7 @@ const mockProps: UserPanelProps = {
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 const mockedUseRiskScore = jest.fn().mockReturnValue(mockRiskScoreState);
-jest.mock('../../../explore/containers/risk_score', () => ({
+jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
   useRiskScore: () => mockedUseRiskScore(),
 }));
 

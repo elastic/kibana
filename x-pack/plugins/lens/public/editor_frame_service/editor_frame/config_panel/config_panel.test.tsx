@@ -484,6 +484,7 @@ describe('ConfigPanel', () => {
           },
           dateRange: expect.anything(),
           filters: [],
+          now: expect.anything(),
           query: undefined,
         },
         groupId: 'a',

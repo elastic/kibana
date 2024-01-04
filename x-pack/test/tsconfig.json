@@ -123,7 +123,6 @@
     "@kbn/discover-plugin",
     "@kbn/files-plugin",
     "@kbn/shared-ux-file-types",
-    "@kbn/securitysolution-io-ts-alerting-types",
     "@kbn/alerting-state-types",
     "@kbn/assetManager-plugin",
     "@kbn/guided-onboarding-plugin",
@@ -165,5 +164,6 @@
     "@kbn/io-ts-utils",
     "@kbn/log-explorer-plugin",
     "@kbn/security-plugin-types-common",
+    "@kbn/typed-react-router-config",
   ]
 }

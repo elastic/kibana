@@ -32,3 +32,32 @@ export const RISK_SCORE_RANGES = {
   [RiskSeverity.high]: { start: 70, stop: 90 },
   [RiskSeverity.critical]: { start: 90, stop: 100 },
 };
+
+type SnakeToCamelCaseString<S extends string> = S extends `${infer T}_${infer U}`
+  ? `${T}${Capitalize<SnakeToCamelCaseString<U>>}`
+  : S;
+
+type SnakeToCamelCaseArray<T> = T extends Array<infer ArrayItem>
+  ? Array<SnakeToCamelCase<ArrayItem>>
+  : T;
+
+// TODO #173073 @tiansivive Add to utilities in `packages/kbn-utility-types`
+export type SnakeToCamelCase<T> = T extends Record<string, unknown>
+  ? {
+      [K in keyof T as SnakeToCamelCaseString<K & string>]: SnakeToCamelCase<T[K]>;
+    }
+  : T extends unknown[]
+  ? SnakeToCamelCaseArray<T>
+  : T;
+
+export enum UserRiskScoreQueryId {
+  USERS_BY_RISK = 'UsersByRisk',
+  USER_DETAILS_RISK_SCORE = 'UserDetailsRiskScore',
+}
+
+export enum HostRiskScoreQueryId {
+  DEFAULT = 'HostRiskScore',
+  HOST_DETAILS_RISK_SCORE = 'HostDetailsRiskScore',
+  OVERVIEW_RISKY_HOSTS = 'OverviewRiskyHosts',
+  HOSTS_BY_RISK = 'HostsByRisk',
+}

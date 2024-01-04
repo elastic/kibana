@@ -63,6 +63,7 @@ function InternalAlertsPage() {
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
     },
+    uiSettings,
   } = kibanaServices;
   const { ObservabilityPageTemplate } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
@@ -80,7 +81,6 @@ function InternalAlertsPage() {
     }
   };
   const chartProps = {
-    theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
     onBrushEnd,
   };
@@ -199,7 +199,7 @@ function InternalAlertsPage() {
               {...alertSearchBarStateProps}
               appName={ALERTS_SEARCH_BAR_ID}
               onEsQueryChange={setEsQuery}
-              services={{ timeFilterService, AlertsSearchBar, useToasts }}
+              services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
             />
           </EuiFlexItem>
           <EuiFlexItem>

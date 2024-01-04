@@ -44,7 +44,9 @@ describe(
       const testNote = 'test note';
       const updatedTestNote = 'updated test note';
 
-      describe('Renders and saves protection updates', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/169187
+      // FLAKY: https://github.com/elastic/kibana/issues/169188
+      describe.skip('Renders and saves protection updates', () => {
         let indexedPolicy: IndexedFleetEndpointPolicyResponse;
         let policy: PolicyData;
         const defaultDate = moment.utc().subtract(1, 'days');

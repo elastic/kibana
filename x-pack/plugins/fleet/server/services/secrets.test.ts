@@ -109,13 +109,13 @@ describe('secrets', () => {
 
         expect(getPolicySecretPaths(packagePolicy, mockIntegrationPackage)).toEqual([
           {
-            path: 'vars.pkg-secret-1',
+            path: ['vars', 'pkg-secret-1'],
             value: {
               value: 'pkg-secret-1-val',
             },
           },
           {
-            path: 'vars.pkg-secret-2',
+            path: ['vars', 'pkg-secret-2'],
             value: {
               value: 'pkg-secret-2-val',
             },
@@ -134,7 +134,7 @@ describe('secrets', () => {
 
         expect(getPolicySecretPaths(packagePolicy, mockIntegrationPackage)).toEqual([
           {
-            path: 'vars.pkg-secret-1',
+            path: ['vars', 'pkg-secret-1'],
             value: {
               value: 'pkg-secret-1-val',
             },
@@ -162,11 +162,11 @@ describe('secrets', () => {
 
         expect(getPolicySecretPaths(packagePolicy, mockIntegrationPackage)).toEqual([
           {
-            path: 'inputs[0].vars.input-secret-1',
+            path: ['inputs', '0', 'vars', 'input-secret-1'],
             value: { value: 'input-secret-1-val' },
           },
           {
-            path: 'inputs[0].vars.input-secret-2',
+            path: ['inputs', '0', 'vars', 'input-secret-2'],
             value: { value: 'input-secret-2-val' },
           },
         ]);
@@ -199,12 +199,137 @@ describe('secrets', () => {
 
         expect(getPolicySecretPaths(packagePolicy, mockIntegrationPackage)).toEqual([
           {
-            path: 'inputs[0].streams[0].vars.stream-secret-1',
+            path: ['inputs', '0', 'streams', '0', 'vars', 'stream-secret-1'],
             value: { value: 'stream-secret-1-value' },
           },
           {
-            path: 'inputs[0].streams[0].vars.stream-secret-2',
+            path: ['inputs', '0', 'streams', '0', 'vars', 'stream-secret-2'],
             value: { value: 'stream-secret-2-value' },
+          },
+        ]);
+      });
+
+      it('variables with dot notated names', () => {
+        const mockPackageWithDotNotatedVariables = {
+          name: 'mock-dot-package',
+          title: 'Mock dot package',
+          version: '0.0.0',
+          description: 'description',
+          type: 'integration',
+          status: 'not_installed',
+          vars: [
+            { name: 'dot-notation.pkg-secret-1', type: 'text', secret: true },
+            { name: 'dot-notation.pkg-secret-2', type: 'text', secret: true },
+          ],
+          data_streams: [
+            {
+              dataset: 'somedataset',
+              streams: [
+                {
+                  input: 'foo',
+                  title: 'Foo',
+                  vars: [
+                    { name: 'dot-notation.stream-secret-1', type: 'text', secret: true },
+                    { name: 'dot-notation.stream-secret-2', type: 'text', secret: true },
+                  ],
+                },
+              ],
+            },
+          ],
+          policy_templates: [
+            {
+              name: 'pkgPolicy1',
+              title: 'Package policy 1',
+              description: 'test package policy',
+              inputs: [
+                {
+                  type: 'foo',
+                  title: 'Foo',
+                  vars: [
+                    {
+                      default: 'foo-input-var-value',
+                      name: 'dot-notation.foo-input-var-name',
+                      type: 'text',
+                    },
+                    {
+                      name: 'dot-notation.input-secret-1',
+                      type: 'text',
+                      secret: true,
+                    },
+                    {
+                      name: 'dot-notation.input-secret-2',
+                      type: 'text',
+                      secret: true,
+                    },
+                    { name: 'dot-notation.foo-input3-var-name', type: 'text', multi: true },
+                  ],
+                },
+              ],
+            },
+          ],
+        } as unknown as PackageInfo;
+        const policy = {
+          vars: {
+            'dot-notation.pkg-secret-1': {
+              value: 'Package level secret 1',
+            },
+            'dot-notation.pkg-secret-2': {
+              value: 'Package level secret 2',
+            },
+          },
+          inputs: [
+            {
+              type: 'foo',
+              policy_template: 'pkgPolicy1',
+              enabled: false,
+              vars: {
+                'dot-notation.foo-input-var-name': { value: 'foo' },
+                'dot-notation.input-secret-1': { value: 'Input level secret 1' },
+                'dot-notation.input-secret-2': { value: 'Input level secret 2' },
+                'dot-notation.input3-var-name': { value: 'bar' },
+              },
+              streams: [
+                {
+                  data_stream: { type: 'foo', dataset: 'somedataset' },
+                  vars: {
+                    'dot-notation.stream-secret-1': { value: 'Stream secret 1' },
+                    'dot-notation.stream-secret-2': { value: 'Stream secret 2' },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        expect(
+          getPolicySecretPaths(
+            policy as unknown as NewPackagePolicy,
+            mockPackageWithDotNotatedVariables as unknown as PackageInfo
+          )
+        ).toEqual([
+          {
+            path: ['vars', 'dot-notation.pkg-secret-1'],
+            value: { value: 'Package level secret 1' },
+          },
+          {
+            path: ['vars', 'dot-notation.pkg-secret-2'],
+            value: { value: 'Package level secret 2' },
+          },
+          {
+            path: ['inputs', '0', 'vars', 'dot-notation.input-secret-1'],
+            value: { value: 'Input level secret 1' },
+          },
+          {
+            path: ['inputs', '0', 'vars', 'dot-notation.input-secret-2'],
+            value: { value: 'Input level secret 2' },
+          },
+          {
+            path: ['inputs', '0', 'streams', '0', 'vars', 'dot-notation.stream-secret-1'],
+            value: { value: 'Stream secret 1' },
+          },
+          {
+            path: ['inputs', '0', 'streams', '0', 'vars', 'dot-notation.stream-secret-2'],
+            value: { value: 'Stream secret 2' },
           },
         ]);
       });
@@ -392,20 +517,20 @@ describe('secrets', () => {
           )
         ).toEqual([
           {
-            path: 'vars.secret_access_key',
+            path: ['vars', 'secret_access_key'],
             value: {
               value: 'my_secret_access_key',
             },
           },
           {
-            path: 'inputs[0].vars.password',
+            path: ['inputs', '0', 'vars', 'password'],
             value: {
               type: 'text',
               value: 'billing_input_password',
             },
           },
           {
-            path: 'inputs[0].streams[0].vars.password',
+            path: ['inputs', '0', 'streams', '0', 'vars', 'password'],
             value: {
               type: 'text',
               value: 'billing_stream_password',
@@ -465,31 +590,31 @@ describe('secrets', () => {
           )
         ).toEqual([
           {
-            path: 'vars.secret_access_key',
+            path: ['vars', 'secret_access_key'],
             value: {
               value: 'my_secret_access_key',
             },
           },
           {
-            path: 'inputs[0].vars.password',
+            path: ['inputs', '0', 'vars', 'password'],
             value: {
               value: 'cloudtrail_httpjson_input_password',
             },
           },
           {
-            path: 'inputs[0].streams[0].vars.password',
+            path: ['inputs', '0', 'streams', '0', 'vars', 'password'],
             value: {
               value: 'cloudtrail_httpjson_stream_password',
             },
           },
           {
-            path: 'inputs[1].vars.password',
+            path: ['inputs', '1', 'vars', 'password'],
             value: {
               value: 'cloudtrail_s3_input_password',
             },
           },
           {
-            path: 'inputs[1].streams[0].vars.password',
+            path: ['inputs', '1', 'streams', '0', 'vars', 'password'],
             value: {
               value: 'cloudtrail_s3_stream_password',
             },
@@ -593,13 +718,13 @@ describe('secrets', () => {
           )
         ).toEqual([
           {
-            path: 'inputs[0].streams[0].vars.secret-1',
+            path: ['inputs', '0', 'streams', '0', 'vars', 'secret-1'],
             value: {
               value: 'secret-1-value',
             },
           },
           {
-            path: 'inputs[0].streams[0].vars.secret-2',
+            path: ['inputs', '0', 'streams', '0', 'vars', 'secret-2'],
             value: {
               value: 'secret-2-value',
             },
@@ -620,7 +745,7 @@ describe('secrets', () => {
     it('should return empty array if single secret not changed', () => {
       const paths = [
         {
-          path: 'somepath',
+          path: ['somepath'],
           value: {
             value: {
               isSecretRef: true,
@@ -638,7 +763,7 @@ describe('secrets', () => {
     it('should return empty array if multiple secrets not changed', () => {
       const paths = [
         {
-          path: 'somepath',
+          path: ['somepath'],
           value: {
             value: {
               isSecretRef: true,
@@ -647,7 +772,7 @@ describe('secrets', () => {
           },
         },
         {
-          path: 'somepath2',
+          path: ['somepath2'],
           value: {
             value: {
               isSecretRef: true,
@@ -656,7 +781,7 @@ describe('secrets', () => {
           },
         },
         {
-          path: 'somepath3',
+          path: ['somepath3'],
           value: {
             value: {
               isSecretRef: true,
@@ -675,7 +800,7 @@ describe('secrets', () => {
     it('single secret modified', () => {
       const paths1 = [
         {
-          path: 'somepath1',
+          path: ['somepath1'],
           value: {
             value: {
               isSecretRef: true,
@@ -684,7 +809,7 @@ describe('secrets', () => {
           },
         },
         {
-          path: 'somepath2',
+          path: ['somepath2'],
           value: {
             value: { isSecretRef: true, id: 'secret-2' },
           },
@@ -694,7 +819,7 @@ describe('secrets', () => {
       const paths2 = [
         paths1[0],
         {
-          path: 'somepath2',
+          path: ['somepath2'],
           value: { value: 'newvalue' },
         },
       ];
@@ -702,13 +827,13 @@ describe('secrets', () => {
       expect(diffSecretPaths(paths1, paths2)).toEqual({
         toCreate: [
           {
-            path: 'somepath2',
+            path: ['somepath2'],
             value: { value: 'newvalue' },
           },
         ],
         toDelete: [
           {
-            path: 'somepath2',
+            path: ['somepath2'],
             value: {
               value: {
                 isSecretRef: true,
@@ -723,7 +848,7 @@ describe('secrets', () => {
     it('double secret modified', () => {
       const paths1 = [
         {
-          path: 'somepath1',
+          path: ['somepath1'],
           value: {
             value: {
               isSecretRef: true,
@@ -732,7 +857,7 @@ describe('secrets', () => {
           },
         },
         {
-          path: 'somepath2',
+          path: ['somepath2'],
           value: {
             value: {
               isSecretRef: true,
@@ -744,11 +869,11 @@ describe('secrets', () => {
 
       const paths2 = [
         {
-          path: 'somepath1',
+          path: ['somepath1'],
           value: { value: 'newvalue1' },
         },
         {
-          path: 'somepath2',
+          path: ['somepath2'],
           value: { value: 'newvalue2' },
         },
       ];
@@ -756,17 +881,17 @@ describe('secrets', () => {
       expect(diffSecretPaths(paths1, paths2)).toEqual({
         toCreate: [
           {
-            path: 'somepath1',
+            path: ['somepath1'],
             value: { value: 'newvalue1' },
           },
           {
-            path: 'somepath2',
+            path: ['somepath2'],
             value: { value: 'newvalue2' },
           },
         ],
         toDelete: [
           {
-            path: 'somepath1',
+            path: ['somepath1'],
             value: {
               value: {
                 isSecretRef: true,
@@ -775,7 +900,7 @@ describe('secrets', () => {
             },
           },
           {
-            path: 'somepath2',
+            path: ['somepath2'],
             value: {
               value: {
                 isSecretRef: true,
@@ -791,7 +916,7 @@ describe('secrets', () => {
     it('single secret added', () => {
       const paths1 = [
         {
-          path: 'somepath1',
+          path: ['somepath1'],
           value: {
             value: {
               isSecretRef: true,
@@ -804,7 +929,7 @@ describe('secrets', () => {
       const paths2 = [
         paths1[0],
         {
-          path: 'somepath2',
+          path: ['somepath2'],
           value: { value: 'newvalue' },
         },
       ];
@@ -812,7 +937,7 @@ describe('secrets', () => {
       expect(diffSecretPaths(paths1, paths2)).toEqual({
         toCreate: [
           {
-            path: 'somepath2',
+            path: ['somepath2'],
             value: { value: 'newvalue' },
           },
         ],
@@ -845,6 +970,7 @@ describe('secrets', () => {
       vars: [
         { name: 'pkg-secret-1', type: 'text', secret: true, required: true },
         { name: 'pkg-secret-2', type: 'text', secret: true, required: false },
+        { name: 'dot-notation.pkg-secret-3', type: 'text', secret: true, required: false },
       ],
       data_streams: [
         {
@@ -853,6 +979,14 @@ describe('secrets', () => {
             {
               input: 'foo',
               title: 'Foo',
+              vars: [
+                {
+                  name: 'dot-notation.stream-secret-1',
+                  type: 'text',
+                  secret: true,
+                  required: false,
+                },
+              ],
             },
           ],
         },
@@ -866,7 +1000,14 @@ describe('secrets', () => {
             {
               type: 'foo',
               title: 'Foo',
-              vars: [],
+              vars: [
+                {
+                  name: 'dot-notation.input-secret-1',
+                  type: 'text',
+                  secret: true,
+                  required: false,
+                },
+              ],
             },
           ],
         },
@@ -919,6 +1060,67 @@ describe('secrets', () => {
         expect(result.secretReferences).toHaveLength(2);
       });
     });
+
+    describe('when variable name uses dot notation', () => {
+      it('places variable at the right path', async () => {
+        const mockPackagePolicy = {
+          vars: {
+            'dot-notation.pkg-secret-3': {
+              value: 'pkg-secret-3-val',
+            },
+          },
+          inputs: [
+            {
+              type: 'foo',
+              vars: {
+                'dot-notation.input-secret-1': {
+                  value: 'dot-notation-input-secret-1-val',
+                },
+              },
+              streams: [
+                {
+                  data_stream: { type: 'foo', dataset: 'somedataset' },
+                  vars: {
+                    'dot-notation.stream-secret-1': {
+                      value: 'dot-notation-stream-var-1-val',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(3);
+        expect(result.secretReferences).toHaveLength(3);
+
+        expect(result.packagePolicy.vars!['dot-notation.pkg-secret-3'].value.id).toBeTruthy();
+        expect(result.packagePolicy.vars!['dot-notation.pkg-secret-3'].value.isSecretRef).toBe(
+          true
+        );
+
+        expect(
+          result.packagePolicy.inputs[0].vars!['dot-notation.input-secret-1'].value.id
+        ).toBeTruthy();
+        expect(
+          result.packagePolicy.inputs[0].vars!['dot-notation.input-secret-1'].value.isSecretRef
+        ).toBe(true);
+
+        expect(
+          result.packagePolicy.inputs[0].streams[0].vars!['dot-notation.stream-secret-1'].value.id
+        ).toBeTruthy();
+        expect(
+          result.packagePolicy.inputs[0].streams[0].vars!['dot-notation.stream-secret-1'].value
+            .isSecretRef
+        ).toBe(true);
+      });
+    });
   });
 
   describe('extractAndUpdateSecrets', () => {
@@ -944,6 +1146,7 @@ describe('secrets', () => {
       vars: [
         { name: 'pkg-secret-1', type: 'text', secret: true, required: true },
         { name: 'pkg-secret-2', type: 'text', secret: true, required: false },
+        { name: 'dot-notation.pkg-secret-3', type: 'text', secret: true, required: false },
       ],
       data_streams: [
         {
@@ -952,6 +1155,14 @@ describe('secrets', () => {
             {
               input: 'foo',
               title: 'Foo',
+              vars: [
+                {
+                  name: 'dot-notation.stream-secret-1',
+                  type: 'text',
+                  secret: true,
+                  required: false,
+                },
+              ],
             },
           ],
         },
@@ -965,7 +1176,14 @@ describe('secrets', () => {
             {
               type: 'foo',
               title: 'Foo',
-              vars: [],
+              vars: [
+                {
+                  name: 'dot-notation.input-secret-1',
+                  type: 'text',
+                  secret: true,
+                  required: false,
+                },
+              ],
             },
           ],
         },
@@ -1051,6 +1269,91 @@ describe('secrets', () => {
         expect((result.packagePolicyUpdate.vars as any)['pkg-secret-2'].value.isSecretRef).toEqual(
           true
         );
+      });
+    });
+
+    describe('when variable name uses dot notation', () => {
+      it('places variable at the right path', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'dot-notation.pkg-secret-3': {
+              value: { id: 123, isSecretRef: true },
+            },
+          },
+          inputs: [
+            {
+              type: 'foo',
+              vars: {
+                'dot-notation.input-secret-1': {
+                  value: { id: 12234, isSecretRef: true },
+                },
+              },
+              streams: [],
+            },
+          ],
+        } as unknown as PackagePolicy;
+
+        const updatedPackagePolicy = {
+          vars: {
+            'dot-notation.pkg-secret-3': {
+              value: 'pkg-secret-3-val',
+            },
+          },
+          inputs: [
+            {
+              type: 'foo',
+              vars: {
+                'dot-notation.input-secret-1': {
+                  value: 'dot-notation-input-secret-1-val',
+                },
+              },
+              streams: [
+                {
+                  data_stream: { type: 'foo', dataset: 'somedataset' },
+                  vars: {
+                    'dot-notation.stream-secret-1': {
+                      value: 'dot-notation-stream-var-1-val',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate: updatedPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(3);
+        expect(result.secretReferences).toHaveLength(3);
+
+        expect(result.packagePolicyUpdate.vars!['dot-notation.pkg-secret-3'].value.id).toBeTruthy();
+        expect(
+          result.packagePolicyUpdate.vars!['dot-notation.pkg-secret-3'].value.isSecretRef
+        ).toBe(true);
+
+        expect(
+          result.packagePolicyUpdate.inputs[0].vars!['dot-notation.input-secret-1'].value.id
+        ).toBeTruthy();
+        expect(
+          result.packagePolicyUpdate.inputs[0].vars!['dot-notation.input-secret-1'].value
+            .isSecretRef
+        ).toBe(true);
+
+        expect(
+          result.packagePolicyUpdate.inputs[0].streams[0].vars!['dot-notation.stream-secret-1']
+            .value.id
+        ).toBeTruthy();
+        expect(
+          result.packagePolicyUpdate.inputs[0].streams[0].vars!['dot-notation.stream-secret-1']
+            .value.isSecretRef
+        ).toBe(true);
+
+        expect(result.secretsToDelete).toHaveLength(2);
       });
     });
   });

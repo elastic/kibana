@@ -43,5 +43,6 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
       reportTelemetry({ fn: telemetry.reportAssistantMessageSent, params }),
     reportAssistantQuickPrompt: (params) =>
       reportTelemetry({ fn: telemetry.reportAssistantQuickPrompt, params }),
+    reportAssistantSettingToggled: (params) => telemetry.reportAssistantSettingToggled(params),
   };
 };

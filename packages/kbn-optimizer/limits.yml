@@ -23,7 +23,7 @@ pageLoadAssetSize:
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
-  controls: 40000
+  controls: 55082
   core: 435325
   crossClusterReplication: 65408
   customIntegrations: 22034
@@ -86,7 +86,7 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 39000
+  lens: 41000
   licenseManagement: 41817
   licensing: 29004
   links: 44490

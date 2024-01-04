@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
-import { Chart, Settings, Heatmap, ScaleType, Tooltip } from '@elastic/charts';
+import { Chart, Settings, Heatmap, ScaleType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { usePingStatusesIsLoading } from '../hooks/use_ping_statuses';
 import { MonitorStatusHeader } from './monitor_status_header';
@@ -73,6 +73,8 @@ export const MonitorStatusPanel = ({
                 showLegend={false}
                 xDomain={xDomain}
                 theme={{ heatmap }}
+                // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                baseTheme={LEGACY_LIGHT_THEME}
                 onBrushEnd={(brushArea) => {
                   onBrushed?.(getBrushData(brushArea));
                 }}

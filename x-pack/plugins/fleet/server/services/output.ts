@@ -441,13 +441,6 @@ class OutputService {
     logger.debug(`Creating new output`);
 
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
-    if (output.type === outputType.RemoteElasticsearch) {
-      if (data.is_default) {
-        throw new OutputInvalidError(
-          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
-        );
-      }
-    }
 
     if (outputTypeSupportPresets(data.type)) {
       if (
@@ -766,14 +759,6 @@ class OutputService {
   ) {
     const logger = appContextService.getLogger();
     logger.debug(`Updating output ${id}`);
-
-    if (data.type === outputType.RemoteElasticsearch) {
-      if (data.is_default) {
-        throw new OutputInvalidError(
-          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
-        );
-      }
-    }
 
     let secretsToDelete: PolicySecretReference[] = [];
     const originalOutput = await this.get(soClient, id);

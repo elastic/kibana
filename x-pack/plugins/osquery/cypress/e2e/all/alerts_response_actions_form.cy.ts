@@ -157,8 +157,8 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
       cy.contains('Days of uptime');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
-      cy.contains(packName);
-      cy.getBySel('comboBoxInput').type('{backspace}{enter}');
+      cy.getBySel('comboBoxSearchInput').should('have.value', packName);
+      cy.getBySel('comboBoxInput').type('{selectall}{backspace}{enter}');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('select * from uptime1');
@@ -166,6 +166,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0)
       .within(() => {
+        cy.getBySel('comboBoxSearchInput').click();
         cy.contains('Search for a pack to run');
         cy.contains('Pack is a required field');
         cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
@@ -201,8 +202,10 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
     cy.getBySel('edit-rule-actions-tab').click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0)
       .within(() => {
-        cy.contains(packName);
-        cy.getBySel('comboBoxInput').type(`${multiQueryPackName}{downArrow}{enter}`);
+        cy.getBySel('comboBoxSearchInput').should('have.value', packName);
+        cy.getBySel('comboBoxInput').type(
+          `{selectall}{backspace}${multiQueryPackName}{downArrow}{enter}`
+        );
         cy.contains('SELECT * FROM memory_info;');
         cy.contains('SELECT * FROM system_info;');
       })

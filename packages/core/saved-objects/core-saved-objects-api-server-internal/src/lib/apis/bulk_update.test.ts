@@ -60,7 +60,7 @@ interface ExpectedErrorResult {
   error: Record<string, any>;
 }
 
-describe('SavedObjectsRepository', () => {
+describe('#bulkUpdate', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -117,7 +117,7 @@ describe('SavedObjectsRepository', () => {
     mockGetSearchDsl.mockClear();
   });
 
-  describe('#bulkUpdate', () => {
+  describe('performBulkUpdate', () => {
     const obj1: SavedObjectsBulkUpdateObject = {
       type: 'config',
       id: '6.0.0-alpha1',

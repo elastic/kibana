@@ -1,0 +1,12 @@
+Numeric fields
+
+auto_bucket can also operate on numeric fields like this:
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| EVAL bs = AUTO_BUCKET(salary, 20, 25324, 74999)
+| SORT hire_date, salary
+| KEEP hire_date, salary, bs
+Unlike the example above where you are intentionally filtering on a date range,
+you rarely want to filter on a numeric range. So you have find the min and max
+separately. We don’t yet have an easy way to do that automatically. Improvements
+coming!

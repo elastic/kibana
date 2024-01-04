@@ -50,7 +50,6 @@ export function KnowledgeBaseEditManualEntryFlyout({
     createEntry({
       entry: {
         id: newEntryId,
-        doc_id: newEntryId,
         text: newEntryText,
       },
     }).then(onClose);

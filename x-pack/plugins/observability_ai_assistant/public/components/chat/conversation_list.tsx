@@ -16,6 +16,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
+  euiScrollBarStyles,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -33,8 +35,9 @@ const panelClassName = css`
   max-height: 100%;
 `;
 
-const overflowScrollClassName = css`
+const overflowScrollClassName = (scrollBarStyles: string) => css`
   overflow-y: auto;
+  ${scrollBarStyles}
 `;
 
 const newChatButtonWrapperClassName = css`
@@ -56,10 +59,12 @@ export function ConversationList({
   onClickNewChat: () => void;
   onClickDeleteConversation: (id: string) => void;
 }) {
+  const euiTheme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(euiTheme);
   return (
     <EuiPanel paddingSize="s" hasShadow={false} className={panelClassName}>
       <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
-        <EuiFlexItem grow className={overflowScrollClassName}>
+        <EuiFlexItem grow className={overflowScrollClassName(scrollBarStyles)}>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">

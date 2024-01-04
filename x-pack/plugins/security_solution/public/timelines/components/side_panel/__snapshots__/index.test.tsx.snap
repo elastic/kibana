@@ -75,63 +75,6 @@ Array [
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           />
         </div>
-        <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
-        >
-          <div
-            class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
-            data-test-subj="securitySolutionFlyoutHeaderAssigneesHeader"
-          >
-            <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
-            >
-              <h3
-                class="euiTitle emotion-euiTitle-xxs"
-                data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
-              >
-                Assignees:
-              </h3>
-            </div>
-            <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
-            >
-              <div
-                class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
-                data-test-subj="securitySolutionUsersAvatarsPanel"
-              />
-            </div>
-            <div
-              class="euiFlexItem emotion-euiFlexItem-growZero"
-            >
-              <div
-                class="euiPopover emotion-euiPopover"
-              >
-                <div
-                  class="euiPopover__anchor css-16vtueo-render"
-                >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                  >
-                    <button
-                      aria-label="Update assignees"
-                      class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
-                      data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
-                      disabled=""
-                      type="button"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="euiButtonIcon__icon"
-                        color="inherit"
-                        data-euiicon-type="plusInCircle"
-                      />
-                    </button>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>,
@@ -264,63 +207,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
             <div
               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
             />
-          </div>
-          <div
-            class="euiFlexItem emotion-euiFlexItem-growZero"
-          >
-            <div
-              class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
-              data-test-subj="securitySolutionFlyoutHeaderAssigneesHeader"
-            >
-              <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
-              >
-                <h3
-                  class="euiTitle emotion-euiTitle-xxs"
-                  data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
-                >
-                  Assignees:
-                </h3>
-              </div>
-              <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
-              >
-                <div
-                  class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
-                  data-test-subj="securitySolutionUsersAvatarsPanel"
-                />
-              </div>
-              <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
-              >
-                <div
-                  class="euiPopover emotion-euiPopover"
-                >
-                  <div
-                    class="euiPopover__anchor css-16vtueo-render"
-                  >
-                    <span
-                      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                    >
-                      <button
-                        aria-label="Update assignees"
-                        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-disabled-isDisabled"
-                        data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"
-                        disabled=""
-                        type="button"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="euiButtonIcon__icon"
-                          color="inherit"
-                          data-euiicon-type="plusInCircle"
-                        />
-                      </button>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
