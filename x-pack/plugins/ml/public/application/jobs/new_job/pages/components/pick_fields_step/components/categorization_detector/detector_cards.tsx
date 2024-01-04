@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiCard } from '@elastic/eui';
+import { EuiFlexItem, EuiCard, EuiSpacer } from '@elastic/eui';
 
 interface CardProps {
   onClick: () => void;
@@ -30,6 +30,13 @@ export const CountCard: FC<CardProps> = ({ onClick, isSelected }) => (
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description"
             defaultMessage="Look for anomalies in the event rate of a category."
+          />
+
+          <EuiSpacer size="s" />
+
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description2"
+            defaultMessage="Using Count is more appropriate when categorizing all messages."
           />
         </>
       }
@@ -54,7 +61,14 @@ export const HighCountCard: FC<CardProps> = ({ onClick, isSelected }) => (
         <>
           <FormattedMessage
             id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.highCountCard.description"
-            defaultMessage="Look for anomalies in the event rate of a category."
+            defaultMessage="Look for unusually high counts of a category in the event rate."
+          />
+
+          <EuiSpacer size="s" />
+
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.pickFieldsStep.categorizationDetectorSelect.countCard.description2"
+            defaultMessage="Using High Count is more appropriate when categorizing just error messages."
           />
         </>
       }
