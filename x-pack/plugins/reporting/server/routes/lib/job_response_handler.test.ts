@@ -99,7 +99,7 @@ describe('deleteJobResponseHandler', () => {
       ReturnType<typeof jobsQuery.get>
     >);
     jobsQuery.delete.mockRejectedValueOnce(
-      Object.assign(new Error('Some error.'), { statusCode: 123 })
+      Object.assign(new Error('Some error.'), { statusCode: 500 })
     );
     await deleteJobResponseHandler(
       core,
@@ -110,7 +110,7 @@ describe('deleteJobResponseHandler', () => {
     );
 
     expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 123,
+      statusCode: 500,
       body: 'Some error.',
     });
   });
