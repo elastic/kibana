@@ -38,7 +38,10 @@ const getSentinelOneAgentInfo = (
   return {
     agent: {
       id: getFieldValue({ category: 'agent', field: 'agent.id' }, eventData),
-      type: getFieldValue({ category: 'event', field: 'event.module' }, eventData),
+      type: getFieldValue(
+        { category: 'event', field: 'event.module' },
+        eventData
+      ) as ResponseActionAgentType,
     },
     host: {
       name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
