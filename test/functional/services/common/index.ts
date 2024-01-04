@@ -9,8 +9,6 @@
 export type { Browser } from './browser';
 export { BrowserProvider } from './browser';
 export { FailureDebuggingProvider } from './failure_debugging';
-// TODO-TRE: I get the feeling this should not be exported here.
-// export { FindProvider } from '@kbn/ftr-common-functional-ui-services';
 export { PngService } from './png';
 export { ScreenshotsService } from './screenshots';
 export { SnapshotsService } from './snapshots';
