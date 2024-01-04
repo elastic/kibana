@@ -10,6 +10,5 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/expressions-plugin",
-    "@kbn/lens-plugin",
   ]
 }

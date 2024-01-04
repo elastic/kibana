@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
+import type { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { Observable } from 'rxjs';
 
 export interface LensChartLoadEvent {
@@ -17,5 +17,5 @@ export interface LensChartLoadEvent {
   /**
    * Observable of the lens embeddable output
    */
-  embeddableOutput$?: Observable<LensEmbeddableOutput>;
+  embeddableOutput$?: Observable<EmbeddableOutput>;
 }
