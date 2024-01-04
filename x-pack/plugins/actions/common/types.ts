@@ -6,6 +6,7 @@
  */
 
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 export {
   AlertingConnectorFeatureId,
@@ -47,6 +48,7 @@ export interface ActionTypeExecutorResult<Data> {
   serviceMessage?: string;
   data?: Data;
   retry?: null | boolean | Date;
+  errorSource?: TaskErrorSource;
 }
 
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
