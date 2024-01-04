@@ -4982,10 +4982,12 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lens-inline-editing-example-plugin@link:x-pack/examples/lens_embeddable_inline_editing_example":
 "@kbn/lens-formula-docs@link:packages/kbn-lens-formula-docs":
   version "0.0.0"
   uid ""
+
+"@kbn/lens-inline-editing-example-plugin@link:x-pack/examples/lens_embeddable_inline_editing_example":
+  
 
 "@kbn/lens-plugin@link:x-pack/plugins/lens":
   version "0.0.0"
