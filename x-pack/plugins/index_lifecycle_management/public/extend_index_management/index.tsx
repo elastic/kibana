@@ -226,4 +226,15 @@ export const addAllExtensions = (
   extensionsService.addFilter(ilmFilterExtension);
 
   extensionsService.addIndexDetailsTab(indexLifecycleTab);
+
+  extensionsService.setEmptyListContent({
+    renderContent: ({ createIndexButton }) => {
+      return (
+        <div>
+          Test component
+          <div>{createIndexButton}</div>
+        </div>
+      );
+    },
+  });
 };
