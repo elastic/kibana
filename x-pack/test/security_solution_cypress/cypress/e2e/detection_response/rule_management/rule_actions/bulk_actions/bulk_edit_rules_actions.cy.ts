@@ -16,7 +16,7 @@ import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   RULES_BULK_EDIT_ACTIONS_INFO,
   RULES_BULK_EDIT_ACTIONS_WARNING,
-  ADD_RULE_ACTIONS_MENU_ITEM,
+  BULK_ACTIONS_BTN,
 } from '../../../../../screens/rules_bulk_actions';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 
@@ -47,7 +47,6 @@ import {
   submitBulkEditForm,
   checkOverwriteRuleActionsCheckbox,
   openBulkEditRuleActionsForm,
-  openBulkActionsMenu,
 } from '../../../../../tasks/rules_bulk_actions';
 import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
@@ -65,16 +64,21 @@ import {
 } from '../../../../../objects/rule';
 import {
   createAndInstallMockedPrebuiltRules,
-  excessivelyInstallAllPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
+import { clickAddElasticRulesButton } from '../../../../../tasks/prebuilt_rules';
+
+import {
+  TOASTER,
+  SELECT_ALL_RULES_BTN,
+  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
+} from '../../../../../screens/alerts_detection_rules';
 
 const ruleNameToAssert = 'Custom rule name with actions';
 
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-// TODO: Fix and unskip in Serverless https://github.com/elastic/kibana/issues/171101
 describe(
   'Detection rules, bulk edit of rule actions',
   { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
@@ -148,7 +152,7 @@ describe(
 
     context('Restricted action privileges', () => {
       it("User with no privileges can't add rule actions", () => {
-        login(ROLES.hunter_no_actions);
+        login(ROLES.t1_analyst);
         visitRulesManagementTable();
 
         expectManagementTableRules([
@@ -164,11 +168,11 @@ describe(
         ]);
         waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-        selectAllRules();
-
-        openBulkActionsMenu();
-
-        cy.get(ADD_RULE_ACTIONS_MENU_ITEM).should('be.disabled');
+        // Make sure that there's no way to trigger bulk actions,
+        // as the user can't select rules to operate on
+        cy.get(SELECT_ALL_RULES_BTN).should('not.exist');
+        cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).should('not.exist');
+        cy.get(BULK_ACTIONS_BTN).should('not.exist');
       });
     });
 
@@ -197,7 +201,10 @@ describe(
           throttleUnit: 'd',
         };
 
-        excessivelyInstallAllPrebuiltRules();
+        clickAddElasticRulesButton();
+        cy.get('[data-test-subj^="installSinglePrebuiltRuleButton"]').eq(0).click();
+        cy.get(TOASTER).should('be.visible').should('have.text', `1 rule installed successfully.`);
+        visitRulesManagementTable();
 
         getRulesManagementTableRows().then((rows) => {
           // select both custom and prebuilt rules
@@ -227,7 +234,10 @@ describe(
       });
 
       it('Overwrite rule actions in rules', () => {
-        excessivelyInstallAllPrebuiltRules();
+        clickAddElasticRulesButton();
+        cy.get('[data-test-subj^="installSinglePrebuiltRuleButton"]').eq(0).click();
+        cy.get(TOASTER).should('be.visible').should('have.text', `1 rule installed successfully.`);
+        visitRulesManagementTable();
 
         getRulesManagementTableRows().then((rows) => {
           // select both custom and prebuilt rules
