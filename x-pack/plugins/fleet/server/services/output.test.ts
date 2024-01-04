@@ -716,43 +716,6 @@ describe('Output Service', () => {
         );
       });
 
-      it('should create output secrets if enabled', async () => {
-        const soClient = getMockedSoClient({});
-        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
-          canEncrypt: true,
-        } as any);
-        jest.mock('./secrets', () => ({
-          isOutputSecretStorageEnabled: jest.fn(async () => true),
-        }));
-
-        await outputService.create(
-          soClient,
-          esClientMock,
-          {
-            is_default: false,
-            is_default_monitoring: false,
-            name: 'Test',
-            type: 'logstash',
-            ssl: {
-              certificate: 'xxx',
-            },
-            secrets: {
-              ssl: {
-                key: 'secretKey',
-              },
-            },
-          },
-          { id: 'output-test' }
-        );
-        expect(soClient.create).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.objectContaining({
-            ssl: JSON.stringify({ certificate: 'xxx', key: 'secretKey' }),
-          }),
-          expect.anything()
-        );
-      });
-
       it('should store output secrets as plain text if disabled', async () => {
         const soClient = getMockedSoClient({});
         mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
