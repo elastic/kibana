@@ -5,11 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 interface BaseEvent<T extends string, Options = object> {
   type: T;
   contentTypeId: string;
   options?: Options;
+
+  /**
+   * User or other entity that initiated the event.
+   */
+  subject?: ContentEventSubject;
 }
+
+export type ContentEventSubjectType = 'user';
+export type ContentEventSubject = [type: ContentEventSubjectType, id: string];
 
 export interface GetItemStart extends BaseEvent<'getItemStart'> {
   contentId: string;

@@ -11,11 +11,15 @@ import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
 import type { ContentStorage, ContentTypeDefinition, MSearchConfig } from './types';
 import type { ContentCrud } from './crud';
+import type { UserProfileServiceStart } from '@kbn/security-plugin/server';
 
 export class ContentRegistry {
   private types = new Map<string, ContentType>();
 
-  constructor(private readonly eventBus: EventBus) {}
+  constructor(
+    private readonly eventBus: EventBus,
+    private readonly getUserProfilesService: () => UserProfileServiceStart | undefined,
+  ) {}
 
   /**
    * Register a new content in the registry.
@@ -41,7 +45,8 @@ export class ContentRegistry {
 
     const contentType = new ContentType(
       { ...definition, version: { ...definition.version, latest: value } },
-      this.eventBus
+      this.eventBus,
+      this.getUserProfilesService,
     );
 
     this.types.set(contentType.id, contentType);

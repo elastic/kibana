@@ -35,7 +35,7 @@ export class ContentManagementPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly core: Core;
+  private core: Core;
   readonly #eventStream?: EventStreamService;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -58,7 +58,7 @@ export class ContentManagementPlugin
     });
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: ContentManagementServerSetupDependencies) {
     if (this.#eventStream) {
       this.#eventStream.setup({ core });
     }
@@ -79,7 +79,9 @@ export class ContentManagementPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: ContentManagementServerStartDependencies) {
+    // this.core!.start(plugins.security?.userProfiles);
+
     if (this.#eventStream) {
       this.#eventStream.start();
     }

@@ -9,6 +9,7 @@
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentStorage, ContentTypeDefinition } from './types';
+import type { UserProfileServiceStart } from '@kbn/security-plugin/server';
 
 export class ContentType {
   /** Content definition. */
@@ -16,9 +17,13 @@ export class ContentType {
   /** Content crud instance. */
   private readonly contentCrud: ContentCrud;
 
-  constructor(definition: ContentTypeDefinition, eventBus: EventBus) {
+  constructor(
+    definition: ContentTypeDefinition,
+    eventBus: EventBus,
+    getUserProfilesService: () => UserProfileServiceStart | undefined,
+  ) {
     this._definition = definition;
-    this.contentCrud = new ContentCrud(definition.id, definition.storage, { eventBus });
+    this.contentCrud = new ContentCrud(definition.id, definition.storage, { eventBus, getUserProfilesService });
   }
 
   public get id() {

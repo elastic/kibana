@@ -16,6 +16,7 @@ import type {
 } from '../../common';
 import type { EventBus } from './event_bus';
 import type { ContentStorage, StorageContext } from './types';
+import type { UserProfileServiceStart } from '@kbn/security-plugin/server';
 
 export interface GetResponse<T = unknown, M = void> {
   contentTypeId: string;
@@ -51,19 +52,23 @@ export class ContentCrud<T = unknown> {
   private readonly storage: ContentStorage<T>;
   private readonly eventBus: EventBus;
   public readonly contentTypeId: string;
+  protected readonly getUserProfilesService: () => UserProfileServiceStart | undefined;
 
   constructor(
     contentTypeId: string,
     contentStorage: ContentStorage<T>,
     {
       eventBus,
+      getUserProfilesService,
     }: {
       eventBus: EventBus;
+      getUserProfilesService: () => UserProfileServiceStart | undefined;
     }
   ) {
     this.contentTypeId = contentTypeId;
     this.storage = contentStorage;
     this.eventBus = eventBus;
+    this.getUserProfilesService = getUserProfilesService;
   }
 
   public async get(
