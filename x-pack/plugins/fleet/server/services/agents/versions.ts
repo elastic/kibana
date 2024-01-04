@@ -111,6 +111,11 @@ export const getAvailableVersions = async ({
 };
 
 async function fetchAgentVersionsFromApi() {
+  // If the airgapped flag is set, do not attempt to reach out to the product versions API
+  if (appContextService.getConfig()?.isAirGapped) {
+    return [];
+  }
+
   const logger = appContextService.getLogger();
 
   const options = {
