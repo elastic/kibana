@@ -73,6 +73,20 @@ const sourceDoc = (doc: Partial<ReportSource>): Partial<ReportSource> => {
   };
 };
 
+const esDoc = (
+  report: SavedReport,
+  doc: Partial<ReportSource>
+): Parameters<ElasticsearchClient['update']>[0] => {
+  return {
+    id: report._id,
+    index: report._index,
+    if_seq_no: report._seq_no,
+    if_primary_term: report._primary_term,
+    refresh: false,
+    body: { doc },
+  };
+};
+
 const jobDebugMessage = (report: Report) =>
   `${report._id} ` +
   `[_index: ${report._index}] ` +
@@ -295,14 +309,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: false,
-        body: { doc },
-      });
+      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to processing! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -324,25 +331,40 @@ export class ReportingStore {
 
   public async setReportFailed(
     report: SavedReport,
-    failedInfo: ReportFailedFields,
-    setFailStatus = true
+    failedInfo: ReportFailedFields
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
       ...failedInfo,
-      status: setFailStatus ? JOB_STATUS.FAILED : JOB_STATUS.PROCESSING,
+      status: JOB_STATUS.FAILED,
     });
 
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: false,
-        body: { doc },
-      });
+      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+    } catch (err) {
+      this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
+      throw err;
+    }
+
+    this.reportingCore.getEventLogger(report).logReportFailure();
+
+    return body;
+  }
+
+  public async setReportError(
+    report: SavedReport,
+    failedInfo: ReportFailedFields
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const doc = sourceDoc({
+      ...failedInfo,
+      status: JOB_STATUS.PROCESSING,
+    });
+
+    let body: UpdateResponse<ReportDocument>;
+    try {
+      const client = await this.getClient();
+      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -370,14 +392,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: false,
-        body: { doc },
-      });
+      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to complete! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;

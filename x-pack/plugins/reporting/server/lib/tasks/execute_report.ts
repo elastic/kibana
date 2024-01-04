@@ -265,9 +265,7 @@ export class ExecuteReportTask implements ReportingTask {
       error: errorParsed,
     };
 
-    // We don't want to mark the report status as failed just yet... we just want to save the error
-    const markReportAsFailed = false;
-    return await store.setReportFailed(report, doc, markReportAsFailed);
+    return await store.setReportError(report, doc);
   }
 
   private _formatOutput(output: CompletedReportOutput | ReportingError): ReportOutput {
