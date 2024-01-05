@@ -199,13 +199,13 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
               <EuiSpacer size="s" />
               <FormattedMessage
                 defaultMessage="Look for anomalies in the event rate of a category."
-                id="xpack.ml.newJobFromPatternAnalysisFlyout.count.description"
+                id="xpack.ml.newJobFromPatternAnalysisFlyout.highCount.description"
               />
 
               <EuiSpacer size="xs" />
 
               <FormattedMessage
-                id="xpack.ml.newJobFromPatternAnalysisFlyout.count.description2"
+                id="xpack.ml.newJobFromPatternAnalysisFlyout.highCount.description2"
                 defaultMessage="Recommended for categorizing error messages."
               />
             </>
