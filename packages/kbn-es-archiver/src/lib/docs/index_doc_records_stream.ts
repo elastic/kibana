@@ -22,7 +22,8 @@ export function createIndexDocRecordsStream(
   client: Client,
   stats: Stats,
   progress: Progress,
-  useCreate: boolean = false
+  useCreate: boolean = false,
+  performance?: PerfOptions
 ) {
   async function indexDocs(docs: any[]) {
     const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
@@ -32,7 +33,7 @@ export function createIndexDocRecordsStream(
     await client.helpers.bulk(
       {
         retries: 5,
-        concurrency: 4,
+        concurrency: performance?.concurrency ? performance?.concurrency : 4,
         datasource: docs.map((doc) => {
           const body = doc.source;
           const op = doc.data_stream ? BulkOperation.Create : operation;
@@ -69,7 +70,7 @@ export function createIndexDocRecordsStream(
   }
 
   return new Writable({
-    highWaterMark: parseInt((process.env.HIGH_WATER_MARK as string) ?? 5000, 10),
+    highWaterMark: performance?.highWaterMark ? performance?.highWaterMark : 5000,
     objectMode: true,
 
     async write(record, enc, callback) {
@@ -92,4 +93,9 @@ export function createIndexDocRecordsStream(
       }
     },
   });
+}
+
+export interface PerfOptions {
+  highWaterMark: 300 | 5000;
+  concurrency?: 4 | undefined;
 }
