@@ -799,6 +799,8 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
+    http,
+    overlays
   ]);
 
   const onQuerySubmitWrapped = useCallback(

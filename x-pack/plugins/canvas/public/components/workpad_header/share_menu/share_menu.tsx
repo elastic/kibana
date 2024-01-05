@@ -35,7 +35,7 @@ export const ShareMenu = () => {
     pageCount: getPages(state).length,
   }));
 
-  const ReportingPanelPDFComponent = reportingService.getReportingPanelPDFComponent();
+  const ReportingModalComponent = reportingService.getReportingModalContent();
 
   const sharingData = {
     workpad,
@@ -43,9 +43,9 @@ export const ShareMenu = () => {
   };
 
   const ReportingComponent =
-    ReportingPanelPDFComponent !== null
+    ReportingModalComponent !== null
       ? ({ onClose }: { onClose: () => void }) => (
-          <ReportingPanelPDFComponent
+          <ReportingModalComponent
             getJobParams={() => getPdfJobParams(sharingData, platformService.getKibanaVersion())}
             layoutOption="canvas"
             onClose={onClose}

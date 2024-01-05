@@ -11,8 +11,8 @@ import { tableHasFormulas } from '@kbn/data-plugin/common';
 import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CoreStart } from '@kbn/core/public';
 import { FormatFactory } from '../../../common/types';
 import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
@@ -95,19 +95,19 @@ function getWarnings(activeData: TableInspectorAdapter) {
 interface DownloadPanelShareOpts {
   uiSettings: IUiSettingsClient;
   formatFactoryFn: () => FormatFactory;
-  theme: ThemeServiceStart;
-  overlays: OverlayStart;
-  i18nStart: I18nStart;
+  openModal: CoreStart['overlays']['openModal'];
+  theme: CoreStart['theme'];
+  i18nStart: CoreStart['i18n'];
 }
 
 export const downloadCsvShareProvider = ({
   uiSettings,
   formatFactoryFn,
+  openModal,
   theme,
-  overlays,
   i18nStart,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, sharingData }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }
@@ -118,8 +118,15 @@ export const downloadCsvShareProvider = ({
       csvEnabled: boolean;
     };
 
-    const openCsvLensModal = () => {
-      const session = overlays.openModal(
+    const panelTitle = i18n.translate(
+      'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
+      {
+        defaultMessage: 'CSV Download',
+      }
+    );
+
+    const openCsvModal = () => {
+      const session = openModal(
         toMountPoint(
           <DownloadPanelContent
             isDisabled={!csvEnabled}
@@ -140,17 +147,10 @@ export const downloadCsvShareProvider = ({
         ),
         {
           maxWidth: 400,
-          'data-test-subj': 'link-modal',
+          'data-test-subj': 'csv-download-modal',
         }
       );
     };
-
-    const panelTitle = i18n.translate(
-      'xpack.lens.reporting.shareContextMenu.csvExportButtonLabel',
-      {
-        defaultMessage: 'CSV Export',
-      }
-    );
 
     return [
       {
@@ -163,13 +163,14 @@ export const downloadCsvShareProvider = ({
         panel: {
           id: 'csvDownloadPanel',
           title: panelTitle,
-          content: openCsvLensModal,
+          onClick: openCsvModal,
         },
       },
     ];
   };
+
   return {
-    id: 'csv export',
+    id: 'csvDownload',
     getShareMenuItems,
   };
 };

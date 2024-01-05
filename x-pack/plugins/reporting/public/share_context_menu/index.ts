@@ -19,7 +19,7 @@ import type { ReportingAPIClient } from '../lib/reporting_api_client';
 export { reportingScreenshotShareProvider } from './register_pdf_png_reporting';
 
 export { ReportingModalContent } from './reporting_panel_content_lazy';
-export interface ExportPanelShareOpts {
+export interface ExportModalShareOpts {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   uiSettings: IUiSettingsClient;

@@ -22,9 +22,9 @@ export const reportingServiceFactory: CanvasReportingServiceFactory = ({
   const { reporting } = startPlugins;
 
   const reportingEnabled = () => ({
-    getReportingPanelPDFComponent: () => reporting?.components.ReportingPanelPDFV2 || null,
+    getReportingModalContent: () => reporting?.components.ReportingModalPDFV2 || null,
   });
-  const reportingDisabled = () => ({ getReportingPanelPDFComponent: () => null });
+  const reportingDisabled = () => ({ getReportingModalContent: () => null, getReportingAPIClient: () => null });
 
   if (!reporting) {
     // Reporting is not enabled

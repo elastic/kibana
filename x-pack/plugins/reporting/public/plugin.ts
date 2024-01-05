@@ -125,9 +125,10 @@ export class ReportingPublicPlugin
 
   private getContract(core?: CoreSetup) {
     if (core) {
+      const apiClient = this.getApiClient(core.http, core.uiSettings);
       this.contract = {
         usesUiCapabilities: () => this.config.roles?.enabled === false,
-        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
+        components: getSharedComponents(core, apiClient),
       };
     }
 

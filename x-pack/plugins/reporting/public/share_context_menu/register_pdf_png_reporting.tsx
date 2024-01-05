@@ -11,7 +11,7 @@ import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { isJobV2Params } from '../../common/job_utils';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
+import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { ReportingModalContent } from './screen_capture_panel_content_lazy';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
@@ -63,7 +63,7 @@ export const reportingScreenshotShareProvider = ({
   theme,
   overlays,
   i18nStart,
-}: ExportPanelShareOpts): ShareMenuProvider => {
+}: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -124,7 +124,7 @@ export const reportingScreenshotShareProvider = ({
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
 
-    const pngReportType = isV2Job ? 'pngV2' : 'png';
+    const pngReportType = 'pngV2';
     const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
 
     const openImageModal = () => {
@@ -133,11 +133,11 @@ export const reportingScreenshotShareProvider = ({
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType={pngReportType}
+            reportType={pngReportType || pdfReportType}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions,[pdfReportType, pngReportType])}
+            getJobParams={getJobParams(apiClient, jobProviderOptions,[pdfReportType , pngReportType])}
             isDirty={isDirty}
             onClose={() => {
               session.close();

@@ -23,7 +23,8 @@ export interface ReportingSetup {
   /**
    * A set of React components for displaying a Reporting share menu in an application
    */
-  components: ReportingPublicComponents;
+  components: ReportingPublicComponents
+  
 }
 
 /**

@@ -14,7 +14,7 @@ import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { checkLicense } from '../lib/license_check';
-import { ExportPanelShareOpts } from '.';
+import { ExportModalShareOpts } from '.';
 import { CsvModalContent } from './csv_export_modal';
 
 export const reportingCsvShareProvider = ({
@@ -27,7 +27,7 @@ export const reportingCsvShareProvider = ({
   theme,
   overlays,
   i18nStart,
-}: ExportPanelShareOpts): ShareMenuProvider => {
+}: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({ objectType, objectId, sharingData }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
