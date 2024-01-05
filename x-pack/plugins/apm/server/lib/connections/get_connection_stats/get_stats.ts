@@ -66,8 +66,8 @@ export const getStats = async ({
   return (
     response.aggregations?.connections.buckets.map((bucket) => {
       const sample = bucket.sample.top[0].metrics;
-      const serviceName = bucket.key[0] as string;
-      const dependencyName = bucket.key[1] as string;
+      const serviceName = bucket.key.serviceName as string;
+      const dependencyName = bucket.key.dependencyName as string;
 
       return {
         from: {
@@ -157,14 +157,22 @@ async function getConnectionStats({
       },
       aggs: {
         connections: {
-          multi_terms: {
+          composite: {
             size: MAX_ITEMS,
-            terms: asMutableArray([
+            sources: asMutableArray([
               {
-                field: SERVICE_NAME,
+                serviceName: {
+                  terms: {
+                    field: SERVICE_NAME,
+                  },
+                },
               },
               {
-                field: SPAN_DESTINATION_SERVICE_RESOURCE,
+                dependencyName: {
+                  terms: {
+                    field: SPAN_DESTINATION_SERVICE_RESOURCE,
+                  },
+                },
               },
             ] as const),
           },
