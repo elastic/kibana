@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { CodeEditorProps as Props } from '@kbn/code-editor';
+import { cssConf, cssLanguage } from '@kbn/monaco';
 
-import { CodeEditor } from '@kbn/code-editor';
-export { CodeEditor };
-
-// React.lazy requires default export
-// eslint-disable-next-line import/no-default-export
-export default CodeEditor;
+export { cssConf as languageConfiguration, cssLanguage as lexerRules };

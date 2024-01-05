@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @kbn/eslint/module_migration */
-import { conf, language } from 'monaco-editor/esm/vs/basic-languages/css/css';
-
-export { conf as languageConfiguration, language as lexerRules };
+// Monaco languages support
+declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
+declare module 'monaco-editor/esm/vs/basic-languages/css/css';
+declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';

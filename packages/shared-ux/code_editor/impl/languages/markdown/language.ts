@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { CodeEditor, type CodeEditorProps } from './code_editor';
+import { markdownConf, markdownLanguage } from '@kbn/monaco';
+
+export { markdownConf as languageConfiguration, markdownLanguage as lexerRules };

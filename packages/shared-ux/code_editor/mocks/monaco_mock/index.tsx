@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { useEffect, KeyboardEventHandler } from 'react';
+import { type MonacoEditorProps } from 'react-monaco-editor';
 import { monaco } from '@kbn/monaco';
 
 function createEditorInstance() {
@@ -15,8 +17,23 @@ function createEditorInstance() {
   let placeholderDiv: undefined | HTMLDivElement;
   let areSuggestionsVisible = false;
 
-  const editorInstance = {
-    // Mock monaco editor API
+  /**
+   * Mocks for monaco editor API
+   */
+  const editorInstanceMethods = {
+    focus: jest.fn(),
+    layout: jest.fn(),
+    applyFontInfo: jest.fn(),
+    executeEdits: jest.fn(),
+    removeContentWidget: jest.fn((widget: monaco.editor.IContentWidget) => {
+      placeholderDiv?.removeChild(widget.getDomNode());
+    }),
+    getValue: jest.fn(),
+    getModel: jest.fn(),
+    getDomNode: jest.fn(),
+    getPosition: jest.fn(),
+    getSelection: jest.fn(),
+    getContentHeight: jest.fn(),
     getContribution: jest.fn((id: string) => {
       if (id === 'editor.contrib.suggestController') {
         return {
@@ -33,19 +50,20 @@ function createEditorInstance() {
         };
       }
     }),
-    focus: jest.fn(),
-    onDidBlurEditorText: jest.fn(),
-    onKeyDown: jest.fn((listener) => {
-      keyDownListeners.push(listener);
-    }),
+    addCommand: jest.fn(),
     addContentWidget: jest.fn((widget: monaco.editor.IContentWidget) => {
       placeholderDiv?.appendChild(widget.getDomNode());
     }),
-    applyFontInfo: jest.fn(),
-    removeContentWidget: jest.fn((widget: monaco.editor.IContentWidget) => {
-      placeholderDiv?.removeChild(widget.getDomNode());
+    onKeyDown: jest.fn((listener) => {
+      keyDownListeners.push(listener);
     }),
-    getDomNode: jest.fn(),
+    onDidBlurEditorText: jest.fn(),
+    onDidChangeModelContent: jest.fn((cb) => cb()),
+    onDidFocusEditorText: jest.fn((cb) => cb()),
+    onDidContentSizeChange: jest.fn((cb) => cb()),
+    onDidBlurEditorWidget: () => ({
+      dispose: jest.fn(),
+    }),
     // Helpers for our tests
     __helpers__: {
       areSuggestionsVisible: () => areSuggestionsVisible,
@@ -58,7 +76,7 @@ function createEditorInstance() {
 
         // Close the suggestions when hitting the ESC key
         if (e.keyCode === monaco.KeyCode.Escape && areSuggestionsVisible) {
-          editorInstance.__helpers__.hideSuggestions();
+          editorInstanceMethods.__helpers__.hideSuggestions();
         }
       }) as KeyboardEventHandler,
       showSuggestions: () => {
@@ -72,50 +90,44 @@ function createEditorInstance() {
     },
   };
 
-  return editorInstance;
+  return editorInstanceMethods;
 }
 
-type MockedEditor = ReturnType<typeof createEditorInstance>;
+export const mockedEditorInstance = createEditorInstance();
 
-export const mockedEditorInstance: MockedEditor = createEditorInstance();
-
-// <MonacoEditor /> mock
-const mockMonacoEditor = ({
-  editorWillMount,
+export const MockedMonacoEditor = ({
   editorDidMount,
-}: Record<string, (...args: unknown[]) => void>) => {
-  editorWillMount(monaco);
+  editorWillMount,
+  onChange,
+  value,
+  ...rest
+}: MonacoEditorProps & {
+  ['data-test-subj']?: string;
+}) => {
+  editorWillMount?.(monaco);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    editorDidMount(mockedEditorInstance, monaco);
+    editorDidMount?.(
+      mockedEditorInstance as unknown as monaco.editor.IStandaloneCodeEditor,
+      monaco
+    );
   }, [editorDidMount]);
 
   return (
     <div>
       <div ref={mockedEditorInstance?.__helpers__.getPlaceholderRef} />
       <textarea
+        value={value ?? ''}
         onKeyDown={mockedEditorInstance?.__helpers__.onTextareaKeyDown}
-        data-test-subj="monacoEditorTextarea"
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+          onChange?.(e.target.value, {} as unknown as monaco.editor.IModelContentChangedEvent);
+        }}
+        {...rest}
+        /**
+         * place this after spreading props, so the fallback value is set
+         */
+        data-test-subj={rest['data-test-subj'] || 'monacoEditorTextarea'}
       />
     </div>
   );
 };
-
-jest.mock('react-monaco-editor', () => {
-  return function JestMockEditor() {
-    return mockMonacoEditor;
-  };
-});
-
-// Mock the htmlIdGenerator to generate predictable ids for snapshot tests
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    htmlIdGenerator: () => {
-      return () => '1234';
-    },
-  };
-});

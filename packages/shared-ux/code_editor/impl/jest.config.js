@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @kbn/eslint/module_migration */
-import { conf, language } from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
-
-export { conf as languageConfiguration, language as lexerRules };
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/shared-ux/code_editor'],
+};

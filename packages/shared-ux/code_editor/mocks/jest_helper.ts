@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/shared-ux/code_editor'],
-};
+import { MockedCodeEditor } from './code_editor_mock';
+
+jest.mock('@kbn/code-editor', () => {
+  const module = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...module,
+    CodeEditorField: MockedCodeEditor,
+    CodeEditor: MockedCodeEditor,
+  };
+});
