@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { EnhancedEmbeddableContext, EnhancedEmbeddable } from '../types';
+import { UiActionsActionDefinition as ActionDefinition, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { type HasDynamicActions, hasDynamicActions } from '@kbn/ui-actions-enhanced-plugin/public';
+import { type EmbeddableApiContext, ViewMode, apiPublishesViewMode } from '@kbn/presentation-publishing';
+import { EnhancedEmbeddable } from '../types';
 
 export const txtOneDrilldown = i18n.translate(
   'xpack.embeddableEnhanced.actions.panelNotifications.oneDrilldown',
@@ -27,30 +28,36 @@ export const txtManyDrilldowns = (count: number) =>
 
 export const ACTION_PANEL_NOTIFICATIONS = 'ACTION_PANEL_NOTIFICATIONS';
 
+export type PanelNotificationActionApi = PublishesViewMode & HasDynamicActions;
+
+const isApiCompatible = (api: unknown | null): api is PanelNotificationActionApi =>
+  Boolean(apiPublishesViewMode(api) && hasDynamicActions(api));
+
 /**
  * This action renders in "edit" mode number of events (dynamic action) a panel
  * has attached to it.
  */
-export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbeddableContext> {
+export class PanelNotificationsAction implements ActionDefinition<EmbeddableApiContext> {
   public readonly id = ACTION_PANEL_NOTIFICATIONS;
   public type = ACTION_PANEL_NOTIFICATIONS;
 
-  private getEventCount(embeddable: EnhancedEmbeddable): number {
+  private getEventCount(embeddable: PanelNotificationActionApi): number {
     return embeddable.enhancements.dynamicActions.state.get().events.length;
   }
 
-  public getIconType = ({ embeddable }: EnhancedEmbeddableContext) => '';
+  public getIconType = ({ embeddable }: EmbeddableApiContext) => '';
 
-  public readonly getDisplayName = ({ embeddable }: EnhancedEmbeddableContext) => {
+  public readonly getDisplayName = ({ embeddable }: EmbeddableApiContext) => {
     return String(this.getEventCount(embeddable));
   };
 
-  public couldBecomeCompatible({ embeddable }: EnhancedEmbeddableContext) {
+  /*
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
     return true;
   }
 
   public subscribeToCompatibilityChanges = (
-    { embeddable }: EnhancedEmbeddableContext,
+    { embeddable }: EmbeddableApiContext,
     onChange: (isCompatible: boolean, action: PanelNotificationsAction) => void
   ) => {
     // There is no notification for when a dynamic action is added or removed, so we subscribe to the embeddable root instead as a proxy.
@@ -63,15 +70,19 @@ export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbedd
           this
         );
       });
-  };
+  };*/
 
-  public readonly getDisplayNameTooltip = ({ embeddable }: EnhancedEmbeddableContext) => {
+  public readonly getDisplayNameTooltip = ({ embeddable }: EmbeddableApiContext) => {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const count = this.getEventCount(embeddable);
     return !count ? '' : count === 1 ? txtOneDrilldown : txtManyDrilldowns(count);
   };
 
-  public readonly isCompatible = async ({ embeddable }: EnhancedEmbeddableContext) => {
-    if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
+  public readonly isCompatible = async ({ embeddable }: EmbeddableApiContext) => {
+    if (!isApiCompatible(embeddable)) return false;
+
+    if (embeddable.viewMode.value !== 'edit') return false;
+
     return this.getEventCount(embeddable) > 0;
   };
 

@@ -9,6 +9,11 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { AdvancedUiActionsPublicPlugin } from './plugin';
 
+export {
+  type HasDynamicActions,
+  hasDynamicActions,
+} from './has_dynamic_actions';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new AdvancedUiActionsPublicPlugin(initializerContext);
 }
