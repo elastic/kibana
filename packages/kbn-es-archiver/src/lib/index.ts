@@ -9,7 +9,7 @@
 export {
   createIndexDocRecordsStream,
   createGenerateDocRecordsStream,
-  type PerfOptions,
+  type LoadActionPerfOptions,
 } from './docs';
 
 export {
