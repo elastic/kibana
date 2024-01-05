@@ -71,6 +71,11 @@ export const useDiscoverInTimelineActions = (
             savedSearchId: data,
           })
         );
+        dispatch(
+          timelineActions.endTimelineSaving({
+            id: TimelineId.active,
+          })
+        );
       }
       queryClient.invalidateQueries({ queryKey: ['savedSearchById', savedSearchId] });
     },
@@ -152,7 +157,6 @@ export const useDiscoverInTimelineActions = (
       function onError(error: Error) {
         addError(error, { title: DISCOVER_SEARCH_SAVE_ERROR_TITLE });
       }
-
       try {
         const id = await saveSavedSearch({
           savedSearch,
@@ -213,7 +217,7 @@ export const useDiscoverInTimelineActions = (
           });
 
           if (!response || !response?.id) {
-            throw new Error('Unknown Error occured');
+            // throw new Error('Unknown Error occured');
           } else if (!savedSearchId) {
             dispatch(
               timelineActions.updateSavedSearchId({
