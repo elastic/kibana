@@ -13,6 +13,7 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { assistantFeatures } from '@kbn/elastic-assistant-common';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { updatePromptContexts } from './helpers';
 import type {
@@ -296,13 +297,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   );
 
   // Fetch assistant capabilities
-  // TODO: Where are constants going these days, server/common, or kbn-elastic-assistant-common pkg?
   const { data: capabilities } = useCapabilities({ http, toasts });
   const { assistantModelEvaluation: modelEvaluatorEnabled, assistantStreamingEnabled } =
-    capabilities ?? {
-      assistantModelEvaluation: false,
-      assistantStreamingEnabled: false,
-    };
+    capabilities ?? assistantFeatures;
 
   const value = useMemo(
     () => ({
