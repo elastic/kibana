@@ -27,7 +27,6 @@
       "spaces"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "kibanaUtils",
       "kibanaReact"
     ]
