@@ -198,7 +198,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
               </EuiTitle>
               <EuiSpacer size="s" />
               <FormattedMessage
-                defaultMessage="Look for anomalies in the event rate of a category."
+                defaultMessage="Look for unusually high counts of a category in the event rate."
                 id="xpack.ml.newJobFromPatternAnalysisFlyout.highCount.description"
               />
 
