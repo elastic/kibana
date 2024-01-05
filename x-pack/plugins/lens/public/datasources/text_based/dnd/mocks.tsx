@@ -224,3 +224,28 @@ export const defaultProps = {
   ],
   dropType: 'duplicate_compatible',
 } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
+
+export const defaultPropsWithExtraColumn = {
+  ...defaultProps,
+  state: {
+    ...defaultProps.state,
+    layers: {
+      ...defaultProps.state.layers,
+      first: {
+        ...defaultProps.state.layers.first,
+        columns: [
+          column1,
+          column2,
+          column3,
+          {
+            columnId: 'currency',
+            fieldName: 'currency',
+            meta: {
+              type: 'string',
+            },
+          },
+        ],
+      },
+    },
+  },
+};

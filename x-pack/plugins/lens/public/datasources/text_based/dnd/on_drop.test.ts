@@ -7,7 +7,14 @@
 
 import { DropType } from '@kbn/dom-drag-drop';
 import { onDrop } from './on_drop';
-import { column1, column2, column3, emptyDimensionTarget, defaultProps } from './mocks';
+import {
+  column1,
+  column2,
+  column3,
+  emptyDimensionTarget,
+  defaultProps,
+  defaultPropsWithExtraColumn,
+} from './mocks';
 import { DatasourceDimensionDropHandlerProps } from '../../../types';
 import { TextBasedPrivateState } from '../types';
 
@@ -74,7 +81,7 @@ describe('onDrop', () => {
   });
   it('should add the column when dropping a field', () => {
     const props = {
-      ...defaultProps,
+      ...defaultPropsWithExtraColumn,
       source: {
         field: 'currency',
         id: 'currency',
@@ -104,6 +111,13 @@ describe('onDrop', () => {
       column1,
       column2,
       column3,
+      {
+        columnId: 'currency',
+        fieldName: 'currency',
+        meta: {
+          type: 'string',
+        },
+      },
       { columnId: 'empty', fieldName: 'currency', meta: { type: 'string' } },
     ];
     expect(onDrop(props)).toEqual(
@@ -120,10 +134,10 @@ describe('onDrop', () => {
     const props = {
       ...defaultProps,
       source: {
-        field: 'currency',
-        id: 'currency',
+        field: 'day_of_week_i',
+        id: 'columnId2',
         humanData: {
-          label: 'currency',
+          label: 'day_of_week_i',
         },
       },
       dropType: 'field_replace' as DropType,
@@ -131,7 +145,7 @@ describe('onDrop', () => {
     const expectedColumns = [
       column1,
       column2,
-      { columnId: 'columnId3', fieldName: 'currency', meta: { type: 'string' } },
+      { columnId: 'columnId3', fieldName: 'day_of_week_i', meta: { type: 'number' } },
     ];
     expect(onDrop(props)).toEqual(
       expect.objectContaining({
