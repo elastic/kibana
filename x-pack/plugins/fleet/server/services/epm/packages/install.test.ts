@@ -77,7 +77,12 @@ jest.mock('../archive', () => {
     generatePackageInfoFromArchiveBuffer: jest.fn(() =>
       Promise.resolve({ packageInfo: { name: 'apache', version: '1.3.0' } })
     ),
-    unpackBufferToCache: jest.fn(),
+    unpackBufferToAssetsMap: jest.fn(() =>
+      Promise.resolve({
+        assetsMap: new Map(),
+        paths: [],
+      })
+    ),
     setPackageInfo: jest.fn(),
     deleteVerificationResult: jest.fn(),
   };
@@ -553,7 +558,9 @@ describe('handleInstallPackageFailure', () => {
     expect(install._installPackage).toBeCalledTimes(1);
     expect(install._installPackage).toBeCalledWith(
       expect.objectContaining({
-        packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+        packageInstallContext: expect.objectContaining({
+          packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+        }),
       })
     );
   });
@@ -597,7 +604,9 @@ describe('handleInstallPackageFailure', () => {
     expect(install._installPackage).toBeCalledTimes(1);
     expect(install._installPackage).toBeCalledWith(
       expect.objectContaining({
-        packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+        packageInstallContext: expect.objectContaining({
+          packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+        }),
       })
     );
   });

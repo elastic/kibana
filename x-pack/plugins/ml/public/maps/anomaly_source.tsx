@@ -388,4 +388,8 @@ export class AnomalySource implements IVectorSource {
   async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
     return {};
   }
+
+  getInspectorRequestIds() {
+    return [];
+  }
 }

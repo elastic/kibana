@@ -19,8 +19,8 @@ import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { asBigNumber, asInteger } from '../../../../common/utils/formatters';
 import type { ApmEvent } from '../../../../server/routes/diagnostics/bundle/get_apm_events';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useDataViewId } from '../../../hooks/use_data_view_id';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useDiagnosticsContext } from './context/use_diagnostics';
@@ -28,7 +28,7 @@ import { useDiagnosticsContext } from './context/use_diagnostics';
 export function DiagnosticsApmDocuments() {
   const { diagnosticsBundle, isImported } = useDiagnosticsContext();
   const { discover } = useKibana<ApmPluginStartDeps>().services;
-  const dataViewId = useDataViewId();
+  const { dataView } = useAdHocApmDataView();
 
   const [sortField, setSortField] = useState<keyof ApmEvent>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -94,30 +94,32 @@ export function DiagnosticsApmDocuments() {
     },
     {
       name: 'Actions',
-      actions: [
-        {
-          name: 'View',
-          description: 'View in Discover',
-          type: 'icon',
-          icon: 'discoverApp',
-          onClick: async (item) => {
-            await discover?.locator?.navigate({
-              query: {
-                language: 'kuery',
-                query: item.kuery,
+      actions: dataView
+        ? [
+            {
+              name: 'View',
+              description: 'View in Discover',
+              type: 'icon',
+              icon: 'discoverApp',
+              onClick: async (item) => {
+                await discover?.locator?.navigate({
+                  query: {
+                    language: 'kuery',
+                    query: item.kuery,
+                  },
+                  dataViewId: dataView?.id ?? '',
+                  timeRange:
+                    rangeTo && rangeFrom
+                      ? {
+                          to: rangeTo,
+                          from: rangeFrom,
+                        }
+                      : undefined,
+                });
               },
-              dataViewId,
-              timeRange:
-                rangeTo && rangeFrom
-                  ? {
-                      to: rangeTo,
-                      from: rangeFrom,
-                    }
-                  : undefined,
-            });
-          },
-        },
-      ],
+            },
+          ]
+        : [],
     },
   ];
 
