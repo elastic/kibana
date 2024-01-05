@@ -14,6 +14,7 @@ import type {
 } from '@kbn/securitysolution-data-table';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+import { assigneesColumn } from '../../../detections/configurations/security_solution_detections/columns';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -195,6 +196,33 @@ export const migrateColumnLabelToDisplayAsText = (
     : {}),
 });
 
+/**
+ * Adds missing columns to table data model
+ */
+export const addMissingColumnsToSecurityDataTable = (
+  dataTableState: DataTableState['dataTable']['tableById']
+) => {
+  for (const [_, tableModel] of Object.entries(dataTableState)) {
+    // We added a new base column for "Assignees" in 8.12
+    // In order to show correct custom header label after user upgrades to 8.12 we need to make sure the appropriate specs are in the table model.
+    const columns = tableModel.columns;
+    if (Array.isArray(columns)) {
+      const hasAssigneesColumn = columns.findIndex((col) => col.id === assigneesColumn.id) !== -1;
+      if (!hasAssigneesColumn) {
+        tableModel.columns.push(assigneesColumn);
+      }
+    }
+    const defaultColumns = tableModel.defaultColumns;
+    if (defaultColumns) {
+      const hasAssigneesColumn =
+        defaultColumns.findIndex((col) => col.id === assigneesColumn.id) !== -1;
+      if (!hasAssigneesColumn) {
+        tableModel.defaultColumns.push(assigneesColumn);
+      }
+    }
+  }
+};
+
 export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdLiteral[]) => {
   let allDataTables = storage.get(LOCAL_STORAGE_TABLE_KEY);
   const legacyTimelineTables = storage.get(LOCAL_STORAGE_TIMELINE_KEY_LEGACY);
@@ -209,6 +237,7 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
 
   migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
   migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+  addMissingColumnsToSecurityDataTable(allDataTables);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];
