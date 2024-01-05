@@ -67,6 +67,7 @@ test('generates heatmap chart config', async () => {
       formulaAPI: {} as any,
     }
   );
+
   expect(result).toMatchInlineSnapshot(`
     Object {
       "references": Array [
