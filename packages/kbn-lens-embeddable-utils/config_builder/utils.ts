@@ -34,6 +34,11 @@ import {
   LensESQLDataset,
 } from './types';
 
+type DataSourceStateLayer =
+  | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
+  | PersistedIndexPatternLayer
+  | TextBasedPersistedState['layers'][0];
+
 export const getDefaultReferences = (
   index: string,
   dataLayerId: string
@@ -77,20 +82,14 @@ export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
   return adHocDataViews;
 };
 
-export function isFormulaValue(value: unknown): value is FormulaValueConfig {
-  if (value && typeof value === 'object' && 'formula' in value) {
-    return true;
-  }
-  return false;
+export function isFormulaValue(value: string | FormulaValueConfig): value is FormulaValueConfig {
+  return typeof value === 'object' && 'formula' in value;
 }
 
-export function isPersistedStateLayer(
-  layer: unknown
+export function isSingleLayer(
+  layer: DataSourceStateLayer
 ): layer is PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] {
-  if (layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer)) {
-    return true;
-  }
-  return false;
+  return layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer);
 }
 
 export function isFormulaDataset(dataset?: LensDataset) {
@@ -154,15 +153,7 @@ function buildDatasourceStatesLayer(
     dataView: DataView
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
-): [
-  'textBased' | 'formBased',
-  (
-    | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
-    | PersistedIndexPatternLayer
-    | TextBasedPersistedState['layers'][0]
-    | undefined
-  )
-] {
+): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
   function buildValueLayer(config: LensBaseLayer): TextBasedPersistedState['layers'][0] {
     const table = dataset as LensDatatableDataset;
     const newLayer = {
@@ -245,7 +236,7 @@ export const buildDatasourceStates = async (
         layers = {
           ...layers,
           [type]: {
-            layers: isPersistedStateLayer(layerConfig)
+            layers: isSingleLayer(layerConfig)
               ? { ...layers[type]?.layers, [layerId]: layerConfig }
               : // metric chart can return 2 layers (one for the metric and one for the trendline)
                 { ...layerConfig },
