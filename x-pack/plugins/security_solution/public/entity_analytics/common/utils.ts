@@ -8,6 +8,7 @@
 import { euiLightVars } from '@kbn/ui-theme';
 import { RiskSeverity } from '../../../common/search_strategy';
 import { SEVERITY_COLOR } from '../../overview/components/detection_response/utils';
+export { RISK_LEVEL_RANGES as RISK_SCORE_RANGES } from '../../../common/entity_analytics/risk_engine';
 
 export const SEVERITY_UI_SORT_ORDER = [
   RiskSeverity.unknown,
@@ -23,14 +24,6 @@ export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
   [RiskSeverity.moderate]: SEVERITY_COLOR.medium,
   [RiskSeverity.high]: SEVERITY_COLOR.high,
   [RiskSeverity.critical]: SEVERITY_COLOR.critical,
-};
-
-export const RISK_SCORE_RANGES = {
-  [RiskSeverity.unknown]: { start: 0, stop: 20 },
-  [RiskSeverity.low]: { start: 20, stop: 40 },
-  [RiskSeverity.moderate]: { start: 40, stop: 70 },
-  [RiskSeverity.high]: { start: 70, stop: 90 },
-  [RiskSeverity.critical]: { start: 90, stop: 100 },
 };
 
 type SnakeToCamelCaseString<S extends string> = S extends `${infer T}_${infer U}`
