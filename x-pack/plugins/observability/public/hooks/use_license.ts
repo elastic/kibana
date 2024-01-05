@@ -25,7 +25,7 @@ export const useLicense = (): UseLicenseReturnValue => {
     getLicense: () => license,
     hasAtLeast: useCallback(
       (level: LicenseType) => {
-        if (!license) return false;
+        if (!license) return true;
 
         return !!license && license.isAvailable && license.isActive && license.hasAtLeast(level);
       },
