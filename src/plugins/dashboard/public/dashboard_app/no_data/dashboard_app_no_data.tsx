@@ -24,6 +24,7 @@ export const DashboardAppNoDataPage = ({
     documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink },
     customBranding,
     noDataPage,
+    share,
   } = pluginServices.getServices();
 
   const analyticsServices = {
@@ -43,6 +44,7 @@ export const DashboardAppNoDataPage = ({
     dataViews,
     dataViewEditor,
     noDataPage,
+    share: share.url ? { url: share.url } : undefined,
   };
 
   const importPromise = import('@kbn/shared-ux-page-analytics-no-data');

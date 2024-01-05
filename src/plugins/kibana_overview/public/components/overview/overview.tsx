@@ -197,6 +197,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         },
       },
       dataViewEditor,
+      share,
     };
 
     const importPromise = import('@kbn/shared-ux-page-analytics-no-data');

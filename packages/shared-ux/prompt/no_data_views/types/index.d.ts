@@ -7,6 +7,8 @@
  */
 
 import { EuiEmptyPromptProps } from '@elastic/eui';
+import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 /**
  * TODO: `DataView` is a class exported by `src/plugins/data_views/public`.  Since this service
@@ -40,6 +42,8 @@ export interface NoDataViewsPromptServices {
   openDataViewEditor: (options: DataViewEditorOptions) => () => void;
   /** A link to information about Data Views in Kibana */
   dataViewsDocLink: string;
+  /** Get a handler for trying ES|QL */
+  getOnTryEsqlHandler: () => Promise<(() => void) | undefined>;
 }
 /**
  * Kibana-specific service types.
@@ -53,6 +57,9 @@ export interface NoDataViewsPromptKibanaDependencies {
         };
       };
     };
+    application: {
+      navigateToApp: (appId: string, options?: { path?: string; state?: unknown }) => void;
+    };
   };
   dataViewEditor: {
     userPermissions: {
@@ -60,23 +67,30 @@ export interface NoDataViewsPromptKibanaDependencies {
     };
     openEditor: (options: DataViewEditorOptions) => () => void;
   };
+  share?: {
+    url: {
+      locators: ILocatorClient;
+    };
+  };
 }
 
 export interface NoDataViewsPromptComponentProps {
   /** True if the user has permission to create a data view, false otherwise. */
   canCreateNewDataView: boolean;
-  /** Click handler for create button. **/
-  onClickCreate?: () => void;
   /** Link to documentation on data views. */
   dataViewsDocLink?: string;
   /** The background color of the prompt; defaults to `plain`. */
   emptyPromptColor?: EuiEmptyPromptProps['color'];
+  /** Click handler for create button. **/
+  onClickCreate?: () => void;
+  /** Handler for someone wanting to try ES|QL. */
+  onTryEsql?: () => void;
 }
 
 // TODO: https://github.com/elastic/kibana/issues/127695
 export interface NoDataViewsPromptProps {
-  /** Handler for successfully creating a new data view. */
-  onDataViewCreated: (dataView: unknown) => void;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
+  /** Handler for successfully creating a new data view. */
+  onDataViewCreated: (dataView: unknown) => void;
 }

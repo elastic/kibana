@@ -16,7 +16,7 @@ import {
 type ServiceArguments = Pick<
   NoDataViewsPromptServices,
   'canCreateNewDataView' | 'dataViewsDocLink'
->;
+> & { canTryEsql: boolean };
 
 export type Params = Record<keyof ServiceArguments, any>;
 
@@ -36,6 +36,10 @@ export class StorybookMock extends AbstractStorybookMock<
       options: ['some/link', undefined],
       control: { type: 'radio' },
     },
+    canTryEsql: {
+      control: 'boolean',
+      defaultValue: true,
+    },
   };
   dependencies = [];
 
@@ -46,7 +50,7 @@ export class StorybookMock extends AbstractStorybookMock<
   }
 
   getServices(params: Params): NoDataViewsPromptServices {
-    const { canCreateNewDataView, dataViewsDocLink } = params;
+    const { canCreateNewDataView, dataViewsDocLink, canTryEsql } = params;
 
     return {
       canCreateNewDataView,
@@ -54,6 +58,13 @@ export class StorybookMock extends AbstractStorybookMock<
       openDataViewEditor: (options) => {
         action('openDataViewEditor')(options);
         return () => {};
+      },
+      getOnTryEsqlHandler: async () => {
+        if (canTryEsql) {
+          return () => {
+            action('onTryEsql')();
+          };
+        }
       },
     };
   }

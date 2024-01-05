@@ -19,9 +19,10 @@ import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { isOfEsqlQueryType } from '@kbn/es-query';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
-import { MainHistoryLocationState } from '../../../common/locator';
+import { MainHistoryLocationState } from '../../../common';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
@@ -66,6 +67,7 @@ export function DiscoverMainRoute({
     toastNotifications,
     http: { basePath },
     dataViewEditor,
+    share,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
@@ -112,6 +114,11 @@ export function DiscoverMainRoute({
       if (savedSearchId) {
         return true; // bypass NoData screen
       }
+
+      if (isOfEsqlQueryType(stateContainer.appState.getState().query)) {
+        return true;
+      }
+
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
         .catch(() => false);
@@ -140,7 +147,7 @@ export function DiscoverMainRoute({
       setError(e);
       return false;
     }
-  }, [data.dataViews, savedSearchId]);
+  }, [data.dataViews, savedSearchId, stateContainer.appState]);
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
@@ -266,10 +273,11 @@ export function DiscoverMainRoute({
           hasUserDataView: () => Promise.resolve(hasUserDataView),
         },
       },
+      share,
       dataViewEditor,
       noDataPage: services.noDataPage,
     }),
-    [core, data.dataViews, dataViewEditor, hasESData, hasUserDataView, services.noDataPage]
+    [core, data.dataViews, dataViewEditor, hasESData, hasUserDataView, services.noDataPage, share]
   );
 
   const loadingIndicator = useMemo(

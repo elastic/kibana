@@ -68,7 +68,11 @@ import {
   DiscoverSingleDocLocator,
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
+import {
+  DiscoverAppLocator,
+  DiscoverAppLocatorDefinition,
+  DiscoverEsqlLocatorDefinition,
+} from '../common';
 import type { RegisterCustomizationProfile } from './customizations';
 import {
   createRegisterCustomizationProfile,
@@ -233,6 +237,10 @@ export class DiscoverPlugin
       );
       this.singleDocLocator = plugins.share.url.locators.create(
         new DiscoverSingleDocLocatorDefinition()
+      );
+
+      plugins.share.url.locators.create(
+        new DiscoverEsqlLocatorDefinition({ discoverAppLocator: this.locator })
       );
     }
 

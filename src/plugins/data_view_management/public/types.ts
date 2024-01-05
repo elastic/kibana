@@ -28,6 +28,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IndexPatternManagementStart } from '.';
 
 export interface IndexPatternManagmentContext {
@@ -42,12 +43,14 @@ export interface IndexPatternManagmentContext {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
   fieldFormats: FieldFormatsStart;
+  share?: SharePluginStart;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;

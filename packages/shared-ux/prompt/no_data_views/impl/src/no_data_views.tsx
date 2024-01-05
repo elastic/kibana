@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   NoDataViewsPromptServices,
@@ -28,8 +28,17 @@ export const NoDataViewsPrompt = ({
   onDataViewCreated,
   allowAdHocDataView = false,
 }: NoDataViewsPromptProps) => {
-  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink } = useServices();
+  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, getOnTryEsqlHandler } =
+    useServices();
+  const [onTryEsql, setOnTryEsql] = useState<(() => void) | undefined>();
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
+
+  useEffect(() => {
+    (async () => {
+      const handler = await getOnTryEsqlHandler();
+      setOnTryEsql(() => handler);
+    })();
+  }, [getOnTryEsqlHandler]);
 
   useEffect(() => {
     const cleanup = () => {
@@ -72,6 +81,8 @@ export const NoDataViewsPrompt = ({
   ]);
 
   return (
-    <NoDataViewsPromptComponent {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink }} />
+    <NoDataViewsPromptComponent
+      {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink, onTryEsql }}
+    />
   );
 };

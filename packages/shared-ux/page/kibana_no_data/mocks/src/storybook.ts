@@ -25,7 +25,7 @@ import {
   NoDataCardStorybookParams,
 } from '@kbn/shared-ux-card-no-data-mocks';
 
-type PropArguments = Pick<NoDataPageProps, 'solution' | 'logo'>;
+type PropArguments = Pick<NoDataPageProps, 'solution' | 'logo' | 'esqlLink'>;
 type ServiceArguments = Pick<KibanaNoDataPageServices, 'hasUserDataView' | 'hasESData'>;
 
 export type Params = ArgumentParams<PropArguments, ServiceArguments> &
@@ -51,6 +51,10 @@ export class StorybookMock extends AbstractStorybookMock<
       options: ['logoElastic', 'logoKibana', 'logoCloud', undefined],
       defaultValue: undefined,
     },
+    esqlLink: {
+      control: 'text',
+      defaultValue: 'elastic.co',
+    },
   };
 
   serviceArguments = {
@@ -67,7 +71,7 @@ export class StorybookMock extends AbstractStorybookMock<
   dependencies = [noDataViewsMock, noDataCardMock];
 
   getProps(params: Params) {
-    const { logo, solution } = params;
+    const { logo, solution, esqlLink } = params;
     const noDataConfig = {
       solution: solution || 'Analytics',
       logo: logo || 'logoKibana',
@@ -77,12 +81,14 @@ export class StorybookMock extends AbstractStorybookMock<
         },
       },
       docsLink: 'http://docs.elastic.dev',
+      esqlLink: esqlLink || 'http://elastic.co',
     };
 
     return {
       showPlainSpinner: false,
       noDataConfig,
       onDataViewCreated: action('onDataViewCreated'),
+      esqlLink,
     };
   }
 

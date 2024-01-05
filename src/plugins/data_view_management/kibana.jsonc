@@ -20,7 +20,8 @@
     ],
     "optionalPlugins": [
       "noDataPage",
-      "spaces"
+      "spaces",
+      "share"
     ],
     "requiredBundles": [
       "kibanaReact",

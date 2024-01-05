@@ -7,6 +7,11 @@
  */
 
 import React, { FC, useContext } from 'react';
+
+// TODO: clintandrewhall - I would love to see these moved to a `@kbn/discover-locators` package.
+import type { DiscoverEsqlLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+
 import type {
   NoDataViewsPromptServices,
   NoDataViewsPromptKibanaDependencies,
@@ -23,11 +28,17 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
 }) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
-  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } = services;
+  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor, getOnTryEsqlHandler } =
+    services;
 
   return (
     <NoDataViewsPromptContext.Provider
-      value={{ canCreateNewDataView, dataViewsDocLink, openDataViewEditor }}
+      value={{
+        canCreateNewDataView,
+        dataViewsDocLink,
+        openDataViewEditor,
+        getOnTryEsqlHandler,
+      }}
     >
       {children}
     </NoDataViewsPromptContext.Provider>
@@ -41,12 +52,36 @@ export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaDependen
   children,
   ...services
 }) => {
+  const {
+    share,
+    coreStart: {
+      application: { navigateToApp },
+    },
+  } = services;
+
+  const getOnTryEsqlHandler = async () => {
+    if (!share) {
+      return;
+    }
+
+    const location = await share.url.locators
+      .get<DiscoverEsqlLocatorParams>(DISCOVER_ESQL_LOCATOR)
+      ?.getLocation({});
+
+    if (!location) {
+      return;
+    }
+
+    return () => navigateToApp(location.app, { path: location.path, state: location.state });
+  };
+
   return (
     <NoDataViewsPromptContext.Provider
       value={{
         dataViewsDocLink: services.coreStart.docLinks.links.indexPatterns?.introduction,
         canCreateNewDataView: services.dataViewEditor.userPermissions.editDataView(),
         openDataViewEditor: services.dataViewEditor.openEditor,
+        getOnTryEsqlHandler,
       }}
     >
       {children}
