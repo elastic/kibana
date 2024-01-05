@@ -126,17 +126,17 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-    const items: TableItem[] = useMemo(
-      () => [
-        {
-          category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
-            defaultMessage: 'Alerts',
-          }),
-          count: alertsData?.length ?? 0,
-        },
-      ],
-      [alertsData?.length]
-    );
+  const items: TableItem[] = useMemo(
+    () => [
+      {
+        category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
+          defaultMessage: 'Alerts',
+        }),
+        count: alertsData?.length ?? 0,
+      },
+    ],
+    [alertsData?.length]
+  );
 
   return (
     <EuiAccordion

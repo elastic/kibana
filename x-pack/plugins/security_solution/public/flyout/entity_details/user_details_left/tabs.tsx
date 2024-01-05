@@ -18,13 +18,13 @@ import type {
 import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
 import { RightPanelProvider } from '../../document_details/right/context';
-import type { UserRiskScore, HostRiskScore } from '../../../../common/search_strategy';
+import type { UserRiskScore } from '../../../../common/search_strategy';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 export const useTabs = (
   managedUser: ManagedUserHits,
-  riskScore: UserRiskScore | HostRiskScore
+  riskScore: UserRiskScore
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];

@@ -79,17 +79,12 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
       openLeftPanel({
         id: HostDetailsPanelKey,
         params: {
-          riskInputs: {
-            alertIds: hostRiskData?.host.risk.inputs?.map(({ id }) => id) ?? [],
-            host: {
-              name: hostName,
-            },
-          },
+          riskScore: hostRiskData,
           path: tab ? { tab } : undefined,
         },
       });
     },
-    [openLeftPanel, hostRiskData?.host.risk.inputs, hostName]
+    [openLeftPanel, hostRiskData]
   );
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);

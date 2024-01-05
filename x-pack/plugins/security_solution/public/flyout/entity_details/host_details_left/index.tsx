@@ -13,13 +13,10 @@ import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
 } from '../shared/components/left_panel/left_panel_header';
-
-interface RiskInputsParam {
-  alertIds: string[];
-}
+import type { HostRiskScore } from '../../../../common/search_strategy';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
-  riskInputs: RiskInputsParam;
+  riskScore: HostRiskScore;
 }
 export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'host_details';
@@ -27,15 +24,15 @@ export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const HostDetailsPanelKey: HostDetailsExpandableFlyoutProps['key'] = 'host_details';
 
-export const HostDetailsPanel = ({ riskInputs }: HostDetailsPanelProps) => {
+export const HostDetailsPanel = ({ riskScore }: HostDetailsPanelProps) => {
   // Temporary implementation while Host details left panel don't have Asset tabs
   const [tabs, selectedTabId, setSelectedTabId] = useMemo(() => {
     return [
-      riskInputs.alertIds.length > 0 ? [getRiskInputTab(riskInputs.alertIds)] : [],
+      riskScore ? [getRiskInputTab(riskScore)] : [],
       EntityDetailsLeftPanelTab.RISK_INPUTS,
       () => {},
     ];
-  }, [riskInputs.alertIds]);
+  }, [riskScore]);
 
   return (
     <>
