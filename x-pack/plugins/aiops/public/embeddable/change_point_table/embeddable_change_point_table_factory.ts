@@ -13,19 +13,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { EmbeddableChangePointChartInput } from '../types';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../../common/constants';
+import { EMBEDDABLE_CHANGE_POINT_TABLE_TYPE } from '../../../common/constants';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
-import { EmbeddableChangePointChart } from './embeddable_change_point_chart';
+import { EmbeddableChangePointTable } from './embeddable_change_point_table';
+import { EmbeddableChangePointChartInput } from '../types';
 
 export interface EmbeddableChangePointChartStartServices {
   data: DataPublicPluginStart;
 }
 
-export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
+export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_TABLE_TYPE;
 
-export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefinition {
-  public readonly type = EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
+export class EmbeddableChangePointTableFactory implements EmbeddableFactoryDefinition {
+  public readonly type = EMBEDDABLE_CHANGE_POINT_TABLE_TYPE;
 
   public readonly grouping = [
     {
@@ -48,7 +48,7 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
 
   getDisplayName() {
     return i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
-      defaultMessage: 'Change point detection chart',
+      defaultMessage: 'Change point detection table',
     });
   }
 
@@ -71,10 +71,10 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
     try {
       const [
         { i18n: i18nService, theme, http, uiSettings, notifications },
-        { lens, data, usageCollection },
+        { lens, data, usageCollection, fieldFormats },
       ] = await this.getStartServices();
 
-      return new EmbeddableChangePointChart(
+      return new EmbeddableChangePointTable(
         {
           theme,
           http,
@@ -84,6 +84,7 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
           notifications,
           lens,
           usageCollection,
+          fieldFormats,
         },
         input,
         parent

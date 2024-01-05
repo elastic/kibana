@@ -9,37 +9,26 @@ import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { Embeddable as AbstractEmbeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
-import { type CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { pick } from 'lodash';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import {
+  EmbeddableChangePointChartDeps,
+  EmbeddableChangePointChartInput,
+  EmbeddableChangePointChartOutput,
+} from '../types';
 import { EmbeddableInputTracker } from '../embeddable_input_tracker';
-import { EmbeddableChangePointChartInput, EmbeddableChangePointChartOutput } from '../types';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE, EMBEDDABLE_ORIGIN } from '../../../common/constants';
+import { EMBEDDABLE_CHANGE_POINT_TABLE_TYPE, EMBEDDABLE_ORIGIN } from '../../../common/constants';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 
-export interface EmbeddableChangePointChartDeps {
-  theme: ThemeServiceStart;
-  data: DataPublicPluginStart;
-  uiSettings: IUiSettingsClient;
-  http: CoreStart['http'];
-  notifications: CoreStart['notifications'];
-  i18n: CoreStart['i18n'];
-  lens: LensPublicStart;
-  usageCollection: UsageCollectionSetup;
-}
+export type IEmbeddableChangePointChart = typeof EmbeddableChangePointTable;
 
-export type IEmbeddableChangePointChart = typeof EmbeddableChangePointChart;
-
-export class EmbeddableChangePointChart extends AbstractEmbeddable<
+export class EmbeddableChangePointTable extends AbstractEmbeddable<
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput
 > {
-  public readonly type = EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
+  public readonly type = EMBEDDABLE_CHANGE_POINT_TABLE_TYPE;
 
   private reload$ = new Subject<number>();
 
@@ -108,7 +97,15 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     const I18nContext = this.deps.i18n.Context;
 
     const datePickerDeps = {
-      ...pick(this.deps, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+      ...pick(this.deps, [
+        'data',
+        'http',
+        'notifications',
+        'theme',
+        'uiSettings',
+        'i18n',
+        'fieldFormats',
+      ]),
       uiSettingsKeys: UI_SETTINGS,
     };
 

@@ -8,12 +8,26 @@
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
-import { EmbeddableChangePointChartFactory } from './change_point_chart/embeddable_change_point_chart_factory';
+import { EmbeddableChangePointChartFactory } from './change_point_chart';
+import { EmbeddableChangePointTableFactory } from './change_point_table';
 
 export const registerEmbeddables = (
   core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
   embeddable: EmbeddableSetup
 ) => {
-  const factory = new EmbeddableChangePointChartFactory(core.getStartServices);
-  embeddable.registerEmbeddableFactory(factory.type, factory);
+  const embeddableChangePointChartFactory = new EmbeddableChangePointChartFactory(
+    core.getStartServices
+  );
+  embeddable.registerEmbeddableFactory(
+    embeddableChangePointChartFactory.type,
+    embeddableChangePointChartFactory
+  );
+
+  const embeddableChangePointTableFactory = new EmbeddableChangePointTableFactory(
+    core.getStartServices
+  );
+  embeddable.registerEmbeddableFactory(
+    embeddableChangePointTableFactory.type,
+    embeddableChangePointTableFactory
+  );
 };

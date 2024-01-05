@@ -26,6 +26,8 @@ export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';
 
 export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart' as const;
 
+export const EMBEDDABLE_CHANGE_POINT_TABLE_TYPE = 'aiopsChangePointTable' as const;
+
 export const AIOPS_TELEMETRY_ID = {
   AIOPS_DEFAULT_SOURCE: 'ml_aiops_labs',
   AIOPS_ANALYSIS_RUN_ORIGIN: 'aiops-analysis-run-origin',

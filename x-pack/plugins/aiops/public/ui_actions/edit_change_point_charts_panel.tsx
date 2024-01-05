@@ -36,7 +36,7 @@ export function createEditChangePointChartsPanelAction(
 
       try {
         const { resolveEmbeddableChangePointUserInput } = await import(
-          '../embeddable/change_point_chart/handle_explicit_input'
+          '../embeddable/handle_explicit_input'
         );
 
         const result = await resolveEmbeddableChangePointUserInput(

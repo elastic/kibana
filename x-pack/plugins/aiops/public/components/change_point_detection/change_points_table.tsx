@@ -35,7 +35,8 @@ export interface ChangePointsTableProps {
   annotations: ChangePointAnnotation[];
   fieldConfig: FieldConfig;
   isLoading: boolean;
-  onSelectionChange: (update: SelectedChangePoint[]) => void;
+  onSelectionChange?: (update: SelectedChangePoint[]) => void;
+  onRenderComplete?: () => void;
 }
 
 function getFilterConfig(
@@ -73,6 +74,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   annotations,
   fieldConfig,
   onSelectionChange,
+  onRenderComplete,
 }) => {
   const {
     fieldFormats,
@@ -80,6 +82,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       query: { filterManager },
     },
   } = useAiopsAppContext();
+
   const { dataView } = useDataSource();
 
   const dateFormatter = useMemo(() => fieldFormats.deserialize({ id: 'date' }), [fieldFormats]);
@@ -249,10 +252,13 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       : []),
   ];
 
-  const selectionValue = useMemo<EuiTableSelectionType<ChangePointAnnotation>>(() => {
+  const selectionValue = useMemo<EuiTableSelectionType<ChangePointAnnotation> | undefined>(() => {
+    if (!onSelectionChange) return undefined;
+
     return {
-      selectable: (item) => true,
+      selectable: (item) => !!onSelectionChange,
       onSelectionChange: (selection) => {
+        if (!onSelectionChange) return;
         onSelectionChange(
           selection.map((s) => {
             return {

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerEmbeddables } from './register_embeddables';
+export { EmbeddableChangePointTableFactory } from './embeddable_change_point_table_factory';

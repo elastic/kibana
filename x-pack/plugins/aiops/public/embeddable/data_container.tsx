@@ -8,37 +8,24 @@
 import React, { FC, useEffect, useMemo } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
-import { EmbeddableChangePointChartProps } from '../types';
-import {
-  type ChangePointAnnotation,
-  type ChangePointDetectionRequestParams,
-} from '../../components/change_point_detection/change_point_detection_context';
-import { useFilerQueryUpdates } from '../../hooks/use_filters_query';
-import { useDataSource } from '../../hooks/use_data_source';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { useTimeBuckets } from '../../hooks/use_time_buckets';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
-import { useChangePointResults } from '../../components/change_point_detection/use_change_point_agg_request';
-import { ChartsGrid } from '../../components/change_point_detection/charts_grid';
-import { NoChangePointsWarning } from '../../components/change_point_detection/no_change_points_warning';
-
-const defaultSort = {
-  field: 'p_value' as keyof ChangePointAnnotation,
-  direction: 'asc',
-};
+import { ChangePointsTable } from '../components/change_point_detection/change_points_table';
+import { EmbeddableChangePointChartProps } from './types';
+import { useFilerQueryUpdates } from '../hooks/use_filters_query';
+import { useDataSource } from '../hooks/use_data_source';
+import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
+import { useTimeBuckets } from '../hooks/use_time_buckets';
+import { createMergedEsQuery } from '../application/utils/search_utils';
+import type {
+  ChangePointAnnotation,
+  ChangePointDetectionRequestParams,
+} from '../components/change_point_detection/change_point_detection_context';
+import { useChangePointResults } from '../components/change_point_detection/use_change_point_agg_request';
+import { NoChangePointsWarning } from '../components/change_point_detection/no_change_points_warning';
 
 /**
- * Grid component wrapper for embeddable.
- *
- * @param timeRange
- * @param fn
- * @param metricField
- * @param maxSeriesToPlot
- * @param splitField
- * @param partitions
- * @constructor
+ * Component responsible for fetching change point results and rendering the view component
  */
-export const ChartGridEmbeddableWrapper: FC<
+export const DataContainer: FC<
   EmbeddableChangePointChartProps & {
     onRenderComplete: () => void;
     onLoading: () => void;
@@ -129,13 +116,7 @@ export const ChartGridEmbeddableWrapper: FC<
   }, [onLoading, isLoading]);
 
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {
-    let resultChangePoints: ChangePointAnnotation[] = results.sort((a, b) => {
-      if (defaultSort.direction === 'asc') {
-        return (a[defaultSort.field] as number) - (b[defaultSort.field] as number);
-      } else {
-        return (b[defaultSort.field] as number) - (a[defaultSort.field] as number);
-      }
-    });
+    let resultChangePoints: ChangePointAnnotation[] = results;
 
     if (maxSeriesToPlot) {
       resultChangePoints = resultChangePoints.slice(0, maxSeriesToPlot);
@@ -156,11 +137,7 @@ export const ChartGridEmbeddableWrapper: FC<
       `}
     >
       {changePoints.length > 0 ? (
-        <ChartsGrid
-          changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
-          interval={requestParams.interval}
-          onRenderComplete={onRenderComplete}
-        />
+        <ChangePointsTable annotations={changePoints} fieldConfig={fieldConfig} isLoading={false} />
       ) : emptyState ? (
         emptyState
       ) : (
