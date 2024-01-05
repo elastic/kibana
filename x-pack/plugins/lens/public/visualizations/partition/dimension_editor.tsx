@@ -140,6 +140,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             defaultMessage: 'Color mapping',
           })}
           style={{ alignItems: 'center' }}
+          fullWidth
         >
           <EuiFlexGroup
             alignItems="center"
