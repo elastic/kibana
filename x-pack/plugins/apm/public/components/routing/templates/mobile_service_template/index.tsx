@@ -232,7 +232,6 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.mobileServiceDetails.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),
