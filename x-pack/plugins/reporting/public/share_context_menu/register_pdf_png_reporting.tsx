@@ -18,7 +18,7 @@ const getJobParams =
   (
     apiClient: ReportingAPIClient,
     opts: JobParamsProviderOptions,
-    type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
+    types: Array<'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'>
   ) =>
   () => {
     const {
@@ -31,29 +31,25 @@ const getJobParams =
       layout,
       title,
     };
-
-    if (type === 'printablePdfV2') {
-      // multi locator for PDF V2
-      return { ...baseParams, locatorParams: [locatorParams] };
-    } else if (type === 'pngV2') {
-      // single locator for PNG V2
-      return { ...baseParams, locatorParams };
-    }
-
-    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-    // Replace hashes with original RISON values.
-    const relativeUrl = opts.shareableUrl.replace(
-      window.location.origin + apiClient.getServerBasePath(),
-      ''
-    );
-
-    if (type === 'printablePdf') {
-      // multi URL for PDF
-      return { ...baseParams, relativeUrls: [relativeUrl] };
-    }
-
-    // single URL for PNG
-    return { ...baseParams, relativeUrl };
+    types.map((type) => {
+      if (type === 'printablePdfV2') {
+        // multi locator for PDF V2
+        return { ...baseParams, locatorParams: [locatorParams] };
+      } else if (type === 'pngV2') {
+        // single locator for PNG V2
+        return { ...baseParams, locatorParams };
+      }
+      // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
+      // Replace hashes with original RISON values.
+      const relativeUrl = opts.shareableUrl.replace(
+        window.location.origin + apiClient.getServerBasePath(),
+        ''
+      );
+      if (type === 'printablePdf') {
+        // multi URL for PDF
+        return { ...baseParams, relativeUrls: [relativeUrl] };
+      }
+    });
   };
 
 export const reportingScreenshotShareProvider = ({
@@ -116,10 +112,6 @@ export const reportingScreenshotShareProvider = ({
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
     const shareActions = [];
 
-    const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
-      defaultMessage: 'PNG Reports',
-    });
-
     const jobProviderOptions: JobParamsProviderOptions = {
       shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
       objectType,
@@ -130,19 +122,25 @@ export const reportingScreenshotShareProvider = ({
     const requiresSavedState = !isV2Job;
 
     const pngReportType = isV2Job ? 'pngV2' : 'png';
+    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
 
-    const panelPng = {
+
+    const imageModal = {
       shareMenuItem: {
-        name: pngPanelTitle,
+        name: i18n.translate('xpack.reporting.shareContextMenu.ExportsButtonLabel', {
+          defaultMessage: 'Exports',
+        }),
         icon: 'document',
         toolTipContent: licenseToolTipContent,
         disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'PNGReports',
+        ['data-test-subj']: 'imageExports',
         sortOrder: 10,
       },
       panel: {
-        id: 'reportingPngPanel',
-        title: pngPanelTitle,
+        id: 'reportingImageModal',
+        title: i18n.translate('xpack.reporting.shareContextMenu.ReportsButtonLabel', {
+          defaultMessage: 'Exports',
+        }),
         content: (
           <ReportingModalContent
             apiClient={apiClient}
@@ -151,43 +149,8 @@ export const reportingScreenshotShareProvider = ({
             reportType={pngReportType}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
-            isDirty={isDirty}
-            onClose={onClose}
-            theme={theme}
-          />
-        ),
-      },
-    };
-
-    const pdfPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
-      defaultMessage: 'PDF Reports',
-    });
-
-    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
-
-    const panelPdf = {
-      shareMenuItem: {
-        name: pdfPanelTitle,
-        icon: 'document',
-        toolTipContent: licenseToolTipContent,
-        disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'PDFReports',
-        sortOrder: 10,
-      },
-      panel: {
-        id: 'reportingPdfPanel',
-        title: pdfPanelTitle,
-        content: (
-          <ReportingModalContent
-            apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
-            reportType={pdfReportType}
-            objectId={objectId}
-            requiresSavedState={requiresSavedState}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
+            getJobParams={getJobParams(apiClient, jobProviderOptions,[pdfReportType, pngReportType])}
             isDirty={isDirty}
             onClose={onClose}
             theme={theme}
@@ -195,9 +158,8 @@ export const reportingScreenshotShareProvider = ({
         ),
       },
     };
-
-    shareActions.push(panelPng);
-    shareActions.push(panelPdf);
+  
+    shareActions.push(imageModal);
     return shareActions;
   };
 
