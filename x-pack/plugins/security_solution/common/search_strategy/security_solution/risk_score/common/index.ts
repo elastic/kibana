@@ -24,7 +24,9 @@ export const getHostRiskIndex = (
   isNewRiskScoreModuleInstalled: boolean
 ): string => {
   return isNewRiskScoreModuleInstalled
-    ? getRiskScoreLatestIndex(spaceId)
+    ? onlyLatest
+      ? getRiskScoreLatestIndex(spaceId)
+      : getRiskScoreTimeSeriesIndex(spaceId)
     : `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
 
