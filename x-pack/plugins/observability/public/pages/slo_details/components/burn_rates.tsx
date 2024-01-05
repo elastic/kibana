@@ -40,7 +40,7 @@ function getWindowsFromOptions(opts: BurnRateOption[]): Array<{ name: string; du
 }
 
 export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
-  const [timeRange, setTimeRange] = useState(burnRateOptions[0]);
+  const [burnRateOption, setBurnRateOption] = useState(burnRateOptions[0]);
   const { isLoading, data } = useFetchSloBurnRates({
     slo,
     shouldRefetch: isAutoRefreshing,
@@ -49,12 +49,12 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
 
   const onTimeRangeChange = (optionId: string) => {
     const selected = burnRateOptions.find((opt) => opt.id === optionId) ?? burnRateOptions[0];
-    setTimeRange(selected);
+    setBurnRateOption(selected);
   };
 
-  const fromRange = moment().subtract(timeRange.duration, 'hour').toDate();
-  const threshold = timeRange.threshold;
-  const burnRate = data?.burnRates.find((br) => br.name === timeRange.windowName)?.burnRate;
+  const fromRange = moment().subtract(burnRateOption.duration, 'hour').toDate();
+  const threshold = burnRateOption.threshold;
+  const burnRate = data?.burnRates.find((br) => br.name === burnRateOption.windowName)?.burnRate;
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
@@ -96,7 +96,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
                 defaultMessage: 'Select the time range',
               })}
               options={burnRateOptions}
-              idSelected={timeRange.id}
+              idSelected={burnRateOption.id}
               onChange={onTimeRangeChange}
               buttonSize="compressed"
             />
