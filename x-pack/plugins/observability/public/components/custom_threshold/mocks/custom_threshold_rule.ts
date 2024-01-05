@@ -200,7 +200,7 @@ export const buildCustomThresholdAlert = (
       '@timestamp': '2023-03-28T14:40:00.000Z',
       'kibana.alert.reason': 'system.cpu.user.pct reported no data in the last 1m for ',
       'kibana.alert.action_group': 'custom_threshold.nodata',
-      tags: [],
+      tags: ['tag 1', 'tag 2'],
       'kibana.alert.duration.us': 248391946000,
       'kibana.alert.time_range': {
         gte: '2023-03-13T14:06:23.695Z',

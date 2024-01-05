@@ -19,6 +19,7 @@ import {
 import { ExpressionChart } from '../expression_chart';
 import AlertDetailsAppSection from './alert_details_app_section';
 import { Groups } from './groups';
+import { Tags } from './tags';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
 
@@ -101,6 +102,10 @@ describe('AlertDetailsAppSection', () => {
             ]}
           />
         ),
+      },
+      {
+        label: 'Tags',
+        value: <Tags tags={['tag 1', 'tag 2']} />,
       },
       {
         label: 'Rule',

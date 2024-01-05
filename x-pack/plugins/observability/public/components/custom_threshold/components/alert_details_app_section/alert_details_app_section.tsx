@@ -23,7 +23,13 @@ import {
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
+import {
+  ALERT_END,
+  ALERT_START,
+  ALERT_EVALUATION_VALUES,
+  ALERT_GROUP,
+  TAGS,
+} from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 
 import { MetricsExplorerChartType } from '../../../../../common/custom_threshold_rule/types';
@@ -39,6 +45,7 @@ import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart'
 import { Threshold } from '../custom_threshold';
 import { ExpressionChart } from '../expression_chart';
 import { Groups } from './groups';
+import { Tags } from './tags';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
@@ -90,6 +97,7 @@ export default function AlertDetailsAppSection({
   ];
   useEffect(() => {
     const groups = alert.fields[ALERT_GROUP];
+    const tags = alert.fields[TAGS];
     const alertSummaryFields = [];
     if (groups) {
       alertSummaryFields.push({
@@ -100,6 +108,17 @@ export default function AlertDetailsAppSection({
           }
         ),
         value: <Groups groups={groups} />,
+      });
+    }
+    if (tags) {
+      alertSummaryFields.push({
+        label: i18n.translate(
+          'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.tags',
+          {
+            defaultMessage: 'Tags',
+          }
+        ),
+        value: <Tags tags={tags} />,
       });
     }
     alertSummaryFields.push({
