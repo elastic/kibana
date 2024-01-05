@@ -106,6 +106,6 @@ export const securityDefaultAppFeaturesConfig: DefaultSecurityAppFeaturesConfig 
   },
 
   [AppFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
-
+  [AppFeatureSecurityKey.endpointAgentTamperProtection]: {},
   [AppFeatureSecurityKey.externalRuleActions]: {},
 };

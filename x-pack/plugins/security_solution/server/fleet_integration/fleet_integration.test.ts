@@ -382,6 +382,8 @@ describe('ingest_integration tests ', () => {
     });
   });
 
+  describe('agent policy update callback (when appFeature is not enabled)', () => {});
+
   describe('package policy update callback (when the license is below platinum)', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

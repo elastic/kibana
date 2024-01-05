@@ -16,6 +16,8 @@ import type {
 } from '@kbn/fleet-plugin/server';
 
 import type {
+  AgentPolicy,
+  NewAgentPolicy,
   NewPackagePolicy,
   PackagePolicy,
   UpdatePackagePolicy,
@@ -23,6 +25,10 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import type {
+  PostAgentPolicyCreateCallback,
+  PostAgentPolicyUpdateCallback,
+} from '@kbn/fleet-plugin/server/types';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
   isPolicySetToEventCollectionOnly,
@@ -283,6 +289,40 @@ export const getPackagePolicyPostCreateCallback = (
       );
     }
     return packagePolicy;
+  };
+};
+
+export const getAgentPolicyCreateCallback = (
+  logger: Logger,
+  appFeatures: AppFeaturesService
+): PostAgentPolicyCreateCallback => {
+  return async (agentPolicy: NewAgentPolicy): Promise<NewAgentPolicy> => {
+    if (
+      agentPolicy.is_protected &&
+      !appFeatures.isEnabled(AppFeatureSecurityKey.endpointAgentTamperProtection)
+    ) {
+      const error = new Error('Agent Tamper Protection requires Complete Endpoint Security tier');
+      logger.error(error);
+      throw error;
+    }
+    return agentPolicy;
+  };
+};
+
+export const getAgentPolicyUpdateCallback = (
+  logger: Logger,
+  appFeatures: AppFeaturesService
+): PostAgentPolicyUpdateCallback => {
+  return async (agentPolicy: Partial<AgentPolicy>): Promise<Partial<AgentPolicy>> => {
+    if (
+      agentPolicy.is_protected &&
+      !appFeatures.isEnabled(AppFeatureSecurityKey.endpointAgentTamperProtection)
+    ) {
+      const error = new Error('Agent Tamper Protection requires Complete Endpoint Security tier');
+      logger.error(error);
+      throw error;
+    }
+    return agentPolicy;
   };
 };
 

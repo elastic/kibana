@@ -16,6 +16,8 @@ import type {
   UpdatePackagePolicy,
   PackagePolicy,
   DeletePackagePoliciesResponse,
+  NewAgentPolicy,
+  AgentPolicy,
 } from '../../common/types';
 
 export type PostPackagePolicyDeleteCallback = (
@@ -58,6 +60,14 @@ export type PutPackagePolicyUpdateCallback = (
   request?: KibanaRequest
 ) => Promise<UpdatePackagePolicy>;
 
+export type PostAgentPolicyCreateCallback = (
+  agentPolicy: NewAgentPolicy
+) => Promise<NewAgentPolicy>;
+
+export type PostAgentPolicyUpdateCallback = (
+  agentPolicy: Partial<AgentPolicy>
+) => Promise<Partial<AgentPolicy>>;
+
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackPostCreate = [
   'packagePolicyPostCreate',
@@ -81,4 +91,19 @@ export type ExternalCallback =
   | ExternalCallbackPostDelete
   | ExternalCallbackUpdate;
 
-export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
+export type ExternalCallbackAgentPolicyCreate = [
+  'agentPolicyCreate',
+  PostAgentPolicyCreateCallback
+];
+export type ExternalCallbackAgentPolicyUpdate = [
+  'agentPolicyUpdate',
+  PostAgentPolicyUpdateCallback
+];
+
+export type ExternalCallbackAgentPolicy =
+  | ExternalCallbackAgentPolicyCreate
+  | ExternalCallbackAgentPolicyUpdate;
+
+type ExternalCallbackType = ExternalCallback | ExternalCallbackAgentPolicy;
+
+export type ExternalCallbacksStorage = Map<ExternalCallbackType[0], Set<ExternalCallbackType[1]>>;

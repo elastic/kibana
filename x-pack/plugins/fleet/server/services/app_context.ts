@@ -42,6 +42,9 @@ import type {
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
+  ExternalCallbackAgentPolicy,
+  PostAgentPolicyCreateCallback,
+  PostAgentPolicyUpdateCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
@@ -234,18 +237,25 @@ class AppContextService {
     return this.kibanaInstanceId;
   }
 
-  public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
+  public addExternalCallback(
+    type: ExternalCallback[0] | ExternalCallbackAgentPolicy[0],
+    callback: ExternalCallback[1] | ExternalCallbackAgentPolicy[1]
+  ) {
     if (!this.externalCallbacks.has(type)) {
       this.externalCallbacks.set(type, new Set());
     }
     this.externalCallbacks.get(type)!.add(callback);
   }
 
-  public getExternalCallbacks<T extends ExternalCallback[0]>(
+  public getExternalCallbacks<T extends ExternalCallback[0] | ExternalCallbackAgentPolicy[0]>(
     type: T
   ):
     | Set<
-        T extends 'packagePolicyCreate'
+        T extends 'agentPolicyCreate'
+          ? PostAgentPolicyCreateCallback
+          : T extends 'agentPolicyUpdate'
+          ? PostAgentPolicyUpdateCallback
+          : T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
           : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
@@ -258,7 +268,11 @@ class AppContextService {
     | undefined {
     if (this.externalCallbacks) {
       return this.externalCallbacks.get(type) as Set<
-        T extends 'packagePolicyCreate'
+        T extends 'agentPolicyCreate'
+          ? PostAgentPolicyCreateCallback
+          : T extends 'agentPolicyUpdate'
+          ? PostAgentPolicyUpdateCallback
+          : T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
           : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
