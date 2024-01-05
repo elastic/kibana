@@ -7,7 +7,8 @@ paths:
     get:
       operationId: GetCapabilities
       x-codegen-enabled: true
-      description: Get Elastic Assistant capabilities for the requesting plugin.
+      description: Get Elastic Assistant capabilities for the requesting plugin
+      summary: Get Elastic Assistant capabilities
       tags:
         - Capabilities API
       responses:
@@ -25,3 +26,16 @@ paths:
                 required:
                   - assistantModelEvaluation
                   - assistantStreamingEnabled
+        '400':
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

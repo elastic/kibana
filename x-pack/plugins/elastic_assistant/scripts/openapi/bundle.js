@@ -13,6 +13,6 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
 
 bundle({
   rootDir: ELASTIC_ASSISTANT_ROOT,
-  sourceGlob: './common/api/**/*.schema.yaml',
+  sourceGlob: './server/schemas/**/*.schema.yaml',
   outputFilePath: './target/openapi/elastic_assistant.bundled.schema.yaml',
 });

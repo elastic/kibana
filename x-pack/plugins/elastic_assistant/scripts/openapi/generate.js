@@ -13,6 +13,6 @@ const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
 
 generate({
   rootDir: ELASTIC_ASSISTANT_ROOT,
-  sourceGlob: './**/*.schema.yaml',
+  sourceGlob: './server/schemas/**/*.schema.yaml',
   templateName: 'zod_operation_schema',
 });
