@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-
 import {
-  TimeRangeEmbeddable,
   TimeRangeContainer,
+  TimeRangeEmbeddable,
   TIME_RANGE_EMBEDDABLE,
 } from '../../../lib/test_samples/embeddables';
-import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
+import { CustomTimeRangeBadge } from './custom_time_range_badge';
 
 const editPanelAction = {
   execute: jest.fn(),
@@ -42,13 +39,7 @@ test(`badge is not compatible with embeddable that inherits from parent`, async 
 
   const child = container.getChild<TimeRangeEmbeddable>('1');
 
-  const compatible = await new CustomTimeRangeBadge(
-    overlayServiceMock.createStartContract(),
-    themeServiceMock.createStartContract(),
-    editPanelAction,
-    [],
-    'MM YYYY'
-  ).isCompatible({
+  const compatible = await new CustomTimeRangeBadge(editPanelAction, 'MM YYYY').isCompatible({
     embeddable: child,
   });
   expect(compatible).toBe(false);
@@ -76,13 +67,7 @@ test(`badge is compatible with embeddable that has custom time range`, async () 
 
   const child = container.getChild<TimeRangeEmbeddable>('1');
 
-  const compatible = await new CustomTimeRangeBadge(
-    overlayServiceMock.createStartContract(),
-    themeServiceMock.createStartContract(),
-    editPanelAction,
-    [],
-    'MM YYYY'
-  ).isCompatible({
+  const compatible = await new CustomTimeRangeBadge(editPanelAction, 'MM YYYY').isCompatible({
     embeddable: child,
   });
   expect(compatible).toBe(true);
@@ -109,13 +94,7 @@ test('Attempting to execute on incompatible embeddable throws an error', async (
 
   const child = container.getChild<TimeRangeEmbeddable>('1');
 
-  const badge = await new CustomTimeRangeBadge(
-    overlayServiceMock.createStartContract(),
-    themeServiceMock.createStartContract(),
-    editPanelAction,
-    [],
-    'MM YYYY'
-  );
+  const badge = await new CustomTimeRangeBadge(editPanelAction, 'MM YYYY');
 
   async function check() {
     await badge.execute({ embeddable: child });
