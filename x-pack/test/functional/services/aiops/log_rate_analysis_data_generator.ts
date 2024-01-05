@@ -46,7 +46,9 @@ const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
 function getTextFieldMessage(timestamp: number, user: string, url: string, responseCode: string) {
   const date = new Date(timestamp);
-  return `${user} [${date.toLocaleString('en-US')}] "GET /${url} HTTP/1.1" ${responseCode}`;
+  return `${user} [${date.toLocaleString('en-US', {
+    timeZone: 'UTC',
+  })}] "GET /${url} HTTP/1.1" ${responseCode}`;
 }
 
 function getArtificialLogsWithDeviation(
