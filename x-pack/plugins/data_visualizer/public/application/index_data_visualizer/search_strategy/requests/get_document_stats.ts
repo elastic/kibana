@@ -27,10 +27,13 @@ const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
 export const getESQLDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   query: AggregateQuery,
+  filter: estypes.QueryDslQueryContainer[] | undefined,
   timeFieldName: string | undefined,
   intervalMs: number | undefined,
   searchOptions: ISearchOptions
 ): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
+  // @TODO: remove
+  console.log(`--@@intervalMs`, intervalMs);
   if (!isESQLQuery(query)) {
     throw Error('No ESQL query provided');
   }
@@ -41,12 +44,20 @@ export const getESQLDocumentCountStats = async (
   if (timeFieldName) {
     const aggQuery = `| EVAL _timestamp_=TO_DOUBLE(DATE_TRUNC(${intervalMs} milliseconds, ${timeFieldName})) | stats rows = count(*) by _timestamp_ | LIMIT 10000`;
 
+    // @TODO: remove
+    console.log(`--@@esqlBaseQuery + aggQuery`, {
+      query: esqlBaseQuery + aggQuery,
+      locale: 'en',
+      ...(filter ? { filter } : {}),
+    });
+
     const esqlResults = await lastValueFrom(
       search.search(
         {
           params: {
             query: esqlBaseQuery + aggQuery,
             locale: 'en',
+            ...(filter ? { filter } : {}),
           },
         },
         { ...searchOptions, strategy: 'esql' }

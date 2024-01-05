@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { css } from '@emotion/react';
 import React, { FC, useEffect, useMemo, useState, useCallback, useRef, useReducer } from 'react';
 import type { Required } from 'utility-types';
-import { useTimefilter } from '@kbn/ml-date-picker';
+import {
+  FullTimeRangeSelector,
+  mlTimefilterRefresh$,
+  useTimefilter,
+  DatePickerWrapper,
+} from '@kbn/ml-date-picker';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { AggregateQuery } from '@kbn/es-query';
-import { Subscription, lastValueFrom } from 'rxjs';
+import { Subscription, lastValueFrom, merge } from 'rxjs';
 
 import {
   useEuiBreakpoint,
@@ -23,24 +30,16 @@ import {
   EuiProgress,
   EuiSpacer,
 } from '@elastic/eui';
-
-// import { type Filter, FilterStateStore, type Query } from '@kbn/es-query';
-// import { generateFilters } from '@kbn/data-plugin/public';
-// import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
-import {
-  DatePickerWrapper,
-  // FullTimeRangeSelector,
-  FROZEN_TIER_PREFERENCE,
-} from '@kbn/ml-date-picker';
-import { useStorage } from '@kbn/ml-local-storage';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { debounce } from 'lodash';
+import { debounce, first } from 'lodash';
+import { current } from 'immer';
+import useObservable from 'react-use/lib/useObservable';
 import { SupportedFieldType } from '../../../../../common/types';
 import { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
@@ -116,6 +115,10 @@ export async function getDataViewByIndexPattern(
   indexPatternFromQuery: string | undefined,
   currentDataView: DataView | undefined
 ) {
+  if (indexPatternFromQuery) {
+    const matched = await dataViews.find(indexPatternFromQuery);
+    if (matched) return first(matched);
+  }
   if (
     indexPatternFromQuery &&
     (currentDataView?.isPersisted() || indexPatternFromQuery !== currentDataView?.getIndexPattern())
@@ -432,6 +435,8 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
   aggregatableFields: string[];
   nonAggregatableFields: string[];
   fieldsToFetch: string[];
+  lastRefresh: number;
+  filter;
 }) => {
   const {
     services: { data },
@@ -446,8 +451,6 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
   );
-
-  const [lastRefresh, setLastRefresh] = useState(0);
 
   const abortCtrl = useRef(new AbortController());
 
@@ -469,7 +472,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
         return;
       }
 
-      const { searchQuery, intervalMs } = fieldStatsRequest;
+      const { searchQuery, intervalMs, filter } = fieldStatsRequest;
 
       const searchOptions = {
         abortSignal: abortCtrl.current.signal,
@@ -491,14 +494,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
             params: {
               query: esqlBaseQuery + '| LIMIT 0',
               locale: 'en',
-              filter: {
-                bool: {
-                  must: [],
-                  filter: [],
-                  should: [],
-                  must_not: [],
-                },
-              },
+              ...(filter ? { filter } : {}),
             },
           },
           { ...searchOptions, strategy: 'esql' }
@@ -511,12 +507,19 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
       })) as Column[];
 
       const timeFields = columns.filter((d) => d.type === 'date');
+
+      const dataViewTimeField = timeFields.find((f) => f.name === fieldStatsRequest?.timeFieldName)
+        ? fieldStatsRequest?.timeFieldName
+        : undefined;
+
+      // @TODO: remove
+      console.log(`--@@dataViewTimeField`, dataViewTimeField);
       // If a date field '@timestamp' exists, set that as default time field, else set the first date field as default
       const timeFieldName =
         timeFields.length > 0
           ? timeFields.find((f) => f.name === '@timestamp')
             ? '@timestamp'
-            : timeFields[0].name
+            : dataViewTimeField ?? timeFields[0].name
           : undefined;
 
       setTableData({ columns, timeFieldName });
@@ -524,6 +527,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
       const { totalCount, documentCountStats } = await getESQLDocumentCountStats(
         data.search,
         searchQuery,
+        filter,
         timeFieldName,
         intervalInMs,
         searchOptions
@@ -589,6 +593,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
               params: {
                 query: searchQuery.esql + countQuery,
                 locale: 'en',
+                ...(filter ? { filter } : {}),
               },
             },
             { strategy: 'esql' }
@@ -649,7 +654,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
     } catch (error) {
       console.error(error);
     }
-  }, [data.search, JSON.stringify({ fieldStatsRequest, lastRefresh })]);
+  }, [data.search, JSON.stringify({ fieldStatsRequest })]);
 
   // auto-update
   useEffect(() => {
@@ -720,17 +725,19 @@ export interface IndexDataVisualizerESQLProps {
 
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data } = services;
+  const { data } = services;
   const euiTheme = useCurrentEuiTheme();
 
-  const [editableQuery, setEditableQuery] = useState<AggregateQuery>({ esql: '' });
+  const [_, setEditableQuery] = useState<AggregateQuery>({ esql: '' });
 
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
 
+  const [lastRefresh, setLastRefresh] = useState(0);
+
   const _timeBuckets = useTimeBuckets();
   const timefilter = useTimefilter({
-    timeRangeSelector: currentDataView?.timeFieldName !== undefined,
+    timeRangeSelector: true,
     autoRefreshSelector: true,
   });
 
@@ -748,15 +755,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     }
     return indexPatternFromQuery;
   }, [query]);
-
-  const [frozenDataPreference, setFrozenDataPreference] = useStorage<
-    DVKey,
-    DVStorageMapped<typeof DV_FROZEN_TIER_PREFERENCE>
-  >(
-    DV_FROZEN_TIER_PREFERENCE,
-    // By default we will exclude frozen data tier
-    FROZEN_TIER_PREFERENCE.EXCLUDE
-  );
 
   const restorableDefaults = useMemo(
     () => getDefaultDataVisualizerListState({}),
@@ -789,58 +787,78 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   );
 
   /** Search strategy **/
-  const fieldStatsRequest = useMemo(
-    () => {
-      // Obtain the interval to use for date histogram aggregations
-      // (such as the document count chart). Aim for 75 bars.
-      const buckets = _timeBuckets;
+  const fieldStatsRequest = useMemo(() => {
+    // Obtain the interval to use for date histogram aggregations
+    // (such as the document count chart). Aim for 75 bars.
+    const buckets = _timeBuckets;
 
-      const tf = timefilter;
+    const tf = timefilter;
 
-      if (!buckets || !tf || !currentDataView) return;
-      const activeBounds = tf.getActiveBounds();
+    if (!buckets || !tf || !currentDataView) return;
+    const activeBounds = tf.getActiveBounds();
 
-      let earliest: number | undefined;
-      let latest: number | undefined;
-      if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
-        earliest = activeBounds.min?.valueOf();
-        latest = activeBounds.max?.valueOf();
-      }
+    let earliest: number | undefined;
+    let latest: number | undefined;
+    if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
+      earliest = activeBounds.min?.valueOf();
+      latest = activeBounds.max?.valueOf();
+    }
 
-      const bounds = tf.getActiveBounds();
-      const BAR_TARGET = 75;
-      buckets.setInterval('auto');
+    const bounds = tf.getActiveBounds();
+    const BAR_TARGET = 75;
+    buckets.setInterval('auto');
 
-      if (bounds) {
-        buckets.setBounds(bounds);
-        buckets.setBarTarget(BAR_TARGET);
-      }
+    if (bounds) {
+      buckets.setBounds(bounds);
+      buckets.setBarTarget(BAR_TARGET);
+    }
 
-      const aggInterval = buckets.getInterval();
+    const aggInterval = buckets.getInterval();
 
-      return {
-        earliest,
-        latest,
-        aggInterval,
-        intervalMs: aggInterval?.asMilliseconds(),
-        searchQuery: query,
-        samplerShardSize: undefined,
-        sessionId: undefined,
-        indexPattern,
-        timeFieldName: currentDataView.timeFieldName,
-        runtimeFieldMap: currentDataView.getRuntimeMappings(),
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      _timeBuckets,
-      timefilter,
-      currentDataView?.id,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      JSON.stringify(query),
+    const filter = currentDataView.timeFieldName
+      ? {
+          bool: {
+            must: [],
+            filter: [
+              {
+                range: {
+                  [currentDataView.timeFieldName]: {
+                    format: 'strict_date_optional_time',
+                    gte: timefilter.getTime().from,
+                    lte: timefilter.getTime().to,
+                  },
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        }
+      : undefined;
+    // @TODO: remove
+    console.log(`--@@filter`, filter);
+    return {
+      earliest,
+      latest,
+      aggInterval,
+      intervalMs: aggInterval?.asMilliseconds(),
+      searchQuery: query,
+      samplerShardSize: undefined,
+      sessionId: undefined,
       indexPattern,
-    ]
-  );
+      timeFieldName: currentDataView.timeFieldName,
+      runtimeFieldMap: currentDataView.getRuntimeMappings(),
+      lastRefresh,
+      filter,
+    };
+  }, [
+    _timeBuckets,
+    timefilter,
+    currentDataView?.id,
+    JSON.stringify(query),
+    indexPattern,
+    lastRefresh,
+  ]);
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
@@ -848,8 +866,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       restorableDefaults
     );
   const [globalState, setGlobalState] = useUrlState('_g');
-
-  const { getAdditionalLinks } = dataVisualizerProps;
 
   const showEmptyFields =
     dataVisualizerListState.showEmptyFields ?? restorableDefaults.showEmptyFields;
@@ -860,26 +876,50 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     });
   };
 
-  // useEffect(() => {
-  //   // Force refresh on index pattern change
-  //   setLastRefresh(Date.now());
-  // }, [setLastRefresh]);
+  useEffect(() => {
+    // Force refresh on index pattern change
+    setLastRefresh(Date.now());
+  }, [setLastRefresh]);
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
+      // @TODO: remove
+      console.log(`--@@timefilter.setTime`, {
+        from: globalState.time.from,
+        to: globalState.time.to,
+      });
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.time), timefilter]);
+
+  useEffect(() => {
+    const timeUpdateSubscription = merge(
+      timefilter.getTimeUpdate$(),
+      timefilter.getAutoRefreshFetch$(),
+      mlTimefilterRefresh$
+    ).subscribe(() => {
+      // @TODO: remove
+      console.log(`--@@timeUpdateSubscription`, timeUpdateSubscription);
+      // if (onUpdate) {
+      setGlobalState({
+        time: timefilter.getTime(),
+        refreshInterval: timefilter.getRefreshInterval(),
+      });
+      // }
+      setLastRefresh(Date.now());
+    });
+    return () => {
+      timeUpdateSubscription.unsubscribe();
+    };
+  });
 
   useEffect(() => {
     if (globalState?.refreshInterval !== undefined) {
       timefilter.setRefreshInterval(globalState.refreshInterval);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
   const {
@@ -1063,45 +1103,40 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   useEffect(() => {
     createMetricCards();
     createNonMetricCards();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overallStats, showEmptyFields]);
 
-  const configs = useMemo(
-    () => {
-      let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
+  const configs = useMemo(() => {
+    let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
 
-      combinedConfigs = filterFields(
-        combinedConfigs,
-        visibleFieldNames,
-        visibleFieldTypes
-      ).filteredFields;
-
-      if (fieldStatsProgress.loaded === 100 && fieldStats) {
-        combinedConfigs = combinedConfigs.map((c) => {
-          const loadedFullStats = fieldStats.get(c.name) ?? {};
-
-          return loadedFullStats
-            ? {
-                ...c,
-                loading: false,
-                stats: { ...c.stats, ...loadedFullStats },
-              }
-            : c;
-        });
-      }
-      return combinedConfigs;
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      nonMetricConfigs,
-      metricConfigs,
-      visibleFieldTypes,
+    combinedConfigs = filterFields(
+      combinedConfigs,
       visibleFieldNames,
-      fieldStatsProgress.loaded,
-      dataVisualizerListState.pageIndex,
-      dataVisualizerListState.pageSize,
-    ]
-  );
+      visibleFieldTypes
+    ).filteredFields;
+
+    if (fieldStatsProgress.loaded === 100 && fieldStats) {
+      combinedConfigs = combinedConfigs.map((c) => {
+        const loadedFullStats = fieldStats.get(c.name) ?? {};
+
+        return loadedFullStats
+          ? {
+              ...c,
+              loading: false,
+              stats: { ...c.stats, ...loadedFullStats },
+            }
+          : c;
+      });
+    }
+    return combinedConfigs;
+  }, [
+    nonMetricConfigs,
+    metricConfigs,
+    visibleFieldTypes,
+    visibleFieldNames,
+    fieldStatsProgress.loaded,
+    dataVisualizerListState.pageIndex,
+    dataVisualizerListState.pageSize,
+  ]);
 
   // Some actions open up fly-out or popup
   // This variable is used to keep track of them and clean up when unmounting
@@ -1146,10 +1181,13 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   //   });
   // }, [data, searchQueryLanguage, searchString]);
 
-  // const hasValidTimeField = useMemo(
-  //   () => currentDataView.timeFieldName !== undefined && currentDataView.timeFieldName !== '',
-  //   [currentDataView.timeFieldName]
-  // );
+  const hasValidTimeField = useMemo(
+    () =>
+      currentDataView &&
+      currentDataView.timeFieldName !== undefined &&
+      currentDataView.timeFieldName !== '',
+    [currentDataView]
+  );
 
   const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
   const dvPageHeader = css({
@@ -1192,18 +1230,18 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             gutterSize="s"
             data-test-subj="dataVisualizerTimeRangeSelectorSection"
           >
-            {/* {hasValidTimeField ? (
+            {hasValidTimeField && currentDataView ? (
               <EuiFlexItem grow={false}>
                 <FullTimeRangeSelector
-                  frozenDataPreference={frozenDataPreference}
-                  setFrozenDataPreference={setFrozenDataPreference}
+                  frozenDataPreference={'exclude-frozen'}
+                  setFrozenDataPreference={() => {}}
                   dataView={currentDataView}
                   query={undefined}
                   disabled={false}
                   timefilter={timefilter}
                 />
               </EuiFlexItem>
-            ) : null} */}
+            ) : null}
             <EuiFlexItem grow={false}>
               <DatePickerWrapper isAutoRefreshOnly={false} showRefresh={false} width="full" />
             </EuiFlexItem>
@@ -1222,7 +1260,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           }}
           expandCodeEditor={() => false}
           isCodeEditorExpanded={true}
-          detectTimestamp={true}
+          detectTimestamp={false}
           hideMinimizeButton={true}
           hideRunQueryText={false}
         />

@@ -82,7 +82,179 @@ export const getLocatorParams = (params: {
   return locatorParams;
 };
 
-export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
+// @TODO: Consolidate url provi
+const DataVisualizerESQLStateContextProvider = () => {
+  const { services } = useDataVisualizerKibana();
+  const {
+    data: { dataViews, search },
+    savedObjects: { client: savedObjectsClient },
+    notifications: { toasts },
+    savedSearch: savedSearchService,
+  } = services;
+
+  const history = useHistory();
+  const { search: urlSearchString } = useLocation();
+
+  const [currentDataView, setCurrentDataView] = useState<DataView | undefined>(undefined);
+  const [currentSavedSearch, setCurrentSavedSearch] = useState<SavedSearch | null>(null);
+
+  const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const urlState = parseUrlState(urlSearchString);
+
+    if (search.session) {
+      search.session.enableStorage({
+        getName: async () => {
+          // return the name you want to give the saved Search Session
+          return INDEX_DATA_VISUALIZER_NAME;
+        },
+        getLocatorData: async () => {
+          return {
+            id: DATA_VISUALIZER_APP_LOCATOR,
+            initialState: getLocatorParams({
+              ...services,
+              urlSearchString,
+              dataViewId: currentDataView?.id,
+              savedSearchId: currentSavedSearch?.id,
+              shouldRestoreSearchSession: false,
+              searchSessionId: search.session.getSessionId(),
+            }),
+            restoreState: getLocatorParams({
+              ...services,
+              urlSearchString,
+              dataViewId: currentDataView?.id,
+              savedSearchId: currentSavedSearch?.id,
+              shouldRestoreSearchSession: true,
+              searchSessionId: search.session.getSessionId(),
+            }),
+          };
+        },
+      });
+    }
+
+    if (urlState.searchSessionId !== undefined && urlState.searchSessionId !== currentSessionId) {
+      search.session?.restore(urlState.searchSessionId);
+      setCurrentSessionId(urlState.searchSessionId);
+    } else {
+      const newSessionId = search.session?.start();
+      setCurrentSessionId(newSessionId);
+    }
+    return () => {
+      search.session.clear();
+    };
+    // urlSearchString already includes all the other dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.session, urlSearchString]);
+
+  useEffect(() => {
+    const prevSearchString = urlSearchString;
+    const parsedQueryString = parse(prevSearchString, { sort: false });
+
+    const getDataView = async () => {
+      if (typeof parsedQueryString?.savedSearchId === 'string') {
+        const savedSearchId = parsedQueryString.savedSearchId;
+        try {
+          const savedSearch = await savedSearchService.get(savedSearchId);
+          const dataView = savedSearch.searchSource.getField('index');
+
+          if (!dataView) {
+            toasts.addDanger({
+              title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
+                defaultMessage: 'Error finding data view',
+              }),
+            });
+          }
+          setCurrentSavedSearch(savedSearch);
+          setCurrentDataView(dataView);
+        } catch (e) {
+          toasts.addError(e, {
+            title: i18n.translate('xpack.dataVisualizer.index.savedSearchErrorMessage', {
+              defaultMessage: 'Error retrieving saved search {savedSearchId}',
+              values: { savedSearchId },
+            }),
+          });
+        }
+      }
+
+      if (typeof parsedQueryString?.index === 'string') {
+        const dataView = await dataViews.get(parsedQueryString.index);
+        setCurrentDataView(dataView);
+      }
+    };
+    getDataView();
+  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search, savedSearchService]);
+
+  const setUrlState: SetUrlState = useCallback(
+    (
+      accessor: Accessor,
+      attribute: string | Dictionary<any>,
+      value?: any,
+      replaceState?: boolean
+    ) => {
+      const prevSearchString = urlSearchString;
+      const urlState = parseUrlState(prevSearchString);
+      const parsedQueryString = parse(prevSearchString, { sort: false });
+
+      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
+        urlState[accessor] = {};
+      }
+
+      if (typeof attribute === 'string') {
+        if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
+          return prevSearchString;
+        }
+
+        urlState[accessor][attribute] = value;
+      } else {
+        const attributes = attribute;
+        Object.keys(attributes).forEach((a) => {
+          urlState[accessor][a] = attributes[a];
+        });
+      }
+
+      try {
+        const oldLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
+
+        Object.keys(urlState).forEach((a) => {
+          if (isRisonSerializationRequired(a)) {
+            parsedQueryString[a] = encode(urlState[a]);
+          } else {
+            parsedQueryString[a] = urlState[a];
+          }
+        });
+        const newLocationSearchString = stringify(parsedQueryString, {
+          sort: false,
+          encode: false,
+        });
+
+        if (oldLocationSearchString !== newLocationSearchString) {
+          const newSearchString = stringify(parsedQueryString, { sort: false });
+          if (replaceState) {
+            history.replace({ search: newSearchString });
+          } else {
+            history.push({ search: newSearchString });
+          }
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Could not save url state', error);
+      }
+    },
+    [history, urlSearchString]
+  );
+
+  return (
+    <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
+      <IndexDataVisualizerESQL />
+    </UrlStateContextProvider>
+  );
+};
+
+const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
   IndexDataVisualizerComponent,
   getAdditionalLinks,
 }) => {
@@ -329,7 +501,7 @@ export const IndexDataVisualizer: FC<Props> = ({
                 getAdditionalLinks={getAdditionalLinks}
               />
             ) : (
-              <IndexDataVisualizerESQL />
+              <DataVisualizerESQLStateContextProvider />
             )}
           </DatePickerContextProvider>
         </StorageContextProvider>
