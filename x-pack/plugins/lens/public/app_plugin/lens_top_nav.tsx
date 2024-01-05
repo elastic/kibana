@@ -800,7 +800,7 @@ export const LensTopNavMenu = ({
     lensStore,
     theme$,
     http,
-    overlays
+    overlays,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
