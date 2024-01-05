@@ -601,6 +601,7 @@ export class IndexTable extends Component {
                               defaultMessage: 'Search',
                             }
                           ),
+                          'data-test-subj': 'indicesSearch',
                         }}
                         aria-label={i18n.translate(
                           'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',

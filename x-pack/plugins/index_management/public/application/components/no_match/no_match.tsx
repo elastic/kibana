@@ -43,7 +43,13 @@ export const NoMatch = ({
           </p>
         }
         actions={
-          <EuiButton onClick={resetFilter} fill color="primary" iconType="cross">
+          <EuiButton
+            onClick={resetFilter}
+            fill
+            color="primary"
+            iconType="cross"
+            data-test-subj="clearIndicesSearch"
+          >
             <FormattedMessage
               id="xpack.idxMgmt.noMatch.clearSearchButton"
               defaultMessage="Clear search"
