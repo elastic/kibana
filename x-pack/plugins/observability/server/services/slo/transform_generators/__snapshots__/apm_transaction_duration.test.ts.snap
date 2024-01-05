@@ -433,8 +433,10 @@ Object {
       "_numerator": Object {
         "range": Object {
           "field": "transaction.duration.histogram",
+          "keyed": true,
           "ranges": Array [
             Object {
+              "key": "target",
               "to": 500000,
             },
           ],
@@ -457,7 +459,7 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "numerator": "_numerator['*-500000.0']>_count",
+            "numerator": "_numerator['target']>_count",
           },
           "script": "params.numerator",
         },
@@ -612,8 +614,10 @@ Object {
       "_numerator": Object {
         "range": Object {
           "field": "transaction.duration.histogram",
+          "keyed": true,
           "ranges": Array [
             Object {
+              "key": "target",
               "to": 500000,
             },
           ],
@@ -627,7 +631,7 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "numerator": "_numerator['*-500000.0']>_count",
+            "numerator": "_numerator['target']>_count",
           },
           "script": "params.numerator",
         },
