@@ -37,7 +37,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
@@ -91,7 +90,6 @@ import {
   setCapabilities,
   setHttp,
   setSearch,
-  setSavedObjects,
   setExpressions,
   setUiActions,
   setTimeFilter,
@@ -153,7 +151,6 @@ export interface VisualizationsStartDeps {
   getAttributeService: EmbeddableStart['getAttributeService'];
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
-  savedObjects: SavedObjectsStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedSearch: SavedSearchPublicPluginStart;
   spaces?: SpacesPluginStart;
@@ -411,7 +408,6 @@ export class VisualizationsPlugin
       expressions,
       uiActions,
       embeddable,
-      savedObjects,
       spaces,
       savedObjectsTaggingOss,
       fieldFormats,
@@ -427,7 +423,6 @@ export class VisualizationsPlugin
     setApplication(core.application);
     setCapabilities(core.application.capabilities);
     setHttp(core.http);
-    setSavedObjects(core.savedObjects);
     setDocLinks(core.docLinks);
     setSearch(data.search);
     setExpressions(expressions);

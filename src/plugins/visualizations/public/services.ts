@@ -14,7 +14,6 @@ import type {
   HttpStart,
   IUiSettingsClient,
   OverlayStart,
-  SavedObjectsStart,
   DocLinksStart,
   ThemeServiceStart,
   ExecutionContextSetup,
@@ -46,9 +45,6 @@ export const [getFieldsFormats, setFieldFormats] =
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 
 export const [getEmbeddable, setEmbeddable] = createGetterSetter<EmbeddableStart>('Embeddable');
-
-export const [getSavedObjects, setSavedObjects] =
-  createGetterSetter<SavedObjectsStart>('SavedObjects');
 
 export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
 
