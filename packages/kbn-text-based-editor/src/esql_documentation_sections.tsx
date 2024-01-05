@@ -7,9 +7,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import * as md from '@kbn/shared-ux-markdown';
-
-const Markdown = md.Markdown;
+import { Markdown } from '@kbn/shared-ux-markdown';
 
 export const initialSection = (
   <Markdown readOnly>
