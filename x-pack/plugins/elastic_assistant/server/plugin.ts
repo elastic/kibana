@@ -18,9 +18,9 @@ import {
 } from '@kbn/core/server';
 import { once } from 'lodash';
 
+import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
-  AssistantFeatures,
   AssistantTool,
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,

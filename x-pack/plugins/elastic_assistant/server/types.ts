@@ -20,6 +20,7 @@ import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Tool } from 'langchain/dist/tools/base';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { RequestBody } from './lib/langchain/types';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 
@@ -119,13 +120,3 @@ export interface AssistantToolParams {
   request: KibanaRequest<unknown, unknown, RequestBody>;
   size?: number;
 }
-
-/**
- * Interfaces for features available to the elastic assistant
- */
-export type AssistantFeatures = { [K in keyof typeof assistantFeatures]: boolean };
-
-export const assistantFeatures = Object.freeze({
-  assistantModelEvaluation: false,
-  assistantStreamingEnabled: false,
-});

@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import type { AssistantFeatures } from '@kbn/elastic-assistant-plugin/server/types';
+import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 
 export interface GetCapabilitiesParams {
   http: HttpSetup;
