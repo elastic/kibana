@@ -34,6 +34,7 @@
     "@kbn/ml-plugin",
     "@kbn/apm-utils",
     "@kbn/core-analytics-server",
+    "@kbn/elastic-assistant-common",
   ],
   "exclude": [
     "target/**/*",
