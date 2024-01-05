@@ -17,7 +17,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { CloudPostureTableResult } from '../../common/hooks/use_cloud_posture_table';
+import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
 import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
@@ -40,7 +40,7 @@ const useNewFieldsApi = true;
 // Hide Checkbox, enable open details Flyout
 const controlColumnIds = ['openDetails'];
 
-interface CloudSecurityDataGridProps {
+export interface CloudSecurityDataTableProps {
   dataView: DataView;
   isLoading: boolean;
   defaultColumns: CloudSecurityDefaultColumn[];
@@ -52,10 +52,10 @@ interface CloudSecurityDataGridProps {
    */
   flyoutComponent: (hit: DataTableRecord, onCloseFlyout: () => void) => JSX.Element;
   /**
-   * This is the object that contains all the data and functions from the useCloudPostureTable hook.
+   * This is the object that contains all the data and functions from the useCloudPostureDataTable hook.
    * This is also used to manage the table state from the parent component.
    */
-  cloudPostureTable: CloudPostureTableResult;
+  cloudPostureDataTable: CloudPostureDataTableResult;
   title: string;
   /**
    * This is a function that returns a map of column ids to custom cell renderers.
@@ -78,6 +78,16 @@ interface CloudSecurityDataGridProps {
    * Height override for the data grid.
    */
   height?: number;
+  /**
+   * Callback Function when the DataView field is edited.
+   * Required to enable editing of the field in the data grid.
+   */
+  dataViewRefetch?: () => void;
+  /**
+   * Flag to indicate if the data view is refetching.
+   * Required for smoothing re-rendering the DataTable columns.
+   */
+  dataViewIsRefetching?: boolean;
 }
 
 export const CloudSecurityDataTable = ({
@@ -87,14 +97,16 @@ export const CloudSecurityDataTable = ({
   rows,
   total,
   flyoutComponent,
-  cloudPostureTable,
+  cloudPostureDataTable,
   loadMore,
   title,
   customCellRenderer,
   groupSelectorComponent,
   height,
+  dataViewRefetch,
+  dataViewIsRefetching,
   ...rest
-}: CloudSecurityDataGridProps) => {
+}: CloudSecurityDataTableProps) => {
   const {
     columnsLocalStorageKey,
     pageSize,
@@ -104,7 +116,7 @@ export const CloudSecurityDataTable = ({
     onResetFilters,
     filters,
     sort,
-  } = cloudPostureTable;
+  } = cloudPostureDataTable;
 
   const [columns, setColumns] = useLocalStorage(
     columnsLocalStorageKey,
@@ -242,6 +254,9 @@ export const CloudSecurityDataTable = ({
     opacity: isLoading ? 1 : 0,
   };
 
+  const loadingState =
+    isLoading || dataViewIsRefetching ? DataLoadingState.loading : DataLoadingState.loaded;
+
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
       <div
@@ -256,7 +271,7 @@ export const CloudSecurityDataTable = ({
           columns={currentColumns}
           expandedDoc={expandedDoc}
           dataView={dataView}
-          loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+          loadingState={loadingState}
           onFilter={onAddFilter as DocViewFilterFn}
           onResize={onResize}
           onSetColumns={onSetColumns}
@@ -281,6 +296,7 @@ export const CloudSecurityDataTable = ({
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
+          onFieldEdited={dataViewRefetch}
         />
       </div>
     </CellActionsProvider>
