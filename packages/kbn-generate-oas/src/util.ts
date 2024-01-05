@@ -7,13 +7,14 @@
  */
 
 import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
+import { RouterRoute, RouteValidatorConfig } from '@kbn/core-http-server';
 
 // https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/path.ts#L5
 export const getPathParameters = (path: string): string[] => {
   return Array.from(path.matchAll(/\{(.+?)\}/g)).map(([_, key]) => key!);
 };
 
-export const extractValidationSchemaFromHandler = (
+export const extractValidationSchemaFromVersionedHandler = (
   handler: VersionedRouterRoute['handlers'][0]
 ) => {
   if (handler.options.validate === false) return undefined;
@@ -23,4 +24,15 @@ export const extractValidationSchemaFromHandler = (
 
 export const getVersionedContentString = (version: string): string => {
   return `application/json; Elastic-Api-Version=${version}`;
+};
+
+export const getJSONContentString = () => {
+  return 'application/json';
+};
+
+export const extractValidationSchemaFromRoute = (
+  route: RouterRoute
+): undefined | RouteValidatorConfig<unknown, unknown, unknown> => {
+  if (route.validationSchemas === false) return undefined;
+  return route.validationSchemas;
 };

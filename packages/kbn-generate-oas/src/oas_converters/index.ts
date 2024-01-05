@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { OpenAPIV3 } from 'openapi-types';
 import { OpenAPIConverter } from '../type';
 
 import { zodConverter } from './zod';
@@ -13,6 +14,21 @@ import { kbnConfigSchemaConverter } from './kbn_config_schema';
 import { catchAllConverter } from './catch_all';
 
 const CONVERTERS: OpenAPIConverter[] = [kbnConfigSchemaConverter, zodConverter, catchAllConverter];
-export const getConverter = (schema: unknown): OpenAPIConverter => {
+const getConverter = (schema: unknown): OpenAPIConverter => {
   return CONVERTERS.find((c) => c.is(schema))!;
+};
+
+export const convert = (schema: unknown): OpenAPIV3.SchemaObject => {
+  return getConverter(schema).convert(schema);
+};
+
+export const convertPathParameters = (
+  schema: unknown,
+  pathParameters: string[]
+): OpenAPIV3.ParameterObject[] => {
+  return getConverter(schema).convertPathParameters(schema, pathParameters);
+};
+
+export const convertQuery = (schema: unknown): OpenAPIV3.ParameterObject[] => {
+  return getConverter(schema).convertQuery(schema);
 };

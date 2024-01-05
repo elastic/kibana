@@ -18,9 +18,13 @@ const instanceofZodType = (type: any): type is z.ZodTypeAny => {
   return !!type?._def?.typeName;
 };
 
+const createError = (message: string): Error => {
+  return new Error(`[Zod converter] ${message}`);
+};
+
 function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAny {
   if (!instanceofZodType(schema)) {
-    throw new Error('Zod validator expected');
+    throw createError('Expected schema to be an instance of Zod');
   }
 }
 
@@ -146,12 +150,12 @@ const convertObjectMembersToParameterObjects = (
     if (!instanceofZodTypeLikeString(subShape)) {
       if (zodSupportsCoerce) {
         if (!instanceofZodTypeCoercible(subShape)) {
-          throw new Error(
+          throw createError(
             `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`
           );
         }
       } else {
-        throw new Error(`Input parser key: "${shapeKey}" must be ZodString`);
+        throw createError(`Input parser key: "${shapeKey}" must be ZodString`);
       }
     }
 
@@ -171,7 +175,7 @@ const convertQuery = (schema: unknown): OpenAPIV3.ParameterObject[] => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
   if (!instanceofZodTypeObject(unwrappedSchema)) {
-    throw new Error('Query schema must be an _object_ schema validator!');
+    throw createError('Query schema must be an _object_ schema validator!');
   }
   const shape = unwrappedSchema.shape;
   const isRequired = !schema.isOptional();
@@ -188,7 +192,7 @@ const convertPathParameters = (
     return [];
   }
   if (!instanceofZodTypeObject(unwrappedSchema)) {
-    throw new Error('Parameters schema must be an _object_ schema validator!');
+    throw createError('Parameters schema must be an _object_ schema validator!');
   }
   const shape = unwrappedSchema.shape;
   const schemaKeys = Object.keys(shape);

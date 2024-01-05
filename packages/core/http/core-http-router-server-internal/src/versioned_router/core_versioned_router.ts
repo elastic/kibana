@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter } from '@kbn/core-http-server';
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
+import type { Router } from '../router';
 import { CoreVersionedRoute } from './core_versioned_route';
 import type { HandlerResolutionStrategy, Method, VersionedRouterRoute } from './types';
 
 /** @internal */
 interface Dependencies {
-  router: IRouter;
+  router: Router;
   defaultHandlerResolutionStrategy?: HandlerResolutionStrategy;
   /** Whether Kibana is running in a dev environment */
   isDev?: boolean;
@@ -25,7 +25,7 @@ export class CoreVersionedRouter implements VersionedRouter {
     return new CoreVersionedRouter(router, defaultHandlerResolutionStrategy, isDev);
   }
   private constructor(
-    public readonly router: IRouter,
+    public readonly router: Router,
     public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest',
     public readonly isDev: boolean = false
   ) {}

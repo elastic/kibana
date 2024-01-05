@@ -27,7 +27,7 @@ import apm from 'elastic-apm-node';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { CoreVersionedRouter, isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreVersionedRouter, isSafeMethod, Router } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -625,14 +625,19 @@ export class HttpServer {
       path: '/api/oas',
       method: 'GET',
       handler: (req, h) => {
-        if (this.oasCache) return h.response(this.oasCache);
+        // TODO cache the result of generating OAS
+        // if (this.oasCache) return h.response(this.oasCache);
         try {
           const routers = this.getRegisteredRouters().flatMap((r) => {
+            const rs: Array<Router | CoreVersionedRouter> = [];
+            if ((r as Router).getRoutes(true).length > 0) {
+              rs.push(r as Router);
+            }
             const versionedRouter = r.versioned as CoreVersionedRouter;
             if (versionedRouter.getRoutes().length > 0) {
-              return [versionedRouter];
+              rs.push(versionedRouter);
             }
-            return [];
+            return rs;
           });
           this.oasCache = generateOpenApiDocument(routers, {
             baseUrl: 'todo',

@@ -5,6 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import type { OpenAPIV3 } from 'openapi-types';
+
 const trimTrailingStar = (str: string) => str.replace(/\*$/, '');
 
 export const validatePathParameters = (pathParameters: string[], schemaKeys: string[]) => {
@@ -24,4 +27,10 @@ export const validatePathParameters = (pathParameters: string[], schemaKeys: str
       );
     }
   }
+};
+
+export const isReferenceObject = (schema: unknown): schema is OpenAPIV3.ReferenceObject => {
+  return (
+    Object.prototype.toString.call(schema) === '[object Object]' && '$ref' in (schema as object)
+  );
 };

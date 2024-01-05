@@ -92,7 +92,8 @@ export class CoreVersionedRoute implements VersionedRoute {
         validate: passThroughValidation,
         options: this.getRouteConfigOptions(),
       },
-      this.requestHandler
+      this.requestHandler,
+      { isVersioned: true }
     );
   }
 

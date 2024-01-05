@@ -12,17 +12,41 @@ import { isConfigSchema, Type } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OpenAPIConverter } from '../type';
-import { validatePathParameters } from './common';
+import { isReferenceObject } from './common';
 
 const parse = (schema: joi.Schema) => {
   return joiToJsonParse(schema, 'open-api');
 };
 
-const isObjectType = (schema: joi.Schema | joi.Description) => {
+const isObjectType = (schema: joi.Schema | joi.Description): boolean => {
   return schema.type === 'object';
 };
 
-const emptyObjectAllowsUnknowns = (schema: joi.Description) => {
+const isRecordType = (schema: joi.Schema | joi.Description): boolean => {
+  return schema.type === 'record';
+};
+
+// See the `schema.nullable` type in @kbn/config-schema
+// TODO: we need to generate better OAS for Kibana config schema nullable type
+const isNullableObjectType = (schema: joi.Schema | joi.Description): boolean => {
+  if (schema.type === 'alternatives') {
+    const { matches } = joi.isSchema(schema) ? schema.describe() : schema;
+    return (
+      matches.length === 2 &&
+      matches.every(
+        (match: { schema: joi.Description }) =>
+          match.schema.type === 'object' ||
+          (match.schema.type === 'any' &&
+            get(match, 'schema.flags.only') === true &&
+            get(match, 'schema.allow')?.length === 1 &&
+            get(match, 'schema.allow.0') === null)
+      )
+    );
+  }
+  return false;
+};
+
+const isEmptyObjectAllowsUnknowns = (schema: joi.Description) => {
   return (
     isObjectType(schema) &&
     Object.keys(schema.keys).length === 0 &&
@@ -30,9 +54,13 @@ const emptyObjectAllowsUnknowns = (schema: joi.Description) => {
   );
 };
 
+const createError = (message: string): Error => {
+  return new Error(`[@kbn/config-schema converter] ${message}`);
+};
+
 function assertInstanceOfKbnConfigSchema(schema: unknown): asserts schema is Type<any> {
   if (!is(schema)) {
-    throw new Error('@kbn/config-schema validator expected');
+    throw createError('Expected schema to be an instance of @kbn/config-schema');
   }
 }
 
@@ -57,29 +85,40 @@ const convertObjectMembersToParameterObjects = (
   schema: joi.Schema,
   isPathParameter = false
 ): OpenAPIV3.ParameterObject[] => {
+  let properties: Exclude<OpenAPIV3.SchemaObject['properties'], undefined>;
+  if (isNullableObjectType(schema)) {
+    const { anyOf }: { anyOf: OpenAPIV3.SchemaObject[] } = parse(schema);
+    properties = anyOf.find((s) => s.type === 'object')!.properties!;
+  } else if (isObjectType(schema)) {
+    ({ properties } = parse(schema));
+  } else if (isRecordType(schema)) {
+    return [];
+  } else {
+    throw createError(`Expected record, object or nullable object type, but got '${schema.type}'`);
+  }
+
   const isRequired = isSchemaRequired(schema);
-  const { properties } = parse(schema);
-  return Object.entries(properties as { [key: string]: OpenAPIV3.SchemaObject }).map(
-    ([schemaKey, schemaObject]) => {
-      const isSubSchemaRequired = isSchemaRequired(schemaObject);
-      const { description, ...openApiSchemaObject } = schemaObject;
-      return {
-        name: schemaKey,
-        in: isPathParameter ? 'path' : 'query',
-        required: isPathParameter || (isRequired && isSubSchemaRequired),
-        schema: openApiSchemaObject,
-        description,
-      };
+  return Object.entries(properties).map(([schemaKey, schemaObject]) => {
+    const isSubSchemaRequired = isSchemaRequired(schemaObject);
+    if (isReferenceObject(schemaObject)) {
+      throw createError(
+        `Expected schema but got reference object: ${JSON.stringify(schemaObject, null, 2)}`
+      );
     }
-  );
+    const { description, ...openApiSchemaObject } = schemaObject;
+    return {
+      name: schemaKey,
+      in: isPathParameter ? 'path' : 'query',
+      required: isPathParameter || (isRequired && isSubSchemaRequired),
+      schema: openApiSchemaObject,
+      description,
+    };
+  });
 };
 
 const convertQuery = (kbnConfigSchema: unknown): OpenAPIV3.ParameterObject[] => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  if (!isObjectType(schema)) {
-    throw new Error('Input parser must be a JoiSchema');
-  }
-  return convertObjectMembersToParameterObjects(schema, true);
+  return convertObjectMembersToParameterObjects(schema, false);
 };
 
 const convertPathParameters = (
@@ -88,13 +127,16 @@ const convertPathParameters = (
 ): OpenAPIV3.ParameterObject[] => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
 
-  if (!isObjectType(schema)) {
-    throw new Error('Input parser must be a JoiSchema');
+  if (isObjectType(schema)) {
+    // TODO: Revisit this validation logic
+    // const schemaDescription = schema.describe();
+    // const schemaKeys = Object.keys(schemaDescription.keys);
+    // validatePathParameters(pathParameters, schemaKeys);
+  } else if (isNullableObjectType(schema)) {
+    // nothing to do for now...
+  } else {
+    throw createError('Input parser for path params expected to be an object schema');
   }
-
-  const schemaDescription = schema.describe();
-  const schemaKeys = Object.keys(schemaDescription.keys);
-  validatePathParameters(pathParameters, schemaKeys);
 
   return convertObjectMembersToParameterObjects(schema, true);
 };
@@ -105,7 +147,7 @@ const is = (schema: unknown): boolean => {
     // We ignore "any" @kbn/config-schema for the purposes of OAS generation...
     if (
       description.type === 'any' ||
-      (!isSchemaRequired(description) && emptyObjectAllowsUnknowns(description))
+      (!isSchemaRequired(description) && isEmptyObjectAllowsUnknowns(description))
     ) {
       return false;
     }
