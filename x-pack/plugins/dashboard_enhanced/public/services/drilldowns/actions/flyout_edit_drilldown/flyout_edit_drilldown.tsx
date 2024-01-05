@@ -46,9 +46,11 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
   public readonly MenuItem = MenuItem as any;
 
   public async isCompatible({ embeddable }: EmbeddableContext) {
-    if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
+    return false;
+    // TODO
+    /*if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
     if (!isEnhancedEmbeddable(embeddable)) return false;
-    return embeddable.enhancements.dynamicActions.state.get().events.length > 0;
+    return embeddable.enhancements.dynamicActions.state.get().events.length > 0;*/
   }
 
   public async execute(context: EmbeddableContext) {

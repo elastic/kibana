@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { Provider } from 'react-redux';
 import { EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
 import {
@@ -42,6 +43,8 @@ const mapEmbeddableFactory: EmbeddableComponentFactory<MapInput, MapApi> = {
     });
     await savedMap.whenReady();
 
+    const viewMode$ = new BehaviorSubject<ViewMode>('edit');
+
     /**
      * Here we create the actual Component inline. This would be the equavalent of the
      *`Embeddable` class in the legacy system.
@@ -64,6 +67,8 @@ const mapEmbeddableFactory: EmbeddableComponentFactory<MapInput, MapApi> = {
              * Here we could open a flyout or modal to edit the embeddable.
              */
           },
+          //type: MAP_SAVED_OBJECT_TYPE,
+          viewMode: viewMode$,
           someSpecialMapFunction: () => {
             console.log('look at me, I am a special map function');
           },

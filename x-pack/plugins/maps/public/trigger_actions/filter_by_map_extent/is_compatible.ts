@@ -10,6 +10,7 @@ import { isLegacyMap } from '../../legacy_visualizations/is_legacy_map';
 import type { FilterByMapExtentActionContext } from './types';
 
 export function isCompatible({ embeddable }: FilterByMapExtentActionContext) {
+  console.log('embeddable.type', embeddable.type);
   return (
     (embeddable.type === MAP_SAVED_OBJECT_TYPE || isLegacyMap(embeddable)) &&
     !embeddable.getInput().disableTriggers

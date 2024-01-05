@@ -24,9 +24,11 @@ interface Context {
 }
 
 export async function isEditActionCompatible(embeddable: IEmbeddable) {
+  return false;
+  // TODO
   // display the action only if dashboard is on editable mode
-  const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
-  return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
+  /*const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
+  return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);*/
 }
 
 export async function executeEditAction({
