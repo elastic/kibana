@@ -37,11 +37,7 @@ export const useDiscoverInTimelineActions = (
   const { addError } = useAppToasts();
 
   const {
-    services: {
-      customDataService: discoverDataService,
-      savedSearch: savedSearchService,
-      // dataViews: dataViewService,
-    },
+    services: { customDataService: discoverDataService, savedSearch: savedSearchService },
   } = useKibana();
 
   const dispatch = useDispatch();
