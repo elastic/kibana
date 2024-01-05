@@ -26,8 +26,7 @@ import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
-const DEFAULT_ESQL_QUERY =
-  'from .alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-* | limit 10 | keep @timestamp, message, event.category, event.action, host.name, source.ip, destination.ip, user.name';
+const DEFAULT_ESQL_QUERY = '';
 
 describe(
   'Timeline Discover ESQL State',
