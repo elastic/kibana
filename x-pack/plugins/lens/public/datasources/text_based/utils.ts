@@ -43,7 +43,7 @@ export const getAllColumns = (
   existingColumns: TextBasedLayerColumn[],
   columnsFromQuery: DatatableColumn[]
 ) => {
-  // filter out columns that do not exist on the query
+  // ToDo: Possibly this is not needed
   const columns = existingColumns.filter((c) => {
     const columnExists = columnsFromQuery?.some((f) => f.name === c?.fieldName);
     if (columnExists) return c;
