@@ -23,7 +23,9 @@
     "@kbn/shared-ux-utility",
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock"
   ],
   "exclude": [
     "target/**/*",
