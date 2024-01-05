@@ -31,8 +31,8 @@ export const FlyoutWrapper = ({
   isScrollable,
   displayFlyoutHeader,
   language,
-  attributesChanged,
   isNewPanel,
+  isSaveable,
   onCancel,
   navigateToLensEditor,
   onApply,
@@ -153,7 +153,7 @@ export const FlyoutWrapper = ({
                 aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
                   defaultMessage: 'Apply changes',
                 })}
-                disabled={Boolean(isNewPanel) ? false : !attributesChanged}
+                disabled={Boolean(isNewPanel) ? false : !isSaveable}
                 iconType="check"
                 data-test-subj="applyFlyoutButton"
               >

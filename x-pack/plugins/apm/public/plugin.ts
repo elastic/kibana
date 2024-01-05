@@ -70,6 +70,7 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { ConfigSchema } from '.';
@@ -84,6 +85,7 @@ import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/la
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
+
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = void;
 
@@ -137,6 +139,7 @@ export interface ApmPluginStartDeps {
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
+  uiSettings: IUiSettingsClient;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
