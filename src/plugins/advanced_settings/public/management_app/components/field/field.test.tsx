@@ -9,6 +9,7 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 import { mount, ReactWrapper } from 'enzyme';
 import { FieldSetting } from '../../types';
 import { UiSettingsType } from '@kbn/core/public';
