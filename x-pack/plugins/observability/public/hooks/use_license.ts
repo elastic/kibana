@@ -14,7 +14,7 @@ import { useKibana } from '../utils/kibana_react';
 
 interface UseLicenseReturnValue {
   getLicense: () => ILicense | null;
-  hasAtLeast: (level: LicenseType) => boolean | undefined;
+  hasAtLeast: (level: LicenseType) => boolean;
 }
 
 export const useLicense = (): UseLicenseReturnValue => {
@@ -25,7 +25,7 @@ export const useLicense = (): UseLicenseReturnValue => {
     getLicense: () => license,
     hasAtLeast: useCallback(
       (level: LicenseType) => {
-        if (!license) return;
+        if (!license) return false;
 
         return !!license && license.isAvailable && license.isActive && license.hasAtLeast(level);
       },
