@@ -17,6 +17,13 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 
+interface BuildkiteStepFull {
+  agents: { queue: string };
+}
+interface BuildkiteStepPartial {
+  agents?: { queue?: string };
+}
+
 const DRY_RUN = process.argv.includes('--dry-run');
 
 if (!fs.existsSync('data/agents.json')) {
@@ -24,22 +31,6 @@ if (!fs.existsSync('data/agents.json')) {
     'data/agents.json does not exist - download it from https://github.com/elastic/kibana-buildkite/blob/main/agents.json'
   );
 }
-
-const agents = JSON.parse(fs.readFileSync('data/agents.json', 'utf8'));
-const agentNameUpdateMap: Record<string, { machineType: string; buildPath?: string }> =
-  agents.gcp.agents.reduce((acc: typeof agentNameUpdateMap, agent: any) => {
-    acc[agent.queue] = { machineType: agent.machineType };
-    if (agent.buildPath) {
-      acc[agent.queue].buildPath = agent.buildPath;
-    }
-    return acc;
-  }, {});
-
-const isOldStyleAgentTargetingRule = (step: any) => {
-  return (
-    step.agents && Object.keys(step.agents).length === 1 && Object.keys(step.agents)[0] === 'queue'
-  );
-};
 
 /**
  * Finds all .yml files in the .buildkite folder,
@@ -53,22 +44,28 @@ run(
       gitignore: true,
     });
 
-    /**
-     * For each path:
-     *  - open the file, read the yaml
-     *  - if there are no steps, skip
-     *  - if all steps' agents are old-style, and the same (only 'queue' key), remove these, add a global agent targeting rule
-     *  - if any individual step has an old-style, rewrite it to the new style
-     */
-    const promises: Array<Promise<void>> = [];
-    for (const ymlPath of paths) {
-      const p = rewriteFile(ymlPath, log).catch((e) => {
+    const failedRewrites: Array<{ path: string; error: Error }> = [];
+
+    const rewritePromises: Array<Promise<void>> = paths.map((ymlPath) => {
+      return rewriteFile(ymlPath, log).catch((e) => {
         // eslint-disable-next-line no-console
         console.error('Failed to rewrite: ' + ymlPath, e);
+        failedRewrites.push({
+          path: ymlPath,
+          error: e,
+        });
       });
-      promises.push(p);
+    });
+
+    await Promise.all(rewritePromises);
+
+    log.info(`Rewriting definitions complete with ${failedRewrites.length} errors.`);
+
+    if (failedRewrites.length) {
+      log.warning('Failed rewrites:', ...failedRewrites);
     }
-    await Promise.all(promises);
+
+    log.success('Done!');
   },
   {
     flags: {
@@ -78,18 +75,15 @@ run(
     Rewrites all agent targeting rules from the shorthands to the full targeting syntax
   `,
   }
-)
-  .then((log) => {
-    process.exit(0);
-  })
-  .catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error('Nem Szuccsesz', err);
-    process.exit(1);
-  });
+).catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('Failure:', err);
+  process.exit(1);
+});
 
 async function rewriteFile(ymlPath: string, log: ToolingLog) {
   let file = await readFile(resolve(REPO_ROOT, ymlPath), 'utf-8');
+
   log.info('Loading: ' + ymlPath);
   const doc = yaml.safeLoad(file);
 
@@ -98,17 +92,14 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
     return;
   }
 
-  const steps = doc.steps as any[];
-
-  for (const step of steps) {
+  for (const step of doc.steps as BuildkiteStepPartial[]) {
     if (isOldStyleAgentTargetingRule(step)) {
       log.info('Rewriting: ' + ymlPath, step);
       file = editYmlInPlace(file, [`queue: ${step.agents.queue}`], () => {
-        return yaml.safeDump({ queue: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
+        return yaml.safeDump({ queue: getFullAgentTargetingRule(step.agents.queue!) }).split('\n');
       });
     }
   }
-  log.info('Rewriting: ' + ymlPath);
 
   if (DRY_RUN) {
     await writeFile(resolve(REPO_ROOT, ymlPath + '.new'), file);
@@ -142,7 +133,19 @@ function editYmlInPlace(
   return lines.join('\n');
 }
 
+let agentNameUpdateMap: Record<string, { machineType: string; buildPath?: string }>;
 function getFullAgentTargetingRule(queue: string) {
+  if (!agentNameUpdateMap) {
+    const agents = JSON.parse(fs.readFileSync('data/agents.json', 'utf8'));
+    agentNameUpdateMap = agents.gcp.agents.reduce((acc: typeof agentNameUpdateMap, agent: any) => {
+      acc[agent.queue] = { machineType: agent.machineType };
+      if (agent.buildPath) {
+        acc[agent.queue].buildPath = agent.buildPath;
+      }
+      return acc;
+    }, {});
+  }
+
   return {
     provider: 'gcp',
     preemptible: true,
@@ -150,4 +153,14 @@ function getFullAgentTargetingRule(queue: string) {
     imageProject: 'elastic-images-qa',
     ...agentNameUpdateMap[queue],
   };
+}
+
+function isOldStyleAgentTargetingRule(
+  step: BuildkiteStepPartial
+): step is BuildkiteStepFull & boolean {
+  return !!(
+    step.agents &&
+    Object.keys(step.agents).length === 1 &&
+    Object.keys(step.agents)[0] === 'queue'
+  );
 }
