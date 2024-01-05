@@ -76,6 +76,19 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
 }> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
 
+  // populate the secret input with the value of the plain input in order to re-save the output with secret storage
+  if (useSecretsStorage) {
+    if (inputs.kafkaAuthPasswordInput.value && !inputs.kafkaAuthPasswordSecretInput.value) {
+      inputs.kafkaAuthPasswordSecretInput.setValue(inputs.kafkaAuthPasswordInput.value);
+      inputs.kafkaAuthPasswordInput.clear();
+    }
+
+    if (inputs.kafkaSslKeyInput.value && !inputs.kafkaSslKeySecretInput.value) {
+      inputs.kafkaSslKeySecretInput.setValue(inputs.kafkaSslKeyInput.value);
+      inputs.kafkaSslKeyInput.clear();
+    }
+  }
+
   const kafkaVerificationModeOptions = useMemo(
     () =>
       (Object.keys(kafkaVerificationModes) as Array<keyof typeof kafkaVerificationModes>).map(

@@ -24,6 +24,14 @@ interface Props {
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
 
+  // populate the secret input with the value of the plain input in order to re-save the output with secret storage
+  if (useSecretsStorage) {
+    if (inputs.serviceTokenInput.value && !inputs.serviceTokenSecretInput.value) {
+      inputs.serviceTokenSecretInput.setValue(inputs.serviceTokenInput.value);
+      inputs.serviceTokenInput.clear();
+    }
+  }
+
   return (
     <>
       <MultiRowInput

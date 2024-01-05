@@ -89,6 +89,14 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     setUseSecretsStorage(secretEnabled);
   };
 
+  // populate the secret input with the value of the plain input in order to re-save the output with secret storage
+  if (useSecretsStorage) {
+    if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
+      inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
+      inputs.sslKeyInput.clear();
+    }
+  }
+
   const proxiesOptions = useMemo(
     () => proxies.map((proxy) => ({ value: proxy.id, label: proxy.name })),
     [proxies]
