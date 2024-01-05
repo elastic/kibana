@@ -66,7 +66,6 @@ import {
   createAndInstallMockedPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
-import { clickAddElasticRulesButton } from '../../../../../tasks/prebuilt_rules';
 
 import {
   TOASTER,
@@ -201,11 +200,6 @@ describe(
           throttleUnit: 'd',
         };
 
-        clickAddElasticRulesButton();
-        cy.get('[data-test-subj^="installSinglePrebuiltRuleButton"]').eq(0).click();
-        cy.get(TOASTER).should('be.visible').should('have.text', `1 rule installed successfully.`);
-        visitRulesManagementTable();
-
         getRulesManagementTableRows().then((rows) => {
           // select both custom and prebuilt rules
           selectAllRules();
@@ -234,11 +228,6 @@ describe(
       });
 
       it('Overwrite rule actions in rules', () => {
-        clickAddElasticRulesButton();
-        cy.get('[data-test-subj^="installSinglePrebuiltRuleButton"]').eq(0).click();
-        cy.get(TOASTER).should('be.visible').should('have.text', `1 rule installed successfully.`);
-        visitRulesManagementTable();
-
         getRulesManagementTableRows().then((rows) => {
           // select both custom and prebuilt rules
           selectAllRules();
