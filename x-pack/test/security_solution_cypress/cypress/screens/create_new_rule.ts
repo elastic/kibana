@@ -29,6 +29,13 @@ export const ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL = `${ALERT_SUPPRESSION
 
 export const ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION = `${ALERT_SUPPRESSION_DURATION_OPTIONS} #per-rule-execution`;
 
+export const ALERT_SUPPRESSION_MISSING_FIELDS_OPTIONS =
+  '[data-test-subj="suppressionMissingFieldsOptions"]';
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS = `${ALERT_SUPPRESSION_MISSING_FIELDS_OPTIONS} #suppress`;
+
+export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS = `${ALERT_SUPPRESSION_MISSING_FIELDS_OPTIONS} #doNotSuppress`;
+
 export const ALERT_SUPPRESSION_DURATION_INPUT =
   '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationInput"]';
 
