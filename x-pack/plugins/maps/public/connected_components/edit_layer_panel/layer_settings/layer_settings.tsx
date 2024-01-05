@@ -172,21 +172,19 @@ export function LayerSettings(props: Props) {
   };
 
   const renderDisableTooltips = () => {
-    return !isVectorLayer(props.layer)
-      ? null
-      : (
-          <EuiFormRow display="columnCompressedSwitch">
-            <EuiSwitch
-              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.DisableTooltips', {
-                defaultMessage: `Show tooltips`,
-              })}
-              disabled={!props.layer.canShowTooltip()}
-              checked={!props.layer.areTooltipsDisabled()}
-              onChange={onShowTooltipsChange}
-              compressed
-            />
-          </EuiFormRow>
-        );
+    return !isVectorLayer(props.layer) ? null : (
+      <EuiFormRow display="columnCompressedSwitch">
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.layerPanel.settingsPanel.DisableTooltips', {
+            defaultMessage: `Show tooltips`,
+          })}
+          disabled={!props.layer.canShowTooltip()}
+          checked={!props.layer.areTooltipsDisabled()}
+          onChange={onShowTooltipsChange}
+          compressed
+        />
+      </EuiFormRow>
+    );
   };
 
   const renderShowLocaleSelector = () => {

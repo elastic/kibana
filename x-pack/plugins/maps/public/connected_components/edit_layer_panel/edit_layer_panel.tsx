@@ -94,7 +94,10 @@ export class EditLayerPanel extends Component<Props, State> {
       return;
     }
 
-    if (!this.props.selectedLayer.getSource().supportsJoins() || this.props.selectedLayer.getLeftJoinFields === undefined) {
+    if (
+      !this.props.selectedLayer.getSource().supportsJoins() ||
+      this.props.selectedLayer.getLeftJoinFields === undefined
+    ) {
       return;
     }
 

@@ -73,7 +73,8 @@ import { Mask } from './mask';
 const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
 export function isVectorLayer(layer: ILayer): layer is IVectorLayer {
-  return typeof (layer as IVectorLayer).addFeature === 'function' &&
+  return (
+    typeof (layer as IVectorLayer).addFeature === 'function' &&
     typeof (layer as IVectorLayer).canShowTooltip === 'function' &&
     typeof (layer as IVectorLayer).deleteFeature === 'function' &&
     typeof (layer as IVectorLayer).getFields === 'function' &&
@@ -82,7 +83,8 @@ export function isVectorLayer(layer: ILayer): layer is IVectorLayer {
     typeof (layer as IVectorLayer).getMbTooltipLayerIds === 'function' &&
     typeof (layer as IVectorLayer).getValidJoins === 'function' &&
     typeof (layer as IVectorLayer).hasJoins === 'function' &&
-    typeof (layer as IVectorLayer).supportsFeatureEditing === 'function';
+    typeof (layer as IVectorLayer).supportsFeatureEditing === 'function'
+  );
 }
 
 export interface VectorLayerArguments {
