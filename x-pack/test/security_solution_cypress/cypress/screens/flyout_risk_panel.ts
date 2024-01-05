@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../../helpers/common';
+import { getDataTestSubjectSelector } from '../helpers/common';
 
-export const RISK_INPUT_BUTTON = getDataTestSubjectSelector('riskInputsTitleLink');
+export const RISK_INPUTS_BUTTON = getDataTestSubjectSelector('riskInputsTitleLink');
 export const RISK_INPUT_PANEL_HEADER = getDataTestSubjectSelector(
   'securitySolutionFlyoutRiskInputsTab'
 );

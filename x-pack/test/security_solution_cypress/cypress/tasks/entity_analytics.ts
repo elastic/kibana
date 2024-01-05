@@ -42,6 +42,7 @@ export const navigateToNextPage = () => {
 export const riskEngineStatusChange = () => {
   cy.get(RISK_SCORE_SWITCH).should('not.have.attr', 'disabled');
   cy.get(RISK_SCORE_SWITCH).click();
+  cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
 };
 
 export const enableRiskEngine = () => {

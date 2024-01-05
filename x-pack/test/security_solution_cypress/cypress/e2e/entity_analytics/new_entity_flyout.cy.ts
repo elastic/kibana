@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RiskScoreEntity } from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   expandFirstAlertHostFlyout,
   expandFirstAlertUserFlyout,
@@ -16,16 +15,13 @@ import { ALERTS_URL } from '../../urls/navigation';
 import { enableRiskEngine } from '../../tasks/entity_analytics';
 import { deleteRiskEngineConfiguration } from '../../tasks/api_calls/risk_engine';
 import { USER_PANEL_HEADER } from '../../screens/hosts/flyout_user_panel';
-import { getNewRule } from '../../objects/rule';
-import { createRule } from '../../tasks/api_calls/rules';
 import { waitForAlerts } from '../../tasks/alerts';
-import { deleteRiskScore } from '../../tasks/api_calls/risk_scores';
-import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
 import { HOST_PANEL_HEADER } from '../../screens/hosts/flyout_host_panel';
-import { RISK_INPUT_BUTTON, RISK_INPUT_PANEL_HEADER } from '../../screens/hosts/flyout_risk_panel';
+import { RISK_INPUT_PANEL_HEADER } from '../../screens/flyout_risk_panel';
+import { expandRiskInputsFlyoutPanel } from '../../tasks/risk_scores/risk_inputs_flyout_panel';
 
-const USER_NAME = 'test';
-const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
+const USER_NAME = 'user1';
+const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
 
 describe(
   'Entity Flyout',
@@ -44,51 +40,46 @@ describe(
   },
   () => {
     before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'all_users' });
       login();
-      createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
       enableRiskEngine();
+      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'all_users');
+      cy.task('esArchiverUnload', 'risk_scores_new');
+      cy.task('esArchiverUnload', 'query_alert');
       deleteRiskEngineConfiguration();
-      deleteAlertsAndRules();
-      deleteRiskScore({ riskScoreEntity: RiskScoreEntity.user, spaceId: 'default' });
     });
 
     describe('User details', () => {
-      beforeEach(() => {
+      it('should display entity flyout and open risk input panel', () => {
         login();
         visitWithTimeRange(ALERTS_URL);
         waitForAlerts();
         expandFirstAlertUserFlyout();
-      });
 
-      it('should display entity flyout and open risk input panel', () => {
         cy.log('header section');
         cy.get(USER_PANEL_HEADER).should('contain.text', USER_NAME);
 
         cy.log('risk input');
-        cy.get(RISK_INPUT_BUTTON).click();
+        expandRiskInputsFlyoutPanel();
         cy.get(RISK_INPUT_PANEL_HEADER).should('exist');
       });
     });
 
     describe('Host details', () => {
-      beforeEach(() => {
+      it('should display entity flyout and open risk input panel', () => {
         login();
         visitWithTimeRange(ALERTS_URL);
         waitForAlerts();
         expandFirstAlertHostFlyout();
-      });
 
-      it('should display entity flyout and open risk input panel', () => {
         cy.log('header section');
         cy.get(HOST_PANEL_HEADER).should('contain.text', SIEM_KIBANA_HOST_NAME);
 
         cy.log('risk input');
-        cy.get(RISK_INPUT_BUTTON).click();
+        expandRiskInputsFlyoutPanel();
         cy.get(RISK_INPUT_PANEL_HEADER).should('exist');
       });
     });
