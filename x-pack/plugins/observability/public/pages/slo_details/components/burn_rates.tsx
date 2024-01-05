@@ -111,7 +111,7 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
                 <h2>
                   {i18n.translate('xpack.observability.slo.burnRate.title', {
                     defaultMessage: 'Burn rate',
-                  })}{' '}
+                  })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -152,7 +152,7 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
             <BurnRate threshold={threshold} burnRate={burnRate} slo={slo} isLoading={isLoading} />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
-            <ErrorRateChart slo={slo} fromRange={fromRange} />
+            <ErrorRateChart slo={slo} fromRange={fromRange} threshold={threshold} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

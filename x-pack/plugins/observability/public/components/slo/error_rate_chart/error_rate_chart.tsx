@@ -16,13 +16,14 @@ import { useLensDefinition } from './use_lens_definition';
 interface Props {
   slo: SLOResponse;
   fromRange: Date;
+  threshold: number;
 }
 
-export function ErrorRateChart({ slo, fromRange }: Props) {
+export function ErrorRateChart({ slo, fromRange, threshold }: Props) {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
-  const lensDef = useLensDefinition(slo);
+  const lensDef = useLensDefinition(slo, threshold);
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
 
   const from = moment(fromRange).subtract(delayInSeconds, 'seconds').toISOString();

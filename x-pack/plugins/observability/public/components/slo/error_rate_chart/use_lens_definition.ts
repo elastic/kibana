@@ -10,7 +10,10 @@ import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ALL_VALUE, SLOResponse, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 
-export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attributes'] {
+export function useLensDefinition(
+  slo: SLOResponse,
+  threshold: number
+): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
   const interval = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
@@ -72,36 +75,10 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
           {
             layerId: '34298f84-681e-4fa3-8107-d6facb32ed92',
             layerType: 'referenceLine',
-            accessors: [
-              '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
-              '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762',
-              'c531a6b1-70dd-4918-bdd0-a21535a7af05',
-              '61f9e663-10eb-41f7-b584-1f0f95418489',
-            ],
+            accessors: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6'],
             yConfig: [
               {
                 forAccessor: '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
-                axisMode: 'left',
-                textVisibility: true,
-                color: euiTheme.colors.danger,
-                iconPosition: 'right',
-              },
-              {
-                forAccessor: '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762',
-                axisMode: 'left',
-                textVisibility: true,
-                color: euiTheme.colors.danger,
-                iconPosition: 'right',
-              },
-              {
-                forAccessor: 'c531a6b1-70dd-4918-bdd0-a21535a7af05',
-                axisMode: 'left',
-                textVisibility: true,
-                color: euiTheme.colors.danger,
-                iconPosition: 'right',
-              },
-              {
-                forAccessor: '61f9e663-10eb-41f7-b584-1f0f95418489',
                 axisMode: 'left',
                 textVisibility: true,
                 color: euiTheme.colors.danger,
@@ -326,7 +303,7 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
               linkToLayers: [],
               columns: {
                 '0a42b72b-cd5a-4d59-81ec-847d97c268e6X0': {
-                  label: 'Part of 14.4x',
+                  label: `Part of ${threshold}x`,
                   dataType: 'number',
                   operationType: 'math',
                   isBucketed: false,
@@ -347,186 +324,36 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
                           },
                           text: `1 - ${slo.objective.target}`,
                         },
-                        14.4,
+                        threshold,
                       ],
                       location: {
                         min: 0,
                         max: 17,
                       },
-                      text: `(1 - ${slo.objective.target}) * 14.4`,
+                      text: `(1 - ${slo.objective.target}) * ${threshold}`,
                     },
                   },
                   references: [],
                   customLabel: true,
                 },
                 '0a42b72b-cd5a-4d59-81ec-847d97c268e6': {
-                  label: '14.4x',
+                  label: `${threshold}x`,
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
                   scale: 'ratio',
                   params: {
                     // @ts-ignore
-                    formula: `(1 - ${slo.objective.target}) * 14.4`,
+                    formula: `(1 - ${slo.objective.target}) * ${threshold}`,
                     isFormulaBroken: false,
                   },
                   references: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6X0'],
-                  customLabel: true,
-                },
-                '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762X0': {
-                  label: 'Part of 6x',
-                  dataType: 'number',
-                  operationType: 'math',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    tinymathAst: {
-                      type: 'function',
-                      name: 'multiply',
-                      args: [
-                        {
-                          type: 'function',
-                          name: 'subtract',
-                          args: [1, slo.objective.target],
-                          location: {
-                            min: 1,
-                            max: 9,
-                          },
-                          text: `1 - ${slo.objective.target}`,
-                        },
-                        6,
-                      ],
-                      location: {
-                        min: 0,
-                        max: 14,
-                      },
-                      text: `(1 - ${slo.objective.target}) * 6`,
-                    },
-                  },
-                  references: [],
-                  customLabel: true,
-                },
-                '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762': {
-                  label: '6x',
-                  dataType: 'number',
-                  operationType: 'formula',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    formula: `(1 - ${slo.objective.target}) * 6`,
-                    isFormulaBroken: false,
-                  },
-                  references: ['76d3bcc9-7d45-4b08-b2b1-8d3866ca0762X0'],
-                  customLabel: true,
-                },
-                'c531a6b1-70dd-4918-bdd0-a21535a7af05X0': {
-                  label: 'Part of 3x',
-                  dataType: 'number',
-                  operationType: 'math',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    tinymathAst: {
-                      type: 'function',
-                      name: 'multiply',
-                      args: [
-                        {
-                          type: 'function',
-                          name: 'subtract',
-                          args: [1, slo.objective.target],
-                          location: {
-                            min: 1,
-                            max: 9,
-                          },
-                          text: `1 - ${slo.objective.target}`,
-                        },
-                        3,
-                      ],
-                      location: {
-                        min: 0,
-                        max: 14,
-                      },
-                      text: `(1 - ${slo.objective.target}) * 3`,
-                    },
-                  },
-                  references: [],
-                  customLabel: true,
-                },
-                'c531a6b1-70dd-4918-bdd0-a21535a7af05': {
-                  label: '3x',
-                  dataType: 'number',
-                  operationType: 'formula',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    formula: `(1 - ${slo.objective.target}) * 3`,
-                    isFormulaBroken: false,
-                  },
-                  references: ['c531a6b1-70dd-4918-bdd0-a21535a7af05X0'],
-                  customLabel: true,
-                },
-                '61f9e663-10eb-41f7-b584-1f0f95418489X0': {
-                  label: 'Part of 1x',
-                  dataType: 'number',
-                  operationType: 'math',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    tinymathAst: {
-                      type: 'function',
-                      name: 'multiply',
-                      args: [
-                        {
-                          type: 'function',
-                          name: 'subtract',
-                          args: [1, slo.objective.target],
-                          location: {
-                            min: 1,
-                            max: 9,
-                          },
-                          text: `1 - ${slo.objective.target}`,
-                        },
-                        1,
-                      ],
-                      location: {
-                        min: 0,
-                        max: 14,
-                      },
-                      text: `(1 - ${slo.objective.target}) * 1`,
-                    },
-                  },
-                  references: [],
-                  customLabel: true,
-                },
-                '61f9e663-10eb-41f7-b584-1f0f95418489': {
-                  label: '1x',
-                  dataType: 'number',
-                  operationType: 'formula',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    formula: `(1 - ${slo.objective.target}) * 1`,
-                    isFormulaBroken: false,
-                  },
-                  references: ['61f9e663-10eb-41f7-b584-1f0f95418489X0'],
                   customLabel: true,
                 },
               },
               columnOrder: [
                 '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
                 '0a42b72b-cd5a-4d59-81ec-847d97c268e6X0',
-                '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762X0',
-                '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762',
-                'c531a6b1-70dd-4918-bdd0-a21535a7af05X0',
-                'c531a6b1-70dd-4918-bdd0-a21535a7af05',
-                '61f9e663-10eb-41f7-b584-1f0f95418489X0',
-                '61f9e663-10eb-41f7-b584-1f0f95418489',
               ],
               sampling: 1,
               ignoreGlobalFilters: false,
