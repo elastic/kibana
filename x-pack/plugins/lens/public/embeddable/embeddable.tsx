@@ -1542,12 +1542,17 @@ export class Embeddable
    * @returns Local/panel-level array of filters for Lens embeddable
    */
   public getFilters() {
-    return mapAndFlattenFilters(
-      this.deps.injectFilterReferences(
-        this.savedVis?.state.filters ?? [],
-        this.savedVis?.references ?? []
-      )
-    );
+    try {
+      return mapAndFlattenFilters(
+        this.deps.injectFilterReferences(
+          this.savedVis?.state.filters ?? [],
+          this.savedVis?.references ?? []
+        )
+      );
+    } catch (e) {
+      // if we can't parse the filters, we publish an empty array.
+      return [];
+    }
   }
   public localFilters;
 

@@ -19,12 +19,13 @@ import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
 
-interface EmbeddablePanelErrorProps {
+export const PresentationPanelError = ({
+  api,
+  error,
+}: {
   error: ErrorLike;
-  api: DefaultPresentationPanelApi;
-}
-
-export const PresentationPanelError = ({ api, error }: EmbeddablePanelErrorProps) => {
+  api?: DefaultPresentationPanelApi;
+}) => {
   const [isEditable, setIsEditable] = useState(false);
   const handleErrorClick = useMemo(
     () => (isEditable ? () => editPanelAction?.execute({ embeddable: api }) : undefined),

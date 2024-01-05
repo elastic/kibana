@@ -122,9 +122,6 @@ export const legacyEmbeddableToApi = (
     return !isInputControl && !isMarkdown && !isImage && !isNavigation;
   };
 
-  /**
-   * Forward Link & Unlink actions for reference or value embeddables.
-   */
   return {
     api: {
       uuid,

@@ -6,133 +6,56 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
-import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Subscription } from 'rxjs';
+import './_presentation_panel.scss';
 
+import { EuiFlexGroup } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
-import { apiFiresPhaseEvents, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
+import { isPromise } from '@kbn/std';
+import React from 'react';
+import useAsync from 'react-use/lib/useAsync';
+import { untilPluginStartServicesReady } from '../kibana_services';
 import { PresentationPanelError } from './presentation_panel_error';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
 
-export const PresentationPanelInternal = <
+export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  ComponentPropsType extends {} = {}
->({
-  index,
-  hideHeader,
-  showShadow,
+  PropsType extends {} = {}
+>(
+  props: PresentationPanelProps<ApiType, PropsType>
+) => {
+  const { Component, ...passThroughProps } = props;
+  const { loading, value, error } = useAsync(async () => {
+    const startServicesPromise = untilPluginStartServicesReady();
+    const modulePromise = await import('./presentation_panel_internal');
+    const componentPromise = isPromise(Component) ? Component : Promise.resolve(Component);
+    const [, unwrappedComponent, panelModule] = await Promise.all([
+      startServicesPromise,
+      componentPromise,
+      modulePromise,
+    ]);
+    const Panel = panelModule.PresentationPanelInternal;
+    return { Panel, unwrappedComponent };
+  }, []);
 
-  showBadges,
-  showNotifications,
-  getActions,
-  actionPredicate,
-
-  Component,
-  componentProps,
-
-  onPanelStatusChange,
-}: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
-  const [api, setApi] = useState<ApiType | null>(null);
-  const headerId = useMemo(() => htmlIdGenerator()(), []);
-
-  const {
-    uuid,
-    viewMode,
-    blockingError,
-    panelTitle,
-    dataLoading,
-    hidePanelTitle,
-    panelDescription,
-    defaultPanelTitle,
-    parentHidePanelTitle,
-  } = useBatchedPublishingSubjects({
-    dataLoading: api?.dataLoading,
-    blockingError: api?.blockingError,
-    viewMode: api?.viewMode,
-    uuid: api?.uuid,
-
-    panelTitle: api?.panelTitle,
-    hidePanelTitle: api?.hidePanelTitle,
-    panelDescription: api?.panelDescription,
-    defaultPanelTitle: api?.defaultPanelTitle,
-    parentHidePanelTitle: (api?.parentApi?.value as DefaultPresentationPanelApi)?.hidePanelTitle,
-  });
-
-  const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (dataLoading === false && !initialLoadComplete) {
-    setInitialLoadComplete(true);
+  if (error) {
+    return (
+      <EuiFlexGroup
+        alignItems="center"
+        className="eui-fullHeight embPanel__error"
+        data-test-subj="embeddableError"
+        justifyContent="center"
+      >
+        <PresentationPanelError error={error} />
+      </EuiFlexGroup>
+    );
   }
 
-  const hideTitle =
-    Boolean(hidePanelTitle) ||
-    Boolean(parentHidePanelTitle) ||
-    (viewMode === 'view' && !Boolean(panelTitle ?? defaultPanelTitle));
-
-  useEffect(() => {
-    let subscription: Subscription;
-    if (api && onPanelStatusChange && apiFiresPhaseEvents(api)) {
-      subscription = api.onPhaseChange.subscribe((phase) => onPanelStatusChange(phase));
-    }
-    return () => subscription?.unsubscribe();
-  }, [api, onPanelStatusChange]);
-
-  const contentAttrs = useMemo(() => {
-    const attrs: { [key: string]: boolean } = {};
-    if (dataLoading) attrs['data-loading'] = true;
-    if (blockingError) attrs['data-error'] = true;
-    return attrs;
-  }, [dataLoading, blockingError]);
+  if (loading || !value?.Panel || !value?.unwrappedComponent)
+    return (
+      <PanelLoader showShadow={props.showShadow} dataTestSubj="embeddablePanelLoadingIndicator" />
+    );
 
   return (
-    <EuiPanel
-      role="figure"
-      paddingSize="none"
-      className={classNames('embPanel', {
-        'embPanel--editing': viewMode !== 'view',
-      })}
-      hasShadow={showShadow}
-      aria-labelledby={headerId}
-      data-test-embeddable-id={uuid}
-      data-test-subj="embeddablePanel"
-    >
-      {!hideHeader && api && (
-        <PresentationPanelHeader
-          api={api}
-          index={index}
-          headerId={headerId}
-          viewMode={viewMode}
-          hideTitle={hideTitle}
-          showBadges={showBadges}
-          getActions={getActions}
-          actionPredicate={actionPredicate}
-          panelDescription={panelDescription}
-          showNotifications={showNotifications}
-          panelTitle={panelTitle ?? defaultPanelTitle}
-        />
-      )}
-      {blockingError && api && (
-        <EuiFlexGroup
-          alignItems="center"
-          className="eui-fullHeight embPanel__error"
-          data-test-subj="embeddableError"
-          justifyContent="center"
-        >
-          <PresentationPanelError api={api} error={blockingError} />
-        </EuiFlexGroup>
-      )}
-      {!initialLoadComplete && <PanelLoader />}
-      <div className={blockingError ? 'embPanel__content--hidden' : 'embPanel__content'}>
-        <Component
-          {...(componentProps as React.ComponentProps<typeof Component>)}
-          {...contentAttrs}
-          ref={(newApi) => {
-            if (newApi && !api) setApi(newApi);
-          }}
-        />
-      </div>
-    </EuiPanel>
+    <value.Panel<ApiType, PropsType> Component={value.unwrappedComponent} {...passThroughProps} />
   );
 };
