@@ -82,6 +82,7 @@
     "@kbn/text-based-languages",
     "@kbn/es-types",
     "@kbn/data-service",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",

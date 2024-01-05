@@ -30,6 +30,7 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",
