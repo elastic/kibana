@@ -110,6 +110,7 @@ export async function getStateFromAggregateQuery(
     timeFieldName = dataView.timeFieldName;
     const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
     columnsFromQuery = table?.columns ?? [];
+    addToCache(columnsFromQuery);
     allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
   } catch (e) {
     errors.push(e);
@@ -127,7 +128,6 @@ export async function getStateFromAggregateQuery(
       },
     },
   };
-  addToCache(columnsFromQuery);
 
   return {
     ...tempState,
