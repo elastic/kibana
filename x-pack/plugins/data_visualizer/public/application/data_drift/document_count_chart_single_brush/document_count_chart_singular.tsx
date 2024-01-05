@@ -42,6 +42,9 @@ import {
   getSnappedSingleBrushWindowParameters,
 } from './single_brush';
 
+// TODO Consolidate with similar component `DocumentCountChartWithBrush` in
+// x-pack/packages/ml/aiops_components/src/document_count_chart/document_count_chart.tsx
+
 declare global {
   interface Window {
     /**
@@ -77,7 +80,7 @@ export interface BrushSettings {
 /**
  * Callback function which gets called when the brush selection has changed
  *
- * @param windowParameters Baseline and deviation time ranges.
+ * @param windowParameters Brush selection time ranges.
  * @param force Force update
  */
 export type BrushSelectionUpdateHandler = (

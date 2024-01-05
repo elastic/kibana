@@ -79,7 +79,7 @@ export interface BrushSettings {
 /**
  * Callback function which gets called when the brush selection has changed
  *
- * @param windowParameters Time ranges.
+ * @param windowParameters Baseline and deviation time ranges.
  * @param force Force update
  * @param logRateAnalysisType `spike` or `dip` based on median log rate bucket size
  */
