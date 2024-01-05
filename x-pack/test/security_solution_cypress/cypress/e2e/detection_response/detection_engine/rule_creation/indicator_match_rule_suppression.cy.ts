@@ -56,11 +56,10 @@ describe(
       cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
       deleteAlertsAndRules();
       login();
+      visit(CREATE_RULE_URL);
     });
 
     it('creates rule with per rule execution suppression', () => {
-      login();
-      visit(CREATE_RULE_URL);
       selectIndicatorMatchType();
       fillDefineIndicatorMatchRule(rule);
 
@@ -94,8 +93,7 @@ describe(
 
     it('creates rule rule with time interval suppression', () => {
       const expectedSuppressByFields = SUPPRESS_BY_FIELDS.slice(0, 1);
-      login();
-      visit(CREATE_RULE_URL);
+
       selectIndicatorMatchType();
       fillDefineIndicatorMatchRule(rule);
 

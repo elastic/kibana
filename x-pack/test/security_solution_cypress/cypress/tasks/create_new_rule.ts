@@ -829,6 +829,10 @@ export const selectAlertSuppressionPerInterval = () => {
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).click({ force: true });
 };
 
+export const selectAlertSuppressionPerRuleExecution = () => {
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).siblings('label').click();
+};
+
 export const selectDoNotSuppressForMissingFields = () => {
   cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).siblings('label').click();
 };
