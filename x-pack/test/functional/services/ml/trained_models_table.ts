@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 import { upperFirst } from 'lodash';
 
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonUI } from './common_ui';
 import { MappedInputParams, MappedOutput, ModelType, TrainedModelsActions } from './trained_models';
