@@ -8,10 +8,12 @@
 
 import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
 
-import { Browsers } from '../remote/browsers';
-import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
-import { TimeoutOpt } from './types';
+import { Browsers } from './remote/browsers';
+import type { FtrProviderContext } from './ftr_provider_context';
+import { WebElementWrapper } from './web_element_wrapper';
+import { TimeoutOpt } from '../types';
+
+import { FtrService } from './ftr_provider_context';
 
 export class FindService extends FtrService {
   private readonly log = this.ctx.getService('log');
