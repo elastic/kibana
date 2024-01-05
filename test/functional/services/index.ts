@@ -13,7 +13,6 @@ import { AppsMenuService } from './apps_menu';
 import {
   BrowserProvider,
   FailureDebuggingProvider,
-  FindProvider,
   PngService,
   ScreenshotsService,
   SnapshotsService,
@@ -40,7 +39,6 @@ import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
 import { QueryBarService } from './query_bar';
-import { RemoteProvider } from './remote';
 import { RenderableService } from './renderable';
 import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
@@ -61,10 +59,8 @@ import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
 export const services = {
   ...commonServiceProviders,
   ...commonFunctionalUIServices,
-  __webdriver__: RemoteProvider,
   filterBar: FilterBarService,
   queryBar: QueryBarService,
-  find: FindProvider,
   testSubjects: TestSubjects,
   docTable: DocTableService,
   png: PngService,

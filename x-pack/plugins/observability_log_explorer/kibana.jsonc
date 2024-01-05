@@ -16,6 +16,7 @@
       "discover",
       "logExplorer",
       "logsShared",
+      "observabilityAIAssistant",
       "observabilityShared",
       "share",
       "kibanaUtils",
@@ -24,7 +25,9 @@
     "optionalPlugins": [
       "serverless"
     ],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
     "extraPublicDirs": [
       "common",
     ]

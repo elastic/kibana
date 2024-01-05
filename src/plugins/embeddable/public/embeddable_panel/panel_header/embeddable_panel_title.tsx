@@ -11,9 +11,10 @@ import React, { useMemo } from 'react';
 import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { IEmbeddable, ViewMode } from '../../lib';
-import { CustomizePanelAction } from '../panel_actions';
 import { getEditTitleAriaLabel, placeholderTitle } from '../embeddable_panel_strings';
 import { EmbeddablePanelPopover } from './embeddable_panel_popover';
+import { EditPanelAction } from '../panel_actions';
+import { openCustomizePanelFlyout } from '../panel_actions/customize_panel_action/open_customize_panel';
 
 const AI_SUPPORTED_INTEGRATIONS = ['[Metrics Oracle]', '[Metrics Kubernetes]'];
 
@@ -27,13 +28,13 @@ export const EmbeddablePanelTitle = ({
   hideTitle,
   embeddable,
   description,
-  customizePanelAction,
+  editPanelAction,
 }: {
   hideTitle?: boolean;
   viewMode?: ViewMode;
   description?: string;
   embeddable: IEmbeddable;
-  customizePanelAction?: CustomizePanelAction;
+  editPanelAction?: EditPanelAction;
 }) => {
   const title = embeddable.getTitle();
   const aiExplanationSupported = supportsAIPopover(title);
@@ -48,27 +49,35 @@ export const EmbeddablePanelTitle = ({
     if (viewMode === ViewMode.VIEW) {
       return <span className={titleClassNames}>{title}</span>;
     }
-    if (customizePanelAction) {
+    if (editPanelAction) {
       return (
         <EuiLink
           color="text"
           className={titleClassNames}
           aria-label={getEditTitleAriaLabel(title)}
           data-test-subj={'embeddablePanelTitleLink'}
-          onClick={() => customizePanelAction.execute({ embeddable })}
+          onClick={() =>
+            openCustomizePanelFlyout({
+              editPanel: editPanelAction,
+              embeddable,
+              focusOnTitle: true,
+            })
+          }
         >
           {title || placeholderTitle}
         </EuiLink>
       );
     }
     return null;
-  }, [customizePanelAction, embeddable, title, viewMode, hideTitle]);
+  }, [editPanelAction, embeddable, title, viewMode, hideTitle]);
 
   const titleComponentWithDescription = useMemo(() => {
     if (!description)
       return (
         <>
-          <span className="embPanel__titleInner">{titleComponent}</span>
+          <span className="embPanel__titleInner" data-test-subj="embeddablePanelTitleInner">
+            {titleComponent}
+          </span>
           {aiExplanationSupported ? <EmbeddablePanelPopover title={title} /> : null}
         </>
       );
@@ -78,8 +87,9 @@ export const EmbeddablePanelTitle = ({
         delay="regular"
         position="top"
         anchorClassName="embPanel__titleTooltipAnchor"
+        anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
       >
-        <span className="embPanel__titleInner">
+        <span className="embPanel__titleInner" data-test-subj="embeddablePanelTitleInner">
           {titleComponent}{' '}
           <EuiIcon
             type="iInCircle"

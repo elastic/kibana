@@ -11,9 +11,10 @@ import { PrettyDuration } from '@elastic/eui';
 import { renderToString } from 'react-dom/server';
 import { Action } from '@kbn/ui-actions-plugin/public';
 
-import { Embeddable } from '../../..';
+import { EditPanelAction, Embeddable } from '../../..';
 import { doesInheritTimeRange } from './does_inherit_time_range';
-import { TimeRangeInput, hasTimeRange, CustomizePanelAction } from './customize_panel_action';
+import { CustomizePanelAction } from './customize_panel_action';
+import { hasTimeRange, TimeRangeInput } from './time_range_helpers';
 
 export const CUSTOM_TIME_RANGE_BADGE = 'CUSTOM_TIME_RANGE_BADGE';
 
@@ -28,6 +29,13 @@ export class CustomTimeRangeBadge
   public readonly type = CUSTOM_TIME_RANGE_BADGE;
   public readonly id = CUSTOM_TIME_RANGE_BADGE;
   public order = 7;
+
+  constructor(
+    protected readonly editPanel: EditPanelAction,
+    protected readonly dateFormat?: string
+  ) {
+    super(editPanel);
+  }
 
   public getDisplayName({ embeddable }: TimeBadgeActionContext) {
     return renderToString(
