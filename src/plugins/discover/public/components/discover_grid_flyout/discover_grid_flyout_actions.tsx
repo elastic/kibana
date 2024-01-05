@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { slice } from 'lodash';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +23,7 @@ import {
   EuiButtonIcon,
   EuiPopoverProps,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { FlyoutActionItem } from '../../customizations';
 
@@ -32,7 +34,9 @@ export interface DiscoverGridFlyoutActionsProps {
 }
 
 export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutActionsProps) {
-  const [isMoreFlyoutActionsPopoverOpen, setIsMoreFlyoutActionsPopover] = useState<boolean>(false);
+  const { euiTheme } = useEuiTheme();
+  const [isMoreFlyoutActionsPopoverOpen, setIsMoreFlyoutActionsPopoverOpen] =
+    useState<boolean>(false);
   const isMobileScreen = useIsWithinBreakpoints(['xs', 's']);
   const isLargeScreen = useIsWithinBreakpoints(['xl']);
 
@@ -48,7 +52,7 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
             iconSide="right"
             flush="left"
             data-test-subj="docViewerMobileActionsButton"
-            onClick={() => setIsMoreFlyoutActionsPopover(!isMoreFlyoutActionsPopoverOpen)}
+            onClick={() => setIsMoreFlyoutActionsPopoverOpen(!isMoreFlyoutActionsPopoverOpen)}
           >
             {i18n.translate('discover.grid.tableRow.mobileFlyoutActionsButton', {
               defaultMessage: 'Actions',
@@ -56,7 +60,7 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
           </EuiButtonEmpty>
         }
         isOpen={isMoreFlyoutActionsPopoverOpen}
-        closePopover={() => setIsMoreFlyoutActionsPopover(false)}
+        closePopover={() => setIsMoreFlyoutActionsPopoverOpen(false)}
       />
     );
   }
@@ -75,8 +79,15 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
       responsive={false}
       wrap={true}
       alignItems="center"
-      gutterSize={showFlyoutIconsOnly ? 'none' : 's'}
+      gutterSize="none"
       data-test-subj="docViewerFlyoutActions"
+      css={
+        showFlyoutIconsOnly
+          ? undefined
+          : css`
+              gap: ${(euiTheme.base / 4) * 3}px;
+            `
+      }
     >
       <EuiFlexItem grow={false}>
         <EuiText size="s">
@@ -106,7 +117,7 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
             <EuiButtonEmpty
               size="s"
               iconSize="s"
-              flush="left"
+              flush="both"
               iconType={action.iconType}
               data-test-subj={action.dataTestSubj}
               href={action.href}
@@ -134,12 +145,12 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
                   aria-label={i18n.translate('discover.grid.tableRow.moreFlyoutActionsButton', {
                     defaultMessage: 'More actions',
                   })}
-                  onClick={() => setIsMoreFlyoutActionsPopover(!isMoreFlyoutActionsPopoverOpen)}
+                  onClick={() => setIsMoreFlyoutActionsPopoverOpen(!isMoreFlyoutActionsPopoverOpen)}
                 />
               </EuiToolTip>
             }
             isOpen={isMoreFlyoutActionsPopoverOpen}
-            closePopover={() => setIsMoreFlyoutActionsPopover(false)}
+            closePopover={() => setIsMoreFlyoutActionsPopoverOpen(false)}
           />
         </EuiFlexItem>
       )}
@@ -174,6 +185,7 @@ function FlyoutActionsPopover({
             key={action.id}
             icon={action.iconType as EuiContextMenuItemIcon}
             data-test-subj={action.dataTestSubj}
+            href={action.href}
             onClick={action.onClick}
           >
             {action.label}
