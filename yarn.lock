@@ -5026,15 +5026,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-explorer-plugin@link:x-pack/plugins/logs_explorer":
-  version "0.0.0"
-  uid ""
-
 "@kbn/logging-mocks@link:packages/kbn-logging-mocks":
   version "0.0.0"
   uid ""
 
 "@kbn/logging@link:packages/kbn-logging":
+  version "0.0.0"
+  uid ""
+
+"@kbn/logs-explorer-plugin@link:x-pack/plugins/logs_explorer":
   version "0.0.0"
   uid ""
 
