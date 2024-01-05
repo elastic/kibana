@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AnalyticsNoDataPageServices } from '@kbn/shared-ux-page-analytics-no-data-types';
+import type { AnalyticsNoDataPageServices } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { of, Observable, catchError, from, map, startWith } from 'rxjs';
 
 export interface HasApiKeysEndpointResponseData {
