@@ -16,7 +16,6 @@ import { useEuiTheme } from '@elastic/eui';
 // TODO Consolidate with similar component `DualBrush` in
 // x-pack/packages/ml/aiops_components/src/dual_brush/dual_brush.tsx
 
-
 const { brush, brushSelection, brushX } = d3Brush;
 const { scaleLinear } = d3Scale;
 const { select: d3Select } = d3Selection;
