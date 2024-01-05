@@ -14,7 +14,7 @@ import {
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
-import { RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
@@ -120,7 +120,7 @@ export const createMetricThresholdExecutor =
 
     const { alertsClient, savedObjectsClient } = services;
     if (!alertsClient) {
-      throw new Error(`Expected alertsClient to be defined but it was not!`);
+      throw new AlertsClientError();
     }
 
     const alertReporter: MetricThresholdAlertReporter = async (

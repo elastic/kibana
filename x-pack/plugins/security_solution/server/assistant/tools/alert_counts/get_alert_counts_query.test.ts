@@ -14,9 +14,16 @@ describe('getAlertsCountQuery', () => {
 
     expect(query).toEqual({
       aggs: {
-        statusBySeverity: {
+        kibanaAlertSeverity: {
           terms: {
             field: 'kibana.alert.severity',
+          },
+          aggs: {
+            kibanaAlertWorkflowStatus: {
+              terms: {
+                field: 'kibana.alert.workflow_status',
+              },
+            },
           },
         },
       },
@@ -26,13 +33,27 @@ describe('getAlertsCountQuery', () => {
           filter: [
             {
               bool: {
+                must: [],
                 filter: [
                   {
-                    match_phrase: {
-                      'kibana.alert.workflow_status': 'open',
+                    bool: {
+                      should: [
+                        {
+                          match_phrase: {
+                            'kibana.alert.workflow_status': 'open',
+                          },
+                        },
+                        {
+                          match_phrase: {
+                            'kibana.alert.workflow_status': 'acknowledged',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
                     },
                   },
                 ],
+                should: [],
                 must_not: [
                   {
                     exists: {
@@ -45,8 +66,8 @@ describe('getAlertsCountQuery', () => {
             {
               range: {
                 '@timestamp': {
-                  gte: 'now/d',
-                  lte: 'now/d',
+                  gte: 'now-24h',
+                  lte: 'now',
                 },
               },
             },

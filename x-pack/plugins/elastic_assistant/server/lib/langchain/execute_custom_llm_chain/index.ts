@@ -30,7 +30,7 @@ export const callAgentExecutor = async ({
   alertsIndexPattern,
   allow,
   allowReplacement,
-  assistantLangChain,
+  isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
   elserId,
@@ -43,6 +43,7 @@ export const callAgentExecutor = async ({
   replacements,
   request,
   size,
+  telemetry,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
@@ -63,6 +64,7 @@ export const callAgentExecutor = async ({
     esClient,
     KNOWLEDGE_BASE_INDEX_PATTERN,
     logger,
+    telemetry,
     elserId,
     kbResource
   );
@@ -77,7 +79,7 @@ export const callAgentExecutor = async ({
     allow,
     allowReplacement,
     alertsIndexPattern,
-    assistantLangChain,
+    isEnabledKnowledgeBase,
     chain,
     esClient,
     modelExists,

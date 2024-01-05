@@ -12,7 +12,7 @@ import '../../../common/mock/react_beautiful_dnd';
 
 import { TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import * as timelineActions from '../../store/timeline/actions';
+import * as timelineActions from '../../store/actions';
 
 import { Flyout } from '.';
 

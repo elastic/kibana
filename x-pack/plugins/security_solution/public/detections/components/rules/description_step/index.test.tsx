@@ -14,6 +14,7 @@ import {
   buildListItems,
   getDescriptionItem,
 } from '.';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
@@ -532,6 +533,208 @@ describe('description_step', () => {
 
         expect(result[0].title).toEqual('Investigation guide');
         expect(React.isValidElement(result[0].description)).toBeTruthy();
+      });
+    });
+
+    describe('alert suppression', () => {
+      const ruleTypesWithoutSuppression: Type[] = [
+        'eql',
+        'esql',
+        'machine_learning',
+        'new_terms',
+        'threat_match',
+      ];
+      const suppressionFields = {
+        groupByDuration: {
+          unit: 'm',
+          value: 50,
+        },
+        groupByRadioSelection: 'per-time-period',
+        enableThresholdSuppression: true,
+        groupByFields: ['agent.name'],
+        suppressionMissingFields: 'suppress',
+      };
+      describe('groupByDuration', () => {
+        ruleTypesWithoutSuppression.forEach((ruleType) => {
+          test(`should be empty if rule is ${ruleType}`, () => {
+            const result: ListItems[] = getDescriptionItem(
+              'groupByDuration',
+              'label',
+              {
+                ruleType,
+                ...suppressionFields,
+              },
+              mockFilterManager,
+              mockLicenseService
+            );
+
+            expect(result).toEqual([]);
+          });
+        });
+
+        ['query', 'saved_query'].forEach((ruleType) => {
+          test(`should be empty if groupByFields empty for ${ruleType} rule`, () => {
+            const result: ListItems[] = getDescriptionItem(
+              'groupByDuration',
+              'label',
+              {
+                ruleType: 'query',
+                ...suppressionFields,
+                groupByFields: [],
+              },
+              mockFilterManager,
+              mockLicenseService
+            );
+
+            expect(result).toEqual([]);
+          });
+
+          test(`should return item for ${ruleType} rule`, () => {
+            const result: ListItems[] = getDescriptionItem(
+              'groupByDuration',
+              'label',
+              {
+                ruleType: 'query',
+                ...suppressionFields,
+              },
+              mockFilterManager,
+              mockLicenseService
+            );
+
+            expect(result[0].description).toBe('50m');
+          });
+        });
+
+        test('should return item for threshold rule', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'groupByDuration',
+            'label',
+            {
+              ruleType: 'threshold',
+              ...suppressionFields,
+            },
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result[0].description).toBe('50m');
+        });
+
+        test('should return item for threshold rule if groupByFields empty', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'groupByDuration',
+            'label',
+            {
+              ruleType: 'threshold',
+              ...suppressionFields,
+              groupByFields: [],
+            },
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result[0].description).toBe('50m');
+        });
+
+        test('should be empty for threshold rule if suppression not enabled', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'groupByDuration',
+            'label',
+            {
+              ruleType: 'threshold',
+              ...suppressionFields,
+              enableThresholdSuppression: false,
+            },
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result).toEqual([]);
+        });
+      });
+
+      describe('groupByFields', () => {
+        [...ruleTypesWithoutSuppression, 'threshold'].forEach((ruleType) => {
+          test(`should be empty if rule is ${ruleType}`, () => {
+            const result: ListItems[] = getDescriptionItem(
+              'groupByFields',
+              'label',
+              {
+                ruleType,
+                ...suppressionFields,
+              },
+              mockFilterManager,
+              mockLicenseService
+            );
+
+            expect(result).toEqual([]);
+          });
+        });
+        ['query', 'saved_query'].forEach((ruleType) => {
+          test(`should return item for ${ruleType} rule`, () => {
+            const result: ListItems[] = getDescriptionItem(
+              'groupByFields',
+              'label',
+              {
+                ruleType,
+                ...suppressionFields,
+              },
+              mockFilterManager,
+              mockLicenseService
+            );
+            expect(mount(result[0].description as React.ReactElement).text()).toBe('agent.name');
+          });
+        });
+      });
+
+      describe('suppressionMissingFields', () => {
+        [...ruleTypesWithoutSuppression, 'threshold'].forEach((ruleType) => {
+          test(`should be empty if rule is ${ruleType}`, () => {
+            const result: ListItems[] = getDescriptionItem(
+              'suppressionMissingFields',
+              'label',
+              {
+                ruleType,
+                ...suppressionFields,
+              },
+              mockFilterManager,
+              mockLicenseService
+            );
+
+            expect(result).toEqual([]);
+          });
+        });
+        ['query', 'saved_query'].forEach((ruleType) => {
+          test(`should return item for ${ruleType} rule`, () => {
+            const result: ListItems[] = getDescriptionItem(
+              'suppressionMissingFields',
+              'label',
+              {
+                ruleType,
+                ...suppressionFields,
+              },
+              mockFilterManager,
+              mockLicenseService
+            );
+            expect(result[0].description).toContain('Suppress');
+          });
+
+          test(`should be empty if groupByFields empty for ${ruleType} rule`, () => {
+            const result: ListItems[] = getDescriptionItem(
+              'suppressionMissingFields',
+              'label',
+              {
+                ruleType: 'query',
+                ...suppressionFields,
+                groupByFields: [],
+              },
+              mockFilterManager,
+              mockLicenseService
+            );
+
+            expect(result).toEqual([]);
+          });
+        });
       });
     });
   });

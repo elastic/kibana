@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { RiskSeverity } from '../../../common/search_strategy';
-import { RiskScoreLevel } from '../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from './severity/common';
 
 import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
 import {
