@@ -46,7 +46,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     forceRefresh?: boolean
   ): Promise<HttpResponse<T> | undefined> {
     const asResponse = true;
-    const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
+    const cacheOptions: { cache?: RequestCache } = forceRefresh ? { cache: 'no-cache' } : {};
     const userId = await this.getCurrentUserId();
 
     const userHash = userId ? await sha1(userId) : '';

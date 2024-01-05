@@ -101,7 +101,7 @@ export class DataViewsPublicPlugin
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http, this.userIdGetter),
+      apiClient: new DataViewsApiClient(http, () => this.userIdGetter()),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {

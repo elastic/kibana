@@ -22,6 +22,8 @@ import {
   EuiButton,
   EuiFilterSelectItem,
   FilterChecked,
+  EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
@@ -60,6 +62,8 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   relationships: SavedObjectRelation[];
   allowedTypes: SavedObjectManagementTypeInfo[];
   compositeRuntimeFields: Record<string, RuntimeField>;
+  refreshIndexPatternClick: () => void;
+  isRefreshing?: boolean;
 }
 
 interface FilterItems {
@@ -139,6 +143,14 @@ const addFieldButtonLabel = i18n.translate(
   }
 );
 
+const refreshAriaLabel = i18n.translate('indexPatternManagement.editDataView.refreshAria', {
+  defaultMessage: 'Refresh',
+});
+
+const refreshTooltip = i18n.translate('indexPatternManagement.editDataView.refreshTooltip', {
+  defaultMessage: 'Refresh local copy of data view field list',
+});
+
 const SCHEMA_ITEMS: FilterItems[] = [
   {
     value: 'runtime',
@@ -159,6 +171,8 @@ export const Tabs: React.FC<TabsProps> = ({
   relationships,
   allowedTypes,
   compositeRuntimeFields,
+  refreshIndexPatternClick,
+  isRefreshing,
 }) => {
   const {
     uiSettings,
@@ -323,6 +337,8 @@ export const Tabs: React.FC<TabsProps> = ({
     [uiSettings]
   );
 
+  const refreshRef = useRef<HTMLButtonElement>(null);
+
   const userEditPermission = dataViews.getCanSaveSync();
   const getFilterSection = useCallback(
     (type: string) => {
@@ -428,6 +444,28 @@ export const Tabs: React.FC<TabsProps> = ({
                   </EuiPopover>
                 </EuiFilterGroup>
               </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={<p>{refreshTooltip}</p>}>
+                  <EuiButtonIcon
+                    buttonRef={refreshRef}
+                    onClick={() => {
+                      refreshIndexPatternClick();
+                      // clear tooltip focus
+                      if (refreshRef.current) {
+                        refreshRef.current.blur();
+                      }
+                    }}
+                    iconType="refresh"
+                    aria-label={refreshAriaLabel}
+                    data-test-subj="refreshDataViewButton"
+                    isLoading={isRefreshing}
+                    isDisabled={isRefreshing}
+                    display="base"
+                    size="m"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
               {userEditPermission && (
                 <EuiFlexItem grow={false}>
                   <EuiButton fill onClick={() => openFieldEditor()} data-test-subj="addField">
@@ -505,6 +543,8 @@ export const Tabs: React.FC<TabsProps> = ({
       updateFieldFilter,
       updateFieldTypeFilter,
       updateSchemaFieldTypeFilter,
+      isRefreshing,
+      refreshIndexPatternClick,
     ]
   );
 

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiButtonEmpty, EuiPageHeader, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 interface IndexHeaderProps {
@@ -46,32 +46,14 @@ const removeTooltip = i18n.translate('indexPatternManagement.editDataView.remove
   defaultMessage: 'Delete',
 });
 
-const refreshAriaLabel = i18n.translate('indexPatternManagement.editDataView.refreshAria', {
-  defaultMessage: 'Refresh',
-});
-
-const refreshTooltip = i18n.translate('indexPatternManagement.editDataView.refreshTooltip', {
-  defaultMessage: 'Refresh local copy of data view field list',
-});
-
-const refreshLabel = i18n.translate('indexPatternManagement.editDataView.refreshLabel', {
-  defaultMessage: 'Refresh',
-});
-
-const isLoadingLabel = i18n.translate('indexPatternManagement.editDataView.refreshLoading', {
-  defaultMessage: 'Loading...',
-});
-
 export const IndexHeader: React.FC<IndexHeaderProps> = ({
   defaultIndex,
   indexPattern,
   setDefault,
   editIndexPatternClick,
   deleteIndexPatternClick,
-  refreshIndexPatternClick,
   children,
   canSave,
-  isRefreshing,
 }) => {
   return (
     <EuiPageHeader
@@ -88,18 +70,7 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             {editTooltip}
           </EuiButton>
         ),
-        <EuiToolTip content={<p>{refreshTooltip}</p>}>
-          <EuiButtonEmpty
-            onClick={refreshIndexPatternClick}
-            iconType="refresh"
-            aria-label={refreshAriaLabel}
-            data-test-subj="refreshDataViewButton"
-            isLoading={isRefreshing}
-            isDisabled={isRefreshing}
-          >
-            {isRefreshing ? isLoadingLabel : refreshLabel}
-          </EuiButtonEmpty>
-        </EuiToolTip>,
+        ,
         defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
           <EuiButton
             onClick={setDefault}
