@@ -136,6 +136,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     showTimeline,
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
+    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -182,12 +183,14 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        <HideShowContainer
-          $isVisible={TimelineTabs.esql === activeTimelineTab}
-          data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
-        >
-          <EsqlTab timelineId={timelineId} />
-        </HideShowContainer>
+        {isEsqlSettingEnabled && (
+          <HideShowContainer
+            $isVisible={TimelineTabs.esql === activeTimelineTab}
+            data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
+          >
+            <EsqlTab timelineId={timelineId} />
+          </HideShowContainer>
+        )}
         <HideShowContainer
           $isVisible={TimelineTabs.pinned === activeTimelineTab}
           data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
