@@ -23,14 +23,14 @@ import { i18n } from '@kbn/i18n';
 export const SecretFormRow: React.FC<{
   fullWidth?: boolean;
   children: ConstructorParameters<typeof EuiFormRow>[0]['children'];
+  useSecretsStorage: boolean;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
   error?: string[];
   isInvalid?: boolean;
-  title: string;
-  clear: () => void;
+  title?: string;
+  clear?: () => void;
   initialValue?: any;
-  onToggleSecretStorage: (secretEnabled: boolean) => void;
-  cancelEdit: () => void;
-  useSecretsStorage?: boolean;
+  cancelEdit?: () => void;
   label?: JSX.Element;
 }> = ({
   fullWidth,

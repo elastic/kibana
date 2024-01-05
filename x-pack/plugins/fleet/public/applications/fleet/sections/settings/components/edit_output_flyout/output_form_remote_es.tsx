@@ -18,7 +18,7 @@ import { SecretFormRow } from './output_form_secret_form_row';
 interface Props {
   inputs: OutputFormInputsType;
   useSecretsStorage: boolean;
-  onToggleSecretStorage: (secretEnabled: true) => void;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {

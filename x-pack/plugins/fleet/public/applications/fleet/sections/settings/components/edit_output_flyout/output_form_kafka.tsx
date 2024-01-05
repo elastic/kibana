@@ -33,7 +33,7 @@ import type { OutputFormInputsType } from './use_output_form';
 interface Props {
   inputs: OutputFormInputsType;
   useSecretsStorage: boolean;
-  onToggleSecretStorage: () => void;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
 }
 
 export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) => {
