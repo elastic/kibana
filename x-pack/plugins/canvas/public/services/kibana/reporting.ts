@@ -24,7 +24,10 @@ export const reportingServiceFactory: CanvasReportingServiceFactory = ({
   const reportingEnabled = () => ({
     getReportingModalContent: () => reporting?.components.ReportingModalPDFV2 || null,
   });
-  const reportingDisabled = () => ({ getReportingModalContent: () => null, getReportingAPIClient: () => null });
+  const reportingDisabled = () => ({
+    getReportingModalContent: () => null,
+    getReportingAPIClient: () => null,
+  });
 
   if (!reporting) {
     // Reporting is not enabled
