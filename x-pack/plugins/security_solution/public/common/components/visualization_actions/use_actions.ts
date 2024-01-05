@@ -7,6 +7,9 @@
 
 import { useCallback, useMemo } from 'react';
 import type { Action, Trigger } from '@kbn/ui-actions-plugin/public';
+
+import { createAction } from '@kbn/ui-actions-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
@@ -38,12 +41,53 @@ export const VISUALIZATION_CONTEXT_MENU_TRIGGER: Trigger = {
   id: 'VISUALIZATION_CONTEXT_MENU_TRIGGER',
 };
 
+const ACTION_DEFINITION: Record<
+  VisualizationContextMenuActions,
+  Omit<ActionDefinition, 'execute'>
+> = {
+  [VisualizationContextMenuActions.inspect]: {
+    id: VisualizationContextMenuActions.inspect,
+    getDisplayName: () => INSPECT,
+    getIconType: () => 'inspect',
+    type: 'actionButton',
+    order: 4,
+  },
+  [VisualizationContextMenuActions.addToNewCase]: {
+    id: VisualizationContextMenuActions.addToNewCase,
+    getDisplayName: () => ADD_TO_NEW_CASE,
+    getIconType: () => 'casesApp',
+    type: 'actionButton',
+    order: 3,
+  },
+  [VisualizationContextMenuActions.addToExistingCase]: {
+    id: VisualizationContextMenuActions.addToExistingCase,
+    getDisplayName: () => ADD_TO_EXISTING_CASE,
+    getIconType: () => 'casesApp',
+    type: 'actionButton',
+    order: 2,
+  },
+  [VisualizationContextMenuActions.saveToLibrary]: {
+    id: VisualizationContextMenuActions.saveToLibrary,
+    getDisplayName: () => ADDED_TO_LIBRARY,
+    getIconType: () => 'save',
+    type: 'actionButton',
+    order: 1,
+  },
+  [VisualizationContextMenuActions.openInLens]: {
+    id: VisualizationContextMenuActions.openInLens,
+    getDisplayName: () => OPEN_IN_LENS,
+    getIconType: () => 'visArea',
+    type: 'actionButton',
+    order: 0,
+  },
+};
+
 export const useActions = ({
   attributes,
-  extraActions,
+  extraActions = [],
   inspectActionProps,
   timeRange,
-  withActions = [],
+  withActions = DEFAULT_ACTIONS,
 }: {
   attributes: LensAttributes | null;
   extraActions?: Action[];
@@ -88,73 +132,63 @@ export const useActions = ({
 
   const { openSaveVisualizationFlyout, disableVisualizations } = useSaveToLibrary({ attributes });
 
-  const contextMenuActionDefinitions = useMemo(
-    () => [
-      ...(extraActions ?? []),
-      {
-        id: VisualizationContextMenuActions.inspect,
-        getDisplayName: () => INSPECT,
-        getIconType: () => 'inspect',
-        type: 'actionButton',
-        execute: async () => {
-          inspectActionProps.handleInspectClick();
-        },
-        disabled: inspectActionProps.isInspectButtonDisabled,
-        isCompatible: async () => withActions.includes(VisualizationContextMenuActions.inspect),
-        order: 4,
-      },
-      {
-        id: VisualizationContextMenuActions.addToExistingCase,
-        getDisplayName: () => ADD_TO_EXISTING_CASE,
-        getIconType: () => 'casesApp',
-        type: 'actionButton',
-        execute: async () => {
-          onAddToExistingCaseClicked();
-        },
-        disabled: isAddToExistingCaseDisabled,
-        isCompatible: async () =>
-          withActions.includes(VisualizationContextMenuActions.addToExistingCase),
-        order: 2,
-      },
-      {
-        id: VisualizationContextMenuActions.addToNewCase,
-        getDisplayName: () => ADD_TO_NEW_CASE,
-        getIconType: () => 'casesApp',
-        type: 'actionButton',
-        execute: async () => {
-          onAddToNewCaseClicked();
-        },
-        disabled: isAddToNewCaseDisabled,
-        isCompatible: async () =>
-          withActions.includes(VisualizationContextMenuActions.addToNewCase),
-        order: 3,
-      },
-      {
-        id: VisualizationContextMenuActions.openInLens,
-        getDisplayName: () => OPEN_IN_LENS,
-        getIconType: () => 'visArea',
-        type: 'actionButton',
-        execute: async () => {
-          onOpenInLens();
-        },
-        isCompatible: async () =>
-          canUseEditor() && withActions.includes(VisualizationContextMenuActions.openInLens),
-        order: 0,
-      },
-      {
-        id: VisualizationContextMenuActions.saveToLibrary,
-        getDisplayName: () => ADDED_TO_LIBRARY,
-        getIconType: () => 'save',
-        type: 'actionButton',
-        execute: async () => {
-          openSaveVisualizationFlyout();
-        },
-        disabled: disableVisualizations,
-        isCompatible: async () =>
-          withActions.includes(VisualizationContextMenuActions.saveToLibrary),
-        order: 1,
-      },
-    ],
+  const allActions: Action[] = useMemo(
+    () =>
+      [
+        createAction({
+          ...ACTION_DEFINITION[VisualizationContextMenuActions.inspect],
+          execute: async () => {
+            inspectActionProps.handleInspectClick();
+          },
+          disabled: inspectActionProps.isInspectButtonDisabled,
+          isCompatible: async () => withActions.includes(VisualizationContextMenuActions.inspect),
+        }),
+        createAction({
+          ...ACTION_DEFINITION[VisualizationContextMenuActions.addToNewCase],
+          execute: async () => {
+            onAddToNewCaseClicked();
+          },
+          disabled: isAddToNewCaseDisabled,
+          isCompatible: async () =>
+            withActions.includes(VisualizationContextMenuActions.addToNewCase),
+        }),
+        createAction({
+          ...ACTION_DEFINITION[VisualizationContextMenuActions.addToExistingCase],
+          execute: async () => {
+            onAddToExistingCaseClicked();
+          },
+          disabled: isAddToExistingCaseDisabled,
+          isCompatible: async () =>
+            withActions.includes(VisualizationContextMenuActions.addToExistingCase),
+          order: 2,
+        }),
+        createAction({
+          ...ACTION_DEFINITION[VisualizationContextMenuActions.saveToLibrary],
+          execute: async () => {
+            openSaveVisualizationFlyout();
+          },
+          disabled: disableVisualizations,
+          isCompatible: async () =>
+            withActions.includes(VisualizationContextMenuActions.saveToLibrary),
+          order: 1,
+        }),
+        createAction({
+          ...ACTION_DEFINITION[VisualizationContextMenuActions.openInLens],
+          execute: async () => {
+            onOpenInLens();
+          },
+          isCompatible: async () =>
+            canUseEditor() && withActions.includes(VisualizationContextMenuActions.openInLens),
+          order: 0,
+        }),
+        ...extraActions,
+      ].map((a, i, totalActions) => {
+        const order = Math.max(totalActions.length - (1 + i), 0);
+        return {
+          ...a,
+          order,
+        };
+      }),
     [
       canUseEditor,
       disableVisualizations,
@@ -170,5 +204,5 @@ export const useActions = ({
     ]
   );
 
-  return contextMenuActionDefinitions;
+  return allActions;
 };

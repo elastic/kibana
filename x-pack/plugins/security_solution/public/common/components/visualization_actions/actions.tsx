@@ -123,14 +123,16 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
     withActions,
   });
 
-  const panels = useAsync(() =>
-    buildContextMenuForActions({
-      actions: contextMenuActions.map((action) => ({
-        action,
-        context,
-        trigger: VISUALIZATION_CONTEXT_MENU_TRIGGER,
-      })),
-    })
+  const panels = useAsync(
+    () =>
+      buildContextMenuForActions({
+        actions: contextMenuActions.map((action) => ({
+          action,
+          context: {},
+          trigger: VISUALIZATION_CONTEXT_MENU_TRIGGER,
+        })),
+      }),
+    [contextMenuActions]
   );
 
   const button = useMemo(
