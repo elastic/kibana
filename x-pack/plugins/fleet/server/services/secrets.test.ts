@@ -968,8 +968,8 @@ describe('secrets', () => {
       type: 'integration',
       status: 'not_installed',
       vars: [
-        { name: 'pkg-secret-1', type: 'text', secret: true, required: false },
-        { name: 'pkg-secret-2', type: 'text', secret: true, required: true },
+        { name: 'pkg-secret-1', type: 'text', secret: true, required: true },
+        { name: 'pkg-secret-2', type: 'text', secret: true, required: false },
         { name: 'dot-notation.pkg-secret-3', type: 'text', secret: true, required: false },
       ],
       data_streams: [
