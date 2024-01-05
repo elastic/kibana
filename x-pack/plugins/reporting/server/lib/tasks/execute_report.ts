@@ -26,6 +26,7 @@ import type {
   ExecutionError,
   ReportDocument,
   ReportOutput,
+  TaskInstanceFields,
   TaskRunResult,
 } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
@@ -38,16 +39,16 @@ import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
 import {
   REPORTING_EXECUTE_TYPE,
-  TIME_BETWEEN_ATTEMPTS,
   ReportTaskParams,
   ReportingTask,
   ReportingTaskStatus,
+  TIME_BETWEEN_ATTEMPTS,
 } from '.';
 import { ExportTypesRegistry, getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import {
-  mapToReportingError,
   isExecutionError,
+  mapToReportingError,
 } from '../../../common/errors/map_to_reporting_error';
 import type { ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
@@ -294,6 +295,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   public async _performJob(
     task: ReportTaskParams,
+    taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
@@ -306,9 +308,9 @@ export class ExecuteReportTask implements ReportingTask {
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
-      Rx.from(exportType.runTask(task.id, task.payload, cancellationToken, stream)).pipe(
-        timeout(queueTimeout)
-      ) // throw an error if a value is not emitted before timeout
+      Rx.from(
+        exportType.runTask(task.id, task.payload, taskInstanceFields, cancellationToken, stream)
+      ).pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
     );
   }
 
@@ -367,7 +369,6 @@ export class ExecuteReportTask implements ReportingTask {
 
           // find the job in the store and set status to processing
           const task = taskInstance.params as ReportTaskParams;
-
           jobId = task?.id;
 
           try {
@@ -430,7 +431,7 @@ export class ExecuteReportTask implements ReportingTask {
             eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([
-              this._performJob(task, cancellationToken, stream),
+              this._performJob(task, taskInstance, cancellationToken, stream),
               this.throwIfKibanaShutsDown(),
             ]);
 

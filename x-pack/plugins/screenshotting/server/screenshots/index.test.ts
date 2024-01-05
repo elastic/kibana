@@ -16,6 +16,7 @@ import {
   SCREENSHOTTING_EXPRESSION_INPUT,
 } from '../../common';
 import * as errors from '../../common/errors';
+import { TaskInstanceFields } from '../../common/types';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
 import type { ConfigType } from '../config';
@@ -66,6 +67,7 @@ describe('Screenshot Observable Pipeline', () => {
       headers: {},
       layout: {},
       urls: ['/welcome/home/start/index.htm'],
+      taskInstanceFields: {} as TaskInstanceFields,
     };
     config = {
       enabled: true,

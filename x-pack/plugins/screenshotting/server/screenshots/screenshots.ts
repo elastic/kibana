@@ -174,6 +174,12 @@ export class Screenshots {
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
+    const { taskInstanceFields, format, layout } = options;
+
+    this.logger.debug(
+      `Task started at: ${taskInstanceFields.startedAt}. Able to run until: ${taskInstanceFields.retryAt}`
+    );
+
     if (this.systemHasInsufficientMemory()) {
       return throwError(() => new errors.InsufficientMemoryAvailableOnCloudError());
     }
@@ -181,10 +187,10 @@ export class Screenshots {
     const eventLogger = new EventLogger(this.logger, this.config);
     const transactionEnd = eventLogger.startTransaction(Transactions.SCREENSHOTTING);
 
-    const layout = createLayout(options.layout ?? {});
+    const layoutInstance = createLayout(layout ?? {});
     const captureOptions = this.getCaptureOptions(options);
 
-    return this.captureScreenshots(eventLogger, layout, captureOptions).pipe(
+    return this.captureScreenshots(eventLogger, layoutInstance, captureOptions).pipe(
       tap(({ results, metrics }) => {
         transactionEnd({
           labels: {
@@ -196,9 +202,9 @@ export class Screenshots {
         });
       }),
       mergeMap((result) => {
-        switch (options.format) {
+        switch (format) {
           case 'pdf':
-            return toPdf(eventLogger, this.packageInfo, layout, options, result);
+            return toPdf(eventLogger, this.packageInfo, layoutInstance, options, result);
           default:
             return toPng(result);
         }

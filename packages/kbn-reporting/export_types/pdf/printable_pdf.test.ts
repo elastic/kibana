@@ -11,10 +11,12 @@ import { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
+import { TaskInstanceFields } from '@kbn/reporting-common/types';
 import { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
+
 import { PdfV1ExportType } from '.';
 
 let content: string;
@@ -22,6 +24,7 @@ let mockPdfExportType: PdfV1ExportType;
 let stream: jest.Mocked<Writable>;
 
 const cancellationToken = new CancellationToken();
+const taskInstanceFields = {} as TaskInstanceFields;
 const mockLogger = loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'testencryptionkey';
@@ -76,6 +79,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
       headers: encryptedHeaders,
       objects: [{ relativeUrl: '/app/kibana#/something' }],
     }),
+    taskInstanceFields,
     cancellationToken,
     stream
   );
@@ -97,6 +101,7 @@ test(`returns content_type of application/pdf`, async () => {
   const { content_type: contentType } = await mockPdfExportType.runTask(
     'pdfJobId',
     getBasePayload({ objects: [], headers: encryptedHeaders }),
+    taskInstanceFields,
     cancellationToken,
     stream
   );
@@ -108,6 +113,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   await mockPdfExportType.runTask(
     'pdfJobId',
     getBasePayload({ objects: [], headers: encryptedHeaders }),
+    taskInstanceFields,
     cancellationToken,
     stream
   );

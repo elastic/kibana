@@ -19,19 +19,21 @@ jest.mock('@kbn/generate-csv', () => ({
 
 import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { Writable } from 'stream';
-import { CancellationToken } from '@kbn/reporting-common';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { setFieldFormats } from '@kbn/reporting-server';
+import { CancellationToken } from '@kbn/reporting-common';
+import { TaskInstanceFields } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { setFieldFormats } from '@kbn/reporting-server';
+import { Writable } from 'stream';
 
 import { CsvSearchSourceExportType } from '.';
 
 const mockLogger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';
 const headers = { sid: 'cooltestheaders' };
+const taskInstanceFields = {} as TaskInstanceFields;
 let encryptedHeaders: string;
 let stream: jest.Mocked<Writable>;
 let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
@@ -92,6 +94,7 @@ test('gets the csv content from job parameters', async () => {
       title: 'Test Search',
       version: '7.13.0',
     },
+    taskInstanceFields,
     new CancellationToken(),
     stream
   );

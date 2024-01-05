@@ -11,7 +11,7 @@ import { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
-import type { LocatorParams } from '@kbn/reporting-common/types';
+import type { LocatorParams, TaskInstanceFields } from '@kbn/reporting-common/types';
 import type { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
@@ -24,6 +24,7 @@ let mockPngExportType: PngExportType;
 let stream: jest.Mocked<Writable>;
 
 const cancellationToken = new CancellationToken();
+const taskInstanceFields = {} as TaskInstanceFields;
 const mockLogger = loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'abcabcsecuresecret';
@@ -80,6 +81,7 @@ test(`passes browserTimezone to generatePng`, async () => {
       browserTimezone,
       headers: encryptedHeaders,
     }),
+    taskInstanceFields,
     cancellationToken,
     stream
   );
@@ -105,6 +107,7 @@ test(`returns content_type of application/png`, async () => {
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
+    taskInstanceFields,
     cancellationToken,
     stream
   );
@@ -119,6 +122,7 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
+    taskInstanceFields,
     cancellationToken,
     stream
   );

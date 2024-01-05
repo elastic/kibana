@@ -31,7 +31,7 @@ import {
   ReportingError,
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
-import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 
 import { CONTENT_TYPE_CSV } from './constants';
@@ -59,6 +59,7 @@ export class CsvGenerator {
   constructor(
     private job: Omit<JobParamsCSV, 'version'>,
     private config: ReportingConfigType['csv'],
+    private taskInstanceFields: TaskInstanceFields,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
@@ -355,7 +356,10 @@ export class CsvGenerator {
       ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
-    let reportingError: undefined | ReportingError;
+
+    this.logger.debug(
+      `Task started at: ${this.taskInstanceFields.startedAt}. Available until: ${this.taskInstanceFields.retryAt}`
+    );
 
     const index = searchSource.getField('index');
 
@@ -372,6 +376,7 @@ export class CsvGenerator {
     let totalRecords: number | undefined;
     let searchAfter: estypes.SortResults | undefined;
 
+    let reportingError: undefined | ReportingError;
     let pitId = await this.openPointInTime(indexPatternTitle, settings);
 
     // apply timezone from the job to all date field formatters

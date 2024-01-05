@@ -31,7 +31,7 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import {
   JobParamsPNGV2,
   PNG_JOB_TYPE_V2,
@@ -83,6 +83,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   public runTask = (
     jobId: string,
     payload: TaskPayloadPNGV2,
+    taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
@@ -125,6 +126,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
             headers,
             layout: { ...payload.layout, id: 'preserve_layout' },
             urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
+            taskInstanceFields,
           })
           .pipe(
             tap(({ metrics }) => {

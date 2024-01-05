@@ -15,6 +15,7 @@ import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { PngScreenshotOptions } from '..';
+import { TaskInstanceFields } from '../../common/types';
 import { HeadlessChromiumDriverFactory } from '../browsers';
 import type { ConfigType } from '../config';
 import { Screenshots } from './screenshots';
@@ -118,6 +119,7 @@ describe('class Screenshots', () => {
         format: 'png',
         layout: { id: 'preserve_layout' },
         urls: ['/app/home/test'],
+        taskInstanceFields: {} as TaskInstanceFields,
       };
 
       const observe = screenshotsInstance.getScreenshots(options);
@@ -151,6 +153,7 @@ describe('class Screenshots', () => {
         format: 'png',
         layout: { id: 'preserve_layout' },
         urls: ['/app/home/test'],
+        taskInstanceFields: {} as TaskInstanceFields,
       };
 
       const observe = screenshotsInstance.getScreenshots(options);

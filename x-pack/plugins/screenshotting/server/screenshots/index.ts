@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { Optional } from '@kbn/utility-types';
 import { LayoutParams } from '../../common';
-import { PerformanceMetrics } from '../../common/types';
+import { PerformanceMetrics, TaskInstanceFields } from '../../common/types';
 import {
   PdfScreenshotOptions,
   PdfScreenshotResult,
@@ -21,6 +21,10 @@ import type { ScreenshotObservableOptions, ScreenshotObservableResult } from './
 export type { ScreenshotObservableResult, UrlOrUrlWithContext } from './observable';
 
 export interface CaptureOptions extends Optional<ScreenshotObservableOptions, 'urls'> {
+  /**
+   * Timestamp metrics about the task lifecycle which are important for calculating timeouts
+   */
+  taskInstanceFields: TaskInstanceFields;
   /**
    * Expression to render. Mutually exclusive with `urls`.
    */
