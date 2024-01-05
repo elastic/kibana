@@ -160,8 +160,8 @@ export const initRoutes = (
   }
 
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
-    riskScorePreviewRoute(router, logger);
-    riskScoreCalculationRoute(router, logger);
+    riskScorePreviewRoute(router, logger, config.experimentalFeatures);
+    riskScoreCalculationRoute(router, logger, config.experimentalFeatures);
     riskEngineStatusRoute(router);
     riskEngineInitRoute(router, getStartServices);
     riskEngineEnableRoute(router, getStartServices);
