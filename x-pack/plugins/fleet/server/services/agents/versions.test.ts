@@ -133,7 +133,7 @@ describe('getAvailableVersions', () => {
   });
 
   it('should cache results', async () => {
-    mockKibanaVersion = '300.0.0';
+    mockKibanaVersion = '9.0.0';
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce({
       status: 200,
@@ -191,7 +191,7 @@ describe('getAvailableVersions', () => {
     const res = await getAvailableVersions({ ignoreCache: true });
 
     // Should sort, uniquify and filter out versions < 7.17
-    expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+    expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
   });
 
   it('should gracefully handle network errors when fetching from product versions API', async () => {
@@ -202,6 +202,7 @@ describe('getAvailableVersions', () => {
     const res = await getAvailableVersions({ ignoreCache: true });
 
     // Should sort, uniquify and filter out versions < 7.17
-    expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+    expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
   });
+
 });
