@@ -37,6 +37,7 @@ import {
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
+import { useCapabilities } from '../assistant/api/use_capabilities';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -53,7 +54,6 @@ export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern?: string;
   assistantAvailability: AssistantAvailability;
-  assistantStreamingEnabled?: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
@@ -87,7 +87,6 @@ export interface AssistantProviderProps {
   }) => EuiCommentProps[];
   http: HttpSetup;
   getInitialConversations: () => Record<string, Conversation>;
-  modelEvaluatorEnabled?: boolean;
   nameSpace?: string;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
@@ -163,7 +162,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
   alertsIndexPattern,
   assistantAvailability,
-  assistantStreamingEnabled = false,
   assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
@@ -179,7 +177,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getComments,
   http,
   getInitialConversations,
-  modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   setConversations,
   setDefaultAllow,
@@ -297,6 +294,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     (id?: string) => id ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
     [localStorageLastConversationId]
   );
+
+  // Fetch assistant capabilities
+  // TODO: Where are constants going these days, server/common, or kbn-elastic-assistant-common pkg?
+  const { data: capabilities } = useCapabilities({ http, toasts });
+  const { assistantModelEvaluation: modelEvaluatorEnabled, assistantStreamingEnabled } =
+    capabilities ?? {
+      assistantModelEvaluation: false,
+      assistantStreamingEnabled: false,
+    };
 
   const value = useMemo(
     () => ({

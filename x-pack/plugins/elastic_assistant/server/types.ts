@@ -21,7 +21,7 @@ import { Tool } from 'langchain/dist/tools/base';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { RequestBody } from './lib/langchain/types';
-import type { GetRegisteredTools } from './services/app_context';
+import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -34,7 +34,26 @@ export interface ElasticAssistantPluginSetup {
 export interface ElasticAssistantPluginStart {
   actions: ActionsPluginStart;
   /**
-   * Register tools to be used by the elastic assistant
+   * Register features to be used by the elastic assistant.
+   *
+   * Note: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted
+   * and the correct features are available. See {@link getPluginNameFromRequest} for more details.
+   *
+   * @param pluginName Name of the plugin the features should be registered to
+   * @param features AssistantFeatures to be registered with for the given plugin
+   */
+  registerFeatures: (pluginName: string, features: AssistantFeatures) => void;
+  /**
+   * Get the registered features
+   * @param pluginName Name of the plugin to get the features for
+   */
+  getRegisteredFeatures: GetRegisteredFeatures;
+  /**
+   * Register tools to be used by the elastic assistant.
+   *
+   * Note: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted
+   * and the correct tools are selected. See {@link getPluginNameFromRequest} for more details.
+   *
    * @param pluginName Name of the plugin the tool should be registered to
    * @param tools AssistantTools to be registered with for the given plugin
    */
@@ -56,6 +75,7 @@ export interface ElasticAssistantPluginStartDependencies {
 
 export interface ElasticAssistantApiRequestHandlerContext {
   actions: ActionsPluginStart;
+  getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
@@ -99,3 +119,13 @@ export interface AssistantToolParams {
   request: KibanaRequest<unknown, unknown, RequestBody>;
   size?: number;
 }
+
+/**
+ * Interfaces for features available to the elastic assistant
+ */
+export type AssistantFeatures = { [K in keyof typeof assistantFeatures]: boolean };
+
+export const assistantFeatures = Object.freeze({
+  assistantModelEvaluation: false,
+  assistantStreamingEnabled: false,
+});

@@ -20,6 +20,7 @@ import { once } from 'lodash';
 
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
+  AssistantFeatures,
   AssistantTool,
   ElasticAssistantPluginSetup,
   ElasticAssistantPluginSetupDependencies,
@@ -36,11 +37,17 @@ import {
   postEvaluateRoute,
   postKnowledgeBaseRoute,
 } from './routes';
-import { appContextService, GetRegisteredTools } from './services/app_context';
+import {
+  appContextService,
+  GetRegisteredFeatures,
+  GetRegisteredTools,
+} from './services/app_context';
+import { getCapabilitiesRoute } from './routes/capabilities/get_capabilities_route';
 
 interface CreateRouteHandlerContextParams {
   core: CoreSetup<ElasticAssistantPluginStart, unknown>;
   logger: Logger;
+  getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   telemetry: AnalyticsServiceSetup;
 }
@@ -63,6 +70,7 @@ export class ElasticAssistantPlugin
   private createRouteHandlerContext = ({
     core,
     logger,
+    getRegisteredFeatures,
     getRegisteredTools,
     telemetry,
   }: CreateRouteHandlerContextParams): IContextProvider<
@@ -74,6 +82,7 @@ export class ElasticAssistantPlugin
 
       return {
         actions: pluginsStart.actions,
+        getRegisteredFeatures,
         getRegisteredTools,
         logger,
         telemetry,
@@ -89,6 +98,9 @@ export class ElasticAssistantPlugin
       this.createRouteHandlerContext({
         core: core as CoreSetup<ElasticAssistantPluginStart, unknown>,
         logger: this.logger,
+        getRegisteredFeatures: (pluginName: string) => {
+          return appContextService.getRegisteredFeatures(pluginName);
+        },
         getRegisteredTools: (pluginName: string) => {
           return appContextService.getRegisteredTools(pluginName);
         },
@@ -112,8 +124,13 @@ export class ElasticAssistantPlugin
     postActionsConnectorExecuteRoute(router, getElserId);
     // Evaluate
     postEvaluateRoute(router, getElserId);
+    // Capabilities
+    getCapabilitiesRoute(router);
     return {
       actions: plugins.actions,
+      getRegisteredFeatures: (pluginName: string) => {
+        return appContextService.getRegisteredFeatures(pluginName);
+      },
       getRegisteredTools: (pluginName: string) => {
         return appContextService.getRegisteredTools(pluginName);
       },
@@ -129,6 +146,26 @@ export class ElasticAssistantPlugin
        * Actions plugin start contract
        */
       actions: plugins.actions,
+
+      /**
+       * Get the registered features for a given plugin name.
+       * @param pluginName
+       */
+      getRegisteredFeatures: (pluginName: string) => {
+        return appContextService.getRegisteredFeatures(pluginName);
+      },
+
+      /**
+       * Register features to be used by the Elastic Assistant for a given plugin. Use the plugin name that
+       * corresponds to your application as defined in the `x-kbn-context` header of requests made from your
+       * application.
+       *
+       * @param pluginName
+       * @param features
+       */
+      registerFeatures: (pluginName: string, features: AssistantFeatures) => {
+        return appContextService.registerFeatures(pluginName, features);
+      },
 
       /**
        * Get the registered tools for a given plugin name.
