@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'observability_maintenace_windows'];
   const find = getService('find');
+  const testSubjects = getService('testSubjects');
 
   describe('create window', function () {
     beforeEach(async () => {
@@ -35,6 +36,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         1400,
         1600
       );
+      const filterAlerts = await find.byCssSelector(
+        '[data-test-subj="maintenanceWindowScopedQuerySwitch"] .euiSwitch__button'
+      );
+      await filterAlerts.click();
+      const radioGroup = await testSubjects.find('maintenanceWindowCategorySelectionRadioGroup');
+      const label = await radioGroup.findByCssSelector(`label[for="observability"]`);
+      await label.click();
+      await testSubjects.setValue('queryInput', 'kibana.alert.rule.name: custom-threshold-rule-1');
+      await svlCommonScreenshots.takeScreenshot(
+        'create-maintenance-window-filter',
+        screenshotDirectories,
+        1400,
+        1600
+      );
+      const cancelButton = await testSubjects.find('cancelMaintenanceWindow');
+      await cancelButton.click();
     });
   });
 }
