@@ -61,6 +61,7 @@ export function MultiPaneFlyout({
           style={{
             flexBasis: flexBasisCol2,
             height: '100%',
+            overflow: 'scroll',
           }}
         >
           {inlineEditingContent ? (
