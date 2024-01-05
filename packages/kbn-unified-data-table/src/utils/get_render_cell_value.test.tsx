@@ -830,7 +830,7 @@ describe('Unified data table cell rendering', function () {
         responsive={false}
       >
         <EuiFlexItem>
-          <DataTableCellValue>
+          <DataTablePopoverCellValue>
             <span
               dangerouslySetInnerHTML={
                 Object {
@@ -840,7 +840,7 @@ describe('Unified data table cell rendering', function () {
                 }
               }
             />
-          </DataTableCellValue>
+          </DataTablePopoverCellValue>
         </EuiFlexItem>
         <EuiFlexItem
           grow={false}
