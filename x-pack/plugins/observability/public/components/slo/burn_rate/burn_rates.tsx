@@ -47,7 +47,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
     windows: getWindowsFromOptions(burnRateOptions),
   });
 
-  const onTimeRangeChange = (optionId: string) => {
+  const onBurnRateOptionChange = (optionId: string) => {
     const selected = burnRateOptions.find((opt) => opt.id === optionId) ?? burnRateOptions[0];
     setBurnRateOption(selected);
   };
@@ -97,7 +97,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
               })}
               options={burnRateOptions.map((opt) => ({ id: opt.id, label: opt.label }))}
               idSelected={burnRateOption.id}
-              onChange={onTimeRangeChange}
+              onChange={onBurnRateOptionChange}
               buttonSize="compressed"
             />
           </EuiFlexItem>

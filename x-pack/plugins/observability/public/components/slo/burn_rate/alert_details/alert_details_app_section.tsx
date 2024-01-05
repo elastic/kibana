@@ -69,7 +69,7 @@ export default function AlertDetailsAppSection({
             data-test-subj="alertDetailsAppSectionSLOLink"
             href={http.basePath.prepend(alert.link!)}
           >
-            {slo?.name ?? 'SLO'}
+            {slo?.name ?? '-'}
           </EuiLink>
         ),
       },
