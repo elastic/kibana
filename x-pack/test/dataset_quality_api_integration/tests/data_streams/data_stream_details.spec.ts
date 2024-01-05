@@ -8,6 +8,7 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { DatasetQualityApiClientKey } from '../../common/config';
+import { DatasetQualityApiError } from '../../common/dataset_quality_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { expectToReject, getDataStreamSettingsOfFirstIndex } from '../../utils';
 
@@ -62,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns 404 if matching data stream is not available', async () => {
         const nonExistentDataStream = 'Non-existent';
         const expectedMessage = `logs-${nonExistentDataStream}-${namespace} not found`;
-        const err = await expectToReject(() =>
+        const err = await expectToReject<DatasetQualityApiError>(() =>
           callApiAs('datasetQualityLogsUser', `${nonExistentDataStream}-${namespace}`)
         );
         expect(err.res.status).to.be(404);
