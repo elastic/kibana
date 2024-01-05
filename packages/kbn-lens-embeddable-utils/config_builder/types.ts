@@ -294,24 +294,20 @@ export type FormulaValueConfig = LensFormula & {
   color?: string;
 };
 
-export type ChartTypeLensConfig<T extends ChartType> = T extends 'gauge'
-  ? LensGaugeConfig
-  : T extends 'metric'
-  ? LensMetricConfig
-  : T extends 'pie' | 'donut'
-  ? LensPieConfig
-  : T extends 'treemap'
-  ? LensTreeMapConfig
-  : T extends 'tagcloud'
-  ? LensTagCloudConfig
-  : T extends 'regionmap'
-  ? LensRegionMapConfig
-  : T extends 'mosaic'
-  ? LensMosaicConfig
-  : T extends 'table'
-  ? LensTableConfig
-  : T extends 'heatmap'
-  ? LensHeatmapConfig
-  : T extends 'xy'
-  ? LensXYConfig
+interface ChartTypeLensMap {
+  gauge: LensGaugeConfig;
+  metric: LensMetricConfig;
+  pie: LensPieConfig;
+  donut: LensPieConfig;
+  treemap: LensTreeMapConfig;
+  tagcloud: LensTagCloudConfig;
+  regionmap: LensRegionMapConfig;
+  mosaic: LensMosaicConfig;
+  table: LensTableConfig;
+  heatmap: LensHeatmapConfig;
+  xy: LensXYConfig;
+}
+
+export type ChartTypeLensConfig<T extends ChartType> = T extends keyof ChartTypeLensMap
+  ? ChartTypeLensMap[T]
   : never;
