@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isJobV2Params } from '../../common/job_utils';
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { ReportingModalContent } from './screen_capture_panel_content_lazy';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
 const getJobParams =
   (
@@ -128,8 +128,9 @@ export const reportingScreenshotShareProvider = ({
     const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
 
     const openImageModal = () => {
-      const session = overlays.openModal(toMountPoint(
-        <ReportingModalContent
+      const session = overlays.openModal(
+        toMountPoint(
+          <ReportingModalContent
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
@@ -137,20 +138,24 @@ export const reportingScreenshotShareProvider = ({
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions,[pdfReportType, pngReportType])}
+            getJobParams={getJobParams(apiClient, jobProviderOptions, [
+              pdfReportType,
+              pngReportType,
+            ])}
             isDirty={isDirty}
             onClose={() => {
               session.close();
             }}
             theme={theme}
           />,
-          {theme, i18n: i18nStart}
-      ), 
-      {
-        maxWidth: 400,
-        'data-test-subj': 'export-image-modal'
-      })
-    }
+          { theme, i18n: i18nStart }
+        ),
+        {
+          maxWidth: 400,
+          'data-test-subj': 'export-image-modal',
+        }
+      );
+    };
     const imageModal = {
       shareMenuItem: {
         name: i18n.translate('xpack.reporting.shareContextMenu.ExportsButtonLabel', {
@@ -171,7 +176,7 @@ export const reportingScreenshotShareProvider = ({
         content: openImageModal,
       },
     };
-  
+
     shareActions.push(imageModal);
     return shareActions;
   };
