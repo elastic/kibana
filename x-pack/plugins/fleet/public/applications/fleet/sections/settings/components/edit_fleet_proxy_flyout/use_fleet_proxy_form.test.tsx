@@ -13,9 +13,7 @@ describe('useFleetProxyForm', () => {
   describe('validate url', () => {
     it('should accept http url', async () => {
       const testRenderer = createFleetTestRendererMock();
-      const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
-        useFleetProxyForm(undefined, () => {})
-      );
+      const { result } = testRenderer.renderHook(() => useFleetProxyForm(undefined, () => {}));
       result.current.inputs.urlInput.setValue('http://test.fr:8080');
       expect(result.current.inputs.urlInput.validate()).toBeTruthy();
       expect(result.current.inputs.urlInput.errors).toBeUndefined();
