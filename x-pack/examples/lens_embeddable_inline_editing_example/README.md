@@ -14,6 +14,7 @@ Steps:
 ```
 
 ```tsx
+  const [lensLoadEvent, setLensLoadEvent] = useState<InlineEditLensEmbeddableContext['lensEvent'] | null>(null);
   // my onLoad callback
    const onLoad = useCallback(
     (

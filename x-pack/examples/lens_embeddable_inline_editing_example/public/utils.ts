@@ -22,7 +22,7 @@ export const getConfigOptions = (dataView: DataView, isESQL?: boolean) => {
           esql: `from ${index} | stats count=count()`,
         },
         value: 'count',
-      } as unknown as LensConfig,
+      } as LensConfig,
       options: {
         embeddable: true,
         timeRange: {
@@ -49,7 +49,7 @@ export const getConfigOptions = (dataView: DataView, isESQL?: boolean) => {
           field: timeFieldName,
         },
         value: 'count()',
-      } as unknown as LensConfig,
+      } as LensConfig,
       options: {
         embeddable: true,
         timeRange: {
@@ -57,7 +57,7 @@ export const getConfigOptions = (dataView: DataView, isESQL?: boolean) => {
           to: 'now',
           type: 'relative',
         },
-      } as unknown as LensConfigOptions,
+      } as LensConfigOptions,
     };
   }
 };
