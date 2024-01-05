@@ -67,7 +67,7 @@ export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number
   return (
     <LensChart
       {...chartProps}
-      id={`hostsViewKPI-${id}}`}
+      id={`hostsViewKPI-${id}`}
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
       loading={loading}

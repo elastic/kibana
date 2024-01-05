@@ -47,7 +47,7 @@ const mockUseKibana = () => {
   } as unknown as KibanaReactContextValue<Partial<CoreStart> & Partial<InfraClientStartDeps>>);
 };
 
-describe('useHostTable hook', () => {
+describe('useLensAttributes hook', () => {
   const params: LensConfig = {
     chartType: 'xy',
     layers: [

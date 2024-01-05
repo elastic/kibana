@@ -6,16 +6,18 @@
  */
 
 import { ChartType, ChartTypeLensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigWithId } from '../../../types';
 import type { HostFormulaNames } from '../formulas';
 import { formulas } from '../formulas';
 
+type CustomLensConfig<T extends ChartType> = { id: string } & ChartTypeLensConfig<T>;
+
 type Args<T extends ChartType> = T extends 'xy'
-  ? Omit<Partial<ChartTypeLensConfig<'xy'>>, 'layers' | 'title' | 'chartType'> & {
+  ? Omit<Partial<ChartTypeLensConfig<'xy'>>, 'layers' | 'chartType'> & {
       layerConfig?: Partial<ChartTypeLensConfig<'xy'>['layers'][number]>;
     }
-  : Omit<Partial<ChartTypeLensConfig<T>>, 'value' | 'title' | 'chartType'>;
+  : Omit<Partial<ChartTypeLensConfig<T>>, 'value' | 'chartType'>;
 
-type LensConfigWithId<T extends ChartType> = ChartTypeLensConfig<T> & { id: string };
 export const createBasicCharts = <T extends ChartType>({
   chartType,
   formFormulas,
@@ -24,20 +26,26 @@ export const createBasicCharts = <T extends ChartType>({
   chartType: T;
   formFormulas: HostFormulaNames[];
   chartConfig: Args<T>;
-}): Record<HostFormulaNames, LensConfigWithId<T>> => {
+}): Record<HostFormulaNames, CustomLensConfig<T>> => {
   return formFormulas.reduce((acc, curr) => {
+    const baseConfig = {
+      ...chartConfig,
+      id: curr,
+      title: formulas[curr].label ?? chartConfig.title ?? '',
+      value: formulas[curr],
+    } as LensConfigWithId;
+
     if (chartType === 'xy') {
-      const { layerConfig, ...rest } = chartConfig as Args<'xy'>;
+      const { layerConfig, legend, ...xyConfig } = baseConfig as Args<'xy'>;
       return {
         ...acc,
         [curr]: {
-          ...chartConfig,
+          ...xyConfig,
           chartType,
-          title: formulas[curr].label ?? '',
           legend: {
             show: false,
             position: 'bottom',
-            ...rest.legend,
+            ...legend,
           },
           axisTitleVisibility: {
             showXAxisTitle: false,
@@ -52,21 +60,20 @@ export const createBasicCharts = <T extends ChartType>({
               ...layerConfig,
             },
           ],
-        } as ChartTypeLensConfig<'xy'>,
-      };
-    } else {
-      return {
-        ...acc,
-        [curr]: {
-          ...chartConfig,
-          chartType,
-          title: formulas[curr].label ?? '',
-          value: formulas[curr],
-        } as ChartTypeLensConfig<T>,
+        } as CustomLensConfig<'xy'>,
       };
     }
-  }, {} as Record<HostFormulaNames, LensConfigWithId<T>>);
+
+    return {
+      ...acc,
+      [curr]: {
+        ...baseConfig,
+        chartType,
+      },
+    };
+  }, {} as Record<HostFormulaNames, CustomLensConfig<T>>);
 };
+
 // custom charts
 export { cpuUsageBreakdown, normalizedLoad1m, loadBreakdown } from './cpu_charts';
 export {
