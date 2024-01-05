@@ -104,6 +104,12 @@ export function registerTransactionDurationRuleType({
     actionGroups: ruleTypeConfig.actionGroups,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: { params: transactionDurationParamsSchema },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: transactionDurationParamsSchema,
+      },
+    },
     actionVariables: {
       context: transactionDurationActionVariables,
     },

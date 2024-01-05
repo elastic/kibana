@@ -177,6 +177,12 @@ export function registerAnomalyDetectionAlertType({
     validate: {
       params: mlAnomalyDetectionAlertParams,
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: mlAnomalyDetectionAlertParams,
+      },
+    },
     actionVariables: {
       context: [
         {

@@ -38,7 +38,9 @@ export const createEqlAlertType = (
           return mutatedRuleParams;
         },
       },
-      zodSchema: EqlRuleParams,
+    },
+    schemas: {
+      params: { type: 'zod', schema: EqlRuleParams },
     },
     actionGroups: [
       {

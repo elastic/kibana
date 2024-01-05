@@ -40,7 +40,9 @@ export const createThresholdAlertType = (
           return mutatedRuleParams;
         },
       },
-      zodSchema: ThresholdRuleParams,
+    },
+    schemas: {
+      params: { type: 'zod', schema: ThresholdRuleParams },
     },
     actionGroups: [
       {

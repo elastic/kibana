@@ -92,6 +92,12 @@ export function registerErrorCountRuleType({
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: { params: errorCountParamsSchema },
+      schemas: {
+        params: {
+          type: 'config-schema',
+          schema: errorCountParamsSchema,
+        },
+      },
       actionVariables: {
         context: errorCountActionVariables,
       },

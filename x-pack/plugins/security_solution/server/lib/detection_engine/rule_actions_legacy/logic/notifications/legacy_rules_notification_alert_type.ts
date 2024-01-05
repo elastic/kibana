@@ -45,6 +45,12 @@ export const legacyRulesNotificationAlertType = ({
   validate: {
     params: legacyRulesNotificationParams,
   },
+  schemas: {
+    params: {
+      type: 'config-schema',
+      schema: legacyRulesNotificationParams,
+    },
+  },
   useSavedObjectReferences: {
     extractReferences: (params) => legacyExtractReferences({ logger, params }),
     injectReferences: (params, savedObjectReferences) =>

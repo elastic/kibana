@@ -92,12 +92,16 @@ describe('ZDT and Rollback Checks', () => {
   for (const ruleTypeId of ruleTypesToCheck) {
     test(`detect param changes for: ${ruleTypeId}`, async () => {
       const ruleType = ruleTypeRegistry.get(ruleTypeId);
-      if (ruleType.validate.params && ruleType.validate.params.getSchema) {
-        expect(ruleType.validate.params.getSchema().describe()).toMatchSnapshot();
-      } else if (ruleType.validate.zodSchema) {
-        expect(zodToJsonSchema(ruleType.validate.zodSchema)).toMatchSnapshot();
+      if (!ruleType?.schemas?.params) {
+        throw new Error('schema.params is required for rule type:' + ruleTypeId);
+      }
+      const schemaType = ruleType.schemas.params.type;
+      if (schemaType === 'config-schema') {
+        expect(ruleType.schemas.params.schema.getSchema().describe()).toMatchSnapshot();
+      } else if (schemaType === 'zod') {
+        expect(zodToJsonSchema(ruleType.schemas.params.schema)).toMatchSnapshot();
       } else {
-        console.log('*** No params schema found for', ruleTypeId);
+        throw new Error(`Support for ${schemaType} missing`);
       }
     });
   }

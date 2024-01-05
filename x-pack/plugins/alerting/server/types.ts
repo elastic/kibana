@@ -21,6 +21,7 @@ import {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
@@ -280,8 +281,18 @@ export interface RuleType<
   name: string;
   validate: {
     params: RuleTypeParamsValidator<Params>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    zodSchema?: z.ZodObject<any> | z.ZodIntersection<any, any>;
+  };
+  schemas?: {
+    params?:
+      | {
+          type: 'zod';
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          schema: z.ZodObject<any> | z.ZodIntersection<any, any>;
+        }
+      | {
+          type: 'config-schema';
+          schema: ObjectType;
+        };
   };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];

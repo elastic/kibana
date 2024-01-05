@@ -26,7 +26,9 @@ export const createEsqlAlertType = (
           return EsqlRuleParams.parse(object);
         },
       },
-      zodSchema: EsqlRuleParams,
+    },
+    schemas: {
+      params: { type: 'zod', schema: EsqlRuleParams },
     },
     actionGroups: [
       {
