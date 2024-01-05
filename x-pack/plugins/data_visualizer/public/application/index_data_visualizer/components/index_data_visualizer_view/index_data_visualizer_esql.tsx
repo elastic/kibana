@@ -512,8 +512,6 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
         ? fieldStatsRequest?.timeFieldName
         : undefined;
 
-      // @TODO: remove
-      console.log(`--@@dataViewTimeField`, dataViewTimeField);
       // If a date field '@timestamp' exists, set that as default time field, else set the first date field as default
       const timeFieldName =
         timeFields.length > 0
@@ -835,8 +833,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           },
         }
       : undefined;
-    // @TODO: remove
-    console.log(`--@@filter`, filter);
     return {
       earliest,
       latest,
@@ -883,11 +879,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
-      // @TODO: remove
-      console.log(`--@@timefilter.setTime`, {
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
@@ -901,14 +892,10 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       timefilter.getAutoRefreshFetch$(),
       mlTimefilterRefresh$
     ).subscribe(() => {
-      // @TODO: remove
-      console.log(`--@@timeUpdateSubscription`, timeUpdateSubscription);
-      // if (onUpdate) {
       setGlobalState({
         time: timefilter.getTime(),
         refreshInterval: timefilter.getRefreshInterval(),
       });
-      // }
       setLastRefresh(Date.now());
     });
     return () => {

@@ -32,8 +32,6 @@ export const getESQLDocumentCountStats = async (
   intervalMs: number | undefined,
   searchOptions: ISearchOptions
 ): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
-  // @TODO: remove
-  console.log(`--@@intervalMs`, intervalMs);
   if (!isESQLQuery(query)) {
     throw Error('No ESQL query provided');
   }
