@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { css } from '@emotion/css';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { EuiCode, EuiPanel } from '@elastic/eui';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
