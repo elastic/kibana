@@ -206,6 +206,18 @@ describe('EsQueryRuleTypeExpression', () => {
     expect(testQueryButton.prop('disabled')).toBe(true);
   });
 
+  test('should show excludeHitsFromPreviousRun unchecked by default', async () => {
+    const wrapper = await setup({
+      ...defaultEsQueryExpressionParams,
+      excludeHitsFromPreviousRun: undefined,
+    } as unknown as EsQueryRuleParams<SearchType.esQuery>);
+    const excludeMatchesCheckBox = wrapper.find(
+      'EuiCheckbox[data-test-subj="excludeHitsFromPreviousRunExpression"]'
+    );
+    expect(excludeMatchesCheckBox.exists()).toBeTruthy();
+    expect(excludeMatchesCheckBox.prop('checked')).toBe(false);
+  });
+
   test('should show success message if ungrouped Test Query is successful', async () => {
     const searchResponseMock$ = of<IKibanaSearchResponse>({
       rawResponse: {

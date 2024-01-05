@@ -14,7 +14,7 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { CreateChatCompletionRequest } from 'openai';
+import type OpenAI from 'openai';
 import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';
 import { createOpenAiChunk } from '../../common/create_openai_chunk';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -145,12 +145,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const titleInterceptor = proxy.intercept(
           'title',
-          (body) => (JSON.parse(body) as CreateChatCompletionRequest).messages.length === 1
+          (body) =>
+            (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).messages
+              .length === 1
         );
 
         const conversationInterceptor = proxy.intercept(
           'conversation',
-          (body) => (JSON.parse(body) as CreateChatCompletionRequest).messages.length !== 1
+          (body) =>
+            (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).messages
+              .length !== 1
         );
 
         const responsePromise = new Promise<Response>((resolve, reject) => {

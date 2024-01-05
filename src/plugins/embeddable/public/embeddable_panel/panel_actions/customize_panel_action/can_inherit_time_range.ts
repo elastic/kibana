@@ -8,8 +8,8 @@
 
 import type { TimeRange } from '@kbn/es-query';
 
-import { TimeRangeInput } from './customize_panel_action';
 import { Embeddable, IContainer, ContainerInput } from '../../..';
+import { TimeRangeInput } from './time_range_helpers';
 
 interface ContainerTimeRangeInput extends ContainerInput<TimeRangeInput> {
   timeRange: TimeRange;

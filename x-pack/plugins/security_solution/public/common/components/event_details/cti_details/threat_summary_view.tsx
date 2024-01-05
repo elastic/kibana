@@ -8,6 +8,7 @@
 import styled from 'styled-components';
 import React from 'react';
 import { EuiTitle, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { HostRisk, UserRisk } from '../../../../entity_analytics/api/types';
 import * as i18n from './translations';
 import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 
@@ -16,9 +17,8 @@ import type {
   TimelineEventsDetailsItem,
   RiskSeverity,
 } from '../../../../../common/search_strategy';
-import { RiskSummary } from './risk_summary';
+import { RiskSummary } from '../../../../entity_analytics/components/risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
-import type { HostRisk, UserRisk } from '../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { RiskScoreInfoTooltip } from '../../../../overview/components/common';
