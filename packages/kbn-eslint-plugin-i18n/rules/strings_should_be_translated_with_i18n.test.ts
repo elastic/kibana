@@ -246,7 +246,7 @@ import React from 'react';
 
 function TestComponent() {
   return (
-    <div>!@#$%^&*()_+{}123 456 789</div>
+    <div>!@#$%^&*()_+{}</div>
   )
 }`,
   },
