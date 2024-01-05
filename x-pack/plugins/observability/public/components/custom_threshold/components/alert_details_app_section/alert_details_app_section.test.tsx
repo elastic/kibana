@@ -85,7 +85,7 @@ describe('AlertDetailsAppSection', () => {
     expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
   });
 
-  it('should render rule link and group fields', async () => {
+  it('should render alert summary fields', async () => {
     renderComponent();
 
     expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
