@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ErrorRateChart } from '../../../components/slo/error_rate_chart';
 import { useFetchSloBurnRates } from '../../../hooks/slo/use_fetch_slo_burn_rates';
 import { BurnRate } from './burn_rate';
@@ -79,23 +79,17 @@ const TIME_RANGE_OPTIONS = [
 ];
 
 export function BurnRates({ slo, isAutoRefreshing }: Props) {
+  const [timeRange, setTimeRange] = useState(TIME_RANGE_OPTIONS[0]);
   const { isLoading, data } = useFetchSloBurnRates({
     slo,
     shouldRefetch: isAutoRefreshing,
     windows: WINDOWS,
   });
 
-  const [timeRangeIdSelected, setTimeRangeIdSelected] = useState(TIME_RANGE_OPTIONS[0].id);
-  const [timeRange, setTimeRange] = useState(TIME_RANGE_OPTIONS[0]);
-  const onChange = (optionId: string) => {
-    setTimeRangeIdSelected(optionId);
-  };
-
-  useEffect(() => {
-    const selected =
-      TIME_RANGE_OPTIONS.find((opt) => opt.id === timeRangeIdSelected) ?? TIME_RANGE_OPTIONS[0];
+  const onTimeRangeChange = (optionId: string) => {
+    const selected = TIME_RANGE_OPTIONS.find((opt) => opt.id === optionId) ?? TIME_RANGE_OPTIONS[0];
     setTimeRange(selected);
-  }, [timeRangeIdSelected]);
+  };
 
   const fromRange = moment().subtract(timeRange.duration, 'hour').toDate();
   const threshold = timeRange.threshold;
@@ -141,8 +135,8 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
                 defaultMessage: 'Select the time range',
               })}
               options={TIME_RANGE_OPTIONS}
-              idSelected={timeRangeIdSelected}
-              onChange={(id) => onChange(id)}
+              idSelected={timeRange.id}
+              onChange={onTimeRangeChange}
               buttonSize="compressed"
             />
           </EuiFlexItem>
