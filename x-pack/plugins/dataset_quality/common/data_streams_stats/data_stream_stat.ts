@@ -34,7 +34,9 @@ export class DataStreamStat {
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
-    const [type, dataset, namespace] = dataStreamStat.name.split('-');
+    const [type, ...dataStreamParts] = dataStreamStat.name.split('-');
+    const namespace = dataStreamParts[dataStreamParts.length - 1];
+    const dataset = dataStreamParts.slice(0, dataStreamParts.length - 1).join('-');
 
     const dataStreamStatProps = {
       rawName: dataStreamStat.name,
