@@ -11,6 +11,12 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
+import { ChangePointsTable } from '../components/change_point_detection/change_points_table';
+import {
+  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+  EMBEDDABLE_CHANGE_POINT_TABLE_TYPE,
+  EmbeddableChangePointType,
+} from '../../common/constants';
 import { ReloadContextProvider } from '../hooks/use_reload';
 import {
   type ChangePointAnnotation,
@@ -37,6 +43,7 @@ const defaultSort = {
 };
 
 export interface EmbeddableInputTrackerProps {
+  type: EmbeddableChangePointType;
   input$: Observable<EmbeddableChangePointChartInput>;
   initialInput: EmbeddableChangePointChartInput;
   reload$: Observable<number>;
@@ -47,6 +54,7 @@ export interface EmbeddableInputTrackerProps {
 }
 
 export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
+  type,
   input$,
   initialInput,
   reload$,
@@ -86,6 +94,7 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
         <ChangePointDetectionControlsContextProvider>
           <FilterQueryContextProvider timeRange={input.timeRange}>
             <ChartGridEmbeddableWrapper
+              visType={type}
               timeRange={input.timeRange}
               fn={input.fn}
               metricField={input.metricField}
@@ -119,11 +128,13 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
  */
 export const ChartGridEmbeddableWrapper: FC<
   EmbeddableChangePointChartProps & {
+    visType: EmbeddableChangePointType;
     onRenderComplete: () => void;
     onLoading: () => void;
     onError: (error: Error) => void;
   }
 > = ({
+  visType,
   fn,
   metricField,
   maxSeriesToPlot,
@@ -235,11 +246,20 @@ export const ChartGridEmbeddableWrapper: FC<
       `}
     >
       {changePoints.length > 0 ? (
-        <ChartsGrid
-          changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
-          interval={requestParams.interval}
-          onRenderComplete={onRenderComplete}
-        />
+        visType === EMBEDDABLE_CHANGE_POINT_CHART_TYPE ? (
+          <ChartsGrid
+            changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
+            interval={requestParams.interval}
+            onRenderComplete={onRenderComplete}
+          />
+        ) : visType === EMBEDDABLE_CHANGE_POINT_TABLE_TYPE ? (
+          <ChangePointsTable
+            isLoading={false}
+            annotations={changePoints}
+            fieldConfig={fieldConfig}
+            onRenderComplete={onRenderComplete}
+          />
+        ) : null
       ) : emptyState ? (
         emptyState
       ) : (
