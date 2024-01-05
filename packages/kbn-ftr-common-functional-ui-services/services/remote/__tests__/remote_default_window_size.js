@@ -9,9 +9,12 @@
 import { fork } from 'child_process';
 
 import expect from '@kbn/expect';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-const FTR_SCRIPT = require.resolve('../../../../../scripts/functional_test_runner');
-const CONFIG_PATH = require.resolve('./fixtures/several_nested_window_size_changes/config.js');
+const FTR_SCRIPT = require.resolve(`${REPO_ROOT}/scripts/functional_test_runner`);
+const CONFIG_PATH = require.resolve(
+  `${REPO_ROOT}/packages/kbn-ftr-common-functional-ui-services/services/remote/__tests__/fixtures/several_nested_window_size_changes/config.js`
+);
 const SECOND = 1000;
 
 const DEFAULT_SIZE = { width: 1600, height: 1000 };

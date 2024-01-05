@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Embeddable, IContainer, ContainerInput } from '../../../lib';
-import { TimeRangeInput } from './customize_panel_action';
+import { ContainerInput, Embeddable, IContainer } from '../../../lib';
+import { TimeRangeInput } from './time_range_helpers';
 
 export function doesInheritTimeRange(embeddable: Embeddable<TimeRangeInput>) {
   if (!embeddable.parent) {
