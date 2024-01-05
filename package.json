@@ -1307,6 +1307,7 @@
     "@octokit/rest": "^16.35.0",
     "@openpgp/web-stream-tools": "^0.0.10",
     "@parcel/watcher": "^2.1.0",
+    "@redocly/cli": "^1.6.0",
     "@storybook/addon-a11y": "^6.5.16",
     "@storybook/addon-actions": "^6.5.16",
     "@storybook/addon-controls": "^6.5.16",
