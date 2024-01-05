@@ -9,6 +9,7 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { SemVer } from 'semver';
 
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { EsLegacyConfigService, SpecDefinitionsService } from '../services';
 import { ESConfigForProxy } from '../types';
 import { ProxyConfigCollection } from '../lib';
@@ -30,6 +31,7 @@ export interface RouteDependencies {
   log: Logger;
   proxy: ProxyDependencies;
   services: {
+    cloud: CloudSetup;
     esLegacyConfigService: EsLegacyConfigService;
     specDefinitionService: SpecDefinitionsService;
   };
