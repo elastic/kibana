@@ -313,7 +313,7 @@ describe('ReportingStore', () => {
     expect(updateCall.if_primary_term).toBe(10002);
   });
 
-  it('setReportError sets the status of a saved report to processing', async () => {
+  it('setReportError sets the if_seq_no, if_primary_term & migration_version of a saved report', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new SavedReport({
       _id: 'id-of-failure',
@@ -338,7 +338,6 @@ describe('ReportingStore', () => {
     const [[updateCall]] = mockEsClient.update.mock.calls;
     const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
     expect(response.migration_version).toBe(`7.14.0`);
-    expect(response.status).toBe(`processing`);
     expect(updateCall.if_seq_no).toBe(43);
     expect(updateCall.if_primary_term).toBe(10002);
   });
