@@ -662,7 +662,8 @@ const prepareDefinitionSectionListItems = (
 
   const isSuppressionEnabled =
     (rule.type === 'eql' && alertSuppressionForEqlRuleEnabled) ||
-    (rule.type === 'threat_match' && alertSuppressionForIndicatorMatchRuleEnabled);
+    (rule.type === 'threat_match' && alertSuppressionForIndicatorMatchRuleEnabled) ||
+    (rule.type && (['query', 'saved_query', 'threshold'] as Type[]).includes(rule.type));
 
   if ('alert_suppression' in rule && rule.alert_suppression && isSuppressionEnabled) {
     if ('group_by' in rule.alert_suppression) {
