@@ -346,11 +346,11 @@ export class RangeSliderEmbeddable
     const params = {} as RangeFilterParams;
 
     if (selectedMin) {
-      params.gte = Math.max(parseFloat(selectedMin), availableMin);
+      params.gte = selectedMin;
     }
 
     if (selectedMax) {
-      params.lte = Math.min(parseFloat(selectedMax), availableMax);
+      params.lte = selectedMax;
     }
 
     const rangeFilter = buildRangeFilter(field, params, dataView);
@@ -380,7 +380,7 @@ export class RangeSliderEmbeddable
           this.dispatch.setLoading(false);
           this.dispatch.setIsInvalid(true);
           this.dispatch.setDataViewId(dataView.id);
-          this.dispatch.publishFilters([]);
+          this.dispatch.publishFilters([rangeFilter]);
           this.dispatch.setErrorMessage(undefined);
         });
         return;

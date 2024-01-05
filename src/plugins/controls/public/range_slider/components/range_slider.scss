@@ -20,8 +20,7 @@
   background-color: transparent;
 
   &:invalid {
-    color: $euiTextSubduedColor;
-    text-decoration: line-through;
+    color: $euiColorWarningText;
     font-weight: $euiFontWeightRegular;
     background-image: none; // hide the red bottom border
   }

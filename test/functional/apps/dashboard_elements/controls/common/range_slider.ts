@@ -96,7 +96,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           width: 'medium',
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
-        const secondId = (await dashboardControls.getAllControlIds())[1];
+        const [firstId, secondId] = await dashboardControls.getAllControlIds();
+        await dashboardControls.clearControlSelections(firstId);
+        await dashboardControls.rangeSliderWaitForLoading(firstId);
         await dashboardControls.validateRange('placeholder', secondId, '100', '1200');
 
         await dashboardControls.rangeSliderSetLowerBound(secondId, '200');
