@@ -5,15 +5,38 @@
  * 2.0.
  */
 
-import { ISearchGeneric } from '@kbn/data-plugin/common';
-import { checkForIgnoredFields, DataStreamQualityCheck } from './checks';
+import { DataStreamQualityCheckExecution } from '../../../common';
+import {
+  checkForIgnoredFields,
+  DataStreamQualityCheck,
+  DataStreamQualityCheckArguments,
+  DataStreamQualityCheckDependencies,
+} from './checks';
 
 export class DataStreamQualityService {
   private checks: DataStreamQualityCheck[] = [checkForIgnoredFields];
 
-  constructor(private readonly search: ISearchGeneric) {}
+  constructor(private readonly dependencies: DataStreamQualityCheckDependencies) {}
 
-  public async performChecks() {
-    return null;
+  public async getChecks(args: DataStreamQualityCheckArguments) {
+    return this.checks.map((check) => check.id);
+  }
+
+  public async performCheck(
+    checkId: string,
+    args: DataStreamQualityCheckArguments
+  ): Promise<DataStreamQualityCheckExecution> {
+    const [check] = this.checks.filter((_check) => _check.id === checkId);
+
+    const started = new Date().toISOString();
+    const result = await check.apply(this.dependencies)(args);
+    const finished = new Date().toISOString();
+
+    return {
+      id: check.id,
+      started,
+      finished,
+      result,
+    };
   }
 }

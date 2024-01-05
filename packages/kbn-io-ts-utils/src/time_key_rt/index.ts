@@ -13,7 +13,7 @@ import { chain } from 'fp-ts/lib/Either';
 
 const NANO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3,9}Z$/;
 
-export const DateFromStringOrNumber = new rt.Type<string, number | string>(
+export const DateFromStringOrNumber = new rt.Type<string, string>(
   'DateFromStringOrNumber',
   (input): input is string => typeof input === 'string',
   (input, context) => {

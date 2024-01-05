@@ -8,15 +8,15 @@
 import { IRouter } from '@kbn/core-http-server';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
-  DATA_STREAM_CHECKS_PATH,
-  getDatastreamChecksRequestParamsRT,
-  getDatastreamChecksRequestPayloadRT,
-  GetDatastreamChecksResponsePayload,
-  getDatastreamChecksResponsePayloadRT,
+  DATA_STREAM_CHECK_PATH,
+  getDatastreamCheckRequestParamsRT,
+  getDatastreamCheckRequestPayloadRT,
+  GetDatastreamCheckResponsePayload,
+  getDatastreamCheckResponsePayloadRT,
 } from '../../common';
 import { DatasetQualityRequestHandlerContext } from '../types';
 
-export const registerDataStreamQualityChecksRoute = ({
+export const registerDataStreamQualityCheckRoute = ({
   router,
 }: {
   router: IRouter<DatasetQualityRequestHandlerContext>;
@@ -24,43 +24,40 @@ export const registerDataStreamQualityChecksRoute = ({
   router.versioned
     .get({
       access: 'internal',
-      path: DATA_STREAM_CHECKS_PATH,
+      path: DATA_STREAM_CHECK_PATH,
     })
     .addVersion(
       {
         version: '1',
         validate: {
           request: {
-            body: createRouteValidationFunction(getDatastreamChecksRequestPayloadRT),
-            params: createRouteValidationFunction(getDatastreamChecksRequestParamsRT),
+            body: createRouteValidationFunction(getDatastreamCheckRequestPayloadRT),
+            params: createRouteValidationFunction(getDatastreamCheckRequestParamsRT),
           },
           response: {
             200: {
-              body: createRouteValidationFunction(getDatastreamChecksResponsePayloadRT),
+              body: createRouteValidationFunction(getDatastreamCheckResponsePayloadRT),
             },
           },
         },
       },
       async (ctx, req, res) => {
-        const dataStream = req.params.dataStream;
+        const { checkId, dataStream } = req.params;
         const timeRange = {
           start: req.body.time_range.start,
           end: req.body.time_range.end,
         };
 
-        const checks = await (
+        const checkExecution = await (
           await ctx.datasetQuality
-        ).dataStreamQualityService.getChecks({
+        ).dataStreamQualityService.performCheck(checkId, {
           dataStream,
           timeRange,
         });
 
-        return res.ok<GetDatastreamChecksResponsePayload>({
-          body: getDatastreamChecksResponsePayloadRT.encode({
-            plan: {
-              time_range: timeRange,
-              checks,
-            },
+        return res.ok<GetDatastreamCheckResponsePayload>({
+          body: getDatastreamCheckResponsePayloadRT.encode({
+            result: checkExecution,
           }),
         });
       }

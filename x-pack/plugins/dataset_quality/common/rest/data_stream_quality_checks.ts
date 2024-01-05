@@ -5,67 +5,24 @@
  * 2.0.
  */
 
-import { DateFromStringOrNumber } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import { checkPlanRT, checkTimeRangeRT } from '../data_stream_quality_checks';
 import { DATASET_QUALITY_URL_PREFIX } from './shared';
 
-export const DATA_STREAM_CHECKS_PATH = `${DATASET_QUALITY_URL_PREFIX}/data_stream/:dataStream/checks`;
+export const getDataStreamChecksPath = <DataStream extends string>(dataStream: DataStream) =>
+  `${DATASET_QUALITY_URL_PREFIX}/data_stream/${dataStream}/checks` as const;
+export const DATA_STREAM_CHECKS_PATH = getDataStreamChecksPath(':dataStream');
+
+export const getDatastreamChecksRequestParamsRT = rt.strict({
+  dataStream: rt.string,
+});
 
 export const getDatastreamChecksRequestPayloadRT = rt.strict({
-  time_range: rt.strict({
-    start: DateFromStringOrNumber,
-    end: DateFromStringOrNumber,
-  }),
-});
-
-export const ignoredFieldFailReasonRT = rt.strict({
-  type: rt.literal('ignored-field'),
-  field_name: rt.string,
-});
-
-export const ingestPipelineErrorFailReasonRT = rt.strict({
-  type: rt.literal('ingest-pipeline-error'),
-  message: rt.string,
-});
-
-export const failReasonRT = rt.union([ignoredFieldFailReasonRT, ingestPipelineErrorFailReasonRT]);
-
-export const checkPassedResultRT = rt.strict({
-  type: rt.literal('passed'),
-});
-
-export const checkFailedResultRT = rt.strict({
-  type: rt.literal('failed'),
-  reasons: rt.array(failReasonRT),
-});
-
-export const checkErrorResultRT = rt.strict({
-  type: rt.literal('error'),
-  name: rt.string,
-  description: rt.string,
-});
-
-export const checkResultRT = rt.union([
-  checkPassedResultRT,
-  checkFailedResultRT,
-  checkErrorResultRT,
-]);
-
-export const datasetQualityCheckRT = rt.strict({
-  id: rt.string,
-  started: rt.string,
-  finished: rt.string,
-  result: checkResultRT,
-});
-
-export const skippedDatasetQualityCheckRT = rt.strict({
-  id: rt.string,
-  reason: rt.string,
+  time_range: checkTimeRangeRT,
 });
 
 export const getDatastreamChecksResponsePayloadRT = rt.strict({
-  performed_checks: rt.array(datasetQualityCheckRT),
-  skipped_checks: rt.array(skippedDatasetQualityCheckRT),
+  plan: checkPlanRT,
 });
 
 export type GetDatastreamChecksResponsePayload = rt.TypeOf<

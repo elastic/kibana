@@ -10,10 +10,12 @@ import { mapValues } from 'lodash';
 import { getDatasetQualityServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetQualityRouteHandlerResources } from './routes/types';
+import { DataStreamQualityService } from './services/data_stream_quality_service/data_stream_quality_service';
 import {
   DatasetQualityPluginSetupDependencies,
   DatasetQualityPluginStart,
   DatasetQualityPluginStartDependencies,
+  DatasetQualityRequestHandlerContext,
 } from './types';
 
 export class DatasetQualityServerPlugin implements Plugin {
@@ -28,6 +30,19 @@ export class DatasetQualityServerPlugin implements Plugin {
     plugins: DatasetQualityPluginSetupDependencies
   ) {
     this.logger.debug('dataset_quality: Setup');
+
+    core.http.registerRouteHandlerContext<DatasetQualityRequestHandlerContext, 'datasetQuality'>(
+      'datasetQuality',
+      async (context, req, res) => {
+        const [, { data }] = await core.getStartServices();
+
+        return {
+          dataStreamQualityService: new DataStreamQualityService({
+            search: data.search.asScoped(req).search,
+          }),
+        };
+      }
+    );
 
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {

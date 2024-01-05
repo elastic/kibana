@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export * from './call_api';
-export * from './create_call_dataset_quality_api';
-export * from './data_stream_quality_check';
-export * from './data_stream_quality_checks';
+import * as rt from 'io-ts';
+import { checkTimeRangeRT } from './common';
+
+export const checkPlanRT = rt.strict({
+  time_range: checkTimeRangeRT,
+  checks: rt.array(rt.string),
+});
+
+export type CheckPlan = rt.TypeOf<typeof checkPlanRT>;

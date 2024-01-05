@@ -5,34 +5,18 @@
  * 2.0.
  */
 
-import { ISearchGeneric } from '@kbn/data-plugin/common';
+import type { ISearchGeneric } from '@kbn/data-plugin/common';
+import type { CheckResult, DataStreamQualityCheckArguments } from '../../../../common';
 
 export interface DataStreamQualityCheck {
   id: string;
   apply: (
     dependencies: DataStreamQualityCheckDependencies
-  ) => (args: DataStreamQualityCheckArguments) => Promise<QualityCheckResult>;
+  ) => (args: DataStreamQualityCheckArguments) => Promise<CheckResult>;
 }
 
-export type QualityCheckResult = CheckPassedResult | CheckFailedResult;
-
-interface CheckPassedResult {
-  type: 'passed';
-}
-
-interface CheckFailedResult {
-  type: 'failed';
-  reasons: null;
-}
-
-interface DataStreamQualityCheckDependencies {
+export interface DataStreamQualityCheckDependencies {
   search: ISearchGeneric;
 }
 
-interface DataStreamQualityCheckArguments {
-  dataStream: string;
-  timeRange: {
-    start: string;
-    end: string;
-  };
-}
+export { DataStreamQualityCheckArguments };

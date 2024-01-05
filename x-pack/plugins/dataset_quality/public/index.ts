@@ -10,6 +10,7 @@ import { DatasetQualityConfig } from '../common/plugin_config';
 import { DatasetQualityPlugin } from './plugin';
 
 export type { DatasetQualityPluginSetup, DatasetQualityPluginStart } from './types';
+export type { DataStreamQualityServiceStart } from './services/data_stream_quality';
 
 export function plugin(context: PluginInitializerContext<DatasetQualityConfig>) {
   return new DatasetQualityPlugin(context);

@@ -14,7 +14,8 @@ export const checkForIgnoredFields: DataStreamQualityCheck = {
     async ({ dataStream, timeRange }) => {
       // TODO: perform actual check
       return {
-        type: 'passed',
+        type: 'skipped',
+        reason: 'not-implemented',
       };
     },
 };
