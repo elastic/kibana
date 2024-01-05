@@ -250,7 +250,7 @@ export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
   '[data-test-subj="event-fields-table-row-@timestamp"] [data-test-subj="showExtraActionsButton"]';
 
-export const TIMELINE_STATUS = '[data-test-subj="timeline-status"]';
+export const TIMELINE_STATUS = '[data-test-subj="timeline-save-status"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';
@@ -283,6 +283,12 @@ export const HOVER_ACTIONS = {
   COPY: '[data-test-subj="hover-actions-copy-button"]',
   SHOW_TOP: '[data-test-subj=show-top-field]',
 };
+
+export const TIMELINE_FILTER_OUT = '[data-test-subj="filter-out-value"]';
+
+export const TIMELINE_FILTER_FOR = '[data-test-subj="filter-for-value"]';
+
+export const TIMELINE_FILTER_BADGE_ENABLED = '[data-test-subj~="filter-enabled"]';
 
 export const GET_TIMELINE_HEADER = (fieldName: string) => {
   return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;

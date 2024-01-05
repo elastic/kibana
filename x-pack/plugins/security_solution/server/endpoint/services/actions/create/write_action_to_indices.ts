@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import moment from 'moment';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions/types';
+import { isExecuteAction } from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
@@ -143,6 +144,7 @@ export const writeActionToIndices = async ({
               completed_at: moment().toISOString(),
               started_at: moment().toISOString(),
               data: doc.EndpointActions.data,
+              input_type: 'endpoint',
             },
           },
           logger,
@@ -179,24 +181,22 @@ const createFailedActionResponseEntry = async ({
   }
 };
 
-const addRuleInfoToAction = (
-  payload: CreateActionPayload
-):
-  | {
-      rule: { id: string; name: string };
-    }
-  | undefined => {
+export const addRuleInfoToAction = (
+  payload: Pick<CreateActionPayload, 'rule_id' | 'rule_name'>
+): Pick<LogsEndpointAction, 'rule'> => {
   if (payload.rule_id && payload.rule_name) {
     return { rule: { id: payload.rule_id, name: payload.rule_name } };
   }
+
+  return {};
 };
 
-const getActionParameters = (
-  action: CreateActionPayload
+export const getActionParameters = (
+  action: Pick<CreateActionPayload, 'command' | 'parameters'>
 ): ResponseActionsExecuteParameters | Readonly<{}> | undefined => {
   // set timeout to 4h (if not specified or when timeout is specified as 0) when command is `execute`
-  if (action.command === 'execute') {
-    const actionRequestParams = action.parameters as ResponseActionsExecuteParameters;
+  if (isExecuteAction(action)) {
+    const actionRequestParams = action.parameters;
     if (typeof actionRequestParams?.timeout === 'undefined') {
       return { ...actionRequestParams, timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT };
     }
@@ -205,4 +205,8 @@ const getActionParameters = (
 
   // for all other commands return the parameters as is
   return action.parameters ?? undefined;
+};
+
+export const getActionRequestExpiration = (): string => {
+  return moment().add(2, 'weeks').toISOString();
 };

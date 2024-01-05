@@ -20,7 +20,9 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "fieldFormats",
       "uiActions",
+      "presentationUtil",
       "exploratoryView",
       "features",
       "files",
@@ -55,7 +57,9 @@
       "kibanaUtils",
       "unifiedSearch",
       "stackAlerts",
-      "spaces"
+      "spaces",
+      "embeddable",
+      "ingestPipelines"
     ],
     "extraPublicDirs": [
       "common"

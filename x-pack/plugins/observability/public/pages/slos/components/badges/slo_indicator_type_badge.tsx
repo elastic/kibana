@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBadge, EuiFlexItem, EuiToolTip, EuiBadgeProps } from '@elastic/eui';
-import { SLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { euiLightVars } from '@kbn/ui-theme';
+import { EuiBadge, EuiBadgeProps, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  SLOResponse,
+  SLOWithSummaryResponse,
+} from '@kbn/slo-schema';
+import { euiLightVars } from '@kbn/ui-theme';
+import React from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
-import { isApmIndicatorType } from '../../../../utils/slo/indicator';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
@@ -27,26 +31,8 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
   } = useKibana().services;
 
   const handleNavigateToApm = () => {
-    if (
-      slo.indicator.type === 'sli.apm.transactionDuration' ||
-      slo.indicator.type === 'sli.apm.transactionErrorRate'
-    ) {
-      const {
-        indicator: {
-          params: { environment, filter, service, transactionName, transactionType },
-        },
-        timeWindow: { duration },
-      } = slo;
-
-      const url = convertSliApmParamsToApmAppDeeplinkUrl({
-        duration,
-        environment,
-        filter,
-        service,
-        transactionName,
-        transactionType,
-      });
-
+    const url = convertSliApmParamsToApmAppDeeplinkUrl(slo);
+    if (url) {
       navigateToUrl(basePath.prepend(url));
     }
   };
@@ -58,7 +44,8 @@ export function SloIndicatorTypeBadge({ slo, color }: Props) {
           {toIndicatorTypeLabel(slo.indicator.type)}
         </EuiBadge>
       </EuiFlexItem>
-      {isApmIndicatorType(slo.indicator.type) && 'service' in slo.indicator.params && (
+      {(apmTransactionDurationIndicatorSchema.is(slo.indicator) ||
+        apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) && (
         <EuiFlexItem grow={false} style={{ maxWidth: 100 }}>
           <EuiToolTip
             position="top"

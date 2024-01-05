@@ -27,7 +27,7 @@ import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import type { Sort } from '../sort';
 
 import { Header } from './header';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 
 import * as i18n from './translations';
 

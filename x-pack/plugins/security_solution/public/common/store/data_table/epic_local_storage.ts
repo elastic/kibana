@@ -12,10 +12,10 @@ import { get } from 'lodash/fp';
 
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { updateTotalCount } from '../../../timelines/store/timeline/actions';
+import { updateTotalCount } from '../../../timelines/store/actions';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
-import type { TimelineEpicDependencies } from '../../../timelines/store/timeline/types';
+import type { TimelineEpicDependencies } from '../../../timelines/store/types';
 
 const {
   applyDeltaToColumnWidth,

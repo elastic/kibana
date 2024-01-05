@@ -18,7 +18,7 @@ import { OpenTimelineModal } from '../../../../timelines/components/open_timelin
 import type { ActionTimelineToShow } from '../../../../timelines/components/open_timeline/types';
 import { QueryBar } from '../../../../common/components/query_bar';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { TimelineModel } from '../../../../timelines/store/timeline/model';
+import type { TimelineModel } from '../../../../timelines/store/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
