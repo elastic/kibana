@@ -433,16 +433,23 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     usageService.notifyUsage(featureKey);
   }
 
-  public async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  public async isolate(
+    actionRequest: IsolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('isolate');
   }
 
-  public async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  public async release(
+    actionRequest: IsolationRouteRequestBody,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('unisolate');
   }
 
   public async killProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
@@ -450,7 +457,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async suspendProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
@@ -458,25 +466,29 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async runningProcesses(
-    options: GetProcessesRequestBody
+    actionRequest: GetProcessesRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
     throw new ResponseActionsNotSupportedError('running-processes');
   }
 
   public async getFile(
-    options: ResponseActionGetFileRequestBody
+    actionRequest: ResponseActionGetFileRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
     throw new ResponseActionsNotSupportedError('get-file');
   }
 
   public async execute(
-    options: ExecuteActionRequestBody
+    actionRequest: ExecuteActionRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
     throw new ResponseActionsNotSupportedError('execute');
   }
 
   public async upload(
-    options: UploadActionApiRequestBody
+    actionRequest: UploadActionApiRequestBody,
+    options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
     throw new ResponseActionsNotSupportedError('upload');
   }

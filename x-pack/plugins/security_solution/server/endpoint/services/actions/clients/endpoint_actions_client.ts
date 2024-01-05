@@ -182,6 +182,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+    // FIXME:PT add real "options" to methods
     return this.handleResponseAction<IsolationRouteRequestBody, ActionDetails>('isolate', options);
   }
 

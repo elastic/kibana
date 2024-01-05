@@ -184,6 +184,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+    // FIXME:PT support method options
+
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...options,
       command: 'isolate',

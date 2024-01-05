@@ -185,6 +185,11 @@ describe('SentinelOneActionsClient class', () => {
 
       expect(getActionDetailsByIdMock).toHaveBeenCalled();
     });
+
+    it('should update cases', async () => {
+      // FIXME:PT implement
+      expect(true).toBe(false);
+    });
   });
 
   describe('#release()', () => {
@@ -257,6 +262,12 @@ describe('SentinelOneActionsClient class', () => {
       await s1ActionsClient.release(createS1IsolationOptions());
 
       expect(getActionDetailsByIdMock).toHaveBeenCalled();
+    });
+
+    it('should update cases', async () => {
+      // FIXME:PT implement
+      // Also - look to build a generic test that tests this for all response actions
+      expect(true).toBe(false);
     });
   });
 });
