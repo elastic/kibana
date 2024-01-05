@@ -13,18 +13,18 @@ import {
   column3,
   numericDraggedColumn,
   fieldList,
-  fieldListNonNumericOnly,
   notNumericDraggedField,
   numericDraggedField,
 } from './mocks';
 import { TextBasedPrivateState } from '../types';
+import { addToCache } from '../fieldlist_cache';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const defaultProps = {
   state: {
     layers: {
       first: {
         columns: [column1, column2, column3],
-        allColumns: [...fieldList, column1, column2, column3],
       },
     },
   },
@@ -42,7 +42,14 @@ const defaultProps = {
     },
   },
 } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
-
+const allColumns = [...fieldList, column1, column2, column3].map((f) => {
+  return {
+    id: f.columnId,
+    name: f.fieldName,
+    meta: f?.meta,
+  };
+}) as DatatableColumn[];
+addToCache(allColumns);
 describe('Text-based: getDropProps', () => {
   it('should return undefined if source and target belong to different layers', () => {
     const props = {
@@ -82,7 +89,6 @@ describe('Text-based: getDropProps', () => {
         layers: {
           first: {
             columns: [column1, column2, column3],
-            allColumns: [...fieldListNonNumericOnly, column1, column2, column3],
           },
         },
       },

@@ -87,7 +87,6 @@ export async function getStateFromAggregateQuery(
   // get the id of the dataview
   let dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
-  let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
     const dataView = await dataViews.create({
@@ -110,7 +109,7 @@ export async function getStateFromAggregateQuery(
     timeFieldName = dataView.timeFieldName;
     const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
     columnsFromQuery = table?.columns ?? [];
-    allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
+    addToCache(columnsFromQuery);
   } catch (e) {
     errors.push(e);
   }
@@ -121,13 +120,11 @@ export async function getStateFromAggregateQuery(
         index: dataViewId,
         query,
         columns: state.layers[newLayerId].columns ?? [],
-        allColumns,
         timeField: timeFieldName,
         errors,
       },
     },
   };
-  addToCache(columnsFromQuery);
 
   return {
     ...tempState,

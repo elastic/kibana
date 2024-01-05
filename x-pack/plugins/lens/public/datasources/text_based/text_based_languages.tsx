@@ -46,7 +46,7 @@ import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import { canColumnBeUsedBeInMetricDimension, MAX_NUM_OF_COLUMNS } from './utils';
-import { addToCache, retrieveFromCache } from './fieldlist_cache';
+import { addToCache, retrieveFromCache, retrieveLayerColumnsFromCache } from './fieldlist_cache';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -89,8 +89,9 @@ export function getTextBasedDatasource({
           layerId: id,
           columns:
             layer.columns?.map((f) => {
+              const allColumns = retrieveLayerColumnsFromCache(layer.columns);
               const inMetricDimension = canColumnBeUsedBeInMetricDimension(
-                layer.allColumns,
+                allColumns,
                 f?.meta?.type
               );
               return {
@@ -166,7 +167,6 @@ export function getTextBasedDatasource({
             index,
             query,
             columns: newColumns.slice(0, MAX_NUM_OF_COLUMNS) ?? [],
-            allColumns: newColumns ?? [],
             timeField: context.dataViewSpec.timeFieldName,
           },
         },
@@ -277,7 +277,7 @@ export function getTextBasedDatasource({
     insertLayer(state: TextBasedPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;
-      const columns = layer?.allColumns ?? [];
+      const columns = retrieveLayerColumnsFromCache(layer.columns);
       const index =
         layer?.index ??
         (JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
@@ -389,7 +389,8 @@ export function getTextBasedDatasource({
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const layer = props.state.layers[props.layerId];
-      const selectedField = layer?.allColumns?.find((column) => column.columnId === props.columnId);
+      const allColumns = retrieveLayerColumnsFromCache(layer.columns);
+      const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
       let customLabel: string | undefined = columnLabelMap[props.columnId];
       if (!customLabel) {
         customLabel = selectedField?.fieldName;
@@ -421,7 +422,7 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      const allColumns = props.state.layers[props.layerId]?.allColumns;
+      const allColumns = retrieveLayerColumnsFromCache(props.state.layers[props.layerId]?.columns);
       const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
       const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
 
@@ -467,10 +468,6 @@ export function getTextBasedDatasource({
                           [props.layerId]: {
                             ...props.state.layers[props.layerId],
                             columns: [...props.state.layers[props.layerId].columns, newColumn],
-                            allColumns: [
-                              ...props.state.layers[props.layerId].allColumns,
-                              newColumn,
-                            ],
                           },
                         },
                       }
@@ -481,11 +478,6 @@ export function getTextBasedDatasource({
                           [props.layerId]: {
                             ...props.state.layers[props.layerId],
                             columns: props.state.layers[props.layerId].columns.map((col) =>
-                              col.columnId !== props.columnId
-                                ? col
-                                : { ...col, fieldName: choice.field, meta }
-                            ),
-                            allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
                               col.columnId !== props.columnId
                                 ? col
                                 : { ...col, fieldName: choice.field, meta }
@@ -547,7 +539,9 @@ export function getTextBasedDatasource({
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
-          const column = layer?.allColumns?.find((c) => c.columnId === columnId);
+          const column = retrieveLayerColumnsFromCache(layer.columns)?.find(
+            (c) => c.columnId === columnId
+          );
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
 
           if (column) {
@@ -605,7 +599,6 @@ export function getTextBasedDatasource({
               [id]: {
                 ...state.layers[id],
                 columns: [...layer.columns, newColumn],
-                allColumns: [...layer.allColumns, newColumn],
               },
             },
           },
@@ -693,6 +686,5 @@ function blankLayer(index: string, query?: AggregateQuery, columns?: TextBasedLa
     index,
     query,
     columns: [],
-    allColumns: columns ?? [],
   };
 }

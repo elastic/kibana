@@ -155,7 +155,6 @@ export const defaultProps = {
           sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
         },
         columns: [column1, column2, column3],
-        allColumns: [...fieldList, column1, column2, column3],
         errors: [],
       },
     },

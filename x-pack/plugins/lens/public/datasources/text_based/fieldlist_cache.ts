@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { TextBasedLayerColumn } from './types';
+import { getAllColumns } from './utils';
 
 let fieldListCache: DatatableColumn[];
 
@@ -13,5 +15,11 @@ export const addToCache = (list: DatatableColumn[]) => {
 };
 
 export const retrieveFromCache = () => {
-  return fieldListCache;
+  return fieldListCache ?? [];
+};
+
+export const retrieveLayerColumnsFromCache = (
+  existingColumns: TextBasedLayerColumn[]
+): TextBasedLayerColumn[] => {
+  return getAllColumns(existingColumns, fieldListCache ?? []);
 };
