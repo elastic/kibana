@@ -214,9 +214,7 @@ export const buildDatasourceStates = async (
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
   dataViewsAPI: DataViewsPublicPluginStart
 ) => {
-  let layers: LensAttributes['state']['datasourceStates'] = {
-    formBased: { layers: {} },
-  };
+  let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   const mainDataset = config.dataset;
   const configLayers = 'layers' in config ? config.layers : [config];
@@ -251,18 +249,11 @@ export const buildDatasourceStates = async (
         layers = {
           ...layers,
           [type]: {
-            layers: isPersistedStateLayer(layerConfig)
-              ? { ...layers[type]?.layers, [layerId]: layerConfig }
-              : // metric chart can return 2 layers (one for the metric and one for the trendline)
-                { ...layerConfig },
+            layers: {
+              [layerId]: layerConfig,
+            },
           },
         };
-      }
-
-      if (dataView) {
-        Object.keys(layers[type]!.layers).forEach((id) => {
-          dataviews[id] = dataView;
-        });
       }
     }
   }
