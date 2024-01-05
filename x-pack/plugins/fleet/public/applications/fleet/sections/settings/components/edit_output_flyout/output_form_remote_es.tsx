@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiCodeBlock, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock, EuiFieldText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -18,11 +18,11 @@ import { SecretFormRow } from './output_form_secret_form_row';
 interface Props {
   inputs: OutputFormInputsType;
   useSecretsStorage: boolean;
-  onUsePlainText: () => void;
+  onToggleSecretStorage: (secretEnabled: true) => void;
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
-  const { inputs, useSecretsStorage, onUsePlainText } = props;
+  const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
 
   return (
     <>
@@ -41,8 +41,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         isUrl
       />
       <EuiSpacer size="m" />
-      {inputs.serviceTokenInput.value || !useSecretsStorage ? (
-        <EuiFormRow
+      {!useSecretsStorage ? (
+        <SecretFormRow
           fullWidth
           label={
             <FormattedMessage
@@ -51,6 +51,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             />
           }
           {...inputs.serviceTokenInput.formRowProps}
+          useSecretsStorage={useSecretsStorage}
+          onToggleSecretStorage={onToggleSecretStorage}
         >
           <EuiFieldText
             fullWidth
@@ -63,7 +65,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               }
             )}
           />
-        </EuiFormRow>
+        </SecretFormRow>
       ) : (
         <SecretFormRow
           fullWidth
@@ -72,7 +74,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           })}
           {...inputs.serviceTokenSecretInput.formRowProps}
           cancelEdit={inputs.serviceTokenSecretInput.cancelEdit}
-          onUsePlainText={onUsePlainText}
+          useSecretsStorage={useSecretsStorage}
+          onToggleSecretStorage={onToggleSecretStorage}
         >
           <EuiFieldText
             data-test-subj="serviceTokenSecretInput"

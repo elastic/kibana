@@ -85,9 +85,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const { euiTheme } = useEuiTheme();
   const { outputSecretsStorage: isOutputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
   const [useSecretsStorage, setUseSecretsStorage] = React.useState(isOutputSecretsStorageEnabled);
-
-  const onUsePlainText = () => {
-    setUseSecretsStorage(false);
+  const onToggleSecretStorage = (secretEnabled: boolean) => {
+    setUseSecretsStorage(secretEnabled);
   };
 
   const proxiesOptions = useMemo(
@@ -196,8 +195,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
             )}
           />
         </EuiFormRow>
-        {(output && output?.ssl?.key) || !useSecretsStorage ? (
-          <EuiFormRow
+        {!useSecretsStorage ? (
+          <SecretFormRow
             fullWidth
             label={
               <FormattedMessage
@@ -206,6 +205,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               />
             }
             {...inputs.sslKeyInput.formRowProps}
+            useSecretsStorage={useSecretsStorage}
+            onToggleSecretStorage={onToggleSecretStorage}
           >
             <EuiTextArea
               fullWidth
@@ -218,7 +219,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 }
               )}
             />
-          </EuiFormRow>
+          </SecretFormRow>
         ) : (
           <SecretFormRow
             fullWidth
@@ -226,7 +227,8 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               defaultMessage: 'Client SSL certificate key',
             })}
             {...inputs.sslKeySecretInput.formRowProps}
-            onUsePlainText={onUsePlainText}
+            useSecretsStorage={useSecretsStorage}
+            onToggleSecretStorage={onToggleSecretStorage}
             cancelEdit={inputs.sslKeySecretInput.cancelEdit}
           >
             <EuiTextArea
@@ -294,7 +296,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         <OutputFormRemoteEsSection
           inputs={inputs}
           useSecretsStorage={useSecretsStorage}
-          onUsePlainText={onUsePlainText}
+          onToggleSecretStorage={onToggleSecretStorage}
         />
       );
     }
@@ -307,7 +309,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         <OutputFormKafkaSection
           inputs={inputs}
           useSecretsStorage={useSecretsStorage}
-          onUsePlainText={onUsePlainText}
+          onToggleSecretStorage={onToggleSecretStorage}
         />
       );
     }

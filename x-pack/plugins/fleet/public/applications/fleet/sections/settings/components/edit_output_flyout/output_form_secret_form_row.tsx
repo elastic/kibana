@@ -28,8 +28,10 @@ export const SecretFormRow: React.FC<{
   title: string;
   clear: () => void;
   initialValue?: any;
-  onUsePlainText: () => void;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
   cancelEdit: () => void;
+  useSecretsStorage?: boolean;
+  label?: JSX.Element;
 }> = ({
   fullWidth,
   error,
@@ -38,8 +40,10 @@ export const SecretFormRow: React.FC<{
   clear,
   title,
   initialValue,
-  onUsePlainText,
+  onToggleSecretStorage,
   cancelEdit,
+  useSecretsStorage,
+  label,
 }) => {
   const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(!initialValue);
@@ -105,7 +109,7 @@ export const SecretFormRow: React.FC<{
     </>
   );
 
-  const label = (
+  const secretLabel = (
     <span>
       <EuiIcon type="lock" />
       &nbsp;
@@ -128,7 +132,7 @@ export const SecretFormRow: React.FC<{
       defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above. {revertLink}"
       values={{
         revertLink: (
-          <EuiButtonEmpty onClick={onUsePlainText} color="primary" size="xs">
+          <EuiButtonEmpty onClick={() => onToggleSecretStorage(false)} color="primary" size="xs">
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
               defaultMessage="Click to use plain text storage instead"
@@ -139,15 +143,42 @@ export const SecretFormRow: React.FC<{
     />
   ) : undefined;
 
+  const plainTextHelp = (
+    <FormattedMessage
+      id="xpack.fleet.settings.editOutputFlyout.secretInputCalloutTitle"
+      defaultMessage="This field should be stored as a secret, currently it is set to be stored as plain text. {enableSecretLink}"
+      values={{
+        enableSecretLink: (
+          <EuiButtonEmpty onClick={() => onToggleSecretStorage(true)} color="primary" size="xs">
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.revertToSecretStorageLink"
+              defaultMessage="Click to use secret storage instead"
+            />
+          </EuiButtonEmpty>
+        ),
+      }}
+    />
+  );
+
   const inputComponent = editMode ? editValue : valueHiddenPanel;
 
-  return (
+  return useSecretsStorage ? (
     <EuiFormRow
       fullWidth={fullWidth}
-      label={label}
+      label={secretLabel}
       error={error}
       isInvalid={isInvalid}
       helpText={helpText}
+    >
+      {inputComponent}
+    </EuiFormRow>
+  ) : (
+    <EuiFormRow
+      fullWidth={fullWidth}
+      error={error}
+      isInvalid={isInvalid}
+      label={label}
+      helpText={plainTextHelp}
     >
       {inputComponent}
     </EuiFormRow>

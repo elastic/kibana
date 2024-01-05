@@ -72,9 +72,9 @@ const kafkaAuthenticationsOptions = [
 export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   inputs: OutputFormInputsType;
   useSecretsStorage: boolean;
-  onUsePlainText: () => void;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
 }> = (props) => {
-  const { inputs, useSecretsStorage, onUsePlainText } = props;
+  const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
 
   const kafkaVerificationModeOptions = useMemo(
     () =>
@@ -148,8 +148,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 )}
               />
             </EuiFormRow>
-            {inputs.kafkaSslKeyInput.value || !useSecretsStorage ? (
-              <EuiFormRow
+            {!useSecretsStorage ? (
+              <SecretFormRow
                 fullWidth
                 label={
                   <FormattedMessage
@@ -158,6 +158,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   />
                 }
                 {...inputs.kafkaSslKeyInput.formRowProps}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretStorage}
               >
                 <EuiTextArea
                   fullWidth
@@ -170,7 +172,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                     }
                   )}
                 />
-              </EuiFormRow>
+              </SecretFormRow>
             ) : (
               <SecretFormRow
                 fullWidth
@@ -181,7 +183,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   }
                 )}
                 {...inputs.kafkaSslKeySecretInput.formRowProps}
-                onUsePlainText={onUsePlainText}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretStorage}
                 cancelEdit={inputs.kafkaSslKeySecretInput.cancelEdit}
               >
                 <EuiTextArea
@@ -219,8 +222,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 {...inputs.kafkaAuthUsernameInput.props}
               />
             </EuiFormRow>
-            {inputs.kafkaAuthPasswordInput.value || !useSecretsStorage ? (
-              <EuiFormRow
+            {!useSecretsStorage ? (
+              <SecretFormRow
                 fullWidth
                 label={
                   <FormattedMessage
@@ -229,6 +232,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   />
                 }
                 {...inputs.kafkaAuthPasswordInput.formRowProps}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretStorage}
               >
                 <EuiFieldPassword
                   type={'dual'}
@@ -236,7 +241,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   fullWidth
                   {...inputs.kafkaAuthPasswordInput.props}
                 />
-              </EuiFormRow>
+              </SecretFormRow>
             ) : (
               <SecretFormRow
                 fullWidth
@@ -247,7 +252,8 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   }
                 )}
                 {...inputs.kafkaAuthPasswordSecretInput.formRowProps}
-                onUsePlainText={onUsePlainText}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretStorage}
                 cancelEdit={inputs.kafkaAuthPasswordSecretInput.cancelEdit}
               >
                 <EuiFieldPassword
