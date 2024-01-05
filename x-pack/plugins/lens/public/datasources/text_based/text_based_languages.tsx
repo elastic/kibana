@@ -146,7 +146,8 @@ export function getTextBasedDatasource({
       const updatedState = {
         ...state,
         initialContext: undefined,
-        fieldList: textBasedQueryColumns,
+        fieldList: [],
+        totalFields: textBasedQueryColumns.length,
         ...(context.dataViewSpec.id
           ? {
               indexPatternRefs: [
@@ -341,8 +342,8 @@ export function getTextBasedDatasource({
     // at this case we don't suggest all columns in a table but the first
     // MAX_NUM_OF_COLUMNS
     suggestsLimitedColumns(state: TextBasedPrivateState) {
-      const fieldsList = state?.fieldList ?? [];
-      return fieldsList.length >= MAX_NUM_OF_COLUMNS;
+      const totalFields = state?.totalFields ?? 0;
+      return totalFields >= MAX_NUM_OF_COLUMNS;
     },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
@@ -421,18 +422,17 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      const fields = props.state.fieldList;
       const allColumns = props.state.layers[props.layerId]?.allColumns;
       const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
       const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
 
-      const updatedFields = fields?.map((f) => {
+      const updatedFields = allColumns?.map((f) => {
         return {
           ...f,
           compatible:
             props.isMetricDimension && hasNumberTypeColumns
               ? props.filterOperations({
-                  dataType: f.meta.type as DataType,
+                  dataType: f?.meta?.type as DataType,
                   isBucketed: Boolean(f?.meta?.type !== 'number'),
                   scale: 'ordinal',
                 })
@@ -453,7 +453,7 @@ export function getTextBasedDatasource({
               existingFields={updatedFields ?? []}
               selectedField={selectedField}
               onChoose={(choice) => {
-                const meta = fields?.find((f) => f.name === choice.field)?.meta;
+                const meta = allColumns?.find((f) => f.fieldName === choice.field)?.meta;
                 const newColumn = {
                   columnId: props.columnId,
                   fieldName: choice.field,
@@ -539,12 +539,8 @@ export function getTextBasedDatasource({
         datasourceId: 'textBased',
 
         getTableSpec: () => {
-          const columns = state.layers[layerId]?.columns.filter((c) => {
-            const columnExists = state?.fieldList?.some((f) => f.name === c?.fieldName);
-            if (columnExists) return c;
-          });
           return (
-            columns.map((column) => ({
+            state.layers[layerId]?.columns.map((column) => ({
               columnId: column.columnId,
               fields: [column.fieldName],
             })) || []

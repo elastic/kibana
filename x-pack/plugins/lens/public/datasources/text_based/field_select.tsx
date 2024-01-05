@@ -8,12 +8,11 @@
 import React, { useMemo } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { FieldPicker, FieldOptionValue, FieldOption } from '@kbn/visualization-ui-components';
 import type { TextBasedLayerColumn } from './types';
 import type { DataType } from '../../types';
 
-export interface FieldOptionCompatible extends DatatableColumn {
+export interface FieldOptionCompatible extends TextBasedLayerColumn {
   compatible: boolean;
 }
 
@@ -36,10 +35,10 @@ export function FieldSelect({
         return {
           compatible: field.compatible ? 1 : 0,
           exists: true,
-          label: field.name,
+          label: field.fieldName,
           value: {
             type: 'field' as FieldOptionValue['type'],
-            field: field.name,
+            field: field.fieldName,
             dataType,
           },
         };

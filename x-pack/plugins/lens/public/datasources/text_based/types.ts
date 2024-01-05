@@ -35,6 +35,7 @@ export interface TextBasedPersistedState {
   layers: Record<string, TextBasedLayer>;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   fieldList?: DatatableColumn[];
+  totalFields?: number;
 }
 
 export type TextBasedPrivateState = TextBasedPersistedState & {
