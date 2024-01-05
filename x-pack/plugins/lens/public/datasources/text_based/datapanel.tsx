@@ -68,7 +68,6 @@ export function TextBasedDataPanel({
           expressions,
           frameDataViews
         );
-
         setDataHasLoaded(true);
         setState(stateFromQuery);
       }
