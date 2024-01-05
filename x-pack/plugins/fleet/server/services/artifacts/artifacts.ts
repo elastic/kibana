@@ -15,7 +15,7 @@ import { isEmpty, sortBy } from 'lodash';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { SearchHit } from '@kbn/es-types';
+import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 
 import type { ListResult } from '../../../common/types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
@@ -306,80 +306,28 @@ export const fetchAllArtifacts = (
   // FIXME:PT add options to NOT return `body` (cut down on data)
 
   const { kuery = '', perPage = 1000, sortField, sortOrder } = options;
-  let done = false;
-  let value: Artifact[] = [];
-  let searchAfterValue: SearchHit['sort'];
-  const fetchData = async () => {
-    try {
-      const searchResult = await esClient.search<ArtifactElasticsearchProperties>({
-        index: FLEET_SERVER_ARTIFACTS_INDEX,
-        ignore_unavailable: true,
-        track_total_hits: true,
-        rest_total_hits_as_int: true,
-        q: kuery,
-        size: perPage,
-        body: {
-          ...(searchAfterValue ? { search_after: searchAfterValue } : {}),
-          sort: [
-            {
-              // MUST have a sort field and sort order
-              [sortField || 'created']: {
-                order: sortOrder || 'asc',
-              },
-            },
-          ],
+
+  return createEsSearchIterable<ArtifactElasticsearchProperties>({
+    esClient,
+    searchRequest: {
+      index: FLEET_SERVER_ARTIFACTS_INDEX,
+      ignore_unavailable: true,
+      rest_total_hits_as_int: true,
+      track_total_hits: false,
+      q: kuery,
+      size: perPage,
+      sort: [
+        {
+          // MUST have a sort field and sort order
+          [sortField || 'created']: {
+            order: sortOrder || 'asc',
+          },
         },
-      });
-
-      const searchHits = searchResult.hits.hits;
-
-      if (searchHits.length === 0) {
-        done = true;
-        value = [];
-        return;
-      }
-
-      const lastSearchHit = searchHits[searchHits.length - 1];
-
-      // @ts-expect-error @elastic/elasticsearch _source is optional
-      value = searchHits.map((hit) => esSearchHitToArtifact(hit));
-      searchAfterValue = lastSearchHit.sort;
-
-      // If (for some reason) we don't have a `searchAfterValue`,
-      // then throw an error, or else we'll keep looping forever
-      if (!searchAfterValue) {
-        done = true;
-        throw new Error(
-          `Unable to store 'search_after' value. Last 'SearchHit' did not include a 'sort' property':\n${JSON.stringify(
-            lastSearchHit
-          )}`
-        );
-      }
-    } catch (e) {
-      throw new ArtifactsElasticsearchError(e);
-    }
-  };
-
-  const createIteratorResult = (): IteratorResult<Artifact[]> => {
-    return { done, value };
-  };
-
-  return {
-    [Symbol.asyncIterator]() {
-      return {
-        async next() {
-          if (!done) {
-            await fetchData();
-          }
-
-          return createIteratorResult();
-        },
-
-        async return() {
-          done = true;
-          return createIteratorResult();
-        },
-      };
+      ],
     },
-  };
+    resultsMapper: (data): Artifact[] => {
+      // @ts-expect-error @elastic/elasticsearch _source is optional
+      return data.hits.hits.map((hit) => esSearchHitToArtifact(hit));
+    },
+  });
 };
