@@ -7,8 +7,7 @@
 
 import type { TextBasedLayerColumn, TextBasedPrivateState } from '../types';
 import { reorderElements } from '../../../utils';
-import { DatasourceDimensionDropHandlerProps, isOperation } from '../../../types';
-import { removeColumn } from '../remove_column';
+import { DatasourceDimensionDropHandlerProps } from '../../../types';
 
 export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPrivateState>) => {
   const { dropType, state, source, target } = props;
@@ -83,12 +82,5 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
       },
     },
   };
-  if (isOperation(source) && ['replace_compatible', 'move_compatible'].includes(dropType)) {
-    return removeColumn({
-      prevState: newState,
-      columnId: source.columnId,
-      layerId: source.layerId,
-    });
-  }
   return newState;
 };

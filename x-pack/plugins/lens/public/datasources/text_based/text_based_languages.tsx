@@ -44,7 +44,6 @@ import { FieldSelect } from './field_select';
 import type { Datasource } from '../../types';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
-import { removeColumn } from './remove_column';
 import { canColumnBeUsedBeInMetricDimension, MAX_NUM_OF_COLUMNS } from './utils';
 
 function getLayerReferenceName(layerId: string) {
@@ -362,7 +361,9 @@ export function getTextBasedDatasource({
       return state.layers[layerId].index;
     },
 
-    removeColumn,
+    removeColumn: ({ prevState }) => {
+      return prevState;
+    },
 
     toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) => {
       return toExpression(state, layerId);
