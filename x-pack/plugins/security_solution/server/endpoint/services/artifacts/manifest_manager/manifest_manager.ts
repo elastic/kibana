@@ -733,27 +733,16 @@ export class ManifestManager {
    * @returns Artifact[]
    */
   private async listAllArtifacts(): Promise<Artifact[]> {
-    const fleetArtifacts = [];
-    const perPage = 100;
-    let page = 1;
+    const fleetArtifacts: Artifact[] = [];
+    let total = 0;
 
-    let fleetArtifactsResponse = await this.artifactClient.listArtifacts({
-      perPage,
-      page,
-    });
-    fleetArtifacts.push(...fleetArtifactsResponse.items);
-
-    while (
-      fleetArtifactsResponse.total > fleetArtifacts.length &&
-      !isEmpty(fleetArtifactsResponse.items)
-    ) {
-      page += 1;
-      fleetArtifactsResponse = await this.artifactClient.listArtifacts({
-        perPage,
-        page,
-      });
-      fleetArtifacts.push(...fleetArtifactsResponse.items);
+    for await (const artifacts of this.artifactClient.fetchAll()) {
+      fleetArtifacts.push(...artifacts);
+      total += artifacts.length;
     }
+
+    this.logger.debug(`Retrieved [${total}] artifacts from fleet`);
+
     return fleetArtifacts;
   }
 
