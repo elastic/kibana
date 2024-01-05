@@ -137,7 +137,9 @@ export const ConnectorConfigurationForm: React.FC<ConnectorConfigurationForm> = 
               setConfigEntry={(key, value) => {
                 setConfigView({
                   ...configView,
-                  advancedConfigurations: { ...configView.advancedConfigurations, [key]: value },
+                  advancedConfigurations: configView.advancedConfigurations.map((config) =>
+                    config.key === key ? { ...config, value } : config
+                  ),
                 });
               }}
             />
