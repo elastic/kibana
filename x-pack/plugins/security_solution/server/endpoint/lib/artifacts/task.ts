@@ -145,7 +145,7 @@ export class ManifestTask {
         }
 
         this.logger.debug(
-          `Encountered an error while attempting to retrieve last computed manifest (this might be ok if no endpoint policies exist yet): ${e.toString()}`
+          `Encountered an error while attempting to retrieve last computed manifest (this might be ok if no endpoint policies exist yet):\n${e.stack}`
         );
       }
 
