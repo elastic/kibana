@@ -101,6 +101,14 @@ export function getStateDefaults({
   if (savedSearch.breakdownField) {
     defaultState.breakdownField = savedSearch.breakdownField;
   }
+  try {
+    if (savedSearch.customVisualizationJSON) {
+      // TODO create a deserializer
+      defaultState.customVisualization = JSON.parse(savedSearch.customVisualizationJSON);
+    }
+  } catch {
+    // nothing
+  }
 
   return defaultState;
 }

@@ -68,6 +68,7 @@ const savedSearchAttributesSchema = schema.object(
       })
     ),
     breakdownField: schema.maybe(schema.string()),
+    customVisualizationJSON: schema.maybe(schema.string()), // TODO: should we create a new version?
     version: schema.maybe(schema.number()),
   },
   { unknowns: 'forbid' }

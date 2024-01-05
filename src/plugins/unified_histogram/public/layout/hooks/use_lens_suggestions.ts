@@ -20,12 +20,15 @@ import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { computeInterval } from './compute_interval';
+import { ExternalCustomVisualization } from '../../types';
+
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
 export const useLensSuggestions = ({
   dataView,
   query,
   originalSuggestion,
+  externalCustomVisualization,
   isPlainRecord,
   columns,
   data,
@@ -36,6 +39,7 @@ export const useLensSuggestions = ({
   dataView: DataView;
   query?: Query | AggregateQuery;
   originalSuggestion?: Suggestion;
+  externalCustomVisualization?: ExternalCustomVisualization;
   isPlainRecord?: boolean;
   columns?: DatatableColumn[];
   data: DataPublicPluginStart;
@@ -60,7 +64,37 @@ export const useLensSuggestions = ({
   }, [dataView, isPlainRecord, lensSuggestionsApi, query, columns]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
-  const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
+  let currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
+
+  if (
+    externalCustomVisualization &&
+    typeof externalCustomVisualization.visualizationState === 'object'
+  ) {
+    const matchingSuggestion = allSuggestions.find(
+      (suggestion) => suggestion.visualizationId === externalCustomVisualization.visualizationId
+    );
+
+    console.log(matchingSuggestion, externalCustomVisualization);
+
+    if (typeof matchingSuggestion === 'object') {
+      const layerId = matchingSuggestion.keptLayerIds[0];
+
+      currentSuggestion = {
+        ...matchingSuggestion,
+        visualizationState: {
+          ...(matchingSuggestion.visualizationState || {}),
+          ...(externalCustomVisualization.visualizationState || {}),
+          layers: externalCustomVisualization.visualizationState.layers
+            ? externalCustomVisualization.visualizationState.layers.map((layer) => ({
+                ...layer,
+                layerId,
+              }))
+            : matchingSuggestion.visualizationState.layers,
+        },
+      };
+    }
+  }
+
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
   const histogramQuery = useRef<AggregateQuery | undefined>();
   const histogramSuggestion = useMemo(() => {

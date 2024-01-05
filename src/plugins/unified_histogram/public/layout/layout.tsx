@@ -65,6 +65,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   currentSuggestion?: Suggestion;
   /**
+   * The external custom Lens suggestion
+   */
+  externalCustomVisualization?: Partial<Suggestion>;
+  /**
    * Flag that indicates that a text based language is used
    */
   isPlainRecord?: boolean;
@@ -184,6 +188,7 @@ export const UnifiedHistogramLayout = ({
   query,
   filters,
   currentSuggestion: originalSuggestion,
+  externalCustomVisualization,
   isChartLoading,
   isPlainRecord,
   timeRange,
@@ -225,6 +230,7 @@ export const UnifiedHistogramLayout = ({
     dataView,
     query,
     originalSuggestion,
+    externalCustomVisualization,
     isPlainRecord,
     columns,
     timeRange,

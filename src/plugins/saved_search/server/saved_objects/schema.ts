@@ -93,3 +93,7 @@ export const SCHEMA_SEARCH_V8_12_0 = schema.object({
     })
   ),
 });
+export const SCHEMA_SEARCH_V8_13_0 = schema.object({
+  ...SCHEMA_SEARCH_BASE,
+  customVisualizationJSON: schema.maybe(schema.string()),
+});

@@ -44,6 +44,7 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  customVisualizationJSON?: string;
 }
 
 /** @internal **/
@@ -74,6 +75,8 @@ export interface SavedSearch {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  customVisualizationJSON?: string;
+
   references?: SavedObjectReference[];
   sharingSavedObjectProps?: {
     outcome?: SavedObjectsResolveResponse['outcome'];

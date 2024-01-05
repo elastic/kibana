@@ -9,7 +9,7 @@
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { LensEmbeddableOutput, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput, LensPublicStart, Suggestion } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
@@ -143,3 +143,11 @@ export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
  * Unified histogram input observable
  */
 export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
+
+/**
+ * Unified Histogram type for recreating a stored Lens vis
+ */
+export interface ExternalCustomVisualization {
+  visualizationId: Suggestion['visualizationId'];
+  visualizationState: Suggestion['visualizationState'];
+}

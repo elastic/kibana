@@ -64,6 +64,10 @@ export function updateSavedSearch({
     savedSearch.rowHeight = state.rowHeight;
     savedSearch.rowsPerPage = state.rowsPerPage;
     savedSearch.sampleSize = state.sampleSize;
+    // TODO: create a serializer
+    savedSearch.customVisualizationJSON = state.customVisualization
+      ? JSON.stringify(state.customVisualization)
+      : undefined;
 
     if (state.viewMode) {
       savedSearch.viewMode = state.viewMode;

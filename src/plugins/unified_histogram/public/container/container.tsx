@@ -20,7 +20,11 @@ import {
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
-import { topPanelHeightSelector, currentSuggestionSelector } from './utils/state_selectors';
+import {
+  topPanelHeightSelector,
+  currentSuggestionSelector,
+  externalCustomVisualizationSelector,
+} from './utils/state_selectors';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -74,6 +78,7 @@ export type UnifiedHistogramApi = {
   UnifiedHistogramStateService,
   | 'state$'
   | 'setChartHidden'
+  | 'setExternalCustomVisualization'
   | 'setTopPanelHeight'
   | 'setBreakdownField'
   | 'setTimeInterval'
@@ -118,6 +123,7 @@ export const UnifiedHistogramContainer = forwardRef<
         stateService,
         'state$',
         'setChartHidden',
+        'setExternalCustomVisualization',
         'setTopPanelHeight',
         'setBreakdownField',
         'setTimeInterval',
@@ -127,6 +133,10 @@ export const UnifiedHistogramContainer = forwardRef<
   }, [input$, stateService]);
   const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
+  const externalCustomVisualization = useStateSelector(
+    stateService?.state$,
+    externalCustomVisualizationSelector
+  );
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
     stateService,
@@ -147,6 +157,7 @@ export const UnifiedHistogramContainer = forwardRef<
       {...layoutProps}
       {...stateProps}
       currentSuggestion={currentSuggestion}
+      externalCustomVisualization={externalCustomVisualization}
       isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}

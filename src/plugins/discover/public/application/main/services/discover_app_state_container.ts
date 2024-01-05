@@ -20,6 +20,7 @@ import {
   FilterStateStore,
   Query,
 } from '@kbn/es-query';
+import type { ExternalCustomVisualization } from '@kbn/unified-histogram-plugin/public';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
@@ -143,6 +144,10 @@ export interface DiscoverAppState {
    * Breakdown field of chart
    */
   breakdownField?: string;
+  /**
+   * Customization for Lens vis in Histogram area
+   */
+  customVisualization?: ExternalCustomVisualization;
 }
 
 export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =

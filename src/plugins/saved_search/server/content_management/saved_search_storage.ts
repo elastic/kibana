@@ -43,6 +43,7 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
         'refreshInterval',
         'rowsPerPage',
         'breakdownField',
+        'customVisualizationJSON',
         'sampleSize',
       ],
       logger,

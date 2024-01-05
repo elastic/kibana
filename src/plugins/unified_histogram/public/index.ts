@@ -28,6 +28,7 @@ export type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
+  ExternalCustomVisualization,
 } from './types';
 export { UnifiedHistogramFetchStatus } from './types';
 

@@ -10,7 +10,11 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
-import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
+import type {
+  UnifiedHistogramServices,
+  UnifiedHistogramChartLoadEvent,
+  ExternalCustomVisualization,
+} from '../../types';
 import {
   getBreakdownField,
   getChartHidden,
@@ -32,6 +36,10 @@ export interface UnifiedHistogramState {
    * The current Lens suggestion
    */
   currentSuggestion: Suggestion | undefined;
+  /**
+   * Lens vis which can be stored externally
+   */
+  externalCustomVisualization: ExternalCustomVisualization | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -101,6 +109,12 @@ export interface UnifiedHistogramStateService {
    */
   setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
   /**
+   * Sets external custom Lens vis
+   */
+  setExternalCustomVisualization: (
+    externalCustomVisualization: ExternalCustomVisualization | undefined
+  ) => void;
+  /**
    * Sets the current top panel height
    */
   setTopPanelHeight: (topPanelHeight: number | undefined) => void;
@@ -150,6 +164,7 @@ export const createStateService = (
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
+    externalCustomVisualization: undefined,
     currentSuggestion: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
@@ -196,6 +211,13 @@ export const createStateService = (
     setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
       updateState({ currentSuggestion: suggestion });
     },
+
+    setExternalCustomVisualization: (
+      externalCustomVisualization: ExternalCustomVisualization | undefined
+    ) => {
+      updateState({ externalCustomVisualization });
+    },
+
     setTimeInterval: (timeInterval: string) => {
       updateState({ timeInterval });
     },

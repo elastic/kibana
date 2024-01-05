@@ -26,6 +26,7 @@ import {
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
@@ -66,10 +67,13 @@ export const useDiscoverHistogram = ({
       hideChart: chartHidden,
       interval: timeInterval,
       breakdownField,
+      customVisualization,
     } = stateContainer.appState.getState();
 
     const { fetchStatus: totalHitsStatus, result: totalHitsResult } =
       savedSearchData$.totalHits$.getValue();
+
+    console.log('initial discover vis', customVisualization);
 
     return {
       localStorageKeyPrefix: 'discover',
@@ -80,6 +84,7 @@ export const useDiscoverHistogram = ({
         breakdownField,
         totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
         totalHitsResult,
+        externalCustomVisualization: customVisualization,
       },
     };
   }, [savedSearchData$.totalHits$, stateContainer.appState]);
@@ -91,20 +96,36 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = createUnifiedHistogramStateObservable(unifiedHistogram?.state$)?.subscribe(
       (changes) => {
-        const { lensRequestAdapter, ...stateChanges } = changes;
+        const { lensRequestAdapter, currentSuggestion, ...stateChanges } = changes;
+        console.log('state changes', changes);
+
         const appState = stateContainer.appState.getState();
         const oldState = {
           hideChart: appState.hideChart,
           interval: appState.interval,
           breakdownField: appState.breakdownField,
+          customVisualization: appState.customVisualization,
         };
-        const newState = { ...oldState, ...stateChanges };
+        const newState = {
+          ...oldState,
+          ...stateChanges,
+        };
 
         if ('lensRequestAdapter' in changes) {
           inspectorAdapters.lensRequests = lensRequestAdapter;
         }
 
+        if ('currentSuggestion' in changes) {
+          newState.customVisualization = currentSuggestion
+            ? {
+                visualizationId: currentSuggestion.visualizationId,
+                visualizationState: currentSuggestion.visualizationState, // TODO: remove layerId?
+              }
+            : undefined;
+        }
+
         if (!isEqual(oldState, newState)) {
+          console.log('sending vis to discover state', newState.customVisualization);
           stateContainer.appState.update(newState);
         }
       }
@@ -154,6 +175,11 @@ export const useDiscoverHistogram = ({
 
         if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
           unifiedHistogram?.setChartHidden(changes.chartHidden);
+        }
+
+        if ('externalCustomVisualization' in changes) {
+          console.log('sending external vis to histogram', changes.externalCustomVisualization);
+          unifiedHistogram?.setExternalCustomVisualization(changes.externalCustomVisualization);
         }
       }
     );
@@ -354,7 +380,10 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
     startWith(undefined),
     pairwise(),
     map(([prev, curr]) => {
-      const changes: Partial<DiscoverAppState> & { lensRequestAdapter?: RequestAdapter } = {};
+      const changes: Partial<DiscoverAppState> & {
+        lensRequestAdapter?: RequestAdapter;
+        currentSuggestion?: Suggestion;
+      } = {};
 
       if (!curr) {
         return changes;
@@ -374,6 +403,11 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
 
       if (prev?.breakdownField !== curr.breakdownField) {
         changes.breakdownField = curr.breakdownField;
+      }
+
+      if (!isEqual(prev?.currentSuggestion, curr.currentSuggestion)) {
+        console.log('noticed a new histogram suggestion', curr.currentSuggestion);
+        changes.currentSuggestion = curr.currentSuggestion;
       }
 
       return changes;
@@ -403,6 +437,11 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
 
       if (prev?.hideChart !== curr.hideChart) {
         changes.chartHidden = curr.hideChart;
+      }
+
+      if (!isEqual(prev?.customVisualization, curr.customVisualization)) {
+        console.log('noticed new discover vis', curr.customVisualization);
+        changes.externalCustomVisualization = curr.customVisualization;
       }
 
       return changes;
