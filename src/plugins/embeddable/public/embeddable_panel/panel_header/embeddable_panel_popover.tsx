@@ -11,7 +11,7 @@ import { EuiIcon, EuiLink, EuiLoadingSpinner, EuiPopover, EuiSpacer } from '@ela
 import { cx, css } from '@emotion/css';
 import { core } from '../../kibana_services';
 
-const ENDPOINT = 'http://35.200.137.16:5000/panel';
+const ENDPOINT = '/api/embeddable/panel_explanation';
 
 const DEFAULT_UNAVAILABLE_MESSAGE = 'No explanation available';
 export const EmbeddablePanelPopover = React.memo(({ title }: { title?: string }) => {
@@ -25,10 +25,10 @@ export const EmbeddablePanelPopover = React.memo(({ title }: { title?: string })
         throw new Error('No title');
       }
 
-      const content = await core.http.get<string>(
+      const response = await core.http.get<{ data: { explanation: string } }>(
         `${ENDPOINT}/${encodeURIComponent(title.replaceAll(/\//g, '__'))}`
       );
-      setPopoverContent(content);
+      setPopoverContent(response.data.explanation);
     } catch (e) {
       setPopoverContent(DEFAULT_UNAVAILABLE_MESSAGE);
     }
