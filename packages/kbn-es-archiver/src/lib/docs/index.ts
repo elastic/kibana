@@ -9,5 +9,7 @@
 export {
   createIndexDocRecordsStream,
   type LoadActionPerfOptions,
+  type HiFi,
+  type LoFi,
 } from './index_doc_records_stream';
 export { createGenerateDocRecordsStream } from './generate_doc_records_stream';
