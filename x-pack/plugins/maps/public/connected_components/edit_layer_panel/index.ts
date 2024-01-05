@@ -13,7 +13,7 @@ import { EditLayerPanel } from './edit_layer_panel';
 import { getSelectedLayer } from '../../selectors/map_selectors';
 import { updateLayerStyleForSelectedLayer, updateSourceProps } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
-import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
+import { isVectorLayer } from '../../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../../classes/sources/source';
 
 function mapStateToProps(state: MapStoreState) {
@@ -21,7 +21,7 @@ function mapStateToProps(state: MapStoreState) {
   let key = 'none';
   if (selectedLayer) {
     key = isVectorLayer(selectedLayer)
-      ? `${selectedLayer.getId()}${(selectedLayer as IVectorLayer).getSource().supportsJoins()}`
+      ? `${selectedLayer.getId()}${selectedLayer.getSource().supportsJoins()}`
       : selectedLayer.getId();
   }
   return {

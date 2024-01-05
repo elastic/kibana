@@ -73,7 +73,7 @@ import {
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
+import { isVectorLayer } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './ui_actions';
 import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
@@ -446,7 +446,7 @@ export function addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
       await asyncForEach(geometries, async (geometry) => {
-        await (layer as IVectorLayer).addFeature(geometry);
+        await layer.addFeature(geometry);
       });
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
@@ -483,7 +483,7 @@ export function deleteFeatureFromIndex(featureId: string) {
 
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
-      await (layer as IVectorLayer).deleteFeature(featureId);
+      await layer.deleteFeature(featureId);
       dispatch(pushDeletedFeatureId(featureId));
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
