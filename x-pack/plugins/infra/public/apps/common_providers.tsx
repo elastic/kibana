@@ -59,16 +59,16 @@ export interface CoreProvidersProps {
   pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
   theme$: AppMountParameters['theme$'];
-  kibanaEnvironment: KibanaEnvContext;
+  kibanaEnvironment?: KibanaEnvContext;
 }
 
 export const CoreProviders: React.FC<CoreProvidersProps> = ({
   children,
   core,
   pluginStart,
-  kibanaEnvironment,
   plugins,
   theme$,
+  kibanaEnvironment,
 }) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,

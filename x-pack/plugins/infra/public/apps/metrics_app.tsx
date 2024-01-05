@@ -29,10 +29,10 @@ export const METRICS_APP_DATA_TEST_SUBJ = 'infraMetricsPage';
 export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
-  kibanaEnvironment: KibanaEnvContext,
   pluginStart: InfraClientStartExports,
   pluginConfig: InfraPublicConfig,
-  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters
+  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters,
+  kibanaEnvironment: KibanaEnvContext
 ) => {
   const storage = new Storage(window.localStorage);
 
