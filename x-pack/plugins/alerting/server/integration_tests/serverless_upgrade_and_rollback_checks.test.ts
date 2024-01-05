@@ -125,6 +125,7 @@ describe('Serverless upgrade and rollback checks', () => {
       }
       const schemaType = ruleType.schemas.params.type;
       if (schemaType === 'config-schema') {
+        // @ts-ignore-next-line getSchema() exists..
         expect(ruleType.schemas.params.schema.getSchema().describe()).toMatchSnapshot();
       } else if (schemaType === 'zod') {
         expect(zodToJsonSchema(ruleType.schemas.params.schema)).toMatchSnapshot();
