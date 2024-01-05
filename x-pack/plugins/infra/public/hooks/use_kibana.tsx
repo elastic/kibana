@@ -51,26 +51,19 @@ export const useKibanaContextForPluginProvider = (
   return Provider;
 };
 
-export const useKibanaEnvironmentContextProvider = ({
-  kibanaVersion,
-  isCloudEnv,
-  isServerlessEnv,
-}: KibanaEnvContext) => {
+export const useKibanaEnvironmentContextProvider = (kibanaEnvironment?: KibanaEnvContext) => {
   const value = useMemo(
     () => ({
-      kibanaVersion,
-      isCloudEnv,
-      isServerlessEnv,
+      kibanaVersion: kibanaEnvironment?.kibanaVersion,
+      isCloudEnv: kibanaEnvironment?.isCloudEnv,
+      isServerlessEnv: kibanaEnvironment?.isServerlessEnv,
     }),
-    [kibanaVersion, isCloudEnv, isServerlessEnv]
+    [kibanaEnvironment]
   );
 
-  const Provider: React.FC<{ kibanaEnvironment?: KibanaEnvContext }> = ({
-    kibanaEnvironment = {},
-    children,
-  }) => {
+  const Provider: React.FC<{ kibanaEnv?: KibanaEnvContext }> = ({ kibanaEnv = {}, children }) => {
     const newProvider = createElement(KibanaEnvironmentContext.Provider, {
-      value: { ...kibanaEnvironment, ...value },
+      value: { ...kibanaEnv, ...value },
       children,
     });
 

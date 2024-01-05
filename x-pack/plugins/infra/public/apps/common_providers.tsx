@@ -80,7 +80,7 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
 
   return (
     <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
-      <KibanaEnvContextForPluginProvider kibanaEnvironment={kibanaEnvironment}>
+      <KibanaEnvContextForPluginProvider kibanaEnv={kibanaEnvironment}>
         <core.i18n.Context>
           <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
         </core.i18n.Context>
