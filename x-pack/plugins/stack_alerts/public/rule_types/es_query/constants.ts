@@ -21,7 +21,7 @@ export const DEFAULT_VALUES = {
   AGGREGATION_TYPE: 'count',
   TERM_SIZE: 5,
   GROUP_BY: 'all',
-  EXCLUDE_PREVIOUS_HITS: true,
+  EXCLUDE_PREVIOUS_HITS: false,
   CAN_SELECT_MULTI_TERMS: true,
   SOURCE_FIELDS: [],
 };

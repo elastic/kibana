@@ -154,10 +154,9 @@ export class EmbeddablePublicPlugin
     });
 
     const { uiActions } = deps;
-    const { overlays, theme, uiSettings } = core;
+    const { uiSettings } = core;
 
     const dateFormat = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
-    const commonlyUsedRanges = uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
 
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
@@ -176,13 +175,7 @@ export class EmbeddablePublicPlugin
       this.stateTransferService
     );
 
-    const timeRangeBadge = new CustomTimeRangeBadge(
-      overlays,
-      theme,
-      editPanel,
-      commonlyUsedRanges,
-      dateFormat
-    );
+    const timeRangeBadge = new CustomTimeRangeBadge(editPanel, dateFormat);
 
     uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
