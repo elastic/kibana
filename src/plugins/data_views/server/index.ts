@@ -50,7 +50,7 @@ const configSchema = schema.object({
     schema.contextRef('serverless'),
     true,
     schema.boolean({ defaultValue: false }),
-    schema.never()
+    schema.boolean({ defaultValue: true })
   ),
 });
 
