@@ -17,8 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useState } from 'react';
-import { ErrorRateChart } from '../../../components/slo/error_rate_chart';
 import { useFetchSloBurnRates } from '../../../hooks/slo/use_fetch_slo_burn_rates';
+import { ErrorRateChart } from '../error_rate_chart';
 import { BurnRate } from './burn_rate';
 
 interface Props {
@@ -95,7 +95,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
               legend={i18n.translate('xpack.observability.slo.burnRate.timeRangeBtnLegend', {
                 defaultMessage: 'Select the time range',
               })}
-              options={burnRateOptions}
+              options={burnRateOptions.map((opt) => ({ id: opt.id, label: opt.label }))}
               idSelected={burnRateOption.id}
               onChange={onTimeRangeChange}
               buttonSize="compressed"

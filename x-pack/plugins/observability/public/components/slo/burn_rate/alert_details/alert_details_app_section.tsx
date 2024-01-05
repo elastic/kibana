@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingChart, htmlIdGenerator } from '@elastic/eui';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AlertSummaryField } from '@kbn/observability-plugin/public/pages/alert_details/components/alert_summary';
 import { TopAlert } from '@kbn/observability-plugin/public/typings/alerts';
 import { BurnRateRuleParams } from '@kbn/observability-plugin/public/typings/slo';
-import { useKibana } from '../../../../utils/kibana_react';
-
 import React, { useEffect } from 'react';
+import { useFetchSloDetails } from '../../../../hooks/slo/use_fetch_slo_details';
+import { useKibana } from '../../../../utils/kibana_react';
+import { BurnRates } from '../burn_rates';
 
 export type BurnRateRule = Rule<BurnRateRuleParams>;
 export type BurnRateAlert = TopAlert;
@@ -36,6 +37,24 @@ export default function AlertDetailsAppSection({
     services: { http },
   } = useKibana();
 
+  const sloId = alert.fields['kibana.alert.rule.parameters']!.sloId as string;
+  const instanceId = alert.fields['kibana.alert.instance.id']!;
+  const { isLoading, data: slo } = useFetchSloDetails({ sloId, instanceId });
+
+  // @ts-ignore
+  const burnRateOptions = (alert?.fields['kibana.alert.rule.parameters']?.windows ?? []).map(
+    (ruleWindowDef: any) => ({
+      id: htmlIdGenerator()(),
+      label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+        defaultMessage: '{duration}h',
+        values: { duration: ruleWindowDef.longWindow.value },
+      }),
+      windowName: ruleWindowDef.actionGroup,
+      threshold: ruleWindowDef.burnRateThreshold,
+      duration: ruleWindowDef.longWindow.value,
+    })
+  );
+
   useEffect(() => {
     setAlertSummaryFields([
       {
@@ -50,7 +69,7 @@ export default function AlertDetailsAppSection({
             data-test-subj="alertDetailsAppSectionSLOLink"
             href={http.basePath.prepend(alert.link!)}
           >
-            {rule.params.sloId}
+            {slo?.name ?? 'SLO'}
           </EuiLink>
         ),
       },
@@ -68,17 +87,20 @@ export default function AlertDetailsAppSection({
         ),
       },
     ]);
-  }, [alert, rule, ruleLink, setAlertSummaryFields]);
+  }, [alert, rule, ruleLink, setAlertSummaryFields, slo]);
+
+  if (isLoading) {
+    return <EuiLoadingChart size="m" mono data-test-subj="loading" />;
+  }
+
+  if (!slo) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="alertOverviewSection">
       <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h4>Hello World</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <pre>{JSON.stringify(alert, null, 2)}</pre>
+        <BurnRates slo={slo} isAutoRefreshing={false} burnRateOptions={burnRateOptions} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

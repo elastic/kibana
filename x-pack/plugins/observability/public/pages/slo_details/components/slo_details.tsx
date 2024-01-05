@@ -22,7 +22,7 @@ import { useLocation } from 'react-router-dom';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { BurnRateOption, BurnRates } from './burn_rates';
+import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
@@ -42,8 +42,9 @@ const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 const BURN_RATE_OPTIONS: BurnRateOption[] = [
   {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.1hLabel', {
-      defaultMessage: '1h',
+    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+      defaultMessage: '{duration}h',
+      values: { duration: 1 },
     }),
     windowName: 'CRITICAL',
     threshold: 14.4,
@@ -51,8 +52,9 @@ const BURN_RATE_OPTIONS: BurnRateOption[] = [
   },
   {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.6hLabel', {
-      defaultMessage: '6h',
+    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+      defaultMessage: '{duration}h',
+      values: { duration: 6 },
     }),
     windowName: 'HIGH',
     threshold: 6,
@@ -60,8 +62,9 @@ const BURN_RATE_OPTIONS: BurnRateOption[] = [
   },
   {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.24hLabel', {
-      defaultMessage: '24h',
+    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+      defaultMessage: '{duration}h',
+      values: { duration: 24 },
     }),
     windowName: 'MEDIUM',
     threshold: 3,
@@ -69,8 +72,9 @@ const BURN_RATE_OPTIONS: BurnRateOption[] = [
   },
   {
     id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.72hLabel', {
-      defaultMessage: '72h',
+    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.label', {
+      defaultMessage: '{duration}h',
+      values: { duration: 72 },
     }),
     windowName: 'LOW',
     threshold: 1,
