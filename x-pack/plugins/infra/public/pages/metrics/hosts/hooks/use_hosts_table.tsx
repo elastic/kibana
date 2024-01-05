@@ -245,7 +245,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={METRICS_TOOLTIP.cpuUsage}
-            formula={formulas?.cpuUsage.value}
+            formula={formulas?.cpuUsage.formula}
           />
         ),
         field: 'cpu',
@@ -259,7 +259,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={METRICS_TOOLTIP.normalizedLoad1m}
-            formula={formulas?.normalizedLoad1m.value}
+            formula={formulas?.normalizedLoad1m.formula}
           />
         ),
         field: 'normalizedLoad1m',
@@ -273,7 +273,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={METRICS_TOOLTIP.memoryUsage}
-            formula={formulas?.memoryUsage.value}
+            formula={formulas?.memoryUsage.formula}
           />
         ),
         field: 'memory',
@@ -287,7 +287,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={METRICS_TOOLTIP.memoryFree}
-            formula={formulas?.memoryFree.value}
+            formula={formulas?.memoryFree.formula}
           />
         ),
         field: 'memoryFree',
@@ -301,7 +301,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={METRICS_TOOLTIP.diskUsage}
-            formula={formulas?.diskUsage.value}
+            formula={formulas?.diskUsage.formula}
           />
         ),
         field: 'diskSpaceUsage',
@@ -315,7 +315,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.rx}
             toolTip={METRICS_TOOLTIP.rx}
-            formula={formulas?.rx.value}
+            formula={formulas?.rx.formula}
           />
         ),
         field: 'rx',
@@ -330,7 +330,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.tx}
             toolTip={METRICS_TOOLTIP.tx}
-            formula={formulas?.tx.value}
+            formula={formulas?.tx.formula}
           />
         ),
         field: 'tx',
@@ -343,13 +343,13 @@ export const useHostsTable = () => {
     ],
     [
       detailsItemId,
-      formulas?.cpuUsage.value,
-      formulas?.diskUsage.value,
-      formulas?.memoryFree.value,
-      formulas?.memoryUsage.value,
-      formulas?.normalizedLoad1m.value,
-      formulas?.rx.value,
-      formulas?.tx.value,
+      formulas?.cpuUsage.formula,
+      formulas?.diskUsage.formula,
+      formulas?.memoryFree.formula,
+      formulas?.memoryUsage.formula,
+      formulas?.normalizedLoad1m.formula,
+      formulas?.rx.formula,
+      formulas?.tx.formula,
       reportHostEntryClick,
       setProperties,
     ]

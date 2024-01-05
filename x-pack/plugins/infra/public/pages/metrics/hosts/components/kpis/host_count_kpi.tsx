@@ -50,7 +50,7 @@ export const HostCountKpi = ({ height }: { height: number }) => {
       subtitle={getSubtitle()}
       toolTip={
         <TooltipContent
-          formula={formulas?.hostCount.value}
+          formula={formulas?.hostCount.formula}
           description={METRICS_TOOLTIP.hostCount}
         />
       }
