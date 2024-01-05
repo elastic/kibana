@@ -12,11 +12,12 @@ import {
   ALERT_RULE_NAME,
   ALERT_START,
   ALERT_STATUS,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { JobsHealthTests } from '../types/alerts';
 
 export const ML_ALERT_TYPES = {
-  ANOMALY_DETECTION: 'xpack.ml.anomaly_detection_alert',
+  ANOMALY_DETECTION: ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   AD_JOBS_HEALTH: 'xpack.ml.anomaly_detection_jobs_health',
 } as const;
 
