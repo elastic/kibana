@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'create-maintenance-window',
         screenshotDirectories,
         1400,
-        1024
+        1600
       );
       const cancelButton = await testSubjects.find('cancelMaintenanceWindow');
       await cancelButton.click();
