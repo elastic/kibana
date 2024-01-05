@@ -6,18 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { CodeEditorProps } from './code_editor';
-export {
-  CssLang,
-  MarkdownLang,
-  YamlLang,
-  HandlebarsLang,
-  HJsonLang,
-  GrokLang,
-  CodeEditor,
-  CodeEditorField,
-} from './code_editor';
-
 export type { UrlTemplateEditorVariable, UrlTemplateEditorProps } from './url_template_editor';
 export { UrlTemplateEditor } from './url_template_editor';
 

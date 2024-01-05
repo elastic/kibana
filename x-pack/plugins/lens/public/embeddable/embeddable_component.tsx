@@ -46,7 +46,7 @@ type LensAttributes<TVisType, TVisState> = Omit<
   visualizationType: TVisType;
   state: Omit<Document['state'], 'datasourceStates' | 'visualization'> & {
     datasourceStates: {
-      formBased: FormBasedPersistedState;
+      formBased?: FormBasedPersistedState;
       textBased?: TextBasedPersistedState;
     };
     visualization: TVisState;

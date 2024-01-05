@@ -19,6 +19,7 @@ import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';
+import type { KibanaEnvContext } from '../kibana_environment_context/kibana_environment_context';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;
@@ -34,6 +35,7 @@ export interface ApmPluginContextValue {
   uiActions: UiActionsStart;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   share: SharePluginSetup;
+  kibanaEnvironment: KibanaEnvContext;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);
