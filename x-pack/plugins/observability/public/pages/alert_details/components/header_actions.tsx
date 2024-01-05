@@ -128,6 +128,9 @@ export function HeaderActions({ alert, alertStatus, onAlertStatusChange }: Heade
                 iconType="boxesVertical"
                 data-test-subj="alert-details-header-actions-menu-button"
                 onClick={handleTogglePopover}
+                aria-label={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
+                  defaultMessage: 'Actions',
+                })}
               />
             }
           >

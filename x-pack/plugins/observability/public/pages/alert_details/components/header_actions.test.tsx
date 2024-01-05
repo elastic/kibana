@@ -99,7 +99,7 @@ describe('Header Actions', () => {
 
         mockCases.hooks.useCasesAddToExistingCaseModal = useCasesAddToExistingCaseModalMock;
 
-        const { getByTestId, findByRole } = render(
+        const { getByTestId, findByTestId } = render(
           <HeaderActions
             alert={alertWithTags}
             alertStatus={alertWithTags.fields[ALERT_STATUS]}
@@ -107,7 +107,7 @@ describe('Header Actions', () => {
           />
         );
 
-        fireEvent.click(await findByRole('button', { name: 'Actions' }));
+        fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
 
         fireEvent.click(getByTestId('add-to-case-button'));
 
@@ -130,15 +130,15 @@ describe('Header Actions', () => {
       mockKibana();
       mockUseFetchRuleWithoutData();
     });
-    it("should disable the 'View rule details' when the rule is not available/delete", async () => {
-      const { queryByTestId, findByRole } = render(
+    it("should disable the 'View rule details' when the rule is not available/deleted", async () => {
+      const { queryByTestId, findByTestId } = render(
         <HeaderActions
           alert={alertWithTags}
           alertStatus={alertWithTags.fields[ALERT_STATUS]}
           onAlertStatusChange={mockOnAlertStatusChange}
         />
       );
-      fireEvent.click(await findByRole('button', { name: 'Actions' }));
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       expect(queryByTestId('view-rule-details-button')).toHaveAttribute('disabled');
     });
   });
