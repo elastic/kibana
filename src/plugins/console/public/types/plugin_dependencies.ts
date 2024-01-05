@@ -7,10 +7,10 @@
  */
 
 import { ReactElement } from 'react';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { SharePluginSetup, LocatorPublic } from '@kbn/share-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
 import { ConsoleUILocatorParams } from './locator';
 import { RemoteConsoleProps } from './remote_console';
@@ -20,6 +20,12 @@ export interface AppSetupUIPluginDependencies {
   devTools: DevToolsSetup;
   share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
+}
+
+export interface AppStartUIPluginDependencies {
+  home?: HomePublicPluginStart;
+  share: SharePluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export interface ConsolePluginSetup {

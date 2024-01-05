@@ -5,50 +5,66 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import React, { useState } from 'react';
-import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import {
+  EuiPageTemplate,
+  EuiPanel,
+  EuiScreenReaderOnly,
+  EuiThemeProvider,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { RemoteConsoleProps } from '../../../types/remote_console';
+import { RemoteConsoleProps, RemoteConsoleDependencies } from '../../../types/remote_console';
 
-export const RemoteConsole = ({ headerRightSideItem }: RemoteConsoleProps) => {
+import { ConsoleHeader } from './console_header';
+import { ConsoleWrapper } from './console_wrapper';
+import { remoteConsoleStyles } from './remote_console.styles';
+
+const landmarkHeading = i18n.translate('console.remoteConsole.landmarkHeading', {
+  defaultMessage: 'Developer console',
+});
+
+export const RemoteConsole = ({
+  headerRightSideItem,
+  core,
+  usageCollection,
+}: RemoteConsoleProps & RemoteConsoleDependencies) => {
+  const euiTheme = useEuiTheme();
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
   const toggleConsole = () => setIsConsoleOpen(!isConsoleOpen);
+  const consoleStyles = remoteConsoleStyles(euiTheme);
 
   return (
-    <EuiBottomBar position="sticky" onClick={toggleConsole}>
-      <ConsoleHeader isConsoleOpen={isConsoleOpen} rightSideItem={headerRightSideItem} />
-    </EuiBottomBar>
+    <>
+      <section aria-label={landmarkHeading} css={consoleStyles.container}>
+        <EuiScreenReaderOnly>
+          <h2>{landmarkHeading}</h2>
+        </EuiScreenReaderOnly>
+        <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
+          <EuiPanel borderRadius="none" hasShadow={false} onClick={toggleConsole}>
+            <ConsoleHeader isConsoleOpen={isConsoleOpen} rightSideItem={headerRightSideItem} />
+          </EuiPanel>
+        </EuiThemeProvider>
+        {isConsoleOpen && (
+          <EuiPageTemplate offset={0} grow>
+            <ConsoleWrapper core={core} usageCollection={usageCollection} />
+          </EuiPageTemplate>
+        )}
+      </section>
+      <EuiScreenReaderOnly>
+        <p aria-live="assertive">
+          {i18n.translate('console.remoteConsole.customScreenReaderAnnouncement', {
+            defaultMessage:
+              'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
+            values: { landmarkHeading },
+          })}
+        </p>
+      </EuiScreenReaderOnly>
+    </>
   );
 };
-
-const ConsoleHeader = ({
-  isConsoleOpen,
-  rightSideItem,
-}: {
-  isConsoleOpen: boolean;
-  rightSideItem?: React.ReactNode;
-}) => (
-  <EuiFlexGroup justifyContent="spaceBetween">
-    <EuiFlexItem grow={false}>
-      <EuiIcon type={isConsoleOpen ? 'arrowUp' : 'arrowDown'} size="l" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiTitle size="xs">
-        <h4>
-          {i18n.translate('console.remoteConsole.title', {
-            defaultMessage: 'Console',
-          })}
-        </h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem />
-    {rightSideItem && <EuiFlexItem grow={false}>{rightSideItem}</EuiFlexItem>}
-    <EuiFlexItem grow={false}>
-      <EuiIcon type="grab" size="l" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 // Default Export is needed to lazy load this react component
 // eslint-disable-next-line import/no-default-export

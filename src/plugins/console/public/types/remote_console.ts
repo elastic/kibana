@@ -6,7 +6,14 @@
  * Side Public License, v 1.
  */
 import type { ReactNode } from 'react-markdown';
+import type { CoreStart } from '@kbn/core/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 export interface RemoteConsoleProps {
   headerRightSideItem?: ReactNode;
+}
+
+export interface RemoteConsoleDependencies {
+  core: CoreStart;
+  usageCollection?: UsageCollectionStart;
 }
