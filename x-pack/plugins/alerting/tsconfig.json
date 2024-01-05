@@ -63,7 +63,9 @@
     "@kbn/core-application-common",
     "@kbn/core-saved-objects-api-server",
     "@kbn/alerts-ui-shared",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-ui-settings-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }
