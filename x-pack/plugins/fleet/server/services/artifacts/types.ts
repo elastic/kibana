@@ -72,6 +72,10 @@ export type ListArtifactsProps = Pick<ListWithKuery, 'perPage' | 'page' | 'kuery
   sortField?: string | keyof ArtifactElasticsearchProperties;
 };
 
+export type FetchAllArtifactsOptions = Pick<ListWithKuery, 'perPage' | 'kuery' | 'sortOrder'> & {
+  sortField?: string | keyof ArtifactElasticsearchProperties;
+};
+
 /**
  * The interface exposed out of Fleet's Artifact service via the client class
  */
@@ -93,4 +97,6 @@ export interface ArtifactsClientInterface {
   encodeContent(content: ArtifactsClientCreateOptions['content']): Promise<ArtifactEncodedMetadata>;
 
   generateHash(content: string): string;
+
+  fetchAll(options?: FetchAllArtifactsOptions): AsyncIterable<Artifact[]>;
 }
