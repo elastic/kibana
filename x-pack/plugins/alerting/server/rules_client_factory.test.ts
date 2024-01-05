@@ -13,6 +13,7 @@ import {
   savedObjectsServiceMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
@@ -58,6 +59,7 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
   kibanaVersion: '7.10.0',
   authorization:
     alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 const actionsAuthorization = actionsAuthorizationMock.create();
