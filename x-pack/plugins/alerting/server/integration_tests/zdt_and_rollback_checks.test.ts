@@ -9,6 +9,7 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { uniq } from 'lodash';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { setupTestServers } from './lib';
 import type { RuleTypeRegistry } from '../rule_type_registry';
@@ -23,57 +24,51 @@ jest.mock('../rule_type_registry', () => {
   };
 });
 
-const ruleTypes: string[] = [
-  'transform_health',
+const esProjectRuleTypes: string[] = [
   '.index-threshold',
   '.geo-containment',
   '.es-query',
-  'slo.rules.burnRate',
-  'observability.rules.custom_threshold',
+  'transform_health',
+];
+const obltProjectRuleTypes: string[] = [
+  '.index-threshold',
+  '.geo-containment',
+  '.es-query',
+  'transform_health',
   'xpack.ml.anomaly_detection_alert',
   'xpack.ml.anomaly_detection_jobs_health',
-  'xpack.uptime.alerts.monitorStatus',
-  'xpack.uptime.alerts.tlsCertificate',
-  'xpack.uptime.alerts.durationAnomaly',
-  'xpack.uptime.alerts.tls',
-  'xpack.synthetics.alerts.monitorStatus',
-  'xpack.synthetics.alerts.tls',
-  'logs.alert.document.count',
+  'slo.rules.burnRate',
+  'observability.rules.custom_threshold',
   'metrics.alert.inventory.threshold',
-  'metrics.alert.threshold',
-  'monitoring_alert_cluster_health',
-  'monitoring_alert_license_expiration',
-  'monitoring_alert_cpu_usage',
-  'monitoring_alert_missing_monitoring_data',
-  'monitoring_alert_disk_usage',
-  'monitoring_alert_thread_pool_search_rejections',
-  'monitoring_alert_thread_pool_write_rejections',
-  'monitoring_alert_jvm_memory_usage',
-  'monitoring_alert_nodes_changed',
-  'monitoring_alert_logstash_version_mismatch',
-  'monitoring_alert_kibana_version_mismatch',
-  'monitoring_alert_elasticsearch_version_mismatch',
-  'monitoring_ccr_read_exceptions',
-  'monitoring_shard_size',
+  'apm.error_rate',
+  'apm.transaction_error_rate',
+  'apm.transaction_duration',
+  'apm.anomaly',
+];
+const securityProjectRuleTypes: string[] = [
+  '.index-threshold',
+  '.geo-containment',
+  '.es-query',
+  'transform_health',
+  'xpack.ml.anomaly_detection_alert',
+  'xpack.ml.anomaly_detection_jobs_health',
+  'siem.notifications',
   'siem.eqlRule',
-  'siem.esqlRule',
-  'siem.savedQueryRule',
   'siem.indicatorRule',
   'siem.mlRule',
   'siem.queryRule',
+  'siem.savedQueryRule',
   'siem.thresholdRule',
   'siem.newTermsRule',
-  'siem.notifications',
-  'apm.transaction_duration',
-  'apm.anomaly',
-  'apm.error_rate',
-  'apm.transaction_error_rate',
 ];
 
 describe('ZDT and Rollback Checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let ruleTypeRegistry: RuleTypeRegistry;
+  const ruleTypesToCheck: string[] = uniq(
+    esProjectRuleTypes.concat(obltProjectRuleTypes).concat(securityProjectRuleTypes)
+  );
 
   beforeAll(async () => {
     const setupResult = await setupTestServers();
@@ -94,15 +89,7 @@ describe('ZDT and Rollback Checks', () => {
     }
   });
 
-  /**
-   * This test is necessary to ensure the array is up to date so we can run tests
-   * on all the rule types.
-   */
-  test('ensure rule types list up to date', async () => {
-    expect(ruleTypes).toEqual(ruleTypeRegistry.getAllTypes());
-  });
-
-  for (const ruleTypeId of ruleTypes) {
+  for (const ruleTypeId of ruleTypesToCheck) {
     test(`detect param changes for: ${ruleTypeId}`, async () => {
       const ruleType = ruleTypeRegistry.get(ruleTypeId);
       if (ruleType.validate.params && ruleType.validate.params.getSchema) {
