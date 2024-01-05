@@ -19,8 +19,12 @@ export const ADD_FALSE_POSITIVE_BTN =
 export const ADD_REFERENCE_URL_BTN =
   '[data-test-subj="detectionEngineStepAboutRuleReferenceUrls"] .euiButtonEmpty__text';
 
-export const ALERT_SUPPRESSION_FIELDS =
+export const ALERT_SUPPRESSION_FIELDS = '[data-test-subj="alertSuppressionInput"]';
+
+export const ALERT_SUPPRESSION_FIELDS_COMBO_BOX =
   '[data-test-subj="alertSuppressionInput"] [data-test-subj="comboBoxInput"]';
+
+export const ALERT_SUPPRESSION_FIELDS_INPUT = `${ALERT_SUPPRESSION_FIELDS_COMBO_BOX} input`;
 
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
   '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';

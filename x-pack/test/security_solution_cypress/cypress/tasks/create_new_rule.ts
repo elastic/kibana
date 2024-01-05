@@ -32,7 +32,7 @@ import { convertHistoryStartToSize, getHumanizedDuration } from '../helpers/rule
 import {
   ABOUT_CONTINUE_BTN,
   ALERT_SUPPRESSION_DURATION_INPUT,
-  ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
@@ -819,7 +819,7 @@ export const enablesAndPopulatesThresholdSuppression = (
 
 export const fillAlertSuppressionFields = (fields: string[]) => {
   fields.forEach((field) => {
-    cy.get(ALERT_SUPPRESSION_FIELDS).type(`${field}{enter}`);
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{enter}`);
   });
 };
 
