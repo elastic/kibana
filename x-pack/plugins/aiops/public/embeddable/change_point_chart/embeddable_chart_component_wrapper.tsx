@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo } from 'react';
+import { BehaviorSubject, type Observable, combineLatest } from 'rxjs';
+import { map, distinctUntilChanged } from 'rxjs/operators';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
-import { EmbeddableChangePointChartProps } from '../types';
+import useObservable from 'react-use/lib/useObservable';
+import { ReloadContextProvider } from '../../hooks/use_reload';
 import {
   type ChangePointAnnotation,
+  ChangePointDetectionControlsContextProvider,
   type ChangePointDetectionRequestParams,
 } from '../../components/change_point_detection/change_point_detection_context';
-import { useFilerQueryUpdates } from '../../hooks/use_filters_query';
-import { useDataSource } from '../../hooks/use_data_source';
+import type {
+  EmbeddableChangePointChartInput,
+  EmbeddableChangePointChartOutput,
+} from './embeddable_change_point_chart';
+import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+import { FilterQueryContextProvider, useFilerQueryUpdates } from '../../hooks/use_filters_query';
+import { DataSourceContextProvider, useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
@@ -25,6 +34,76 @@ import { NoChangePointsWarning } from '../../components/change_point_detection/n
 const defaultSort = {
   field: 'p_value' as keyof ChangePointAnnotation,
   direction: 'asc',
+};
+
+export interface EmbeddableInputTrackerProps {
+  input$: Observable<EmbeddableChangePointChartInput>;
+  initialInput: EmbeddableChangePointChartInput;
+  reload$: Observable<number>;
+  onOutputChange: (output: Partial<EmbeddableChangePointChartOutput>) => void;
+  onRenderComplete: () => void;
+  onLoading: () => void;
+  onError: (error: Error) => void;
+}
+
+export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
+  input$,
+  initialInput,
+  reload$,
+  onOutputChange,
+  onRenderComplete,
+  onLoading,
+  onError,
+}) => {
+  const input = useObservable(input$, initialInput);
+
+  const [manualReload$] = useState<BehaviorSubject<number>>(
+    new BehaviorSubject<number>(initialInput.lastReloadRequestTime ?? Date.now())
+  );
+
+  useEffect(
+    function updateManualReloadSubject() {
+      if (
+        input.lastReloadRequestTime === initialInput.lastReloadRequestTime ||
+        !input.lastReloadRequestTime
+      )
+        return;
+      manualReload$.next(input.lastReloadRequestTime);
+    },
+    [input.lastReloadRequestTime, initialInput.lastReloadRequestTime, manualReload$]
+  );
+
+  const resultObservable$ = useMemo<Observable<number>>(() => {
+    return combineLatest([reload$, manualReload$]).pipe(
+      map(([reload, manualReload]) => Math.max(reload, manualReload)),
+      distinctUntilChanged()
+    );
+  }, [manualReload$, reload$]);
+
+  return (
+    <ReloadContextProvider reload$={resultObservable$}>
+      <DataSourceContextProvider dataViewId={input.dataViewId}>
+        <ChangePointDetectionControlsContextProvider>
+          <FilterQueryContextProvider timeRange={input.timeRange}>
+            <ChartGridEmbeddableWrapper
+              timeRange={input.timeRange}
+              fn={input.fn}
+              metricField={input.metricField}
+              splitField={input.splitField}
+              maxSeriesToPlot={input.maxSeriesToPlot}
+              dataViewId={input.dataViewId}
+              partitions={input.partitions}
+              onLoading={onLoading}
+              onRenderComplete={onRenderComplete}
+              onError={onError}
+              onChange={input.onChange}
+              emptyState={input.emptyState}
+            />
+          </FilterQueryContextProvider>
+        </ChangePointDetectionControlsContextProvider>
+      </DataSourceContextProvider>
+    </ReloadContextProvider>
+  );
 };
 
 /**

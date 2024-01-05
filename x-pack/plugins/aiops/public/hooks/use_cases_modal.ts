@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EmbeddableChangePointChartInput } from '../embeddable/types';
+import { EmbeddableChangePointChartInput } from '../embeddable/change_point_chart/embeddable_change_point_chart';
 import { EmbeddableChangePointChartType } from '../embeddable/change_point_chart/embeddable_change_point_chart_factory';
 import { useAiopsAppContext } from './use_aiops_app_context';
 

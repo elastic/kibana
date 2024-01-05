@@ -7,7 +7,12 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable as AbstractEmbeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import {
+  Embeddable as AbstractEmbeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IContainer,
+} from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -17,10 +22,16 @@ import { pick } from 'lodash';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { EmbeddableInputTracker } from '../embeddable_input_tracker';
-import { EmbeddableChangePointChartInput, EmbeddableChangePointChartOutput } from '../types';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { EmbeddableInputTracker } from './embeddable_chart_component_wrapper';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE, EMBEDDABLE_ORIGIN } from '../../../common/constants';
 import { AiopsAppContext, type AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
+
+import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+
+export type EmbeddableChangePointChartInput = EmbeddableInput & EmbeddableChangePointChartProps;
+
+export type EmbeddableChangePointChartOutput = EmbeddableOutput & { indexPatterns?: DataView[] };
 
 export interface EmbeddableChangePointChartDeps {
   theme: ThemeServiceStart;

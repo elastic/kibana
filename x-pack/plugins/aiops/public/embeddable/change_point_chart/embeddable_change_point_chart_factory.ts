@@ -13,10 +13,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { EmbeddableChangePointChartInput } from '../types';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../../common/constants';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
-import { EmbeddableChangePointChart } from './embeddable_change_point_chart';
+import {
+  EmbeddableChangePointChart,
+  EmbeddableChangePointChartInput,
+} from './embeddable_change_point_chart';
 
 export interface EmbeddableChangePointChartStartServices {
   data: DataPublicPluginStart;
@@ -48,7 +50,7 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
 
   getDisplayName() {
     return i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
-      defaultMessage: 'Change point detection chart',
+      defaultMessage: 'Change point detection',
     });
   }
 
@@ -60,7 +62,7 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
     const [coreStart, pluginStart] = await this.getStartServices();
 
     try {
-      const { resolveEmbeddableChangePointUserInput } = await import('../handle_explicit_input');
+      const { resolveEmbeddableChangePointUserInput } = await import('./handle_explicit_input');
       return await resolveEmbeddableChangePointUserInput(coreStart, pluginStart);
     } catch (e) {
       return Promise.reject();

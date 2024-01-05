@@ -9,8 +9,8 @@ import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput,
-  EmbeddableChangePointChartProps,
-} from '../types';
+} from './embeddable_change_point_chart';
+import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
 
 export type EmbeddableChangePointChartExplicitInput = {
   title: string;

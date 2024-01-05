@@ -27,7 +27,7 @@ export class AiopsPlugin
   ) {
     Promise.all([
       firstValueFrom(licensing.license$),
-      import('./embeddable'),
+      import('./embeddable/register_embeddables'),
       import('./ui_actions'),
       import('./cases/register_change_point_charts_attachment'),
       core.getStartServices(),
