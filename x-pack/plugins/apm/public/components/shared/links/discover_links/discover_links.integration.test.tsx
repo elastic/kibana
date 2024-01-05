@@ -10,12 +10,33 @@ import React from 'react';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import * as useAdHocApmDataView from '../../../../hooks/use_adhoc_apm_data_view';
 import { getRenderedHref } from '../../../../utils/test_helpers';
 import { DiscoverErrorLink } from './discover_error_link';
 import { DiscoverSpanLink } from './discover_span_link';
 import { DiscoverTransactionLink } from './discover_transaction_link';
 
 describe('DiscoverLinks', () => {
+  let useAdHocApmDataViewSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    useAdHocApmDataViewSpy = jest.spyOn(
+      useAdHocApmDataView,
+      'useAdHocApmDataView'
+    );
+
+    useAdHocApmDataViewSpy.mockImplementation(() => {
+      return {
+        dataView: {
+          id: 'foo-1',
+        },
+      };
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   it('produces the correct URL for a transaction', async () => {
     const transaction = {
       transaction: {
@@ -35,7 +56,7 @@ describe('DiscoverLinks', () => {
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_data_view_id_mockSpaceId,interval:auto,query:(language:kuery,query:'processor.event:\\"transaction\\" AND transaction.id:\\"8b60bd32ecc6e150\\" AND trace.id:\\"8b60bd32ecc6e1506735a8b6cfcf175c\\"'))"`
+      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:foo-1,interval:auto,query:(language:kuery,query:'processor.event:\\"transaction\\" AND transaction.id:\\"8b60bd32ecc6e150\\" AND trace.id:\\"8b60bd32ecc6e1506735a8b6cfcf175c\\"'))"`
     );
   });
 
@@ -55,7 +76,7 @@ describe('DiscoverLinks', () => {
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_data_view_id_mockSpaceId,interval:auto,query:(language:kuery,query:'span.id:\\"test-span-id\\"'))"`
+      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:foo-1,interval:auto,query:(language:kuery,query:'span.id:\\"test-span-id\\"'))"`
     );
   });
 
@@ -77,7 +98,7 @@ describe('DiscoverLinks', () => {
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_data_view_id_mockSpaceId,interval:auto,query:(language:kuery,query:'service.name:\\"service-name\\" AND error.grouping_key:\\"grouping-key\\"'),sort:('@timestamp':desc))"`
+      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:foo-1,interval:auto,query:(language:kuery,query:'service.name:\\"service-name\\" AND error.grouping_key:\\"grouping-key\\"'),sort:('@timestamp':desc))"`
     );
   });
 
@@ -100,7 +121,7 @@ describe('DiscoverLinks', () => {
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_data_view_id_mockSpaceId,interval:auto,query:(language:kuery,query:'service.name:\\"service-name\\" AND error.grouping_key:\\"grouping-key\\" AND some:kuery-string'),sort:('@timestamp':desc))"`
+      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:foo-1,interval:auto,query:(language:kuery,query:'service.name:\\"service-name\\" AND error.grouping_key:\\"grouping-key\\" AND some:kuery-string'),sort:('@timestamp':desc))"`
     );
   });
 });
