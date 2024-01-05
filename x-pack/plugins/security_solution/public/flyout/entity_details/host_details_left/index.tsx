@@ -16,7 +16,7 @@ import {
 import type { HostRiskScore } from '../../../../common/search_strategy';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
-  riskScore: HostRiskScore;
+  riskScore: HostRiskScore | undefined;
 }
 export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'host_details';

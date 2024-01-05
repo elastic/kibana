@@ -10,13 +10,23 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { HostDetailsPanel } from '.';
 import { TestProviders } from '../../../common/mock';
+import { RiskSeverity } from '../../../../common/search_strategy';
 
 describe('HostDetailsPanel', () => {
   it('render risk inputs panel', () => {
     const { getByTestId } = render(
       <HostDetailsPanel
-        riskInputs={{
-          alertIds: ['test-id-1', 'test-id-2'],
+        riskScore={{
+          '@timestamp': '2021-08-19T16:00:00.000Z',
+          host: {
+            name: 'elastic',
+            risk: {
+              rule_risks: [],
+              calculated_score_norm: 100,
+              multipliers: [],
+              calculated_level: RiskSeverity.critical,
+            },
+          },
         }}
       />,
       { wrapper: TestProviders }
@@ -25,14 +35,9 @@ describe('HostDetailsPanel', () => {
   });
 
   it("doesn't render risk inputs panel when no alerts ids are provided", () => {
-    const { queryByTestId } = render(
-      <HostDetailsPanel
-        riskInputs={{
-          alertIds: [],
-        }}
-      />,
-      { wrapper: TestProviders }
-    );
+    const { queryByTestId } = render(<HostDetailsPanel riskScore={undefined} />, {
+      wrapper: TestProviders,
+    });
     expect(queryByTestId(RISK_INPUTS_TAB_TEST_ID)).not.toBeInTheDocument();
   });
 });

@@ -24,7 +24,7 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 
 export const useTabs = (
   managedUser: ManagedUserHits,
-  riskScore: UserRiskScore
+  riskScore: UserRiskScore | undefined
 ): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
