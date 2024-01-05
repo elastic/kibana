@@ -37,6 +37,7 @@ export type FormServices = FieldRowServices & Services;
 interface KibanaDependencies {
   settings: {
     client: Pick<IUiSettingsClient, 'set'>;
+    globalClient: Pick<IUiSettingsClient, 'set'>;
   };
   theme: ThemeServiceStart;
   i18n: I18nStart;

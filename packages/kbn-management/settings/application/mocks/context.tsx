@@ -18,6 +18,7 @@ import { createFormServicesMock } from '@kbn/management-settings-components-form
 import { Subscription } from 'rxjs';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
+import {UiSettingsScope} from "@kbn/core-ui-settings-common";
 
 const createRootMock = () => {
   const analytics = analyticsServiceMock.createAnalyticsServiceStart();
@@ -36,8 +37,8 @@ export const createSettingsApplicationServicesMock = (
   hasGlobalSettings?: boolean
 ): SettingsApplicationServices => ({
   ...createFormServicesMock(),
-  getSpaceSettings: () => getSettingsMock(),
-  getGlobalSettings: () => (hasGlobalSettings === false ? {} : getSettingsMock()),
+  getAllowlistedSettings: (scope: UiSettingsScope) =>
+    scope === 'global' && hasGlobalSettings === false ? {} : getSettingsMock(),
   isCustomSetting: () => false,
   isOverriddenSetting: () => false,
   subscribeToUpdates: () => new Subscription(),

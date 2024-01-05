@@ -7,13 +7,22 @@
  */
 import React, { useState } from 'react';
 
-import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, Query, EuiTabs } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  Query,
+  EuiTabs,
+  EuiCallOut,
+} from '@elastic/eui';
 import { categorizeFields } from '@kbn/management-settings-utilities';
-
-import { CategorizedFields } from '@kbn/management-settings-types';
+import { FieldDefinition } from '@kbn/management-settings-types';
+import { Form } from '@kbn/management-settings-components-form';
+import { SettingsTabs } from '@kbn/management-settings-types/tab';
+import { EmptyState } from './empty_state';
 import { i18nTexts } from './i18n_texts';
 import { Tab } from './tab';
-import { TabContent } from './tab_content';
 import { useFields } from './hooks/use_fields';
 import { QueryInput, QueryInputProps } from './query_input';
 import { useServices } from './services';
@@ -41,7 +50,8 @@ function getQueryParam(url: string) {
   return '';
 }
 
-function getCategoryCounts(categorizedFields: CategorizedFields) {
+function getCategoryCounts(fields: FieldDefinition[]) {
+  const categorizedFields = categorizeFields(fields);
   const categoryCounts: { [category: string]: number } = {};
   Object.entries(categorizedFields).forEach(
     ([category, value]) => (categoryCounts[category] = value.count)
@@ -66,61 +76,35 @@ export const SettingsApplication = () => {
   };
 
   const spaceAllFields = useFields('namespace');
-  const spaceCategorizedFields = categorizeFields(spaceAllFields);
-  const spaceCategoryCounts = getCategoryCounts(spaceCategorizedFields);
   const spaceFilteredFields = useFields('namespace', query);
 
   const globalAllFields = useFields('global');
-  const globalCategorizedFields = categorizeFields(globalAllFields);
-  const globalCategoryCounts = getCategoryCounts(globalCategorizedFields);
   const globalFilteredFields = useFields('global', query);
 
   const globalSettingsEnabled = globalAllFields.length > 0;
 
-  const tabs = [
-    {
-      id: SPACE_SETTINGS_TAB_ID,
-      name: i18nTexts.defaultSpaceTabTitle,
-      content: (
-        <TabContent
-          isGlobal={false}
-          fields={spaceFilteredFields}
-          query={query}
-          onClearQuery={() => onQueryChange()}
-          callOutEnabled={globalSettingsEnabled}
-          categoryCounts={spaceCategoryCounts}
-        />
-      ),
+  const tabs: SettingsTabs = {
+    [SPACE_SETTINGS_TAB_ID]: {
+      name: i18nTexts.spaceTabTitle,
+      fields: spaceFilteredFields,
+      categoryCounts: getCategoryCounts(spaceAllFields),
+      callOutTitle: i18nTexts.spaceCalloutTitle,
+      callOutText: i18nTexts.spaceCalloutText,
     },
-  ];
+  };
+  // Only add a Global settings tab if there are any global settings
   if (globalSettingsEnabled) {
-    tabs.push({
-      id: GLOBAL_SETTINGS_TAB_ID,
+    tabs[GLOBAL_SETTINGS_TAB_ID] = {
       name: i18nTexts.globalTabTitle,
-      content: (
-        <TabContent
-          isGlobal={true}
-          fields={globalFilteredFields}
-          query={query}
-          onClearQuery={() => onQueryChange()}
-          callOutEnabled={true}
-          categoryCounts={globalCategoryCounts}
-        />
-      ),
-    });
+      fields: globalFilteredFields,
+      categoryCounts: getCategoryCounts(globalAllFields),
+      callOutTitle: i18nTexts.globalCalloutTitle,
+      callOutText: i18nTexts.globalCalloutText,
+    };
   }
 
   const [selectedTabId, setSelectedTabId] = useState(SPACE_SETTINGS_TAB_ID);
-  const selectedTabContent = tabs.find((obj) => obj.id === selectedTabId)?.content;
-
-  const onSelectedTabChanged = (id: string) => {
-    setSelectedTabId(id);
-  };
-
-  const queryCategories =
-    selectedTabId === SPACE_SETTINGS_TAB_ID
-      ? Object.keys(spaceCategorizedFields)
-      : Object.keys(globalCategorizedFields);
+  const selectedTab = tabs[selectedTabId];
 
   return (
     <div>
@@ -133,23 +117,41 @@ export const SettingsApplication = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryInput {...{ categories: queryCategories, query, onQueryChange }} />
+          <QueryInput
+            {...{ categories: Object.keys(selectedTab.categoryCounts), query, onQueryChange }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {globalSettingsEnabled && (
-        <EuiTabs>
-          {tabs.map((tab, index) => (
-            <Tab
-              id={tab.id}
-              name={tab.name}
-              onSelectedTabChanged={() => onSelectedTabChanged(tab.id)}
-              isSelected={tab.id === selectedTabId}
-            />
-          ))}
-        </EuiTabs>
+        <>
+          <EuiTabs>
+            {Object.keys(tabs).map((id) => (
+              <Tab
+                id={id}
+                name={tabs[id].name}
+                onChangeSelectedTab={() => setSelectedTabId(id)}
+                isSelected={id === selectedTabId}
+              />
+            ))}
+          </EuiTabs>
+          <EuiSpacer size="xl" />
+          <EuiCallOut title={selectedTab.callOutTitle} iconType="warning">
+            <p>{selectedTab.callOutText}</p>
+          </EuiCallOut>
+        </>
       )}
-      {selectedTabContent}
+      <EuiSpacer size="xl" />
+      {selectedTab.fields.length ? (
+        <Form
+          fields={selectedTab.fields}
+          categoryCounts={selectedTab.categoryCounts}
+          isSavingEnabled={true}
+          onClearQuery={() => onQueryChange()}
+        />
+      ) : (
+        <EmptyState {...{ queryText: query?.text, onClearQuery: () => onQueryChange() }} />
+      )}
     </div>
   );
 };

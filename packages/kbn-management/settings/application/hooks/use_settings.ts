@@ -16,17 +16,17 @@ import { useServices } from '../services';
  * React hook which retrieves settings from a particular {@link IUiSettingsClient},
  * normalizes them to a predictable format, {@link UiSettingMetadata}, and returns
  * them as an observed collection.
+ * @param scope The {@link UiSettingsScope} of the settings to be retrieved.
+ * @returns An array of settings metadata objects.
  */
 export const useSettings = (scope: UiSettingsScope) => {
-  const { getSpaceSettings, getGlobalSettings, subscribeToUpdates } = useServices();
+  const { getAllowlistedSettings, subscribeToUpdates } = useServices();
 
-  const scopeSettings = scope === 'namespace' ? getSpaceSettings() : getGlobalSettings();
-
-  const [settings, setSettings] = useState(scopeSettings);
+  const [settings, setSettings] = useState(getAllowlistedSettings(scope));
 
   useEffectOnce(() => {
     const subscription = subscribeToUpdates(() => {
-      setSettings(scopeSettings);
+      setSettings(getAllowlistedSettings(scope));
     });
 
     return () => {

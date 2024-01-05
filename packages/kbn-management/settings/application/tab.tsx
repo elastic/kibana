@@ -17,18 +17,18 @@ export const DATA_TEST_SUBJ_PREFIX_TAB = 'settings-tab';
 export interface TabProps {
   id: string;
   name: string;
-  onSelectedTabChanged: () => void;
+  onChangeSelectedTab: () => void;
   isSelected: boolean;
 }
 
 /**
  * Component for rendering a settings tab.
  */
-export const Tab = ({ id, name, onSelectedTabChanged, isSelected }: TabProps) => {
+export const Tab = ({ id, name, onChangeSelectedTab, isSelected }: TabProps) => {
   return (
     <EuiTab
       data-test-subj={`${DATA_TEST_SUBJ_PREFIX_TAB}-${id}`}
-      onClick={() => onSelectedTabChanged()}
+      onClick={() => onChangeSelectedTab()}
       isSelected={isSelected}
     >
       {name}

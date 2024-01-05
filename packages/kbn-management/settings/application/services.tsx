@@ -19,10 +19,10 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { Subscription } from 'rxjs';
 import { ScopedHistory } from '@kbn/core-application-browser';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 export interface Services {
-  getSpaceSettings: () => Record<string, UiSettingMetadata>;
-  getGlobalSettings: () => Record<string, UiSettingMetadata>;
+  getAllowlistedSettings: (scope: UiSettingsScope) => Record<string, UiSettingMetadata>;
   subscribeToUpdates: (fn: () => void) => Subscription;
   isCustomSetting: (key: string) => boolean;
   isOverriddenSetting: (key: string) => boolean;
@@ -64,8 +64,7 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
     showReloadPagePrompt,
     links,
     showDanger,
-    getSpaceSettings,
-    getGlobalSettings,
+    getAllowlistedSettings,
     subscribeToUpdates,
     isCustomSetting,
     isOverriddenSetting,
@@ -75,8 +74,7 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
   return (
     <SettingsApplicationContext.Provider
       value={{
-        getSpaceSettings,
-        getGlobalSettings,
+        getAllowlistedSettings,
         subscribeToUpdates,
         isCustomSetting,
         isOverriddenSetting,
@@ -102,18 +100,10 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
   const { docLinks, notifications, theme, i18n, settings, history } = dependencies;
   const { client, globalClient } = settings;
 
-  const getSpaceSettings = () => {
+  const getAllowlistedSettings = (scope: UiSettingsScope) => {
+    const scopeClient = scope === 'namespace' ? client : globalClient;
     const rawSettings = Object.fromEntries(
-      Object.entries(client.getAll()).filter(
-        ([settingId, settingDef]) => !settingDef.readonly && !client.isCustom(settingId)
-      )
-    );
-    return normalizeSettings(rawSettings);
-  };
-
-  const getGlobalSettings = () => {
-    const rawSettings = Object.fromEntries(
-      Object.entries(globalClient.getAll()).filter(
+      Object.entries(scopeClient.getAll()).filter(
         ([settingId, settingDef]) => !settingDef.readonly && !client.isCustom(settingId)
       )
     );
@@ -121,8 +111,7 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
   };
 
   const services: Services = {
-    getSpaceSettings,
-    getGlobalSettings,
+    getAllowlistedSettings,
     isCustomSetting: (key: string) => client.isCustom(key),
     isOverriddenSetting: (key: string) => client.isOverridden(key),
     subscribeToUpdates: (fn: () => void) => client.getUpdate$().subscribe(fn),

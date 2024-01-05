@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+import { FieldDefinition } from '.';
 
-export const useApplicationStory = () => {
-  return { getAllowlistedSettings: getSettingsMock };
-};
+export interface SettingsTabs {
+  [id: string]: {
+    name: string;
+    fields: FieldDefinition[];
+    categoryCounts: { [category: string]: number };
+    callOutTitle: string;
+    callOutText: string;
+  };
+}
