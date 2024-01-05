@@ -8,9 +8,9 @@
 
 import React from 'react';
 
-export const DataTableCellValue = ({ children }: { children: React.ReactNode }) => {
+export const DataTablePopoverCellValue = ({ children }: { children: React.ReactNode }) => {
   return <span className="unifiedDataTable__cellPopoverValue eui-textBreakWord">{children}</span>;
 };
 
 // eslint-disable-next-line import/no-default-export
-export default DataTableCellValue;
+export default DataTablePopoverCellValue;

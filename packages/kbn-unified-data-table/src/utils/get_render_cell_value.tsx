@@ -20,10 +20,10 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
-import { CustomCellRenderer } from '../..';
+import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
-import { DataTableCellValue } from '../components/data_table_cell_value';
+import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -207,7 +207,7 @@ function renderPopoverContent({
       data-test-subj="dataTableExpandCellActionPopover"
     >
       <EuiFlexItem>
-        <DataTableCellValue>
+        <DataTablePopoverCellValue>
           <span
             // formatFieldValue guarantees sanitized values
             // eslint-disable-next-line react/no-danger
@@ -221,7 +221,7 @@ function renderPopoverContent({
               ),
             }}
           />
-        </DataTableCellValue>
+        </DataTablePopoverCellValue>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
     </EuiFlexGroup>

@@ -24,7 +24,7 @@ import { FilterInButton } from './filter_in_button';
 import { FilterOutButton } from './filter_out_button';
 import { CopyButton } from './copy_button';
 import { dynamic } from '../../utils/dynamic';
-const DataTableCellValue = dynamic(
+const DataTablePopoverCellValue = dynamic(
   () => import('@kbn/unified-data-table/src/components/data_table_cell_value')
 );
 
@@ -110,9 +110,9 @@ export function ChipWithPopover({
         <EuiFlexItem>
           <div style={{ maxWidth: '200px' }}>
             <EuiText size="s">
-              <DataTableCellValue>
+              <DataTablePopoverCellValue>
                 {property}:{text}
-              </DataTableCellValue>
+              </DataTablePopoverCellValue>
             </EuiText>
           </div>
         </EuiFlexItem>

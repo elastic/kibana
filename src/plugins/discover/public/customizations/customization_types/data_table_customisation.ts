@@ -10,5 +10,5 @@ import type { CustomCellRenderer } from '@kbn/unified-data-table';
 
 export interface DataTableCustomisation {
   id: 'data_table';
-  customCellRenderer: CustomCellRenderer;
+  customCellRenderer?: CustomCellRenderer;
 }
