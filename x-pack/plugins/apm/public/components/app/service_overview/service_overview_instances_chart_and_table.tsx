@@ -157,16 +157,10 @@ export function ServiceOverviewInstancesChartAndTable({
     currentPeriodItemsCount,
   } = mainStatsData;
 
-  const currentPeriodSlicedItems = currentPeriodItems
-    .map((item) => ({
-      ...item,
-      latency: item.latency ?? 0,
-      throughput: item.throughput ?? 0,
-      errorRate: item.errorRate ?? 0,
-      cpuUsage: item.cpuUsage ?? 0,
-      memoryUsage: item.memoryUsage ?? 0,
-    }))
-    .slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+  const currentPageItems = currentPeriodItems.slice(
+    pageIndex * PAGE_SIZE,
+    (pageIndex + 1) * PAGE_SIZE
+  );
 
   const {
     data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
@@ -200,7 +194,7 @@ export function ServiceOverviewInstancesChartAndTable({
               numBuckets: 20,
               transactionType,
               serviceNodeIds: JSON.stringify(
-                currentPeriodSlicedItems.map((item) => item.serviceNodeName)
+                currentPageItems.map((item) => item.serviceNodeName)
               ),
               offset:
                 comparisonEnabled && isTimeComparison(offset)
@@ -230,7 +224,7 @@ export function ServiceOverviewInstancesChartAndTable({
       <EuiFlexItem grow={7}>
         <EuiPanel hasBorder={true}>
           <ServiceOverviewInstancesTable
-            mainStatsItems={currentPeriodSlicedItems}
+            mainStatsItems={currentPageItems}
             mainStatsStatus={mainStatsStatus}
             mainStatsItemCount={currentPeriodItemsCount}
             detailedStatsLoading={isPending(detailedStatsStatus)}
