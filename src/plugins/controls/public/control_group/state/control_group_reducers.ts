@@ -31,6 +31,18 @@ export const controlGroupReducers = {
   ) => {
     state.explicitInput.chainingSystem = action.payload;
   },
+  // setShowApplySelections: (
+  //   state: WritableDraft<ControlGroupReduxState>,
+  //   action: PayloadAction<ControlGroupInput['showApplySelections']>
+  // ) => {
+  //   state.explicitInput.showApplySelections = action.payload;
+  // },
+  // setShowSelectionReset: (
+  //   state: WritableDraft<ControlGroupReduxState>,
+  //   action: PayloadAction<ControlGroupInput['showSelectionReset']>
+  // ) => {
+  //   state.explicitInput.showSelectionReset = action.payload;
+  // },
   setDefaultControlWidth: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['defaultControlWidth']>

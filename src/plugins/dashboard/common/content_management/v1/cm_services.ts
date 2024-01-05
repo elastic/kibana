@@ -44,6 +44,8 @@ const dashboardAttributesSchema = schema.object(
         panelsJSON: schema.maybe(schema.string()),
         controlStyle: schema.maybe(schema.string()),
         chainingSystem: schema.maybe(schema.string()),
+        showSelectionReset: schema.maybe(schema.boolean()),
+        showApplySelections: schema.maybe(schema.boolean()),
         ignoreParentSettingsJSON: schema.maybe(schema.string()),
       })
     ),

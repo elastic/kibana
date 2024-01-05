@@ -44,6 +44,8 @@ export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => 
   defaultControlGrow: DEFAULT_CONTROL_GROW,
   controlStyle: DEFAULT_CONTROL_STYLE,
   chainingSystem: 'HIERARCHICAL',
+  showApplySelections: false,
+  showSelectionReset: false,
   ignoreParentSettings: {
     ignoreFilters: false,
     ignoreQuery: false,
@@ -62,19 +64,37 @@ export const persistableControlGroupInputIsEqual = (
   const defaultInput = getDefaultControlGroupInput();
   const inputA = {
     ...defaultInput,
-    ...pick(a, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
+    ...pick(a, [
+      'panels',
+      'chainingSystem',
+      'controlStyle',
+      'ignoreParentSettings',
+      'showApplySelections',
+      'showSelectionReset',
+    ]),
   };
   const inputB = {
     ...defaultInput,
-    ...pick(b, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
+    ...pick(b, [
+      'panels',
+      'chainingSystem',
+      'controlStyle',
+      'ignoreParentSettings',
+      'showApplySelections',
+      'showSelectionReset',
+    ]),
   };
-
   if (
     getPanelsAreEqual(inputA.panels, inputB.panels) &&
-    deepEqual(omit(inputA, 'panels'), omit(inputB, 'panels'))
-  )
+    deepEqual(
+      omit(inputA, ['panels', 'showApplySelections', 'showSelectionReset']),
+      omit(inputB, ['panels', 'showApplySelections', 'showSelectionReset'])
+    ) &&
+    Boolean(inputA.showApplySelections) === Boolean(inputB.showApplySelections) &&
+    Boolean(inputA.showSelectionReset) === Boolean(inputB.showSelectionReset)
+  ) {
     return true;
-
+  }
   return false;
 };
 
@@ -108,6 +128,8 @@ export const controlGroupInputToRawControlGroupAttributes = (
   return {
     controlStyle: controlGroupInput.controlStyle,
     chainingSystem: controlGroupInput.chainingSystem,
+    showApplySelections: controlGroupInput.showApplySelections,
+    showSelectionReset: controlGroupInput.showSelectionReset,
     panelsJSON: JSON.stringify(controlGroupInput.panels),
     ignoreParentSettingsJSON: JSON.stringify(controlGroupInput.ignoreParentSettings),
   };
@@ -131,8 +153,14 @@ export const rawControlGroupAttributesToControlGroupInput = (
   rawControlGroupAttributes: RawControlGroupAttributes
 ): PersistableControlGroupInput | undefined => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
-  const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON } =
-    rawControlGroupAttributes;
+  const {
+    chainingSystem,
+    controlStyle,
+    showApplySelections,
+    showSelectionReset,
+    ignoreParentSettingsJSON,
+    panelsJSON,
+  } = rawControlGroupAttributes;
   const panels = safeJSONParse<ControlGroupInput['panels']>(panelsJSON);
   const ignoreParentSettings =
     safeJSONParse<ControlGroupInput['ignoreParentSettings']>(ignoreParentSettingsJSON);
@@ -140,6 +168,8 @@ export const rawControlGroupAttributesToControlGroupInput = (
     ...defaultControlGroupInput,
     ...(chainingSystem ? { chainingSystem } : {}),
     ...(controlStyle ? { controlStyle } : {}),
+    ...(showApplySelections ? { showApplySelections } : {}),
+    ...(showSelectionReset ? { showSelectionReset } : {}),
     ...(ignoreParentSettings ? { ignoreParentSettings } : {}),
     ...(panels ? { panels } : {}),
   };
@@ -152,6 +182,8 @@ export const rawControlGroupAttributesToSerializable = (
   return {
     chainingSystem: rawControlGroupAttributes?.chainingSystem,
     controlStyle: rawControlGroupAttributes?.controlStyle ?? defaultControlGroupInput.controlStyle,
+    showApplySelections: rawControlGroupAttributes?.showApplySelections,
+    showSelectionReset: rawControlGroupAttributes?.showSelectionReset,
     ignoreParentSettings: safeJSONParse(rawControlGroupAttributes?.ignoreParentSettingsJSON) ?? {},
     panels: safeJSONParse(rawControlGroupAttributes?.panelsJSON) ?? {},
   };
@@ -163,6 +195,8 @@ export const serializableToRawControlGroupAttributes = (
   return {
     controlStyle: serializable.controlStyle as RawControlGroupAttributes['controlStyle'],
     chainingSystem: serializable.chainingSystem as RawControlGroupAttributes['chainingSystem'],
+    showApplySelections: Boolean(serializable.showApplySelections),
+    showSelectionReset: Boolean(serializable.showSelectionReset),
     ignoreParentSettingsJSON: JSON.stringify(serializable.ignoreParentSettings),
     panelsJSON: JSON.stringify(serializable.panels),
   };

@@ -419,7 +419,6 @@ export abstract class Embeddable<
       ...this.input,
       ...changes,
     });
-
     this.onResetInput(newInput);
   }
 
