@@ -12,6 +12,7 @@ servers:
 paths:
   /internal/asset_criticality/privileges:
     get:
+      operationId: AssetCriticalityGetPrivileges
       summary: Get Asset Criticality Privileges
       responses:
         '200':
