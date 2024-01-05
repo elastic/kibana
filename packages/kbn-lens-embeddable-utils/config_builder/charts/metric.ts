@@ -31,7 +31,7 @@ import {
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
-const TRENDLINE_LAYER_ID = `layer_0_trendline`;
+const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 
 function getAccessorName(type: 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;

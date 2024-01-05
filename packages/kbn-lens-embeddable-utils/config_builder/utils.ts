@@ -232,10 +232,6 @@ export const buildDatasourceStates = async (
       ? await getDataView(index.index, dataViewsAPI, index.timeFieldName)
       : undefined;
 
-    if (dataView) {
-      dataviews[layerId] = dataView;
-    }
-
     if (dataset) {
       const [type, layerConfig] = buildDatasourceStatesLayer(
         layer,
@@ -255,6 +251,12 @@ export const buildDatasourceStates = async (
                 { ...layerConfig },
           },
         };
+      }
+
+      if (dataView) {
+        Object.keys(layers[type]?.layers ?? []).forEach((id) => {
+          dataviews[id] = dataView;
+        });
       }
     }
   }

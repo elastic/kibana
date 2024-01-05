@@ -189,6 +189,11 @@ test('generates metric chart config with trendline', async () => {
           "name": "indexpattern-datasource-layer-layer_0",
           "type": "index-pattern",
         },
+        Object {
+          "id": undefined,
+          "name": "indexpattern-datasource-layer-layer_0_trendline",
+          "type": "index-pattern",
+        },
       ],
       "state": Object {
         "adHocDataViews": Object {
