@@ -20,13 +20,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
-import { DiscoverEsqlLocatorParams } from '@kbn/discover-plugin/common';
-import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { NoDataViewsPromptComponent, useOnTryEsql } from '@kbn/shared-ux-prompt-no-data-views';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
@@ -100,7 +99,10 @@ export const IndexPatternTable = ({
         config: { defaultDataView: uiSettings.get('defaultIndex') },
       })
   );
-  const [onTryEsql, setOnTryEsql] = useState<(() => void) | undefined>();
+  const onTryEsql = useOnTryEsql({
+    locatorClient: share?.url.locators,
+    navigateToApp: application?.navigateToApp,
+  });
 
   const isLoadingIndexPatterns = useObservable(
     dataViewController.isLoadingIndexPatterns$,
@@ -113,22 +115,6 @@ export const IndexPatternTable = ({
   );
   const hasDataView = useObservable(dataViewController.hasDataView$, defaults.hasDataView);
   const hasESData = useObservable(dataViewController.hasESData$, defaults.hasEsData);
-
-  useEffect(() => {
-    (async () => {
-      const location = await share?.url.locators
-        .get<DiscoverEsqlLocatorParams>(DISCOVER_ESQL_LOCATOR)
-        ?.getLocation({});
-
-      if (!location) {
-        return;
-      }
-
-      const { app, path, state } = location;
-
-      setOnTryEsql(() => () => application.navigateToApp(app, { path, state }));
-    })();
-  }, [share, application]);
 
   const handleOnChange = ({ queryText, error }: { queryText: string; error: unknown }) => {
     if (!error) {

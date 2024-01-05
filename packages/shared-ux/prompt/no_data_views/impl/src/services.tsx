@@ -8,14 +8,11 @@
 
 import React, { FC, useContext } from 'react';
 
-// TODO: clintandrewhall - I would love to see these moved to a `@kbn/discover-locators` package.
-import type { DiscoverEsqlLocatorParams } from '@kbn/discover-plugin/common';
-import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
-
 import type {
   NoDataViewsPromptServices,
   NoDataViewsPromptKibanaDependencies,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { useOnTryEsql } from './hooks';
 
 const NoDataViewsPromptContext = React.createContext<NoDataViewsPromptServices | null>(null);
 
@@ -28,8 +25,7 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
 }) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
-  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor, getOnTryEsqlHandler } =
-    services;
+  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor, onTryEsql } = services;
 
   return (
     <NoDataViewsPromptContext.Provider
@@ -37,7 +33,7 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
         canCreateNewDataView,
         dataViewsDocLink,
         openDataViewEditor,
-        getOnTryEsqlHandler,
+        onTryEsql,
       }}
     >
       {children}
@@ -58,22 +54,7 @@ export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaDependen
       application: { navigateToApp },
     },
   } = services;
-
-  const getOnTryEsqlHandler = async () => {
-    if (!share) {
-      return;
-    }
-
-    const location = await share.url.locators
-      .get<DiscoverEsqlLocatorParams>(DISCOVER_ESQL_LOCATOR)
-      ?.getLocation({});
-
-    if (!location) {
-      return;
-    }
-
-    return () => navigateToApp(location.app, { path: location.path, state: location.state });
-  };
+  const onTryEsql = useOnTryEsql({ locatorClient: share?.url.locators, navigateToApp });
 
   return (
     <NoDataViewsPromptContext.Provider
@@ -81,7 +62,7 @@ export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaDependen
         dataViewsDocLink: services.coreStart.docLinks.links.indexPatterns?.introduction,
         canCreateNewDataView: services.dataViewEditor.userPermissions.editDataView(),
         openDataViewEditor: services.dataViewEditor.openEditor,
-        getOnTryEsqlHandler,
+        onTryEsql,
       }}
     >
       {children}

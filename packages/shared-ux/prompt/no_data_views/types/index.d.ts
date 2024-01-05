@@ -43,8 +43,12 @@ export interface NoDataViewsPromptServices {
   /** A link to information about Data Views in Kibana */
   dataViewsDocLink: string;
   /** Get a handler for trying ES|QL */
-  getOnTryEsqlHandler: () => Promise<(() => void) | undefined>;
+  onTryEsql: (() => void) | undefined;
 }
+
+export type NavigateToAppFn = (appId: string, options?: { path?: string; state?: unknown }) => void;
+export type LocatorClient = ILocatorClient;
+
 /**
  * Kibana-specific service types.
  */
@@ -58,7 +62,7 @@ export interface NoDataViewsPromptKibanaDependencies {
       };
     };
     application: {
-      navigateToApp: (appId: string, options?: { path?: string; state?: unknown }) => void;
+      navigateToApp: NavigateToAppFn;
     };
   };
   dataViewEditor: {
@@ -69,7 +73,7 @@ export interface NoDataViewsPromptKibanaDependencies {
   };
   share?: {
     url: {
-      locators: ILocatorClient;
+      locators: LocatorClient;
     };
   };
 }

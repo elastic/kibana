@@ -163,6 +163,7 @@ export interface DiscoverStart {
  * @internal
  */
 export interface DiscoverSetupPlugins {
+  dataViews: DataViewsServicePublic;
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   embeddable: EmbeddableSetup;
@@ -237,10 +238,6 @@ export class DiscoverPlugin
       );
       this.singleDocLocator = plugins.share.url.locators.create(
         new DiscoverSingleDocLocatorDefinition()
-      );
-
-      plugins.share.url.locators.create(
-        new DiscoverEsqlLocatorDefinition({ discoverAppLocator: this.locator })
       );
     }
 
@@ -407,6 +404,15 @@ export class DiscoverPlugin
     const getDiscoverServicesInternal = () => {
       return this.getDiscoverServices(core, plugins);
     };
+
+    if (plugins.share && this.locator) {
+      plugins.share?.url.locators.create(
+        new DiscoverEsqlLocatorDefinition({
+          discoverAppLocator: this.locator,
+          getIndices: plugins.dataViews.getIndices,
+        })
+      );
+    }
 
     return {
       locator: this.locator,

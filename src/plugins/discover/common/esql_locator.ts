@@ -14,6 +14,11 @@ export type DiscoverEsqlLocatorParams = SerializableRecord;
 
 export interface DiscoverEsqlLocatorDependencies {
   discoverAppLocator: LocatorPublic<SerializableRecord>;
+  getIndices: (options: {
+    showAllIndices: boolean;
+    pattern: string;
+    isRollupIndex: () => boolean;
+  }) => Promise<Array<{ name: string }>>;
 }
 
 export type DiscoverEsqlLocator = LocatorPublic<DiscoverEsqlLocatorParams>;
@@ -24,16 +29,36 @@ export class DiscoverEsqlLocatorDefinition implements LocatorDefinition<Discover
   constructor(protected readonly deps: DiscoverEsqlLocatorDependencies) {}
 
   public readonly getLocation = async () => {
-    const { discoverAppLocator } = this.deps;
+    const { discoverAppLocator, getIndices } = this.deps;
+
+    const getIndicesList = async () => {
+      const indices = await getIndices({
+        showAllIndices: false,
+        pattern: '*',
+        isRollupIndex: () => false,
+      });
+      return indices.filter((index) => index.name.startsWith('.')).map((index) => index.name);
+    };
+
+    const indices = await getIndicesList();
+    let esql = '';
+
+    if (indices.length < 0) {
+      let indexName = indices[0];
+
+      if (indices.find((index) => index.includes('logs'))) {
+        indexName = 'logs*';
+      }
+
+      esql = `from ${indexName} | limit 10`;
+    }
 
     const params = {
       query: {
-        esql: `SHOW FUNCTIONS`,
+        esql,
       },
     };
 
-    const discoverLocation = await discoverAppLocator.getLocation(params);
-
-    return discoverLocation;
+    return await discoverAppLocator.getLocation(params);
   };
 }
