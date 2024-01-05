@@ -53,11 +53,13 @@ export class ManifestTask {
           return {
             run: async () => {
               const taskInterval = (await this.endpointAppContext.config()).packagerTaskInterval;
-              const startTime = new Date().getTime();
+              const startTime = new Date();
               await this.runTask(taskInstance.id);
               const endTime = new Date().getTime();
-              this.logger.debug(
-                `${ManifestTaskConstants.TYPE} task run took ${endTime - startTime}ms`
+              this.logger.info(
+                `Complete. Task run took ${
+                  endTime - startTime.getTime()
+                }ms [ stated: ${startTime.toISOString()} ]`
               );
               const nextRun = new Date();
               if (taskInterval.endsWith('s')) {
@@ -75,7 +77,9 @@ export class ManifestTask {
                 runAt: nextRun,
               };
             },
-            cancel: async () => {},
+            cancel: async () => {
+              // TODO:PT add support for AbortController to Task manager
+            },
           };
         },
       },
