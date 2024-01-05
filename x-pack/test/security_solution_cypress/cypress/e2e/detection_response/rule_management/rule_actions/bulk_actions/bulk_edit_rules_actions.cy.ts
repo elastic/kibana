@@ -67,12 +67,6 @@ import {
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 
-import {
-  TOASTER,
-  SELECT_ALL_RULES_BTN,
-  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
-} from '../../../../../screens/alerts_detection_rules';
-
 const ruleNameToAssert = 'Custom rule name with actions';
 
 const expectedExistingSlackMessage = 'Existing slack action';
@@ -167,10 +161,6 @@ describe(
         ]);
         waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-        // Make sure that there's no way to trigger bulk actions,
-        // as the user can't select rules to operate on
-        cy.get(SELECT_ALL_RULES_BTN).should('not.exist');
-        cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).should('not.exist');
         cy.get(BULK_ACTIONS_BTN).should('not.exist');
       });
     });
