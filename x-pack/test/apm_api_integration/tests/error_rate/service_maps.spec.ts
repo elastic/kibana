@@ -10,12 +10,14 @@ import { meanBy } from 'lodash';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const synthtraceEsClient = getService('synthtraceEsClient');
+  const log = getService('log');
 
   const serviceName = 'synth-go';
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -27,49 +29,67 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       end: new Date(end).toISOString(),
       environment: 'ENVIRONMENT_ALL',
     };
-    const [serviceInventoryAPIResponse, serviceMapsNodeDetails] = await Promise.all([
-      apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/services',
-        params: {
-          query: {
-            ...commonQuery,
-            kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
-            probability: 1,
-            ...(processorEvent === ProcessorEvent.metric
-              ? {
-                  documentType: ApmDocumentType.TransactionMetric,
-                  rollupInterval: RollupInterval.OneMinute,
-                  useDurationSummary: true,
-                }
-              : {
-                  documentType: ApmDocumentType.TransactionEvent,
-                  rollupInterval: RollupInterval.None,
-                  useDurationSummary: false,
-                }),
-          },
-        },
-      }),
-      apmApiClient.readUser({
-        endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
-        params: {
-          path: { serviceName },
-          query: commonQuery,
-        },
-      }),
-    ]);
 
-    const serviceInventoryErrorRate =
-      serviceInventoryAPIResponse.body.items[0].transactionErrorRate;
+    return pRetry(
+      async () => {
+        const [serviceInventoryAPIResponse, serviceMapsNodeDetails] = await Promise.all([
+          apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/services',
+            params: {
+              query: {
+                ...commonQuery,
+                kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
+                probability: 1,
+                ...(processorEvent === ProcessorEvent.metric
+                  ? {
+                      documentType: ApmDocumentType.TransactionMetric,
+                      rollupInterval: RollupInterval.OneMinute,
+                      useDurationSummary: true,
+                    }
+                  : {
+                      documentType: ApmDocumentType.TransactionEvent,
+                      rollupInterval: RollupInterval.None,
+                      useDurationSummary: false,
+                    }),
+              },
+            },
+          }),
+          apmApiClient.readUser({
+            endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
+            params: {
+              path: { serviceName },
+              query: commonQuery,
+            },
+          }),
+        ]);
 
-    const serviceMapsNodeDetailsErrorRate = meanBy(
-      serviceMapsNodeDetails.body.currentPeriod.failedTransactionsRate?.timeseries,
-      'y'
+        if (
+          serviceInventoryAPIResponse.body.items.length === 0 ||
+          !serviceInventoryAPIResponse.body.items[0].transactionErrorRate
+        ) {
+          log.debug('Timed-out: No APM Services were found');
+          throw new Error('Timed-out: No APM Services were found');
+        }
+        const serviceInventoryErrorRate =
+          serviceInventoryAPIResponse.body.items[0].transactionErrorRate;
+
+        const serviceMapsNodeDetailsErrorRate = meanBy(
+          serviceMapsNodeDetails.body.currentPeriod.failedTransactionsRate?.timeseries,
+          'y'
+        );
+
+        return {
+          serviceInventoryErrorRate,
+          serviceMapsNodeDetailsErrorRate,
+        };
+      },
+      {
+        retries: 5,
+        onFailedAttempt: (error) => {
+          log.info(`Attempt ${error.attemptNumber}/${5}: Waiting for services`);
+        },
+      }
     );
-
-    return {
-      serviceInventoryErrorRate,
-      serviceMapsNodeDetailsErrorRate,
-    };
   }
 
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
@@ -140,8 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(() => synthtraceEsClient.clean());
 
-      // FLAKY: https://github.com/elastic/kibana/issues/172772
-      describe.skip('compare latency value between service inventory and service maps', () => {
+      describe('compare latency value between service inventory and service maps', () => {
         before(async () => {
           [errorTransactionValues, errorRateMetricValues] = await Promise.all([
             getErrorRateValues('transaction'),
