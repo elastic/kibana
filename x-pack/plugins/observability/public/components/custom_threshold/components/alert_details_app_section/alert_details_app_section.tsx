@@ -31,19 +31,20 @@ import {
   TAGS,
 } from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
-
 import { MetricsExplorerChartType } from '../../../../../common/custom_threshold_rule/types';
-import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
+import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
+import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField, TopAlert } from '../../../..';
 import {
   AlertParams,
   CustomThresholdAlertFields,
   CustomThresholdRuleTypeParams,
 } from '../../types';
+import { ExpressionChart } from '../expression_chart';
 import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../custom_threshold';
-import { ExpressionChart } from '../expression_chart';
+import { LogRateAnalysis } from './log_rate_analysis';
 import { Groups } from './groups';
 import { Tags } from './tags';
 
@@ -69,8 +70,11 @@ export default function AlertDetailsAppSection({
   ruleLink,
   setAlertSummaryFields,
 }: AppSectionProps) {
-  const { uiSettings, charts, data } = useKibana().services;
+  const services = useKibana().services;
+  const { uiSettings, charts, data } = services;
   const { euiTheme } = useEuiTheme();
+  const { hasAtLeast } = useLicense();
+  const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
@@ -95,6 +99,7 @@ export default function AlertDetailsAppSection({
       key={ALERT_TIME_RANGE_ANNOTATION_ID}
     />,
   ];
+
   useEffect(() => {
     const groups = alert.fields[ALERT_GROUP];
     const tags = alert.fields[TAGS];
@@ -218,6 +223,9 @@ export default function AlertDetailsAppSection({
           </EuiPanel>
         </EuiFlexItem>
       ))}
+      {hasLogRateAnalysisLicense && (
+        <LogRateAnalysis alert={alert} dataView={dataView} rule={rule} services={services} />
+      )}
     </EuiFlexGroup>
   ) : null;
 
