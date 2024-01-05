@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 
+import type { ExperimentalFeatures } from '../../../../../common';
 import { RISK_SCORE_PREVIEW_URL } from '../../../../../common/constants';
 import {
   RiskCategories,
@@ -48,7 +49,7 @@ describe('POST risk_engine/preview route', () => {
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
     (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
-    riskScorePreviewRoute(server.router, logger);
+    riskScorePreviewRoute(server.router, logger, {} as ExperimentalFeatures);
   });
 
   const buildRequest = (body: object = {}) =>
