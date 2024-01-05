@@ -50,7 +50,7 @@ function mockDataViewsService() {
   } as unknown as Pick<DataViewsContract, 'get' | 'create'>;
 }
 
-test('generates heatmap chart config', async () => {
+test('generates metric chart config', async () => {
   const result = await buildHeatmap(
     {
       chartType: 'heatmap',
@@ -67,7 +67,6 @@ test('generates heatmap chart config', async () => {
       formulaAPI: {} as any,
     }
   );
-
   expect(result).toMatchInlineSnapshot(`
     Object {
       "references": Array [
@@ -87,11 +86,11 @@ test('generates heatmap chart config', async () => {
               "layer_0": Object {
                 "allColumns": Array [
                   Object {
-                    "columnId": "metric_formula_accessor_y",
+                    "columnId": "y_metric_formula_accessor",
                     "fieldName": "category",
                   },
                   Object {
-                    "columnId": "metric_formula_accessor_x",
+                    "columnId": "x_metric_formula_accessor",
                     "fieldName": "@timestamp",
                   },
                   Object {
@@ -101,11 +100,11 @@ test('generates heatmap chart config', async () => {
                 ],
                 "columns": Array [
                   Object {
-                    "columnId": "metric_formula_accessor_y",
+                    "columnId": "y_metric_formula_accessor",
                     "fieldName": "category",
                   },
                   Object {
-                    "columnId": "metric_formula_accessor_x",
+                    "columnId": "x_metric_formula_accessor",
                     "fieldName": "@timestamp",
                   },
                   Object {
@@ -145,8 +144,8 @@ test('generates heatmap chart config', async () => {
           },
           "shape": "heatmap",
           "valueAccessor": "metric_formula_accessor",
-          "xAccessor": "metric_formula_accessor_x",
-          "yAccessor": "metric_formula_accessor_y",
+          "xAccessor": "x_metric_formula_accessor",
+          "yAccessor": "y_metric_formula_accessor",
         },
       },
       "title": "test",

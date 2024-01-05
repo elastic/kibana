@@ -93,7 +93,7 @@ test('generates xy chart config', async () => {
               "layer_0": Object {
                 "allColumns": Array [
                   Object {
-                    "columnId": "metric_formula_accessor0_x",
+                    "columnId": "x_metric_formula_accessor0",
                     "fieldName": "@timestamp",
                   },
                   Object {
@@ -106,7 +106,7 @@ test('generates xy chart config', async () => {
                 ],
                 "columns": Array [
                   Object {
-                    "columnId": "metric_formula_accessor0_x",
+                    "columnId": "x_metric_formula_accessor0",
                     "fieldName": "@timestamp",
                   },
                   Object {
@@ -157,7 +157,7 @@ test('generates xy chart config', async () => {
               "layerId": "layer_0",
               "layerType": "data",
               "seriesType": "bar",
-              "xAccessor": "metric_formula_accessor0_x",
+              "xAccessor": "x_metric_formula_accessor0",
             },
           ],
           "legend": Object {
