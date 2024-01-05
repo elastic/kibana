@@ -143,6 +143,10 @@ export class ManifestTask {
           this.logger.info('recovering from invalid internal manifest');
           oldManifest = ManifestManager.createDefaultManifest();
         }
+
+        this.logger.debug(
+          `Encountered an error while attempting to retrieve last computed manifest (this might be ok if no endpoint policies exist yet): ${e.toString()}`
+        );
       }
 
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
