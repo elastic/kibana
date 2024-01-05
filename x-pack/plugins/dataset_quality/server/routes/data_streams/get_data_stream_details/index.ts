@@ -23,7 +23,7 @@ export async function getDataStreamDetails(args: {
 
   const indexSettings = await dataStreamService.getDataSteamIndexSettings(esClient, {
     type,
-    dataset: `*${datasetQuery}*`,
+    dataset: `${datasetQuery}`,
   });
 
   const indexesList = Object.values(indexSettings);

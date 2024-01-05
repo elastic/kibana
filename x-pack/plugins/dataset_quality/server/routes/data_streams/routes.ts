@@ -7,6 +7,7 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
+import Boom from '@hapi/boom';
 import {
   DataStreamDetails,
   DataStreamStat,
@@ -113,7 +114,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<DataStreamDetails> {
-    const { context, params, response } = resources;
+    const { context, params } = resources;
     const { type = DEFAULT_DATASET_TYPE, datasetQuery } = params.query;
     const coreContext = await context.core;
 
@@ -125,9 +126,7 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     } catch (e) {
       if (e) {
         if (e?.message?.indexOf('index_not_found_exception') > -1) {
-          throw response.notFound({
-            body: { message: `Data stream ${type}-*${datasetQuery}* not found.` },
-          });
+          throw Boom.notFound(`Data stream ${type}-${datasetQuery} not found.`);
         }
       }
 

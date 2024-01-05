@@ -19,6 +19,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const dataStream = 'nginx.access';
+  const namespace = 'default';
 
   async function callApiAs(user: DatasetQualityApiClientKey, datasetQuery: string) {
     return await datasetQualityApiClient[user]({
@@ -44,6 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .message('This is a log message')
                 .timestamp(timestamp)
                 .dataset(dataStream)
+                .namespace(namespace)
                 .defaults({
                   'log.file.path': '/my-service.log',
                 })
@@ -59,20 +61,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       it('returns 404 if matching data stream is not available', async () => {
         const nonExistentDataStream = 'Non-existent';
-        const expectedMessage = `*${nonExistentDataStream}* not found`;
-        expect(
-          (
-            await expectToReject(() => callApiAs('datasetQualityLogsUser', nonExistentDataStream))
-          ).message.indexOf(expectedMessage)
-        ).to.greaterThan(-1);
+        const expectedMessage = `logs-${nonExistentDataStream}-${namespace} not found`;
+        const err = await expectToReject(() =>
+          callApiAs('datasetQualityLogsUser', `${nonExistentDataStream}-${namespace}`)
+        );
+        expect(err.res.status).to.be(404);
+        expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
       });
 
       it('returns data stream details correctly', async () => {
         const dataStreamSettings = await getDataStreamSettingsOfFirstIndex(
           esClient,
-          `logs-*${dataStream}*`
+          `logs-${dataStream}-${namespace}`
         );
-        const resp = await callApiAs('datasetQualityLogsUser', dataStream);
+        const resp = await callApiAs('datasetQualityLogsUser', `${dataStream}-${namespace}`);
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
       });
 
