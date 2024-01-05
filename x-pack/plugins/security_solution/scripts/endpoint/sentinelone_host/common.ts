@@ -265,7 +265,7 @@ export const createDetectionEngineSentinelOneRuleIfNeeded = async (
   log: ToolingLog
 ): Promise<RuleResponse> => {
   const ruleName = 'Promote SentinelOne alerts';
-  const sentinelOneAlertsIndexPattern = 'logs-sentinel_one.alert';
+  const sentinelOneAlertsIndexPattern = 'logs-sentinel_one.alert*';
   const ruleQueryValue = 'observer.serial_number:*';
 
   const { data } = await findRules(kbnClient, {
