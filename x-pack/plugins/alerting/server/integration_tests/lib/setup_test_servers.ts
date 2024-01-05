@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import deepmerge from 'deepmerge';
 import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 
 export async function setupTestServers(settings = {}) {
@@ -20,25 +19,7 @@ export async function setupTestServers(settings = {}) {
 
   const esServer = await startES();
 
-  const root = createRootWithCorePlugins(
-    deepmerge(
-      {
-        logging: {
-          root: {
-            level: 'warn',
-          },
-          loggers: [
-            {
-              name: 'plugins.taskManager',
-              level: 'all',
-            },
-          ],
-        },
-      },
-      settings
-    ),
-    { oss: false }
-  );
+  const root = createRootWithCorePlugins(settings, { oss: false });
 
   await root.preboot();
   const coreSetup = await root.setup();

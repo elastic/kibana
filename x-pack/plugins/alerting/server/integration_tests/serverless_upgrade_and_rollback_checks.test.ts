@@ -5,6 +5,21 @@
  * 2.0.
  */
 
+/**
+ * This test is designed to detect changes to rule parameter schemas on any rule type running inserverless.
+ *
+ * The Response Ops team will be required to review the changes to ensure the change will work in
+ * upgrade and rollback scenarios so any alerting rule remains running after a rollback.
+ *
+ * To facilitate a review, describe in the PR the following:
+ *   - Details about the change in parameters
+ *   - How users leverage the change
+ *   - How the system behaves if a user leverages the change and a rollback occurs afterwards
+ *
+ * Intermediate releases may be necessary so the param and rule executor changes are released
+ * prior to users being able to leverage the new capability. This way if we rollback, the application
+ * still understands how to run the alerting rule.
+ */
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
@@ -24,13 +39,21 @@ jest.mock('../rule_type_registry', () => {
   };
 });
 
-const esProjectRuleTypes: string[] = [
+/**
+ * These rule types are manually updated.
+ *
+ * TODO: We should spin up three serverless projects and pull the rule types
+ * directly from them to ensure the list below remains up to date. We will still
+ * need a copied list of rule types here because they are needed to write
+ * test scenarios below.
+ */
+const ruleTypesInEsProjects: string[] = [
   '.index-threshold',
   '.geo-containment',
   '.es-query',
   'transform_health',
 ];
-const obltProjectRuleTypes: string[] = [
+const ruleTypesInObltProjects: string[] = [
   '.index-threshold',
   '.geo-containment',
   '.es-query',
@@ -45,7 +68,7 @@ const obltProjectRuleTypes: string[] = [
   'apm.transaction_duration',
   'apm.anomaly',
 ];
-const securityProjectRuleTypes: string[] = [
+const ruleTypesInSecurityProjects: string[] = [
   '.index-threshold',
   '.geo-containment',
   '.es-query',
@@ -62,12 +85,12 @@ const securityProjectRuleTypes: string[] = [
   'siem.newTermsRule',
 ];
 
-describe('ZDT and Rollback Checks', () => {
+describe('Serverless upgrade and rollback checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let ruleTypeRegistry: RuleTypeRegistry;
   const ruleTypesToCheck: string[] = uniq(
-    esProjectRuleTypes.concat(obltProjectRuleTypes).concat(securityProjectRuleTypes)
+    ruleTypesInEsProjects.concat(ruleTypesInObltProjects).concat(ruleTypesInSecurityProjects)
   );
 
   beforeAll(async () => {
@@ -90,7 +113,7 @@ describe('ZDT and Rollback Checks', () => {
   });
 
   for (const ruleTypeId of ruleTypesToCheck) {
-    test(`detect param changes for: ${ruleTypeId}`, async () => {
+    test(`detect param changes to review for: ${ruleTypeId}`, async () => {
       const ruleType = ruleTypeRegistry.get(ruleTypeId);
       if (!ruleType?.schemas?.params) {
         throw new Error('schema.params is required for rule type:' + ruleTypeId);

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ZDT and Rollback Checks detect param changes for: .es-query 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: .es-query 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -775,7 +775,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: .geo-containment 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: .geo-containment 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1013,7 +1013,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: .index-threshold 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: .index-threshold 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1407,7 +1407,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: apm.anomaly 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: apm.anomaly 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1549,7 +1549,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: apm.error_rate 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: apm.error_rate 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -1779,7 +1779,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: apm.transaction_duration 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: apm.transaction_duration 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -2069,7 +2069,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: apm.transaction_error_rate 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: apm.transaction_error_rate 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -2315,7 +2315,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: metrics.alert.inventory.threshold 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: metrics.alert.inventory.threshold 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -2622,7 +2622,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: observability.rules.custom_threshold 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: observability.rules.custom_threshold 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -4802,7 +4802,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: siem.eqlRule 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.eqlRule 1`] = `
 Object {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
@@ -5221,7 +5221,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: siem.indicatorRule 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.indicatorRule 1`] = `
 Object {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
@@ -5703,7 +5703,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: siem.mlRule 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.mlRule 1`] = `
 Object {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
@@ -6103,7 +6103,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: siem.newTermsRule 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.newTermsRule 1`] = `
 Object {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
@@ -6529,7 +6529,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: siem.notifications 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.notifications 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -6563,7 +6563,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: siem.queryRule 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.queryRule 1`] = `
 Object {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
@@ -7201,7 +7201,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: siem.savedQueryRule 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.savedQueryRule 1`] = `
 Object {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
@@ -7839,7 +7839,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: siem.thresholdRule 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.thresholdRule 1`] = `
 Object {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": Array [
@@ -8327,7 +8327,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: slo.rules.burnRate 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: slo.rules.burnRate 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -8524,7 +8524,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: transform_health 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: transform_health 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -8804,7 +8804,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: xpack.ml.anomaly_detection_alert 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: xpack.ml.anomaly_detection_alert 1`] = `
 Object {
   "flags": Object {
     "default": Object {
@@ -9047,7 +9047,7 @@ Object {
 }
 `;
 
-exports[`ZDT and Rollback Checks detect param changes for: xpack.ml.anomaly_detection_jobs_health 1`] = `
+exports[`Serverless upgrade and rollback checks detect param changes to review for: xpack.ml.anomaly_detection_jobs_health 1`] = `
 Object {
   "flags": Object {
     "default": Object {
