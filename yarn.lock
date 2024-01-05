@@ -1740,10 +1740,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@91.0.0-backport.0":
-  version "91.0.0-backport.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-91.0.0-backport.0.tgz#821306a580cc8fcf1a142106e425f3fcd1bebfbf"
-  integrity sha512-2T+8JiPs1Ejh2T8l7cwqv/IIlNV6I9RbXtJ60L9U4lJGtS/R8zIoikrR/2SEs8bXwyXXg4i/trhfbYbylAvZpw==
+"@elastic/eui@91.3.1":
+  version "91.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-91.3.1.tgz#2289b1683f0409c043150c39f5fb7233aa7beb16"
+  integrity sha512-zxnhBaAsykmDqjbZ3i++CFTyv2dKZSe3UUZKSgYj5MaMnbE86uzeWGjhp3gh1b+LxJZP2672MbNZ6qxVOh1vcQ==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -17259,9 +17259,9 @@ folktale@2.3.2:
   integrity sha512-+8GbtQBwEqutP0v3uajDDoN64K2ehmHd0cjlghhxh0WpcfPzAIjPA03e1VvHlxL02FVGR0A6lwXsNQKn3H1RNQ==
 
 follow-redirects@^1.0.0, follow-redirects@^1.15.0:
-  version "1.15.2"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.2.tgz#b460864144ba63f2681096f274c4e57026da2c13"
-  integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
+  version "1.15.4"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.4.tgz#cdc7d308bf6493126b17ea2191ea0ccf3e535adf"
+  integrity sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==
 
 font-awesome@4.7.0:
   version "4.7.0"
