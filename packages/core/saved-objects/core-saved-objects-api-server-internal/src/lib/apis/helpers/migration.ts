@@ -59,7 +59,7 @@ export class MigrationHelper {
     typeMap,
     originalAttributes,
   }: {
-    document: SavedObjectUnsanitizedDoc<T>;
+    document: SavedObjectUnsanitizedDoc<T> | SavedObject<T>;
     typeMap: AuthorizationTypeMap<A> | undefined;
     originalAttributes?: T;
   }): Promise<SavedObject<T>> {
@@ -67,7 +67,7 @@ export class MigrationHelper {
 
     const migrate = (doc: SavedObjectUnsanitizedDoc | SavedObject) => {
       try {
-        return this.migrateStorageDocument(doc) as SavedObject<T>;
+        return this.migrator.migrateDocument(doc, { allowDowngrade: true }) as SavedObject<T>;
       } catch (error) {
         throw SavedObjectsErrorHelpers.decorateGeneralError(
           error,
