@@ -354,11 +354,10 @@ export class ReportingStore {
 
   public async setReportError(
     report: SavedReport,
-    failedInfo: ReportFailedFields
+    errorInfo: Pick<ReportFailedFields, 'error' | 'output'>
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
-      ...failedInfo,
-      status: JOB_STATUS.PROCESSING,
+      ...errorInfo,
     });
 
     let body: UpdateResponse<ReportDocument>;
