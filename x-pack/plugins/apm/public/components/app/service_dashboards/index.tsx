@@ -212,11 +212,13 @@ export function ServiceDashboards() {
                       emptyButton={true}
                       onRefresh={refetch}
                       serviceDashboards={serviceDashboards}
+                      serviceName={serviceName}
                     />,
                     <GotoDashboard currentDashboard={currentDashboard} />,
                     <EditDashboard
                       currentDashboard={currentDashboard}
                       onRefresh={refetch}
+                      serviceName={serviceName}
                     />,
                     <UnlinkDashboard
                       currentDashboard={currentDashboard}
@@ -241,7 +243,11 @@ export function ServiceDashboards() {
           </EuiFlexItem>
         </>
       ) : (
-        <EmptyDashboards actions={<LinkDashboard onRefresh={refetch} />} />
+        <EmptyDashboards
+          actions={
+            <LinkDashboard onRefresh={refetch} serviceName={serviceName} />
+          }
+        />
       )}
     </EuiPanel>
   );
