@@ -6,16 +6,21 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
 import React from 'react';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { SharePluginSetup } from '../shared_imports';
-import { JobParamsProviderOptions, reportingScreenshotShareProvider } from '../share_context_menu';
+import { CsvModalContent } from '../share_context_menu/csv_export_modal';
+import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
 import { ReportingModalContent } from '../share_context_menu/reporting_panel_content_lazy';
 /**
  * Properties for displaying a share menu with Reporting features.
  */
 export interface ApplicationProps {
+  /**
+   * A function that Reporting calls to get the sharing data from the application.
+   */
+  getJobParams: ReportingPanelProps['getJobParams'];
+
   /**
    * Option to control how the screenshot(s) is/are placed in the PDF
    */
@@ -32,39 +37,69 @@ export interface ApplicationProps {
   onClose: () => void;
 }
 
+export interface ReportingPublicComponents {
+  /**
+   * An element to display a form to export the page as PDF
+   */
+  ReportingModalPDFV2(props: ApplicationProps): JSX.Element;
+
+  /**
+   * An element to display a form to export the page as PNG
+   */
+  ReportingModalPNGV2(props: ApplicationProps): JSX.Element;
+
+  /**
+   * An element to display a form to export the page as CSV
+   */
+  ReportingModalCSV(props: ApplicationProps): JSX.Element;
+}
+
 /**
  * As of 7.14, the only shared component is a PDF report that is suited for Canvas integration.
  * This is not planned to expand, as work is to be done on moving the export-type implementations out of Reporting
  * Related Discuss issue: https://github.com/elastic/kibana/issues/101422
  */
-export const getSharedComponents = async (
+export function getSharedComponents(
   core: CoreSetup,
-  apiClient: ReportingAPIClient,
-  share: SharePluginSetup
-) => {
-  const [plugins, startDeps] = await core.getStartServices();
-  const { jobProviderOptions } = reportingScreenshotShareProvider({
-    apiClient,
-    toasts: plugins.notifications.toasts,
-    uiSettings: core.uiSettings,
-    license: startDeps as ILicense,
-    usesUiCapabilities: true,
-    application: plugins.application,
-    theme: core.theme,
-    overlays: plugins.overlays,
-    i18nStart: plugins.i18n,
-    urlService: share?.url,
-  });
-
-  return (
-    <ReportingModalContent
-      requiresSavedState={false}
-      apiClient={apiClient}
-      toasts={core.notifications.toasts}
-      uiSettings={core.uiSettings}
-      theme={core.theme}
-      jobProviderOptions={jobProviderOptions as unknown as JobParamsProviderOptions}
-      onClose={() => {}}
-    />
-  );
-};
+  apiClient: ReportingAPIClient
+): ReportingPublicComponents {
+  return {
+    ReportingModalPDFV2(props: ApplicationProps) {
+      return (
+        <ReportingModalContent
+          requiresSavedState={false}
+          apiClient={apiClient}
+          toasts={core.notifications.toasts}
+          uiSettings={core.uiSettings}
+          theme={core.theme}
+          {...props}
+        />
+      );
+    },
+    ReportingModalPNGV2(props: ApplicationProps) {
+      return (
+        <ReportingModalContent
+          requiresSavedState={false}
+          apiClient={apiClient}
+          toasts={core.notifications.toasts}
+          uiSettings={core.uiSettings}
+          theme={core.theme}
+          {...props}
+        />
+      );
+    },
+    ReportingModalCSV(props: ApplicationProps) {
+      return (
+        <CsvModalContent
+          requiresSavedState={false}
+          apiClient={apiClient}
+          toasts={core.notifications.toasts}
+          uiSettings={core.uiSettings}
+          reportType={CSV_JOB_TYPE}
+          theme={core.theme}
+          {...props}
+        />
+      );
+    },
+  };
+}

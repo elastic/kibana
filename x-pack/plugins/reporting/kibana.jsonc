@@ -23,7 +23,6 @@
       "screenshotMode",
       "share",
       "features", 
-      "kibanaUtils"
     ],
     "optionalPlugins": [
       "security",

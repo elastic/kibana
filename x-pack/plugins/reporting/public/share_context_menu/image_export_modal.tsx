@@ -30,11 +30,9 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useEffect, useState } from 'react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common/layout';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { JobParamsProviderOptions } from '.';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
-import { AppParams } from '../lib/reporting_api_client/reporting_api_client';
 
 export interface ReportingModalProps {
   apiClient: ReportingAPIClient;
@@ -42,7 +40,7 @@ export interface ReportingModalProps {
   uiSettings: IUiSettingsClient;
   reportType?: string;
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
-  jobProviderOptions: JobParamsProviderOptions;
+  getJobParams: any; // (() => JobParamsCSV) |(() => JobParamsPNGV2 )| (() => JobParamsPDFV2);
   objectId?: string;
   isDirty?: boolean;
   onClose: () => void;
@@ -52,42 +50,6 @@ export interface ReportingModalProps {
 
 export type Props = ReportingModalProps & { intl?: InjectedIntl };
 
-const getJobParams = (
-  apiClient: ReportingAPIClient,
-  opts: JobParamsProviderOptions,
-  type: string
-) => {
-  const {
-    objectType = 'dashboard',
-    sharingData: { title, layout, locatorParams },
-  } = opts;
-
-  if (!['pngV2', 'printablePdfV2', 'printablePdf'].includes(type)) return;
-
-  const baseParams = {
-    objectType,
-    layout,
-    title,
-  };
-
-  if (type === 'printablePdfV2') {
-    // multi locator for PDF V2
-    return { ...baseParams, locatorParams: [locatorParams] } as AppParams;
-  } else if (type === 'pngV2') {
-    // single locator for PNG V2
-    return { ...baseParams, locatorParams } as AppParams;
-  } else {
-    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-    // Replace hashes with original RISON values.
-    const relativeUrl = opts.shareableUrl.replace(
-      window.location.origin + apiClient.getServerBasePath(),
-      ''
-    );
-    // multi URL for PDF
-    return { ...baseParams, relativeUrls: [relativeUrl] } as AppParams;
-  }
-};
-
 const renderDescription = (objectType: string) => {
   return objectType === 'dashboard'
     ? `Reports can take a few minutes to generate based upon the size of your dashboard.`
@@ -95,8 +57,7 @@ const renderDescription = (objectType: string) => {
 };
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
-  const { apiClient, jobProviderOptions, intl, toasts, theme, onClose, objectId, layoutOption } =
-    props;
+  const { apiClient, getJobParams, intl, toasts, theme, onClose, objectId, layoutOption } = props;
 
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
@@ -110,10 +71,10 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
   const getAbsoluteReportGenerationUrl = () => {
-    if (getJobParams(apiClient, jobProviderOptions, selectedRadio) !== undefined) {
+    if (getJobParams(apiClient, getJobParams, selectedRadio) !== undefined) {
       const relativePath = apiClient.getReportingPublicJobPath(
         selectedRadio,
-        apiClient.getDecoratedJobParams(getJobParams(apiClient, jobProviderOptions, selectedRadio)!)
+        apiClient.getDecoratedJobParams(getJobParams(apiClient, getJobParams, selectedRadio)!)
       );
       return url.resolve(window.location.href, relativePath);
     }
@@ -138,7 +99,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   });
 
   const getLayout = (): LayoutParams => {
-    let dimensions = getJobParams(apiClient, jobProviderOptions, selectedRadio)?.layout?.dimensions;
+    let dimensions = getJobParams(apiClient, getJobParams, selectedRadio)?.layout?.dimensions;
     if (!dimensions) {
       const el = document.querySelector('[data-shared-items-container]');
       const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
@@ -158,7 +119,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
 
   const getJobsParams = () => {
     return {
-      ...getJobParams(apiClient, jobProviderOptions, selectedRadio),
+      ...getJobParams(apiClient, getJobParams, selectedRadio),
       layout: getLayout(),
     };
   };

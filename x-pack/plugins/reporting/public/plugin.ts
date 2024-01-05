@@ -22,7 +22,6 @@ import {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
@@ -30,13 +29,10 @@ import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/publ
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, durationToNumber } from '@kbn/reporting-common';
 import type { JobId } from '@kbn/reporting-common/types';
 import type { ClientConfigType } from '@kbn/reporting-public';
-import type {
-  BrowserUrlService,
-  SharePluginSetup,
-  SharePluginStart,
-} from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+import { i18n as i18nKibana } from '@kbn/i18n';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
@@ -59,7 +55,7 @@ function handleError(
 ): Rx.Observable<JobSummarySet> {
   notifications.toasts.addDanger(
     getGeneralErrorToast(
-      i18n.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {
+      i18nKibana.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {
         defaultMessage: 'Reporting notifier error!',
       }),
       err,
@@ -76,7 +72,6 @@ export interface ReportingPublicPluginSetupDependencies {
   uiActions: UiActionsSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
-  urlService: BrowserUrlService;
 }
 
 export interface ReportingPublicPluginStartDependencies {
@@ -104,10 +99,10 @@ export class ReportingPublicPlugin
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
   private readonly stop$ = new Rx.ReplaySubject<void>(1);
-  private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
+  private readonly title = i18nKibana.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
   });
-  private readonly breadcrumbText = i18n.translate('xpack.reporting.breadcrumb', {
+  private readonly breadcrumbText = i18nKibana.translate('xpack.reporting.breadcrumb', {
     defaultMessage: 'Reporting',
   });
   private config: ClientConfigType;
@@ -128,13 +123,11 @@ export class ReportingPublicPlugin
     return this.apiClient;
   }
 
-  private getContract(share?: SharePluginSetup, core?: CoreSetup) {
+  private getContract(core?: CoreSetup) {
     if (core) {
       this.contract = {
         usesUiCapabilities: () => this.config.roles?.enabled === false,
-        components: share
-          ? getSharedComponents(core, this.getApiClient(core.http, core.uiSettings), share!)
-          : {},
+        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
       };
     }
 
@@ -156,7 +149,6 @@ export class ReportingPublicPlugin
       screenshotMode: screenshotModeSetup,
       share: shareSetup,
       uiActions: uiActionsSetup,
-      urlService: urlSetup,
     } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
@@ -166,10 +158,10 @@ export class ReportingPublicPlugin
 
     homeSetup.featureCatalogue.register({
       id: 'reporting',
-      title: i18n.translate('xpack.reporting.registerFeature.reportingTitle', {
+      title: i18nKibana.translate('xpack.reporting.registerFeature.reportingTitle', {
         defaultMessage: 'Reporting',
       }),
-      description: i18n.translate('xpack.reporting.registerFeature.reportingDescription', {
+      description: i18nKibana.translate('xpack.reporting.registerFeature.reportingDescription', {
         defaultMessage: 'Manage your reports generated from Discover, Visualize, and Dashboard.',
       }),
       icon: 'reportingApp',
@@ -233,11 +225,10 @@ export class ReportingPublicPlugin
       new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
 
-    const reportingStart = this.getContract(shareSetup, core);
+    const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
 
-    startServices$.subscribe(([coreStart, { licensing }]) => {
-      const { application, overlays, i18n: i18nStart } = coreStart;
+    startServices$.subscribe(([{ application, overlays, i18n }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
         shareSetup.register(
           reportingCsvShareProvider({
@@ -249,8 +240,7 @@ export class ReportingPublicPlugin
             usesUiCapabilities,
             theme: core.theme,
             overlays,
-            i18nStart,
-            urlService: urlSetup,
+            i18nStart: i18n,
           })
         );
 
@@ -265,8 +255,7 @@ export class ReportingPublicPlugin
               usesUiCapabilities,
               theme: core.theme,
               overlays,
-              i18nStart,
-              urlService: urlSetup,
+              i18nStart: i18n,
             })
           );
         }
