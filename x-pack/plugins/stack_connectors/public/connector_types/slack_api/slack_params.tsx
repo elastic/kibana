@@ -363,7 +363,7 @@ const SlackParamsFields: React.FunctionComponent<
                 external
               >
                 <FormattedMessage
-                  id="viewInSlack"
+                  id="xpack.stackConnectors.components.slack.viewInBlockkitBuilder"
                   defaultMessage="View in Slack Block Kit Builder"
                 />
               </EuiLink>
