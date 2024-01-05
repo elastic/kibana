@@ -968,6 +968,8 @@
       "@kbn/lens-embeddable-utils/*": ["packages/kbn-lens-embeddable-utils/*"],
       "@kbn/lens-formula-docs": ["packages/kbn-lens-formula-docs"],
       "@kbn/lens-formula-docs/*": ["packages/kbn-lens-formula-docs/*"],
+      "@kbn/lens-inline-editing-example-plugin": ["x-pack/examples/lens_embeddable_inline_editing_example"],
+      "@kbn/lens-inline-editing-example-plugin/*": ["x-pack/examples/lens_embeddable_inline_editing_example/*"],
       "@kbn/lens-plugin": ["x-pack/plugins/lens"],
       "@kbn/lens-plugin/*": ["x-pack/plugins/lens/*"],
       "@kbn/license-api-guard-plugin": ["x-pack/plugins/license_api_guard"],
