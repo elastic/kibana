@@ -4,17 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isRunningResponse } from '@kbn/data-plugin/common';
+import {
+  IEsSearchRequest,
+  IKibanaSearchResponse,
+  isRunningResponse,
+} from '@kbn/data-plugin/common';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
-import { sloKeys } from './query_key_factory';
 
-const createFetchAggregations = async function (searchService) {
-  const search = async function () {
+interface Aggregation {
+  doc_count: number;
+  key: string;
+}
+
+interface GroupAggregationsResponse {
+  aggregations: {
+    groupByTags: {
+      buckets: Aggregation[];
+    };
+  };
+}
+
+const createFetchAggregations = async (searchService: ISearchStart) => {
+  const search = async <TResponse>(): Promise<TResponse> => {
     return new Promise((resolve, reject) => {
       searchService
-        .search({
+        .search<IEsSearchRequest, IKibanaSearchResponse<TResponse>>({
           params: {
             index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
             body: {
@@ -42,15 +59,11 @@ const createFetchAggregations = async function (searchService) {
         });
     });
   };
-  const { aggregations } = await search();
-  // const tags = aggregations.groupByTags.buckets.reduce((acc, bucket) => {
-  //   return { ...acc, [bucket.key]: bucket.doc_count ?? 0 };
-  // }, {} as Record<string, number>);
-  // return tags;
+  const { aggregations } = await search<GroupAggregationsResponse>();
   return aggregations;
 };
 
-export function useFetchSloGroups({ kqlQuery, groupBy }) {
+export function useFetchSloGroups() {
   const {
     data: { search: searchService },
   } = useKibana().services;
@@ -59,10 +72,9 @@ export function useFetchSloGroups({ kqlQuery, groupBy }) {
     queryKey: ['slos'],
     queryFn: async () => {
       const response = await createFetchAggregations(searchService);
-      const tags = response.groupByTags.buckets.reduce((acc, bucket) => {
+      return response.groupByTags.buckets.reduce((acc, bucket) => {
         return { ...acc, [bucket.key]: bucket.doc_count ?? 0 };
       }, {} as Record<string, number>);
-      return tags;
     },
   });
 

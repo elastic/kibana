@@ -22,11 +22,6 @@ export function GroupView({ groupBy, sloView, isCompact, kqlQuery }) {
   }
   return (
     <>
-      <h1>
-        {i18n.translate('xpack.observability.groupedSlos.h1.groupedSLOsLabel', {
-          defaultMessage: 'Grouped SLOs',
-        })}
-      </h1>
       {data &&
         Object.keys(data).map((group) => {
           return (
