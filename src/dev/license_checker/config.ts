@@ -73,7 +73,7 @@ export const LICENSE_ALLOWED = [
 
 // The following list only applies to licenses that
 // we wanna allow in packages only used as dev dependencies
-export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0'];
+export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0', '(MPL-2.0 OR Apache-2.0)'];
 
 // there are some licenses which should not be globally allowed
 // but can be brought in on a per-package basis
