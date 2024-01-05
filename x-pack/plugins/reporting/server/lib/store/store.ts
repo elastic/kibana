@@ -10,6 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ILM_POLICY_NAME, JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
 import { ReportDocument, ReportOutput, ReportSource } from '@kbn/reporting-common/types';
 import moment from 'moment';
+import type { ContentCrud, StorageContext } from '@kbn/content-management-plugin/server';
 import type { IReport, Report } from '.';
 import { SavedReport } from '.';
 import type { ReportingCore } from '../..';
@@ -85,9 +86,16 @@ export class ReportingStore {
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
+  private cmStorageContext?: StorageContext;
   config: ReportingCore['config'];
 
-  constructor(private reportingCore: ReportingCore, private logger: Logger) {
+  constructor(
+    private reportingCore: ReportingCore,
+    private logger: Logger,
+    private contentManagement: {
+      crud: ContentCrud;
+    }
+  ) {
     this.config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;
@@ -168,8 +176,8 @@ export class ReportingStore {
         }),
       },
     };
-    const client = await this.getClient();
-    return await client.index(doc);
+    const res = await this.contentManagement.crud.create(this.getCmStorageContext(), doc);
+    return res.result.item as IndexResponse;
   }
 
   /*
@@ -446,5 +454,16 @@ export class ReportingStore {
 
   public getReportingIndexPattern(): string {
     return `${this.indexPrefix}-*`;
+  }
+
+  public setCmStorageContext(storageContext: StorageContext) {
+    this.cmStorageContext = storageContext;
+  }
+
+  private getCmStorageContext(): StorageContext {
+    if (!this.cmStorageContext) {
+      throw new Error('Content management storage context is not set');
+    }
+    return this.cmStorageContext;
   }
 }

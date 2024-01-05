@@ -36,6 +36,7 @@ const searchOptionsSchema = schema.maybe(
 );
 
 const createOptionsSchema = schema.object({
+  id: schema.maybe(createOptionsSchemas.id),
   references: schema.maybe(createOptionsSchemas.references),
 });
 

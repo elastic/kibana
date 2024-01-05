@@ -6,16 +6,38 @@
  * Side Public License, v 1.
  */
 
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
-import type { ContentStorage, ContentTypeDefinition, MSearchConfig } from './types';
+import type { ContentStorage, ContentTypeDefinition, MSearchConfig, StorageContext } from './types';
 import type { ContentCrud } from './crud';
+import { SearchIndex } from '../search_index';
+import { getStorageContext } from '../rpc/procedures/utils';
+import { getServiceObjectTransformFactory } from '../rpc/services_transforms_factory';
+
+export interface GetStorageContextFnParams {
+  requestHandlerContext: RequestHandlerContext;
+  req: KibanaRequest;
+  version?: number;
+}
+export type GetStorageContextFn = (params: GetStorageContextFnParams) => Promise<StorageContext>;
 
 export class ContentRegistry {
   private types = new Map<string, ContentType>();
 
-  constructor(private eventBus: EventBus) {}
+  constructor(
+    private eventBus: EventBus,
+    private searchIndex: SearchIndex,
+    private ctx: {
+      auth: {
+        getCurrentUser: (request: KibanaRequest) => Promise<AuthenticatedUser | null>;
+      };
+    }
+  ) {}
 
   /**
    * Register a new content in the registry.
@@ -41,10 +63,37 @@ export class ContentRegistry {
 
     const contentType = new ContentType(
       { ...definition, version: { ...definition.version, latest: value } },
-      this.eventBus
+      { eventBus: this.eventBus, searchIndex: this.searchIndex }
     );
 
     this.types.set(contentType.id, contentType);
+
+    if (definition.searchIndex?.indexer) {
+      this.searchIndex.registerIndexer(
+        contentType.id,
+        definition.searchIndex.indexer,
+        definition.searchIndex.parser
+      );
+    }
+
+    const getStorageCtx: GetStorageContextFn = async ({ requestHandlerContext, req, version }) => {
+      const currentUser = await this.ctx.auth.getCurrentUser(req);
+      return getStorageContext({
+        contentTypeId: contentType.id,
+        version,
+        ctx: {
+          requestHandlerContext,
+          contentRegistry: this,
+          getTransformsFactory: getServiceObjectTransformFactory,
+          currentUser,
+        },
+      });
+    };
+
+    return {
+      crud: contentType.crud,
+      getStorageCtx,
+    };
   }
 
   getContentType(id: string): ContentType {

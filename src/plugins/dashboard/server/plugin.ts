@@ -69,6 +69,14 @@ export class DashboardPlugin
       version: {
         latest: LATEST_VERSION,
       },
+      searchIndex: {
+        parser: (data: any) => {
+          return {
+            title: data.title,
+            description: data.description,
+          };
+        },
+      },
     });
 
     if (plugins.taskManager) {

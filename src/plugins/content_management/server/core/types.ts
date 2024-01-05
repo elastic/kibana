@@ -13,6 +13,7 @@ import type {
   ContentManagementServiceDefinitionVersioned,
 } from '@kbn/object-versioning';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 import type {
   GetResult,
@@ -23,6 +24,14 @@ import type {
   SearchQuery,
   SearchResult,
 } from '../../common';
+import { SearchIndexDoc } from '../search_index/types';
+
+export type IndexerFn = () => Promise<{
+  items: Array<{ id: string; doc: object }>;
+  next?: IndexerFn;
+}>;
+
+export type IndexParserFn = <T = unknown>(item: T) => Pick<SearchIndexDoc, 'title' | 'description'>;
 
 export type StorageContextGetTransformFn = (
   definitions: ContentManagementServiceDefinitionVersioned,
@@ -32,12 +41,14 @@ export type StorageContextGetTransformFn = (
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
   requestHandlerContext: RequestHandlerContext;
+  currentUser: AuthenticatedUser | null;
   version: {
     request: Version;
     latest: Version;
   };
   utils: {
     getTransforms: StorageContextGetTransformFn;
+    generateId: () => string;
   };
 }
 
@@ -53,7 +64,11 @@ export interface ContentStorage<
   bulkGet(ctx: StorageContext, ids: string[], options?: object): Promise<BulkGetResult<T, any>>;
 
   /** Create an item */
-  create(ctx: StorageContext, data: object, options?: object): Promise<CreateResult<T, any>>;
+  create(
+    ctx: StorageContext,
+    data: object,
+    options: { id: string; [key: string]: unknown }
+  ): Promise<CreateResult<T, any>>;
 
   /** Update an item */
   update(
@@ -81,6 +96,14 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
   id: string;
   /** The storage layer for the content. It must implment the ContentStorage interface. */
   storage: S;
+  contentIdGenerator?: () => string;
+  searchIndex?: {
+    parser: IndexParserFn;
+    indexer?: IndexerFn;
+    indexSchedule?: {
+      interval?: number;
+    };
+  };
   version: {
     latest: Version;
   };

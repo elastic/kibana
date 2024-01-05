@@ -248,7 +248,7 @@ export interface CMCrudTypes {
   /**
    *
    */
-  CreateOptions: object;
+  CreateOptions: { id?: string; [key: string]: unknown };
 
   /**
    * Search item params
@@ -294,7 +294,7 @@ export interface CMCrudTypes {
 export interface ContentManagementCrudTypes<
   ContentType extends string,
   Attributes extends object,
-  CreateOptions extends object,
+  CreateOptions extends { id?: string; [key: string]: unknown },
   UpdateOptions extends object,
   SearchOptions extends object
 > {

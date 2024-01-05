@@ -13,6 +13,7 @@ import { ApiRoutes } from './routes';
 import { IndexDataEnricher } from './services';
 import { handleEsError } from './shared_imports';
 import { IndexManagementConfig } from './config';
+import { DummyStorage, getIndexTemplateIndexer } from './content_management';
 
 export interface IndexManagementPluginSetup {
   indexDataEnricher: {
@@ -33,7 +34,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
 
   setup(
     { http, getStartServices }: CoreSetup,
-    { features, security }: Dependencies
+    { features, security, contentManagement }: Dependencies
   ): IndexManagementPluginSetup {
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
@@ -61,6 +62,24 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       indexDataEnricher: this.indexDataEnricher,
       lib: {
         handleEsError,
+      },
+    });
+
+    const clientGetter = () =>
+      getStartServices().then(([coreStart]) => coreStart.elasticsearch.client.asInternalUser);
+
+    contentManagement.register({
+      id: 'esIndexTemplates',
+      storage: new DummyStorage(),
+      version: { latest: 1 },
+      searchIndex: {
+        parser: (data: any) => {
+          return {
+            title: data.name,
+            description: data._meta?.description,
+          };
+        },
+        indexer: getIndexTemplateIndexer({ clientGetter }),
       },
     });
 

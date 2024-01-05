@@ -32,6 +32,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import {
+  ContentManagementServerSetup,
+  ContentManagementServerStart,
+} from '@kbn/content-management-plugin/server';
 
 import { ExportTypesRegistry } from './lib';
 
@@ -61,6 +65,7 @@ export interface ReportingSetupDeps {
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  contentManagement: ContentManagementServerSetup;
 }
 
 export interface ReportingStartDeps {
@@ -71,6 +76,7 @@ export interface ReportingStartDeps {
   taskManager: TaskManagerStartContract;
   screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
+  contentManagement: ContentManagementServerStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{

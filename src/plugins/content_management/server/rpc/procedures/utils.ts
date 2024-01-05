@@ -5,11 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import type { Version } from '@kbn/object-versioning';
 import type { StorageContext } from '../../core';
 import type { Context as RpcContext } from '../types';
+
+const generateId = () => uuidv4();
 
 const validateRequestVersion = (
   requestVersion: Version | undefined,
@@ -36,22 +38,27 @@ const validateRequestVersion = (
 export const getStorageContext = ({
   contentTypeId,
   version: _version,
-  ctx: { contentRegistry, requestHandlerContext, getTransformsFactory },
+  ctx: { contentRegistry, requestHandlerContext, getTransformsFactory, currentUser },
 }: {
   contentTypeId: string;
   version?: number;
-  ctx: RpcContext;
+  ctx: Pick<
+    RpcContext,
+    'contentRegistry' | 'requestHandlerContext' | 'getTransformsFactory' | 'currentUser'
+  >;
 }): StorageContext => {
   const contentDefinition = contentRegistry.getDefinition(contentTypeId);
   const version = validateRequestVersion(_version, contentDefinition.version.latest);
   const storageContext: StorageContext = {
     requestHandlerContext,
+    currentUser,
     version: {
       request: version,
       latest: contentDefinition.version.latest,
     },
     utils: {
       getTransforms: getTransformsFactory(contentTypeId, version),
+      generateId: contentDefinition.contentIdGenerator || generateId,
     },
   };
   return storageContext;

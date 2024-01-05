@@ -9,6 +9,7 @@ interface BaseEvent<T extends string, Options = object> {
   type: T;
   contentTypeId: string;
   options?: Options;
+  txId?: string;
 }
 
 export interface GetItemStart extends BaseEvent<'getItemStart'> {

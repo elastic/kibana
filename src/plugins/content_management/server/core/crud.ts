@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { v4 as uuidv4 } from 'uuid';
+
 import type {
   GetResult,
   BulkGetResult,
@@ -14,8 +16,10 @@ import type {
   SearchResult,
   SearchQuery,
 } from '../../common';
+import { SearchIndex } from '../search_index';
+import { SearchIndexDoc } from '../search_index/types';
 import type { EventBus } from './event_bus';
-import type { ContentStorage, StorageContext } from './types';
+import type { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 
 export interface GetResponse<T = unknown, M = void> {
   contentTypeId: string;
@@ -47,23 +51,30 @@ export interface SearchResponse<T = unknown> {
   result: SearchResult<T>;
 }
 
+const generateTxId = () => uuidv4();
+
 export class ContentCrud<T = unknown> {
   private storage: ContentStorage<T>;
   private eventBus: EventBus;
+  private searchIndex: SearchIndex;
   public contentTypeId: string;
 
   constructor(
     contentTypeId: string,
     contentStorage: ContentStorage<T>,
+    private contentDefinition: ContentTypeDefinition,
     {
       eventBus,
+      searchIndex,
     }: {
       eventBus: EventBus;
+      searchIndex: SearchIndex;
     }
   ) {
     this.contentTypeId = contentTypeId;
     this.storage = contentStorage;
     this.eventBus = eventBus;
+    this.searchIndex = searchIndex;
   }
 
   public async get(
@@ -146,16 +157,29 @@ export class ContentCrud<T = unknown> {
   public async create(
     ctx: StorageContext,
     data: object,
-    options?: object
+    _options?: { id?: string; [key: string]: unknown }
   ): Promise<CreateItemResponse<T, any>> {
+    const id = _options?.id ?? ctx.utils.generateId();
+    const options = { ..._options, id };
+    const userId = ctx.currentUser?.profile_uid;
+    const txId = generateTxId();
+
     this.eventBus.emit({
       type: 'createItemStart',
       contentTypeId: this.contentTypeId,
       data,
       options,
+      txId,
     });
 
     try {
+      if (this.isSearchIndexEnabled()) {
+        await this.searchIndex.addDocument(this.getIdForSeachIndex(id), {
+          ...this.parseDataForSearch(data, txId, userId),
+          owner: userId,
+        });
+      }
+
       const result = await this.storage.create(ctx, data, options);
 
       this.eventBus.emit({
@@ -163,6 +187,7 @@ export class ContentCrud<T = unknown> {
         contentTypeId: this.contentTypeId,
         data: result,
         options,
+        txId,
       });
 
       return { contentTypeId: this.contentTypeId, result };
@@ -173,6 +198,7 @@ export class ContentCrud<T = unknown> {
         data,
         options,
         error: e.message,
+        txId,
       });
 
       throw e;
@@ -185,15 +211,26 @@ export class ContentCrud<T = unknown> {
     data: object,
     options?: object
   ): Promise<UpdateItemResponse<T, any>> {
+    const userId = ctx.currentUser?.profile_uid;
+    const txId = generateTxId();
+
     this.eventBus.emit({
       type: 'updateItemStart',
       contentId: id,
       contentTypeId: this.contentTypeId,
       data,
       options,
+      txId,
     });
 
     try {
+      if (this.isSearchIndexEnabled()) {
+        await this.searchIndex.updateDocument(
+          this.getIdForSeachIndex(id),
+          this.parseDataForSearch(data, txId, userId)
+        );
+      }
+
       const result = await this.storage.update(ctx, id, data, options);
 
       this.eventBus.emit({
@@ -202,6 +239,7 @@ export class ContentCrud<T = unknown> {
         contentTypeId: this.contentTypeId,
         data: result,
         options,
+        txId,
       });
 
       return { contentTypeId: this.contentTypeId, result };
@@ -213,6 +251,7 @@ export class ContentCrud<T = unknown> {
         data,
         options,
         error: e.message,
+        txId,
       });
 
       throw e;
@@ -224,14 +263,21 @@ export class ContentCrud<T = unknown> {
     id: string,
     options?: object
   ): Promise<DeleteItemResponse> {
+    const txId = generateTxId();
+
     this.eventBus.emit({
       type: 'deleteItemStart',
       contentId: id,
       contentTypeId: this.contentTypeId,
       options,
+      txId,
     });
 
     try {
+      if (this.isSearchIndexEnabled()) {
+        await this.searchIndex.deleteDocument(this.getIdForSeachIndex(id));
+      }
+
       const result = await this.storage.delete(ctx, id, options);
 
       this.eventBus.emit({
@@ -239,6 +285,7 @@ export class ContentCrud<T = unknown> {
         contentId: id,
         contentTypeId: this.contentTypeId,
         options,
+        txId,
       });
 
       return { contentTypeId: this.contentTypeId, result };
@@ -249,6 +296,7 @@ export class ContentCrud<T = unknown> {
         contentTypeId: this.contentTypeId,
         options,
         error: e.message,
+        txId,
       });
 
       throw e;
@@ -290,5 +338,27 @@ export class ContentCrud<T = unknown> {
 
       throw e;
     }
+  }
+
+  private isSearchIndexEnabled(): boolean {
+    return Boolean(this.contentDefinition.searchIndex);
+  }
+
+  private parseDataForSearch(
+    data: Record<any, any>,
+    txId: string,
+    userId?: string
+  ): SearchIndexDoc {
+    return {
+      title: '',
+      ...this.contentDefinition.searchIndex?.parser(data),
+      type: this.contentTypeId,
+      updatedBy: userId,
+      updateTxId: txId,
+    };
+  }
+
+  private getIdForSeachIndex(id: string): string {
+    return `${this.contentTypeId}:${id}`;
   }
 }

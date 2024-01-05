@@ -22,7 +22,8 @@
       "taskManager",
       "screenshotMode",
       "share",
-      "features"
+      "features",
+      "contentManagement",
     ],
     "optionalPlugins": [
       "security",

@@ -7,10 +7,14 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
 import { EventStreamService } from '../event_stream';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
+import { SearchIndex } from '../search_index';
 
 export interface CoreApi {
   /**
@@ -28,7 +32,11 @@ export interface CoreApi {
 
 export interface CoreInitializerContext {
   logger: Logger;
+  searchIndex: SearchIndex;
   eventStream?: EventStreamService;
+  auth: {
+    getCurrentUser: (request: KibanaRequest) => Promise<AuthenticatedUser | null>;
+  };
 }
 
 export interface CoreSetup {
@@ -46,7 +54,9 @@ export class Core {
     const contentTypeValidator = (contentType: string) =>
       this.contentRegistry?.isContentRegistered(contentType) ?? false;
     this.eventBus = new EventBus(contentTypeValidator);
-    this.contentRegistry = new ContentRegistry(this.eventBus);
+    this.contentRegistry = new ContentRegistry(this.eventBus, ctx.searchIndex, {
+      auth: this.ctx.auth,
+    });
   }
 
   setup(): CoreSetup {

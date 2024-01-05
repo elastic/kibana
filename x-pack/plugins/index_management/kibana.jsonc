@@ -14,7 +14,8 @@
       "home",
       "management",
       "features",
-      "share"
+      "share",
+      "contentManagement",
     ],
     "optionalPlugins": [
       "security",

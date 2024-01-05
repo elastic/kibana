@@ -10,6 +10,7 @@ import { IRouter } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { IndexDataEnricher } from './services';
 import { handleEsError } from './shared_imports';
 
@@ -17,6 +18,7 @@ export interface Dependencies {
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
+  contentManagement: ContentManagementServerSetup;
 }
 
 export interface RouteDependencies {

@@ -211,6 +211,14 @@ export class MapsPlugin implements Plugin {
       version: {
         latest: LATEST_VERSION,
       },
+      searchIndex: {
+        parser: (data: any) => {
+          return {
+            title: data.title,
+            description: data.description,
+          };
+        },
+      },
     });
 
     setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);

@@ -46,6 +46,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
+import { GetStorageContextFnParams } from '@kbn/content-management-plugin/server';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { ExportTypesRegistry, checkLicense } from './lib';
@@ -53,6 +54,7 @@ import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
+import type { ReportingContentManagement } from './plugin';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -80,6 +82,7 @@ export interface ReportingInternalStart {
   screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
+  contentManagement: ReportingContentManagement;
 }
 
 /**
@@ -330,8 +333,16 @@ export class ReportingCore {
     return await this.executeTask.scheduleTask(report);
   }
 
-  public async getStore() {
-    return (await this.getPluginStartDeps()).store;
+  public async getStore(params?: GetStorageContextFnParams) {
+    const { store, contentManagement } = await this.getPluginStartDeps();
+    if (params) {
+      const storageContext = await contentManagement.getStorageCtx({
+        ...params,
+        version: params.version ?? 1,
+      });
+      store.setCmStorageContext(storageContext);
+    }
+    return store;
   }
 
   public async getLicenseInfo() {

@@ -15,7 +15,7 @@ import { MapContentType } from '../types';
 export type MapCrudTypes = ContentManagementCrudTypes<
   MapContentType,
   MapAttributes,
-  Pick<SavedObjectCreateOptions, 'references'>,
+  Pick<SavedObjectCreateOptions, 'references' | 'id'>,
   Pick<SavedObjectUpdateOptions, 'references'>,
   {
     /** Flag to indicate to only search the text on the "title" field */
