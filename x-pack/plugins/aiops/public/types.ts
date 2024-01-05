@@ -47,4 +47,5 @@ export interface AiopsPluginStartDeps {
 export type AiopsPluginSetup = void;
 export interface AiopsPluginStart {
   EmbeddableChangePointChart: React.ComponentType<EmbeddableChangePointChartInput>;
+  EmbeddableChangePointTable: React.ComponentType<EmbeddableChangePointChartInput>;
 }
