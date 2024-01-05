@@ -146,7 +146,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
 
 export const getCurrentTimeField = (attributes: TypedLensByValueInput['attributes']) => {
   return (
-    attributes.state.datasourceStates.formBased.layers[DATA_LAYER_ID].columns[
+    attributes.state.datasourceStates?.formBased?.layers[DATA_LAYER_ID].columns[
       DATE_HISTOGRAM_COLUMN_ID
     ] as FieldBasedIndexPatternColumn
   ).sourceField;
