@@ -342,7 +342,7 @@ export function getTextBasedDatasource({
     // MAX_NUM_OF_COLUMNS
     suggestsLimitedColumns(state: TextBasedPrivateState) {
       const fieldList = retrieveFromCache();
-      return fieldList.length >= MAX_NUM_OF_COLUMNS;
+      return fieldList?.length >= MAX_NUM_OF_COLUMNS;
     },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
