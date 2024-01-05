@@ -26,6 +26,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import basicClusterFixture from './fixtures/basiccluster.json';
+import multiClusterFixture from './fixtures/multicluster.json';
 import type { SecurityService } from '../../../../../test/common/services/security/security';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -111,7 +112,12 @@ export default function ({ getService }: FtrProviderContext) {
       const toTimestamp = '2017-08-16T00:00:00.000Z';
 
       before(async () => {
-        await esArchiver.load(archive);
+        await esArchiver.load(archive, {
+          performance: {
+            highWaterMark: 300,
+            concurrency: 1,
+          },
+        });
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
 
         const { body }: { body: UnencryptedTelemetryPayload } = await supertest
@@ -155,10 +161,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(monitoring).length(3);
         expect(localXPack.collectionSource).to.eql('local_xpack');
 
-        // Expectation needs updating due to concurrency in es archiver
-        // expect(omitCacheDetails(monitoring)).to.eql(
-        //   updateFixtureTimestamps(multiClusterFixture, timestamp)
-        // );
+        expect(omitCacheDetails(monitoring)).to.eql(
+          updateFixtureTimestamps(multiClusterFixture, timestamp)
+        );
       });
     });
 
