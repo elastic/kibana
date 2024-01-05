@@ -6,20 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { isNil } from 'lodash';
-import classNames from 'classnames';
-import { distinct, map } from 'rxjs';
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import classNames from 'classnames';
+import { isNil } from 'lodash';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import { distinct, map } from 'rxjs';
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { PanelLoader } from '@kbn/panel-loader';
+import { core, embeddableStart, inspector } from '../kibana_services';
+import { EmbeddableErrorHandler, EmbeddableOutput, ViewMode } from '../lib';
+import { EmbeddablePanelError } from './embeddable_panel_error';
 import {
-  EditPanelAction,
-  RemovePanelAction,
-  InspectPanelAction,
   CustomizePanelAction,
+  EditPanelAction,
+  InspectPanelAction,
+  RemovePanelAction,
 } from './panel_actions';
+import { EmbeddablePanelHeader } from './panel_header/embeddable_panel_header';
 import {
   EmbeddablePhase,
   EmbeddablePhaseEvent,
@@ -30,10 +33,6 @@ import {
   useSelectFromEmbeddableInput,
   useSelectFromEmbeddableOutput,
 } from './use_select_from_embeddable';
-import { EmbeddablePanelError } from './embeddable_panel_error';
-import { core, embeddableStart, inspector } from '../kibana_services';
-import { ViewMode, EmbeddableErrorHandler, EmbeddableOutput } from '../lib';
-import { EmbeddablePanelHeader } from './panel_header/embeddable_panel_header';
 
 const getEventStatus = (output: EmbeddableOutput): EmbeddablePhase => {
   if (!isNil(output.error)) {
@@ -61,8 +60,6 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
    * bypass the trigger registry.
    */
   const universalActions = useMemo<PanelUniversalActions>(() => {
-    const commonlyUsedRanges = core.uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
-    const dateFormat = core.uiSettings.get(UI_SETTINGS.DATE_FORMAT);
     const stateTransfer = embeddableStart.getStateTransfer();
     const editPanel = new EditPanelAction(
       embeddableStart.getEmbeddableFactory,
@@ -71,13 +68,7 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
     );
 
     const actions: PanelUniversalActions = {
-      customizePanel: new CustomizePanelAction(
-        core.overlays,
-        core.theme,
-        editPanel,
-        commonlyUsedRanges,
-        dateFormat
-      ),
+      customizePanel: new CustomizePanelAction(editPanel),
       removePanel: new RemovePanelAction(),
       editPanel,
     };

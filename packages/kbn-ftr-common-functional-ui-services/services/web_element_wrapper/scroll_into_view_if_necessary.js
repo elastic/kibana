@@ -1,4 +1,4 @@
-/* eslint-disable @kbn/eslint/require-license-header */
+/* eslint-disable @kbn/eslint/require-license-header, no-var */
 
 /* @notice
  * Based on the scroll-into-view-if-necessary module from npm
