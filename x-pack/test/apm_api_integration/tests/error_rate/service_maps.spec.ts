@@ -80,7 +80,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_PROD_LIST_ERROR_RATE = 25;
       const GO_PROD_ID_RATE = 50;
       const GO_PROD_ID_ERROR_RATE = 50;
-      beforeEach(() => {
+      before(() => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
