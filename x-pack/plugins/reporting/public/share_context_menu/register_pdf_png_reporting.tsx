@@ -13,6 +13,7 @@ import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { ReportingModalContent } from './screen_capture_panel_content_lazy';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 const getJobParams =
   (
@@ -60,6 +61,8 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
+  overlays,
+  i18nStart,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -124,7 +127,30 @@ export const reportingScreenshotShareProvider = ({
     const pngReportType = isV2Job ? 'pngV2' : 'png';
     const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
 
-
+    const openImageModal = () => {
+      const session = overlays.openModal(toMountPoint(
+        <ReportingModalContent
+            apiClient={apiClient}
+            toasts={toasts}
+            uiSettings={uiSettings}
+            reportType={pngReportType}
+            objectId={objectId}
+            requiresSavedState={requiresSavedState}
+            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
+            getJobParams={getJobParams(apiClient, jobProviderOptions,[pdfReportType, pngReportType])}
+            isDirty={isDirty}
+            onClose={() => {
+              session.close();
+            }}
+            theme={theme}
+          />,
+          {theme, i18n: i18nStart}
+      ), 
+      {
+        maxWidth: 400,
+        'data-test-subj': 'export-image-modal'
+      })
+    }
     const imageModal = {
       shareMenuItem: {
         name: i18n.translate('xpack.reporting.shareContextMenu.ExportsButtonLabel', {
@@ -135,27 +161,14 @@ export const reportingScreenshotShareProvider = ({
         disabled: licenseDisabled || sharingData.reportingDisabled,
         ['data-test-subj']: 'imageExports',
         sortOrder: 10,
+        onClick: openImageModal,
       },
       panel: {
         id: 'reportingImageModal',
         title: i18n.translate('xpack.reporting.shareContextMenu.ReportsButtonLabel', {
           defaultMessage: 'Exports',
         }),
-        content: (
-          <ReportingModalContent
-            apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
-            reportType={pngReportType}
-            objectId={objectId}
-            requiresSavedState={requiresSavedState}
-            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-            getJobParams={getJobParams(apiClient, jobProviderOptions,[pdfReportType, pngReportType])}
-            isDirty={isDirty}
-            onClose={onClose}
-            theme={theme}
-          />
-        ),
+        content: openImageModal,
       },
     };
   

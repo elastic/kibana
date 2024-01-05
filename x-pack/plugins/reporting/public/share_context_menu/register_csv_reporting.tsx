@@ -107,7 +107,7 @@ export const reportingCsvShareProvider = ({
           icon: 'document',
           toolTipContent: licenseToolTipContent,
           disabled: licenseDisabled,
-          ['data-test-subj']: 'CSVReports',
+          ['data-test-subj']: 'CSVDownload',
           sortOrder: 1,
           onClick: openCsvModal,
         },
