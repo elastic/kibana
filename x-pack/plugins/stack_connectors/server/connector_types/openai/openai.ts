@@ -154,6 +154,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       data: executeBody,
       ...axiosOptions,
     });
+    // console.log('streamApi response', response);
     return stream ? pipeStreamingResponse(response) : response.data;
   }
 

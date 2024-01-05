@@ -12,7 +12,7 @@ import { ChatOpenAI } from '@langchain/openai';
 
 import { PassThrough, Readable } from 'stream';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { ActionsClientLlm } from '../llm/actions_client_llm';
+import { ActionsClientLlm } from '../llm/openai';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
@@ -50,7 +50,7 @@ export const callAgentExecutor = async ({
 }: AgentExecutorParams): AgentExecutorResponse => {
   // do not commit to main. For development only
   const azureCreds = config.preconfigured['my-gen-ai'];
-  const llm2 = new ActionsClientLlm({
+  const llm = new ActionsClientLlm({
     actions,
     connectorId,
     request,
@@ -58,7 +58,7 @@ export const callAgentExecutor = async ({
     logger,
     streaming: true,
   });
-  const llm = new ChatOpenAI({
+  const llm3 = new ChatOpenAI({
     modelName: 'gpt-3.5-turbo-1106',
     temperature: 0,
     streaming: true,
@@ -120,18 +120,7 @@ export const callAgentExecutor = async ({
   });
 
   if (true) {
-    /**
-     * Agent executors also allow you to stream back all generated tokens and steps
-     * from their runs.
-     *
-     * This contains a lot of data, so we do some filtering of the generated log chunks
-     * and only stream back the final response.
-     *
-     * This filtering is easiest with the OpenAI functions or tools agents, since final outputs
-     * are log chunk values from the model that contain a string instead of a function call object.
-     *
-     * See: https://js.langchain.com/docs/modules/agents/how_to/streaming#streaming-tokens
-     */
+    console.log('latestMessage[0]', latestMessage[0]);
     const logStream = await executor.streamLog({
       input: latestMessage[0].content,
       chat_history: [],
@@ -143,6 +132,7 @@ export const callAgentExecutor = async ({
         for await (const chunk of logStream) {
           if (chunk.ops?.length > 0 && chunk.ops[0].op === 'add') {
             const addOp = chunk.ops[0];
+            console.log('CHUNKCHUNK', addOp);
             if (
               addOp.path.startsWith('/logs/ChatOpenAI') &&
               typeof addOp.value === 'string' &&

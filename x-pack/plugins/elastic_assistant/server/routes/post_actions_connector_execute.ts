@@ -111,6 +111,8 @@ export const postActionsConnectorExecuteRoute = (
           esClient,
           kbResource: ESQL_RESOURCE,
           langChainMessages,
+          // TODO make dynamic
+          llmType: 'openai',
           logger,
           onNewReplacements,
           request,
