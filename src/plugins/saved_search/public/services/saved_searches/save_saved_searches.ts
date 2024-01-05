@@ -71,8 +71,7 @@ export const saveSavedSearch = async (
         onTitleDuplicate: options.onTitleDuplicate,
         contentManagement,
       });
-    } catch (error) {
-      console.log(error);
+    } catch {
       return;
     }
   }
