@@ -26,7 +26,7 @@ export function Tags({ tags }: { tags: string[] }) {
       )}
     >
       <FormattedMessage
-        id="xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.tags"
+        id="xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.moreTags"
         defaultMessage="+{number} more"
         values={{ number: tags.length - 3 }}
       />
