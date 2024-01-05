@@ -30,6 +30,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
 import { DataViewsState } from '../../state_management';
+import { addToCache } from './fieldlist_cache';
 
 const fieldsFromQuery = [
   {
@@ -114,8 +115,9 @@ const initialState: TextBasedPrivateState = {
     { id: '2', title: 'my-fake-restricted-pattern' },
     { id: '3', title: 'my-compatible-pattern' },
   ],
-  fieldList: fieldsFromQuery,
 };
+
+addToCache(fieldsFromQuery);
 
 function getFrameAPIMock({
   indexPatterns,

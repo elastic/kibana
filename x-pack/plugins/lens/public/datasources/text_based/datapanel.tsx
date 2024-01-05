@@ -28,6 +28,7 @@ import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
 import { FieldItem } from '../common/field_item';
+import { retrieveFromCache } from './fieldlist_cache';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
@@ -75,7 +76,7 @@ export function TextBasedDataPanel({
     fetchData();
   }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews]);
 
-  const { fieldList } = state;
+  const fieldList = retrieveFromCache();
 
   const onSelectedFieldFilter = useCallback(
     (field: DatatableColumn): boolean => {

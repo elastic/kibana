@@ -14,6 +14,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
 import { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../types';
+import { addToCache } from './fieldlist_cache';
 
 jest.mock('../../id_generator');
 
@@ -119,15 +120,6 @@ describe('Textbased Data Source', () => {
           query: { esql: 'FROM foo' },
         },
       },
-      fieldList: [
-        {
-          id: 'col1',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-      ],
     } as unknown as TextBasedPrivateState;
   });
 
@@ -308,7 +300,6 @@ describe('Textbased Data Source', () => {
   describe('#createEmptyLayer', () => {
     it('creates state with empty layers', () => {
       expect(TextBasedDatasource.createEmptyLayer('index-pattern-id')).toEqual({
-        fieldList: [],
         layers: {},
         indexPatternRefs: [],
       });
@@ -402,8 +393,6 @@ describe('Textbased Data Source', () => {
       expect(suggestions[0].state).toEqual({
         ...state,
         initialContext: undefined,
-        fieldList: [],
-        totalFields: 2,
         indexPatternRefs: [
           {
             id: '1',
@@ -555,8 +544,6 @@ describe('Textbased Data Source', () => {
       expect(suggestions[0].state).toEqual({
         ...state,
         initialContext: undefined,
-        fieldList: [],
-        totalFields: 2,
         indexPatternRefs: [
           {
             id: '1',
@@ -639,6 +626,44 @@ describe('Textbased Data Source', () => {
 
   describe('#suggestsLimitedColumns', () => {
     it('should return true if query returns big number of columns', () => {
+      addToCache([
+        {
+          id: 'a',
+          name: 'Test 1',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'b',
+          name: 'Test 2',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          id: 'c',
+          name: 'Test 3',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          id: 'd',
+          name: 'Test 4',
+          meta: {
+            type: 'string',
+          },
+        },
+        {
+          id: 'e',
+          name: 'Test 5',
+          meta: {
+            type: 'string',
+          },
+        },
+      ]);
+
       const state = {
         totalFields: 5,
         layers: {
@@ -974,22 +999,6 @@ describe('Textbased Data Source', () => {
               index: 'foo',
             },
           },
-          fieldList: [
-            {
-              id: 'col1',
-              name: 'Test 1',
-              meta: {
-                type: 'number',
-              },
-            },
-            {
-              id: 'col2',
-              name: 'Test 2',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
         } as unknown as TextBasedPrivateState;
 
         publicAPI = TextBasedDatasource.getPublicAPI({

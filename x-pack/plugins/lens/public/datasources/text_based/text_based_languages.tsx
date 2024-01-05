@@ -46,6 +46,7 @@ import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import { canColumnBeUsedBeInMetricDimension, MAX_NUM_OF_COLUMNS } from './utils';
+import { addToCache, retrieveFromCache } from './fieldlist_cache';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -141,13 +142,13 @@ export function getTextBasedDatasource({
         };
       });
 
+      addToCache(textBasedQueryColumns);
+
       const index = context.dataViewSpec.id ?? context.dataViewSpec.title;
       const query = context.query;
       const updatedState = {
         ...state,
         initialContext: undefined,
-        fieldList: [],
-        totalFields: textBasedQueryColumns.length,
         ...(context.dataViewSpec.id
           ? {
               indexPatternRefs: [
@@ -293,7 +294,6 @@ export function getTextBasedDatasource({
       return {
         indexPatternRefs: [],
         layers: {},
-        fieldList: [],
       };
     },
 
@@ -317,7 +317,6 @@ export function getTextBasedDatasource({
         newState: {
           ...state,
           layers: newLayers,
-          fieldList: state.fieldList,
         },
       };
     },
@@ -342,8 +341,8 @@ export function getTextBasedDatasource({
     // at this case we don't suggest all columns in a table but the first
     // MAX_NUM_OF_COLUMNS
     suggestsLimitedColumns(state: TextBasedPrivateState) {
-      const totalFields = state?.totalFields ?? 0;
-      return totalFields >= MAX_NUM_OF_COLUMNS;
+      const fieldList = retrieveFromCache();
+      return fieldList.length >= MAX_NUM_OF_COLUMNS;
     },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
@@ -588,7 +587,8 @@ export function getTextBasedDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
-      const field = state.fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
+      const fieldList = retrieveFromCache();
+      const field = fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
       if (!field) return [];
       return Object.entries(state.layers)?.map(([id, layer]) => {
         const newId = generateId();

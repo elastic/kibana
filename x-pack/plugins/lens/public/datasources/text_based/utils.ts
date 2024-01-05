@@ -19,6 +19,7 @@ import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
 import type { DataViewsState } from '../../state_management';
+import { addToCache } from './fieldlist_cache';
 
 export const MAX_NUM_OF_COLUMNS = 5;
 
@@ -126,10 +127,10 @@ export async function getStateFromAggregateQuery(
       },
     },
   };
+  addToCache(columnsFromQuery);
 
   return {
     ...tempState,
-    fieldList: columnsFromQuery ?? [],
     indexPatternRefs,
     initialContext: context,
   };
