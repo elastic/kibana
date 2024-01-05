@@ -216,9 +216,9 @@ export const useDiscoverInTimelineActions = (
             copyOnSave: !savedSearchId,
           });
 
-          if (!response || !response?.id) {
-            // throw new Error('Unknown Error occured');
-          } else if (!savedSearchId) {
+          const responseIsEmpty = !response || !response?.id;
+
+          if (!savedSearchId && !responseIsEmpty) {
             dispatch(
               timelineActions.updateSavedSearchId({
                 id: TimelineId.active,
