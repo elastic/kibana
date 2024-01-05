@@ -76,9 +76,7 @@ function buildFormulaLayer(
     [DEFAULT_LAYER_ID]: {
       ...getFormulaColumn(
         ACCESSOR,
-        {
-          ...(typeof layer.value === 'string' ? { formula: layer.value } : layer.value),
-        },
+        isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
         dataView,
         formulaAPI
       ),

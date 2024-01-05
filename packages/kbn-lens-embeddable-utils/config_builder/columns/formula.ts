@@ -21,7 +21,7 @@ export function getFormulaColumn(
   const formulaLayer = formulaAPI.insertOrReplaceFormulaColumn(
     id,
     { formula, ...rest },
-    baseLayer ?? { columnOrder: [], columns: {} },
+    baseLayer || { columnOrder: [], columns: {} },
     dataView
   );
 

@@ -50,7 +50,7 @@ function mockDataViewsService() {
   } as unknown as Pick<DataViewsContract, 'get' | 'create'>;
 }
 
-test('generates metric chart config', async () => {
+test('generates xy chart config', async () => {
   const result = await buildXY(
     {
       chartType: 'xy',
@@ -73,6 +73,7 @@ test('generates metric chart config', async () => {
       formulaAPI: {} as any,
     }
   );
+
   expect(result).toMatchInlineSnapshot(`
     Object {
       "references": Array [
