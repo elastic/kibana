@@ -8,9 +8,9 @@
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
-import { EmbeddableChangePointChartFactory } from './change_point_chart/embeddable_change_point_chart_factory';
+import { EmbeddableChangePointChartFactory } from './embeddable_change_point_chart_factory';
 
-export const registerEmbeddables = (
+export const registerEmbeddable = (
   core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>,
   embeddable: EmbeddableSetup
 ) => {
