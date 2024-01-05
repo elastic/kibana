@@ -22,7 +22,6 @@ import {
   EuiPanel,
   EuiProgress,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 
 // import { type Filter, FilterStateStore, type Query } from '@kbn/es-query';
@@ -1216,14 +1215,16 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           onTextLangQueryChange={debounce((q: AggregateQuery) => {
             setEditableQuery(q);
           }, 1000)}
-          onTextLangQuerySubmit={(q: AggregateQuery) => {
-            setQuery(q);
+          onTextLangQuerySubmit={(q?: AggregateQuery) => {
+            if (q) {
+              setQuery(q);
+            }
           }}
           expandCodeEditor={() => false}
           isCodeEditorExpanded={true}
           detectTimestamp={true}
           hideMinimizeButton={true}
-          hideRunQueryText={true}
+          hideRunQueryText={false}
         />
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
