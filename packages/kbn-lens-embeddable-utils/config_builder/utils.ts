@@ -157,7 +157,7 @@ function buildDatasourceStatesLayer(
 ): [
   'textBased' | 'formBased',
   (
-    | FormBasedPersistedState['layers']
+    | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
     | PersistedIndexPatternLayer
     | TextBasedPersistedState['layers'][0]
     | undefined
@@ -232,10 +232,6 @@ export const buildDatasourceStates = async (
       ? await getDataView(index.index, dataViewsAPI, index.timeFieldName)
       : undefined;
 
-    if (dataView) {
-      dataviews[layerId] = dataView;
-    }
-
     if (dataset) {
       const [type, layerConfig] = buildDatasourceStatesLayer(
         layer,
@@ -249,11 +245,18 @@ export const buildDatasourceStates = async (
         layers = {
           ...layers,
           [type]: {
-            layers: {
-              [layerId]: layerConfig,
-            },
+            layers: isPersistedStateLayer(layerConfig)
+              ? { ...layers[type]?.layers, [layerId]: layerConfig }
+              : // metric chart can return 2 layers (one for the metric and one for the trendline)
+                { ...layerConfig },
           },
         };
+      }
+
+      if (dataView) {
+        Object.keys(layers[type]?.layers ?? []).forEach((id) => {
+          dataviews[id] = dataView;
+        });
       }
     }
   }
