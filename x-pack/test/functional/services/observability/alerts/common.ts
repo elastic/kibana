@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { chunk } from 'lodash';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
