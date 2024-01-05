@@ -379,136 +379,134 @@ export class LensPlugin {
     if (share) {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
 
-      async () => {
-        const [coreStart] = await core.getStartServices();
-
+      core.getStartServices().then(([coreStart]) => {
         share.register(
           downloadCsvShareProvider({
             uiSettings: core.uiSettings,
             formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
             theme: core.theme,
-            overlays: coreStart.overlays,
             i18nStart: coreStart.i18n,
+            openModal: coreStart.overlays.openModal,
           })
         );
-      };
-    }
+      });
 
-    visualizations.registerAlias(getLensAliasConfig());
+      visualizations.registerAlias(getLensAliasConfig());
 
-    uiActionsEnhanced.registerDrilldown(
-      new OpenInDiscoverDrilldown({
-        dataViews: () => this.dataViewsService!,
-        locator: () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
-        hasDiscoverAccess: () => this.hasDiscoverAccess,
-        application: () => startServices().core.application,
-      })
-    );
+      uiActionsEnhanced.registerDrilldown(
+        new OpenInDiscoverDrilldown({
+          dataViews: () => this.dataViewsService!,
+          locator: () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
+          hasDiscoverAccess: () => this.hasDiscoverAccess,
+          application: () => startServices().core.application,
+        })
+      );
 
-    contentManagement.registry.register({
-      id: CONTENT_ID,
-      version: {
-        latest: LATEST_VERSION,
-      },
-      name: i18n.translate('xpack.lens.content.name', {
-        defaultMessage: 'Lens Visualization',
-      }),
-    });
+      contentManagement.registry.register({
+        id: CONTENT_ID,
+        version: {
+          latest: LATEST_VERSION,
+        },
+        name: i18n.translate('xpack.lens.content.name', {
+          defaultMessage: 'Lens Visualization',
+        }),
+      });
 
-    setupExpressions(
-      expressions,
-      () => startServices().plugins.fieldFormats.deserialize,
-      () => startServices().plugins.data.datatableUtilities,
-      async () => {
-        const { getTimeZone } = await import('./utils');
-        return getTimeZone(core.uiSettings);
-      },
-      () => startServices().plugins.data.nowProvider.get()
-    );
+      setupExpressions(
+        expressions,
+        () => startServices().plugins.fieldFormats.deserialize,
+        () => startServices().plugins.data.datatableUtilities,
+        async () => {
+          const { getTimeZone } = await import('./utils');
+          return getTimeZone(core.uiSettings);
+        },
+        () => startServices().plugins.data.nowProvider.get()
+      );
 
-    const getPresentationUtilContext = () =>
-      startServices().plugins.presentationUtil.ContextProvider;
+      const getPresentationUtilContext = () =>
+        startServices().plugins.presentationUtil.ContextProvider;
 
-    core.application.register({
-      id: APP_ID,
-      title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
-      mount: async (params: AppMountParameters) => {
-        const { core: coreStart, plugins: deps } = startServices();
+      core.application.register({
+        id: APP_ID,
+        title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        mount: async (params: AppMountParameters) => {
+          const { core: coreStart, plugins: deps } = startServices();
 
+          await this.initParts(
+            core,
+            data,
+            charts,
+            expressions,
+            fieldFormats,
+            deps.fieldFormats.deserialize
+          );
+
+          const {
+            mountApp,
+            getLensAttributeService,
+            setUsageCollectionStart,
+            initMemoizedErrorNotification,
+          } = await import('./async_services');
+
+          if (deps.usageCollection) {
+            setUsageCollectionStart(deps.usageCollection);
+          }
+          initMemoizedErrorNotification(coreStart);
+
+          const frameStart = this.editorFrameService!.start(coreStart, deps);
+          return mountApp(core, params, {
+            createEditorFrame: frameStart.createInstance,
+            attributeService: getLensAttributeService(coreStart, deps),
+            getPresentationUtilContext,
+            topNavMenuEntryGenerators: this.topNavMenuEntries,
+            locator: this.locator,
+          });
+        },
+      });
+
+      if (globalSearch) {
+        globalSearch.registerResultProvider(
+          getSearchProvider(
+            core.getStartServices().then(
+              ([
+                {
+                  application: { capabilities },
+                },
+              ]) => capabilities
+            )
+          )
+        );
+      }
+
+      urlForwarding.forwardApp('lens', 'lens');
+
+      this.initDependenciesForApi = async () => {
+        const { plugins } = startServices();
         await this.initParts(
           core,
           data,
           charts,
           expressions,
           fieldFormats,
-          deps.fieldFormats.deserialize
+          plugins.fieldFormats.deserialize
         );
+      };
 
-        const {
-          mountApp,
-          getLensAttributeService,
-          setUsageCollectionStart,
-          initMemoizedErrorNotification,
-        } = await import('./async_services');
-
-        if (deps.usageCollection) {
-          setUsageCollectionStart(deps.usageCollection);
-        }
-        initMemoizedErrorNotification(coreStart);
-
-        const frameStart = this.editorFrameService!.start(coreStart, deps);
-        return mountApp(core, params, {
-          createEditorFrame: frameStart.createInstance,
-          attributeService: getLensAttributeService(coreStart, deps),
-          getPresentationUtilContext,
-          topNavMenuEntryGenerators: this.topNavMenuEntries,
-          locator: this.locator,
-        });
-      },
-    });
-
-    if (globalSearch) {
-      globalSearch.registerResultProvider(
-        getSearchProvider(
-          core.getStartServices().then(
-            ([
-              {
-                application: { capabilities },
-              },
-            ]) => capabilities
-          )
-        )
-      );
+      return {
+        registerVisualization: (vis: Visualization | (() => Promise<Visualization>)) => {
+          if (this.editorFrameSetup) {
+            this.editorFrameSetup.registerVisualization(vis);
+          } else {
+            // queue visualizations if editor frame is not yet ready as it's loaded async
+            this.queuedVisualizations.push(vis);
+          }
+        },
+        registerTopNavMenuEntryGenerator: (menuEntryGenerator: LensTopNavMenuEntryGenerator) => {
+          this.topNavMenuEntries.push(menuEntryGenerator);
+        },
+      };
     }
-
-    urlForwarding.forwardApp('lens', 'lens');
-
-    this.initDependenciesForApi = async () => {
-      const { plugins } = startServices();
-      await this.initParts(
-        core,
-        data,
-        charts,
-        expressions,
-        fieldFormats,
-        plugins.fieldFormats.deserialize
-      );
-    };
-
-    return {
-      registerVisualization: (vis: Visualization | (() => Promise<Visualization>)) => {
-        if (this.editorFrameSetup) {
-          this.editorFrameSetup.registerVisualization(vis);
-        } else {
-          // queue visualizations if editor frame is not yet ready as it's loaded async
-          this.queuedVisualizations.push(vis);
-        }
-      },
-      registerTopNavMenuEntryGenerator: (menuEntryGenerator: LensTopNavMenuEntryGenerator) => {
-        this.topNavMenuEntries.push(menuEntryGenerator);
-      },
-    };
   }
 
   private async initParts(

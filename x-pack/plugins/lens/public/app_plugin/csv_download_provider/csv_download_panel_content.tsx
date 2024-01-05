@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiForm, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiModalBody, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -22,7 +22,7 @@ export function DownloadPanelContent({
   warnings = [],
 }: DownloadPanelContentProps) {
   return (
-    <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
+    <EuiModalBody className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
       <EuiText size="s">
         <p>
           <FormattedMessage
@@ -48,6 +48,6 @@ export function DownloadPanelContent({
           defaultMessage="Export as CSV"
         />
       </EuiButton>
-    </EuiForm>
+    </EuiModalBody>
   );
 }

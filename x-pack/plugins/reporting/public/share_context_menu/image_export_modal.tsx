@@ -325,18 +325,20 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         <EuiSpacer size="m" />
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
           <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
-            <EuiRadioGroup
-              options={[
-                { id: 'printablePdfV2', label: 'PDF' },
-                { id: 'pngV2', label: 'PNG' },
-              ]}
-              onChange={(id) => setSelectedRadio(id)}
-              name="image reporting radio group"
-              idSelected={selectedRadio}
-              legend={{
-                children: <span>File type</span>,
-              }}
-            />
+            {layoutOption !== 'canvas' && (
+              <EuiRadioGroup
+                options={[
+                  { id: 'printablePdfV2', label: 'PDF' },
+                  { id: 'pngV2', label: 'PNG' },
+                ]}
+                onChange={(id) => setSelectedRadio(id)}
+                name="image reporting radio group"
+                idSelected={selectedRadio}
+                legend={{
+                  children: <span>File type</span>,
+                }}
+              />
+            )}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           {renderOptions()}
