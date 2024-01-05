@@ -9,8 +9,12 @@ import { validateBlockkit } from './schema';
 
 describe('validateBlockkit', () => {
   test('should return error for invalid json', () => {
-    expect(validateBlockkit('')).toEqual(`block kit body is not valid JSON`);
-    expect(validateBlockkit('abc')).toEqual(`block kit body is not valid JSON`);
+    expect(validateBlockkit('')).toEqual(
+      `block kit body is not valid JSON - Unexpected end of JSON input`
+    );
+    expect(validateBlockkit('abc')).toEqual(
+      `block kit body is not valid JSON - Unexpected token 'a', \"abc\" is not valid JSON`
+    );
   });
 
   test('should return error for json that does not contain the "blocks" field', () => {

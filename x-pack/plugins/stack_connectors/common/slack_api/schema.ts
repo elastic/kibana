@@ -46,7 +46,7 @@ export function validateBlockkit(text: string) {
       return 'block kit body must contain field "blocks"';
     }
   } catch (err) {
-    return 'block kit body is not valid JSON';
+    return `block kit body is not valid JSON - ${err.message}`;
   }
 }
 

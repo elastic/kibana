@@ -70,7 +70,7 @@ const validateSlackUrl = (secretsObject: SlackApiSecrets, validatorServices: Val
 };
 
 const renderParameterTemplates = (params: SlackApiParams, variables: Record<string, unknown>) => {
-  if (params.subAction === 'postMessage' || params.subAction === 'postBlockkit')
+  if (params.subAction === 'postMessage') {
     return {
       subAction: params.subAction,
       subActionParams: {
@@ -78,6 +78,15 @@ const renderParameterTemplates = (params: SlackApiParams, variables: Record<stri
         text: renderMustacheString(params.subActionParams.text, variables, 'slack'),
       },
     };
+  } else if (params.subAction === 'postBlockkit') {
+    return {
+      subAction: params.subAction,
+      subActionParams: {
+        ...params.subActionParams,
+        text: renderMustacheString(params.subActionParams.text, variables, 'json'),
+      },
+    };
+  }
   return params;
 };
 

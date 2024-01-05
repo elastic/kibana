@@ -264,13 +264,13 @@ describe('execute', () => {
       subAction: 'postBlockkit' as const,
       subActionParams: { text: JSON.stringify(getBlock(text)), channelIds: ['LKJHGF345'] },
     };
-    const variables = { name: 'Dwight' };
+    const variables = { name: '"Dwight"' };
     const params = connectorType.renderParameterTemplates!(
       paramsWithTemplates,
       variables
     ) as PostMessageParams;
     expect(params.subActionParams.text).toBe(
-      JSON.stringify(getBlock(text.replace(`{{name}}`, `Dwight`)))
+      JSON.stringify(getBlock(text.replace(`{{name}}`, `"Dwight"`)))
     );
   });
 
