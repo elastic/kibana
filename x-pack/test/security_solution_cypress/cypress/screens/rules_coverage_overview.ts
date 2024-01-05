@@ -8,8 +8,8 @@
 export const COVERAGE_OVERVIEW_TECHNIQUE_PANEL =
   '[data-test-subj="coverageOverviewTechniquePanel"]';
 
-export const COVERAGE_OVERVIEW_TECHNIQUE_TITLE = (id: string) =>
-  `[data-test-subj="coverageOverviewTechniqueTitle-${id}"]`;
+export const COVERAGE_OVERVIEW_TECHNIQUE_PANEL_IN_TACTIC_GROUP = (id: string) =>
+  `[data-test-subj="coverageOverviewTacticGroup-${id}"] [data-test-subj="coverageOverviewTechniquePanel"]`;
 
 export const COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES =
   '[data-test-subj="coverageOverviewEnabledRulesList"]';

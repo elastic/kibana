@@ -17,7 +17,6 @@ import {
   COVERAGE_OVERVIEW_TACTIC_DISABLED_STATS,
   COVERAGE_OVERVIEW_TACTIC_ENABLED_STATS,
   COVERAGE_OVERVIEW_TACTIC_PANEL,
-  COVERAGE_OVERVIEW_TECHNIQUE_TITLE,
 } from '../../../../screens/rules_coverage_overview';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { visit } from '../../../../tasks/navigation';
@@ -37,6 +36,7 @@ import {
   enableAllDisabledRules,
   filterCoverageOverviewBySearchBar,
   openTechniquePanelByName,
+  openTechniquePanelByNameAndTacticId,
   selectCoverageOverviewActivityFilterOption,
   selectCoverageOverviewSourceFilterOption,
 } from '../../../../tasks/rules_coverage_overview';
@@ -48,8 +48,8 @@ const EnabledCustomRuleMitreData = getMockThreatData()[2];
 const DisabledCustomRuleMitreData = getMockThreatData()[3];
 
 // Mitre data used for duplicate technique tests
-const DuplicateTechniqueMitreData1 = getDuplicateTechniqueThreatData()[0];
-const DuplicateTechniqueMitreData2 = getDuplicateTechniqueThreatData()[1];
+const DuplicateTechniqueMitreData1 = getDuplicateTechniqueThreatData()[1];
+const DuplicateTechniqueMitreData2 = getDuplicateTechniqueThreatData()[0];
 
 const MockEnabledPrebuiltRuleThreat: Threat = {
   framework: 'MITRE ATT&CK',
@@ -233,7 +233,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
 
     describe('filtering tests', () => {
       it('filters for all data', () => {
-        selectCoverageOverviewActivityFilterOption('Disabled rules');
+        selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
 
         openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
         cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
@@ -250,7 +250,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
 
       it('filters for disabled and prebuilt rules', () => {
         selectCoverageOverviewActivityFilterOption('Enabled rules'); // Disables default filter
-        selectCoverageOverviewActivityFilterOption('Disabled rules');
+        selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
         selectCoverageOverviewSourceFilterOption('Custom rules'); // Disables default filter
 
         openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
@@ -273,7 +273,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('filters for only prebuilt rules', () => {
-        selectCoverageOverviewActivityFilterOption('Disabled rules');
+        selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
         selectCoverageOverviewSourceFilterOption('Custom rules'); // Disables default filter
 
         openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
@@ -294,7 +294,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('filters for only custom rules', () => {
-        selectCoverageOverviewActivityFilterOption('Disabled rules');
+        selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
         selectCoverageOverviewSourceFilterOption('Elastic rules'); // Disables default filter
 
         openTechniquePanelByName(EnabledPrebuiltRuleMitreData.technique.name);
@@ -338,7 +338,7 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('enables all disabled rules', () => {
-      selectCoverageOverviewActivityFilterOption('Disabled rules');
+      selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
       openTechniquePanelByName(DisabledPrebuiltRuleMitreData.technique.name);
       enableAllDisabledRules();
 
@@ -355,6 +355,10 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('with rules that have identical mitre techniques that belong to multiple tactics', () => {
+    const SharedTechniqueName = DuplicateTechniqueMitreData1.technique.name;
+    const TacticOfRule1 = DuplicateTechniqueMitreData1.tactic;
+    const TacticOfRule2 = DuplicateTechniqueMitreData2.tactic;
+
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
@@ -363,14 +367,14 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
         getNewRule({
           rule_id: 'duplicate_technique_rule_1',
           enabled: true,
-          name: 'Rule with tactic 1',
+          name: 'Rule under Persistence tactic',
           threat: [MockCustomRuleDuplicateTechniqueThreat1],
         })
       );
       createRule(
         getNewRule({
           rule_id: 'duplicate_technique_rule_2',
-          name: 'Rule with tactic 2',
+          name: 'Rule under Privilege Escalation tactic',
           enabled: false,
           threat: [MockCustomRuleDuplicateTechniqueThreat2],
         })
@@ -379,49 +383,55 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('technique panels render unique rule data', () => {
-      selectCoverageOverviewActivityFilterOption('Disabled rules');
+      // Tests to make sure each rule only exists in the specific technique and tactic that's assigned to it
 
-      // Open duplicated technique panel under first tactic
-      cy.get(COVERAGE_OVERVIEW_TECHNIQUE_TITLE(DuplicateTechniqueMitreData1.technique.id))
-        .first()
-        .click();
-      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
-        .contains('Rule with tactic 1')
-        .should('not.exist');
-      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Rule with tactic 2');
+      selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
 
-      // Open duplicated technique panel under second tactic
-      cy.get(COVERAGE_OVERVIEW_TECHNIQUE_TITLE(DuplicateTechniqueMitreData2.technique.id))
-        .last()
-        .click();
-      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Rule with tactic 1');
+      // Open duplicated technique panel under Persistence tactic
+      openTechniquePanelByNameAndTacticId(SharedTechniqueName, TacticOfRule1.id);
+
+      // Only rule 1 data is present
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Rule under Persistence tactic');
       cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
-        .contains('Rule with tactic 2')
+        .contains('Rule under Privilege Escalation tactic')
         .should('not.exist');
+
+      // Open duplicated technique panel under Privilege Escalation tactic
+      openTechniquePanelByNameAndTacticId(SharedTechniqueName, TacticOfRule2.id);
+
+      // Only rule 2 data is present
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+        .contains('Rule under Persistence tactic')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains(
+        'Rule under Privilege Escalation tactic'
+      );
     });
 
     it('tactic panels render correct rule stats', () => {
-      selectCoverageOverviewActivityFilterOption('Disabled rules');
+      selectCoverageOverviewActivityFilterOption('Disabled rules'); // Activates disabled rules filter as it's off by default on page load
 
-      // Validate rule count stats for first tactic
+      // Validate rule count stats for the Persistence tactic only show stats based on its own technique
+      // Enabled rule count
       cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL)
-        .contains(DuplicateTechniqueMitreData1.tactic.name)
+        .contains(TacticOfRule1.name)
         .get(COVERAGE_OVERVIEW_TACTIC_ENABLED_STATS)
         .contains('0');
-
+      // Disabled rule count
       cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL)
-        .contains(DuplicateTechniqueMitreData1.tactic.name)
+        .contains(TacticOfRule1.name)
         .get(COVERAGE_OVERVIEW_TACTIC_DISABLED_STATS)
         .contains('1');
 
-      // Validate rule count stats for second tactic
+      // Validate rule count stats for the Privilege Escalation tactic only show stats based on its own technique
+      // Enabled rule count
       cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL)
-        .contains(DuplicateTechniqueMitreData2.tactic.name)
+        .contains(TacticOfRule2.name)
         .get(COVERAGE_OVERVIEW_TACTIC_ENABLED_STATS)
         .contains('1');
-
+      // Disabled rule count
       cy.get(COVERAGE_OVERVIEW_TACTIC_PANEL)
-        .contains(DuplicateTechniqueMitreData2.tactic.name)
+        .contains(TacticOfRule2.name)
         .get(COVERAGE_OVERVIEW_TACTIC_DISABLED_STATS)
         .contains('0');
     });

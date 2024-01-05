@@ -11,12 +11,17 @@ import {
   COVERAGE_OVERVIEW_FILTER_LIST,
   COVERAGE_OVERVIEW_SEARCH_BAR,
   COVERAGE_OVERVIEW_SOURCE_FILTER_BUTTON,
+  COVERAGE_OVERVIEW_TECHNIQUE_PANEL_IN_TACTIC_GROUP,
   COVERAGE_OVERVIEW_TECHNIQUE_PANEL,
 } from '../screens/rules_coverage_overview';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 export const openTechniquePanelByName = (label: string) => {
   cy.get(COVERAGE_OVERVIEW_TECHNIQUE_PANEL).contains(label).click();
+};
+
+export const openTechniquePanelByNameAndTacticId = (label: string, tacticId: string) => {
+  cy.get(COVERAGE_OVERVIEW_TECHNIQUE_PANEL_IN_TACTIC_GROUP(tacticId)).contains(label).click();
 };
 
 export const selectCoverageOverviewActivityFilterOption = (option: string) => {
