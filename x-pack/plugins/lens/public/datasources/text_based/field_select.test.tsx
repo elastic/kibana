@@ -13,24 +13,24 @@ import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 
 const fields = [
   {
-    name: 'timestamp',
-    id: 'timestamp',
+    fieldName: 'timestamp',
+    columnId: 'timestamp',
     meta: {
       type: 'date',
     },
     compatible: true,
   },
   {
-    name: 'bytes',
-    id: 'bytes',
+    fieldName: 'bytes',
+    columnId: 'bytes',
     meta: {
       type: 'number',
     },
     compatible: true,
   },
   {
-    name: 'memory',
-    id: 'memory',
+    fieldName: 'memory',
+    columnId: 'memory',
     meta: {
       type: 'number',
     },

@@ -23,7 +23,7 @@ const defaultProps = {
   state: {
     layers: {
       first: {
-        columns: [column1, column2, column3],
+        columns: [...fieldList, column1, column2, column3],
       },
     },
     fieldList,

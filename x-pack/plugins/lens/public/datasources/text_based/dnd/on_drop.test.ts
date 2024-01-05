@@ -55,13 +55,13 @@ describe('onDrop', () => {
       })
     );
   });
-  it('should move the dimension if dropType is move_compatible and remove the original one', () => {
+  it('should move the dimension if dropType is move_compatible', () => {
     const props = {
       ...defaultProps,
       target: emptyDimensionTarget,
       dropType: 'move_compatible' as DropType,
     };
-    const expectedColumns = [column2, column3, { ...column1, columnId: 'newId' }];
+    const expectedColumns = [column1, column2, column3, { ...column1, columnId: 'newId' }];
     expect(onDrop(props)).toEqual(
       expect.objectContaining({
         layers: {
