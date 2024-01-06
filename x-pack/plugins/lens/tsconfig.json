@@ -101,7 +101,8 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/discover-utils",
     "@kbn/lens-formula-docs",
-    "@kbn/visualization-utils"
+    "@kbn/visualization-utils",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*"
