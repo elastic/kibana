@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
     });
     it('should have cache setting', async () => {
-      await PageObjects.settings.clickKibanaSettings();
       const cacheSetting = await find.byCssSelector('#data_views\\:cache_max_age-group');
       expect(cacheSetting).to.not.be(undefined);
     });
