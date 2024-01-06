@@ -11,8 +11,6 @@ import type * as estypes from '@kbn/es-types';
 
 import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
-import { ArtifactsElasticsearchError } from '../../errors';
-
 export interface CreateEsSearchIterableOptions<TDocument = unknown> {
   esClient: ElasticsearchClient;
   searchRequest: Omit<SearchRequest, 'search_after' | 'from' | 'sort'> &
@@ -73,38 +71,39 @@ export const createEsSearchIterable = <TDocument = unknown>({
   // FIXME:PT should use PIT for the query. Look into adding it.
 
   const fetchData = async () => {
-    try {
-      const searchResult = await esClient.search<TDocument>({
+    const searchResult = await esClient
+      .search<TDocument>({
         ...searchOptions,
         size,
         search_after: searchAfterValue,
+      })
+      .catch((e) => {
+        Error.captureStackTrace(e);
+        throw e;
       });
 
-      const searchHits = searchResult.hits.hits;
+    const searchHits = searchResult.hits.hits;
 
-      if (searchHits.length === 0) {
-        done = true;
-        return;
-      }
-
-      const lastSearchHit = searchHits[searchHits.length - 1];
-      searchAfterValue = lastSearchHit.sort;
-
-      // If (for some reason) we don't have a `searchAfterValue`,
-      // then throw an error, or else we'll keep looping forever
-      if (!searchAfterValue) {
-        done = true;
-        throw new Error(
-          `Unable to store 'search_after' value. Last 'SearchHit' did not include a 'sort' property \n(did you forget to set the 'sort' attribute on your SearchRequest?)':\n${JSON.stringify(
-            lastSearchHit
-          )}`
-        );
-      }
-
-      value = resultsMapper ? resultsMapper(searchResult) : searchResult;
-    } catch (e) {
-      throw new ArtifactsElasticsearchError(e);
+    if (searchHits.length === 0) {
+      done = true;
+      return;
     }
+
+    const lastSearchHit = searchHits[searchHits.length - 1];
+    searchAfterValue = lastSearchHit.sort;
+
+    // If (for some reason) we don't have a `searchAfterValue`,
+    // then throw an error, or else we'll keep looping forever
+    if (!searchAfterValue) {
+      done = true;
+      throw new Error(
+        `Unable to store 'search_after' value. Last 'SearchHit' did not include a 'sort' property \n(did you forget to set the 'sort' attribute on your SearchRequest?)':\n${JSON.stringify(
+          lastSearchHit
+        )}`
+      );
+    }
+
+    value = resultsMapper ? resultsMapper(searchResult) : searchResult;
   };
 
   const createIteratorResult = (): IteratorResult<SearchResponse<TDocument>> => {
