@@ -7,6 +7,7 @@
 
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { isEqualWith } from 'lodash';
 import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
 import { useDispatch } from 'react-redux';
@@ -20,6 +21,7 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
+import { savedSearchComparator } from '../../../timelines/components/timeline/esql_tab_content/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
@@ -189,7 +191,9 @@ export const useDiscoverInTimelineActions = (
               savedSearch,
             })
           );
-        } else {
+        } else if (
+          !isEqualWith(timelineRef.current.savedSearch, savedSearch, savedSearchComparator)
+        ) {
           dispatch(
             timelineActions.updateSavedSearch({
               id: TimelineId.active,
