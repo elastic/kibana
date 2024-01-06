@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { IpPrefixOutput } from '../../expressions';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';

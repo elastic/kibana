@@ -18,6 +18,7 @@ import {
   EuiSwitchProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { AggParamEditorProps } from '../agg_param_props';
 import { useValidation } from './utils';
 
@@ -39,7 +40,7 @@ function isPrefixValid({ prefixLength, isIpv6 }: IpPrefix): boolean {
 }
 
 const prefixLengthLabel = i18n.translate('visDefaultEditor.controls.IpPrefix.prefixLength', {
-  defaultMessage: 'Prefix Length',
+  defaultMessage: 'Prefix length',
 });
 
 const isIpv6Label = i18n.translate('visDefaultEditor.controls.IpPrefix.isIpv6', {
@@ -60,7 +61,7 @@ function IpPrefixParamEditor({
   if (!isValid) {
     error = i18n.translate('visDefaultEditor.controls.ipPrefix.errorMessage', {
       defaultMessage:
-        'Prefix Length must be between 0 and 32 for IPv4 Addresses and 0 and 128 for IPv6 Addresses.',
+        'Prefix length must be between 0 and 32 for IPv4 addresses and 0 and 128 for IPv6 addresses.',
     });
   }
 

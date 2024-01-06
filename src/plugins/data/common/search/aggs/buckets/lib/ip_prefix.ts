@@ -14,6 +14,6 @@ export interface IpPrefixAggKey {
 
 export type IpPrefixKey = IpPrefixAggKey;
 
-export const convertIPPrefixToString = (range: IpPrefixKey, format: (val: any) => string) => {
-  return format(range.address);
+export const convertIPPrefixToString = (cidr: IpPrefixKey, format: (val: any) => string) => {
+  return format(cidr.address);
 };

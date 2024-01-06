@@ -28,19 +28,19 @@ export const ipPrefixFunction: ExpressionFunctionIpPrefix = {
   type: 'ip_prefix',
   inputTypes: ['null'],
   help: i18n.translate('data.search.functions.ipPrefix.help', {
-    defaultMessage: 'Create extended bounds',
+    defaultMessage: 'Create an IP prefix',
   }),
   args: {
     prefixLength: {
       types: ['number'],
       help: i18n.translate('data.search.functions.ipPrefix.prefixLength.help', {
-        defaultMessage: 'Specify the lower boundary value',
+        defaultMessage: 'Specify the length of the network prefix',
       }),
     },
     isIpv6: {
       types: ['boolean'],
       help: i18n.translate('data.search.functions.ipPrefix.isIpv6.help', {
-        defaultMessage: 'Specify the upper boundary value',
+        defaultMessage: 'Specify whether the prefix applies to IPv6 addresses',
       }),
     },
   },

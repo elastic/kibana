@@ -118,14 +118,14 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static id = 'ip_prefix';
       static hidden = true;
 
-      textConvert = (range: IpPrefixKey) => {
-        if (range == null) {
+      textConvert = (cidr: IpPrefixKey) => {
+        if (cidr == null) {
           return '';
         }
 
         const nestedFormatter = this._params as SerializedFieldFormat;
         const format = this.getCachedFormat(nestedFormatter);
-        return convertIPPrefixToString(range, format.convert.bind(format));
+        return convertIPPrefixToString(cidr, format.convert.bind(format));
       };
     },
     class AggsIpRangeFieldFormat extends FieldFormatWithCache {
