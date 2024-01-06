@@ -134,6 +134,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     showTimeline,
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
+
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
