@@ -14,7 +14,7 @@ import {
   parseGroupingQuery,
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
 import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
@@ -122,14 +122,14 @@ export const isFindingsRootGroupingAggregation = (
  * for the findings page
  */
 export const useLatestFindingsGrouping = ({
-  dataView,
   groupPanelRenderer,
   groupStatsRenderer,
 }: {
-  dataView: DataView;
   groupPanelRenderer?: GroupPanelRenderer<FindingsGroupingAggregation>;
   groupStatsRenderer?: GroupStatsRenderer<FindingsGroupingAggregation>;
 }) => {
+  const { dataView } = useDataViewContext();
+
   const {
     activePageIndex,
     grouping,
