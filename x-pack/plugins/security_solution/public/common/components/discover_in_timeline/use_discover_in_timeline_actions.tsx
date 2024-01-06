@@ -66,12 +66,6 @@ export const useDiscoverInTimelineActions = (
       // Invalidate and refetch
       if (data) {
         dispatch(
-          timelineActions.updateSavedSearchId({
-            id: TimelineId.active,
-            savedSearchId: data,
-          })
-        );
-        dispatch(
           timelineActions.endTimelineSaving({
             id: TimelineId.active,
           })
@@ -217,8 +211,9 @@ export const useDiscoverInTimelineActions = (
           });
 
           const responseIsEmpty = !response || !response?.id;
-
-          if (!savedSearchId && !responseIsEmpty) {
+          if (responseIsEmpty) {
+            throw new Error('Response is empty');
+          } else if (!savedSearchId && !responseIsEmpty) {
             dispatch(
               timelineActions.updateSavedSearchId({
                 id: TimelineId.active,
@@ -229,10 +224,6 @@ export const useDiscoverInTimelineActions = (
             dispatch(timelineActions.saveTimeline({ id: TimelineId.active, saveAsNew: false }));
           }
         } catch (err) {
-          addError(DISCOVER_SEARCH_SAVE_ERROR_TITLE, {
-            title: DISCOVER_SEARCH_SAVE_ERROR_TITLE,
-            toastMessage: String(err),
-          });
           dispatch(
             timelineActions.endTimelineSaving({
               id: TimelineId.active,
@@ -241,7 +232,7 @@ export const useDiscoverInTimelineActions = (
         }
       }
     },
-    [persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]
+    [persistSavedSearch, savedSearchId, dispatch, discoverDataService]
   );
 
   const initializeLocalSavedSearch = useCallback(
