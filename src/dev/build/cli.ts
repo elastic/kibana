@@ -16,7 +16,6 @@ import { isErrorLogged } from './lib';
 import { readCliArgs } from './args';
 
 // ensure the cwd() is always the repo root
-// noop
 process.chdir(resolve(__dirname, '../../../'));
 
 const { showHelp, unknownFlags, log, buildOptions } = readCliArgs(process.argv);
