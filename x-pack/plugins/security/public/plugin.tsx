@@ -13,7 +13,10 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -48,6 +51,7 @@ export interface PluginSetupDependencies {
   management?: ManagementSetup;
   share?: SharePluginSetup;
   cloud?: CloudSetup;
+  dataViews?: DataViewsPublicPluginSetup;
 }
 
 export interface PluginStartDependencies {
@@ -90,7 +94,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { cloud, home, licensing, management, share }: PluginSetupDependencies
+    { cloud, home, licensing, management, share, dataViews }: PluginSetupDependencies
   ): SecurityPluginSetup {
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
@@ -161,6 +165,16 @@ export class SecurityPlugin
     if (share) {
       this.anonymousAccessService.setup({ share });
     }
+
+    const userIdGetter = async () => {
+      const [, , security] = await core.getStartServices();
+      const { profile_uid: profileUid } = await (
+        security as SecurityPluginStart
+      ).authc.getCurrentUser();
+      return profileUid;
+    };
+
+    dataViews?.setUserIdGetter(userIdGetter);
 
     return {
       authc: this.authc,

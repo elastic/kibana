@@ -51,6 +51,9 @@ describe('Security Plugin', () => {
       licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
+      dataViews: {
+        setGetUserId: jest.fn(),
+      },
     } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();

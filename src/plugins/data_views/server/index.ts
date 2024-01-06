@@ -16,6 +16,7 @@ export type {
   DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
+  GetUserId,
 } from './types';
 
 import { PluginInitializerContext } from '@kbn/core/server';
@@ -41,6 +42,12 @@ export type { DataViewsServerPlugin as Plugin };
 
 const configSchema = schema.object({
   scriptedFieldsEnabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.never()
+  ),
+  fieldListCachingEnabled: schema.conditional(
     schema.contextRef('serverless'),
     true,
     schema.boolean({ defaultValue: false }),

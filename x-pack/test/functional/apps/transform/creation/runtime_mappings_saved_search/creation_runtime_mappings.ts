@@ -19,9 +19,10 @@ import {
   PivotTransformTestData,
 } from '../../helpers';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
+  const PageObjects = getPageObjects(['discover']);
 
   const runtimeMappings = {
     rt_airline_lower: {
@@ -453,6 +454,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('redirects to Discover page');
           await transform.wizard.redirectToDiscover();
+          await PageObjects.discover.refreshFieldList();
 
           if (isLatestTransformTestData(testData)) {
             const fromTime = 'Feb 7, 2016 @ 00:00:00.000';

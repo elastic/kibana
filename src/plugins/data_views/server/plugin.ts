@@ -21,8 +21,10 @@ import {
   DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
+  GetUserId,
 } from './types';
 import { DataViewsStorage } from './content_management';
+import { cacheMaxAge } from './ui_settings';
 
 export class DataViewsServerPlugin
   implements
@@ -35,6 +37,7 @@ export class DataViewsServerPlugin
 {
   private readonly logger: Logger;
   private rollupsEnabled: boolean = false;
+  private getUserId: GetUserId = async () => undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
@@ -46,14 +49,23 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
+    // add conditional
+    if (config.fieldListCachingEnabled) {
+      core.uiSettings.register(cacheMaxAge);
+    }
+
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
-    registerRoutes(
-      core.http,
-      core.getStartServices,
-      () => this.rollupsEnabled,
-      dataViewRestCounter
-    );
+    registerRoutes({
+      http: core.http,
+      getStartServices: core.getStartServices,
+      isRollupsEnabled: () => this.rollupsEnabled,
+      dataViewRestCounter,
+      getUserIdGetter: () => this.getUserId,
+    });
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
@@ -72,6 +84,9 @@ export class DataViewsServerPlugin
 
     return {
       enableRollups: () => (this.rollupsEnabled = true),
+      setGetUserId: (getUserId: GetUserId) => {
+        this.getUserId = getUserId;
+      },
     };
   }
 

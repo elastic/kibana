@@ -18,6 +18,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { DataViewsServerPluginSetup } from '@kbn/data-views-plugin/server';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
@@ -90,6 +91,7 @@ export interface PluginSetupDependencies {
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
+  dataViews: DataViewsServerPluginSetup;
 }
 
 export interface PluginStartDependencies {
@@ -214,7 +216,14 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies, SecurityPluginStart>,
-    { features, licensing, taskManager, usageCollection, spaces }: PluginSetupDependencies
+    {
+      features,
+      licensing,
+      taskManager,
+      usageCollection,
+      spaces,
+      dataViews,
+    }: PluginSetupDependencies
   ) {
     this.kibanaIndexName = core.savedObjects.getDefaultIndex();
     const config$ = this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
@@ -230,6 +239,13 @@ export class SecurityPlugin
 
     const config = this.getConfig();
     const kibanaIndexName = this.getKibanaIndexName();
+
+    async function getUserId(request: KibanaRequest): Promise<string | undefined> {
+      const [, , security] = await core.getStartServices();
+      return security.authc.getCurrentUser(request)?.profile_uid;
+    }
+
+    dataViews.setGetUserId(getUserId);
 
     // A subset of `start` services we need during `setup`.
     const startServicesPromise = core.getStartServices().then(([coreServices, depsServices]) => ({
