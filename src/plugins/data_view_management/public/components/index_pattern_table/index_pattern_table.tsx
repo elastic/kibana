@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
+import { map, distinctUntilChanged, BehaviorSubject } from 'rxjs';
 import { EmptyIndexListPrompt } from '../empty_index_list_prompt';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
@@ -34,6 +35,7 @@ import { removeDataView, RemoveDataViewProps } from '../edit_index_pattern';
 import { deleteModalMsg } from './delete_modal_msg';
 import {
   DataViewTableController,
+  DataViewTableControllerState,
   dataViewTableControllerStateDefaults as defaults,
 } from './data_view_table_controller';
 
@@ -69,6 +71,24 @@ interface Props extends RouteComponentProps {
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
+// shared code, would live elsewhere
+function useStateSelector<S, R>(
+  state$: BehaviorSubject<S>,
+  selector: (state: S) => R,
+  equalityFn?: (arg0: R, arg1: R) => boolean
+) {
+  const memoizedObservable = useMemo(
+    () => state$.pipe(map(selector), distinctUntilChanged(equalityFn)),
+    [state$, selector, equalityFn]
+  );
+  const defaultValue = useMemo(() => selector(state$.value), [selector, state$]);
+  return useObservable(memoizedObservable, defaultValue);
+}
+
+// selector would live in consumer or in a shared file
+const selectIsLoadingIndexPatterns = (state: DataViewTableControllerState) =>
+  state.isLoadingDataViews;
+
 export const IndexPatternTable = ({
   history,
   canSave,
@@ -96,10 +116,13 @@ export const IndexPatternTable = ({
       })
   );
 
-  const isLoadingIndexPatterns = useObservable(
-    dataViewController.isLoadingIndexPatterns$,
-    defaults.isLoadingDataViews
+  // new pattern for subscribing to state
+  // notice no default as shared code assumes BehaviorSubject
+  const isLoadingIndexPatterns = useStateSelector(
+    dataViewController.state$,
+    selectIsLoadingIndexPatterns
   );
+
   const indexPatterns = useObservable(dataViewController.indexPatterns$, defaults.dataViews);
   const isLoadingDataState = useObservable(
     dataViewController.isLoadingDataState$,
