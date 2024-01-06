@@ -23,6 +23,7 @@ export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext)
       await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
     });
 
+    loadTestFile(require.resolve('./_cache'));
     loadTestFile(require.resolve('./serverless'));
     loadTestFile(require.resolve('./_data_view_create_delete'));
     loadTestFile(require.resolve('./_runtime_fields'));
