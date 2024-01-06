@@ -18,6 +18,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { DataViewsServerPluginSetup } from '@kbn/data-views-plugin/server';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
@@ -90,6 +91,7 @@ export interface PluginSetupDependencies {
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
+  dataViews: DataViewsServerPluginSetup;
 }
 
 export interface PluginStartDependencies {

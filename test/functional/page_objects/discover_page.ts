@@ -433,6 +433,12 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
+  // disabled while `data_views:cache_max_age` ui setting is set to zero
+  public async refreshFieldList() {
+    // await this.clickIndexPatternActions();
+    // await this.testSubjects.click('data-view-refresh-fields');
+  }
+
   public async clickAddNewField() {
     await this.retry.try(async () => {
       await this.testSubjects.click('indexPattern-add-field');

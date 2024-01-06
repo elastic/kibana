@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpServiceSetup, StartServicesAccessor } from '@kbn/core/server';
+import { HttpServiceSetup, StartServicesAccessor, KibanaRequest } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { routes } from './rest_api_routes/public';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
@@ -14,21 +14,32 @@ import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies
 import { registerExistingIndicesPath } from './rest_api_routes/internal/existing_indices';
 import { registerFieldForWildcard } from './rest_api_routes/internal/fields_for';
 import { registerHasDataViewsRoute } from './rest_api_routes/internal/has_data_views';
+import { registerFields } from './rest_api_routes/internal/fields';
 
-export function registerRoutes(
-  http: HttpServiceSetup,
+interface RegisterRoutesArgs {
+  http: HttpServiceSetup;
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
-  >,
-  isRollupsEnabled: () => boolean,
-  dataViewRestCounter?: UsageCounter
-) {
+  >;
+  isRollupsEnabled: () => boolean;
+  dataViewRestCounter?: UsageCounter;
+  getUserIdGetter: () => (request: KibanaRequest) => Promise<string | undefined>;
+}
+
+export function registerRoutes({
+  http,
+  getStartServices,
+  dataViewRestCounter,
+  isRollupsEnabled,
+  getUserIdGetter,
+}: RegisterRoutesArgs) {
   const router = http.createRouter();
 
   routes.forEach((route) => route(router, getStartServices, dataViewRestCounter));
 
   registerExistingIndicesPath(router);
   registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
+  registerFields(router, getStartServices, isRollupsEnabled, getUserIdGetter);
   registerHasDataViewsRoute(router);
 }

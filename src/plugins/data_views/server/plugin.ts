@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+  KibanaRequest,
+} from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { dataViewsServiceFactory } from './data_views_service_factory';
 import { registerRoutes } from './routes';
 import { dataViewSavedObjectType } from './saved_objects';
@@ -21,8 +29,10 @@ import {
   DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
+  GetUserId,
 } from './types';
 import { DataViewsStorage } from './content_management';
+import { cacheMaxAge } from './ui_settings';
 
 export class DataViewsServerPlugin
   implements
@@ -35,6 +45,7 @@ export class DataViewsServerPlugin
 {
   private readonly logger: Logger;
   private rollupsEnabled: boolean = false;
+  private getUserId: GetUserId = async () => undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
@@ -46,14 +57,28 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+    core.uiSettings.register(cacheMaxAge);
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
+    core.plugins.onStart<{ security: SecurityPluginStart }>('security').then(({ security }) => {
+      if (security.found) {
+        const getUserId = async function getUserId(
+          request: KibanaRequest
+        ): Promise<string | undefined> {
+          return security.contract.authc.getCurrentUser(request)?.profile_uid;
+        };
+        this.getUserId = getUserId;
+      } else {
+        throw new Error('Security plugin is not available, but is required for Data Views plugin');
+      }
+    });
 
-    registerRoutes(
-      core.http,
-      core.getStartServices,
-      () => this.rollupsEnabled,
-      dataViewRestCounter
-    );
+    registerRoutes({
+      http: core.http,
+      getStartServices: core.getStartServices,
+      isRollupsEnabled: () => this.rollupsEnabled,
+      dataViewRestCounter,
+      getUserIdGetter: () => this.getUserId,
+    });
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);

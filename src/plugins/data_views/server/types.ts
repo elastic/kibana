@@ -18,6 +18,8 @@ import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { DataViewsService } from '../common';
 
+export type GetUserId = (request: KibanaRequest) => Promise<string | undefined>;
+
 /**
  * Data Views service factory
  */

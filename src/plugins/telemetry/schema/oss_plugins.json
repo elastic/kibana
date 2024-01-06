@@ -9434,6 +9434,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "data_views:cache_max_age": {
+          "type": "long",
+          "_meta": {
+            "description": "Sets the 'max-age' cache header value for data view fields API requests. A value of 0 will disable caching."
+          }
+        },
         "discover:searchOnPageLoad": {
           "type": "boolean",
           "_meta": {
