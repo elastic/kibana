@@ -7,12 +7,10 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
 import TinesParamsFields from './tines_params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 
-const kibanaReactPath = '@kbn/kibana-react-plugin/public';
 const triggersActionsPath = '@kbn/triggers-actions-ui-plugin/public';
 interface Result {
   isLoading: boolean;
@@ -45,16 +43,6 @@ jest.mock(triggersActionsPath, () => {
       ...original.useKibana(),
       notifications: { toasts: mockToasts },
     }),
-  };
-});
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
   };
 });
 

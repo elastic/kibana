@@ -39,8 +39,7 @@ import {
   EuiOutsideClickDetector,
   EuiToolTip,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
 import {
   textBasedLanguagedEditorStyles,
@@ -86,6 +85,8 @@ export interface TextBasedLanguagesEditorProps {
   errors?: Error[];
   /** Warning string as it comes from ES */
   warning?: string;
+  /** Disables the editor and displays loading icon in run button */
+  isLoading?: boolean;
   /** Disables the editor */
   isDisabled?: boolean;
   /** Indicator if the editor is on dark mode */
@@ -149,6 +150,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   detectTimestamp = false,
   errors: serverErrors,
   warning: serverWarning,
+  isLoading,
   isDisabled,
   isDarkMode,
   hideMinimizeButton,
@@ -540,7 +542,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     },
     overviewRulerBorder: false,
     readOnly:
-      isDisabled || Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+      isLoading ||
+      isDisabled ||
+      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
   };
 
   if (isCompactFocused) {
@@ -836,6 +840,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         disableSubmitAction={disableSubmitAction}
                         hideRunQueryText={hideRunQueryText}
                         isSpaceReduced={isSpaceReduced}
+                        isLoading={isLoading}
                       />
                     )}
                   </div>
@@ -925,6 +930,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
           isSpaceReduced={isSpaceReduced}
+          isLoading={isLoading}
           {...editorMessages}
         />
       )}
