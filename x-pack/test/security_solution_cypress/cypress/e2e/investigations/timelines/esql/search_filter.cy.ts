@@ -59,6 +59,8 @@ describe(
     });
 
     it('should be able to add fields to the table', () => {
+      addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
+      submitDiscoverSearchBar();
       addFieldToTable('host.name');
       addFieldToTable('user.name');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');

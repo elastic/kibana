@@ -20,8 +20,15 @@ import {
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
-import { closeTimeline, goToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
+import {
+  closeTimeline,
+  goToEsqlTab,
+  openActiveTimeline,
+  addNameAndDescriptionToTimeline,
+  saveTimeline,
+} from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
+import { getTimeline } from '../../../../objects/timeline';
 import { ALERTS, CSP_FINDINGS } from '../../../../screens/security_header';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
@@ -51,6 +58,8 @@ describe(
       const esqlQuery = 'from auditbeat-* | limit 5';
       addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
+      addNameAndDescriptionToTimeline(getTimeline());
+      saveTimeline();
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
@@ -60,8 +69,13 @@ describe(
       verifyDiscoverEsqlQuery(esqlQuery);
     });
     it('should remember columns when navigating away and back to discover ', () => {
+      const esqlQuery = 'from auditbeat-* | limit 5';
+      addDiscoverEsqlQuery(esqlQuery);
+      submitDiscoverSearchBar();
+      addNameAndDescriptionToTimeline(getTimeline());
       addFieldToTable('host.name');
       addFieldToTable('user.name');
+      saveTimeline();
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
