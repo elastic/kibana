@@ -63,7 +63,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 export const isVulnerabilitiesRootGroupingAggregation = (
   groupData: Record<string, any> | undefined
 ): groupData is VulnerabilitiesRootGroupingAggregation => {
-  return groupData?.unitsCount?.doc_count !== undefined;
+  return groupData?.unitsCount?.value !== undefined;
 };
 
 /**
@@ -133,7 +133,7 @@ export const useLatestVulnerabilitiesGrouping = ({
   const isEmptyResults =
     !isFetching &&
     isVulnerabilitiesRootGroupingAggregation(groupData) &&
-    !groupData.unitsCount?.value;
+    groupData.unitsCount?.value === 0;
 
   return {
     groupData,
