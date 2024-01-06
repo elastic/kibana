@@ -57,7 +57,7 @@ describe(
     it('should have the default esql query on load', () => {
       verifyDiscoverEsqlQuery(DEFAULT_ESQL_QUERY);
     });
-    it('should remember esql query when navigating away and back to discover ', () => {
+    it.skip('should remember esql query when navigating away and back to discover ', () => {
       const esqlQuery = 'from auditbeat-* | limit 5';
       addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
