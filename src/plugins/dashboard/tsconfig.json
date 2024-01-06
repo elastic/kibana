@@ -69,7 +69,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-lifecycle-browser",
     "@kbn/logging",
-    "@kbn/content-management-table-list-view-common"
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": ["target/**/*"]
 }
