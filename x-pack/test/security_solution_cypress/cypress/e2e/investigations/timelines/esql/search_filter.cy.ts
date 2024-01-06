@@ -23,7 +23,7 @@ import {
   addFieldToTable,
   convertNBSPToSP,
 } from '../../../../tasks/discover';
-import { createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
+import { createNewTimeline, goToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';

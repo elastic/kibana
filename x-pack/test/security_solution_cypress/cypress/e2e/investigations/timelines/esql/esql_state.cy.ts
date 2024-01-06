@@ -25,7 +25,6 @@ import {
   goToEsqlTab,
   openActiveTimeline,
   addNameAndDescriptionToTimeline,
-  saveTimeline,
 } from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { getTimeline } from '../../../../objects/timeline';
@@ -63,7 +62,6 @@ describe.skip(
       addDiscoverEsqlQuery(esqlQuery);
       submitDiscoverSearchBar();
       addNameAndDescriptionToTimeline(getTimeline());
-      saveTimeline();
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
@@ -79,7 +77,6 @@ describe.skip(
       addNameAndDescriptionToTimeline(getTimeline());
       addFieldToTable('host.name');
       addFieldToTable('user.name');
-      saveTimeline();
       closeTimeline();
       navigateFromHeaderTo(CSP_FINDINGS);
       navigateFromHeaderTo(ALERTS);
