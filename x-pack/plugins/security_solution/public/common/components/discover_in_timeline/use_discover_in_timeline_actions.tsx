@@ -14,7 +14,6 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { defaultHeaders } from '@kbn/securitysolution-data-table';
 import { endTimelineSaving, startTimelineSaving } from '../../../timelines/store/timeline/actions';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { TimelineId } from '../../../../common/types';
@@ -22,8 +21,6 @@ import { timelineActions, timelineSelectors } from '../../../timelines/store/tim
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
@@ -41,16 +38,10 @@ export const useDiscoverInTimelineActions = (
   const { addError } = useAppToasts();
 
   const {
-    services: {
-      customDataService: discoverDataService,
-      savedSearch: savedSearchService,
-      dataViews: dataViewService,
-    },
+    services: { customDataService: discoverDataService, savedSearch: savedSearchService },
   } = useKibana();
 
   const dispatch = useDispatch();
-
-  const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline = useShallowEqualSelector(
@@ -68,22 +59,23 @@ export const useDiscoverInTimelineActions = (
       savedSearch: SavedSearch;
       savedSearchOptions: SaveSavedSearchOptions;
     }) => savedSearchService.save(savedSearch, savedSearchOptions),
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidate and refetch
+      if (data) {
+        dispatch(
+          timelineActions.endTimelineSaving({
+            id: TimelineId.active,
+          })
+        );
+      }
       queryClient.invalidateQueries({ queryKey: ['savedSearchById', savedSearchId] });
     },
   });
 
   const getDefaultDiscoverAppState: () => Promise<DiscoverAppState> = useCallback(async () => {
-    const localDataViewId = dataViewId ?? 'security-solution-default';
-
-    const dataView = await dataViewService.get(localDataViewId);
-    const defaultColumns = defaultHeaders.map((header) => header.id);
     return {
       query: {
-        esql: dataView
-          ? `from ${dataView.getIndexPattern()} | limit 10 | keep ${defaultColumns.join(', ')}`
-          : '',
+        esql: '',
       },
       sort: [['@timestamp', 'desc']],
       columns: [],
@@ -92,7 +84,7 @@ export const useDiscoverInTimelineActions = (
       hideChart: true,
       grid: {},
     };
-  }, [dataViewService, dataViewId]);
+  }, []);
 
   /*
    * generates Appstate from a given saved Search object
@@ -156,7 +148,6 @@ export const useDiscoverInTimelineActions = (
       function onError(error: Error) {
         addError(error, { title: DISCOVER_SEARCH_SAVE_ERROR_TITLE });
       }
-
       try {
         const id = await saveSavedSearch({
           savedSearch,
@@ -224,7 +215,7 @@ export const useDiscoverInTimelineActions = (
         );
       }
     },
-    [persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]
+    [persistSavedSearch, savedSearchId, dispatch, discoverDataService, addError]
   );
 
   const actions = useMemo(

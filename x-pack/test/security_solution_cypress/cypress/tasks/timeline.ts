@@ -12,6 +12,7 @@ import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { BASIC_TABLE_LOADING } from '../screens/common';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
 import { LOADING_INDICATOR } from '../screens/security_header';
+import { EQL_QUERY_VALIDATION_SPINNER } from '../screens/create_new_rule';
 
 import {
   ADD_FILTER,
@@ -189,6 +190,12 @@ export const addEqlToTimeline = (eql: string) => {
   goToCorrelationTab().then(() => {
     cy.get(TIMELINE_CORRELATION_INPUT).type(eql);
   });
+};
+
+export const clearEqlInTimeline = () => {
+  cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
+  cy.get(TIMELINE_CORRELATION_INPUT).clear();
+  cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
 };
 
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {

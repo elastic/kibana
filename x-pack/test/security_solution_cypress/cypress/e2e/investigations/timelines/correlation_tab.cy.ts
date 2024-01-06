@@ -17,7 +17,7 @@ import { createTimeline } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { addEqlToTimeline } from '../../../tasks/timeline';
+import { addEqlToTimeline, clearEqlInTimeline } from '../../../tasks/timeline';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
@@ -46,8 +46,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should update timeline after removing eql', () => {
-    cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
-    cy.get(TIMELINE_CORRELATION_INPUT).clear();
+    clearEqlInTimeline();
     cy.wait('@updateTimeline');
     cy.reload();
     cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
