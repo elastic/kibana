@@ -13,8 +13,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const find = getService('find');
 
-  describe('"Create Index Pattern" wizard', async function () {
+  before(async () => {
     await PageObjects.settings.navigateTo();
+  });
+
+  describe('"Create Index Pattern" wizard', async function () {
     await PageObjects.settings.clickKibanaSettings();
     const cacheSetting = await find.byCssSelector('#data_views:cache_max_age-group');
     expect(cacheSetting).to.not.be(undefined);
