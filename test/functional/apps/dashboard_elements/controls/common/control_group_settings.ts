@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('Dashboard control group settings', () => {
+  describe.only('Dashboard control group settings', () => {
     before(async () => {
       await dashboard.navigateToApp();
       await dashboard.gotoDashboardLandingPage();
