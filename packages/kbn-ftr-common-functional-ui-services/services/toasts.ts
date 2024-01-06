@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrService } from '../ftr_provider_context';
+import { FtrService } from './ftr_provider_context';
 
 export class ToastsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
