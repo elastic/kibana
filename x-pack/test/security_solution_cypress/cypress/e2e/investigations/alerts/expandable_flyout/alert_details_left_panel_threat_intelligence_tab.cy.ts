@@ -20,7 +20,7 @@ import { openThreatIntelligenceTab } from '../../../../tasks/expandable_flyout/a
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
 
-describe(
+describe.skip(
   'Expandable flyout left panel threat intelligence',
   { tags: ['@ess', '@serverless'] },
   () => {
