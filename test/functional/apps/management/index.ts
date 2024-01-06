@@ -21,7 +21,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
     });
 
-    loadTestFile(require.resolve('./data_views/_cache'));
     loadTestFile(require.resolve('./data_views/_create_index_pattern_wizard'));
     loadTestFile(require.resolve('./data_views/_data_view_create_delete'));
     loadTestFile(require.resolve('./data_views/_index_pattern_results_sort'));
@@ -48,5 +47,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_views/_edit_field'));
     loadTestFile(require.resolve('./_files'));
     loadTestFile(require.resolve('./_data_view_field_filters'));
+    loadTestFile(require.resolve('./data_views/_cache'));
   });
 }

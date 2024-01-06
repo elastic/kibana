@@ -19,7 +19,6 @@ import {
   EuiTabbedContentTab,
   EuiSpacer,
   EuiFieldSearch,
-  EuiButton,
   EuiFilterSelectItem,
   FilterChecked,
   EuiToolTip,
@@ -338,6 +337,7 @@ export const Tabs: React.FC<TabsProps> = ({
   );
 
   const refreshRef = useRef<HTMLButtonElement>(null);
+  const addFieldRef = useRef<HTMLButtonElement>(null);
 
   const userEditPermission = dataViews.getCanSaveSync();
   const getFilterSection = useCallback(
@@ -445,6 +445,28 @@ export const Tabs: React.FC<TabsProps> = ({
                 </EuiFilterGroup>
               </EuiFlexItem>
 
+              {userEditPermission && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={<p>{addFieldButtonLabel}</p>}>
+                    <EuiButtonIcon
+                      buttonRef={addFieldRef}
+                      display="base"
+                      size="m"
+                      onClick={() => {
+                        openFieldEditor();
+                        // clear tooltip focus
+                        if (addFieldRef.current) {
+                          addFieldRef.current.blur();
+                        }
+                      }}
+                      data-test-subj="addField"
+                      iconType="plus"
+                      aria-label={addFieldButtonLabel}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={<p>{refreshTooltip}</p>}>
                   <EuiButtonIcon
@@ -466,13 +488,6 @@ export const Tabs: React.FC<TabsProps> = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              {userEditPermission && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={() => openFieldEditor()} data-test-subj="addField">
-                    {addFieldButtonLabel}
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
             </>
           )}
           {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (

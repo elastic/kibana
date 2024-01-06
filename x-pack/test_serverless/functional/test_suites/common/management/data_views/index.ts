@@ -23,7 +23,6 @@ export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext)
       await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
     });
 
-    loadTestFile(require.resolve('./_cache'));
     loadTestFile(require.resolve('./serverless'));
     loadTestFile(require.resolve('./_data_view_create_delete'));
     loadTestFile(require.resolve('./_runtime_fields'));
@@ -31,5 +30,6 @@ export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext)
     loadTestFile(require.resolve('./_exclude_index_pattern'));
     loadTestFile(require.resolve('./_index_pattern_filter'));
     loadTestFile(require.resolve('./_edit_field'));
+    loadTestFile(require.resolve('./_cache'));
   });
 };
