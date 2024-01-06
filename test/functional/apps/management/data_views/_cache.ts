@@ -13,13 +13,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
   const find = getService('find');
 
-  before(async () => {
-    await PageObjects.settings.navigateTo();
-  });
-
-  describe('"Create Index Pattern" wizard', async function () {
-    await PageObjects.settings.clickKibanaSettings();
-    const cacheSetting = await find.byCssSelector('#data_views:cache_max_age-group');
-    expect(cacheSetting).to.not.be(undefined);
+  describe('Data view field caps cache advanced setting', async function () {
+    before(async () => {
+      await PageObjects.settings.navigateTo();
+    });
+    it('should have cache setting', async () => {
+      await PageObjects.settings.clickKibanaSettings();
+      const cacheSetting = await find.byCssSelector('#data_views:cache_max_age-group');
+      expect(cacheSetting).to.not.be(undefined);
+    });
   });
 }
