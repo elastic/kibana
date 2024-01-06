@@ -45,6 +45,9 @@ describe(
       login();
       visitWithTimeRange(ALERTS_URL);
       openActiveTimeline();
+      cy.window().then((win) => {
+        win.onbeforeunload = null;
+      });
       goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
     });
