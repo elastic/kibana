@@ -51,7 +51,7 @@ import { createConfig } from './config';
 import { ExportTypesRegistry, checkLicense } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
-import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
+import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
 import type { ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
@@ -93,7 +93,6 @@ export class ReportingCore {
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
   private executeTask: ExecuteReportTask;
-  private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
   private exportTypesRegistry = new ExportTypesRegistry();
@@ -116,7 +115,6 @@ export class ReportingCore {
     });
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
-    this.monitorTask = new MonitorReportsTask(this, config, this.logger);
 
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
@@ -142,10 +140,9 @@ export class ReportingCore {
       et.setup(setupDeps);
     });
 
-    const { executeTask, monitorTask } = this;
+    const { executeTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
-      [monitorTask.TYPE]: monitorTask.getTaskDefinition(),
     });
   }
 
@@ -161,9 +158,9 @@ export class ReportingCore {
     });
 
     const { taskManager } = startDeps;
-    const { executeTask, monitorTask } = this;
-    // enable this instance to generate reports and to monitor for pending reports
-    await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
+    const { executeTask } = this;
+    // enable this instance to generate reports
+    await Promise.all([executeTask.init(taskManager)]);
   }
 
   public pluginStop() {
