@@ -15,3 +15,5 @@ export const TAB_ID_VULNERABILITY_FLYOUT = (tabId: string) =>
   `vulnerability-finding-flyout-tab-${tabId}`;
 
 export const LATEST_VULNERABILITIES_TABLE = 'latest_vulnerabilities_table';
+
+export const VULNERABILITIES_GROUPING_COUNTER = 'vulnerabilities_grouping_counter';

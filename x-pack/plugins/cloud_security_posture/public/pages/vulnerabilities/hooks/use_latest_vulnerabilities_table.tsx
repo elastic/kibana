@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
 import { useMemo } from 'react';
+import { Filter } from '@kbn/es-query';
 import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
 import { FindingsBaseURLQuery } from '../../../common/types';
 import { useCloudPostureDataTable } from '../../../common/hooks/use_cloud_posture_data_table';
@@ -15,20 +15,20 @@ import { useLatestVulnerabilities } from './use_latest_vulnerabilities';
 const columnsLocalStorageKey = 'cloudPosture:latestVulnerabilities:columns';
 
 export const useLatestVulnerabilitiesTable = ({
-  dataView,
   getDefaultQuery,
+  nonPersistedFilters,
 }: {
-  dataView: DataView;
   getDefaultQuery: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
+  nonPersistedFilters?: Filter[];
 }) => {
-  const cloudPostureTable = useCloudPostureDataTable({
-    dataView,
+  const cloudPostureDataTable = useCloudPostureDataTable({
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey,
     defaultQuery: getDefaultQuery,
+    nonPersistedFilters,
   });
 
-  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages } = cloudPostureTable;
+  const { query, sort, queryError, getRowsFromPages } = cloudPostureDataTable;
 
   const {
     data,
@@ -47,7 +47,7 @@ export const useLatestVulnerabilitiesTable = ({
   const error = fetchError || queryError;
 
   return {
-    cloudPostureTable,
+    cloudPostureDataTable,
     rows,
     error,
     isFetching,

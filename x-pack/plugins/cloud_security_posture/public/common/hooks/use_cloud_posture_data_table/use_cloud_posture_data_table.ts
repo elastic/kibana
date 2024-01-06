@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { Dispatch, SetStateAction, useCallback } from 'react';
-import { type DataView } from '@kbn/data-views-plugin/common';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { CriteriaWithPagination } from '@elastic/eui';
 import { DataTableRecord } from '@kbn/discover-utils/types';
@@ -16,6 +15,7 @@ import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
 import { FindingsBaseURLQuery } from '../../types';
 import { useBaseEsQuery } from './use_base_es_query';
 import { usePersistedQuery } from './use_persisted_query';
+import { useDataViewContext } from '../../contexts/data_view_context';
 
 type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 
@@ -46,13 +46,11 @@ export interface CloudPostureDataTableResult {
 */
 export const useCloudPostureDataTable = ({
   defaultQuery = getDefaultQuery,
-  dataView,
   paginationLocalStorageKey,
   columnsLocalStorageKey,
   nonPersistedFilters,
 }: {
   defaultQuery?: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
-  dataView: DataView;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
   nonPersistedFilters?: Filter[];
@@ -60,6 +58,7 @@ export const useCloudPostureDataTable = ({
   const getPersistedDefaultQuery = usePersistedQuery(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(paginationLocalStorageKey);
+  const { dataView } = useDataViewContext();
 
   const onChangeItemsPerPage = useCallback(
     (newPageSize) => {

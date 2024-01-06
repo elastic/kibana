@@ -9,7 +9,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
+import {
+  LATEST_FINDINGS_INDEX_PATTERN,
+  LATEST_VULNERABILITIES_INDEX_PATTERN,
+} from '../../../common/constants';
 import { CspClientPluginStartDeps } from '../../types';
 
 const cloudSecurityFieldLabels: Record<string, string> = {
@@ -45,6 +48,30 @@ const cloudSecurityFieldLabels: Record<string, string> = {
     'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
     { defaultMessage: 'Last Checked' }
   ),
+  'vulnerability.id': i18n.translate(
+    'xpack.csp.findings.findingsTable.findingsTableColumn.vulnerabilityIdColumnLabel',
+    { defaultMessage: 'Vulnerability' }
+  ),
+  'vulnerability.score.base': i18n.translate(
+    'xpack.csp.findings.findingsTable.findingsTableColumn.vulnerabilityScoreColumnLabel',
+    { defaultMessage: 'CVSS' }
+  ),
+  'vulnerability.severity': i18n.translate(
+    'xpack.csp.findings.findingsTable.findingsTableColumn.vulnerabilitySeverityColumnLabel',
+    { defaultMessage: 'Severity' }
+  ),
+  'package.name': i18n.translate(
+    'xpack.csp.findings.findingsTable.findingsTableColumn.packageNameColumnLabel',
+    { defaultMessage: 'Package' }
+  ),
+  'package.version': i18n.translate(
+    'xpack.csp.findings.findingsTable.findingsTableColumn.packageVersionColumnLabel',
+    { defaultMessage: 'Version' }
+  ),
+  'package.fixed_version': i18n.translate(
+    'xpack.csp.findings.findingsTable.findingsTableColumn.packageFixedVersionColumnLabel',
+    { defaultMessage: 'Fix Version' }
+  ),
 } as const;
 
 /**
@@ -61,8 +88,10 @@ export const useLatestFindingsDataView = (dataView: string) => {
       throw new Error(`Data view not found [Name: {${dataView}}]`);
     }
 
-    // or FINDINGS_INDEX_PATTERN
-    if (dataView === LATEST_FINDINGS_INDEX_PATTERN) {
+    if (
+      dataView === LATEST_FINDINGS_INDEX_PATTERN ||
+      dataView === LATEST_VULNERABILITIES_INDEX_PATTERN
+    ) {
       let shouldUpdate = false;
       Object.entries(cloudSecurityFieldLabels).forEach(([field, label]) => {
         if (

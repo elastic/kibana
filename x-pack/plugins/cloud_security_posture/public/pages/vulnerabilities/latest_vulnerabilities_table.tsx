@@ -8,35 +8,36 @@
 import React from 'react';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, EuiSpacer } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { CspVulnerabilityFinding } from '../../../common/schemas';
-import { FindingsBaseProps } from '../../common/types';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
 import { getDefaultQuery, defaultColumns } from './constants';
 import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
 import { ErrorCallout } from '../configurations/layout/error_callout';
+import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
 
-type LatestVulnerabilitiesTableProps = FindingsBaseProps & {
+interface LatestVulnerabilitiesTableProps {
   groupSelectorComponent?: JSX.Element;
   height?: number;
-};
-
+  nonPersistedFilters?: Filter[];
+}
 /**
  * Type Guard for checking if the given source is a CspVulnerabilityFinding
  */
 const isCspVulnerabilityFinding = (
   source: Record<string, any> | undefined
 ): source is CspVulnerabilityFinding => {
-  return source?.result?.evaluation !== undefined;
+  return source?.vulnerability?.id !== undefined;
 };
 
 /**
  * This Wrapper component renders the children if the given row is a CspVulnerabilityFinding
  * it uses React's Render Props pattern
  */
-const CspFindingRenderer = ({
+const CspVulnerabilityFindingRenderer = ({
   row,
   children,
 }: {
@@ -51,11 +52,11 @@ const CspFindingRenderer = ({
 
 const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
   return (
-    <CspFindingRenderer row={row}>
+    <CspVulnerabilityFindingRenderer row={row}>
       {({ finding }) => (
         <VulnerabilityFindingFlyout vulnerabilityRecord={finding} closeFlyout={onCloseFlyout} />
       )}
-    </CspFindingRenderer>
+    </CspVulnerabilityFindingRenderer>
   );
 };
 
@@ -63,36 +64,60 @@ const title = i18n.translate('xpack.csp.findings.latestVulnerabilities.tableRowT
   defaultMessage: 'Vulnerabilities',
 });
 
+const customCellRenderer = (rows: DataTableRecord[]) => ({
+  'vulnerability.score.base': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => (
+        <CVSScoreBadge
+          score={finding.vulnerability?.score?.base}
+          version={finding.vulnerability?.score?.version}
+        />
+      )}
+    </CspVulnerabilityFindingRenderer>
+  ),
+  'vulnerability.severity': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => <SeverityStatusBadge severity={finding.vulnerability.severity} />}
+    </CspVulnerabilityFindingRenderer>
+  ),
+});
+
 export const LatestVulnerabilitiesTable = ({
-  dataView,
+  groupSelectorComponent,
   height,
+  nonPersistedFilters,
 }: LatestVulnerabilitiesTableProps) => {
-  const { cloudPostureTable, rows, total, error, isFetching, fetchNextPage } =
+  const { cloudPostureDataTable, rows, total, error, isFetching, fetchNextPage } =
     useLatestVulnerabilitiesTable({
-      dataView,
       getDefaultQuery,
+      nonPersistedFilters,
     });
 
-  return error ? (
+  const { filters } = cloudPostureDataTable;
+
+  return (
     <>
-      <EuiSpacer size="m" />
-      <ErrorCallout error={error} />
+      {error ? (
+        <>
+          <EuiSpacer size="m" />
+          <ErrorCallout error={error} />
+        </>
+      ) : (
+        <CloudSecurityDataTable
+          data-test-subj={LATEST_VULNERABILITIES_TABLE}
+          isLoading={isFetching}
+          defaultColumns={defaultColumns}
+          rows={rows}
+          total={total}
+          flyoutComponent={flyoutComponent}
+          cloudPostureDataTable={cloudPostureDataTable}
+          loadMore={fetchNextPage}
+          title={title}
+          customCellRenderer={customCellRenderer}
+          groupSelectorComponent={groupSelectorComponent}
+          height={height ?? `calc(100vh - ${filters?.length > 0 ? 404 : 364}px)`}
+        />
+      )}
     </>
-  ) : (
-    <CloudSecurityDataTable
-      data-test-subj={LATEST_VULNERABILITIES_TABLE}
-      dataView={dataView}
-      isLoading={isFetching}
-      defaultColumns={defaultColumns}
-      rows={rows}
-      total={total}
-      flyoutComponent={flyoutComponent}
-      cloudPostureTable={cloudPostureTable}
-      loadMore={fetchNextPage}
-      title={title}
-      // customCellRenderer={customCellRenderer}
-      // groupSelectorComponent={groupSelectorComponent}
-      height={height}
-    />
   );
 };
