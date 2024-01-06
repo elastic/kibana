@@ -23,7 +23,7 @@ import {
   addFieldToTable,
   convertNBSPToSP,
 } from '../../../../tasks/discover';
-import { createNewTimeline, goToEsqlTab } from '../../../../tasks/timeline';
+import { createNewTimeline, goToEsqlTab, openActiveTimeline } from '../../../../tasks/timeline';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
@@ -43,6 +43,10 @@ describe.skip(
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
+      openActiveTimeline();
+      cy.window().then((win) => {
+        win.onbeforeunload = null;
+      });
       createNewTimeline();
       goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
@@ -54,6 +58,8 @@ describe.skip(
       cy.get(DISCOVER_RESULT_HITS).should('have.text', 1);
     });
     it('should be able to add fields to the table', () => {
+      addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
+      submitDiscoverSearchBar();
       addFieldToTable('host.name');
       addFieldToTable('user.name');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
