@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Data view field caps cache advanced setting', async function () {
     before(async () => {
       await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSettings();
     });
     it('should have cache setting', async () => {
       const cacheSetting = await find.byCssSelector('#data_views\\:cache_max_age-group');
