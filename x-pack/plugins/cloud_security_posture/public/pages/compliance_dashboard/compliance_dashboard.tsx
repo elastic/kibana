@@ -222,7 +222,6 @@ export const getDefaultTab = (
   const installedPolicyTemplatesCspm = pluginStatus?.cspm?.status;
   const installedPolicyTemplatesKspm = pluginStatus?.kspm?.status;
   let preferredDashboard: PosturePolicyTemplate = POSTURE_TYPE_CSPM;
-
   // cspm has findings
   if (!!cspmTotalFindings) {
     preferredDashboard = POSTURE_TYPE_CSPM;
@@ -427,8 +426,10 @@ export const ComplianceDashboard = () => {
     history,
   ]);
 
+  const lastTabSelected = !isCloudSecurityPostureInstalled ? undefined : selectedTabLocalStorage;
+
   return (
-    <DashboardTabRedirecter lastTabSelected={selectedTabLocalStorage}>
+    <DashboardTabRedirecter lastTabSelected={lastTabSelected}>
       <CloudPosturePage>
         <EuiPageHeader
           data-test-subj={CLOUD_POSTURE_DASHBOARD_PAGE_HEADER}
