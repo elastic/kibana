@@ -6,7 +6,6 @@
  */
 
 import { generateRandomStringName } from '../../tasks/utils';
-import { APP_ALERTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
