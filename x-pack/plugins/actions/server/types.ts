@@ -76,6 +76,7 @@ export interface ActionTypeExecutorOptions<
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
+  request?: KibanaRequest;
 }
 
 export type ActionResult = Connector;

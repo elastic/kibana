@@ -399,7 +399,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaSslKeySecretInput = useSecretInput(
-    kafkaOutput?.ssl?.certificate,
+    kafkaOutput?.secrets?.ssl?.key,
     kafkaAuthMethodInput.value === kafkaAuthType.Ssl ? validateSSLKeySecret : undefined,
     isSSLEditable
   );
@@ -874,7 +874,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
               hosts: elasticsearchUrlInput.value,
-              is_default: false,
+              is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,

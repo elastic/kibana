@@ -48,7 +48,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
 }) => {
   const { showNodeInfo } = useEnabledFeatures();
   const columns: Array<EuiBasicTableColumn<JobMessage>> = useMemo(() => {
-    const cols = [
+    const cols: Array<EuiBasicTableColumn<JobMessage>> = [
       {
         name: refreshMessage ? (
           <EuiToolTip
@@ -100,42 +100,42 @@ export const JobMessages: FC<JobMessagesProps> = ({
       });
     }
 
-    return cols;
-  }, [showNodeInfo, refreshMessage]);
-
-  if (typeof actionHandler === 'function') {
-    columns.push({
-      name: i18n.translate('xpack.ml.jobMessages.actionsLabel', {
-        defaultMessage: 'Actions',
-      }),
-      width: '10%',
-      actions: [
-        {
-          render: (message: JobMessage) => {
-            return (
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.ml.jobMessages.toggleInChartTooltipText"
-                    defaultMessage="Toggle in chart"
+    if (typeof actionHandler === 'function') {
+      cols.push({
+        name: i18n.translate('xpack.ml.jobMessages.actionsLabel', {
+          defaultMessage: 'Actions',
+        }),
+        width: '10%',
+        actions: [
+          {
+            render: (message: JobMessage) => {
+              return (
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.jobMessages.toggleInChartTooltipText"
+                      defaultMessage="Toggle in chart"
+                    />
+                  }
+                >
+                  <EuiButtonIcon
+                    size="xs"
+                    aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
+                      defaultMessage: 'Toggle in chart',
+                    })}
+                    iconType="visAreaStacked"
+                    onClick={() => actionHandler(message)}
                   />
-                }
-              >
-                <EuiButtonIcon
-                  size="xs"
-                  aria-label={i18n.translate('xpack.ml.jobMessages.toggleInChartAriaLabel', {
-                    defaultMessage: 'Toggle in chart',
-                  })}
-                  iconType="visAreaStacked"
-                  onClick={() => actionHandler(message)}
-                />
-              </EuiToolTip>
-            );
+                </EuiToolTip>
+              );
+            },
           },
-        },
-      ],
-    });
-  }
+        ],
+      });
+    }
+
+    return cols;
+  }, [showNodeInfo, refreshMessage, actionHandler]);
 
   const defaultSorting = {
     sort: {

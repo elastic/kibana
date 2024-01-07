@@ -12,7 +12,6 @@ import {
   EuiComment,
   EuiErrorBoundary,
   EuiPanel,
-  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ChatItemActions } from './chat_item_actions';
@@ -27,7 +26,7 @@ import type { Feedback } from '../feedback_buttons';
 import type { ChatActionClickHandler } from './types';
 import type { TelemetryEventTypeWithPayload } from '../../analytics';
 
-export interface ChatItemProps extends ChatTimelineItem {
+export interface ChatItemProps extends Omit<ChatTimelineItem, 'message'> {
   onActionClick: ChatActionClickHandler;
   onEditSubmit: (message: Message) => void;
   onFeedbackClick: (feedback: Feedback) => void;
@@ -36,14 +35,18 @@ export interface ChatItemProps extends ChatTimelineItem {
   onStopGeneratingClick: () => void;
 }
 
-const normalMessageClassName = css`
-  .euiCommentEvent__body {
-    padding: 0;
-  }
-
+const moreCompactHeaderClassName = css`
   .euiCommentEvent__header > .euiPanel {
     padding-top: 4px;
     padding-bottom: 4px;
+  }
+`;
+
+const normalMessageClassName = css`
+  ${moreCompactHeaderClassName}
+
+  .euiCommentEvent__body {
+    padding: 0;
   }
 
   /* targets .*euiTimelineItemEvent-top, makes sure text properly wraps and doesn't overflow */
@@ -74,12 +77,13 @@ const noPanelMessageClassName = css`
 export function ChatItem({
   actions: { canCopy, canEdit, canGiveFeedback, canRegenerate },
   content,
+  function_call: functionCall,
+  role,
   currentUser,
   display: { collapsed },
   element,
   error,
   loading,
-  message,
   title,
   onActionClick,
   onEditSubmit,
@@ -96,10 +100,13 @@ export function ChatItem({
   const actions = [canCopy, collapsed, canCopy].filter(Boolean);
 
   const noBodyMessageClassName = css`
+    ${moreCompactHeaderClassName}
+
     .euiCommentEvent__body {
       padding: 0;
       height: ${expanded ? 'fit-content' : '0px'};
       overflow: hidden;
+      border: none;
     }
   `;
 
@@ -132,7 +139,9 @@ export function ChatItem({
       <ChatItemContentInlinePromptEditor
         editing={editing}
         loading={loading}
-        message={message}
+        functionCall={functionCall}
+        content={content}
+        role={role}
         onSubmit={handleInlineEditSubmit}
         onActionClick={onActionClick}
         onSendTelemetry={onSendTelemetry}
@@ -147,7 +156,6 @@ export function ChatItem({
         forceState={expanded ? 'open' : 'closed'}
         onToggle={handleToggleExpand}
       >
-        <EuiSpacer size="s" />
         {contentElement}
       </EuiAccordion>
     );
@@ -155,10 +163,8 @@ export function ChatItem({
 
   return (
     <EuiComment
-      timelineAvatar={
-        <ChatItemAvatar loading={loading} currentUser={currentUser} role={message.message.role} />
-      }
-      username={getRoleTranslation(message.message.role)}
+      timelineAvatar={<ChatItemAvatar loading={loading} currentUser={currentUser} role={role} />}
+      username={getRoleTranslation(role)}
       event={title}
       actions={
         <ChatItemActions

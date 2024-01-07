@@ -6,6 +6,8 @@
  */
 
 import { kibanaPackageJson } from '@kbn/repo-info';
+import type { Client } from '@elastic/elasticsearch';
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test/src/kbn_client';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
@@ -28,6 +30,7 @@ import {
 
 export interface CreateAndEnrollEndpointHostCIOptions
   extends Pick<BaseVmCreateOptions, 'disk' | 'cpus' | 'memory'> {
+  esClient: Client;
   kbnClient: KbnClient;
   log: ToolingLog;
   /** The fleet Agent Policy ID to use for enrolling the agent */
@@ -51,6 +54,7 @@ export interface CreateAndEnrollEndpointHostCIResponse {
  */
 export const createAndEnrollEndpointHostCI = async ({
   kbnClient,
+  esClient,
   log,
   agentPolicyId,
   cpus,
@@ -122,7 +126,13 @@ export const createAndEnrollEndpointHostCI = async ({
 
   await hostVm.exec(agentEnrollCommand);
 
-  const { id: agentId } = await waitForHostToEnroll(kbnClient, log, hostVm.name, 240000);
+  const { id: agentId } = await waitForHostToEnroll(
+    kbnClient,
+    log,
+    hostVm.name,
+    5 * 60 * 1000,
+    esClient
+  );
 
   return {
     hostname: hostVm.name,

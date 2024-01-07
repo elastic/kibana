@@ -10,12 +10,36 @@ import {
   CspBenchmarkRulesBulkActionRequestSchema,
   CspBenchmarkRulesStates,
   cspBenchmarkRulesBulkActionRequestSchema,
-} from '../../../../common/types/rules/v3';
+  CspBenchmarkRulesBulkActionResponse,
+} from '../../../../common/types/rules/v4';
 import { CspRouter } from '../../../types';
 
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../../common/constants';
 import { bulkActionBenchmarkRulesHandler } from './v1';
 
+/**
+	This API allows bulk actions (mute or unmute) on CSP benchmark rules.
+	Request:
+	{
+	  action: 'mute' | 'unmute'; // Specify the bulk action type (mute or unmute)
+	  rules: [
+	    {
+        benchmark_id: string;       // Identifier for the CSP benchmark
+	      benchmark_version: string;  // Version of the CSP benchmark
+	      rule_number: string;        // Rule number within the benchmark
+	      rule_id: string;            // Unique identifier for the rule
+	    },
+	    // ... (additional benchmark rules)
+	  ];
+	}
+	
+	Response:
+	{
+	  updated_benchmark_rules: CspBenchmarkRulesStates; Benchmark rules object that were affected
+	  detection_rules: string;         // Status message indicating the number of detection rules affected
+	  message: string;                 // Success message
+	}
+	*/
 export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
   router.versioned
     .post({
@@ -42,19 +66,30 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
 
           const benchmarkRulesToUpdate = requestBody.rules;
 
+          const detectionRulesClient = (await context.alerting).getRulesClient();
+
           const handlerResponse = await bulkActionBenchmarkRulesHandler(
+            cspContext.soClient,
             cspContext.encryptedSavedObjects,
+            detectionRulesClient,
             benchmarkRulesToUpdate,
-            requestBody.action
+            requestBody.action,
+            cspContext.logger
           );
 
-          const updatedBenchmarkRules: CspBenchmarkRulesStates = handlerResponse;
-          return response.ok({
-            body: {
-              updated_benchmark_rules: updatedBenchmarkRules,
-              message: 'The bulk operation has been executed successfully.',
-            },
-          });
+          const updatedBenchmarkRules: CspBenchmarkRulesStates =
+            handlerResponse.newCspSettings.attributes.rules!;
+
+          const body: CspBenchmarkRulesBulkActionResponse = {
+            updated_benchmark_rules: updatedBenchmarkRules,
+            message: 'The bulk operation has been executed successfully.',
+          };
+
+          if (requestBody.action === 'mute' && handlerResponse.disabledRules) {
+            body.disabled_detection_rules = handlerResponse.disabledRules;
+          }
+
+          return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
 

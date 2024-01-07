@@ -7,16 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import {
+  ANNUAL_SECONDS,
+  CalculateImpactEstimates,
+} from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asDuration } from '../../utils/formatters/as_duration';
 import { asNumber } from '../../utils/formatters/as_number';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
-import {
-  ANNUAL_SECONDS,
-  CalculateImpactEstimates,
-} from '../../hooks/use_calculate_impact_estimates';
 
 interface Params {
   countInclusive: number;
@@ -24,11 +24,56 @@ interface Params {
   totalSamples: number;
   totalSeconds: number;
   calculateImpactEstimates: CalculateImpactEstimates;
-  shouldUseLegacyCo2Calculation: boolean;
   selfAnnualCO2Kgs: number;
   totalAnnualCO2Kgs: number;
   selfAnnualCostUSD: number;
   totalAnnualCostUSD: number;
+  rank?: number;
+}
+
+export interface ImpactRow {
+  'data-test-subj': string;
+  label: React.ReactNode;
+  value: string;
+}
+
+const getComparisonValue = <T,>(value: T, comparisonValue?: T) =>
+  comparisonValue ? `${value} vs ${comparisonValue}` : value;
+
+/**
+ * e.g.:
+ * label: 'foo',
+ * value: 'abc' vs 'xyz'
+ */
+export function getComparisonImpactRow({
+  base,
+  comparison,
+}: {
+  base: Params;
+  comparison?: Params;
+}) {
+  const baseImpactRows = getImpactRows(base);
+  const comparisonImpactRows = comparison ? getImpactRows(comparison) : [];
+  return [
+    ...(base.rank
+      ? [
+          {
+            'data-test-subj': 'rank',
+            label: i18n.translate('xpack.profiling.flameGraphInformationWindow.rank', {
+              defaultMessage: 'Rank',
+            }),
+            value: getComparisonValue(base.rank, comparison?.rank),
+          },
+        ]
+      : []),
+    ...baseImpactRows.map((baseItem, index) => {
+      const comparisonValue = comparisonImpactRows[index]?.value;
+      return {
+        ...baseItem,
+        value: getComparisonValue(baseItem.value, comparisonValue),
+      };
+    }),
+  ];
 }
 
 export function getImpactRows({
@@ -37,12 +82,11 @@ export function getImpactRows({
   totalSamples,
   totalSeconds,
   calculateImpactEstimates,
-  shouldUseLegacyCo2Calculation,
   selfAnnualCO2Kgs,
   totalAnnualCO2Kgs,
   selfAnnualCostUSD,
   totalAnnualCostUSD,
-}: Params) {
+}: Params): ImpactRow[] {
   const { selfCPU, totalCPU } = calculateImpactEstimates({
     countInclusive,
     countExclusive,
@@ -117,10 +161,7 @@ export function getImpactRows({
           defaultMessage: 'CO2 emission',
         }
       ),
-      value: asWeight(
-        shouldUseLegacyCo2Calculation ? totalCPU.co2 : totalAnnualCO2Kgs / annualSecondsRatio,
-        'kgs'
-      ),
+      value: asWeight(totalAnnualCO2Kgs / annualSecondsRatio, 'kgs'),
     },
     {
       'data-test-subj': 'selfCo2Emission',
@@ -128,10 +169,7 @@ export function getImpactRows({
         'xpack.profiling.flameGraphInformationWindow.co2EmissionExclusiveLabel',
         { defaultMessage: 'CO2 emission (excl. children)' }
       ),
-      value: asWeight(
-        shouldUseLegacyCo2Calculation ? selfCPU.co2 : selfAnnualCO2Kgs / annualSecondsRatio,
-        'kgs'
-      ),
+      value: asWeight(selfAnnualCO2Kgs / annualSecondsRatio, 'kgs'),
     },
     {
       'data-test-subj': 'annualizedCo2Emission',
@@ -139,10 +177,7 @@ export function getImpactRows({
         'xpack.profiling.flameGraphInformationWindow.annualizedCo2InclusiveLabel',
         { defaultMessage: 'Annualized CO2' }
       ),
-      value: asWeight(
-        shouldUseLegacyCo2Calculation ? totalCPU.annualizedCo2 : totalAnnualCO2Kgs,
-        'kgs'
-      ),
+      value: asWeight(totalAnnualCO2Kgs, 'kgs'),
     },
     {
       'data-test-subj': 'annualizedSelfCo2Emission',
@@ -150,10 +185,7 @@ export function getImpactRows({
         'xpack.profiling.flameGraphInformationWindow.annualizedCo2ExclusiveLabel',
         { defaultMessage: 'Annualized CO2 (excl. children)' }
       ),
-      value: asWeight(
-        shouldUseLegacyCo2Calculation ? selfCPU.annualizedCo2 : selfAnnualCO2Kgs,
-        'kgs'
-      ),
+      value: asWeight(selfAnnualCO2Kgs, 'kgs'),
     },
     {
       'data-test-subj': 'dollarCost',
@@ -161,11 +193,7 @@ export function getImpactRows({
         'xpack.profiling.flameGraphInformationWindow.dollarCostInclusiveLabel',
         { defaultMessage: 'Dollar cost' }
       ),
-      value: asCost(
-        shouldUseLegacyCo2Calculation
-          ? totalCPU.dollarCost
-          : totalAnnualCostUSD / annualSecondsRatio
-      ),
+      value: asCost(totalAnnualCostUSD / annualSecondsRatio),
     },
     {
       'data-test-subj': 'selfDollarCost',
@@ -173,9 +201,7 @@ export function getImpactRows({
         'xpack.profiling.flameGraphInformationWindow.dollarCostExclusiveLabel',
         { defaultMessage: 'Dollar cost (excl. children)' }
       ),
-      value: asCost(
-        shouldUseLegacyCo2Calculation ? selfCPU.dollarCost : selfAnnualCostUSD / annualSecondsRatio
-      ),
+      value: asCost(selfAnnualCostUSD / annualSecondsRatio),
     },
     {
       'data-test-subj': 'annualizedDollarCost',
@@ -183,9 +209,7 @@ export function getImpactRows({
         'xpack.profiling.flameGraphInformationWindow.annualizedDollarCostInclusiveLabel',
         { defaultMessage: 'Annualized dollar cost' }
       ),
-      value: asCost(
-        shouldUseLegacyCo2Calculation ? totalCPU.annualizedDollarCost : totalAnnualCostUSD
-      ),
+      value: asCost(totalAnnualCostUSD),
     },
     {
       'data-test-subj': 'annualizedSelfDollarCost',
@@ -193,9 +217,7 @@ export function getImpactRows({
         'xpack.profiling.flameGraphInformationWindow.annualizedDollarCostExclusiveLabel',
         { defaultMessage: 'Annualized dollar cost (excl. children)' }
       ),
-      value: asCost(
-        shouldUseLegacyCo2Calculation ? selfCPU.annualizedDollarCost : selfAnnualCostUSD
-      ),
+      value: asCost(selfAnnualCostUSD),
     },
   ];
 }
