@@ -38,7 +38,7 @@ export interface HighlightedFieldsTableRow {
     /**
      * Highlighted overrideField name
      */
-    originalField: string;
+    originalField?: string;
     /**
      * Highlighted field value
      */
