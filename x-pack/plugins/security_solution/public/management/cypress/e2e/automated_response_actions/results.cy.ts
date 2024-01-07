@@ -49,37 +49,55 @@ describe('Results', { tags: ['@ess', '@serverless'] }, () => {
     }
   });
 
-  describe('see results when has RBAC', () => {
-    before(() => {
-      login(ROLE.endpoint_response_actions_access);
-    });
+  describe(
+    'see results when has RBAC',
+    {
+      // Not supported in serverless!
+      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+      // `internal/kibana/settings` is not accessible in serverless
+      tags: ['@brokenInServerless'],
+    },
+    () => {
+      before(() => {
+        login(ROLE.endpoint_response_actions_access);
+      });
 
-    it('see endpoint action', () => {
-      cy.visit(APP_ALERTS_PATH);
-      closeAllToasts();
-      cy.getByTestSubj('expand-event').first().click();
-      cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-      cy.getByTestSubj('responseActionsViewTab').click();
-      cy.getByTestSubj('endpoint-results-comment');
-      cy.contains(/isolate is pending|isolate completed successfully/g);
-    });
-  });
-  describe('do not see results results when does not have RBAC', () => {
-    before(() => {
-      login(ROLE.endpoint_response_actions_no_access);
-    });
+      it('see endpoint action', () => {
+        cy.visit(APP_ALERTS_PATH);
+        closeAllToasts();
+        cy.getByTestSubj('expand-event').first().click();
+        cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+        cy.getByTestSubj('responseActionsViewTab').click();
+        cy.getByTestSubj('endpoint-results-comment');
+        cy.contains(/isolate is pending|isolate completed successfully/g);
+      });
+    }
+  );
+  describe(
+    'do not see results results when does not have RBAC',
+    {
+      // Not supported in serverless!
+      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+      // `internal/kibana/settings` is not accessible in serverless
+      tags: ['@brokenInServerless'],
+    },
+    () => {
+      before(() => {
+        login(ROLE.endpoint_response_actions_no_access);
+      });
 
-    it('show the permission denied callout', () => {
-      cy.visit(APP_ALERTS_PATH);
-      closeAllToasts();
+      it('show the permission denied callout', () => {
+        cy.visit(APP_ALERTS_PATH);
+        closeAllToasts();
 
-      cy.getByTestSubj('expand-event').first().click();
-      cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-      cy.getByTestSubj('responseActionsViewTab').click();
-      cy.contains('Permission denied');
-      cy.contains(
-        'To access these results, ask your administrator for Elastic Defend Kibana privileges.'
-      );
-    });
-  });
+        cy.getByTestSubj('expand-event').first().click();
+        cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+        cy.getByTestSubj('responseActionsViewTab').click();
+        cy.contains('Permission denied');
+        cy.contains(
+          'To access these results, ask your administrator for Elastic Defend Kibana privileges.'
+        );
+      });
+    }
+  );
 });

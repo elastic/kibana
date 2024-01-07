@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HIGHLIGHTED_FIELDS_CELL_TEST_ID } from '../../../../flyout/document_details/right/components/test_ids';
 import { openAlertDetailsView } from '../../screens/alerts';
 import { getEndpointListPath } from '../../../common/routing';
 import {
@@ -185,7 +186,7 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
       cy.contains(`Release on host ${hostname} successfully submitted`);
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       openAlertDetailsView();
-      cy.getByTestSubj('event-field-agent.status').within(() => {
+      cy.getByTestSubj(`agent.status-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`).within(() => {
         cy.get('[title="Isolated"]').should('not.exist');
       });
     });
@@ -278,6 +279,9 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       cy.getByTestSubj('euiFlyoutCloseButton').click();
 
+      // FIX: Cases doesn't automatically refresh comments list
+      cy.reload();
+
       cy.getByTestSubj('user-actions-list').within(() => {
         cy.contains(isolateComment);
         cy.get('[aria-label="lock"]').should('exist');
@@ -301,6 +305,9 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
       cy.contains(`Release on host ${hostname} successfully submitted`);
       cy.getByTestSubj('euiFlyoutCloseButton').click();
 
+      // FIX: Cases doesn't automatically refresh comments list
+      cy.reload();
+
       cy.getByTestSubj('user-actions-list').within(() => {
         cy.contains(releaseComment);
         cy.contains(isolateComment);
@@ -309,7 +316,7 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
       });
 
       openCaseAlertDetails(caseAlertId);
-      cy.getByTestSubj('event-field-agent.status').then(($status) => {
+      cy.getByTestSubj(`agent.status-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`).then(($status) => {
         if ($status.find('[title="Isolated"]').length > 0) {
           cy.getByTestSubj('euiFlyoutCloseButton').click();
           cy.getByTestSubj(`comment-action-show-alert-${caseAlertId}`).click();

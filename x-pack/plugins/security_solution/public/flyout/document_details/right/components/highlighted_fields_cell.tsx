@@ -91,7 +91,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
           <EuiFlexItem
             grow={false}
             key={`${i}-${value}`}
-            data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
+            data-test-subj={`${field}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
           >
             {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
               <LinkFieldCell value={value} />
