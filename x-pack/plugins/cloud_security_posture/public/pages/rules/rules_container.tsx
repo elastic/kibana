@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
@@ -20,6 +20,7 @@ import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
 import type { CspBenchmarkRule, PageUrlParams } from '../../../common/types/latest';
+import { RulesCounters } from './rules_counters';
 interface RulesPageData {
   rules_page: CspBenchmarkRule[];
   all_rules: CspBenchmarkRule[];
@@ -106,38 +107,38 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <EuiPanel hasBorder={false} hasShadow={false}>
-        <RulesTableHeader
-          onSectionChange={(value) =>
-            setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
-          }
-          onRuleNumberChange={(value) =>
-            setRulesQuery((currentQuery) => ({ ...currentQuery, ruleNumber: value }))
-          }
-          sectionSelectOptions={cleanedSectionList}
-          ruleNumberSelectOptions={cleanedRuleNumberList}
-          search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
-          searchValue={rulesQuery.search || ''}
-          totalRulesCount={rulesPageData.all_rules.length}
-          pageSize={rulesPageData.rules_page.length}
-          isSearching={status === 'loading'}
-        />
-        <EuiSpacer />
-        <RulesTable
-          rules_page={rulesPageData.rules_page}
-          total={rulesPageData.total}
-          error={rulesPageData.error}
-          loading={rulesPageData.loading}
-          perPage={pageSize || rulesQuery.perPage}
-          page={rulesQuery.page}
-          setPagination={(paginationQuery) => {
-            setPageSize(paginationQuery.perPage);
-            setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
-          }}
-          setSelectedRuleId={setSelectedRuleId}
-          selectedRuleId={selectedRuleId}
-        />
-      </EuiPanel>
+      <RulesCounters />
+      <EuiSpacer />
+      <RulesTableHeader
+        onSectionChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
+        }
+        onRuleNumberChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, ruleNumber: value }))
+        }
+        sectionSelectOptions={cleanedSectionList}
+        ruleNumberSelectOptions={cleanedRuleNumberList}
+        search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
+        searchValue={rulesQuery.search || ''}
+        totalRulesCount={rulesPageData.all_rules.length}
+        pageSize={rulesPageData.rules_page.length}
+        isSearching={status === 'loading'}
+      />
+      <EuiSpacer />
+      <RulesTable
+        rules_page={rulesPageData.rules_page}
+        total={rulesPageData.total}
+        error={rulesPageData.error}
+        loading={rulesPageData.loading}
+        perPage={pageSize || rulesQuery.perPage}
+        page={rulesQuery.page}
+        setPagination={(paginationQuery) => {
+          setPageSize(paginationQuery.perPage);
+          setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
+        }}
+        setSelectedRuleId={setSelectedRuleId}
+        selectedRuleId={selectedRuleId}
+      />
       {selectedRuleId && (
         <RuleFlyout
           rule={rulesPageData.rules_map.get(selectedRuleId)!}
