@@ -45,6 +45,17 @@ Array [
     ],
     "display": <div
       aria-label="timestamp - this field represents the time that events occurred."
+      css={
+        Object {
+          "map": undefined,
+          "name": "1sxf1pk",
+          "next": undefined,
+          "styles": "
+          text-align: left;
+        ",
+          "toString": [Function],
+        }
+      }
     >
       <EuiToolTip
         content="This field represents the time that events occurred."
@@ -1422,6 +1433,17 @@ Array [
     ],
     "display": <div
       aria-label="timestamp - this field represents the time that events occurred."
+      css={
+        Object {
+          "map": undefined,
+          "name": "1sxf1pk",
+          "next": undefined,
+          "styles": "
+          text-align: left;
+        ",
+          "toString": [Function],
+        }
+      }
     >
       <EuiToolTip
         content="This field represents the time that events occurred."
@@ -1593,6 +1615,17 @@ Array [
     ],
     "display": <div
       aria-label="timestamp - this field represents the time that events occurred."
+      css={
+        Object {
+          "map": undefined,
+          "name": "1sxf1pk",
+          "next": undefined,
+          "styles": "
+          text-align: left;
+        ",
+          "toString": [Function],
+        }
+      }
     >
       <EuiToolTip
         content="This field represents the time that events occurred."

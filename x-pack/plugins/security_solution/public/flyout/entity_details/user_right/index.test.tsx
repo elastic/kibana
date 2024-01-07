@@ -10,12 +10,12 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
-import { mockRiskScoreState } from './mocks';
 
 import {
   mockManagedUserData,
-  mockObservedUser,
+  mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { mockObservedUser } from './mocks';
 
 const mockProps: UserPanelProps = {
   userName: 'test',
@@ -41,12 +41,9 @@ jest.mock(
   })
 );
 
-jest.mock(
-  '../../../timelines/components/side_panel/new_user_detail/hooks/use_observed_user',
-  () => ({
-    useObservedUser: () => mockedUseObservedUser(),
-  })
-);
+jest.mock('./hooks/use_observed_user', () => ({
+  useObservedUser: () => mockedUseObservedUser(),
+}));
 
 describe('UserPanel', () => {
   beforeEach(() => {

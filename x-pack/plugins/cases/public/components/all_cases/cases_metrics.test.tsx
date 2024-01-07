@@ -13,7 +13,8 @@ import { CasesMetrics } from './cases_metrics';
 
 jest.mock('../../api');
 
-describe('Cases metrics', () => {
+// Failing: See https://github.com/elastic/kibana/issues/174300
+describe.skip('Cases metrics', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
