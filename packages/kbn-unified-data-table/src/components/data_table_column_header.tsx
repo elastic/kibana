@@ -153,7 +153,12 @@ export const DataTableTimeColumnHeader = ({
   });
 
   return (
-    <div aria-label={primaryTimeAriaLabel}>
+    <div
+      aria-label={primaryTimeAriaLabel}
+      css={css`
+        text-align: left;
+      `}
+    >
       <EuiToolTip content={primaryTimeTooltip}>
         <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
           {timeFieldName} <EuiIcon type="clock" />
