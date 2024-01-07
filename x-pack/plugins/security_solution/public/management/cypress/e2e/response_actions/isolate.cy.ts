@@ -23,7 +23,7 @@ import {
 } from '../../tasks/isolate';
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
@@ -34,15 +34,7 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 describe.skip(
   'Isolate command',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      '@brokenInServerless',
-    ],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let isolateComment: string;
@@ -85,7 +77,6 @@ describe.skip(
 
     beforeEach(() => {
       login();
-      disableExpandableFlyoutAdvancedSettings();
     });
 
     describe('From manage', () => {

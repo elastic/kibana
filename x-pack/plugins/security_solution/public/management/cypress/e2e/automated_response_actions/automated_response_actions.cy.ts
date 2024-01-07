@@ -11,7 +11,7 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
@@ -23,14 +23,7 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 describe(
   'Automated Response Actions',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      '@brokenInServerless',
-    ],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -72,7 +65,6 @@ describe(
 
     beforeEach(() => {
       login();
-      disableExpandableFlyoutAdvancedSettings();
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/169828

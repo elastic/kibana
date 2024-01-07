@@ -24,7 +24,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
 import { APP_ALERTS_PATH, APP_CASES_PATH, APP_PATH } from '../../../../../common/constants';
 import { login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
@@ -89,117 +89,107 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
     });
   });
 
-  describe.skip(
-    'from Alerts',
-    {
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      tags: ['@brokenInServerless'],
-    },
-    () => {
-      let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
-      let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
-      let hostname: string;
+  describe.skip('from Alerts', () => {
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
+    let hostname: string;
 
-      before(() => {
-        disableExpandableFlyoutAdvancedSettings();
-        indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
-          (indexEndpoints) => {
-            endpointData = indexEndpoints;
-            hostname = endpointData.data.hosts[0].host.name;
+    before(() => {
+      indexEndpointHosts({ withResponseActions: false, isolation: false }).then(
+        (indexEndpoints) => {
+          endpointData = indexEndpoints;
+          hostname = endpointData.data.hosts[0].host.name;
 
-            return indexEndpointRuleAlerts({
-              endpointAgentId: endpointData.data.hosts[0].agent.id,
-              endpointHostname: endpointData.data.hosts[0].host.name,
-              endpointIsolated: false,
-            });
-          }
-        );
-      });
-
-      after(() => {
-        if (endpointData) {
-          endpointData.cleanup();
-          endpointData = undefined;
+          return indexEndpointRuleAlerts({
+            endpointAgentId: endpointData.data.hosts[0].agent.id,
+            endpointHostname: endpointData.data.hosts[0].host.name,
+            endpointIsolated: false,
+          });
         }
+      );
+    });
 
-        if (alertData) {
-          alertData.cleanup();
-          alertData = undefined;
-        }
+    after(() => {
+      if (endpointData) {
+        endpointData.cleanup();
+        endpointData = undefined;
+      }
+
+      if (alertData) {
+        alertData.cleanup();
+        alertData = undefined;
+      }
+    });
+
+    beforeEach(() => {
+      login();
+    });
+
+    it('should isolate and release host', () => {
+      const isolateComment = `Isolating ${hostname}`;
+      const releaseComment = `Releasing ${hostname}`;
+      let isolateRequestResponse: ActionDetails;
+      let releaseRequestResponse: ActionDetails;
+
+      loadPage(APP_ALERTS_PATH);
+      closeAllToasts();
+
+      cy.getByTestSubj('alertsTable').within(() => {
+        cy.getByTestSubj('expand-event')
+          .first()
+          .within(() => {
+            cy.get(`[data-is-loading="true"]`).should('exist');
+          });
+        cy.getByTestSubj('expand-event')
+          .first()
+          .within(() => {
+            cy.get(`[data-is-loading="true"]`).should('not.exist');
+          });
       });
 
-      beforeEach(() => {
-        login();
+      openAlertDetailsView();
+
+      isolateHostWithComment(isolateComment, hostname);
+
+      interceptActionRequests((responseBody) => {
+        isolateRequestResponse = responseBody;
+      }, 'isolate');
+
+      cy.getByTestSubj('hostIsolateConfirmButton').click();
+
+      cy.wait('@isolate').then(() => {
+        sendActionResponse(isolateRequestResponse);
       });
 
-      it('should isolate and release host', () => {
-        const isolateComment = `Isolating ${hostname}`;
-        const releaseComment = `Releasing ${hostname}`;
-        let isolateRequestResponse: ActionDetails;
-        let releaseRequestResponse: ActionDetails;
+      cy.contains(`Isolation on host ${hostname} successfully submitted`);
 
-        loadPage(APP_ALERTS_PATH);
-        closeAllToasts();
+      cy.getByTestSubj('euiFlyoutCloseButton').click();
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(1000);
+      openAlertDetailsView();
 
-        cy.getByTestSubj('alertsTable').within(() => {
-          cy.getByTestSubj('expand-event')
-            .first()
-            .within(() => {
-              cy.get(`[data-is-loading="true"]`).should('exist');
-            });
-          cy.getByTestSubj('expand-event')
-            .first()
-            .within(() => {
-              cy.get(`[data-is-loading="true"]`).should('not.exist');
-            });
-        });
+      checkFlyoutEndpointIsolation();
 
-        openAlertDetailsView();
+      releaseHostWithComment(releaseComment, hostname);
 
-        isolateHostWithComment(isolateComment, hostname);
+      interceptActionRequests((responseBody) => {
+        releaseRequestResponse = responseBody;
+      }, 'release');
 
-        interceptActionRequests((responseBody) => {
-          isolateRequestResponse = responseBody;
-        }, 'isolate');
+      cy.contains('Confirm').click();
 
-        cy.getByTestSubj('hostIsolateConfirmButton').click();
-
-        cy.wait('@isolate').then(() => {
-          sendActionResponse(isolateRequestResponse);
-        });
-
-        cy.contains(`Isolation on host ${hostname} successfully submitted`);
-
-        cy.getByTestSubj('euiFlyoutCloseButton').click();
-        // eslint-disable-next-line cypress/no-unnecessary-waiting
-        cy.wait(1000);
-        openAlertDetailsView();
-
-        checkFlyoutEndpointIsolation();
-
-        releaseHostWithComment(releaseComment, hostname);
-
-        interceptActionRequests((responseBody) => {
-          releaseRequestResponse = responseBody;
-        }, 'release');
-
-        cy.contains('Confirm').click();
-
-        cy.wait('@release').then(() => {
-          sendActionResponse(releaseRequestResponse);
-        });
-
-        cy.contains(`Release on host ${hostname} successfully submitted`);
-        cy.getByTestSubj('euiFlyoutCloseButton').click();
-        openAlertDetailsView();
-        cy.getByTestSubj('event-field-agent.status').within(() => {
-          cy.get('[title="Isolated"]').should('not.exist');
-        });
+      cy.wait('@release').then(() => {
+        sendActionResponse(releaseRequestResponse);
       });
-    }
-  );
+
+      cy.contains(`Release on host ${hostname} successfully submitted`);
+      cy.getByTestSubj('euiFlyoutCloseButton').click();
+      openAlertDetailsView();
+      cy.getByTestSubj('event-field-agent.status').within(() => {
+        cy.get('[title="Isolated"]').should('not.exist');
+      });
+    });
+  });
 
   describe('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
@@ -211,7 +201,6 @@ describe('Isolate command', { tags: ['@ess', '@serverless', '@brokenInServerless
     let hostname: string;
 
     before(() => {
-      disableExpandableFlyoutAdvancedSettings();
       indexNewCase().then((indexCase) => {
         caseData = indexCase;
         caseUrlPath = `${APP_CASES_PATH}/${indexCase.data.id}`;
