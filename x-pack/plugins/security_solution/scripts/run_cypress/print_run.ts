@@ -356,6 +356,9 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
     });
 
     _.each(runs, (run) => {
+      // Handle ERROR TypeError: Cannot destructure property 'spec' of 'run' as it is undefined.
+      if (!run) return;
+
       const { spec, stats } = run;
       const ms = durationInMinutes(stats?.duration ?? 0);
       const formattedSpec = formatPath(spec.relative, getWidth(table2, 1));

@@ -71,8 +71,10 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
       navigateToAlertsList(`query=(language:kuery,query:'agent.id: "${endpointAgentId}" ')`);
       closeAllToasts();
       cy.getByTestSubj('expand-event').first().click();
-      cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-      cy.getByTestSubj('responseActionsViewTab').click();
+      // response-actions-notification doesn't exist in expandable flyout
+      // cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+      cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+      cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
       cy.contains('Permission denied');
       cy.contains(
         'To access these results, ask your administrator for Elastic Defend Kibana privileges.'

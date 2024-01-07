@@ -96,8 +96,11 @@ describe(
 
         changeAlertsFilter('event.category: "file"');
         cy.getByTestSubj('expand-event').first().click();
-        cy.getByTestSubj('responseActionsViewTab').click();
-        cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+
+        // response-actions-notification doesn't exist in expandable flyout
+        // cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+        cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+        cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 
         cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
           .should('contain', 'isolate completed successfully')
