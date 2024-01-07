@@ -156,11 +156,7 @@ export const thresholdExecutor = async ({
     let createResult: GenericBulkCreateResponse<BaseFieldsLatest>;
     let newSignalHistory: ThresholdSignalHistory;
 
-    if (
-      alertSuppression?.duration &&
-      runOpts?.experimentalFeatures?.alertSuppressionForThresholdRuleEnabled &&
-      hasPlatinumLicense
-    ) {
+    if (alertSuppression?.duration && hasPlatinumLicense) {
       const suppressedResults = await bulkCreateSuppressedThresholdAlerts({
         buckets,
         completeRule,

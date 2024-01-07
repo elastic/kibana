@@ -180,7 +180,7 @@ export function FunctionListPopover({
         }}
         singleSelection
         onChange={(options) => {
-          const selectedFunction = options.filter((fn) => fn.checked !== 'off');
+          const selectedFunction = options.filter((fn) => !('checked' in fn));
           if (selectedFunction && selectedFunction.length === 1) {
             handleSelectFunction({ ...selectedFunction[0], checked: 'on' });
           }

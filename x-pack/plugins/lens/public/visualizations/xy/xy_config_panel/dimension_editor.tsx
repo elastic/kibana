@@ -166,6 +166,7 @@ export function DataDimensionEditor(
           defaultMessage: 'Color mapping',
         })}
         style={{ alignItems: 'center' }}
+        fullWidth
       >
         <EuiFlexGroup
           alignItems="center"

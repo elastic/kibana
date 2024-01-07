@@ -13,6 +13,14 @@ import { CustomUrlList, CustomUrlListProps } from './list';
 
 jest.mock('../../../contexts/kibana');
 
+jest.mock('../../../services/toast_notification_service', () => ({
+  useToastNotificationService: () => {
+    return {
+      displayErrorToast: jest.fn(),
+    };
+  },
+}));
+
 function prepareTest(setCustomUrlsFn: jest.Mock) {
   const customUrls = [
     {

@@ -14,9 +14,11 @@ import {
   IContextProvider,
   KibanaRequest,
   SavedObjectsClientContract,
+  type AnalyticsServiceSetup,
 } from '@kbn/core/server';
 import { once } from 'lodash';
 
+import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
   ElasticAssistantPluginSetup,
@@ -40,6 +42,7 @@ interface CreateRouteHandlerContextParams {
   core: CoreSetup<ElasticAssistantPluginStart, unknown>;
   logger: Logger;
   getRegisteredTools: GetRegisteredTools;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export class ElasticAssistantPlugin
@@ -61,6 +64,7 @@ export class ElasticAssistantPlugin
     core,
     logger,
     getRegisteredTools,
+    telemetry,
   }: CreateRouteHandlerContextParams): IContextProvider<
     ElasticAssistantRequestHandlerContext,
     typeof PLUGIN_ID
@@ -72,6 +76,7 @@ export class ElasticAssistantPlugin
         actions: pluginsStart.actions,
         getRegisteredTools,
         logger,
+        telemetry,
       };
     };
   };
@@ -87,8 +92,10 @@ export class ElasticAssistantPlugin
         getRegisteredTools: (pluginName: string) => {
           return appContextService.getRegisteredTools(pluginName);
         },
+        telemetry: core.analytics,
       })
     );
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
     const getElserId: GetElser = once(
       async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {

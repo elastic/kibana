@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-// Please also add new aliases to test/scripts/jenkins_storybook.sh
+// Please also add new aliases to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 //
 // If you wish for your Storybook to be built and included in CI, also add your
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts

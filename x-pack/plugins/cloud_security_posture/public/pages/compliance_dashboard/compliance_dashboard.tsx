@@ -276,7 +276,7 @@ const TabContent = ({ posturetype }: { posturetype: PosturePolicyTemplate }) => 
   }
 
   if (shouldRenderNoFindings) {
-    return <NoFindingsStates posturetype={posturetype} />;
+    return <NoFindingsStates postureType={posturetype} />;
   }
 
   return (
@@ -384,7 +384,7 @@ export const ComplianceDashboard = () => {
         `}
       >
         {tabs.find((t) => t.isSelected)?.content}
-        {!isCloudSecurityPostureInstalled && <NoFindingsStates posturetype={POSTURE_TYPE_CSPM} />}
+        {!isCloudSecurityPostureInstalled && <NoFindingsStates postureType={POSTURE_TYPE_CSPM} />}
       </div>
     </CloudPosturePage>
   );
