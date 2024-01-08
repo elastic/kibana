@@ -120,8 +120,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
   const timeFilterRefreshInterval = useRefreshIntervalUpdates();
   const time = useTimeRangeUpdates();
 
-  // @TODO: remove
-  console.log(`--@@DatePickerWrapper time`, time);
   useEffect(
     function syncTimeRangeFromUrlState() {
       if (globalState?.time !== undefined) {
@@ -252,8 +250,6 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
 
   const updateTimeFilter = useCallback(
     ({ start, end }: OnTimeChangeProps) => {
-      // @TODO: remove
-      console.log(`--@@updateTimeFilter start, end`, start, end);
       setRecentlyUsedRanges(getRecentlyUsedRanges());
       setGlobalState('time', {
         from: start,

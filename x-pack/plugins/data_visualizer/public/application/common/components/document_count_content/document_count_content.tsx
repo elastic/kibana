@@ -38,7 +38,7 @@ export interface Props {
   samplingProbability?: number | null;
   setSamplingProbability?: (value: number | null) => void;
   randomSamplerPreference?: RandomSamplerOption;
-  setRandomSamplerPreference: (value: RandomSamplerOption) => void;
+  setRandomSamplerPreference?: (value: RandomSamplerOption) => void;
   loading: boolean;
 }
 
@@ -152,24 +152,26 @@ export const DocumentCountContent: FC<Props> = ({
               </EuiFlexItem>
               <EuiSpacer size="m" />
 
-              <EuiFormRow
-                data-test-subj="dvRandomSamplerOptionsFormRow"
-                label={i18n.translate(
-                  'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerRowLabel',
-                  {
-                    defaultMessage: 'Random sampling',
-                  }
-                )}
-              >
-                <EuiSelect
-                  data-test-subj="dvRandomSamplerOptionsSelect"
-                  options={RANDOM_SAMPLER_SELECT_OPTIONS}
-                  value={randomSamplerPreference}
-                  onChange={(e) =>
-                    setRandomSamplerPreference(e.target.value as RandomSamplerOption)
-                  }
-                />
-              </EuiFormRow>
+              {setRandomSamplerPreference ? (
+                <EuiFormRow
+                  data-test-subj="dvRandomSamplerOptionsFormRow"
+                  label={i18n.translate(
+                    'xpack.dataVisualizer.randomSamplerSettingsPopUp.randomSamplerRowLabel',
+                    {
+                      defaultMessage: 'Random sampling',
+                    }
+                  )}
+                >
+                  <EuiSelect
+                    data-test-subj="dvRandomSamplerOptionsSelect"
+                    options={RANDOM_SAMPLER_SELECT_OPTIONS}
+                    value={randomSamplerPreference}
+                    onChange={(e) =>
+                      setRandomSamplerPreference(e.target.value as RandomSamplerOption)
+                    }
+                  />
+                </EuiFormRow>
+              ) : null}
 
               {randomSamplerPreference === RANDOM_SAMPLER_OPTION.ON_MANUAL ? (
                 <RandomSamplerRangeSlider

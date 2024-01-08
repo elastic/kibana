@@ -38,8 +38,10 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { debounce, first } from 'lodash';
-import { current } from 'immer';
-import useObservable from 'react-use/lib/useObservable';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ESQLSearchReponse } from '@kbn/es-types';
+import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { SupportedFieldType } from '../../../../../common/types';
 import { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
@@ -48,44 +50,16 @@ import type {
   StringFieldStats,
 } from '../../../../../common/types/field_stats';
 import { getInitialProgress, getReducer } from '../../progress_utils';
-// import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
-import {
-  DV_FROZEN_TIER_PREFERENCE,
-  // DV_RANDOM_SAMPLER_PREFERENCE,
-  // DV_RANDOM_SAMPLER_P_VALUE,
-  type DVKey,
-  type DVStorageMapped,
-} from '../../types/storage';
-// import {
-//   DataVisualizerTable,
-//   ItemIdToExpandedRowMap,
-// } from '../../../common/components/stats_table';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
-// import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
 import type { NonAggregatableField, OverallStats } from '../../types/overall_stats';
-// import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import {
   DataVisualizerIndexBasedAppState,
   DataVisualizerIndexBasedPageUrlState,
 } from '../../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-// import { FieldCountPanel } from '../../../common/components/field_count_panel';
-// import { DocumentCountContent } from '../../../common/components/document_count_content';
-// import { OMIT_FIELDS } from '../../../../../common/constants';
-// import { SearchPanel } from '../search_panel';
-// import { ActionsPanel } from '../actions_panel';
-// import { createMergedEsQuery } from '../../utils/saved_search_utils';
-// import { DataVisualizerDataViewManagement } from '../data_view_management';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
-// import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
-// import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
-import {
-  // MIN_SAMPLER_PROBABILITY,
-  RANDOM_SAMPLER_OPTION,
-  // RandomSamplerOption,
-} from '../../constants/random_sampler';
 import { getESQLDocumentCountStats } from '../../search_strategy/requests/get_document_stats';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
 import { getESQLSupportedAggs, getSupportedAggs } from '../../utils/get_supported_aggs';
@@ -103,6 +77,10 @@ import { useCancellableSearch } from '../../hooks/use_cancellable_hooks';
 import { MAX_PERCENT, PERCENTILE_SPACING } from '../../search_strategy/requests/constants';
 import { processDistributionData } from '../../utils/process_distribution_data';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
+import type { DocumentCountStats } from '../../../common/hooks/use_document_count_stats';
+
+type BucketCount = number;
+type BucketTerm = string;
 
 const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
   KBN_FIELD_TYPES.GEO_SHAPE,
@@ -156,7 +134,7 @@ interface Data {
   totalCount?: number;
   nonAggregatableFields?: Array<{ name: string; type: string }>;
   aggregatableFields?: Array<{ name: string; type: string; supportedAggs: Set<string> }>;
-  documentCountStats?: FieldVisConfig;
+  documentCountStats?: DocumentCountStats;
   overallStats?: {
     aggregatableExistsFields: AggregatableField[];
     aggregatableNotExistsFields: AggregatableField[];
@@ -253,7 +231,7 @@ export const useESQLFieldStatsData = ({
                 },
               },
             },
-            { strategy: 'esql' }
+            { strategy: ESQL_SEARCH_STRATEGY }
           );
 
           if (!unmounted && fieldStatsResp) {
@@ -267,7 +245,7 @@ export const useESQLFieldStatsData = ({
 
               const percentiles = values
                 .slice(startIndex + 2, startIndex + 23)
-                .map((value) => ({ value }));
+                .map((value: number) => ({ value }));
 
               const distribution = processDistributionData(percentiles, PERCENTILE_SPACING, min);
 
@@ -310,28 +288,31 @@ export const useESQLFieldStatsData = ({
                       },
                     },
                   },
-                  { strategy: 'esql' }
+                  { strategy: ESQL_SEARCH_STRATEGY }
                 )
               )
             );
             if (keywordTopTermsResp) {
               keywordFields.forEach(({ field }, idx) => {
-                const results = keywordTopTermsResp[idx].rawResponse.values;
-                const topValuesSampleSize = results.reduce((acc, row) => acc + row[0], 0);
+                const resp = keywordTopTermsResp[idx];
+                if (isDefined(resp)) {
+                  const results = resp.rawResponse.values as Array<[BucketCount, BucketTerm]>;
+                  const topValuesSampleSize = results.reduce((acc: number, row) => acc + row[0], 0);
 
-                const terms = results.map((row) => ({
-                  key: row[1],
-                  doc_count: row[0],
-                  percent: row[0] / topValuesSampleSize,
-                }));
+                  const terms = results.map((row) => ({
+                    key: row[1],
+                    doc_count: row[0],
+                    percent: row[0] / topValuesSampleSize,
+                  }));
 
-                processedFieldStats.set(field.name, {
-                  fieldName: field.name,
-                  topValues: terms,
-                  topValuesSampleSize,
-                  topValuesSamplerShardSize: topValuesSampleSize,
-                  isTopValuesSampled: false,
-                } as StringFieldStats);
+                  processedFieldStats.set(field.name, {
+                    fieldName: field.name,
+                    topValues: terms,
+                    topValuesSampleSize,
+                    topValuesSamplerShardSize: topValuesSampleSize,
+                    isTopValuesSampled: false,
+                  } as StringFieldStats);
+                }
               });
             }
 
@@ -362,40 +343,43 @@ export const useESQLFieldStatsData = ({
                       },
                     },
                   },
-                  { strategy: 'esql' }
+                  { strategy: ESQL_SEARCH_STRATEGY }
                 )
               )
             );
             if (booleanTopTermsResp) {
               booleanFields.forEach(({ field }, idx) => {
-                const results = booleanTopTermsResp[idx].rawResponse.values;
-                const topValuesSampleSize = results.reduce((acc, row) => acc + row[0], 0);
+                const resp = booleanTopTermsResp[idx];
+                if (isDefined(resp)) {
+                  const results = resp.rawResponse.values as Array<[BucketCount, boolean]>;
+                  const topValuesSampleSize = results.reduce((acc, row) => acc + row[0], 0);
 
-                let falseCount = 0;
-                let trueCount = 0;
-                const terms = results.map((row) => {
-                  if (row[1] === false) {
-                    falseCount = row[0];
-                  }
-                  if (row[1] === true) {
-                    trueCount = row[0];
-                  }
-                  return {
-                    key_as_string: row[1].toString(),
-                    doc_count: row[0],
-                    percent: row[0] / topValuesSampleSize,
-                  };
-                });
+                  let falseCount = 0;
+                  let trueCount = 0;
+                  const terms = results.map((row) => {
+                    if (row[1] === false) {
+                      falseCount = row[0];
+                    }
+                    if (row[1] === true) {
+                      trueCount = row[0];
+                    }
+                    return {
+                      key_as_string: row[1].toString(),
+                      doc_count: row[0],
+                      percent: row[0] / topValuesSampleSize,
+                    };
+                  });
 
-                processedFieldStats.set(field.name, {
-                  fieldName: field.name,
-                  topValues: terms,
-                  topValuesSampleSize,
-                  topValuesSamplerShardSize: topValuesSampleSize,
-                  isTopValuesSampled: false,
-                  trueCount,
-                  falseCount,
-                } as StringFieldStats);
+                  processedFieldStats.set(field.name, {
+                    fieldName: field.name,
+                    topValues: terms,
+                    topValuesSampleSize,
+                    topValuesSamplerShardSize: topValuesSampleSize,
+                    isTopValuesSampled: false,
+                    trueCount,
+                    falseCount,
+                  } as StringFieldStats);
+                }
               });
             }
 
@@ -436,7 +420,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
   nonAggregatableFields: string[];
   fieldsToFetch: string[];
   lastRefresh: number;
-  filter;
+  filter?: QueryDslQueryContainer[] | undefined;
 }) => {
   const {
     services: { data },
@@ -476,8 +460,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
 
       const searchOptions = {
         abortSignal: abortCtrl.current.signal,
-        // sessionId,
-        // ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
+        // No sessionId here because ES|QL not yet supported (?)
       };
 
       if (!isESQLQuery(searchQuery)) {
@@ -497,10 +480,11 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
               ...(filter ? { filter } : {}),
             },
           },
-          { ...searchOptions, strategy: 'esql' }
+          { ...searchOptions, strategy: ESQL_SEARCH_STRATEGY }
         )
       );
 
+      // @ts-expect-error ES types need to be updated with columns for ESQL queries
       const columns = columnsResp.rawResponse.columns.map((c) => ({
         ...c,
         secondaryType: getSupportedFieldType(c.type),
@@ -512,7 +496,9 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
         ? fieldStatsRequest?.timeFieldName
         : undefined;
 
-      // If a date field '@timestamp' exists, set that as default time field, else set the first date field as default
+      // If a date field named '@timestamp' exists, set that as default time field
+      // Else, use the default time view defined by data view
+      // Else, use first available date field as default
       const timeFieldName =
         timeFields.length > 0
           ? timeFields.find((f) => f.name === '@timestamp')
@@ -536,12 +522,24 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
         isRunning: true,
         error: undefined,
       });
-      const aggregatableFields: Array<{ name: string; type: string; supportedAggs: Set<string> }> =
-        [];
-      const nonAggregatableFields: Array<{ name: string; type: string }> = [];
+      const aggregatableFields: Array<{
+        fieldName: string;
+        name: string;
+        type: string;
+        supportedAggs: Set<string>;
+        secondaryType: string;
+        aggregatable: boolean;
+      }> = [];
+      const nonAggregatableFields: Array<{
+        fieldName: string;
+        name: string;
+        type: string;
+        secondaryType: string;
+      }> = [];
 
       // @TODO: swap type and secondary type
       const fields = columns
+        // Some field types are not supported by ESQL yet
         .filter((c) => c.type !== 'unsupported')
         .map((field) => {
           return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
@@ -594,20 +592,22 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
                 ...(filter ? { filter } : {}),
               },
             },
-            { strategy: 'esql' }
+            { strategy: ESQL_SEARCH_STRATEGY }
           )
         );
 
         const stats = {
-          aggregatableExistsFields: [],
-          aggregatableNotExistsFields: [],
+          aggregatableExistsFields: [] as AggregatableField[],
+          aggregatableNotExistsFields: [] as AggregatableField[],
           nonAggregatableExistsFields: [] as NonAggregatableField[],
           nonAggregatableNotExistsFields: [] as NonAggregatableField[],
         };
 
+        const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
+
         aggregatableFieldsToQuery.forEach((field, idx) => {
-          const count = esqlResults.rawResponse.values[0][idx * 2];
-          const cardinality = esqlResults.rawResponse.values[0][idx * 2 + 1];
+          const count = esqlResultsResp.values[0][idx * 2] as number;
+          const cardinality = esqlResultsResp.values[0][idx * 2 + 1] as number;
 
           if (field.aggregatable === true) {
             if (count > 0) {
@@ -626,7 +626,8 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
                 ...field,
                 fieldName: field.name,
                 existsInDocs: false,
-                stats: {},
+                // @todo: check  if stats {}
+                stats: undefined,
               });
             }
           } else {
@@ -650,7 +651,8 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
         });
       }
     } catch (error) {
-      console.error(error);
+      // eslint-disable-next-line no-console
+      console.error('An error occured fetching ESQL data\n', error);
     }
   }, [data.search, JSON.stringify({ fieldStatsRequest })]);
 
@@ -713,7 +715,7 @@ export const getDefaultDataVisualizerListState = (
   showAllFields: false,
   showEmptyFields: false,
   probability: null,
-  rndSamplerPref: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
+  rndSamplerPref: null,
   ...overrides,
 });
 
@@ -1160,14 +1162,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     [currentDataView, totalCount]
   );
 
-  // useEffect(() => {
-  //   // Update data query manager if input string is updated
-  //   data?.query.queryString.setQuery({
-  //     query: searchString,
-  //     language: searchQueryLanguage,
-  //   });
-  // }, [data, searchQueryLanguage, searchString]);
-
   const hasValidTimeField = useMemo(
     () =>
       currentDataView &&
@@ -1200,15 +1194,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             direction="row"
             alignItems="center"
             css={{ padding: `${euiTheme.euiSizeS} 0`, marginRight: `${euiTheme.euiSize}` }}
-          >
-            {/* <EuiTitle size={'s'}>
-              <h2>{currentDataView.getName()}</h2>
-            </EuiTitle>
-            <DataVisualizerDataViewManagement
-              currentDataView={currentDataView}
-              useNewFieldsApi={true}
-            /> */}
-          </EuiFlexGroup>
+          />
 
           {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
           <EuiFlexGroup
@@ -1255,22 +1241,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder grow={false}>
-              {/* <SearchPanel
-                dataView={currentDataView}
-                searchString={searchString}
-                searchQuery={searchQuery}
-                searchQueryLanguage={searchQueryLanguage}
-                setSearchParams={setSearchParams}
-                overallStats={overallStats}
-                indexedFieldTypes={fieldTypes}
-                setVisibleFieldTypes={setVisibleFieldTypes}
-                visibleFieldTypes={visibleFieldTypes}
-                visibleFieldNames={visibleFieldNames}
-                setVisibleFieldNames={setVisibleFieldNames}
-                showEmptyFields={showEmptyFields}
-                onAddFilter={onAddFilter}
-              /> */}
-
               {totalCount !== undefined && (
                 <>
                   <EuiSpacer size="m" />
@@ -1278,11 +1248,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                     <DocumentCountContent
                       documentCountStats={documentCountStats}
                       totalCount={totalCount}
-                      // setSamplingProbability={setSamplingProbability}
                       samplingProbability={1}
                       loading={false}
-                      // randomSamplerPreference={savedRandomSamplerPreference}
-                      // setRandomSamplerPreference={setRandomSamplerPreference}
                     />
                   </EuiFlexGroup>
                 </>
@@ -1291,7 +1258,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
               {/* <FieldCountPanel
                 showEmptyFields={showEmptyFields}
                 toggleShowEmptyFields={toggleShowEmptyFields}
-                fieldsCountStats={fieldsCountStats}
+                // fieldsCountStats={fieldsCountStats}
                 metricsStats={metricsStats}
               /> */}
               <EuiSpacer size="m" />
@@ -1301,8 +1268,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 pageState={dataVisualizerListState}
                 updatePageState={setDataVisualizerListState}
                 getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
-                // extendedColumns={extendedColumns}
-                // loading={progress < 100}
                 overallStatsRunning={overallStatsProgress.isRunning}
                 showPreviewByDefault={dataVisualizerListState.showDistributions ?? true}
                 onChange={setDataVisualizerListState}

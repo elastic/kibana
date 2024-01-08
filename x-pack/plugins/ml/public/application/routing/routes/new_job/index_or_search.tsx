@@ -25,7 +25,7 @@ enum MODE {
 interface IndexOrSearchPageProps extends PageProps {
   nextStepPath: string;
   mode: MODE;
-  extraButtons?: React.Children;
+  extraButtons?: React.ReactNode;
 }
 
 const getBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
