@@ -259,6 +259,7 @@ export function registerAnomalyRuleType({
                 ),
                 timestamp: Date.parse(latest.timestamp as string),
                 bucketSpan: latest.bucket_span as number,
+                bucketKey: bucket.key,
               };
             })
             .filter((anomaly) =>
@@ -274,6 +275,7 @@ export function registerAnomalyRuleType({
             detectorType,
             timestamp,
             bucketSpan,
+            bucketKey,
           } = anomaly;
 
           const eventSourceFields = await getServiceGroupFieldsForAnomaly({
@@ -297,14 +299,7 @@ export function registerAnomalyRuleType({
             detectorType,
           });
 
-          const alertId = [
-            ApmRuleType.Anomaly,
-            serviceName,
-            environment,
-            transactionType,
-          ]
-            .filter((name) => name)
-            .join('_');
+          const alertId = bucketKey.join('_');
 
           const alert = services.alertWithLifecycle({
             id: alertId,
