@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
@@ -51,7 +52,7 @@ describe(
       const [ruleName, ruleDescription] = generateRandomStringName(2);
 
       beforeEach(() => {
-        login(ROLE.endpoint_response_actions_access);
+        login(ROLE.soc_manager);
       });
       afterEach(() => {
         if (ruleId) {
@@ -161,11 +162,13 @@ describe(
         validateAvailableCommands();
 
         cy.getByTestSubj(`command-type-${secondTestedCommand}`).click();
-        cy.getByTestSubj('config-custom-field-name').should('have.value', '');
-        cy.getByTestSubj('config-overwrite-toggle').click();
+        cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
+          cy.getByTestSubj('config-custom-field-name').should('have.value', '');
+          cy.getByTestSubj('config-overwrite-toggle').click();
 
-        cy.getByTestSubj('config-custom-field-name').type('process.entity_id{downArrow}{enter}');
-        cy.getByTestSubj('config-overwrite-toggle').click();
+          cy.getByTestSubj('config-custom-field-name').type('process.entity_id{downArrow}{enter}');
+          cy.getByTestSubj('config-overwrite-toggle').click();
+        });
 
         cy.intercept('PUT', '/api/detection_engine/rules').as('updateResponseAction');
         cy.getByTestSubj('ruleEditSubmitButton').click();
@@ -196,7 +199,7 @@ describe(
         cy.intercept('PUT', '/api/detection_engine/rules').as('deleteResponseAction');
         cy.getByTestSubj('ruleEditSubmitButton').click();
         cy.wait('@deleteResponseAction').should(({ request }) => {
-          expect(request.body.response_actions).to.be.equal(undefined);
+          expect(request.body.response_actions.length).to.be.equal(2);
         });
         cy.contains(`${ruleName} was saved`).should('exist');
       });
@@ -251,8 +254,8 @@ describe(
           // Try removing action
           cy.getByTestSubj('remove-response-action').click({ force: true });
         });
-        cy.getByTestSubj(`response-actions-list-item-0`).should('exist');
-        tryAddingDisabledResponseAction(1);
+        cy.getByTestSubj(`response-actions-list-item-2`).should('exist');
+        tryAddingDisabledResponseAction(3);
       });
     });
   }
