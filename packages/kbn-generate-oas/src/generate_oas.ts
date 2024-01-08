@@ -245,10 +245,12 @@ const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.Pa
 
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: {
-          requestBody: Boolean(validationSchemas?.body)
+          requestBody: !!validationSchemas?.body
             ? {
                 content: {
-                  [getJSONContentString()]: convert(validationSchemas?.body),
+                  [getJSONContentString()]: {
+                    schema: convert(validationSchemas.body),
+                  },
                 },
               }
             : undefined,
