@@ -22,7 +22,7 @@ import { kibanaContextMock } from '../../contexts/kibana/__mocks__/kibana_contex
 
 const utilityProps = {
   timeBuckets: timeBucketsMock,
-  chartTheme: kibanaContextMock.services.charts.theme.useChartsTheme(),
+  chartTheme: kibanaContextMock.services.charts.theme.useChartsBaseTheme(),
   onPointerUpdate: jest.fn(),
   cursor: {
     x: 10432423,

@@ -78,7 +78,15 @@ const getRuleMock = (id = chance.guid()): CspBenchmarkRule =>
   } as CspBenchmarkRule);
 
 const params = {
-  packagePolicyId: chance.guid(),
+  paginations: {
+    page: 1,
+    perPage: 10000,
+    ruleNumber: undefined,
+    search: '',
+    section: undefined,
+  },
+  benchmarkId: 'cis_k8s',
+  benchmarkVersion: '1.0.1',
 };
 
 describe('<RulesContainer />', () => {
@@ -109,5 +117,10 @@ describe('<RulesContainer />', () => {
 
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
     expect(await screen.findByText(rule1.metadata.name)).toBeInTheDocument();
+    expect(useFindCspBenchmarkRule).toHaveBeenCalledWith(
+      params.paginations,
+      params.benchmarkId,
+      params.benchmarkVersion
+    );
   });
 });

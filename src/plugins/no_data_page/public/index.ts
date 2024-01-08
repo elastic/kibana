@@ -13,4 +13,7 @@ export function plugin(ctx: PluginInitializerContext) {
   return new NoDataPagePlugin(ctx);
 }
 
-export type { NoDataPagePluginSetup, NoDataPagePluginStart } from './types';
+export type {
+  NoDataPagePublicSetup as NoDataPagePluginSetup,
+  NoDataPagePublicStart as NoDataPagePluginStart,
+} from './types';

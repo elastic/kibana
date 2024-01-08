@@ -17,6 +17,10 @@ interface IpSegments {
   type: 'ipv4' | 'ipv6' | 'unknown';
 }
 
+export const getIsValidFullIp = (searchString: string) => {
+  return ipaddr.IPv4.isValidFourPartDecimal(searchString) || ipaddr.IPv6.isValid(searchString);
+};
+
 export const getIpSegments = (searchString: string): IpSegments => {
   if (searchString.indexOf('.') !== -1) {
     // ipv4 takes priority - so if search string contains both `.` and `:` then it will just be an invalid ipv4 search

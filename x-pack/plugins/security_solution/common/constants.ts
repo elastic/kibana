@@ -31,7 +31,6 @@ export const ADD_THREAT_INTELLIGENCE_DATA_PATH = `/app/integrations/browse/threa
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern' as const;
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
-export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
@@ -284,6 +283,8 @@ export const INTERNAL_TAGS_URL = `/internal/tags`;
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
+export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/users/_find` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
@@ -326,8 +327,6 @@ export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
 export const DETECTION_ENGINE_ALERT_TAGS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/tags` as const;
 export const DETECTION_ENGINE_ALERT_ASSIGNEES_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/assignees` as const;
-export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
-  `${DETECTION_ENGINE_SIGNALS_URL}/_find` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;

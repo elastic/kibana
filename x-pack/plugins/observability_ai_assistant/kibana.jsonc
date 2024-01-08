@@ -20,7 +20,8 @@
       "share",
       "taskManager",
       "triggersActionsUi",
-      "dataViews"
+      "dataViews",
+      "ml"
     ],
     "requiredBundles": [ "kibanaReact", "kibanaUtils"],
     "optionalPlugins": [],

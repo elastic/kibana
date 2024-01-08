@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
 import { UseFetchDataViewsResponse } from '../use_fetch_data_views';
 
 export const useFetchDataViews = (): UseFetchDataViewsResponse => {
@@ -16,10 +15,9 @@ export const useFetchDataViews = (): UseFetchDataViewsResponse => {
     data: Array(20)
       .fill(0)
       .map((_, i) => ({
+        id: `dataview-${i}`,
         title: `dataview-${i}`,
         type: 'foo',
-        getName: () => `dataview-${i}`,
-        getIndexPattern: () => `.index-pattern-dataview-${i}`,
-      })) as DataView[],
+      })),
   };
 };

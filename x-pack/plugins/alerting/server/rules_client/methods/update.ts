@@ -37,6 +37,7 @@ import {
   validateScheduleLimit,
   ValidateScheduleLimitResult,
 } from '../../application/rule/methods/get_schedule_frequency';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 type ShouldIncrementRevision = (params?: RuleTypeParams) => boolean;
 
@@ -80,16 +81,23 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   try {
     alertSavedObject =
-      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-        namespace: context.namespace,
-      });
+      await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        id,
+        {
+          namespace: context.namespace,
+        }
+      );
   } catch (e) {
     // We'll skip invalidating the API key since we failed to load the decrypted saved object
     context.logger.error(
       `update(): Failed to load API key to invalidate on alert ${id}: ${e.message}`
     );
     // Still attempt to load the object using SOC
-    alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+    alertSavedObject = await context.unsecuredSavedObjectsClient.get<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      id
+    );
   }
 
   const {
@@ -127,7 +135,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.UPDATE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -138,7 +146,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
     ruleAuditEvent({
       action: RuleAuditAction.UPDATE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
@@ -277,7 +285,7 @@ async function updateAlert<Params extends RuleTypeParams>(
 
   try {
     updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       createAttributes,
       {
         id,

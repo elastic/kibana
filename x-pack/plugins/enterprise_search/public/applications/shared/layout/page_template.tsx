@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 
 import classNames from 'classnames';
 import { useValues } from 'kea';
@@ -71,10 +71,13 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
 
   const navIcon = solutionNavIcon ?? 'logoEnterpriseSearch';
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (useEndpointHeaderActions) {
       renderHeaderActions(EndpointsHeaderAction);
     }
+    return () => {
+      renderHeaderActions();
+    };
   }, []);
   return (
     <KibanaPageTemplate

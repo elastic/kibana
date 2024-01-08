@@ -13,13 +13,13 @@ import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { timelineActions, timelineSelectors } from '../../store';
+import { timelineDefaults } from '../../store/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeaderPanel } from '../flyout/header';
-import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
+import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { activeTimeline } from '../../containers/active_timeline_context';
@@ -82,6 +82,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
     initialized,
     show: isOpen,
     isLoading,
+    activeTab,
   } = useDeepEqualSelector((state) =>
     pick(
       [
@@ -95,6 +96,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         'initialized',
         'show',
         'isLoading',
+        'activeTab',
       ],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
@@ -195,6 +197,18 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const showTimelineTour = isOpen && !isLoading && canEditTimeline;
 
+  const handleSwitchToTab = useCallback(
+    (tab: TimelineTabs) => {
+      dispatch(
+        timelineActions.setActiveTabTimeline({
+          id: timelineId,
+          activeTab: tab,
+        })
+      );
+    },
+    [timelineId, dispatch]
+  );
+
   return (
     <TimelineContext.Provider value={timelineContext}>
       <TimelineContainer
@@ -230,7 +244,13 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           />
         </div>
       </TimelineContainer>
-      {showTimelineTour ? <TimelineTour /> : null}
+      {showTimelineTour ? (
+        <TimelineTour
+          activeTab={activeTab}
+          switchToTab={handleSwitchToTab}
+          timelineType={timelineType}
+        />
+      ) : null}
     </TimelineContext.Provider>
   );
 };

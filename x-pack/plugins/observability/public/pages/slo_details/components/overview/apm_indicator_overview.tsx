@@ -9,8 +9,9 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ALL_VALUE,
-  APMTransactionDurationIndicator,
-  APMTransactionErrorRateIndicator,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -18,24 +19,30 @@ import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../../utils/slo/co
 import { OverviewItem } from './overview_item';
 
 interface Props {
-  indicator: APMTransactionDurationIndicator | APMTransactionErrorRateIndicator;
+  slo: SLOWithSummaryResponse;
 }
 
-export function ApmIndicatorOverview({ indicator }: Props) {
+export function ApmIndicatorOverview({ slo }: Props) {
   const {
     http: { basePath },
   } = useKibana().services;
-  const { service, transactionType, transactionName, environment, filter } = indicator.params;
 
-  const link = basePath.prepend(
-    convertSliApmParamsToApmAppDeeplinkUrl({
-      environment,
-      filter,
-      service,
-      transactionName,
-      transactionType,
-    })
-  );
+  const indicator = slo.indicator;
+  if (
+    !apmTransactionDurationIndicatorSchema.is(indicator) ||
+    !apmTransactionErrorRateIndicatorSchema.is(indicator)
+  ) {
+    return null;
+  }
+
+  const url = convertSliApmParamsToApmAppDeeplinkUrl(slo);
+  if (!url) {
+    return null;
+  }
+  const link = basePath.prepend(url);
+  const {
+    params: { environment, service, transactionName, transactionType },
+  } = indicator;
 
   return (
     <OverviewItem

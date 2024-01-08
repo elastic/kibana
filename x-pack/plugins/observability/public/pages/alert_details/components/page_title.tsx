@@ -22,8 +22,10 @@ import {
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
+  ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
@@ -70,7 +72,13 @@ export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
           <AlertLifecycleStatusBadge
-            alertStatus={alert.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+            alertStatus={
+              alert.fields[ALERT_STATUS] === 'active'
+                ? ALERT_STATUS_ACTIVE
+                : alert.fields[ALERT_STATUS] === 'recovered'
+                ? ALERT_STATUS_RECOVERED
+                : ALERT_STATUS_UNTRACKED
+            }
             flapping={alert.fields[ALERT_FLAPPING]}
           />
         </EuiFlexItem>

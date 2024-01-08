@@ -16,12 +16,12 @@ import {
   EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
-import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import {
   aggValueToLabel,
   CUSTOM_METRIC_AGGREGATION_OPTIONS,
@@ -32,7 +32,7 @@ import { QueryBuilder } from '../common/query_builder';
 
 interface MetricIndicatorProps {
   type: 'good' | 'total';
-  metricFields: Field[];
+  metricFields: FieldSpec[];
   isLoadingIndex: boolean;
 }
 

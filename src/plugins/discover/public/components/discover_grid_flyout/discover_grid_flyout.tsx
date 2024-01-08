@@ -152,6 +152,7 @@ export function DiscoverGridFlyout({
         onAddColumn={addColumn}
         onRemoveColumn={removeColumn}
         textBasedHits={isPlainRecord ? hits : undefined}
+        docViewsRegistry={flyoutCustomization?.docViewsRegistry}
       />
     ),
     [
@@ -164,14 +165,15 @@ export function DiscoverGridFlyout({
       isPlainRecord,
       onFilter,
       removeColumn,
+      flyoutCustomization?.docViewsRegistry,
     ]
   );
 
   const contentActions = useMemo(
     () => ({
-      addFilter: onFilter,
-      addColumn,
-      removeColumn,
+      filter: onFilter,
+      onAddColumn: addColumn,
+      onRemoveColumn: removeColumn,
     }),
     [onFilter, addColumn, removeColumn]
   );

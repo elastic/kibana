@@ -41,6 +41,8 @@ export interface HostFlyoutFilterActionParams {
 
 export interface HostsViewQueryHostsCountRetrievedParams {
   total: number;
+  with_query: boolean;
+  with_filters: boolean;
 }
 
 export interface AssetDetailsFlyoutViewedParams {

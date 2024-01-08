@@ -6,7 +6,7 @@
  */
 
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CasesCommon } from './common';
 
@@ -183,11 +183,16 @@ export function CasesTableServiceProvider(
       await casesCommon.selectFirstRowInAssigneesPopover();
     },
 
-    async filterByOwner(owner: string) {
-      await common.clickAndValidate(
-        'options-filter-popover-button-owner',
-        `options-filter-popover-item-${owner}`
-      );
+    async filterByOwner(
+      owner: string,
+      options: { popupAlreadyOpen: boolean } = { popupAlreadyOpen: false }
+    ) {
+      if (!options.popupAlreadyOpen) {
+        await common.clickAndValidate(
+          'options-filter-popover-button-owner',
+          `options-filter-popover-item-${owner}`
+        );
+      }
 
       await testSubjects.click(`options-filter-popover-item-${owner}`);
     },
