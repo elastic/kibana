@@ -7,10 +7,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-i18n'],
-  globals: {
-    structuredClone: {},
-  },
+  roots: ['<rootDir>/packages/kbn-test-eui-helpers'],
 };
