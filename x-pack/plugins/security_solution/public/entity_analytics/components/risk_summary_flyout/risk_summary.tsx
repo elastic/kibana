@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+
 import {
   useEuiTheme,
   EuiAccordion,
@@ -22,11 +22,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
+
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type {
-  HostRiskScore,
-  UserRiskScore,
-} from '../../../../common/search_strategy/security_solution/risk_score';
+
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
@@ -36,38 +34,21 @@ import { ExpandablePanel } from '../../../flyout/shared/components/expandable_pa
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 import { useRiskContributingAlerts } from '../../hooks/use_risk_contributing_alerts';
+import {
+  buildColumns,
+  getEntityData,
+  getItems,
+  isUserRiskData,
+  LAST_30_DAYS,
+  LENS_VISUALIZATION_HEIGHT,
+} from './common';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
   queryId: string;
   openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
 }
-
-interface TableItem {
-  category: string;
-  count: number;
-}
-const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
-const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
 const ALERTS_FIELDS: string[] = [];
-
-function isUserRiskData(
-  riskData: UserRiskScore | HostRiskScore | undefined
-): riskData is UserRiskScore {
-  return !!riskData && (riskData as UserRiskScore).user !== undefined;
-}
-
-const getEntityData = (riskData: UserRiskScore | HostRiskScore | undefined) => {
-  if (!riskData) {
-    return;
-  }
-
-  if (isUserRiskData(riskData)) {
-    return riskData.user;
-  }
-
-  return riskData.host;
-};
 
 const RiskSummaryComponent = <T extends RiskScoreEntity>({
   riskScoreData,
@@ -95,37 +76,6 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
     });
   }, [entityData?.name, entityData?.risk?.calculated_level, riskData]);
 
-  const columns: Array<EuiBasicTableColumn<TableItem>> = useMemo(
-    () => [
-      {
-        field: 'category',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.categoryColumnLabel"
-            defaultMessage="Category"
-          />
-        ),
-        truncateText: false,
-        mobileOptions: { show: true },
-        sortable: true,
-      },
-      {
-        field: 'count',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.inputsColumnLabel"
-            defaultMessage="Inputs"
-          />
-        ),
-        truncateText: false,
-        mobileOptions: { show: true },
-        sortable: true,
-        dataType: 'number',
-      },
-    ],
-    []
-  );
-
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
   const items: TableItem[] = useMemo(
@@ -139,6 +89,8 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
     ],
     [alertsData?.length]
   );
+  const columns = useMemo(buildColumns, []);
+  const rows = useMemo(() => getItems(entityData), [entityData]);
 
   const onToggle = useCallback(
     (isOpen) => {
@@ -279,7 +231,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                   data-test-subj="risk-summary-table"
                   responsive={false}
                   columns={columns}
-                  items={items}
+                  items={rows}
                   compressed
                 />
               </div>
