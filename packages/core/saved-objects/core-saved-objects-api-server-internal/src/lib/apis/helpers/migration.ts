@@ -8,10 +8,10 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  SavedObjectUnsanitizedDoc,
-  AuthorizationTypeMap,
-  SavedObject,
   SavedObjectsErrorHelpers,
+  type SavedObjectUnsanitizedDoc,
+  type AuthorizationTypeMap,
+  type SavedObject,
 } from '@kbn/core-saved-objects-server';
 import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import type { IEncryptionHelper } from './encryption';
