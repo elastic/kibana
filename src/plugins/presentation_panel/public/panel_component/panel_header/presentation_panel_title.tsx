@@ -12,7 +12,10 @@ import React, { useMemo } from 'react';
 
 import { ViewMode } from '@kbn/presentation-publishing';
 import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
-import { isApiCompatibleWithCustomizePanelAction } from '../../panel_actions/customize_panel_action';
+import {
+  CustomizePanelActionApi,
+  isApiCompatibleWithCustomizePanelAction,
+} from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
 
 export const PresentationPanelTitle = ({
@@ -35,7 +38,7 @@ export const PresentationPanelTitle = ({
       embPanel__placeholderTitleText: !panelTitle,
     });
 
-    if (viewMode !== 'edit') {
+    if (viewMode !== 'edit' && isApiCompatibleWithCustomizePanelAction(api)) {
       return <span className={titleClassNames}>{panelTitle}</span>;
     }
 
@@ -45,14 +48,11 @@ export const PresentationPanelTitle = ({
         className={titleClassNames}
         aria-label={getEditTitleAriaLabel(panelTitle)}
         data-test-subj={'embeddablePanelTitleLink'}
-        onClick={
-          isApiCompatibleWithCustomizePanelAction(api)
-            ? () =>
-                openCustomizePanelFlyout({
-                  api,
-                  focusOnTitle: true,
-                })
-            : undefined
+        onClick={() =>
+          openCustomizePanelFlyout({
+            api: api as CustomizePanelActionApi,
+            focusOnTitle: true,
+          })
         }
       >
         {panelTitle || placeholderTitle}

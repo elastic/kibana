@@ -16,6 +16,18 @@ import { PresentationPanelContextMenu } from './presentation_panel_context_menu'
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
+export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPanelApi> = {
+  api: ApiType;
+  headerId: string;
+  viewMode?: ViewMode;
+  hideTitle?: boolean;
+  panelTitle?: string;
+  panelDescription?: string;
+} & Pick<
+  PresentationPanelInternalProps,
+  'index' | 'showBadges' | 'getActions' | 'actionPredicate' | 'showNotifications'
+>;
+
 export const PresentationPanelHeader = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
 >({
@@ -30,17 +42,7 @@ export const PresentationPanelHeader = <
   actionPredicate,
   showBadges = true,
   showNotifications = true,
-}: {
-  api: ApiType;
-  headerId: string;
-  viewMode?: ViewMode;
-  hideTitle?: boolean;
-  panelTitle?: string;
-  panelDescription?: string;
-} & Pick<
-  PresentationPanelInternalProps,
-  'index' | 'showBadges' | 'getActions' | 'actionPredicate' | 'showNotifications'
->) => {
+}: PresentationPanelHeaderProps<ApiType>) => {
   const { notificationElements, badgeElements } = usePresentationPanelHeaderActions<ApiType>(
     showNotifications,
     showBadges,
@@ -76,7 +78,7 @@ export const PresentationPanelHeader = <
 
   if (!showPanelBar) {
     return (
-      <div className={headerClasses}>
+      <div data-test-subj={`embeddablePanelHeading`} className={headerClasses}>
         {contextMenuElement}
         {ariaLabelElement}
       </div>

@@ -10,7 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/presentation-publishing';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
@@ -205,9 +205,6 @@ describe('customize panel editor', () => {
       api.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
 
       renderPanelEditor();
-      await waitFor(() => {
-        expect(screen.getByTestId('euiSkeletonLoadingAriaWrapper')).toBeInTheDocument();
-      });
       const customPanelQuery = await screen.findByTestId('panelCustomFiltersRow');
       expect(customPanelQuery).toBeInTheDocument();
     });
@@ -221,10 +218,7 @@ describe('customize panel editor', () => {
       });
 
       renderPanelEditor();
-      await waitFor(() => {
-        expect(screen.getByTestId('euiSkeletonLoadingAriaWrapper')).toBeInTheDocument();
-      });
-      const customPanelQuery = await screen.findByTestId('customPanelQuery');
+      const customPanelQuery = await screen.findByTestId('panelCustomQueryRow');
       expect(customPanelQuery).toHaveTextContent('field : value');
     });
   });

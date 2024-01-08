@@ -6,21 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { PublishesDataViews, ViewMode } from '@kbn/presentation-publishing';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PresentationPanel } from '.';
 import { uiActions } from '../kibana_services';
 import { getMockPresentationPanelCompatibleComponent } from '../mocks';
+import * as openCustomizePanel from '../panel_actions/customize_panel_action/open_customize_panel';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
-import { ViewMode } from '@kbn/presentation-publishing';
-
-const mockCustomizePanelAction = { execute: jest.fn() };
-jest.mock('../panel_actions/panel_actions', () => ({
-  customizePanelAction: mockCustomizePanelAction,
-}));
 
 describe('Presentation panel', () => {
   const renderPresentationPanel = async ({
@@ -140,7 +137,7 @@ describe('Presentation panel', () => {
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
-        expect(screen.getByTestId('presentationPanelTitle')).toHaveTextContent('SUPER TITLE');
+        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SUPER TITLE');
       });
     });
 
@@ -155,30 +152,57 @@ describe('Presentation panel', () => {
       });
     });
 
-    it('runs customize panel action on title click when in edit mode', async () => {
+    it('does not render a title when in view mode when the provided title is blank', async () => {
       const api: DefaultPresentationPanelApi = {
-        panelTitle: new BehaviorSubject<string | undefined>('TITLE'),
+        panelTitle: new BehaviorSubject<string | undefined>(''),
+        viewMode: new BehaviorSubject<ViewMode>('view'),
+      };
+      await renderPresentationPanel({ api });
+      const header = await screen.findByTestId('embeddablePanelHeading');
+      const titleComponent = screen.queryByTestId('dashboardPanelTitle');
+      expect(header).not.toContainElement(titleComponent);
+    });
+
+    it('renders a placeholder title when in edit mode and the provided title is blank', async () => {
+      const api: DefaultPresentationPanelApi = {
+        panelTitle: new BehaviorSubject<string | undefined>(''),
         viewMode: new BehaviorSubject<ViewMode>('edit'),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
-        expect(screen.getByTestId('presentationPanelTitle')).toHaveTextContent('TITLE');
+        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('[No Title]');
       });
-      expect(screen.queryByTestId('presentationPanelTitleLink')).toBeInTheDocument();
-      await userEvent.click(screen.getByTestId('presentationPanelTitleLink'));
-      expect(mockCustomizePanelAction.execute).toHaveBeenCalled();
     });
 
-    it('does not show title customize link in view mode', async () => {
-      const api: DefaultPresentationPanelApi = {
-        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
-        viewMode: new BehaviorSubject<ViewMode>('view'),
+    it('opens customize panel flyout on title click when in edit mode', async () => {
+      const spy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
+
+      const api: DefaultPresentationPanelApi & PublishesDataViews = {
+        panelTitle: new BehaviorSubject<string | undefined>('TITLE'),
+        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        dataViews: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
-        expect(screen.getByTestId('presentationPanelTitle')).toHaveTextContent('SUPER TITLE');
+        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('TITLE');
       });
-      expect(screen.queryByTestId('presentationPanelTitleLink')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('embeddablePanelTitleLink')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('embeddablePanelTitleLink'));
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('does not show title customize link in view mode', async () => {
+      const api: DefaultPresentationPanelApi & PublishesDataViews = {
+        panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
+        viewMode: new BehaviorSubject<ViewMode>('view'),
+        dataViews: new BehaviorSubject<DataView[] | undefined>([]),
+      };
+      await renderPresentationPanel({ api });
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddablePanelTitleInner')).toHaveTextContent('SUPER TITLE');
+      });
+      expect(screen.queryByTestId('embeddablePanelTitleLink')).not.toBeInTheDocument();
     });
 
     it('hides title when API hide title option is true', async () => {
