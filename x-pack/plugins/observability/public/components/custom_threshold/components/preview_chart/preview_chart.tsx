@@ -114,7 +114,7 @@ export function PreviewChart({
           {
             value: (threshold[0] || 0).toString(),
             color: euiTheme.colors.danger,
-            fill: comparator === Comparator.OUTSIDE_RANGE ? 'below' : 'above',
+            fill: comparator === Comparator.OUTSIDE_RANGE ? 'below' : 'none',
             format,
           },
         ],
@@ -124,7 +124,7 @@ export function PreviewChart({
           {
             value: (threshold[1] || 0).toString(),
             color: euiTheme.colors.danger,
-            fill: comparator === Comparator.OUTSIDE_RANGE ? 'above' : 'below',
+            fill: comparator === Comparator.OUTSIDE_RANGE ? 'above' : 'none',
             format,
           },
         ],
