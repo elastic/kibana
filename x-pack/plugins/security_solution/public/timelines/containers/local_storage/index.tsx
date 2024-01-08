@@ -197,11 +197,56 @@ export const migrateColumnLabelToDisplayAsText = (
 });
 
 /**
- * Adds missing columns to table data model
+ * Adds "Assignees" column and makes it visible in alerts table
  */
-export const addMissingColumnsToSecurityDataTable = (
+const addAssigneesColumnToAlertsTable = (storage: Storage) => {
+  const localStorageKeys = [
+    `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}-gridView`,
+    `detection-engine-alert-table-${ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}-gridView`,
+  ];
+
+  localStorageKeys.forEach((key) => {
+    const alertTableData = storage.get(key);
+    if (!alertTableData) {
+      return;
+    }
+    // Make "Assignees" field selected in the table
+    if ('columns' in alertTableData) {
+      let updatedAlertsTableState = false;
+      const columns =
+        alertTableData.columns as DataTableState['dataTable']['tableById'][string]['columns'];
+      const hasAssigneesColumn = columns.findIndex((col) => col.id === assigneesColumn.id) !== -1;
+      if (!hasAssigneesColumn) {
+        // Insert "Assignees" column at the index 1 to mimic behaviour of adding field to alerts table
+        alertTableData.columns.splice(1, 0, assigneesColumn);
+        updatedAlertsTableState = true;
+      }
+      // Make "Assignees" column visible in the table
+      if ('visibleColumns' in alertTableData) {
+        const visibleColumns = alertTableData.visibleColumns as string[];
+        const assigneesColumnExists =
+          visibleColumns.findIndex((col) => col === assigneesColumn.id) !== -1;
+        if (!assigneesColumnExists) {
+          alertTableData.visibleColumns.splice(1, 0, assigneesColumn.id);
+          updatedAlertsTableState = true;
+        }
+      }
+      if (updatedAlertsTableState) {
+        storage.set(key, alertTableData);
+      }
+    }
+  });
+};
+
+/**
+ * Adds "Assignees" column specs to table data model
+ */
+export const addAssigneesSpecsToSecurityDataTableIfNeeded = (
+  storage: Storage,
   dataTableState: DataTableState['dataTable']['tableById']
 ) => {
+  // Add "Assignees" column specs to the table data model
+  let updatedTableModel = false;
   for (const [_, tableModel] of Object.entries(dataTableState)) {
     // We added a new base column for "Assignees" in 8.12
     // In order to show correct custom header label after user upgrades to 8.12 we need to make sure the appropriate specs are in the table model.
@@ -209,6 +254,7 @@ export const addMissingColumnsToSecurityDataTable = (
     if (Array.isArray(columns)) {
       const hasAssigneesColumn = columns.findIndex((col) => col.id === assigneesColumn.id) !== -1;
       if (!hasAssigneesColumn) {
+        updatedTableModel = true;
         tableModel.columns.push(assigneesColumn);
       }
     }
@@ -217,9 +263,14 @@ export const addMissingColumnsToSecurityDataTable = (
       const hasAssigneesColumn =
         defaultColumns.findIndex((col) => col.id === assigneesColumn.id) !== -1;
       if (!hasAssigneesColumn) {
+        updatedTableModel = true;
         tableModel.defaultColumns.push(assigneesColumn);
       }
     }
+  }
+  if (updatedTableModel) {
+    storage.set(LOCAL_STORAGE_TABLE_KEY, dataTableState);
+    addAssigneesColumnToAlertsTable(storage);
   }
 };
 
@@ -237,7 +288,7 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
 
   migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
   migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
-  addMissingColumnsToSecurityDataTable(allDataTables);
+  addAssigneesSpecsToSecurityDataTableIfNeeded(storage, allDataTables);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];

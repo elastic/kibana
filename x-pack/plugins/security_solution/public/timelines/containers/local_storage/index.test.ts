@@ -16,7 +16,7 @@ import {
   addTableInStorage,
   migrateAlertTableStateToTriggerActionsState,
   migrateTriggerActionsVisibleColumnsAlertTable88xTo89,
-  addMissingColumnsToSecurityDataTable,
+  addAssigneesSpecsToSecurityDataTableIfNeeded,
 } from '.';
 
 import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
@@ -1587,6 +1587,10 @@ describe('SiemLocalStorage', () => {
           },
         },
       };
+      storage.set(LOCAL_STORAGE_TABLE_KEY, dataTableState);
+      migrateAlertTableStateToTriggerActionsState(storage, dataTableState);
+      migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
+
       const expectedColumns = [
         { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
         {
@@ -1607,9 +1611,17 @@ describe('SiemLocalStorage', () => {
           initialWidth: 190,
         },
       ];
-      addMissingColumnsToSecurityDataTable(dataTableState);
+
+      addAssigneesSpecsToSecurityDataTableIfNeeded(storage, dataTableState);
+
       expect(dataTableState['alerts-page'].columns).toMatchObject(expectedColumns);
       expect(dataTableState['alerts-page'].defaultColumns).toMatchObject(expectedDefaultColumns);
+
+      const tableKey = 'detection-engine-alert-table-securitySolution-alerts-page-gridView';
+      expect(storage.get(tableKey)).toMatchObject({
+        columns: expectedColumns,
+        visibleColumns: expectedColumns.map((col) => col.id),
+      });
     });
   });
 });
