@@ -39,50 +39,52 @@ describe('EditAssigneesFlyout', () => {
     useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
   });
 
-  it('renders correctly', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} />);
+  for (let index = 0; index < 100; index++) {
+    it('renders correctly', async () => {
+      appMock.render(<EditAssigneesFlyout {...props} />);
 
-    expect(await screen.findByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-assignees-flyout-title')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-assignees-flyout-cancel')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-assignees-flyout-submit')).toBeInTheDocument();
-  });
-
-  it('calls onClose when pressing the cancel button', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} />);
-
-    userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-cancel'));
-
-    await waitFor(() => {
-      expect(props.onClose).toHaveBeenCalled();
+      expect(await screen.findByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-edit-assignees-flyout-title')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-edit-assignees-flyout-cancel')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-edit-assignees-flyout-submit')).toBeInTheDocument();
     });
-  });
 
-  it('calls onSaveAssignees when pressing the save selection button', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} />);
+    it('calls onClose when pressing the cancel button', async () => {
+      appMock.render(<EditAssigneesFlyout {...props} />);
 
-    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
+      userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-cancel'));
 
-    userEvent.click(await screen.findByText('Damaged Raccoon'));
-    userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-submit'));
-
-    await waitFor(() => {
-      expect(props.onSaveAssignees).toHaveBeenCalledWith({
-        selectedItems: [],
-        unSelectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0'],
+      await waitFor(() => {
+        expect(props.onClose).toHaveBeenCalled();
       });
     });
-  });
 
-  it('shows the case title when selecting one case', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} />);
+    it('calls onSaveAssignees when pressing the save selection button', async () => {
+      appMock.render(<EditAssigneesFlyout {...props} />);
 
-    expect(await screen.findByText(basicCase.title)).toBeInTheDocument();
-  });
+      expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
 
-  it('shows the number of total selected cases in the title  when selecting multiple cases', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} selectedCases={[basicCase, basicCase]} />);
+      userEvent.click(await screen.findByText('Damaged Raccoon'));
+      userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-submit'));
 
-    expect(await screen.findByText('Selected cases: 2')).toBeInTheDocument();
-  });
+      await waitFor(() => {
+        expect(props.onSaveAssignees).toHaveBeenCalledWith({
+          selectedItems: [],
+          unSelectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0'],
+        });
+      });
+    });
+
+    it('shows the case title when selecting one case', async () => {
+      appMock.render(<EditAssigneesFlyout {...props} />);
+
+      expect(await screen.findByText(basicCase.title)).toBeInTheDocument();
+    });
+
+    it('shows the number of total selected cases in the title  when selecting multiple cases', async () => {
+      appMock.render(<EditAssigneesFlyout {...props} selectedCases={[basicCase, basicCase]} />);
+
+      expect(await screen.findByText('Selected cases: 2')).toBeInTheDocument();
+    });
+  }
 });
