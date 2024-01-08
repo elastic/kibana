@@ -146,8 +146,6 @@ export function ChatBody({
   const isAtBottom = (parent: HTMLElement) =>
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
 
-  const [isEditing, setIsEditing] = useState(false);
-
   const [promptEditorHeight, setPromptEditorHeight] = useState<number>(0);
 
   const handleFeedback = (message: Message, feedback: Feedback) => {
