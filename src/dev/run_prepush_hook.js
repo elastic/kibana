@@ -24,36 +24,40 @@ run(
 
     const commonAncestor = (await git.raw(['merge-base', 'origin/main', current])).trim();
 
-    const changedFiles = (await git.diff(['--name-only', `${commonAncestor}..${current}`]))
-      .split('\n')
-      .filter(Boolean);
+    const changedFiles = await git.diff([`${commonAncestor}..${current}`]);
 
-    console.log('foo', `${REPO_ROOT}/${changedFiles[0]}`);
+    console.log('changed files', changedFiles);
 
-    const changedFilesWithDiff = await Promise.all(
-      changedFiles.map(async (file) => ({
-        file: new File(`${REPO_ROOT}/${file}`),
-        diff: await git.diff([`${commonAncestor}..${current}`, file]),
-      }))
-    );
+    // .split('\n')
+    // .filter(Boolean);
 
-    console.log('changedFilesWithDiff', changedFilesWithDiff);
+    // console.log('changed files', changedFiles);
+    // console.log('foo', `${REPO_ROOT}/${changedFiles[0]}`);
 
-    const errors = [];
+    // const changedFilesWithDiff = await Promise.all(
+    //   changedFiles.map(async (file) => ({
+    //     file: new File(`${REPO_ROOT}/${file}`),
+    //     diff: await git.diff([`${commonAncestor}..${current}`, file]),
+    //   }))
+    // );
 
-    // check file casing
-    try {
-      await checkFileCasing(
-        log,
-        changedFilesWithDiff.map(({ file }) => file)
-      );
-    } catch (error) {
-      errors.push(error);
-    }
+    // console.log('changedFilesWithDiff', changedFilesWithDiff);
 
-    if (errors.length) {
-      throw combineErrors(errors);
-    }
+    // const errors = [];
+
+    // // check file casing
+    // try {
+    //   await checkFileCasing(
+    //     log,
+    //     changedFilesWithDiff.map(({ file }) => file)
+    //   );
+    // } catch (error) {
+    //   errors.push(error);
+    // }
+
+    // if (errors.length) {
+    //   throw combineErrors(errors);
+    // }
 
     throw new Error('test');
     /*
