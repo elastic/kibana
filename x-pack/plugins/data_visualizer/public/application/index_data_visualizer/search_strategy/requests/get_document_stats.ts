@@ -40,14 +40,9 @@ export const getESQLDocumentCountStats = async (
   let latestMs = -Infinity;
 
   if (timeFieldName) {
-    const aggQuery = `| EVAL _timestamp_=TO_DOUBLE(DATE_TRUNC(${intervalMs} milliseconds, ${timeFieldName})) | stats rows = count(*) by _timestamp_ | LIMIT 10000`;
-
-    // @TODO: remove
-    console.log(`--@@esqlBaseQuery + aggQuery`, {
-      query: esqlBaseQuery + aggQuery,
-      locale: 'en',
-      ...(filter ? { filter } : {}),
-    });
+    const aggQuery = `| EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} milliseconds, ${timeFieldName}))
+    | stats rows = count(*) by _timestamp_
+    | LIMIT 10000`;
 
     const esqlResults = await lastValueFrom(
       search.search(

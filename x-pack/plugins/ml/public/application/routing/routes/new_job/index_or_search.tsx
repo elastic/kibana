@@ -107,11 +107,6 @@ export const dataVizIndexOrSearchRouteFactory = (
     defaultMessage: 'Select Data View',
   }),
   render: (props, deps) => {
-    // @TODO: remove
-    console.log(
-      `--@@createPath(ML_PAGES.DATA_VISUALIZER_ESQL)`,
-      createPath(ML_PAGES.DATA_VISUALIZER_ESQL)
-    );
     const button = (
       <NavigateToPageButton
         nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
