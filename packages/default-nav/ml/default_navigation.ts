@@ -122,6 +122,15 @@ export const defaultNavigation: MlNodeDefinition = {
           },
         },
         {
+          title: i18n.translate('defaultNavigation.ml.dataView', {
+            defaultMessage: 'ES|QL',
+          }),
+          link: 'ml:esqlDataVisualizer',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.includes(prepend('/app/ml/datavisualizer/esql'));
+          },
+        },
+        {
           title: i18n.translate('defaultNavigation.ml.dataComparison', {
             defaultMessage: 'Data drift',
           }),
