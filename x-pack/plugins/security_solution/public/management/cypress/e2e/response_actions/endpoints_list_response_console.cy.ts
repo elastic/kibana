@@ -20,9 +20,7 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169821
-// FLAKY: https://github.com/elastic/kibana/issues/169822
-describe.skip('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     login();
   });

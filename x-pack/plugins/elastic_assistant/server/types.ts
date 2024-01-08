@@ -12,6 +12,7 @@ import type {
 import type {
   CoreRequestHandlerContext,
   CoreSetup,
+  AnalyticsServiceSetup,
   CustomRequestHandlerContext,
   IRouter,
   KibanaRequest,
@@ -75,6 +76,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantSOClient: () => AIAssistantSOClient;
+  telemetry: AnalyticsServiceSetup;
 }
 /**
  * @internal
@@ -163,7 +165,7 @@ export interface AssistantToolParams {
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  assistantLangChain: boolean;
+  isEnabledKnowledgeBase: boolean;
   chain: RetrievalQAChain;
   esClient: ElasticsearchClient;
   modelExists: boolean;

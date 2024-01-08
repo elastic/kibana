@@ -98,6 +98,12 @@ export const useConversation = (): UseConversation => {
     },
     [http]
   );
+  const {
+    allSystemPrompts,
+    assistantTelemetry,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
+    setConversations,
+  } = useAssistantContext();
 
   /**
    * Removes the last message of conversation[] for a given conversationId
@@ -151,8 +157,13 @@ export const useConversation = (): UseConversation => {
    * Append a message to the conversation[] for a given conversationId
    */
   const appendMessage = useCallback(
-    async ({ conversationId, message }: AppendMessageProps): Promise<Message[] | undefined> => {
-      assistantTelemetry?.reportAssistantMessageSent({ conversationId, role: message.role });
+    ({ conversationId, message }: AppendMessageProps): Message[] => {
+      assistantTelemetry?.reportAssistantMessageSent({
+        conversationId,
+        role: message.role,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+      });
       let messages: Message[] = [];
       const prevConversation = await getConversationById({ http, id: conversationId });
       if (isHttpFetchError(prevConversation)) {
@@ -170,6 +181,7 @@ export const useConversation = (): UseConversation => {
       return messages;
     },
     [assistantTelemetry, http]
+    [isEnabledKnowledgeBase, isEnabledRAGAlerts, assistantTelemetry, setConversations]
   );
 
   const appendReplacements = useCallback(

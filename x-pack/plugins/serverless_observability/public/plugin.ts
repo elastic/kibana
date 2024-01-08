@@ -12,22 +12,28 @@ import { appCategories } from '@kbn/management-cards-navigation/src/types';
 import { getObservabilitySideNavComponent } from './components/side_navigation';
 import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
 import {
-  ServerlessObservabilityPluginSetup,
-  ServerlessObservabilityPluginStart,
-  ServerlessObservabilityPluginSetupDependencies,
-  ServerlessObservabilityPluginStartDependencies,
+  ServerlessObservabilityPublicSetup,
+  ServerlessObservabilityPublicStart,
+  ServerlessObservabilityPublicSetupDependencies,
+  ServerlessObservabilityPublicStartDependencies,
 } from './types';
 
 export class ServerlessObservabilityPlugin
-  implements Plugin<ServerlessObservabilityPluginSetup, ServerlessObservabilityPluginStart>
+  implements
+    Plugin<
+      ServerlessObservabilityPublicSetup,
+      ServerlessObservabilityPublicStart,
+      ServerlessObservabilityPublicSetupDependencies,
+      ServerlessObservabilityPublicStartDependencies
+    >
 {
   public setup(
     _core: CoreSetup<
-      ServerlessObservabilityPluginStartDependencies,
-      ServerlessObservabilityPluginStart
+      ServerlessObservabilityPublicStartDependencies,
+      ServerlessObservabilityPublicStart
     >,
-    setupDeps: ServerlessObservabilityPluginSetupDependencies
-  ): ServerlessObservabilityPluginSetup {
+    setupDeps: ServerlessObservabilityPublicSetupDependencies
+  ): ServerlessObservabilityPublicSetup {
     setupDeps.observability.dashboard.register(
       createObservabilityDashboardRegistration({
         search: _core
@@ -41,8 +47,8 @@ export class ServerlessObservabilityPlugin
 
   public start(
     core: CoreStart,
-    setupDeps: ServerlessObservabilityPluginStartDependencies
-  ): ServerlessObservabilityPluginStart {
+    setupDeps: ServerlessObservabilityPublicStartDependencies
+  ): ServerlessObservabilityPublicStart {
     const { observabilityShared, serverless, management, cloud } = setupDeps;
     observabilityShared.setIsSidebarEnabled(false);
     serverless.setProjectHome('/app/observability/landing');

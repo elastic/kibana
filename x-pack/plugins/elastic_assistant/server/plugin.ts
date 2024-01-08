@@ -12,9 +12,11 @@ import {
   Logger,
   KibanaRequest,
   SavedObjectsClientContract,
+  type AnalyticsServiceSetup,
 } from '@kbn/core/server';
 import { once } from 'lodash';
 
+import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
   ElasticAssistantPluginCoreSetupDependencies,
@@ -42,6 +44,14 @@ import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerConversationsRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
+import { appContextService, GetRegisteredTools } from './services/app_context';
+
+interface CreateRouteHandlerContextParams {
+  core: CoreSetup<ElasticAssistantPluginStart, unknown>;
+  logger: Logger;
+  getRegisteredTools: GetRegisteredTools;
+  telemetry: AnalyticsServiceSetup;
+}
 
 export class ElasticAssistantPlugin
   implements
@@ -62,6 +72,27 @@ export class ElasticAssistantPlugin
     this.dataStreamAdapter = getDataStreamAdapter();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
+
+  private createRouteHandlerContext = ({
+    core,
+    logger,
+    getRegisteredTools,
+    telemetry,
+  }: CreateRouteHandlerContextParams): IContextProvider<
+    ElasticAssistantRequestHandlerContext,
+    typeof PLUGIN_ID
+  > => {
+    return async function elasticAssistantRouteHandlerContext(context, request) {
+      const [_, pluginsStart] = await core.getStartServices();
+
+      return {
+        actions: pluginsStart.actions,
+        getRegisteredTools,
+        logger,
+        telemetry,
+      };
+    };
+  };
 
   public setup(
     core: ElasticAssistantPluginCoreSetupDependencies,
@@ -91,7 +122,16 @@ export class ElasticAssistantPlugin
     core.http.registerRouteHandlerContext<ElasticAssistantRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
       (context, request) => requestContextFactory.create(context, request)
+      this.createRouteHandlerContext({
+        core: core as CoreSetup<ElasticAssistantPluginStart, unknown>,
+        logger: this.logger,
+        getRegisteredTools: (pluginName: string) => {
+          return appContextService.getRegisteredTools(pluginName);
+        },
+        telemetry: core.analytics,
+      })
     );
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
     core.savedObjects.registerType(assistantPromptsType);
     core.savedObjects.registerType(assistantAnonimizationFieldsType);

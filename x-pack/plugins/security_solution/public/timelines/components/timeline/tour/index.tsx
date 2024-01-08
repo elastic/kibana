@@ -10,8 +10,9 @@
  *
  * */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiTourStep } from '@elastic/eui';
+import type { TimelineType } from '../../../../../common/api/timeline';
 import type { TimelineTabs } from '../../../../../common/types';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
@@ -26,20 +27,26 @@ interface TourState {
   tourSubtitle: string;
 }
 
-interface TimelineTourProps {
+export interface TimelineTourProps {
   activeTab: TimelineTabs;
+  timelineType: TimelineType;
   switchToTab: (tab: TimelineTabs) => void;
 }
 
 const TimelineTourComp = (props: TimelineTourProps) => {
-  const { activeTab, switchToTab } = props;
+  const { activeTab, switchToTab, timelineType } = props;
   const {
     services: { storage },
   } = useKibana();
 
+  const updatedTourSteps = useMemo(
+    () =>
+      timelineTourSteps.filter((step) => !step.timelineType || step.timelineType === timelineType),
+    [timelineType]
+  );
+
   const [tourState, setTourState] = useState<TourState>(() => {
     const restoredTourState = storage.get(NEW_FEATURES_TOUR_STORAGE_KEYS.TIMELINE);
-
     if (restoredTourState != null) {
       return restoredTourState;
     }
@@ -71,7 +78,7 @@ const TimelineTourComp = (props: TimelineTourProps) => {
   const getFooterAction = useCallback(
     (step: number) => {
       // if it's the last step, we don't want to show the next button
-      return step === timelineTourSteps.length ? (
+      return step === updatedTourSteps.length ? (
         <EuiButton color="success" size="s" onClick={finishTour}>
           {i18n.TIMELINE_TOUR_FINISH}
         </EuiButton>
@@ -86,14 +93,14 @@ const TimelineTourComp = (props: TimelineTourProps) => {
         ]
       );
     },
-    [finishTour, nextStep]
+    [finishTour, nextStep, updatedTourSteps.length]
   );
 
-  const nextEl = timelineTourSteps[tourState.currentTourStep - 1]?.anchor;
+  const nextEl = updatedTourSteps[tourState.currentTourStep - 1]?.anchor;
 
   const isElementAtCurrentStepMounted = useIsElementMounted(nextEl);
 
-  const currentStepConfig = timelineTourSteps[tourState.currentTourStep - 1];
+  const currentStepConfig = updatedTourSteps[tourState.currentTourStep - 1];
 
   if (currentStepConfig?.timelineTab && currentStepConfig.timelineTab !== activeTab) {
     switchToTab(currentStepConfig.timelineTab);
@@ -105,7 +112,7 @@ const TimelineTourComp = (props: TimelineTourProps) => {
 
   return (
     <>
-      {timelineTourSteps.map((steps, idx) => {
+      {updatedTourSteps.map((steps, idx) => {
         const stepCount = idx + 1;
         if (tourState.currentTourStep !== stepCount) return null;
         const panelProps = {
@@ -118,7 +125,7 @@ const TimelineTourComp = (props: TimelineTourProps) => {
             step={stepCount}
             isStepOpen={tourState.isTourActive && tourState.currentTourStep === idx + 1}
             minWidth={tourState.tourPopoverWidth}
-            stepsTotal={timelineTourSteps.length}
+            stepsTotal={updatedTourSteps.length}
             onFinish={finishTour}
             title={steps.title}
             content={steps.content}

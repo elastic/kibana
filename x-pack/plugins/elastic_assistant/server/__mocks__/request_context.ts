@@ -26,6 +26,7 @@ export const createMockClients = () => {
       actions: actionsClientMock.create(),
       getRegisteredTools: jest.fn(),
       logger: loggingSystemMock.createLogger(),
+      telemetry: coreMock.createSetup().analytics,
     },
     savedObjectsClient: core.savedObjects.client,
 
@@ -81,6 +82,7 @@ const createElasticAssistantRequestContextMock = (
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn(),
     core: clients.core,
+    telemetry: clients.elasticAssistant.telemetry,
   };
 };
 

@@ -13,6 +13,7 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -90,6 +91,7 @@ export interface AssistantProviderProps {
   nameSpace?: string;
   ragOnAlerts?: boolean;
   // setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
@@ -135,11 +137,10 @@ export interface UseAssistantContext {
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
-  localStorageLastConversationId: string | undefined;
+  getConversationId: (id?: string) => string;
   promptContexts: Record<string, PromptContext>;
   modelEvaluatorEnabled: boolean;
   nameSpace: string;
-  ragOnAlerts: boolean;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
@@ -182,6 +183,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   ragOnAlerts = false,
+  setConversations,
   setDefaultAllow,
   setDefaultAllowReplacement,
   title = DEFAULT_ASSISTANT_TITLE,
@@ -259,6 +261,45 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
 
+  const [conversations, setConversationsInternal] = useState(getInitialConversations());
+  const conversationIds = useMemo(() => Object.keys(conversations).sort(), [conversations]);
+
+  // TODO: This is a fix for conversations not loading out of localstorage. Also re-introduces our cascading render issue (as it loops back in localstorage)
+  useEffect(() => {
+    setConversationsInternal(getInitialConversations());
+  }, [getInitialConversations]);
+
+  const onConversationsUpdated = useCallback<
+    React.Dispatch<React.SetStateAction<Record<string, Conversation>>>
+  >(
+    (
+      newConversations:
+        | Record<string, Conversation>
+        | ((prev: Record<string, Conversation>) => Record<string, Conversation>)
+    ) => {
+      if (typeof newConversations === 'function') {
+        const updater = newConversations;
+        setConversationsInternal((prevValue) => {
+          const newValue = updater(prevValue);
+          setConversations(newValue);
+          return newValue;
+        });
+      } else {
+        setConversations(newConversations);
+        setConversationsInternal(newConversations);
+      }
+    },
+    [setConversations]
+  );
+
+  const getConversationId = useCallback(
+    // if a conversationId has been provided, use that
+    // if not, check local storage
+    // last resort, go to welcome conversation
+    (id?: string) => id ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
+    [localStorageLastConversationId]
+  );
+
   const value = useMemo(
     () => ({
       actionTypeRegistry,
@@ -280,11 +321,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      knowledgeBase: localStorageKnowledgeBase ?? DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+      knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
       modelEvaluatorEnabled,
       promptContexts,
       nameSpace,
-      ragOnAlerts,
       registerPromptContext,
       selectedSettingsTab,
       setAllQuickPrompts: setLocalStorageQuickPrompts,
@@ -299,7 +339,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       title,
       toasts,
       unRegisterPromptContext,
-      localStorageLastConversationId,
+      getConversationId,
       setLastConversationId: setLocalStorageLastConversationId,
       baseConversations,
     }),
@@ -322,14 +362,13 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getComments,
       http,
       localStorageKnowledgeBase,
-      localStorageLastConversationId,
+      getConversationId,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
       modelEvaluatorEnabled,
       nameSpace,
       // onConversationsUpdated,
       promptContexts,
-      ragOnAlerts,
       registerPromptContext,
       selectedSettingsTab,
       setDefaultAllow,

@@ -53,7 +53,6 @@ export const AssistantProvider: React.FC = ({ children }) => {
 
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
-  const ragOnAlerts = useIsExperimentalFeatureEnabled('assistantRagOnAlerts');
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
 
   return (
@@ -81,6 +80,9 @@ export const AssistantProvider: React.FC = ({ children }) => {
       ragOnAlerts={ragOnAlerts}
       setDefaultAllow={setDefaultAllow} // remove
       setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
+      setConversations={setConversations}
+      setDefaultAllow={setDefaultAllow}
+      setDefaultAllowReplacement={setDefaultAllowReplacement}
       title={ASSISTANT_TITLE}
       toasts={toasts}
     >

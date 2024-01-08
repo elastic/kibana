@@ -18,8 +18,9 @@ import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { sloFeatureId } from '../../../../common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
+import { InspectSLOPortal } from './common/inspect_slo_portal';
+import { EquivalentApiRequest } from './common/equivalent_api_request';
+import { BurnRateRuleFlyout } from '../../slos/components/common/burn_rate_rule_flyout';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
@@ -35,7 +36,6 @@ import {
   CREATE_RULE_SEARCH_PARAM,
   useAddRuleFlyoutState,
 } from '../hooks/use_add_rule_flyout_state';
-import { useCopyToJson } from '../hooks/use_copy_to_json';
 import { useParseUrlState } from '../hooks/use_parse_url_state';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
@@ -54,7 +54,6 @@ export function SloEditForm({ slo }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
   const isEditMode = slo !== undefined;
@@ -80,7 +79,6 @@ export function SloEditForm({ slo }: Props) {
     mode: 'all',
   });
   const { watch, getFieldState, getValues, formState, trigger } = methods;
-  const handleCopyToJson = useCopyToJson({ trigger, getValues });
 
   const { isIndicatorSectionValid, isObjectiveSectionValid, isDescriptionSectionValid } =
     useSectionFormValidation({
@@ -146,10 +144,6 @@ export function SloEditForm({ slo }: Props) {
     setIsCreateRuleCheckboxChecked(!isCreateRuleCheckboxChecked);
   };
 
-  const handleCloseRuleFlyout = async () => {
-    navigateToUrl(basePath.prepend(paths.observability.slos));
-  };
-
   return (
     <>
       <FormProvider {...methods}>
@@ -198,7 +192,7 @@ export function SloEditForm({ slo }: Props) {
                         defaultMessage: 'SLO burn rate alert rule',
                       })}
                     </strong>
-                  </span>{' '}
+                  </span>
                   <EuiIconTip
                     content={
                       'Selecting this will allow you to create a new alert rule for this SLO upon saving.'
@@ -241,32 +235,20 @@ export function SloEditForm({ slo }: Props) {
               })}
             </EuiButtonEmpty>
 
-            <EuiButtonEmpty
-              color="primary"
-              iconType="copyClipboard"
-              data-test-subj="sloFormCopyJsonButton"
-              disabled={isCreateSloLoading || isUpdateSloLoading}
-              onClick={handleCopyToJson}
-            >
-              {i18n.translate('xpack.observability.slo.sloEdit.copyJsonButton', {
-                defaultMessage: 'Copy JSON',
-              })}
-            </EuiButtonEmpty>
+            <EquivalentApiRequest
+              isCreateSloLoading={isCreateSloLoading}
+              isUpdateSloLoading={isUpdateSloLoading}
+            />
           </EuiFlexGroup>
         </EuiFlexGroup>
+        <InspectSLOPortal trigger={trigger} getValues={getValues} slo={slo} />
       </FormProvider>
 
-      {isAddRuleFlyoutOpen && slo ? (
-        <AddRuleFlyout
-          canChangeTrigger={false}
-          consumer={sloFeatureId}
-          initialValues={{ name: `${watch('name')} burn rate rule`, params: { sloId: slo.id } }}
-          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
-          onClose={handleCloseRuleFlyout}
-          onSave={handleCloseRuleFlyout}
-          useRuleProducer
-        />
-      ) : null}
+      <BurnRateRuleFlyout
+        slo={slo as GetSLOResponse}
+        isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}
+        canChangeTrigger={false}
+      />
     </>
   );
 }

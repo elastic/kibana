@@ -37,6 +37,8 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   const {
     allQuickPrompts,
     allSystemPrompts,
+    assistantTelemetry,
+    conversations,
     defaultAllow,
     defaultAllowReplacement,
     baseConversations,
@@ -109,35 +111,28 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   const saveSettings = useCallback((): void => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
-
-    bulkConversationsChange(http, {
-      conversationsToUpdate: Object.keys(updatedConversationSettings).reduce(
-        (conversationsToUpdate: Conversation[], conversationId: string) => {
-          if (!updatedConversationSettings[conversationId].isDefault) {
-            conversationsToUpdate.push(updatedConversationSettings[conversationId]);
-          }
-          return conversationsToUpdate;
-        },
-        []
-      ),
-      conversationsToCreate: Object.keys(updatedConversationSettings).reduce(
-        (conversationsToCreate: Conversation[], conversationId: string) => {
-          if (updatedConversationSettings[conversationId].isDefault) {
-            conversationsToCreate.push(updatedConversationSettings[conversationId]);
-          }
-          return conversationsToCreate;
-        },
-        []
-      ),
-      conversationsToDelete: deletedConversationSettings,
-    });
-
+    setConversations(updatedConversationSettings);
+    const didUpdateKnowledgeBase =
+      knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
+    const didUpdateRAGAlerts =
+      knowledgeBase.isEnabledRAGAlerts !== updatedKnowledgeBaseSettings.isEnabledRAGAlerts;
+    if (didUpdateKnowledgeBase || didUpdateRAGAlerts) {
+      assistantTelemetry?.reportAssistantSettingToggled({
+        ...(didUpdateKnowledgeBase
+          ? { isEnabledKnowledgeBase: updatedKnowledgeBaseSettings.isEnabledKnowledgeBase }
+          : {}),
+        ...(didUpdateRAGAlerts
+          ? { isEnabledRAGAlerts: updatedKnowledgeBaseSettings.isEnabledRAGAlerts }
+          : {}),
+      });
+    }
     setKnowledgeBase(updatedKnowledgeBaseSettings);
     setDefaultAllow(updatedDefaultAllow);
     setDefaultAllowReplacement(updatedDefaultAllowReplacement);
   }, [
-    deletedConversationSettings,
-    http,
+    assistantTelemetry,
+    knowledgeBase.isEnabledRAGAlerts,
+    knowledgeBase.isEnabledKnowledgeBase,
     setAllQuickPrompts,
     setAllSystemPrompts,
     setDefaultAllow,

@@ -460,10 +460,10 @@
                 "pluginId": "exploratoryView",
                 "scope": "public",
                 "docId": "kibExploratoryViewPluginApi",
-                "section": "def-public.AllSeries",
-                "text": "AllSeries"
+                "section": "def-public.SeriesUrl",
+                "text": "SeriesUrl"
               },
-              " | undefined"
+              "[]"
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -520,20 +520,6 @@
             "description": [],
             "signature": [
               "string | undefined"
-            ],
-            "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "exploratoryView",
-            "id": "def-public.ExploratoryEmbeddableProps.customLensAttrs",
-            "type": "Any",
-            "tags": [],
-            "label": "customLensAttrs",
-            "description": [],
-            "signature": [
-              "any"
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
