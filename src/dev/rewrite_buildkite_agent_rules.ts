@@ -119,8 +119,8 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
   for (const step of steps) {
     if (isOldStyleAgentTargetingRule(step)) {
       log.info('Rewriting: ' + ymlPath, step);
-      file = editYmlInPlace(file, [`queue: ${step.agents.queue}`], () => {
-        return yaml.safeDump({ queue: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
+      file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
+        return yaml.safeDump({ agents: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
       });
     }
   }
