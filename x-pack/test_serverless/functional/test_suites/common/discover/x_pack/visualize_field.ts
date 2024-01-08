@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

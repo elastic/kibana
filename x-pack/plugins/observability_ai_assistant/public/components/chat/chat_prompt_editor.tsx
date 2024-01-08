@@ -20,7 +20,9 @@ export interface ChatPromptEditorProps {
   disabled: boolean;
   hidden: boolean;
   loading: boolean;
-  initialMessage?: Message;
+  initialRole?: Message['message']['role'];
+  initialFunctionCall?: Message['message']['function_call'];
+  initialContent?: Message['message']['content'];
   onChangeHeight: (height: number) => void;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onSubmit: (message: Message) => void;
@@ -30,21 +32,31 @@ export function ChatPromptEditor({
   disabled,
   hidden,
   loading,
-  initialMessage,
+  initialRole,
+  initialFunctionCall,
+  initialContent,
   onChangeHeight,
   onSendTelemetry,
   onSubmit,
 }: ChatPromptEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const isFocusTrapEnabled = Boolean(initialMessage?.message);
-
-  const [innerMessage, setInnerMessage] = useState<Message['message'] | undefined>(
-    initialMessage?.message
-  );
+  const isFocusTrapEnabled = Boolean(initialContent || initialFunctionCall);
 
   const [mode, setMode] = useState<'prompt' | 'function'>(
-    initialMessage?.message.function_call?.name ? 'function' : 'prompt'
+    initialFunctionCall?.name ? 'function' : 'prompt'
+  );
+
+  const initialInnerMessage = initialRole
+    ? {
+        role: initialRole,
+        content: initialContent ?? '',
+        ...(initialFunctionCall ? { function_call: initialFunctionCall } : {}),
+      }
+    : undefined;
+
+  const [innerMessage, setInnerMessage] = useState<Message['message'] | undefined>(
+    initialInnerMessage
   );
 
   const handleChangeMessageInner = (newInnerMessage: Message['message']) => {
