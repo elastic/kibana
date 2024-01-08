@@ -186,22 +186,33 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       if (!dataViewId) {
         this.setState({ isLoadingDataView: false });
       } else {
-        try {
-          this.props.dataViews.get(dataViewId).then((dataView) => {
-            this.setState({
-              selectedDataView: dataView,
-              isLoadingDataView: false,
-              indexPatterns: [dataView, ...this.props.indexPatterns],
-              localFilter: merge({}, this.props.filter),
-              queryDsl: this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns),
-            });
-          });
-        } catch (e) {
-          this.setState({
-            isLoadingDataView: false,
-          });
-        }
+        this.loadDataView(dataViewId);
       }
+    }
+  }
+
+  /**
+   * Helper function to load the data view from the index pattern id
+   * E.g. in Discover there's just one active data view, so filters with different data view id
+   * Than the currently selected data view need to load the data view from the id to display the filter
+   * correctly
+   * @param dataViewId
+   * @private
+   */
+  private async loadDataView(dataViewId: string) {
+    try {
+      const dataView = await this.props.dataViews.get(dataViewId, false);
+      this.setState({
+        selectedDataView: dataView,
+        isLoadingDataView: false,
+        indexPatterns: [dataView, ...this.props.indexPatterns],
+        localFilter: merge({}, this.props.filter),
+        queryDsl: this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns),
+      });
+    } catch (e) {
+      this.setState({
+        isLoadingDataView: false,
+      });
     }
   }
 
