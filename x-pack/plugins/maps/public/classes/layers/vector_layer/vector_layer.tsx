@@ -87,8 +87,11 @@ export function isVectorLayer(layer: ILayer): layer is IVectorLayer {
   );
 }
 
-export function hasVectorLayerMethod(layer: ILayer, methodName: keyof IVectorLayer): layer is Pick<IVectorLayer, typeof methodName> {
-  return typeof (layer as IVectorLayer)[methodName] === 'function'
+export function hasVectorLayerMethod(
+  layer: ILayer,
+  methodName: keyof IVectorLayer
+): layer is Pick<IVectorLayer, typeof methodName> {
+  return typeof (layer as IVectorLayer)[methodName] === 'function';
 }
 
 export interface VectorLayerArguments {

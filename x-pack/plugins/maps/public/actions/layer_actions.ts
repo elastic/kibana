@@ -401,7 +401,8 @@ function updateMetricsProp(layerId: string, value: unknown) {
     getState: () => MapStoreState
   ) => {
     const layer = getLayerById(layerId, getState());
-    const previousFields = layer && hasVectorLayerMethod(layer, 'getFields') ? await layer.getFields() : [];
+    const previousFields =
+      layer && hasVectorLayerMethod(layer, 'getFields') ? await layer.getFields() : [];
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
