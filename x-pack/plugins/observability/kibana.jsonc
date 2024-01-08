@@ -20,6 +20,7 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "fieldFormats",
       "uiActions",
       "presentationUtil",
       "exploratoryView",

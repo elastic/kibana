@@ -71,7 +71,7 @@ export const getSections = ({
   nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
   dataViewId?: string;
 }) => {
-  if (!transaction || !dataViewId) return [];
+  if (!transaction) return [];
 
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
@@ -273,9 +273,9 @@ export const getSections = ({
         basePath,
         query: getDiscoverQuery(transaction),
         location,
-        dataViewId,
+        dataViewId: dataViewId ?? '',
       }),
-      condition: true,
+      condition: !!dataViewId,
     },
   ];
 
