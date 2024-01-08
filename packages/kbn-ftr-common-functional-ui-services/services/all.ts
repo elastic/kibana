@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { RetryService } from '@kbn/ftr-common-functional-services';
 import { RetryOnStaleProvider } from './retry_on_stale';
 import { RemoteProvider } from './remote';
 import { FindProvider } from './find';
@@ -18,6 +17,5 @@ export const services = {
   __webdriver__: RemoteProvider,
   find: FindProvider,
   testSubjects: TestSubjects,
-  retry: RetryService,
   browser: BrowserProvider,
 };
