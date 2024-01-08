@@ -151,6 +151,10 @@ export interface JobTypes {
     metrics: MetricsStatsCsv;
     error_codes: ErrorCodesStatsCsv;
   };
+  csv_esql: AvailableTotal & {
+    metrics: MetricsStatsCsv;
+    error_codes: ErrorCodesStatsCsv;
+  };
   PNG: AvailableTotal & {
     metrics: MetricsStatsPng;
     error_codes: ErrorCodesStatsPng;

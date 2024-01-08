@@ -9,7 +9,11 @@ import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
-import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+import {
+  CSV_REPORT_TYPE,
+  CSV_REPORT_TYPE_V2,
+  CSV_ESQL_REPORT_TYPE,
+} from '@kbn/reporting-export-types-csv-common';
 import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
@@ -100,9 +104,12 @@ describe('Reporting Plugin', () => {
 
     it('expect all report types to be in registry', async () => {
       // check the spy function
-      expect(registerSpy).toHaveBeenCalledTimes(5);
+      expect(registerSpy).toHaveBeenCalledTimes(6);
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE }));
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE_V2 }));
+      expect(registerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ id: CSV_ESQL_REPORT_TYPE })
+      );
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PDF_REPORT_TYPE }));
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PDF_REPORT_TYPE_V2 }));
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: PNG_REPORT_TYPE_V2 }));
@@ -127,9 +134,12 @@ describe('Reporting Plugin', () => {
       plugin = new ReportingPlugin(initContext);
 
       // check the spy function was called with CSV
-      expect(registerSpy).toHaveBeenCalledTimes(2);
+      expect(registerSpy).toHaveBeenCalledTimes(3);
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE }));
       expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: CSV_REPORT_TYPE_V2 }));
+      expect(registerSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ id: CSV_ESQL_REPORT_TYPE })
+      );
 
       // check the spy function was NOT called with anything else
       expect(registerSpy).not.toHaveBeenCalledWith(

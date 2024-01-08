@@ -144,6 +144,11 @@ const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
     metrics: metricsSchemaCsv,
     error_codes: errorCodesSchemaCsv,
   },
+  csv_esql: {
+    ...availableTotalSchema,
+    metrics: metricsSchemaCsv,
+    error_codes: errorCodesSchemaCsv,
+  },
   PNG: { ...availableTotalSchema, metrics: metricsSchemaPng, error_codes: errorCodesSchemaPng },
   PNGV2: { ...availableTotalSchema, metrics: metricsSchemaPng, error_codes: errorCodesSchemaPng },
   printable_pdf: {
