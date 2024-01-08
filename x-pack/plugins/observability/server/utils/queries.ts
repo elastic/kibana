@@ -8,6 +8,8 @@ import { reject } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { ESSearchResponse } from '@kbn/es-types';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 export function isUndefinedOrNull(value: any): value is undefined | null {
   return value === undefined || value === null;
@@ -67,4 +69,14 @@ export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
 
   const ast = fromKueryExpression(kql);
   return [toElasticsearchQuery(ast)];
+}
+
+export async function typedSearch<
+  DocumentSource extends unknown,
+  TParams extends estypes.SearchRequest
+>(
+  esClient: ElasticsearchClient,
+  params: TParams
+): Promise<ESSearchResponse<DocumentSource, TParams>> {
+  return (await esClient.search(params)) as unknown as ESSearchResponse<DocumentSource, TParams>;
 }
