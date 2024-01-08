@@ -1,0 +1,24 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../../../typings/**/*",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/monaco",
+  ]
+}

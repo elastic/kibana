@@ -10,8 +10,8 @@ import { ToastsStart } from '@kbn/core-notifications-browser';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
 import { BoolQuery, Query } from '@kbn/es-query';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { AlertStatus } from '../../../common/typings';
-
 export interface AlertStatusFilterProps {
   status: AlertStatus;
   onChange: (id: AlertStatus) => void;
@@ -37,6 +37,7 @@ export interface Services {
   timeFilterService: TimefilterContract;
   AlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   useToasts: () => ToastsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export interface ObservabilityAlertSearchBarProps
