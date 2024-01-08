@@ -57,10 +57,7 @@ export const BottomBar = ({
         gutterSize="s"
       >
         <EuiFlexItem grow={false} css={cssFormUnsavedCount}>
-          <UnsavedCount
-            unsavedCount={unsavedChangesCount}
-            hiddenUnsavedCount={hiddenChangesCount}
-          />
+          <UnsavedCount unsavedCount={unsavedChangesCount} hiddenCount={hiddenChangesCount} />
         </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
