@@ -97,6 +97,8 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import { createSoFindIterable } from './utils/create_so_find_iterable';
+
 import type { FleetAuthzRouteConfig } from './security';
 
 import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
@@ -124,6 +126,7 @@ import {
   isSecretStorageEnabled,
 } from './secrets';
 import { getPackageAssetsMap } from './epm/packages/get';
+import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -1886,6 +1889,28 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
       }
     }
+  }
+
+  fetchAllItemIds(
+    soClient: SavedObjectsClientContract,
+    { perPage = 1000, kuery }: PackagePolicyClientFetchAllItemIdsOptions = {}
+  ): AsyncIterable<string[]> {
+    // TODO:PT Question for fleet team: do I need to `auditLoggingService.writeCustomSoAuditLog()` here? Its only IDs
+
+    return createSoFindIterable<{}>({
+      soClient,
+      findRequest: {
+        type: SAVED_OBJECT_TYPE,
+        perPage,
+        sortField: 'created_at',
+        sortOrder: 'asc',
+        fields: [],
+        filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+      },
+      resultsMapper: (data) => {
+        return data.saved_objects.map((packagePolicySO) => packagePolicySO.id);
+      },
+    });
   }
 }
 

@@ -82,6 +82,8 @@ export const createEsSearchIterable = <TDocument = unknown>({
         throw e;
       });
 
+    value = resultsMapper ? resultsMapper(searchResult) : searchResult;
+
     const searchHits = searchResult.hits.hits;
 
     if (searchHits.length === 0) {
@@ -102,8 +104,6 @@ export const createEsSearchIterable = <TDocument = unknown>({
         )}`
       );
     }
-
-    value = resultsMapper ? resultsMapper(searchResult) : searchResult;
   };
 
   const createIteratorResult = (): IteratorResult<SearchResponse<TDocument>> => {

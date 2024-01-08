@@ -5,25 +5,31 @@
  * 2.0.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
+  SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 
 export interface CreateSoFindIterableOptions<TDocument = unknown> {
   soClient: SavedObjectsClientContract;
-  findRequest: Omit<SavedObjectsFindOptions, 'searchAfter' | 'page'>;
+  findRequest: Omit<SavedObjectsFindOptions, 'searchAfter' | 'page' | 'sortField'> &
+    // sortField is required
+    Pick<Required<SavedObjectsFindOptions>, 'sortField'>;
   /**
-   * An optional callback for mapping the results retrieved from ES. If defined, the iterator
+   * An optional callback for mapping the results retrieved from SavedObjects. If defined, the iterator
    * `value` will be set to the data returned by this mapping function.
    *
    * @param data
    */
   resultsMapper?: (data: SavedObjectsFindResponse<TDocument>) => any;
 }
+
+export type InferSoFindIteratorResultValue<TDocument = unknown> =
+  CreateSoFindIterableOptions<TDocument>['resultsMapper'] extends undefined
+    ? SavedObjectsFindResponse<TDocument>
+    : ReturnType<Required<CreateSoFindIterableOptions<TDocument>>['resultsMapper']>;
 
 /**
  * Creates an `AsyncIterable` that can be used to iterate (ex. via `for..await..of`) over all the data
@@ -36,10 +42,11 @@ export const createSoFindIterable = <TDocument = unknown>({
   soClient,
   findRequest: { perPage = 1000, ...findOptions },
   resultsMapper,
-}: CreateSoFindIterableOptions<TDocument>) => {
+}: CreateSoFindIterableOptions<TDocument>): AsyncIterable<
+  InferSoFindIteratorResultValue<TDocument>
+> => {
   let done = false;
-  let value: SearchResponse<TDocument>;
-
+  let value: SavedObjectsFindResponse<TDocument>;
   let searchAfterValue: SavedObjectsFindResult['sort'] | undefined;
 
   // FIXME:PT should use PIT for the query. Look into adding it.
@@ -56,6 +63,8 @@ export const createSoFindIterable = <TDocument = unknown>({
         throw e;
       });
 
+    value = resultsMapper ? resultsMapper(findResult) : findResult;
+
     const soItems = findResult.saved_objects;
 
     if (soItems.length === 0) {
@@ -71,16 +80,14 @@ export const createSoFindIterable = <TDocument = unknown>({
     if (!searchAfterValue) {
       done = true;
       throw new Error(
-        `Unable to store 'search_after' value. Last 'SearchHit' did not include a 'sort' property \n(did you forget to set the 'sort' attribute on your SearchRequest?)':\n${JSON.stringify(
+        `Unable to store 'searchAfter' value. Last 'SavedObjectsFindResult' did not include a 'sort' property \n(did you forget to set the 'sortField' attribute on your SavedObjectsFindOptions?)':\n${JSON.stringify(
           lastSearchHit
         )}`
       );
     }
-
-    value = resultsMapper ? resultsMapper(findResult) : findResult;
   };
 
-  const createIteratorResult = (): IteratorResult<SearchResponse<TDocument>> => {
+  const createIteratorResult = (): IteratorResult<SavedObjectsFindResponse<TDocument>> => {
     return { done, value };
   };
 

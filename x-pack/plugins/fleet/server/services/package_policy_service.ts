@@ -213,4 +213,11 @@ export interface PackagePolicyClient {
     packageInfo: PackageInfo;
     experimentalDataStreamFeatures: ExperimentalDataStreamFeature[];
   }>;
+
+  fetchAllItemIds(
+    soClient: SavedObjectsClientContract,
+    options?: PackagePolicyClientFetchAllItemIdsOptions
+  ): AsyncIterable<string[]>;
 }
+
+export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;
