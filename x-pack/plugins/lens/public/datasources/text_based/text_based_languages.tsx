@@ -421,17 +421,18 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
+      const fields = retrieveFromCache();
       const allColumns = props.state.layers[props.layerId]?.allColumns;
       const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
       const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
 
-      const updatedFields = allColumns?.map((f) => {
+      const updatedFields = fields?.map((f) => {
         return {
           ...f,
           compatible:
             props.isMetricDimension && hasNumberTypeColumns
               ? props.filterOperations({
-                  dataType: f?.meta?.type as DataType,
+                  dataType: f.meta.type as DataType,
                   isBucketed: Boolean(f?.meta?.type !== 'number'),
                   scale: 'ordinal',
                 })
@@ -452,7 +453,7 @@ export function getTextBasedDatasource({
               existingFields={updatedFields ?? []}
               selectedField={selectedField}
               onChoose={(choice) => {
-                const meta = allColumns?.find((f) => f.fieldName === choice.field)?.meta;
+                const meta = fields?.find((f) => f.name === choice.field)?.meta;
                 const newColumn = {
                   columnId: props.columnId,
                   fieldName: choice.field,
