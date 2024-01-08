@@ -46,6 +46,7 @@
     "@kbn/std",
     "@kbn/tinymath",
     "@kbn/visualization-utils",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",
