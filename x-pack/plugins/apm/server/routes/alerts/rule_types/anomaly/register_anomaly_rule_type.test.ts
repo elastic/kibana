@@ -164,6 +164,7 @@ describe('Transaction duration anomaly alert', () => {
               anomaly_groups: {
                 buckets: [
                   {
+                    key: ['apm.anomaly', 'foo', 'development', 'type-foo'],
                     latest_score: {
                       top: [
                         {
@@ -181,6 +182,7 @@ describe('Transaction duration anomaly alert', () => {
                     },
                   },
                   {
+                    key: ['apm.anomaly', 'bar', 'production', 'type-bar'],
                     latest_score: {
                       top: [
                         {
