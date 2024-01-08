@@ -26,7 +26,7 @@ import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../../commo
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { IVectorSource } from '../../sources/vector_source';
 import { mockVectorLayer } from '../__fixtures__/mock_vector_layer';
-import { AbstractVectorLayer, isVectorLayer } from './vector_layer';
+import { AbstractVectorLayer, isVectorLayer, hasVectorLayerMethod } from './vector_layer';
 import type { ILayer } from '../layer';
 
 class MockSource {
@@ -46,6 +46,20 @@ describe('isVectorLayer', () => {
 
   test('Should return false when Layer instance implements IVectorLayer interface', async () => {
     expect(isVectorLayer({} as unknown as ILayer)).toBe(false);
+  });
+});
+
+describe('hasVectorLayerMethod', () => {
+  test('Should return true when Layer instance implements specific method IVectorLayer interface', async () => {
+    const mockLayer = {
+      getJoins: () => {},
+    } as unknown as ILayer;
+    expect(hasVectorLayerMethod(mockLayer, 'getJoins')).toBe(true);
+  });
+
+  test('Should return true when Layer instance implements specific method IVectorLayer interface', async () => {
+    const mockLayer = {} as unknown as ILayer;
+    expect(hasVectorLayerMethod(mockLayer, 'getJoins')).toBe(false);
   });
 });
 

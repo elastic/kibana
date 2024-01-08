@@ -61,7 +61,7 @@ import {
   VectorStyleDescriptor,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
-import { isVectorLayer } from '../classes/layers/vector_layer';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../classes/sources/source';
 import {
   DRAW_MODE,
@@ -401,7 +401,7 @@ function updateMetricsProp(layerId: string, value: unknown) {
     getState: () => MapStoreState
   ) => {
     const layer = getLayerById(layerId, getState());
-    const previousFields = layer && isVectorLayer(layer) ? await layer.getFields() : [];
+    const previousFields = layer && hasVectorLayerMethod(layer, 'getFields') ? await layer.getFields() : [];
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
@@ -716,7 +716,7 @@ function updateStyleProperties(layerId: string, previousFields?: IField[]) {
       return;
     }
 
-    if (!isVectorLayer(targetLayer)) {
+    if (!hasVectorLayerMethod(targetLayer, 'getFields')) {
       return;
     }
 
@@ -769,7 +769,7 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
 
 export function setJoinsForLayer(layer: ILayer, joins: Array<Partial<JoinDescriptor>>) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
-    const previousFields = isVectorLayer(layer) ? await layer.getFields() : [];
+    const previousFields = hasVectorLayerMethod(layer, 'getFields') ? await layer.getFields() : [];
     dispatch({
       type: SET_JOINS,
       layerId: layer.getId(),
@@ -864,7 +864,7 @@ function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
     });
   }
 
-  if (adapters.requests && isVectorLayer(layer)) {
+  if (adapters.requests && hasVectorLayerMethod(layer, 'getValidJoins')) {
     layer.getValidJoins().forEach((join) => {
       adapters.requests!.resetRequest(join.getRightJoinSource().getId());
     });

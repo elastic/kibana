@@ -45,7 +45,7 @@ import {
 } from './map_action_constants';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { ILayer } from '../classes/layers/layer';
-import { isVectorLayer } from '../classes/layers/vector_layer';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import { DataRequestMeta, MapExtent, DataFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds } from '../../common/elasticsearch_util';
@@ -175,7 +175,7 @@ function syncDataForAllJoinLayers() {
   ) => {
     const syncPromises = getLayerList(getState())
       .filter((layer) => {
-        return isVectorLayer(layer) ? layer.hasJoins() : false;
+        return hasVectorLayerMethod(layer, 'hasJoins') ? layer.hasJoins() : false;
       })
       .map((layer) => {
         return dispatch(syncDataForLayer(layer, false));
@@ -438,7 +438,7 @@ function setGotoWithBounds(bounds: MapExtent) {
 function setJoinError(layerId: string, joinIndex: number, error?: string) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
-    if (!layer || !isVectorLayer(layer)) {
+    if (!layer || !hasVectorLayerMethod(layer, 'getJoins')) {
       return;
     }
 

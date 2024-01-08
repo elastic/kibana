@@ -15,7 +15,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
-  isVectorLayer,
+  hasVectorLayerMethod,
   BlendedVectorLayer,
   MvtVectorLayer,
   GeoJsonVectorLayer,
@@ -402,7 +402,7 @@ export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
 );
 
 export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, (selectedLayer) => {
-  if (!selectedLayer || !isVectorLayer(selectedLayer)) {
+  if (!selectedLayer || !hasVectorLayerMethod(selectedLayer, 'getJoins')) {
     return [];
   }
 

@@ -73,7 +73,7 @@ import {
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { isVectorLayer } from '../classes/layers/vector_layer';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './ui_actions';
 import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
@@ -439,7 +439,7 @@ export function addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !isVectorLayer(layer)) {
+    if (!layer || !hasVectorLayerMethod(layer, 'addFeature')) {
       return;
     }
 
@@ -477,7 +477,7 @@ export function deleteFeatureFromIndex(featureId: string) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !isVectorLayer(layer)) {
+    if (!layer || !hasVectorLayerMethod(layer, 'deleteFeature')) {
       return;
     }
 

@@ -18,7 +18,7 @@ import {
   getVisibilityToggleLabel,
 } from '../action_labels';
 import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
-import { isVectorLayer } from '../../../../../../classes/layers/vector_layer';
+import { hasVectorLayerMethod } from '../../../../../../classes/layers/vector_layer';
 import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
 import { RemoveLayerConfirmModal } from '../../../../../../components/remove_layer_confirm_modal';
 import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
@@ -71,7 +71,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   async _loadFeatureEditing() {
-    if (!isVectorLayer(this.props.layer)) {
+    if (!hasVectorLayerMethod(this.props.layer, 'supportsFeatureEditing')) {
       return;
     }
     const supportsFeatureEditing = this.props.layer.supportsFeatureEditing();
@@ -87,7 +87,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   async _getIsFeatureEditingEnabled(): Promise<boolean> {
-    if (!isVectorLayer(this.props.layer)) {
+    if (!hasVectorLayerMethod(this.props.layer, 'hasJoins')) {
       return false;
     }
 
