@@ -8,6 +8,7 @@
 import moment from 'moment-timezone';
 import React from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
+import type { EuiToolTipProps } from '@elastic/eui';
 
 import { useDateFormat, useTimeZone, useUiSetting$ } from '../../lib/kibana';
 import { getOrEmptyTagFromValue } from '../empty_value';
@@ -98,16 +99,22 @@ interface FormattedDateProps {
   fieldName: string;
   value?: string | number | null;
   dateFormat?: string;
+  tooltipProps?: Partial<EuiToolTipProps>;
 }
 export const FormattedDate = React.memo<FormattedDateProps>(
-  ({ value, fieldName, className = '', dateFormat }): JSX.Element => {
+  ({ value, fieldName, className = '', dateFormat, tooltipProps }): JSX.Element => {
     if (value == null) {
       return getOrEmptyTagFromValue(value);
     }
 
     const maybeDate = getMaybeDate(value);
     return maybeDate.isValid() ? (
-      <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName} className={className}>
+      <LocalizedDateTooltip
+        date={maybeDate.toDate()}
+        fieldName={fieldName}
+        className={className}
+        tooltipProps={tooltipProps}
+      >
         <PreferenceFormattedDate value={maybeDate.toDate()} dateFormat={dateFormat} />
       </LocalizedDateTooltip>
     ) : (

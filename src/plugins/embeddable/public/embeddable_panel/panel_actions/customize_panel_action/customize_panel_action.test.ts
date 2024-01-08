@@ -6,27 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { Container, isErrorEmbeddable } from '../../..';
-import { CustomizePanelAction } from './customize_panel_action';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../../../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
 import {
-  CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
+  CONTACT_CARD_EMBEDDABLE,
 } from '../../../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../../../lib/test_samples/embeddables/hello_world_container';
 import { embeddablePluginMock } from '../../../mocks';
 import { EditPanelAction } from '../edit_panel_action/edit_panel_action';
+import { CustomizePanelAction } from './customize_panel_action';
+import * as openCustomizePanel from './open_customize_panel';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
-const overlays = overlayServiceMock.createStartContract();
-const theme = themeServiceMock.createStartContract();
 const editPanelActionMock = { execute: jest.fn() } as unknown as EditPanelAction;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
@@ -59,9 +56,9 @@ beforeAll(async () => {
 });
 
 test('execute should open flyout', async () => {
-  const customizePanelAction = new CustomizePanelAction(overlays, theme, editPanelActionMock);
-  const spy = jest.spyOn(overlays, 'openFlyout');
-  await customizePanelAction.execute({ embeddable });
+  const customizePanelAction = new CustomizePanelAction(editPanelActionMock);
 
+  const spy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
+  await customizePanelAction.execute({ embeddable });
   expect(spy).toHaveBeenCalled();
 });

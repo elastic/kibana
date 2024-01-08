@@ -56,7 +56,11 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-http-browser",
     "@kbn/security-plugin-types-common",
-    "@kbn/ml-plugin"
+    "@kbn/ml-plugin",
+    "@kbn/expect",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/apm-synthtrace",
+    "@kbn/code-editor"
   ],
   "exclude": ["target/**/*"]
 }
