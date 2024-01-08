@@ -4,6 +4,7 @@
     "outDir": "target/types",
   },
   "include": [
+    "__mocks__/**/*",
     "common/**/*",
     "scripts/**/*",
     "public/**/*",
@@ -79,7 +80,9 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/securitysolution-io-ts-types",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock",
   ],
   "exclude": [
     "target/**/*",
