@@ -28,7 +28,7 @@ $ yarn es snapshot --license trial --ssl -E path.data=/tmp/es-data
 1. Add the following to your `kibana.dev.yml`
 
 ```bash
-server.basePath: '/some-base-path' # Optional
+server.basePath: '/some-base-path' # Optional, if used, sets basePath in kibana url e.g. https://localhost:5601/some-base-path/app/fleet
 server.versioned.versionResolution: oldest
 elasticsearch.hosts: [<http://localhost:9200>]
 
