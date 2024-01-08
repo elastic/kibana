@@ -14,7 +14,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
 import { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../types';
-import { addToCache } from './fieldlist_cache';
 
 jest.mock('../../id_generator');
 
@@ -626,50 +625,49 @@ describe('Textbased Data Source', () => {
 
   describe('#suggestsLimitedColumns', () => {
     it('should return true if query returns big number of columns', () => {
-      addToCache([
-        {
-          id: 'a',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'b',
-          name: 'Test 2',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'c',
-          name: 'Test 3',
-          meta: {
-            type: 'date',
-          },
-        },
-        {
-          id: 'd',
-          name: 'Test 4',
-          meta: {
-            type: 'string',
-          },
-        },
-        {
-          id: 'e',
-          name: 'Test 5',
-          meta: {
-            type: 'string',
-          },
-        },
-      ]);
-
       const state = {
         totalFields: 5,
         layers: {
           a: {
             query: { esql: 'from foo' },
             index: 'foo',
+            allColumns: [
+              {
+                id: 'a',
+                name: 'Test 1',
+                meta: {
+                  type: 'number',
+                },
+              },
+              {
+                id: 'b',
+                name: 'Test 2',
+                meta: {
+                  type: 'number',
+                },
+              },
+              {
+                id: 'c',
+                name: 'Test 3',
+                meta: {
+                  type: 'date',
+                },
+              },
+              {
+                id: 'd',
+                name: 'Test 4',
+                meta: {
+                  type: 'string',
+                },
+              },
+              {
+                id: 'e',
+                name: 'Test 5',
+                meta: {
+                  type: 'string',
+                },
+              },
+            ],
           },
         },
       } as unknown as TextBasedPrivateState;

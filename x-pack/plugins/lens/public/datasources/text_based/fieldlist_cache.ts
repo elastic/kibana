@@ -6,12 +6,14 @@
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 
-let fieldListCache: DatatableColumn[];
+const cachedColumns = new Map<string, DatatableColumn[]>();
 
-export const addToCache = (list: DatatableColumn[]) => {
-  fieldListCache = [...list];
+export const addColumnsToCache = (query: string, list: DatatableColumn[]) => {
+  const trimmedQuery = query.replaceAll('\n', '').trim();
+  cachedColumns.set(trimmedQuery, list);
 };
 
-export const retrieveFromCache = () => {
-  return fieldListCache ?? [];
+export const getColumnsFromCache = (query: string) => {
+  const trimmedQuery = query.replaceAll('\n', '').trim();
+  return cachedColumns.get(trimmedQuery);
 };

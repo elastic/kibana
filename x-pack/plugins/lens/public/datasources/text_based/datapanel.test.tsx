@@ -30,7 +30,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
 import { DataViewsState } from '../../state_management';
-import { addToCache } from './fieldlist_cache';
+import { addColumnsToCache } from './fieldlist_cache';
 
 const fieldsFromQuery = [
   {
@@ -107,7 +107,7 @@ const initialState: TextBasedPrivateState = {
       index: '1',
       columns: [],
       allColumns: [],
-      query: { sql: 'SELECT * FROM foo' },
+      query: { esql: 'SELECT * FROM foo' },
     },
   },
   indexPatternRefs: [
@@ -117,7 +117,7 @@ const initialState: TextBasedPrivateState = {
   ],
 };
 
-addToCache(fieldsFromQuery);
+addColumnsToCache('SELECT * FROM my-fake-index-pattern', fieldsFromQuery);
 
 function getFrameAPIMock({
   indexPatterns,
@@ -191,7 +191,7 @@ describe('TextBased Query Languages Data Panel', () => {
         fromDate: 'now-7d',
         toDate: 'now',
       },
-      query: { sql: 'SELECT * FROM my-fake-index-pattern' } as unknown as Query,
+      query: { esql: 'SELECT * FROM my-fake-index-pattern' } as unknown as Query,
       filters: [],
       showNoDataPopover: jest.fn(),
       dropOntoWorkspace: jest.fn(),

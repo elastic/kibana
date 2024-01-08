@@ -46,7 +46,7 @@ import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import { canColumnBeUsedBeInMetricDimension, MAX_NUM_OF_COLUMNS } from './utils';
-import { addToCache, retrieveFromCache } from './fieldlist_cache';
+import { getColumnsFromCache, addColumnsToCache } from './fieldlist_cache';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -142,7 +142,8 @@ export function getTextBasedDatasource({
         };
       });
 
-      addToCache(textBasedQueryColumns);
+      const language = getAggregateQueryMode(context.query);
+      addColumnsToCache(context.query[language], textBasedQueryColumns);
 
       const index = context.dataViewSpec.id ?? context.dataViewSpec.title;
       const query = context.query;
@@ -595,7 +596,9 @@ export function getTextBasedDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
-      const fieldList = retrieveFromCache();
+      const layers = Object.values(state.layers);
+      const query = layers?.[0]?.query;
+      const fieldList = query ? getColumnsFromCache(query[getAggregateQueryMode(query)]) : [];
       const field = fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
       if (!field) return [];
       return Object.entries(state.layers)?.map(([id, layer]) => {

@@ -12,6 +12,7 @@ import {
   type AggregateQuery,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
+  getAggregateQueryMode,
 } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
@@ -19,7 +20,7 @@ import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
 import type { DataViewsState } from '../../state_management';
-import { addToCache } from './fieldlist_cache';
+import { addColumnsToCache } from './fieldlist_cache';
 
 export const MAX_NUM_OF_COLUMNS = 5;
 
@@ -110,7 +111,8 @@ export async function getStateFromAggregateQuery(
     timeFieldName = dataView.timeFieldName;
     const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
     columnsFromQuery = table?.columns ?? [];
-    addToCache(columnsFromQuery);
+    const language = getAggregateQueryMode(query);
+    addColumnsToCache(query[language], columnsFromQuery);
     allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
   } catch (e) {
     errors.push(e);
