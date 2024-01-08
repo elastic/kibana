@@ -1,7 +1,11 @@
 steps:
   - label: ':pipeline: Create pipeline with priority'
     agents:
-      queue: kibana-default
+      provider: gcp
+      preemptible: true
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-2
     concurrency_group: bazel_macos
     concurrency: 1
     concurrency_method: eager

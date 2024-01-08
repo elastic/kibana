@@ -2,7 +2,11 @@ steps:
   - command: .buildkite/scripts/steps/functional/fleet_cypress.sh
     label: 'Fleet Cypress Tests'
     agents:
-      queue: n2-4-spot
+      provider: gcp
+      preemptible: true
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-4
     depends_on: build
     timeout_in_minutes: 50
     parallelism: 6

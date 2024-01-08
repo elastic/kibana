@@ -11,4 +11,8 @@ steps:
   - label: Promote Snapshot
     command: .buildkite/scripts/steps/es_snapshots/promote.sh
     agents:
-      queue: kibana-default
+      provider: gcp
+      preemptible: true
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-2
