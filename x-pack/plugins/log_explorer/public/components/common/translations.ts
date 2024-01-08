@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const flyoutContentLabel = i18n.translate('xpack.logExplorer.flyoutDetail.label.message', {
-  defaultMessage: 'Content',
+  defaultMessage: 'Content breakdown',
 });
 
 export const flyoutServiceLabel = i18n.translate('xpack.logExplorer.flyoutDetail.label.service', {

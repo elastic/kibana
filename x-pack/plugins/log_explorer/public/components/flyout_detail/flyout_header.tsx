@@ -6,7 +6,16 @@
  */
 
 import React from 'react';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiToken, EuiText } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToken,
+  EuiText,
+  EuiAccordion,
+  useGeneratedHtmlId,
+  EuiTitle,
+} from '@elastic/eui';
 import { FlyoutDoc } from './types';
 import { getMessageWithFallbacks } from '../../hooks/use_doc_detail';
 import { LogLevel } from '../common/log_level';
@@ -22,6 +31,16 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
   const { field, value } = getMessageWithFallbacks(doc);
   const hasMessageField = field && value;
   const hasFlyoutHeader = hasMessageField || hasBadges;
+
+  const accordionId = useGeneratedHtmlId({
+    prefix: flyoutContentLabel,
+  });
+
+  const accordionTitle = (
+    <EuiTitle size="xs">
+      <p>{flyoutContentLabel}</p>
+    </EuiTitle>
+  );
 
   const logLevelAndTimestamp = (
     <EuiFlexItem grow={false}>
@@ -64,11 +83,11 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
                 gutterSize="xs"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiToken iconType="tokenStruct" />
+                  <EuiToken iconType="tokenEvent" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="xs">
-                    {flyoutContentLabel}
+                    {field}
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -99,8 +118,16 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
   );
 
   return hasFlyoutHeader ? (
-    <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="logExplorerFlyoutDetail">
-      {hasMessageField ? contentField : logLevelAndTimestamp}
-    </EuiFlexGroup>
+    <EuiAccordion
+      id={accordionId}
+      buttonContent={accordionTitle}
+      paddingSize="m"
+      initialIsOpen={true}
+      data-test-subj={`logExplorerFlyoutHeaderSection${flyoutContentLabel}`}
+    >
+      <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="logExplorerFlyoutDetail">
+        {hasMessageField ? contentField : logLevelAndTimestamp}
+      </EuiFlexGroup>
+    </EuiAccordion>
   ) : null;
 }

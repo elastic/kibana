@@ -111,7 +111,7 @@ export function ChipWithPopover({
           <div style={{ maxWidth: '200px' }}>
             <EuiText size="s">
               <DataTablePopoverCellValue>
-                {property}:{text}
+                <span style={{ fontWeight: 700 }}>{property}</span> {text}
               </DataTablePopoverCellValue>
             </EuiText>
           </div>
