@@ -15,13 +15,14 @@ import { updateLayerStyleForSelectedLayer, updateSourceProps } from '../../actio
 import { MapStoreState } from '../../reducers/store';
 import type { OnSourceChangeArgs } from '../../classes/sources/source';
 import { hasVectorSourceMethod } from '../../classes/sources/vector_source';
+import { isLayerGroup } from '../../classes/layers/layer_group';
 
 function mapStateToProps(state: MapStoreState) {
   const selectedLayer = getSelectedLayer(state);
   let key = 'none';
   if (selectedLayer) {
-    const source = selectedLayer.getSource();
-    key = hasVectorSourceMethod(source, 'supportsJoins')
+    const source = !isLayerGroup(selectedLayer) && selectedLayer.getSource();
+    key = source && hasVectorSourceMethod(source, 'supportsJoins')
       ? `${selectedLayer.getId()}${source.supportsJoins()}`
       : selectedLayer.getId();
   }
