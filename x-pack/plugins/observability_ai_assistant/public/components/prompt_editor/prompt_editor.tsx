@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import { MessageRole, type Message } from '../../../common';
@@ -56,6 +56,19 @@ export function PromptEditor({
   const [innerMessage, setInnerMessage] = useState<Message['message'] | undefined>(
     initialInnerMessage
   );
+
+  const invalid = useMemo(() => {
+    let isInvalid = false;
+
+    if (innerMessage?.function_call?.name && innerMessage?.function_call?.arguments) {
+      try {
+        JSON.parse(innerMessage.function_call.arguments);
+      } catch (e) {
+        isInvalid = true;
+      }
+      return isInvalid;
+    }
+  }, [innerMessage?.function_call?.arguments, innerMessage?.function_call?.name]);
 
   const handleChangeMessageInner = (newInnerMessage: Message['message']) => {
     setInnerMessage(newInnerMessage);
@@ -111,7 +124,7 @@ export function PromptEditor({
   // Submit on Enter
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
-      if (innerMessage && !disabled && hasFocus) {
+      if (innerMessage && !disabled && !invalid && hasFocus) {
         if (!event.shiftKey && event.key === keys.ENTER) {
           event.preventDefault();
           handleSubmit();
@@ -124,7 +137,7 @@ export function PromptEditor({
     return () => {
       window.removeEventListener('keypress', keyboardListener);
     };
-  }, [disabled, handleSubmit, hasFocus, innerMessage]);
+  }, [disabled, handleSubmit, hasFocus, innerMessage, invalid]);
 
   useEffect(() => {
     if (hidden) {
@@ -170,7 +183,7 @@ export function PromptEditor({
             'xpack.observabilityAiAssistant.chatPromptEditor.euiButtonIcon.submitLabel',
             { defaultMessage: 'Submit' }
           )}
-          disabled={loading || disabled}
+          disabled={loading || disabled || invalid}
           display={
             mode === 'function'
               ? innerMessage?.function_call?.name
