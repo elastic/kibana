@@ -6199,6 +6199,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-eui-helpers@link:packages/kbn-test-eui-helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-feature-usage-plugin@link:x-pack/test/licensing_plugin/plugins/test_feature_usage":
   version "0.0.0"
   uid ""
