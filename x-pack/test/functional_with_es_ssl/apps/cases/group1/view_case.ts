@@ -1183,13 +1183,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         {
           key: 'valid_key_1',
           label: 'Summary',
-          type: CustomFieldTypes.TEXT,
+          type: CustomFieldTypes.TEXT as const,
+          default_value: 'foobar',
           required: true,
         },
         {
           key: 'valid_key_2',
           label: 'Sync',
-          type: CustomFieldTypes.TOGGLE,
+          type: CustomFieldTypes.TOGGLE as const,
+          default_value: false,
           required: true,
         },
       ];
