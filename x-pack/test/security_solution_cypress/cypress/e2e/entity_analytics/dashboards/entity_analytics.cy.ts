@@ -330,21 +330,15 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
     describe('Risk Score enabled but still no data', () => {
       before(() => {
-        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_no_data' });
-      });
-
-      beforeEach(() => {
         login();
         enableRiskEngine();
+        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_no_data' });
         visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      });
-
-      afterEach(() => {
-        deleteRiskEngineConfiguration();
       });
 
       after(() => {
         cy.task('esArchiverUnload', 'risk_scores_new_no_data');
+        deleteRiskEngineConfiguration();
       });
 
       it('shows no data detected prompt for host and user risk scores', () => {
@@ -355,9 +349,9 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
     describe('With host risk data', () => {
       before(() => {
-        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         login();
         enableRiskEngine();
+        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
       });
 
       beforeEach(() => {
@@ -453,9 +447,9 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
     describe('With user risk data', () => {
       before(() => {
-        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         login();
         enableRiskEngine();
+        cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
       });
 
       beforeEach(() => {

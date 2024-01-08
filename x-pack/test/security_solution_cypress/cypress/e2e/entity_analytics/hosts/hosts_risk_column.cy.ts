@@ -41,13 +41,9 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with new risk score', () => {
     before(() => {
-      // illegal_argument_exception: unknown setting [index.lifecycle.name]
-      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
-    });
-
-    beforeEach(() => {
       login();
       enableRiskEngine();
+      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });
 
     after(() => {
