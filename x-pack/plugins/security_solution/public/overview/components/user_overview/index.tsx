@@ -12,9 +12,8 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
-import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { DescriptionList } from '../../../../common/utility_types';
-import { useUiSetting$ } from '../../../common/lib/kibana';
+import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import {
@@ -82,7 +81,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+    const darkMode = useDarkMode();
     const filterQuery = useMemo(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]
