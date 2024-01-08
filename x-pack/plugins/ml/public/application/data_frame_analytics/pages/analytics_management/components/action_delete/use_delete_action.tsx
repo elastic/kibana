@@ -132,13 +132,12 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       if ((userCanDeleteIndex && deleteTargetIndex) || (userCanDeleteIndex && deleteDataView)) {
         deleteAnalyticsAndDestIndex(
           item.config,
-          item.stats,
           deleteTargetIndex,
           dataViewExists && deleteDataView,
           toastNotificationService
         );
       } else {
-        deleteAnalytics(item.config, item.stats, toastNotificationService);
+        deleteAnalytics(item.config, toastNotificationService);
       }
     }
   };
