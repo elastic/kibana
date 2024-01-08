@@ -211,6 +211,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 <EuiTextArea
                   fullWidth
                   rows={5}
+                  data-test-subj="kafkaSslKeySecretInput"
                   {...inputs.kafkaSslKeySecretInput.props}
                   placeholder={i18n.translate(
                     'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',

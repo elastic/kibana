@@ -245,6 +245,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               fullWidth
               rows={5}
               {...inputs.sslKeySecretInput.props}
+              data-test-subj="sslKeySecretInput"
               placeholder={i18n.translate(
                 'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder',
                 {

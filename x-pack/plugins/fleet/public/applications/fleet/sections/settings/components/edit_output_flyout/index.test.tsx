@@ -37,7 +37,7 @@ jest.mock('../../../../hooks', () => {
 });
 
 jest.mock('./confirm_update', () => ({
-  confirmUpdate: () => Promise.resolve(true),
+  confirmUpdate: () => jest.fn().mockResolvedValue(true),
 }));
 
 const mockSendPutOutput = sendPutOutput as jest.MockedFunction<typeof sendPutOutput>;
@@ -103,6 +103,9 @@ describe('EditOutputFlyout', () => {
 
   beforeEach(() => {
     mockStartServices(false);
+    jest.clearAllMocks();
+    // mockSendPutOutput.mockClear();
+    // mockedUsedFleetStatus.mockClear();
   });
 
   it('should render the flyout if there is not output provided', async () => {
@@ -185,6 +188,102 @@ describe('EditOutputFlyout', () => {
     });
   });
 
+  it('should populate secret input with plain text value when editing kafka output', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ outputSecretsStorage: true, kafkaOutput: true });
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topics: [{ topic: 'topic' }],
+      auth_type: 'ssl',
+      version: '1.0.0',
+      ssl: { certificate: 'cert', key: 'key', verification_mode: 'full' },
+      compression: 'none',
+    });
+
+    expect((utils.getByTestId('kafkaSslKeySecretInput') as any).value).toEqual('key');
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputK',
+        expect.objectContaining({
+          secrets: { ssl: { key: 'key' } },
+          ssl: { certificate: 'cert', key: '', verification_mode: 'full' },
+        })
+      );
+    });
+  });
+
+  it('should populate secret password input with plain text value when editing kafka output', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ outputSecretsStorage: true, kafkaOutput: true });
+    const { utils } = renderFlyout({
+      type: 'kafka',
+      name: 'kafka output',
+      id: 'outputK',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['kafka:443'],
+      topics: [{ topic: 'topic' }],
+      auth_type: 'user_pass',
+      version: '1.0.0',
+      username: 'user',
+      password: 'pass',
+      compression: 'none',
+    });
+
+    expect(
+      (utils.getByTestId('settingsOutputsFlyout.kafkaPasswordSecretInput') as any).value
+    ).toEqual('pass');
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputK',
+        expect.objectContaining({
+          secrets: { password: 'pass' },
+        })
+      );
+      expect((mockSendPutOutput.mock.calls[0][1] as any).password).toBeUndefined();
+    });
+  });
+
+  it('should populate secret input with plain text value when editing logstash output', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ outputSecretsStorage: true });
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash'],
+      ssl: { certificate: 'cert', key: 'key', certificate_authorities: [] },
+    });
+
+    expect((utils.getByTestId('sslKeySecretInput') as HTMLInputElement).value).toEqual('key');
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputL',
+        expect.objectContaining({
+          secrets: { ssl: { key: 'key' } },
+          ssl: { certificate: 'cert', certificate_authorities: [] },
+        })
+      );
+    });
+  });
+
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
     mockedUsedFleetStatus.mockReturnValue({
       missingOptionalFeatures: ['encrypted_saved_object_encryption_key_required'],
@@ -246,7 +345,8 @@ describe('EditOutputFlyout', () => {
     fireEvent.click(utils.getByText('Save and apply settings'));
 
     await waitFor(() => {
-      expect(mockSendPutOutput.mock.calls[0][1]).toEqual(
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputR',
         expect.objectContaining({
           secrets: { service_token: '1234' },
           service_token: undefined,
