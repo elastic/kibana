@@ -46,7 +46,12 @@ import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import { canColumnBeUsedBeInMetricDimension, MAX_NUM_OF_COLUMNS } from './utils';
-import { addToCache, retrieveFromCache, retrieveLayerColumnsFromCache } from './fieldlist_cache';
+import {
+  addToCache,
+  retrieveFromCache,
+  retrieveLayerColumnsFromCache,
+  updateCacheFromQuery,
+} from './fieldlist_cache';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -423,16 +428,17 @@ export function getTextBasedDatasource({
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
       const allColumns = retrieveLayerColumnsFromCache(props.state.layers[props.layerId]?.columns);
+      const fields = retrieveFromCache();
       const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
       const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
 
-      const updatedFields = allColumns?.map((f) => {
+      const updatedFields = fields?.map((f) => {
         return {
           ...f,
           compatible:
             props.isMetricDimension && hasNumberTypeColumns
               ? props.filterOperations({
-                  dataType: f?.meta?.type as DataType,
+                  dataType: f.meta.type as DataType,
                   isBucketed: Boolean(f?.meta?.type !== 'number'),
                   scale: 'ordinal',
                 })
@@ -453,7 +459,7 @@ export function getTextBasedDatasource({
               existingFields={updatedFields ?? []}
               selectedField={selectedField}
               onChoose={(choice) => {
-                const meta = allColumns?.find((f) => f.fieldName === choice.field)?.meta;
+                const meta = fields?.find((f) => f.name === choice.field)?.meta;
                 const newColumn = {
                   columnId: props.columnId,
                   fieldName: choice.field,
@@ -642,6 +648,13 @@ export function getTextBasedDatasource({
       references2: SavedObjectReference[]
     ) => isEqual(persistableState1, persistableState2),
     getDatasourceInfo: async (state, references, dataViewsService) => {
+      const fieldList = retrieveFromCache();
+      const layers = Object.values(state.layers);
+      const query = layers?.[0]?.query;
+      if (fieldList.length === 0 && query) {
+        console.log('meow');
+        await updateCacheFromQuery(query, expressions);
+      }
       const indexPatterns: DataView[] = [];
       for (const { index } of Object.values(state.layers)) {
         const dataView = await dataViewsService?.get(index);

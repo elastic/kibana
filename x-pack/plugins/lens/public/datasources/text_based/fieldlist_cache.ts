@@ -6,48 +6,39 @@
  */
 import { AggregateQuery } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { LensPluginStartDependencies } from '../../plugin';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+
 import type { TextBasedLayerColumn } from './types';
 import { getAllColumns } from './utils';
-import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
+import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 
 let fieldListCache: DatatableColumn[];
-
-export const getQueryColumns = async (
-  query: AggregateQuery,
-  dataView: DataView,
-  deps: LensPluginStartDependencies
-) => {
-  // Fetching only columns for ES|QL for performance reasons with limit 0
-  // Important note: ES doesnt return the warnings for 0 limit,
-  // I am skipping them in favor of performance now
-  // but we should think another way to get them (from Lens embeddable or store)
-  const performantQuery = { ...query };
-  if ('esql' in performantQuery && performantQuery.esql) {
-    performantQuery.esql = `${performantQuery.esql} | limit 0`;
-  }
-  const table = await fetchDataFromAggregateQuery(
-    performantQuery,
-    dataView,
-    deps.data,
-    deps.expressions
-  );
-  return table?.columns;
-};
 
 export const addToCache = (list: DatatableColumn[]) => {
   fieldListCache = [...list];
 };
 
 export const retrieveFromCache = () => {
-  // if fieldCache is empty then retrieve from getQueryColumns
   return fieldListCache ?? [];
 };
 
 export const retrieveLayerColumnsFromCache = (
   existingColumns: TextBasedLayerColumn[]
 ): TextBasedLayerColumn[] => {
-  // if fieldCache is empty then retrieve from getQueryColumns
   return getAllColumns(existingColumns, fieldListCache ?? []);
+};
+
+export const updateCacheFromQuery = async (
+  query: AggregateQuery,
+  expressions: ExpressionsStart
+) => {
+  // Fetching only columns for ES|QL for performance reasons with limit 0
+  const performantQuery = { ...query };
+  if ('esql' in performantQuery && performantQuery.esql) {
+    performantQuery.esql = `${performantQuery.esql} | limit 0`;
+  }
+  const table = await fetchFieldsFromESQL(performantQuery, expressions);
+  if (table) {
+    addToCache(table.columns);
+  }
 };

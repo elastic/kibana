@@ -9,10 +9,10 @@ import { TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
 import { BasePayload, ReportSource } from '@kbn/reporting-common/types';
 
 export const REPORTING_EXECUTE_TYPE = 'report:execute';
-export const REPORTING_MONITOR_TYPE = 'reports:monitor';
+
+export const TIME_BETWEEN_ATTEMPTS = 10 * 1000; // 10 seconds
 
 export { ExecuteReportTask } from './execute_report';
-export { MonitorReportsTask } from './monitor_reports';
 
 export interface ReportTaskParams<JobPayloadType = BasePayload> {
   id: string;

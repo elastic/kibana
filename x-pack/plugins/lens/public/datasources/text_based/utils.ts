@@ -43,13 +43,8 @@ export const getAllColumns = (
   existingColumns: TextBasedLayerColumn[],
   columnsFromQuery: DatatableColumn[]
 ) => {
-  // ToDo: Possibly this is not needed
-  const columns = existingColumns.filter((c) => {
-    const columnExists = columnsFromQuery?.some((f) => f.name === c?.fieldName);
-    if (columnExists) return c;
-  });
   const allCols = [
-    ...columns,
+    ...existingColumns,
     ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
   ];
   const uniqueIds: string[] = [];
