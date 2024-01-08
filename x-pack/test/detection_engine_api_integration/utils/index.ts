@@ -28,6 +28,7 @@ export * from './update_rule';
 export * from './wait_for';
 export * from './wait_for_rule_status';
 export * from './prebuilt_rules/create_prebuilt_rule_saved_objects';
+export * from './prebuilt_rules/install_prebuilt_rules_and_timelines';
 export * from './get_simple_rule_update';
 export * from './get_simple_ml_rule_update';
 export * from './create_non_security_rule';
