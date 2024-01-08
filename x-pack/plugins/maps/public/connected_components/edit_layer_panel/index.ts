@@ -22,9 +22,10 @@ function mapStateToProps(state: MapStoreState) {
   let key = 'none';
   if (selectedLayer) {
     const source = !isLayerGroup(selectedLayer) && selectedLayer.getSource();
-    key = source && hasVectorSourceMethod(source, 'supportsJoins')
-      ? `${selectedLayer.getId()}${source.supportsJoins()}`
-      : selectedLayer.getId();
+    key =
+      source && hasVectorSourceMethod(source, 'supportsJoins')
+        ? `${selectedLayer.getId()}${source.supportsJoins()}`
+        : selectedLayer.getId();
   }
   return {
     key,
