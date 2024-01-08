@@ -29,6 +29,7 @@ export interface FormProps {
   categoryCounts: { [category: string]: number };
   /** Handler for the "clear search" link. */
   onClearQuery: () => void;
+  /** {@link UiSettingsScope} of the settings in this form. */
   scope: UiSettingsScope;
 }
 
@@ -46,6 +47,16 @@ export const Form = (props: FormProps) => {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
+
+  const scopeUnsavedChanges = Object.keys(unsavedChanges)
+    .filter((id) => fields.some((field) => field.id === id))
+    .reduce((obj: Record<string, UnsavedFieldChange>, key) => {
+      obj[key] = unsavedChanges[key];
+      return obj;
+    }, {});
+
+  const hiddenChangesCount = unsavedChangesCount - Object.keys(scopeUnsavedChanges).length;
+
   const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
 
   const clearAllUnsaved = () => {
@@ -56,7 +67,7 @@ export const Form = (props: FormProps) => {
 
   const saveAll = async () => {
     setIsLoading(true);
-    await saveChanges(unsavedChanges);
+    await saveChanges(scopeUnsavedChanges);
     setIsLoading(false);
   };
 
@@ -91,6 +102,7 @@ export const Form = (props: FormProps) => {
           hasInvalidChanges={hasInvalidChanges}
           isLoading={isLoading}
           unsavedChangesCount={unsavedChangesCount}
+          hiddenChangesCount={hiddenChangesCount}
         />
       )}
     </Fragment>

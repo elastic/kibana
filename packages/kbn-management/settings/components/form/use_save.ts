@@ -18,6 +18,7 @@ export interface UseSaveParameters {
   fields: FieldDefinition[];
   /** The function to invoke for clearing all unsaved changes. */
   clearChanges: () => void;
+  /** The {@link UiSettingsScope} of the unsaved changes. */
   scope: UiSettingsScope;
 }
 

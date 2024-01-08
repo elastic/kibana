@@ -148,6 +148,7 @@ export const SettingsApplication = () => {
           categoryCounts={selectedTab.categoryCounts}
           isSavingEnabled={true}
           onClearQuery={() => onQueryChange()}
+          scope={selectedTabId === SPACE_SETTINGS_TAB_ID ? 'namespace' : 'global'}
         />
       ) : (
         <EmptyState {...{ queryText: query?.text, onClearQuery: () => onQueryChange() }} />

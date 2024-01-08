@@ -16,9 +16,12 @@ import { I18nStart } from '@kbn/core-i18n-browser';
 
 import { createFormServicesMock } from '@kbn/management-settings-components-form/mocks';
 import { Subscription } from 'rxjs';
-import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+import {
+  getGlobalSettingsMock,
+  getSettingsMock,
+} from '@kbn/management-settings-utilities/mocks/settings.mock';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
-import {UiSettingsScope} from "@kbn/core-ui-settings-common";
 
 const createRootMock = () => {
   const analytics = analyticsServiceMock.createAnalyticsServiceStart();
@@ -38,7 +41,7 @@ export const createSettingsApplicationServicesMock = (
 ): SettingsApplicationServices => ({
   ...createFormServicesMock(),
   getAllowlistedSettings: (scope: UiSettingsScope) =>
-    scope === 'global' && hasGlobalSettings === false ? {} : getSettingsMock(),
+    scope === 'namespace' ? getSettingsMock() : hasGlobalSettings ? getGlobalSettingsMock() : {},
   isCustomSetting: () => false,
   isOverriddenSetting: () => false,
   subscribeToUpdates: () => new Subscription(),

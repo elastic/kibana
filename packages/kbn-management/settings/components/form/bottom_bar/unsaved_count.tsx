@@ -17,12 +17,13 @@ import { useFormStyles } from '../form.styles';
  */
 interface UnsavedCountProps {
   unsavedCount: number;
+  hiddenUnsavedCount: number;
 }
 
 /**
  * Component for displaying the count of unsaved changes in a {@link BottomBar}.
  */
-export const UnsavedCount = ({ unsavedCount }: UnsavedCountProps) => {
+export const UnsavedCount = ({ unsavedCount, hiddenUnsavedCount }: UnsavedCountProps) => {
   const { cssFormUnsavedCountMessage } = useFormStyles();
   return (
     <EuiText size="s" css={cssFormUnsavedCountMessage}>
@@ -31,9 +32,13 @@ export const UnsavedCount = ({ unsavedCount }: UnsavedCountProps) => {
         defaultMessage="{unsavedCount} unsaved {unsavedCount, plural,
               one {setting}
               other {settings}
+            }{hiddenCount, plural,
+              =0 {}
+              other {, # hidden}
             }"
         values={{
           unsavedCount,
+          hiddenCount: hiddenUnsavedCount,
         }}
       />
     </EuiText>

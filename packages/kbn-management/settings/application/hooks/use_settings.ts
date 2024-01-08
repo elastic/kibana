@@ -27,7 +27,7 @@ export const useSettings = (scope: UiSettingsScope) => {
   useEffectOnce(() => {
     const subscription = subscribeToUpdates(() => {
       setSettings(getAllowlistedSettings(scope));
-    });
+    }, scope);
 
     return () => {
       subscription.unsubscribe();

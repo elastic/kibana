@@ -11,7 +11,10 @@ import type { ComponentMeta, Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { Subscription } from 'rxjs';
-import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+import {
+  getGlobalSettingsMock,
+  getSettingsMock,
+} from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { SettingsApplication as Component } from '../application';
 import { SettingsApplicationProvider } from '../services';
@@ -38,7 +41,7 @@ const getSettingsApplicationStory = ({ hasGlobalSettings }: StoryProps) => (
     showDanger={action('showDanger')}
     links={{ deprecationKey: 'link/to/deprecation/docs' }}
     getAllowlistedSettings={(scope: UiSettingsScope) =>
-      scope === 'namespace' || hasGlobalSettings ? getSettingsMock() : {}
+      scope === 'namespace' ? getSettingsMock() : hasGlobalSettings ? getGlobalSettingsMock() : {}
     }
     isCustomSetting={() => false}
     isOverriddenSetting={() => false}

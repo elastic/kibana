@@ -24,7 +24,8 @@ import { DATA_TEST_SUBJ_SETTINGS_CATEGORY } from '@kbn/management-settings-compo
 import { wrap, createSettingsApplicationServicesMock } from './mocks';
 import { SettingsApplicationServices } from './services';
 
-const categories = ['general', 'dashboard', 'notifications'];
+const spaceCategories = ['general', 'dashboard', 'notifications'];
+const globalCategories = ['custom branding'];
 
 describe('Settings application', () => {
   beforeEach(() => {
@@ -38,7 +39,7 @@ describe('Settings application', () => {
     expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_TITLE)).toBeInTheDocument();
     expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeInTheDocument();
     // Verify that all category panels are rendered
-    for (const category of categories) {
+    for (const category of spaceCategories) {
       expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
     }
   });
@@ -74,7 +75,7 @@ describe('Settings application', () => {
       fireEvent.click(clearSearchLink);
     });
 
-    for (const category of categories) {
+    for (const category of spaceCategories) {
       expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
     }
   });
@@ -94,7 +95,9 @@ describe('Settings application', () => {
     });
 
     it('renders tabs when global settings are enabled', () => {
-      const { container, getByTestId } = render(wrap(<SettingsApplication />));
+      const services: SettingsApplicationServices = createSettingsApplicationServicesMock(true);
+
+      const { container, getByTestId } = render(wrap(<SettingsApplication />, services));
 
       expect(container).toBeInTheDocument();
       expect(getByTestId(spaceSettingsTestSubj)).toBeInTheDocument();
@@ -102,7 +105,9 @@ describe('Settings application', () => {
     });
 
     it('can switch between tabs', () => {
-      const { getByTestId } = render(wrap(<SettingsApplication />));
+      const services: SettingsApplicationServices = createSettingsApplicationServicesMock(true);
+
+      const { getByTestId } = render(wrap(<SettingsApplication />, services));
 
       const spaceTab = getByTestId(spaceSettingsTestSubj);
       const globalTab = getByTestId(globalSettingsTestSubj);
@@ -122,7 +127,7 @@ describe('Settings application', () => {
       expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_TITLE)).toBeInTheDocument();
       expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeInTheDocument();
       // Verify that all category panels are rendered
-      for (const category of categories) {
+      for (const category of globalCategories) {
         expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
       }
     });
