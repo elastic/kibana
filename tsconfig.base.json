@@ -1572,6 +1572,8 @@
       "@kbn/telemetry-tools/*": ["packages/kbn-telemetry-tools/*"],
       "@kbn/test": ["packages/kbn-test"],
       "@kbn/test/*": ["packages/kbn-test/*"],
+      "@kbn/test-eui-helpers": ["packages/kbn-test-eui-helpers"],
+      "@kbn/test-eui-helpers/*": ["packages/kbn-test-eui-helpers/*"],
       "@kbn/test-feature-usage-plugin": ["x-pack/test/licensing_plugin/plugins/test_feature_usage"],
       "@kbn/test-feature-usage-plugin/*": ["x-pack/test/licensing_plugin/plugins/test_feature_usage/*"],
       "@kbn/test-jest-helpers": ["packages/kbn-test-jest-helpers"],
