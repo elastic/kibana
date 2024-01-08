@@ -13,7 +13,6 @@ import {
   getTotalIndices,
   getTotalIndicesChecked,
   getTotalSameFamily,
-  onPatternRollupUpdated,
   updateResultOnCheckCompleted,
 } from './helpers';
 import { auditbeatWithAllResults } from '../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
@@ -163,21 +162,6 @@ describe('helpers', () => {
       };
 
       expect(getTotalIndicesChecked(someErrors)).toEqual(4);
-    });
-  });
-
-  describe('onPatternRollupUpdated', () => {
-    test('it returns a new collection with the updated rollup', () => {
-      const before: Record<string, PatternRollup> = {
-        'auditbeat-*': auditbeatWithAllResults,
-      };
-
-      expect(
-        onPatternRollupUpdated({
-          patternRollup: mockPacketbeatPatternRollup,
-          patternRollups: before,
-        })
-      ).toEqual(patternRollups);
     });
   });
 
