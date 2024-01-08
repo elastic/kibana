@@ -21,9 +21,12 @@ import { useSettings } from './use_settings';
  * @returns An array of {@link FieldDefinition} objects.
  */
 export const useFields = (scope: UiSettingsScope, query?: Query): FieldDefinition[] => {
-  const { isCustomSetting: isCustom, isOverriddenSetting: isOverridden } = useServices();
+  const { isCustomSetting, isOverriddenSetting } = useServices();
   const settings = useSettings(scope);
-  const fields = getFieldDefinitions(settings, { isCustom, isOverridden });
+  const fields = getFieldDefinitions(settings, {
+    isCustom: (key) => isCustomSetting(key, scope),
+    isOverridden: (key) => isOverriddenSetting(key, scope),
+  });
   if (query) {
     return Query.execute(query, fields);
   }

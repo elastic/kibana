@@ -23,9 +23,9 @@ import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 export interface Services {
   getAllowlistedSettings: (scope: UiSettingsScope) => Record<string, UiSettingMetadata>;
-  subscribeToUpdates: (fn: () => void) => Subscription;
-  isCustomSetting: (key: string) => boolean;
-  isOverriddenSetting: (key: string) => boolean;
+  subscribeToUpdates: (fn: () => void, scope: UiSettingsScope) => Subscription;
+  isCustomSetting: (key: string, scope: UiSettingsScope) => boolean;
+  isOverriddenSetting: (key: string, scope: UiSettingsScope) => boolean;
   addUrlToHistory: (url: string) => void;
 }
 
@@ -100,8 +100,12 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
   const { docLinks, notifications, theme, i18n, settings, history } = dependencies;
   const { client, globalClient } = settings;
 
+  const getScopeClient = (scope: UiSettingsScope) => {
+    return scope === 'namespace' ? client : globalClient;
+  };
+
   const getAllowlistedSettings = (scope: UiSettingsScope) => {
-    const scopeClient = scope === 'namespace' ? client : globalClient;
+    const scopeClient = getScopeClient(scope);
     const rawSettings = Object.fromEntries(
       Object.entries(scopeClient.getAll()).filter(
         ([settingId, settingDef]) => !settingDef.readonly && !client.isCustom(settingId)
@@ -110,11 +114,26 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
     return normalizeSettings(rawSettings);
   };
 
+  const isCustomSetting = (key: string, scope: UiSettingsScope) => {
+    const scopeClient = getScopeClient(scope);
+    return scopeClient.isCustom(key);
+  };
+
+  const isOverriddenSetting = (key: string, scope: UiSettingsScope) => {
+    const scopeClient = getScopeClient(scope);
+    return scopeClient.isOverridden(key);
+  };
+
+  const subscribeToUpdates = (fn: () => void, scope: UiSettingsScope) => {
+    const scopeClient = getScopeClient(scope);
+    return scopeClient.getUpdate$().subscribe(fn);
+  };
+
   const services: Services = {
     getAllowlistedSettings,
-    isCustomSetting: (key: string) => client.isCustom(key),
-    isOverriddenSetting: (key: string) => client.isOverridden(key),
-    subscribeToUpdates: (fn: () => void) => client.getUpdate$().subscribe(fn),
+    isCustomSetting,
+    isOverriddenSetting,
+    subscribeToUpdates,
     addUrlToHistory: (url: string) => history.push({ pathname: '', search: url }),
   };
 

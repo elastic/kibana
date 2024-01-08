@@ -13,6 +13,7 @@ import { FieldCategories } from '@kbn/management-settings-components-field-categ
 import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { categorizeFields } from '@kbn/management-settings-utilities';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
 
@@ -28,6 +29,7 @@ export interface FormProps {
   categoryCounts: { [category: string]: number };
   /** Handler for the "clear search" link. */
   onClearQuery: () => void;
+  scope: UiSettingsScope;
 }
 
 /**
@@ -35,7 +37,7 @@ export interface FormProps {
  * @param props The {@link FormProps} for the {@link Form} component.
  */
 export const Form = (props: FormProps) => {
-  const { fields, isSavingEnabled, categoryCounts, onClearQuery } = props;
+  const { fields, isSavingEnabled, categoryCounts, onClearQuery, scope } = props;
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
     {}
@@ -50,7 +52,7 @@ export const Form = (props: FormProps) => {
     setUnsavedChanges({});
   };
 
-  const saveChanges = useSave({ fields, clearChanges: clearAllUnsaved });
+  const saveChanges = useSave({ fields, clearChanges: clearAllUnsaved, scope });
 
   const saveAll = async () => {
     setIsLoading(true);
