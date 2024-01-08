@@ -15,7 +15,7 @@ import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { AppFeatureKey } from '@kbn/security-solution-features/keys';
-import { dump } from '../../../utils/dump';
+import { stringify } from '../../../utils/stringify';
 import { BatchProcessor } from '../../../utils/batch_processor';
 import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
 import type { ExperimentalFeatures } from '../../../../../common';
@@ -759,7 +759,7 @@ export class ManifestManager {
           this.logger.error(
             `Delete batch #[${batch}] with [${
               data.length
-            }] items encountered the following errors:\n${dump(deleteErrors)}`
+            }] items encountered the following errors:\n${stringify(deleteErrors)}`
           );
         }
       },
@@ -783,51 +783,7 @@ export class ManifestManager {
     this.logger.info(`Orphan artifacts (if any) have been cleaned up`);
 
     if (badArtifactIds.length) {
-      this.logger.debug(`Deleted artifacts from Fleet:\n${dump(badArtifactIds)}`);
+      this.logger.debug(`Deleted artifacts from Fleet:\n${stringify(badArtifactIds)}`);
     }
-
-    //
-    //
-    // =====================================================
-    //
-    //
-
-    // try {
-    //   const fleetArtifacts = await this.listAllArtifacts();
-    //   if (isEmpty(fleetArtifacts)) {
-    //     return;
-    //   }
-    //
-    //   const badArtifacts = [];
-    //   const badArtifactIds = [];
-    //
-    //   const manifestArtifactsIds = manifest
-    //     .getAllArtifacts()
-    //     .map((artifact) => getArtifactId(artifact));
-    //
-    //   for (const fleetArtifact of fleetArtifacts) {
-    //     const artifactId = getArtifactId(fleetArtifact);
-    //     const isArtifactInManifest = manifestArtifactsIds.includes(artifactId);
-    //
-    //     if (!isArtifactInManifest) {
-    //       badArtifacts.push(fleetArtifact);
-    //       badArtifactIds.push(artifactId);
-    //     }
-    //   }
-    //
-    //   if (isEmpty(badArtifacts)) {
-    //     return;
-    //   }
-    //
-    //   this.logger.error(
-    //     new EndpointError(`Cleaning up ${badArtifacts.length} orphan artifacts`, badArtifacts)
-    //   );
-    //
-    //   await this.artifactClient.bulkDeleteArtifacts(badArtifactIds);
-    //
-    //   this.logger.info(`All orphan artifacts has been removed successfully`);
-    // } catch (error) {
-    //   this.logger.error(new EndpointError('There was an error cleaning orphan artifacts', error));
-    // }
   }
 }
