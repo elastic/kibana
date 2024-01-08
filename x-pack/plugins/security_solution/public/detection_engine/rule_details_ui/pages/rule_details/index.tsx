@@ -60,7 +60,7 @@ import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { StepAboutRuleToggleDetails } from '../../../rule_creation_ui/components/step_about_rule_details';
+import { StepAboutRuleToggleDetails } from '../../../rule_creation/components/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../../../detections/components/user_info';
 import { StepRuleActionsReadOnly } from '../../../rule_creation/components/step_rule_actions';

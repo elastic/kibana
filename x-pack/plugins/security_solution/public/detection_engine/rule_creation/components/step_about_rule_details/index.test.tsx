@@ -16,7 +16,7 @@ import {
   mockAboutStepRule,
 } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { StepAboutRule } from '../step_about_rule';
+import { StepAboutRule } from '../../../rule_creation_ui/components/step_about_rule';
 import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
