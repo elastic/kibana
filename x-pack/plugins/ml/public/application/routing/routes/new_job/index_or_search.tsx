@@ -15,6 +15,7 @@ import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { NavigateToPageButton } from '../../components/navigate_to_page_button';
 
 enum MODE {
   NEW_JOB,
@@ -24,6 +25,7 @@ enum MODE {
 interface IndexOrSearchPageProps extends PageProps {
   nextStepPath: string;
   mode: MODE;
+  extraButtons?: React.Children;
 }
 
 const getBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
@@ -104,14 +106,28 @@ export const dataVizIndexOrSearchRouteFactory = (
   title: i18n.translate('xpack.ml.selectDataViewLabel', {
     defaultMessage: 'Select Data View',
   }),
-  render: (props, deps) => (
-    <PageWrapper
-      {...props}
-      nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER)}
-      deps={deps}
-      mode={MODE.DATAVISUALIZER}
-    />
-  ),
+  render: (props, deps) => {
+    // @TODO: remove
+    console.log(
+      `--@@createPath(ML_PAGES.DATA_VISUALIZER_ESQL)`,
+      createPath(ML_PAGES.DATA_VISUALIZER_ESQL)
+    );
+    const button = (
+      <NavigateToPageButton
+        nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
+        title="Use ES|QL"
+      />
+    );
+    return (
+      <PageWrapper
+        {...props}
+        nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER)}
+        deps={deps}
+        mode={MODE.DATAVISUALIZER}
+        extraButtons={button}
+      />
+    );
+  },
   breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
@@ -185,7 +201,7 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
-const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
+const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode, extraButtons }) => {
   const {
     services: {
       http: { basePath },
@@ -207,7 +223,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
   );
   return (
     <PageLoader context={context}>
-      <Page {...{ nextStepPath }} />
+      <Page {...{ nextStepPath, extraButtons }} />
     </PageLoader>
   );
 };
