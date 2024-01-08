@@ -452,15 +452,20 @@ export class ManifestManager {
       if (isEmpty(artifactIds)) {
         return [];
       }
+
       const errors = await this.artifactClient.bulkDeleteArtifacts(artifactIds);
+
       if (!isEmpty(errors)) {
         return errors;
       }
-      for (const artifactId of artifactIds) {
-        this.logger.info(`Cleaned up artifact ${artifactId}`);
-      }
+
+      this.logger.info(`Cleaned up artifacts:\n  ${artifactIds.join('\n  ')}`);
+
       return [];
     } catch (err) {
+      this.logger.debug(
+        `Attempted to delete [${artifactIds.length}] outdated artifacts failed with: ${err.message}`
+      );
       return [err];
     }
   }
