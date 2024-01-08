@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -16,10 +16,10 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/164387
-  describe.skip('/deprecations/_delete_unknown_types', () => {
+  describe('/deprecations/_delete_unknown_types', () => {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
+      // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
+      await es.indices.putMapping({ index: '.kibana', body: { dynamic: true }});
       await esArchiver.load(
         'test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types'
       );
