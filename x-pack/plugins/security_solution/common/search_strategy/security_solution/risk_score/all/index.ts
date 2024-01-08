@@ -31,6 +31,8 @@ export interface RiskStats {
   multipliers: string[];
   calculated_level: RiskSeverity;
   inputs?: RiskInputs;
+  category_1_score: number;
+  category_1_count: number;
 }
 
 export { RiskSeverity };
