@@ -21,7 +21,8 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInQA install_large_prebuilt_rules_package', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es, log);
+      const test = await deleteAllPrebuiltRuleAssets(es, log);
+      console.log('\n\n\nHola a todos: ', test, '\n\n\n', '\n\n\n');
     });
 
     afterEach(async () => {

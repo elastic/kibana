@@ -7,7 +7,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { retryIfConflicts } from '../../retry_if_conflicts';
+import { retryIfDeleteByQueryConflicts } from '../../retry_delete_by_query_conflicts';
 
 /**
  * Remove all prebuilt rule assets from the security solution savedObjects index
@@ -17,8 +17,8 @@ export const deleteAllPrebuiltRuleAssets = async (
   es: Client,
   logger: ToolingLog
 ): Promise<void> => {
-  await retryIfConflicts(logger, 'deleteAllPrebuiltRuleAssets', async () => {
-    await es.deleteByQuery({
+  await retryIfDeleteByQueryConflicts(logger, 'deleteAllPrebuiltRuleAssets', async () => {
+    return await es.deleteByQuery({
       index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
       q: 'type:security-rule',
       wait_for_completion: true,
