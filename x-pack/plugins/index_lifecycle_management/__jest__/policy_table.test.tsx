@@ -43,6 +43,7 @@ const testPolicy = {
 
 const isUsedByAnIndex = (i: number) => i % 2 === 0;
 const isDesignatedManagedPolicy = (i: number) => i > 0 && i % 3 === 0;
+const isDeprecatedPolicy = (i: number) => i > 0 && i % 2 === 0;
 
 const policies: PolicyFromES[] = [testPolicy];
 for (let i = 1; i < 105; i++) {
@@ -54,6 +55,7 @@ for (let i = 1; i < 105; i++) {
     name: `testy${i}`,
     policy: {
       name: `testy${i}`,
+      deprecated: i % 2 === 0,
       phases: {},
       ...(isDesignatedManagedPolicy(i)
         ? {
@@ -96,6 +98,7 @@ const getPolicies = (rendered: ReactWrapper) => {
       version,
       name,
       isManagedPolicy: isDesignatedManagedPolicy(version),
+      isDeprecatedPolicy: isDeprecatedPolicy(version),
       isUsedByAnIndex: isUsedByAnIndex(version),
     };
   });
@@ -194,6 +197,22 @@ describe('policy table', () => {
         expect(warningBadge.exists()).toBeTruthy();
       } else {
         expect(warningBadge.exists()).toBeFalsy();
+      }
+    });
+  });
+
+  test('shows deprecated policies with Deprecated badges', () => {
+    const rendered = mountWithIntl(component);
+    const visiblePolicies = getPolicies(rendered);
+
+    visiblePolicies.forEach((p) => {
+      const policyRow = findTestSubject(rendered, `policyTableRow-${p.name}`);
+      const deprecatedBadge = findTestSubject(policyRow, 'deprecatedPolicyBadge');
+
+      if (p.isDeprecatedPolicy) {
+        expect(deprecatedBadge.exists()).toBeTruthy();
+      } else {
+        expect(deprecatedBadge.exists()).toBeFalsy();
       }
     });
   });

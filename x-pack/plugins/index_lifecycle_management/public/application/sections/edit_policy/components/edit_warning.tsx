@@ -114,7 +114,7 @@ export const EditWarning: FunctionComponent = () => {
               }
               color="warning"
               iconType="warning"
-              data-test-subj="editManagedPolicyWithDeprecation"
+              data-test-subj="editPolicyWithDeprecation"
             >
               <p>
                 <FormattedMessage
