@@ -18,7 +18,7 @@ Previous versions: {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}
 We are introducing editing of an {esql} query on a dashboard and allows the users to select among different chart suggestions. This is quite powerful since users don't need to go back to Discover to edit the query and recreate the chart, they can simply adjust the query right there on a dashboard. 
 
 [role="screenshot"]
-image::images/edit-esql.gif[A short video demo of how to edit {esql} in a dashboard]
+image::images/edit-esql-dashboard.gif[A short video demo of how to edit {esql} in a dashboard]
 
 [discrete]
 ==== Improved ES|QL in-app documentation search
