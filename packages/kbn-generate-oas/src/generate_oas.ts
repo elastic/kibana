@@ -34,6 +34,7 @@ export interface GenerateOpenApiDocumentOptions {
   baseUrl: string;
   docsUrl?: string;
   tags?: string[];
+  pathStartsWith?: string;
 }
 
 export const generateOpenApiDocument = (
@@ -42,7 +43,7 @@ export const generateOpenApiDocument = (
 ): OpenAPIV3.Document => {
   const paths: OpenAPIV3.PathsObject = {};
   for (const appRouter of appRouters) {
-    Object.assign(paths, getOpenApiPathsObject(appRouter));
+    Object.assign(paths, getOpenApiPathsObject(appRouter, opts.pathStartsWith));
   }
   return {
     openapi: openApiVersion,
@@ -96,7 +97,7 @@ const extractRequestBody = (
     };
   }, {} as OpenAPIV3.RequestBodyObject['content']);
 };
-const extractResponses = (route: VersionedRouterRoute): OpenAPIV3.ResponsesObject => {
+const extractVersionedResponses = (route: VersionedRouterRoute): OpenAPIV3.ResponsesObject => {
   return route.handlers.reduce<OpenAPIV3.ResponsesObject>((acc, handler) => {
     const schemas = extractValidationSchemaFromVersionedHandler(handler);
     if (!schemas?.response) return acc;
@@ -120,10 +121,13 @@ const extractResponses = (route: VersionedRouterRoute): OpenAPIV3.ResponsesObjec
 };
 
 const prepareRoutes = <R extends { path: string; options: { access?: 'public' | 'internal' } }>(
-  routes: R[]
+  routes: R[],
+  pathStartsWith?: string
 ): R[] => {
   return (
     routes
+      // TODO: Make this smarter?
+      .filter(pathStartsWith ? (route) => route.path.startsWith(pathStartsWith) : () => true)
       // TODO: Figure out how we can scope which routes we generate OAS for
       // .filter((route) => route.options.access === 'public')
       .map((route) => ({
@@ -133,8 +137,11 @@ const prepareRoutes = <R extends { path: string; options: { access?: 'public' | 
   );
 };
 
-const processVersionedRouter = (appRouter: CoreVersionedRouter): OpenAPIV3.PathsObject => {
-  const routes = prepareRoutes(appRouter.getRoutes());
+const processVersionedRouter = (
+  appRouter: CoreVersionedRouter,
+  pathStartsWith?: string
+): OpenAPIV3.PathsObject => {
+  const routes = prepareRoutes(appRouter.getRoutes(), pathStartsWith);
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);
@@ -173,7 +180,7 @@ const processVersionedRouter = (appRouter: CoreVersionedRouter): OpenAPIV3.Paths
                 content: extractRequestBody(route),
               }
             : undefined,
-          responses: extractResponses(route),
+          responses: extractVersionedResponses(route),
           parameters: pathObjects.concat(queryObjects),
           operationId: getOperationId(route.path),
         },
@@ -189,8 +196,32 @@ const processVersionedRouter = (appRouter: CoreVersionedRouter): OpenAPIV3.Paths
   return paths;
 };
 
-const processRouter = (appRouter: Router): OpenAPIV3.PathsObject => {
-  const routes = prepareRoutes(appRouter.getRoutes(true));
+type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
+
+const extractResponses = (route: InternalRouterRoute): OpenAPIV3.ResponsesObject => {
+  return !!route.options?.responses
+    ? Object.entries(route.options.responses).reduce<OpenAPIV3.ResponsesObject>(
+        (acc, [statusCode, schema]) => {
+          const oasSchema = convert(schema.body);
+          acc[statusCode] = {
+            ...acc[statusCode],
+            description: route.options.description ?? 'No description',
+            content: {
+              ...((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+              [getJSONContentString()]: {
+                schema: oasSchema,
+              },
+            },
+          };
+          return acc;
+        },
+        {}
+      )
+    : {};
+};
+
+const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.PathsObject => {
+  const routes = prepareRoutes(appRouter.getRoutes(true), pathStartsWith);
 
   const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
@@ -221,8 +252,7 @@ const processRouter = (appRouter: Router): OpenAPIV3.PathsObject => {
                 },
               }
             : undefined,
-          /* Not supported yet... */
-          responses: {},
+          responses: extractResponses(route),
           parameters: pathObjects.concat(queryObjects),
           operationId: getOperationId(route.path),
         },
@@ -238,9 +268,12 @@ const processRouter = (appRouter: Router): OpenAPIV3.PathsObject => {
   return paths;
 };
 
-const getOpenApiPathsObject = (appRouter: Router | CoreVersionedRouter): OpenAPIV3.PathsObject => {
+const getOpenApiPathsObject = (
+  appRouter: Router | CoreVersionedRouter,
+  pathStartsWith?: string
+): OpenAPIV3.PathsObject => {
   if (appRouter instanceof CoreVersionedRouter) {
-    return processVersionedRouter(appRouter);
+    return processVersionedRouter(appRouter, pathStartsWith);
   }
-  return processRouter(appRouter);
+  return processRouter(appRouter, pathStartsWith);
 };

@@ -32,7 +32,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
 > & {
-  options?: Omit<RouteConfigOptions<Method>, 'access'>;
+  options?: Omit<RouteConfigOptions<Method>, 'access' | 'oas'>;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: Exclude<RouteConfigOptions<Method>['access'], undefined>;
   /** A human-readable description of this route */

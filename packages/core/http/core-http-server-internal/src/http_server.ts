@@ -627,6 +627,8 @@ export class HttpServer {
       handler: (req, h) => {
         // TODO cache the result of generating OAS
         // if (this.oasCache) return h.response(this.oasCache);
+
+        const pathStartsWith = req.query?.pathStartsWith;
         try {
           const routers = this.getRegisteredRouters().flatMap((r) => {
             const rs: Array<Router | CoreVersionedRouter> = [];
@@ -643,6 +645,7 @@ export class HttpServer {
             baseUrl: 'todo',
             title: 'todo',
             version: '0.0.0',
+            pathStartsWith,
           });
           return h.response(this.oasCache);
         } catch (e) {

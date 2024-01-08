@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Type } from '@kbn/config-schema';
 import type { RouteValidatorFullConfig } from './route_validator';
 
 /**
@@ -158,6 +159,17 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
      * Milliseconds the socket can be idle before it's closed
      */
     idleSocket?: number;
+  };
+
+  /** Human-friendly description of this endpoint */
+  description?: string;
+
+  /**
+   * Responses grouped by status code expressed using runtime validation schemas.
+   * The mechanism used to express request inputs (params, query, body).
+   */
+  responses?: {
+    [statusCode: number]: { body: Type<any> };
   };
 }
 
