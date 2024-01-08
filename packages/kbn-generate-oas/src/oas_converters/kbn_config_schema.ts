@@ -15,7 +15,9 @@ import type { OpenAPIConverter } from '../type';
 import { isReferenceObject } from './common';
 
 const parse = (schema: joi.Schema) => {
-  return joiToJsonParse(schema, 'open-api');
+  const result = joiToJsonParse(schema, 'open-api');
+  postProcess(result);
+  return result;
 };
 
 const isObjectType = (schema: joi.Schema | joi.Description): boolean => {
@@ -76,9 +78,39 @@ const isSchemaRequired = (schema: joi.Schema | joi.Description): boolean => {
   return 'required' === get(schema, 'flags.presence');
 };
 
+const MUTATEstripDefaultDeep = (schema: OpenAPIV3.SchemaObject): void => {
+  if (schema.default?.special === 'deep') {
+    if (Object.keys(schema.default).length === 1) {
+      delete schema.default;
+    } else {
+      delete schema.default.special;
+    }
+  }
+};
+
+const MUTATEreplaceRecordType = (schema: OpenAPIV3.SchemaObject): void => {
+  schema.type = 'object';
+};
+
+const walkSchema = (schema: OpenAPIV3.SchemaObject): void => {
+  if (schema.type === 'array') {
+    walkSchema(schema.items as OpenAPIV3.SchemaObject);
+  } else if (schema.type === 'object') {
+    MUTATEstripDefaultDeep(schema);
+    Object.values(schema.properties!).forEach((obj) => walkSchema(obj as OpenAPIV3.SchemaObject));
+  } else if ((schema.type as string) === 'record') {
+    MUTATEreplaceRecordType(schema);
+  }
+};
+
+const postProcess = (oasSchema: OpenAPIV3.SchemaObject) => {
+  if (!oasSchema) return oasSchema;
+  walkSchema(oasSchema);
+};
+
 const convert = (kbnConfigSchema: unknown): OpenAPIV3.BaseSchemaObject => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  return parse(schema);
+  return parse(schema) as OpenAPIV3.SchemaObject;
 };
 
 const convertObjectMembersToParameterObjects = (
