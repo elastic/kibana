@@ -80,7 +80,7 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
   return {};
 }
 
-interface ESQLSearchParams {
+export interface ESQLSearchParams {
   // TODO: time_zone support was temporarily removed from ES|QL,
   // we will need to add it back in once it is supported again.
   // https://github.com/elastic/elasticsearch/pull/102767
@@ -90,7 +90,7 @@ interface ESQLSearchParams {
   locale?: string;
 }
 
-interface ESQLSearchReponse {
+export interface ESQLSearchResponse {
   columns?: Array<{
     name: string;
     type: string;
@@ -205,7 +205,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
-            IKibanaSearchResponse<ESQLSearchReponse>
+            IKibanaSearchResponse<ESQLSearchResponse>
           >({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
             catchError((error) => {
               if (!error.attributes) {

@@ -9,3 +9,4 @@
 export { CsvSearchSourceExportType } from './csv_searchsource';
 export { CsvV2ExportType } from './csv_v2';
 export { CsvSearchSourceImmediateExportType } from './csv_searchsource_immediate';
+export { CsvESQLExportType } from './csv_esql';

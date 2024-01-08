@@ -31,6 +31,7 @@ import {
   CsvSearchSourceExportType,
   CsvSearchSourceImmediateExportType,
   CsvV2ExportType,
+  CsvESQLExportType,
 } from '@kbn/reporting-export-types-csv';
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
@@ -221,6 +222,7 @@ export class ReportingCore {
         new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
       );
       exportTypes.push(new CsvV2ExportType(this.core, this.config, this.logger, this.context));
+      exportTypes.push(new CsvESQLExportType(this.core, this.config, this.logger, this.context));
     }
 
     if (pdf.enabled) {

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Optional } from '@kbn/utility-types';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type {
   BaseParams,
@@ -42,6 +43,12 @@ export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
   Omit<BaseParamsV2, 'title'> & { title?: string };
 
 export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayloadV2;
+
+/**
+ * Makes title optional, as it can be derived from the locator
+ */
+export type JobParamsCsvESQL = Optional<BaseParamsV2, 'title'>;
+export type TaskPayloadCsvESQL = BasePayloadV2;
 
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 

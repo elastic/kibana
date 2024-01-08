@@ -11,3 +11,6 @@ export const CSV_REPORT_TYPE = 'csv_searchsource';
 
 export const CSV_JOB_TYPE_V2 = 'csv_v2';
 export const CSV_REPORT_TYPE_V2 = 'csv_v2';
+
+export const CSV_ESQL_JOB_TYPE = 'csv_esql';
+export const CSV_ESQL_REPORT_TYPE = 'csv_esql';

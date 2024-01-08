@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
+import { CSV_JOB_TYPE, CSV_ESQL_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
@@ -41,12 +41,19 @@ export const reportingCsvShareProvider = ({
     const jobParams = {
       title: sharingData.title as string,
       objectType,
-      columns: sharingData.columns as string[] | undefined,
     };
 
     const getJobParams = (forShareUrl?: boolean) => {
+      if (sharingData.isTextBased) {
+        return {
+          ...jobParams,
+          locatorParams: sharingData.locatorParams as [Record<string, unknown>],
+        };
+      }
+
       return {
         ...jobParams,
+        columns: sharingData.columns as string[] | undefined,
         searchSource: getSearchSource({
           addGlobalTimeFilter: true,
           absoluteTime: !forShareUrl,
@@ -92,7 +99,7 @@ export const reportingCsvShareProvider = ({
               apiClient={apiClient}
               toasts={toasts}
               uiSettings={uiSettings}
-              reportType={CSV_JOB_TYPE}
+              reportType={sharingData.isTextBased ? CSV_ESQL_JOB_TYPE : CSV_JOB_TYPE}
               layoutId={undefined}
               objectId={objectId}
               getJobParams={getJobParams}
