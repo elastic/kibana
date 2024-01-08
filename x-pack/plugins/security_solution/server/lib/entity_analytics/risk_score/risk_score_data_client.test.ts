@@ -15,6 +15,8 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
+import { times } from 'lodash';
+
 import { RiskScoreDataClient } from './risk_score_data_client';
 
 import { createDataStream } from '../utils/create_datastream';
@@ -282,7 +284,7 @@ describe('RiskScoreDataClient', () => {
         options: {
           index: `risk-score.risk-score-latest-default`,
           mappings: {
-            dynamic: 'strict',
+            dynamic: false,
             properties: {
               '@timestamp': {
                 ignore_malformed: false,
@@ -452,4 +454,37 @@ describe('RiskScoreDataClient', () => {
       }
     });
   });
+  describe('upgrade process', () => {
+    beforeEach(() => {
+      jest.spyOn(riskScoreDataClient, 'upgrade');
+      spyOnPrivateMethod(riskScoreDataClient, 'upsertRiskScoreLatestIndex');
+    });
+    it('upserts the configuration for the latest risk score index when upgrading', async () => {
+      await riskScoreDataClient.upgrade();
+
+      expect(
+        getPrivateMethod(riskScoreDataClient, 'upsertRiskScoreLatestIndex')
+      ).toHaveBeenCalled();
+    });
+    it('upserts the configuration for the latest risk score index only a single time, no matter how many times upgrade is called', async () => {
+      await Promise.all(
+        times(3, () => {
+          return riskScoreDataClient.upgrade();
+        })
+      );
+      expect(
+        getPrivateMethod(riskScoreDataClient, 'upsertRiskScoreLatestIndex')
+      ).toHaveBeenCalledTimes(1);
+    });
+  });
 });
+
+const getPrivateMethod = (target: unknown, method: string) => {
+  // @ts-expect-error intentionally retrieve a method, despite its visibility
+  return target[method];
+};
+
+const spyOnPrivateMethod = (target: unknown, method: string) => {
+  // @ts-expect-error intentionally allow spying on a method, despite its visibility
+  jest.spyOn(target, method);
+};

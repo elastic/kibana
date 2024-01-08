@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  Metadata,
+  MappingDynamicMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
@@ -39,6 +42,7 @@ interface RiskScoringDataClientOpts {
 }
 
 export class RiskScoreDataClient {
+  private alreadyUpgraded = false;
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskScoringDataClientOpts) {}
 
@@ -140,7 +144,7 @@ export class RiskScoreDataClient {
         logger: this.options.logger,
         options: {
           index: getRiskScoreLatestIndex(namespace),
-          mappings: mappingFromFieldMap(riskScoreFieldMap, 'strict'),
+          mappings: mappingFromFieldMap(riskScoreFieldMap, false),
         },
       });
 
@@ -160,5 +164,39 @@ export class RiskScoreDataClient {
       this.options.logger.error(`Error initializing risk engine resources: ${error.message}`);
       throw error;
     }
+  }
+  /**
+   * Ensures that configuration migrations for risk score indices are seamlessly handled across Kibana upgrades.
+   * This function is meant to be mostly idempotent. However, to reduce unnecessary processing, it will only execute once
+   * across the lifecycle of a {@link RiskScoreDataClient} instance.
+   *
+   * Included upgrades:
+   * - Migrating to 8.12+ requires a change to the risk score latest transform index's 'dynamic' setting to ensure that
+   * unmapped fields are allowed within stored documents.
+   *
+   */
+  public async upgrade() {
+    try {
+      if (this.alreadyUpgraded) {
+        return;
+      }
+      this.alreadyUpgraded = true;
+      await this.setRiskScoreLatestIndexDynamicConfiguration(false);
+    } catch (error) {
+      this.options.logger.error(`Error upgrading risk engine resources: ${error.message}`);
+      this.alreadyUpgraded = false;
+      throw error;
+    }
+  }
+
+  private async setRiskScoreLatestIndexDynamicConfiguration(dynamic: MappingDynamicMapping) {
+    return createOrUpdateIndex({
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+      options: {
+        index: getRiskScoreLatestIndex(this.options.namespace),
+        mappings: { dynamic },
+      },
+    });
   }
 }

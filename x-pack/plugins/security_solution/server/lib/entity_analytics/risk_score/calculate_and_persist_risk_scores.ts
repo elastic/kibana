@@ -22,6 +22,9 @@ export const calculateAndPersistRiskScores = async (
   }
 ): Promise<CalculateAndPersistScoresResponse> => {
   const { riskScoreDataClient, spaceId, ...rest } = params;
+
+  await riskScoreDataClient.upgrade();
+
   const writer = await riskScoreDataClient.getWriter({
     namespace: spaceId,
   });
