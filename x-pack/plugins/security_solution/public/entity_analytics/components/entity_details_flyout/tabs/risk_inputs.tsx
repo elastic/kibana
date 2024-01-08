@@ -15,10 +15,13 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { ActionColumn } from '../components/action_column';
 import { RiskInputsUtilityBar } from '../components/utility_bar';
 import { useRiskContributingAlerts } from '../../../hooks/use_risk_contributing_alerts';
-import type { UserRiskScore, HostRiskScore } from '../../../../../common/search_strategy';
+import { useRiskScore } from '../../../api/hooks/use_risk_score';
+import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
-  riskScore: UserRiskScore | HostRiskScore;
+  entityType: RiskScoreEntity;
+  entityName: string;
 }
 
 export interface AlertRawData {
@@ -27,8 +30,30 @@ export interface AlertRawData {
   _id: string;
 }
 
-export const RiskInputsTab = ({ riskScore }: RiskInputsTabProps) => {
+const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};
+
+export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) => {
   const [selectedItems, setSelectedItems] = useState<AlertRawData[]>([]);
+  const nameFilterQuery = useMemo(() => {
+    if (entityType === RiskScoreEntity.host) {
+      return buildHostNamesFilter([entityName]);
+    } else if (entityType === RiskScoreEntity.user) {
+      return buildUserNamesFilter([entityName]);
+    }
+  }, [entityName, entityType]);
+
+  const { data: riskScoreData } = useRiskScore({
+    riskEntity: entityType,
+    filterQuery: nameFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+    skip: nameFilterQuery === undefined,
+  });
+
+  const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
   const { loading, data: alertsData } = useRiskContributingAlerts({ riskScore });
 
   const euiTableSelectionProps = useMemo(

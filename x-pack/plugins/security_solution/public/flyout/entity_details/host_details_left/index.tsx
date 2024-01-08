@@ -13,10 +13,11 @@ import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
 } from '../shared/components/left_panel/left_panel_header';
-import type { HostRiskScore } from '../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
-  riskScore: HostRiskScore | undefined;
+  isRiskScoreExist: boolean;
+  name: string;
 }
 export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'host_details';
@@ -24,15 +25,18 @@ export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const HostDetailsPanelKey: HostDetailsExpandableFlyoutProps['key'] = 'host_details';
 
-export const HostDetailsPanel = ({ riskScore }: HostDetailsPanelProps) => {
+export const HostDetailsPanel = ({ name, isRiskScoreExist }: HostDetailsPanelProps) => {
   // Temporary implementation while Host details left panel don't have Asset tabs
   const [tabs, selectedTabId, setSelectedTabId] = useMemo(() => {
+    const isRiskScorTabAvailable = isRiskScoreExist && name;
     return [
-      riskScore ? [getRiskInputTab(riskScore)] : [],
+      isRiskScorTabAvailable
+        ? [getRiskInputTab({ entityName: name, entityType: RiskScoreEntity.host })]
+        : [],
       EntityDetailsLeftPanelTab.RISK_INPUTS,
       () => {},
     ];
-  }, [riskScore]);
+  }, [name, isRiskScoreExist]);
 
   return (
     <>

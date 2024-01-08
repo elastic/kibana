@@ -12,11 +12,18 @@ import { times } from 'lodash/fp';
 import { RiskInputsTab } from './risk_inputs';
 import { alertDataMock } from '../mocks';
 import { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
 
 const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
 
 jest.mock('../../../hooks/use_risk_contributing_alerts', () => ({
   useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
+}));
+
+const mockUseRiskScore = jest.fn().mockReturnValue({ loading: false, data: [] });
+
+jest.mock('../../../api/hooks/use_risk_score', () => ({
+  useRiskScore: () => mockUseRiskScore(),
 }));
 
 const riskScore = {
@@ -39,10 +46,15 @@ describe('RiskInputsTab', () => {
       error: false,
       data: [alertDataMock],
     });
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScore],
+    });
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab riskScore={riskScore} />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
       </TestProviders>
     );
 
@@ -66,10 +78,15 @@ describe('RiskInputsTab', () => {
       error: false,
       data: alerts,
     });
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScore],
+    });
 
     const { getAllByTestId, getByLabelText } = render(
       <TestProviders>
-        <RiskInputsTab riskScore={riskScore} />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
       </TestProviders>
     );
 

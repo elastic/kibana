@@ -11,7 +11,6 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
 import { useTabs } from './tabs';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import type { UserRiskScore } from '../../../../common/search_strategy';
 import type {
   EntityDetailsLeftPanelTab,
   LeftPanelTabsType,
@@ -25,7 +24,7 @@ interface UserParam {
 }
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
-  riskScore: UserRiskScore;
+  isRiskScoreExist: boolean;
   user: UserParam;
   path?: PanelPath;
 }
@@ -35,10 +34,10 @@ export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'user_details';
 
-export const UserDetailsPanel = ({ riskScore, user, path }: UserDetailsPanelProps) => {
+export const UserDetailsPanel = ({ isRiskScoreExist, user, path }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser(user.name, user.email);
-  const tabs = useTabs(managedUser.data, riskScore);
-  const { selectedTabId, setSelectedTabId } = useSelectedTab(riskScore, user, tabs, path);
+  const tabs = useTabs(managedUser.data, user.name, isRiskScoreExist);
+  const { selectedTabId, setSelectedTabId } = useSelectedTab(isRiskScoreExist, user, tabs, path);
 
   if (managedUser.isLoading) return <FlyoutLoading />;
 
@@ -55,7 +54,7 @@ export const UserDetailsPanel = ({ riskScore, user, path }: UserDetailsPanelProp
 };
 
 const useSelectedTab = (
-  riskScore: UserRiskScore,
+  isRiskScoreExist: boolean,
   user: UserParam,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined
@@ -76,8 +75,8 @@ const useSelectedTab = (
         tab: tabId,
       },
       params: {
-        riskScore,
         user,
+        isRiskScoreExist,
       },
     });
   };

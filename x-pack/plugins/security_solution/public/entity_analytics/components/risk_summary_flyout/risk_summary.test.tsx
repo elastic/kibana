@@ -18,10 +18,12 @@ import type {
   VisualizationEmbeddableProps,
 } from '../../../common/components/visualization_actions/types';
 
-// we need just array size to be 6
+const mockContributingAlerts = Array(6).fill({});
+const expectedRiskInputsLength = mockContributingAlerts.length;
+
 const mockUseRiskContributingAlerts = jest
   .fn()
-  .mockReturnValue({ loading: false, data: [{}, {}, {}, {}, {}, {}] });
+  .mockReturnValue({ loading: false, data: mockContributingAlerts });
 
 jest.mock('../../hooks/use_risk_contributing_alerts', () => ({
   useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
@@ -53,7 +55,9 @@ describe('RiskSummary', () => {
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-    expect(getByTestId('risk-summary-table')).toHaveTextContent('Inputs6');
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `Inputs${expectedRiskInputsLength}`
+    );
     expect(getByTestId('risk-summary-table')).toHaveTextContent('CategoryAlerts');
   });
 

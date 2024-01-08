@@ -83,7 +83,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
       openLeftPanel({
         id: UserDetailsPanelKey,
         params: {
-          riskScore: userRiskData,
+          isRiskScoreExist: !!userRiskData?.user?.risk,
           user: {
             name: userName,
             email,
