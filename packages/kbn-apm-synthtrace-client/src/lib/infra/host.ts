@@ -42,7 +42,7 @@ class Host extends Entity<HostDocument> {
       'system.memory.used.bytes': 39964708864,
       'system.memory.used.pct': 0.582,
       'metricset.period': 10000,
-      'metricset.name': 'cpu',
+      'metricset.name': 'memory',
     });
   }
 
