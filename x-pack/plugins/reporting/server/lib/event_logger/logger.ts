@@ -62,9 +62,9 @@ export function reportingEventLoggerFactory(logger: Logger) {
       this.report = report;
       this.task = task;
       this.eventObj = {
-        event: { timezone: report.payload.browserTimezone },
+        event: { timezone: report.payload?.browserTimezone ?? 'UTC' },
         kibana: {
-          reporting: { id: report._id, jobType: report.jobtype },
+          reporting: { id: report._id, jobType: report.jobtype ?? 'NULL' },
           ...(task?.id ? { task: { id: task.id } } : undefined),
         },
         user: report.created_by ? { name: report.created_by } : undefined,
