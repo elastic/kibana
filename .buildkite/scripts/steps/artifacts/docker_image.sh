@@ -95,6 +95,7 @@ CDN_ASSETS_FOLDER=$(mktemp -d)
 tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip=1
 
 gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_QA_BUCKET/$GIT_ABBREV_COMMIT"
+gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
 
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
