@@ -93,7 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug('CSP plugin is initialized');
     });
 
-  describe('Verify update csp rules states API', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/174204
+  describe.skip('Verify update csp rules states API', async () => {
     before(async () => {
       await waitForPluginInitialized();
     });

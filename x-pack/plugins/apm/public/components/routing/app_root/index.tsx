@@ -21,6 +21,7 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { useKibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/use_kibana_environment_context';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -54,7 +55,9 @@ export function ApmAppRoot({
   pluginsStart: ApmPluginStartDeps;
   apmServices: ApmServices;
 }) {
-  const { appMountParameters, core } = apmPluginContextValue;
+  const { appMountParameters, kibanaEnvironment, core } = apmPluginContextValue;
+  const KibanaEnvironmentContextProvider =
+    useKibanaEnvironmentContextProvider(kibanaEnvironment);
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 
@@ -73,46 +76,50 @@ export function ApmAppRoot({
           <KibanaContextProvider
             services={{ ...core, ...pluginsStart, storage, ...apmServices }}
           >
-            <i18nCore.Context>
-              <TimeRangeIdContextProvider>
-                <RouterProvider history={history} router={apmRouter as any}>
-                  <ApmErrorBoundary>
-                    <RedirectDependenciesToDependenciesInventory>
-                      <RedirectWithDefaultEnvironment>
-                        <RedirectWithDefaultDateRange>
-                          <RedirectWithOffset>
-                            <TrackPageview>
-                              <UpdateExecutionContextOnRouteChange>
-                                <BreadcrumbsContextProvider>
-                                  <UrlParamsProvider>
-                                    <LicenseProvider>
-                                      <AnomalyDetectionJobsContextProvider>
-                                        <InspectorContextProvider>
-                                          <ApmThemeProvider>
-                                            <MountApmHeaderActionMenu />
+            <KibanaEnvironmentContextProvider
+              kibanaEnvironment={kibanaEnvironment}
+            >
+              <i18nCore.Context>
+                <TimeRangeIdContextProvider>
+                  <RouterProvider history={history} router={apmRouter as any}>
+                    <ApmErrorBoundary>
+                      <RedirectDependenciesToDependenciesInventory>
+                        <RedirectWithDefaultEnvironment>
+                          <RedirectWithDefaultDateRange>
+                            <RedirectWithOffset>
+                              <TrackPageview>
+                                <UpdateExecutionContextOnRouteChange>
+                                  <BreadcrumbsContextProvider>
+                                    <UrlParamsProvider>
+                                      <LicenseProvider>
+                                        <AnomalyDetectionJobsContextProvider>
+                                          <InspectorContextProvider>
+                                            <ApmThemeProvider>
+                                              <MountApmHeaderActionMenu />
 
-                                            <Route
-                                              component={
-                                                ScrollToTopOnPathChange
-                                              }
-                                            />
-                                            <RouteRenderer />
-                                          </ApmThemeProvider>
-                                        </InspectorContextProvider>
-                                      </AnomalyDetectionJobsContextProvider>
-                                    </LicenseProvider>
-                                  </UrlParamsProvider>
-                                </BreadcrumbsContextProvider>
-                              </UpdateExecutionContextOnRouteChange>
-                            </TrackPageview>
-                          </RedirectWithOffset>
-                        </RedirectWithDefaultDateRange>
-                      </RedirectWithDefaultEnvironment>
-                    </RedirectDependenciesToDependenciesInventory>
-                  </ApmErrorBoundary>
-                </RouterProvider>
-              </TimeRangeIdContextProvider>
-            </i18nCore.Context>
+                                              <Route
+                                                component={
+                                                  ScrollToTopOnPathChange
+                                                }
+                                              />
+                                              <RouteRenderer />
+                                            </ApmThemeProvider>
+                                          </InspectorContextProvider>
+                                        </AnomalyDetectionJobsContextProvider>
+                                      </LicenseProvider>
+                                    </UrlParamsProvider>
+                                  </BreadcrumbsContextProvider>
+                                </UpdateExecutionContextOnRouteChange>
+                              </TrackPageview>
+                            </RedirectWithOffset>
+                          </RedirectWithDefaultDateRange>
+                        </RedirectWithDefaultEnvironment>
+                      </RedirectDependenciesToDependenciesInventory>
+                    </ApmErrorBoundary>
+                  </RouterProvider>
+                </TimeRangeIdContextProvider>
+              </i18nCore.Context>
+            </KibanaEnvironmentContextProvider>
           </KibanaContextProvider>
         </ApmPluginContext.Provider>
       </RedirectAppLinks>
