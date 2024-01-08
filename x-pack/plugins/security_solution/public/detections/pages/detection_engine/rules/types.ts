@@ -20,9 +20,9 @@ import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
-import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
-import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
+import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
+import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
+import type { FieldValueThreshold } from '../../../../detection_engine/rule_creation_ui/components/threshold_input';
 import type {
   BuildingBlockType,
   RelatedIntegrationArray,
