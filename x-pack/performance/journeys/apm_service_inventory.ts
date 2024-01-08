@@ -11,8 +11,6 @@ import { SynthtraceClient } from '../services/synthtrace';
 import { generateData } from '../synthtrace_data/apm_data';
 
 export const journey = new Journey({
-  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172757
-  skipped: true,
   beforeSteps: async ({ kbnUrl, log, auth, es }) => {
     // Install APM Package
     const synthClient = new SynthtraceClient({
