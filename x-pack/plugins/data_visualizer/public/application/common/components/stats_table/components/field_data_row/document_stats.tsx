@@ -40,7 +40,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
     count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
   const docsPercent =
     valueCount !== undefined && total !== undefined
-      ? `(${roundToDecimalPlace((valueCount / total) * 100)}%)`
+      ? `(${total === 0 ? 0 : roundToDecimalPlace((valueCount / total) * 100)}%)`
       : null;
 
   const content = (

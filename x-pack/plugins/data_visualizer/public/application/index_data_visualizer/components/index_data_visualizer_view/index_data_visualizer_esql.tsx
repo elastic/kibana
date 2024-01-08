@@ -41,6 +41,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESQLSearchReponse } from '@kbn/es-types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { getFieldType } from '@kbn/field-utils';
 import { SupportedFieldType } from '../../../../../common/types';
 import { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
@@ -61,7 +62,7 @@ import { useDataVisualizerKibana } from '../../../kibana_context';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { getESQLDocumentCountStats } from '../../search_strategy/requests/get_document_stats';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
-import { getESQLSupportedAggs, getSupportedAggs } from '../../utils/get_supported_aggs';
+import { getESQLSupportedAggs } from '../../utils/get_supported_aggs';
 import { useTimeBuckets } from '../../../common/hooks/use_time_buckets';
 import {
   DataVisualizerTable,
@@ -73,7 +74,6 @@ import {
   TotalFieldsStats,
 } from '../../../common/components/stats_table/components/field_count_stats';
 import { filterFields } from '../../../common/components/fields_stats_grid/filter_fields';
-import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { useCancellableSearch } from '../../hooks/use_cancellable_hooks';
 import { MAX_PERCENT, PERCENTILE_SPACING } from '../../search_strategy/requests/constants';
@@ -106,6 +106,7 @@ interface AggregatableField {
     count: number;
     cardinality: number;
   };
+  aggregatable?: boolean;
 }
 interface Data {
   timeFieldName?: string;
@@ -387,20 +388,24 @@ export const useESQLFieldStatsData = ({
   return { fieldStats, fieldStatsProgress: fetchState };
 };
 
-export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
-  earliest: number | undefined;
-  latest: number | undefined;
-  aggInterval: TimeBucketsInterval;
-  intervalMs: number;
-  searchQuery: AggregateQuery;
-  indexPattern: string | undefined;
-  timeFieldName: string | undefined;
-  aggregatableFields: string[];
-  nonAggregatableFields: string[];
-  fieldsToFetch: string[];
-  lastRefresh: number;
-  filter?: QueryDslQueryContainer[] | undefined;
-}) => {
+export const useESQLDataVisualizerGridData = (
+  fieldStatsRequest:
+    | {
+        earliest: number | undefined;
+        latest: number | undefined;
+        aggInterval: TimeBucketsInterval;
+        intervalMs: number;
+        searchQuery: AggregateQuery;
+        indexPattern: string | undefined;
+        timeFieldName: string | undefined;
+        // aggregatableFields: string[];
+        // nonAggregatableFields: string[];
+        // fieldsToFetch: string[];
+        lastRefresh: number;
+        filter?: QueryDslQueryContainer;
+      }
+    | undefined
+) => {
   const {
     services: { data },
   } = useDataVisualizerKibana();
@@ -516,7 +521,6 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
         secondaryType: string;
       }> = [];
 
-      // @TODO: swap type and secondary type
       const fields = columns
         // Some field types are not supported by ESQL yet
         .filter((c) => c.type !== 'unsupported')
@@ -524,13 +528,7 @@ export const useESQLDataVisualizerGridData = (fieldStatsRequest: {
           return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
         });
 
-      // @TODO: Update fields to fetch to reflect pagination & visible field types/names only
-      const fieldsToFetch = fields;
       fields?.forEach((field) => {
-        // @TODO: renable
-        // if (fieldsToFetch && !fieldsToFetch.includes(field.name)) {
-        //   return;
-        // }
         const fieldName = field.name;
         if (!OMIT_FIELDS.includes(fieldName)) {
           if (!field.aggregatable) {
@@ -795,7 +793,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     const aggInterval = buckets.getInterval();
 
     const filter = currentDataView.timeFieldName
-      ? {
+      ? ({
           bool: {
             must: [],
             filter: [
@@ -812,7 +810,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             should: [],
             must_not: [],
           },
-        }
+        } as QueryDslQueryContainer)
       : undefined;
     return {
       earliest,
@@ -890,15 +888,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     }
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
-  const {
-    documentCountStats,
-    totalCount,
-    aggregatableFields,
-    nonAggregatableFields,
-    overallStats,
-    overallStatsProgress,
-    columns,
-  } = useESQLDataVisualizerGridData(fieldStatsRequest);
+  const { documentCountStats, totalCount, overallStats, overallStatsProgress, columns } =
+    useESQLDataVisualizerGridData(fieldStatsRequest);
 
   const { fieldStats, fieldStatsProgress } = useESQLFieldStatsData({
     searchQuery: fieldStatsRequest?.searchQuery,
@@ -913,15 +904,9 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
-  const setVisibleFieldTypes = (values: string[]) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, visibleFieldTypes: values });
-  };
 
   const visibleFieldNames =
     dataVisualizerListState.visibleFieldNames ?? restorableDefaults.visibleFieldNames;
-  const setVisibleFieldNames = (values: string[]) => {
-    setDataVisualizerListState({ ...dataVisualizerListState, visibleFieldNames: values });
-  };
 
   const createMetricCards = useCallback(() => {
     if (!columns || !overallStats) return;
@@ -938,12 +923,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         return existsF.fieldName === f.name;
       });
     });
-
-    // @todo: re-enable
-    // if (metricsLoaded === false) {
-    //   setMetricsLoaded(true);
-    //   return;
-    // }
 
     let _aggregatableFields: AggregatableField[] = overallStats.aggregatableExistsFields;
     if (allMetricFields.length !== metricExistsFields.length && metricsLoaded === true) {
@@ -962,15 +941,11 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       const metricConfig: FieldVisConfig = {
         ...field,
         ...fieldData,
-        // fieldFormat: currentDataView.getFormatterForField(field),
         loading: fieldData?.existsInDocs ?? true,
         aggregatable: true,
         deletable: false,
-        supportedAggs: getSupportedAggs(field),
+        type: getFieldType(field) as SupportedFieldType,
       };
-      // if (field.displayName !== metricConfig.fieldName) {
-      //   metricConfig.displayName = field.displayName;
-      // }
 
       configs.push(metricConfig);
     });
@@ -1039,16 +1014,14 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.name);
       const nonMetricConfig: Partial<FieldVisConfig> = {
         ...(fieldData ? fieldData : {}),
-        secondaryType: kbnTypeToSupportedType(field),
-        // fieldFormat: currentDataView.getFormatterForField(field),
-        aggregatable: fieldData?.aggregatable,
+        secondaryType: getFieldType(field) as SupportedFieldType,
         loading: fieldData?.existsInDocs ?? true,
         deletable: false,
       };
 
       // Map the field type from the Kibana index pattern to the field type
       // used in the data visualizer.
-      const dataVisualizerType = kbnTypeToSupportedType(field) as SupportedFieldType;
+      const dataVisualizerType = getFieldType(field) as SupportedFieldType;
       if (dataVisualizerType !== undefined) {
         nonMetricConfig.type = dataVisualizerType;
       } else {
@@ -1074,7 +1047,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     let _visibleFieldsCount = 0;
     let _totalFieldsCount = 0;
     Object.keys(overallStats).forEach((key) => {
-      const fieldsGroup = overallStats[key as keyof OverallStats];
+      const fieldsGroup = overallStats[key as keyof typeof overallStats];
       if (Array.isArray(fieldsGroup) && fieldsGroup.length > 0) {
         _totalFieldsCount += fieldsGroup.length;
       }
@@ -1106,7 +1079,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
     if (fieldStatsProgress.loaded === 100 && fieldStats) {
       combinedConfigs = combinedConfigs.map((c) => {
-        const loadedFullStats = fieldStats.get(c.name) ?? {};
+        const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
 
         return loadedFullStats
           ? {

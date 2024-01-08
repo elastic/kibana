@@ -27,10 +27,10 @@ const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
 export const getESQLDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   query: AggregateQuery,
-  filter: estypes.QueryDslQueryContainer[] | undefined,
-  timeFieldName: string | undefined,
-  intervalMs: number | undefined,
-  searchOptions: ISearchOptions
+  filter?: estypes.QueryDslQueryContainer,
+  timeFieldName?: string,
+  intervalMs?: number,
+  searchOptions?: ISearchOptions
 ): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
   if (!isESQLQuery(query)) {
     throw Error('No ESQL query provided');
@@ -53,12 +53,12 @@ export const getESQLDocumentCountStats = async (
             ...(filter ? { filter } : {}),
           },
         },
-        { ...searchOptions, strategy: 'esql' }
+        { ...(searchOptions ?? {}), strategy: 'esql' }
       )
     );
 
     let totalCount = 0;
-    const _buckets = {};
+    const _buckets: Record<string, number> = {};
     // @ts-expect-error ES types needs to be updated with columns and values as part of esql response
     esqlResults.rawResponse.values.forEach((val) => {
       const [count, bucket] = val;
