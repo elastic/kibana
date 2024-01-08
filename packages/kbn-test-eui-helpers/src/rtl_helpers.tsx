@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-i18n'],
-  globals: {
-    structuredClone: {},
-  },
+import { screen, within } from '@testing-library/react';
+
+export const getButtonGroupInputValue = (testId: string) => () => {
+  const buttonGroup = screen.getByTestId(testId);
+  return within(buttonGroup).getByRole('button', { pressed: true });
 };

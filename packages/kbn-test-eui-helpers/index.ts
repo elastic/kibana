@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-i18n'],
-  globals: {
-    structuredClone: {},
-  },
-};
+export * from './src/rtl_helpers';
