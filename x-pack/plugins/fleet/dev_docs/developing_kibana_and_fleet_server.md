@@ -15,31 +15,34 @@ Before continuing, please review the developer documentation for both Fleet Serv
 - https://github.com/elastic/fleet-server?tab=readme-ov-file#development
 - https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md
 
-## Start up Kibana and Elasticsearch
+You can either run your local stack over HTTPS or HTTP. Each has its own set of instructions below. An HTTPS environment more closely resembles production, but requires a bit more setup. HTTPS may be necessary when developing certain features related to certificates. An HTTP environment is easier to set up, and will generally be the fastest and easiest way to get up and running for end-to-end development.
 
-1. Get a local Kibana checkout up and running by following [the developer guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env) (internal Elastic employee link for now). Run the commands below from your `kibana` directory
-2. Run a local Elasticsearch server from the latest snapshot build by running:
+_This guide expects you have forked + cloned the https://github.com/elastic/fleet-server and https://github.com/elastic/kibana repoisitories locally._
+
+## Running a local stack over HTTP
+
+1. In your `kibana` directory, run a local Elasticsearch server from the latest snapshot build by running:
 
 ```bash
-# Enable SSL + set a data path to prevent blowing away your Elasticsearch data between server restarts
-$ yarn es snapshot --license trial --ssl -E path.data=/tmp/es-data
+# Set a data path to prevent blowing away your Elasticsearch data between server restarts
+$ yarn es snapshot --license trial -E path.data=/tmp/es-data
 ```
 
-1. Add the following to your `kibana.dev.yml`
+2. Add the following to your `kibana.dev.yml`
 
-```bash
+```yaml
 server.basePath: '/some-base-path' # Optional, if used, sets basePath in kibana url e.g. https://localhost:5601/some-base-path/app/fleet
 server.versioned.versionResolution: oldest
-elasticsearch.hosts: [<http://localhost:9200>]
+elasticsearch.hosts: [http://localhost:9200]
 
 # Optional - set up an APM service in a cloud.elastic.co cluster to send your dev logs, traces, etc
 # Can be helpful for troubleshooting and diagnosting performance issues
 # elastic.apm:
-  # active: true
-  # serverUrl: <https://some-cluster.apm.us-east4.gcp.elastic-cloud.com:443>
-  # secretToken: some-token
-  # breakdownMetrics: true
-  # transactionSampleRate: 0.1
+# active: true
+# serverUrl: <https://some-cluster.apm.us-east4.gcp.elastic-cloud.com:443>
+# secretToken: some-token
+# breakdownMetrics: true
+# transactionSampleRate: 0.1
 
 logging:
   loggers:
@@ -53,12 +56,11 @@ xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.fleetServerHosts:
   - id: localhost
     name: Localhost
-    # Make sure this is `https` since we're running our local Fleet Server with SSL enabled
-    host_urls: ['<https://localhost:8220>']
- # If you want to run a Fleet Server in Docker, use this Fleet Server host
+    host_urls: ['http://localhost:8220']
+  # If you want to run a Fleet Server containers via Docker, use this Fleet Server host
   - id: docker
     name: Docker Internal Gateway
-    host_urls: ['<https://host.docker.internal:8220>']
+    host_urls: ['http://host.docker.internal:8220']
     is_default: true
 
 xpack.fleet.packages:
@@ -69,8 +71,7 @@ xpack.fleet.outputs:
   - id: preconfigured-localhost-output
     name: Localhost Output
     type: elasticsearch
-    hosts: ['<https://localhost:9200>']
-    ca_trusted_fingerprint: 'f71f73085975fd977339a1909ebfe2df40db255e0d5bb56fc37246bf383ffc84'
+    hosts: ['https://localhost:9200']
     is_default: true
 
   # If you enroll agents via Docker, use this output so they can output to your local
@@ -78,8 +79,7 @@ xpack.fleet.outputs:
   - id: preconfigured-docker-output
     name: Docker Output
     type: elasticsearch
-    hosts: ['<https://host.docker.internal:9200>']
-    ca_trusted_fingerprint: 'f71f73085975fd977339a1909ebfe2df40db255e0d5bb56fc37246bf383ffc84'
+    hosts: ['https://host.docker.internal:9200']
 
 xpack.fleet.agentPolicies:
   - name: Fleet Server Policy
@@ -102,33 +102,153 @@ xpack.fleet.agentPolicies:
                 frozen: true
 ```
 
-1. Start up Kibana by running the following in another terminal session:
-
-```bash
-$ yarn start --ssl
-```
-
-1. Navigate to https://localhost:5601/app/fleet and click "Add Fleet Server"
-2. Select your localhost Fleet Server host and generate a service token
-3. Copy the service token somewhere convenient - you'll need it to run Fleet Server below
-
-## Start up Fleet Server
-
-These instructions assume you're currently in your local `fleet-server` checkout directory.
-
-1. Create a `fleet-server.dev.yml` file if one doesn't exist. This file is git ignored, so we can make our configuration changes directly instead of having to use environment variables or accidentally tracking changes to `fleet-server.yml`.
+4. Navigate to https://localhost:5601/app/fleet and click "Add Fleet Server"
+5. Ensure your `localhost` Fleet Server host is selected and generate a service token
+6. Copy the service token somewhere convenient - you'll need it to run Fleet Server below
+7. In a new terminal session, navigate to your `fleet-server` directory
+8. Create a `fleet-server.dev.yml` file if one doesn't exist. This file is git ignored, so we can make our configuration changes directly instead of having to use environment variables or accidentally tracking changes to `fleet-server.yml`.
 
 ```bash
 $ cp fleet-server.yml fleet-server.dev.yml
 ```
 
-1. Update your `fleet-server.dev.yml` to look as follows
+9. Add the following to your `fleet-server.dev.yml` file
+
+```yaml
+output:
+  elasticsearch:
+    hosts: 'http://localhost:9200'
+    # Copy the service token from the Fleet onboarding UI in Kibana
+    service_token: 'your_service_token'
+
+fleet:
+  agent:
+    id: '${FLEET_SERVER_AGENT_ID:dev-fleet-server}'
+
+inputs:
+  - type: fleet-server
+    policy.id: '${FLEET_SERVER_POLICY_ID:fleet-server-policy}'
+
+logging:
+  to_stderr: true # Force the logging output to stderr
+  pretty: true
+  level: '${LOG_LEVEL:DEBUG}'
+
+# Enables the stats endpoint under <http://localhost:5601> by default.
+# Additional stats can be found under <http://127.0.0.1:5066/stats> and <http://127.0.0.1:5066/state>
+http.enabled: true
+#http.host: <http://127.0.0.1>
+#http.port: 5601
+```
+
+10. Run the following in your `fleet-server` directory to build and run your local Fleet Server
+
+```bash
+# Create standalone dev build
+$ DEV=true SNAPSHOT=true make release-darwin/amd64
+
+# Run dev build, provide your fingerprint and service token from before
+$ ./build/binaries/fleet-server-8.13.0-SNAPSHOT-darwin-x86_64/fleet-server -c fleet-server.dev.yml
+```
+
+Now you should have a local ES snapshot running on http://localhost:9200, a local Kibana running on http://localhost:5601, and a local Fleet Server running on http://localhost:8220. You can now navigate to http://localhost:5601/app/fleet and [enroll agents](#enroll-agents).
+
+## Running a local stack over HTTPS
+
+The instructions for HTTPS are largely the same, with a few key differences:
+
+1. You'll need to provide the `--ssl` flag to your ES + Kibana commands, e.g.
+
+```bash
+# In your `kibana` directory
+$ yarn es snapshot --license trial --ssl -E path.data=/tmp/es-data
+$ yarn start --ssl
+```
+
+2. Change various URLs in `kibana.dev.yml` to use `https` instead of `http`, and add a `ca_trusted_fingerprint` calculated from the `ca.crt` certificate in Kibana's dev utils package. Your `kibana.dev.yml` should be the same as above, with the following changes:
+
+```yaml
+server.basePath: '/some-base-path' # Optional, if used, sets basePath in kibana url e.g. https://localhost:5601/some-base-path/app/fleet
+server.versioned.versionResolution: oldest
+elasticsearch.hosts: [https://localhost:9200] # <-- Updated to https
+
+# Optional - set up an APM service in a cloud.elastic.co cluster to send your dev logs, traces, etc
+# Can be helpful for troubleshooting and diagnosting performance issues
+# elastic.apm:
+# active: true
+# serverUrl: <https://some-cluster.apm.us-east4.gcp.elastic-cloud.com:443>
+# secretToken: some-token
+# breakdownMetrics: true
+# transactionSampleRate: 0.1
+
+logging:
+  loggers:
+    - name: plugins.fleet
+      appenders: [console]
+      level: debug
+
+# Allows enrolling agents when standalone Fleet Server is in use
+xpack.fleet.internal.fleetServerStandalone: true
+
+xpack.fleet.fleetServerHosts:
+  - id: localhost
+    name: Localhost
+    # Make sure this is `https` since we're running our local Fleet Server with SSL enabled
+    host_urls: ['https://localhost:8220'] # <-- Updated to https
+    is_default: true
+  # If you want to run a Fleet Server in Docker, use this Fleet Server host
+  - id: docker
+    name: Docker Internal Gateway
+    host_urls: ['https://host.docker.internal:8220'] # <-- Updated to https
+
+xpack.fleet.packages:
+  - name: fleet_server
+    version: latest
+
+xpack.fleet.outputs:
+  - id: preconfigured-localhost-output
+    name: Localhost Output
+    type: elasticsearch
+    hosts: ['https://localhost:9200'] # <-- Updated to https
+    ca_trusted_fingerprint: 'f71f73085975fd977339a1909ebfe2df40db255e0d5bb56fc37246bf383ffc84' # <-- Added
+    is_default: true
+
+  # If you enroll agents via Docker, use this output so they can output to your local
+  # Elasticsearch cluster
+  - id: preconfigured-docker-output
+    name: Docker Output
+    type: elasticsearch
+    hosts: ['https://host.docker.internal:9200'] # <-- Updated to https
+    ca_trusted_fingerprint: 'f71f73085975fd977339a1909ebfe2df40db255e0d5bb56fc37246bf383ffc84' # <-- Added
+
+xpack.fleet.agentPolicies:
+  - name: Fleet Server Policy
+    id: fleet-server-policy
+    is_default_fleet_server: true
+    package_policies:
+      - package:
+          name: fleet_server
+        name: Fleet Server
+        id: fleet_server
+        inputs:
+          - type: fleet-server
+            keep_enabled: true
+            vars:
+              - name: host
+                value: 0.0.0.0
+                frozen: true
+              - name: port
+                value: 8220
+                frozen: true
+```
+
+3. Update your `fleet-server.dev.yml` to look as follows
 
 ```yaml
 # This config is intended to be used with a stand-alone fleet-server instance for development.
 output:
   elasticsearch:
-    hosts: '<https://localhost:9200>'
+    hosts: 'https://localhost:9200' # <-- Updated to https
     # Copy the service token from the Fleet onboarding UI in Kibana
     service_token: 'your_service_token'
     # Fingerprint of the ca.crt certificate in Kibana's dev utils package
@@ -141,6 +261,7 @@ fleet:
 inputs:
   - type: fleet-server
     policy.id: '${FLEET_SERVER_POLICY_ID:fleet-server-policy}'
+    # Enable SSL, point at Kibana's self-signed certs
     server:
       ssl:
         enabled: true
@@ -160,31 +281,32 @@ http.enabled: true
 #http.port: 5601
 ```
 
-```bash
-# Create standalone dev build
-$ DEV=true SNAPSHOT=true make release-darwin/amd64
-
-# Run dev build, provide your fingerprint and service token from before
-$ ELASTICSEARCH_CA_TRUSTED_FINGERPRINT="f71f73085975fd977339a1909ebfe2df40db255e0d5bb56fc37246bf383ffc84" ELASTICSEARCH_SERVICE_TOKEN="AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE3MDQ0Njk3NTc4Mjk6dDhWaVl5Qy1SQ0taTjRRYzdibUx4UQ" FLEET_SERVER_POLICY_ID="fleet-server-policy" ./build/binaries/fleet-server-8.13.0-SNAPSHOT-darwin-x86_64/fleet-server -c fleet-server.yml
-
-```
-
-Once your Fleet Server is online, you should be able to refresh your Kibana UI and begin enrolling agents. Note that you won't see your Fleet Server in the `agents` list, because it's running in standalone mode and thus is not running Elastic Agent.
+With these changes in place, the process to start up your local stack is the same as above.
 
 ## Enroll agents
 
-Now that you have Kibana + Elasticsearch + Fleet Server all up and running, you can enroll agents. The quickest way to enroll an agent is by using the bash script below to spin up agents in Docker containers:
+Once you have your local stack up and running, you can enroll agents to test your changes end-to-end. There are a few ways to do this. The fastest is to spin up a Docker container running Elastic Agent, e.g.
+
+```bash
+docker run  --add-host host.docker.internal:host-gateway  \
+  --env FLEET_ENROLL=1  --env FLEET_INSECURE=true\
+  --env FLEET_URL=https://localhost:8220 \
+  --env FLEET_ENROLLMENT_TOKEN=enrollment_token \
+  docker.elastic.co/beats/elastic-agent:8.13.0-SNAPSHOT # <-- Update this version as needed
+```
+
+You can also create a `run-dockerized-agent.sh` file as below to make this process easier. This script will run a Docker container with Elastic Agent and enroll it to your local Fleet Server. You can also use it to run a Dockerized Fleet Server container if you don't need to develop Fleet Server locally.
 
 ```bash
 #!/usr/bin/env bash
 
-# Copy this script somehwere convenient, and name it `run_dockerized_elastic_agent.sh`. Make sure to `chmod +x` this file as well.
+# Name this file `run-dockerized-agent.sh` and place it somewhere convenient. Make sure to run `chmod +x` on it to make it executable.
 
 # This script is used to run a instance of Elastic Agent in a Docker container.
-# Ref.: <https://www.elastic.co/guide/en/fleet/current/elastic-agent-container.html>
+# Ref.: https://www.elastic.co/guide/en/fleet/current/elastic-agent-container.html
 
-# To run a Fleet server: ./run_dockerized_elastic_agent.sh fleet_server -e <service_token> -v <version> -t <tags>
-# To run an agent: ./run_dockerized_elastic_agent.sh agent -e <enrollment token> -v <version> -t <tags>
+# To run a Fleet server: ./run_dockerized_agent.sh fleet_server
+# To run an agent: ./run_dockerized_agent agent -e <enrollment token> -v <version> -t <tags>
 
 # NB: this script assumes a Fleet server policy with id "fleet-server-policy" is already created.
 
@@ -199,15 +321,15 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-DEFAULT_ELASTIC_AGENT_VERSION=8.13.0-SNAPSHOT # Update as needed when new versions are available
+DEFAULT_ELASTIC_AGENT_VERSION=8.13.0-SNAPSHOT # update as needed
 
-# Needed to run Dockerized Fleet Server - note that we're not running over SSL in this case
+# Needed for Fleet Server
 ELASTICSEARCH_HOST=http://host.docker.internal:9200 # should match Fleet settings or xpack.fleet.agents.elasticsearch.hosts in kibana.dev.yml
 KIBANA_HOST=http://host.docker.internal:5601
-KIBANA_BASE_PATH=my_base_path # should match server.basePath in kibana.dev.yml if you've set one
+KIBANA_BASE_PATH=kyle # should match server.basePath in kibana.dev.yml
 FLEET_SERVER_POLICY_ID=fleet-server-policy # as defined in kibana.dev.yml
 
-# Needed for agent - make sure this `https` if you're running everything over SSL as this guide instructs.
+# Needed for agent
 FLEET_SERVER_URL=https://host.docker.internal:8220
 
 printArgs() {
@@ -236,17 +358,17 @@ if [[ $CMD == "fleet_server" ]]; then
 
   printArgs
 
-  docker run \\
-    -e ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST} \\
-    -e KIBANA_HOST=${KIBANA_HOST}/${KIBANA_BASE_PATH} \\
-    -e KIBANA_USERNAME=elastic \\
-    -e KIBANA_PASSWORD=changeme \\
-    -e KIBANA_FLEET_SETUP=1 \\
-    -e FLEET_INSECURE=1 \\
-    -e FLEET_SERVER_ENABLE=1 \\
-    -e FLEET_SERVER_POLICY_ID=${FLEET_SERVER_POLICY_ID} \\
-    -e ELASTIC_AGENT_TAGS=${TAGS} \\
-    -p 8220:8220 \\
+  docker run \
+    -e ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST} \
+    -e KIBANA_HOST=${KIBANA_HOST}/${KIBANA_BASE_PATH} \
+    -e KIBANA_USERNAME=elastic \
+    -e KIBANA_PASSWORD=changeme \
+    -e KIBANA_FLEET_SETUP=1 \
+    -e FLEET_INSECURE=1 \
+    -e FLEET_SERVER_ENABLE=1 \
+    -e FLEET_SERVER_POLICY_ID=${FLEET_SERVER_POLICY_ID} \
+    -e ELASTIC_AGENT_TAGS=${TAGS} \
+    -p 8220:8220 \
     --rm docker.elastic.co/beats/elastic-agent:${ELASTIC_AGENT_VERSION}
 
 elif [[ $CMD == "agent" ]]; then
@@ -254,12 +376,12 @@ elif [[ $CMD == "agent" ]]; then
 
   printArgs
 
-  docker run \\
-    -e FLEET_URL=${FLEET_SERVER_URL} \\
-    -e FLEET_ENROLL=1 \\
-    -e FLEET_ENROLLMENT_TOKEN=${ENROLLMENT_TOKEN} \\
-    -e FLEET_INSECURE=1 \\
-    -e ELASTIC_AGENT_TAGS=${TAGS} \\
+  docker run \
+    -e FLEET_URL=${FLEET_SERVER_URL} \
+    -e FLEET_ENROLL=1 \
+    -e FLEET_ENROLLMENT_TOKEN=${ENROLLMENT_TOKEN} \
+    -e FLEET_INSECURE=1 \
+    -e ELASTIC_AGENT_TAGS=${TAGS} \
     --rm docker.elastic.co/beats/elastic-agent:${ELASTIC_AGENT_VERSION}
 
 elif [[ $CMD == "help" ]]; then
