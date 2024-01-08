@@ -68,7 +68,10 @@ import {
   ItemIdToExpandedRowMap,
 } from '../../../common/components/stats_table';
 import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
-import { MetricFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
+import {
+  MetricFieldsStats,
+  TotalFieldsStats,
+} from '../../../common/components/stats_table/components/field_count_stats';
 import { filterFields } from '../../../common/components/fields_stats_grid/filter_fields';
 import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
@@ -78,6 +81,7 @@ import { processDistributionData } from '../../utils/process_distribution_data';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import type { DocumentCountStats } from '../../../common/hooks/use_document_count_stats';
 import { getDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
+import { FieldCountPanel } from '../../../common/components/field_count_panel';
 
 type BucketCount = number;
 type BucketTerm = string;
@@ -690,7 +694,7 @@ export const getDefaultDataVisualizerListState = (
   showAllFields: false,
   showEmptyFields: false,
   probability: null,
-  rndSamplerPref: null,
+  rndSamplerPref: 'off',
   ...overrides,
 });
 
@@ -1037,7 +1041,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         ...(fieldData ? fieldData : {}),
         secondaryType: kbnTypeToSupportedType(field),
         // fieldFormat: currentDataView.getFormatterForField(field),
-        aggregatable: fieldData.aggregatable,
+        aggregatable: fieldData?.aggregatable,
         loading: fieldData?.existsInDocs ?? true,
         deletable: false,
       };
@@ -1063,6 +1067,28 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
     setNonMetricConfigs(configs);
   }, [columns, nonMetricsLoaded, overallStats, showEmptyFields]);
+
+  const fieldsCountStats: TotalFieldsStats | undefined = useMemo(() => {
+    if (!overallStats) return;
+
+    let _visibleFieldsCount = 0;
+    let _totalFieldsCount = 0;
+    Object.keys(overallStats).forEach((key) => {
+      const fieldsGroup = overallStats[key as keyof OverallStats];
+      if (Array.isArray(fieldsGroup) && fieldsGroup.length > 0) {
+        _totalFieldsCount += fieldsGroup.length;
+      }
+    });
+
+    if (showEmptyFields === true) {
+      _visibleFieldsCount = _totalFieldsCount;
+    } else {
+      _visibleFieldsCount =
+        overallStats.aggregatableExistsFields.length +
+        overallStats.nonAggregatableExistsFields.length;
+    }
+    return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
+  }, [overallStats, showEmptyFields]);
 
   useEffect(() => {
     createMetricCards();
@@ -1218,7 +1244,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             <EuiPanel hasShadow={false} hasBorder grow={false}>
               {totalCount !== undefined && (
                 <>
-                  <EuiSpacer size="m" />
                   <EuiFlexGroup gutterSize="s" direction="column">
                     <DocumentCountContent
                       documentCountStats={documentCountStats}
@@ -1230,12 +1255,12 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 </>
               )}
               <EuiSpacer size="m" />
-              {/* <FieldCountPanel
+              <FieldCountPanel
                 showEmptyFields={showEmptyFields}
                 toggleShowEmptyFields={toggleShowEmptyFields}
-                // fieldsCountStats={fieldsCountStats}
+                fieldsCountStats={fieldsCountStats}
                 metricsStats={metricsStats}
-              /> */}
+              />
               <EuiSpacer size="m" />
               <EuiProgress value={50} max={100} size="xs" />
               <DataVisualizerTable<FieldVisConfig>
