@@ -97,7 +97,11 @@ export const SelectConnector: React.FC = () => {
           a.name.localeCompare(b.name)
         )
       : CONNECTORS.sort((a, b) => a.name.localeCompare(b.name));
-    const connectors = [...nativeConnectors, ...nonNativeConnectors];
+    const connectors =
+      !hasNativeAccess || useClientsFilter
+        ? CONNECTORS.sort((a, b) => a.name.localeCompare(b.name))
+        : [...nativeConnectors, ...nonNativeConnectors];
+
     return connectors
       .filter((connector) => (showBeta ? true : !connector.isBeta))
       .filter((connector) => (showTechPreview ? true : !connector.isTechPreview))
@@ -105,7 +109,7 @@ export const SelectConnector: React.FC = () => {
       .filter((connector) =>
         searchTerm ? connector.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
       );
-  }, [showBeta, showTechPreview, useNativeFilter, searchTerm]);
+  }, [hasNativeAccess, useClientsFilter, showBeta, showTechPreview, useNativeFilter, searchTerm]);
   const { euiTheme } = useEuiTheme();
 
   return (
