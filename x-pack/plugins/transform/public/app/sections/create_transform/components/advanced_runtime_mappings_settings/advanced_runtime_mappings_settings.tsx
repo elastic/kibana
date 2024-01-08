@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { useEffect, type FC } from 'react';
 
 import {
   EuiButton,
@@ -40,6 +40,8 @@ const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
 export const AdvancedRuntimeMappingsSettings: FC = () => {
   const {
     applyRuntimeMappingsEditorChanges,
+    setAdvancedRuntimeMappingsConfig,
+    setAdvancedRuntimeMappingsConfigLastApplied,
     pivotConfig: { deleteAggregation, deleteGroupBy, updateAggregation },
   } = useWizardActions();
   const aggList = useWizardSelector((s) => s.stepDefine.aggList);
@@ -92,6 +94,16 @@ export const AdvancedRuntimeMappingsSettings: FC = () => {
       }
     });
   };
+
+  useEffect(() => {
+    if (!isRuntimeMappingsEditorEnabled) {
+      const stringifiedRuntimeMappings = JSON.stringify(runtimeMappings, null, 2);
+      setAdvancedRuntimeMappingsConfigLastApplied(stringifiedRuntimeMappings);
+      setAdvancedRuntimeMappingsConfig(stringifiedRuntimeMappings);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRuntimeMappingsEditorEnabled, runtimeMappings]);
+
   return (
     <>
       <EuiSpacer size="s" />

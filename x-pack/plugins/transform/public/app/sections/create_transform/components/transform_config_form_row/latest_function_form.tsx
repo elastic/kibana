@@ -14,7 +14,7 @@ import { useAppDependencies } from '../../../../app_dependencies';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
-import { useLatestFunctionOptions } from './hooks/use_latest_function_config';
+import { useLatestFunctionOptions } from '../step_define/hooks/use_latest_function_config';
 
 interface LatestFunctionFormProps {
   copyToClipboard: string;

@@ -8,7 +8,7 @@
 import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
@@ -40,32 +40,34 @@ export const TransformFunctionSelector: FC = () => {
   ];
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="m" data-test-subj="transformFunctionSelection">
-        {transformFunctions.map(({ helpText, icon, name, title }) => (
-          <EuiFlexItem key={name} style={{ width: 320 }} grow={false}>
-            <EuiCard
-              icon={<EuiIcon size="xl" type={icon} />}
-              title={title}
-              description={helpText}
-              data-test-subj={`transformCreation-${name}-option${
-                selectedFunction === name ? ' selectedFunction' : ''
-              }`}
-              selectable={{
-                onClick: () => {
-                  // Only allow one function selected at a time and don't allow deselection
-                  if (selectedFunction === name) {
-                    return;
-                  }
-                  setTransformFunction(name);
-                },
-                isSelected: selectedFunction === name,
-              }}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-    </>
+    <EuiFormRow fullWidth>
+      <>
+        <EuiFlexGroup gutterSize="m" data-test-subj="transformFunctionSelection">
+          {transformFunctions.map(({ helpText, icon, name, title }) => (
+            <EuiFlexItem key={name} style={{ width: 320 }} grow={false}>
+              <EuiCard
+                icon={<EuiIcon size="xl" type={icon} />}
+                title={title}
+                description={helpText}
+                data-test-subj={`transformCreation-${name}-option${
+                  selectedFunction === name ? ' selectedFunction' : ''
+                }`}
+                selectable={{
+                  onClick: () => {
+                    // Only allow one function selected at a time and don't allow deselection
+                    if (selectedFunction === name) {
+                      return;
+                    }
+                    setTransformFunction(name);
+                  },
+                  isSelected: selectedFunction === name,
+                }}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+      </>
+    </EuiFormRow>
   );
 };
