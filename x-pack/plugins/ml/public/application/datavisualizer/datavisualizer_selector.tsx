@@ -6,6 +6,7 @@
  */
 
 import React, { FC, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -17,6 +18,8 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiBetaBadge,
+  EuiTextAlign,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,6 +52,7 @@ function startTrialDescription() {
 
 export const DatavisualizerSelector: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
+
   const {
     services: {
       licenseManagement,
@@ -152,6 +156,53 @@ export const DatavisualizerSelector: FC = () => {
                 </EuiButton>
               }
               data-test-subj="mlDataVisualizerCardIndexData"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              hasBorder
+              icon={<EuiIcon size="xxl" type="dataVisualizer" />}
+              title={
+                <EuiTextAlign textAlign="center">
+                  <>
+                    <FormattedMessage
+                      id="xpack.ml.datavisualizer.selector.selectESQLTitle"
+                      defaultMessage="Visualize data using ES|QL"
+                    />{' '}
+                    <EuiBetaBadge
+                      iconType="beaker"
+                      size="m"
+                      color="hollow"
+                      tooltipContent={
+                        <FormattedMessage
+                          id="xpack.ml.datavisualizer.selector.technicalPreviewBadge.titleMsg"
+                          defaultMessage="ES|QL is currently in technical preview."
+                        />
+                      }
+                      tooltipPosition={'right'}
+                    />
+                  </>
+                </EuiTextAlign>
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg"
+                  defaultMessage="Use ES|QL queries to visualize information about any data set."
+                />
+              }
+              footer={
+                <EuiButton
+                  target="_self"
+                  onClick={() => navigateToPath('/datavisualizer/esql')}
+                  data-test-subj="mlDataVisualizerSelectESQLButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
+                    defaultMessage="Use ES|QL"
+                  />
+                </EuiButton>
+              }
+              data-test-subj="mlDataVisualizerCardESQLData"
             />
           </EuiFlexItem>
         </EuiFlexGrid>
