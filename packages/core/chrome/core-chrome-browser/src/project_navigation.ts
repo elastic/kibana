@@ -50,6 +50,15 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
+export interface CloudLink {
+  title: string;
+  href: string;
+}
+
+export type CloudLinks = {
+  [id in CloudLinkId]?: CloudLink;
+};
+
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
@@ -225,7 +234,7 @@ export interface ChromeSetProjectBreadcrumbsParams {
  * "link" to "deepLink" and adding the "path" property for each node.
  */
 export interface NodeDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  LinkId extends string = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
 > extends NodeDefinitionBase {
@@ -248,7 +257,7 @@ export interface NodeDefinition<
  * deep link and children.
  */
 export type NodeDefinitionWithChildren<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  LinkId extends string = AppDeepLinkId,
   Id extends string = string,
   ChildrenID extends string = Id
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
@@ -289,7 +298,7 @@ export interface RecentlyAccessedDefinition {
  * A group root item definition.
  */
 export interface GroupDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  LinkId extends string = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
@@ -303,7 +312,7 @@ export interface GroupDefinition<
  * A group root item definition built from a specific preset.
  */
 export interface PresetDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  LinkId extends string = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
 > extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children' | 'type'> {
@@ -317,7 +326,7 @@ export interface PresetDefinition<
  * An item root.
  */
 export interface ItemDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  LinkId extends string = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
@@ -330,7 +339,7 @@ export interface ItemDefinition<
  * The navigation definition for a root item in the side navigation.
  */
 export type RootNavigationItemDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  LinkId extends string = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
 > =
@@ -340,7 +349,7 @@ export type RootNavigationItemDefinition<
   | ItemDefinition<LinkId, Id, ChildrenId>;
 
 export type ProjectNavigationTreeDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  LinkId extends string = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
 > = Array<
@@ -354,7 +363,7 @@ export type ProjectNavigationTreeDefinition<
  * Definition for the complete navigation tree, including body and footer
  */
 export interface NavigationTreeDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  LinkId extends string = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
 > {
@@ -370,27 +379,9 @@ export interface NavigationTreeDefinition<
   footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
 
-/**
- * @public
- *
- * A project navigation definition that can be passed to the `<DefaultNavigation />` component
- * or when calling `setNavigation()` on the serverless plugin.
- */
-export interface ProjectNavigationDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> {
-  /**
-   * A navigation tree structure with object items containing labels, links, and sub-items
-   * for a project. Use it if you only need to configure your project navigation and leave
-   * all the other navigation items to the default (Recently viewed items, Management, etc.)
-   */
-  projectNavigationTree?: ProjectNavigationTreeDefinition<LinkId, Id, ChildrenId>;
-  /**
-   * A navigation tree structure with object items containing labels, links, and sub-items
-   * that defines a complete side navigation. This configuration overrides `projectNavigationTree`
-   * if both are provided.
-   */
-  navigationTree?: NavigationTreeDefinition<LinkId, Id, ChildrenId>;
+export interface CloudUrls {
+  billingUrl?: string;
+  deploymentUrl?: string;
+  performanceUrl?: string;
+  usersAndRolesUrl?: string;
 }

@@ -14,7 +14,7 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   AppDeepLinkId,
   ChromeProjectNavigationNode,
-  ProjectNavigationDefinition,
+  NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
@@ -73,13 +73,15 @@ export interface InternalChromeStart extends ChromeStart {
      */
     setNavigationDeprecated(projectNavigation: ChromeProjectNavigation): void;
 
-    setNavigation<
+    setSideNavigationDefinition<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
     >(
-      definition: ProjectNavigationDefinition<LinkId, Id, ChildrenId>
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
     ): void;
+
+    getSideNavigationDefinition$: () => Observable<NavigationTreeDefinition>;
 
     /**
      * Returns an observable of the active nodes in the project navigation.

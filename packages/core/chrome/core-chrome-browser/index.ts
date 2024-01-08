@@ -45,7 +45,6 @@ export type {
   NodeRenderAs,
   EuiThemeSize,
   NavigationTreeDefinition,
-  ProjectNavigationDefinition,
   GroupDefinition,
   ItemDefinition,
   PresetDefinition,
@@ -54,4 +53,7 @@ export type {
   NavigationGroupPreset,
   ProjectNavigationTreeDefinition,
   RootNavigationItemDefinition,
+  CloudLink,
+  CloudLinks,
+  CloudUrls,
 } from './src';
