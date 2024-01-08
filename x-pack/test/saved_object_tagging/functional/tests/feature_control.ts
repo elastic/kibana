@@ -43,6 +43,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }
   };
 
+  const unselectTags = async () => {
+    if (await tagManagementPage.isSelectionColumnDisplayed()) {
+      await tagManagementPage.selectAllTagRows();
+      await tagManagementPage.selectAllTagRows();
+    }
+  };
+
   const addFeatureControlSuite = ({ user, description, privileges }: FeatureControlUserSuite) => {
     const testPrefix = (allowed: boolean) => (allowed ? `can` : `can't`);
 
@@ -69,6 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`${testPrefix(privileges.delete)} bulk delete tags`, async () => {
         await selectSomeTags();
         expect(await tagManagementPage.isBulkActionPresent('delete')).to.be(privileges.delete);
+        await unselectTags();
       });
 
       it(`${testPrefix(privileges.create)} create tag`, async () => {
