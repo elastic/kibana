@@ -28,9 +28,9 @@ export const HostDetailsPanelKey: HostDetailsExpandableFlyoutProps['key'] = 'hos
 export const HostDetailsPanel = ({ name, isRiskScoreExist }: HostDetailsPanelProps) => {
   // Temporary implementation while Host details left panel don't have Asset tabs
   const [tabs, selectedTabId, setSelectedTabId] = useMemo(() => {
-    const isRiskScorTabAvailable = isRiskScoreExist && name;
+    const isRiskScoreTabAvailable = isRiskScoreExist && name;
     return [
-      isRiskScorTabAvailable
+      isRiskScoreTabAvailable
         ? [getRiskInputTab({ entityName: name, entityType: RiskScoreEntity.host })]
         : [],
       EntityDetailsLeftPanelTab.RISK_INPUTS,
