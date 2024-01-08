@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('/deprecations/_delete_unknown_types', () => {
     before(async () => {
       // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
-      await es.indices.putMapping({ index: '.kibana', body: { dynamic: true }});
+      await es.indices.putMapping({ index: '.kibana', body: { dynamic: true } });
       await esArchiver.load(
         'test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types'
       );
