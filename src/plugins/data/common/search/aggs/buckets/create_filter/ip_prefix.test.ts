@@ -113,7 +113,10 @@ describe('AggConfig Filters', () => {
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter.query.range).toHaveProperty('ip');
       expect(filter.query.range.ip).toHaveProperty('gte', '1989:1337:c0de:7e00::');
-      expect(filter.query.range.ip).toHaveProperty('lte', '1989:1337:c0de:7eff:ffff:ffff:ffff:ffff');
+      expect(filter.query.range.ip).toHaveProperty(
+        'lte',
+        '1989:1337:c0de:7eff:ffff:ffff:ffff:ffff'
+      );
     });
   });
 });
