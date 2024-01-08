@@ -11,6 +11,7 @@ import {
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
+  extractExternalCustomVisualizationFromSuggestion,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
@@ -116,12 +117,8 @@ export const useDiscoverHistogram = ({
         }
 
         if ('currentSuggestion' in changes) {
-          newState.customVisualization = currentSuggestion
-            ? {
-                visualizationId: currentSuggestion.visualizationId,
-                visualizationState: currentSuggestion.visualizationState, // TODO: remove layerId?
-              }
-            : undefined;
+          newState.customVisualization =
+            extractExternalCustomVisualizationFromSuggestion(currentSuggestion);
         }
 
         if (!isEqual(oldState, newState)) {

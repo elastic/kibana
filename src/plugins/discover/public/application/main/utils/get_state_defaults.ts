@@ -9,7 +9,10 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
+import {
+  getChartHidden,
+  fromExternalCustomVisualizationJSONString,
+} from '@kbn/unified-histogram-plugin/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -101,13 +104,10 @@ export function getStateDefaults({
   if (savedSearch.breakdownField) {
     defaultState.breakdownField = savedSearch.breakdownField;
   }
-  try {
-    if (savedSearch.customVisualizationJSON) {
-      // TODO create a deserializer
-      defaultState.customVisualization = JSON.parse(savedSearch.customVisualizationJSON);
-    }
-  } catch {
-    // nothing
+  if (savedSearch.customVisualizationJSON) {
+    defaultState.customVisualization = fromExternalCustomVisualizationJSONString(
+      savedSearch.customVisualizationJSON
+    );
   }
 
   return defaultState;

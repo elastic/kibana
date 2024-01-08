@@ -7,6 +7,7 @@
  */
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { toExternalCustomVisualizationJSONString } from '@kbn/unified-histogram-plugin/public';
 import { cloneDeep } from 'lodash';
 import { isTextBasedQuery } from './is_text_based_query';
 import type { DiscoverAppState } from '../services/discover_app_state_container';
@@ -64,10 +65,9 @@ export function updateSavedSearch({
     savedSearch.rowHeight = state.rowHeight;
     savedSearch.rowsPerPage = state.rowsPerPage;
     savedSearch.sampleSize = state.sampleSize;
-    // TODO: create a serializer
-    savedSearch.customVisualizationJSON = state.customVisualization
-      ? JSON.stringify(state.customVisualization)
-      : undefined;
+    savedSearch.customVisualizationJSON = toExternalCustomVisualizationJSONString(
+      state.customVisualization
+    );
 
     if (state.viewMode) {
       savedSearch.viewMode = state.viewMode;

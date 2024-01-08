@@ -92,11 +92,15 @@ export const useLensSuggestions = ({
             : matchingSuggestion.visualizationState.layers,
         },
       };
+
+      console.log('merged suggestion', currentSuggestion.visualizationState);
     }
   }
 
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
   const histogramQuery = useRef<AggregateQuery | undefined>();
+
+  // TODO: customization for the histogram suggestion too?
   const histogramSuggestion = useMemo(() => {
     if (
       !currentSuggestion &&
@@ -160,6 +164,7 @@ export const useLensSuggestions = ({
 
     if (!isEqual(suggestionDeps.current, newSuggestionsDeps)) {
       setAllSuggestions(suggestions.allSuggestions);
+      console.log('deps change triggers a new suggestion');
       onSuggestionChange?.(suggestions.firstSuggestion);
 
       suggestionDeps.current = newSuggestionsDeps;

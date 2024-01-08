@@ -267,6 +267,12 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
     const isSame = isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
 
     if (!isSame) {
+      console.log({
+        key,
+        before: prevSavedSearch[key],
+        after: nextSavedSearchWithoutSearchSource[key],
+      });
+
       addLog('[savedSearch] difference between initial and changed version', {
         key,
         before: prevSavedSearch[key],
