@@ -152,6 +152,7 @@ export type OnCheckCompleted = (param: {
   isLastCheck: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata | null;
   pattern: string;
+  version: string;
   requestTime?: number;
 }) => void;
 

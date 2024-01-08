@@ -36,6 +36,7 @@ export async function checkIndex({
   isLastCheck,
   onCheckCompleted,
   pattern,
+  version,
 }: {
   abortController: AbortController;
   batchId: string;
@@ -48,6 +49,7 @@ export async function checkIndex({
   isLastCheck: boolean;
   onCheckCompleted: OnCheckCompleted;
   pattern: string;
+  version: string;
 }) {
   try {
     const startTime = Date.now();
@@ -98,6 +100,7 @@ export async function checkIndex({
         partitionedFieldMetadata,
         pattern,
         requestTime: Date.now() - startTime,
+        version,
         isLastCheck,
       });
     }
@@ -112,6 +115,7 @@ export async function checkIndex({
         indexName,
         partitionedFieldMetadata: null,
         pattern,
+        version,
         isLastCheck,
       });
     }
