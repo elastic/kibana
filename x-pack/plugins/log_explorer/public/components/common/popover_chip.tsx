@@ -60,8 +60,8 @@ export function ChipWithPopover({
 
   const handleChipClick = useCallback(() => {
     if (!shouldRenderPopover) return;
-    setIsPopoverOpen(true);
-  }, [shouldRenderPopover]);
+    setIsPopoverOpen(!isPopoverOpen);
+  }, [isPopoverOpen, shouldRenderPopover]);
 
   const closePopover = () => setIsPopoverOpen(false);
 

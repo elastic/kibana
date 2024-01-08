@@ -8,7 +8,7 @@
 
 import { filter, map, Observable, startWith, Subject } from 'rxjs';
 import {
-  DataTableCustomisation,
+  DataTableCustomization,
   FlyoutCustomization,
   SearchBarCustomization,
   TopNavCustomization,
@@ -20,7 +20,7 @@ export type DiscoverCustomization =
   | SearchBarCustomization
   | TopNavCustomization
   | UnifiedHistogramCustomization
-  | DataTableCustomisation;
+  | DataTableCustomization;
 
 export type DiscoverCustomizationId = DiscoverCustomization['id'];
 

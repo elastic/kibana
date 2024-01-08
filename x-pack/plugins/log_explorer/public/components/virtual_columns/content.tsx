@@ -133,12 +133,10 @@ export const renderContent =
   ({ data }: { data: LogExplorerDiscoverServices['data'] }) =>
   (props: DataGridCellValueElementProps) => {
     const { dataView } = props;
-    const virtualColumnServices = useMemo(() => {
-      return {
-        data,
-        dataView,
-      };
-    }, [dataView]);
+    const virtualColumnServices = {
+      data,
+      dataView,
+    };
     return (
       <VirtualColumnServiceProvider services={virtualColumnServices}>
         <Content {...props} />
