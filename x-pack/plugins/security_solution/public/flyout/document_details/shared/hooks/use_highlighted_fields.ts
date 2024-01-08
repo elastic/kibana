@@ -103,7 +103,7 @@ export const useHighlightedFields = ({
       return acc;
     }
 
-    // if the field is observer.serial_number and the event is not an endpoint event we skip it
+    // if the field is observer.serial_number and the event is not a sentinel one event we skip it
     if (
       field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
       !isAlertFromSentinelOneEvent({ data: dataFormattedForFieldBrowser })
