@@ -16,7 +16,10 @@ import type SuperTest from 'supertest';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
 import { retry } from '../../retry';
-import { refreshSavedObjectIndices } from '../..';
+import { refreshSavedObjectIndices } from '../../refresh_index';
+
+const MAX_RETRIES = 2;
+const ATTEMPT_TIMEOUT = 120000;
 
 /**
  * Installs the `security_detection_engine` package via fleet API. This will
@@ -56,13 +59,13 @@ export const installPrebuiltRulesFleetPackage = async ({
         return testResponse.body;
       },
       retryService,
-      retries: 2,
-      timeout: 120000,
+      retries: MAX_RETRIES,
+      timeout: ATTEMPT_TIMEOUT,
     });
 
     await refreshSavedObjectIndices(es);
 
-    return response as InstallPackageResponse;
+    return response;
   } else {
     // Install the latest version
     const response = await retry<BulkInstallPackagesResponse>({
@@ -88,13 +91,13 @@ export const installPrebuiltRulesFleetPackage = async ({
         return body;
       },
       retryService,
-      retries: 2,
-      timeout: 120000,
+      retries: MAX_RETRIES,
+      timeout: ATTEMPT_TIMEOUT,
     });
 
     await refreshSavedObjectIndices(es);
 
-    return response as BulkInstallPackagesResponse;
+    return response;
   }
 };
 

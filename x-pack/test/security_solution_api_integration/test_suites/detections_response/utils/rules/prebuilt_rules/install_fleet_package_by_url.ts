@@ -10,7 +10,11 @@ import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
-import { refreshSavedObjectIndices, retry } from '../..';
+import { retry } from '../../retry';
+import { refreshSavedObjectIndices } from '../../refresh_index';
+
+const MAX_RETRIES = 2;
+const ATTEMPT_TIMEOUT = 120000;
 
 /**
  * Installs latest available non-prerelease prebuilt rules package `security_detection_engine`.
@@ -41,13 +45,13 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
       return testResponse.body;
     },
     retryService,
-    retries: 2,
-    timeout: 120000,
+    retries: MAX_RETRIES,
+    timeout: ATTEMPT_TIMEOUT,
   });
 
   await refreshSavedObjectIndices(es);
 
-  return fleetResponse as InstallPackageResponse;
+  return fleetResponse;
 };
 /**
  * Installs prebuilt rules package `security_detection_engine`, passing in the version
@@ -80,8 +84,8 @@ export const installPrebuiltRulesPackageByVersion = async (
       return testResponse.body;
     },
     retryService,
-    retries: 2,
-    timeout: 120000,
+    retries: MAX_RETRIES,
+    timeout: ATTEMPT_TIMEOUT,
   });
 
   await refreshSavedObjectIndices(es);

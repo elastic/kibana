@@ -11,7 +11,7 @@ import {
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
-import { refreshSavedObjectIndices } from '../es_indices';
+import { refreshSavedObjectIndices } from '../../refresh_index';
 
 /**
  * (LEGACY)
