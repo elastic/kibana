@@ -10,8 +10,6 @@ export {
   createIndexDocRecordsStream,
   createGenerateDocRecordsStream,
   type LoadActionPerfOptions,
-  type HiFi,
-  type LoFi,
 } from './docs';
 
 export {
