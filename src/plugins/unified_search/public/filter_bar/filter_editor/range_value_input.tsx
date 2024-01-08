@@ -54,14 +54,14 @@ function RangeValueInputUI(props: Props) {
     if (typeof value !== 'string' && typeof value !== 'number') {
       throw new Error('Range params must be a string or number');
     }
-    props.onChange({ from: value, to: get(props, 'value.to') });
+    props.onChange({ from: value === '' ? undefined : value, to: get(props, 'value.to') });
   };
 
   const onToChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') {
       throw new Error('Range params must be a string or number');
     }
-    props.onChange({ from: get(props, 'value.from'), to: value });
+    props.onChange({ from: get(props, 'value.from'), to: value === '' ? undefined : value });
   };
 
   return (
