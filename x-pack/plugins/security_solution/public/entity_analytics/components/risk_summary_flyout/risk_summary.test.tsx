@@ -102,7 +102,9 @@ describe('RiskSummary', () => {
 
     const lensAttributes: LensAttributes =
       mockVisualizationEmbeddable.mock.calls[0][0].lensAttributes;
-    const datasourceLayers = Object.values(lensAttributes.state.datasourceStates.formBased.layers);
+    const datasourceLayers = Object.values(
+      lensAttributes.state.datasourceStates.formBased?.layers ?? {}
+    );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
     expect(lensAttributes.state.query.query).toEqual('host.name: test');
@@ -126,7 +128,9 @@ describe('RiskSummary', () => {
 
     const lensAttributes: LensAttributes =
       mockVisualizationEmbeddable.mock.calls[0][0].lensAttributes;
-    const datasourceLayers = Object.values(lensAttributes.state.datasourceStates.formBased.layers);
+    const datasourceLayers = Object.values(
+      lensAttributes.state.datasourceStates.formBased?.layers ?? {}
+    );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
     expect(lensAttributes.state.query.query).toEqual('user.name: test');
