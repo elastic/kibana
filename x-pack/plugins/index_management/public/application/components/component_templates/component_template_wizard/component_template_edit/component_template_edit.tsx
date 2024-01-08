@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { History } from 'history';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
@@ -177,6 +177,28 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       />
 
       <EuiSpacer size="l" />
+
+      {componentTemplate?.isDeprecated && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningTitle"
+                defaultMessage="This component template is deprecated"
+              />
+            }
+            iconType="warning"
+            color="warning"
+            data-test-subj="deprecatedIndexTemplateCallout"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningDescription"
+              defaultMessage="This component template is deprecated and should not be relied on."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <ComponentTemplateForm
         defaultValue={componentTemplate!}

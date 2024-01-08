@@ -23,6 +23,7 @@ import { ScopedHistory } from '@kbn/core/public';
 import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
+import { DeprecatedBadge } from '../components';
 
 export interface Props {
   componentTemplates: ComponentTemplateListItem[];
@@ -169,6 +170,12 @@ export const ComponentTable: FunctionComponent<Props> = ({
             >
               {name}
             </EuiLink>
+            {item.isDeprecated && (
+              <>
+                &nbsp;
+                <DeprecatedBadge />
+              </>
+            )}
             {item.isManaged && (
               <>
                 &nbsp;
