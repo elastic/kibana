@@ -10,6 +10,7 @@ import React from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -47,15 +48,14 @@ export const DiscoverHistogramLayout = ({
     return null;
   }
 
-  if (!datatable || !['partial', 'complete'].includes(datatable.fetchStatus)) {
-    return null;
+  let table: Datatable | undefined;
+  if (datatable && ['partial', 'complete'].includes(datatable.fetchStatus)) {
+    table = {
+      type: 'datatable' as 'datatable',
+      rows: datatable.result!.map((r) => r.raw),
+      columns: datatable.textBasedQueryColumns || [],
+    };
   }
-
-  const table = {
-    type: 'datatable' as 'datatable',
-    rows: datatable.result!.map((r) => r.raw),
-    columns: datatable.textBasedQueryColumns || [],
-  };
 
   return (
     <UnifiedHistogramContainer
