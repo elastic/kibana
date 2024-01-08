@@ -709,18 +709,15 @@ export class ManifestManager {
 
   private async listEndpointPolicyIds(): Promise<string[]> {
     const allPolicyIds: string[] = [];
-    await iterateAllListItems(
-      (page, perPage) => {
-        return this.packagePolicyService.listIds(this.savedObjectsClient, {
-          page,
-          perPage,
-          kuery: 'ingest-package-policies.package.name:endpoint',
-        });
-      },
-      (packagePolicyIdsBatch) => {
-        allPolicyIds.push(...packagePolicyIdsBatch);
-      }
-    );
+
+    for await (const itemIds of this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
+      kuery: 'ingest-package-policies.package.name:endpoint',
+    })) {
+      allPolicyIds.push(...itemIds);
+    }
+
+    this.logger.debug(`Retrieved [${allPolicyIds.length}] endpoint integration policy IDs`);
+
     return allPolicyIds;
   }
 
