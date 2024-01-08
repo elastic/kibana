@@ -53,6 +53,7 @@ const SlackParamsFields: React.FunctionComponent<
       : ''
   );
   const [messageType, setMessageType] = useState('text');
+  const [textValue, setTextValue] = useState<string | undefined>(text);
   const [validChannelId, setValidChannelId] = useState('');
   const { toasts } = useKibana().notifications;
   const allowedChannelsConfig =
@@ -85,12 +86,12 @@ const SlackParamsFields: React.FunctionComponent<
 
   const onToggleInput = useCallback(
     (id: string) => {
-      editAction('subAction', id === 'text' ? 'postMessage' : 'postBlockkit', index);
       // clear the text when toggled
-      editAction('subActionParams', { channels, channelIds, text: '' }, index);
+      setTextValue('');
+      editAction('subAction', id === 'text' ? 'postMessage' : 'postBlockkit', index);
       setMessageType(id);
     },
-    [setMessageType, editAction, index, channels, channelIds]
+    [setMessageType, editAction, index, setTextValue]
   );
 
   useEffect(() => {
@@ -322,12 +323,13 @@ const SlackParamsFields: React.FunctionComponent<
       {messageType === 'text' ? (
         <TextAreaWithMessageVariables
           index={index}
-          editAction={(_: string, value: any) =>
-            editAction('subActionParams', { channels, channelIds, text: value }, index)
-          }
+          editAction={(_: string, value: any) => {
+            setTextValue(value);
+            editAction('subActionParams', { channels, channelIds, text: value }, index);
+          }}
           messageVariables={messageVariables}
           paramsProperty="webApiText"
-          inputTargetValue={text}
+          inputTargetValue={textValue}
           label={i18n.translate(
             'xpack.stackConnectors.components.slack.messageTextAreaFieldLabel',
             {
@@ -340,11 +342,12 @@ const SlackParamsFields: React.FunctionComponent<
         <>
           <JsonEditorWithMessageVariables
             onDocumentsChange={(json: string) => {
+              setTextValue(json);
               editAction('subActionParams', { channels, channelIds, text: json }, index);
             }}
             messageVariables={messageVariables}
             paramsProperty="webApiBlock"
-            inputTargetValue={text}
+            inputTargetValue={textValue}
             label={i18n.translate(
               'xpack.stackConnectors.components.slack.messageJsonAreaFieldLabel',
               {

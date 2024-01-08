@@ -263,19 +263,9 @@ describe('SlackParamsFields renders', () => {
 
     getByTestId('blockkit').click();
     expect(mockEditFunc).toBeCalledWith('subAction', 'postBlockkit', 0);
-    expect(mockEditFunc).toBeCalledWith(
-      'subActionParams',
-      { channelIds: [], channels: ['general'], text: '' },
-      0
-    );
 
     getByTestId('text').click();
     expect(mockEditFunc).toBeCalledWith('subAction', 'postMessage', 0);
-    expect(mockEditFunc).toBeCalledWith(
-      'subActionParams',
-      { channelIds: [], channels: ['general'], text: '' },
-      0
-    );
   });
 
   test('show the Channel label when using the old attribute "channels" in subActionParams', async () => {
