@@ -17,7 +17,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { LogAIAssistantComponent } from './components/log_ai_assistant';
+import type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views';
 
@@ -28,7 +28,7 @@ export interface LogsSharedClientSetupExports {
 
 export interface LogsSharedClientStartExports {
   logViews: LogViewsServiceStart;
-  LogAIAssistant: LogAIAssistantComponent;
+  LogAIAssistant: (props: Omit<LogAIAssistantProps, 'observabilityAIAssistant'>) => JSX.Element;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

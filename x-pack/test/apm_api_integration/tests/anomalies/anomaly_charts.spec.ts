@@ -87,15 +87,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172766
-  registry.when.skip(
+  registry.when(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
     () => {
       const NORMAL_DURATION = 100;
       const NORMAL_RATE = 1;
 
-      before(async () => {
+      beforeEach(async () => {
         const serviceA = apm
           .service({ name: 'a', environment: 'production', agentName: 'java' })
           .instance('a');
@@ -132,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         await synthtraceEsClient.index(events);
       });
 
-      after(async () => {
+      afterEach(async () => {
         await cleanup();
       });
 
@@ -171,7 +170,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with ml jobs', () => {
-        before(async () => {
+        beforeEach(async () => {
           await createAndRunApmMlJobs({
             es,
             ml,
@@ -200,7 +199,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           let failureRateSeries: ServiceAnomalyTimeseries | undefined;
           const endTimeMs = end.valueOf();
 
-          before(async () => {
+          beforeEach(async () => {
             allAnomalyTimeseries = (
               await getAnomalyCharts({
                 serviceName: 'a',

@@ -59,7 +59,6 @@ export const selectTimeline = (timelineId: string) => {
 };
 
 export const selectAllTimelines = () => {
-  cy.get(SELECT_ALL_CHECKBOX).should('exist');
   cy.get(SELECT_ALL_CHECKBOX).click();
 };
 

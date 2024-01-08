@@ -367,8 +367,7 @@ function FilterItemComponent(props: FilterItemProps) {
 
   const popoverProps: FilterPopoverProps = {
     id: `popoverFor_filter${id}`,
-    className: `globalFilterItem__popover`,
-    anchorClassName: `globalFilterItem__popoverAnchor`,
+    display: 'block',
     isOpen: isPopoverOpen,
     closePopover,
     button: <FilterView {...filterViewProps} />,

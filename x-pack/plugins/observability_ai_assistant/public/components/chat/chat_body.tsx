@@ -14,6 +14,8 @@ import {
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  useEuiTheme,
+  euiScrollBarStyles,
 } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -32,16 +34,17 @@ import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
-import { MESSAGE_FEEDBACK } from '../../analytics/schema';
 import { ChatActionClickType } from './types';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { TELEMETRY, sendEvent } from '../../analytics';
 
 const fullHeightClassName = css`
   height: 100%;
 `;
 
-const timelineClassName = css`
+const timelineClassName = (scrollBarStyles: string) => css`
   overflow-y: auto;
+  ${scrollBarStyles}
 `;
 
 const promptEditorClassname = css`
@@ -81,6 +84,8 @@ const animClassName = css`
     ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
 `;
 
+const PADDING_AND_BORDER = 32;
+
 export function ChatBody({
   initialTitle,
   initialMessages,
@@ -104,6 +109,8 @@ export function ChatBody({
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
+  const euiTheme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
   const chatService = useObservabilityAIAssistantChatService();
 
@@ -139,9 +146,26 @@ export function ChatBody({
   const isAtBottom = (parent: HTMLElement) =>
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
 
+  const [promptEditorHeight, setPromptEditorHeight] = useState<number>(0);
+
   const handleFeedback = (message: Message, feedback: Feedback) => {
-    const feedbackEvent = { ...message, feedback };
-    chatService.analytics.reportEvent(MESSAGE_FEEDBACK, feedbackEvent);
+    if (conversation.value?.conversation && 'user' in conversation.value) {
+      sendEvent(chatService.analytics, {
+        type: TELEMETRY.observability_ai_assistant_chat_feedback,
+        payload: {
+          messageWithFeedback: { message, feedback },
+          conversation: conversation.value,
+        },
+      });
+    }
+  };
+
+  const handleChangeHeight = (editorHeight: number) => {
+    if (editorHeight === 0) {
+      setPromptEditorHeight(0);
+    } else {
+      setPromptEditorHeight(editorHeight + PADDING_AND_BORDER);
+    }
   };
 
   useEffect(() => {
@@ -191,11 +215,16 @@ export function ChatBody({
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
             <ChatPromptEditor
+              hidden={connectors.loading || connectors.connectors?.length === 0}
               loading={isLoading}
               disabled
+              onChangeHeight={setPromptEditorHeight}
               onSubmit={(message) => {
                 next(messages.concat(message));
               }}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
             />
             <EuiSpacer size="s" />
           </EuiPanel>
@@ -207,7 +236,7 @@ export function ChatBody({
   } else {
     footer = (
       <>
-        <EuiFlexItem grow className={timelineClassName}>
+        <EuiFlexItem grow className={timelineClassName(scrollBarStyles)}>
           <div ref={timelineContainerRef} className={fullHeightClassName}>
             <EuiPanel
               grow
@@ -236,6 +265,9 @@ export function ChatBody({
                     const indexOf = messages.indexOf(message);
                     next(messages.slice(0, indexOf));
                   }}
+                  onSendTelemetry={(eventWithPayload) =>
+                    sendEvent(chatService.analytics, eventWithPayload)
+                  }
                   onStopGenerating={() => {
                     stop();
                   }}
@@ -271,20 +303,24 @@ export function ChatBody({
         <EuiFlexItem
           grow={false}
           className={promptEditorClassname}
-          style={{
-            height: !connectors.loading && connectors.connectors?.length !== 0 ? 110 : 0,
-          }}
+          style={{ height: promptEditorHeight }}
         >
           <EuiHorizontalRule margin="none" />
           <EuiPanel
             hasBorder={false}
             hasShadow={false}
             paddingSize="m"
+            color="subdued"
             className={promptEditorContainerClassName}
           >
             <ChatPromptEditor
-              loading={isLoading}
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
+              hidden={connectors.loading || connectors.connectors?.length === 0}
+              loading={isLoading}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
+              onChangeHeight={handleChangeHeight}
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));

@@ -97,17 +97,23 @@ const render = (component: React.ReactElement) => {
   return rtlRender(<IntlProvider locale="en">{component}</IntlProvider>);
 };
 
-describe('Welcome Message', () => {
-  beforeEach(() => {
-    useKibanaMock.mockReturnValue({
-      services: {
-        application: { navigateToApp, capabilities: {} },
-        http: { basePath: { prepend: jest.fn((path: string) => `/${path}`) } },
+const defaultMockServices = {
+  services: {
+    application: { navigateToApp, capabilities: {} },
+    http: { basePath: { prepend: jest.fn((path: string) => `/${path}`) } },
+    plugins: {
+      start: {
         triggersActionsUi: {
           getAddConnectorFlyout: () => <button data-test-subj="connectorFlyout">hello</button>,
         },
       },
-    });
+    },
+  },
+};
+
+describe('Welcome Message', () => {
+  beforeEach(() => {
+    useKibanaMock.mockReturnValue(defaultMockServices);
   });
 
   describe('when no connectors are available', () => {
@@ -159,8 +165,14 @@ describe('Welcome Message', () => {
                 },
               },
             },
-            triggersActionsUi: {
-              getAddConnectorFlyout: () => <button data-test-subj="connectorFlyout">hello</button>,
+            plugins: {
+              start: {
+                triggersActionsUi: {
+                  getAddConnectorFlyout: () => (
+                    <button data-test-subj="connectorFlyout">hello</button>
+                  ),
+                },
+              },
             },
           },
         });

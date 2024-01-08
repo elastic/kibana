@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { updateProviders } from '../../../../timelines/store/timeline/actions';
+import { updateProviders } from '../../../../timelines/store/actions';
 import { useNavigateToTimeline } from './use_navigate_to_timeline';
 import * as mock from './mock_data';
 

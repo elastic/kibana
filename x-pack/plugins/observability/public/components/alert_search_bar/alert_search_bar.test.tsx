@@ -8,6 +8,8 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+
 import { ObservabilityAlertSearchBarProps, Services } from './types';
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
@@ -33,6 +35,7 @@ describe('ObservabilityAlertSearchBar', () => {
       rangeFrom: 'now-15m',
       status: 'all',
       services: {
+        uiSettings: uiSettingsServiceMock.createStartContract(),
         timeFilterService: timefilterServiceMock.createStartContract().timefilter,
         AlertsSearchBar: getAlertsSearchBarMock.mockReturnValue(
           <div data-test-subj={ALERT_SEARCH_BAR_DATA_TEST_SUBJ} />

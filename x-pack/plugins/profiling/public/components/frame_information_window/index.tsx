@@ -4,19 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
 import React from 'react';
-import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
+import { FramesSummary } from '../frames_summary';
+import { EmptyFrame } from './empty_frame';
 import { FrameInformationAIAssistant } from './frame_information_ai_assistant';
 import { FrameInformationPanel } from './frame_information_panel';
-import { getImpactRows } from './get_impact_rows';
+import { getComparisonImpactRow } from './get_impact_rows';
 import { getInformationRows } from './get_information_rows';
 import { KeyValueList } from './key_value_list';
 import { MissingSymbolsCallout } from './missing_symbols_callout';
-import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
-import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 export interface Frame {
   fileID: string;
@@ -35,37 +35,34 @@ export interface Frame {
 }
 
 export interface Props {
+  comparisonFrame?: Frame;
+  comparisonTotalSeconds?: number;
+  comparisonTotalSamples?: number;
+  comparisonRank?: number;
   frame?: Frame;
   totalSamples: number;
   totalSeconds: number;
-  showAIAssistant?: boolean;
+  rank?: number;
   showSymbolsStatus?: boolean;
+  compressed?: boolean;
 }
 
 export function FrameInformationWindow({
   frame,
+  showSymbolsStatus = true,
+  comparisonFrame,
+  comparisonRank,
+  comparisonTotalSamples,
+  comparisonTotalSeconds,
   totalSamples,
   totalSeconds,
-  showSymbolsStatus = true,
+  rank,
+  compressed = false,
 }: Props) {
   const calculateImpactEstimates = useCalculateImpactEstimate();
-  const {
-    start: { core },
-  } = useProfilingDependencies();
-  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
-    profilingUseLegacyCo2Calculation
-  );
 
   if (!frame) {
-    return (
-      <FrameInformationPanel>
-        <EuiText>
-          {i18n.translate('xpack.profiling.frameInformationWindow.selectFrame', {
-            defaultMessage: 'Click on a frame to display more information',
-          })}
-        </EuiText>
-      </FrameInformationPanel>
-    );
+    return <EmptyFrame />;
   }
 
   const symbolStatus = getFrameSymbolStatus({
@@ -82,12 +79,6 @@ export function FrameInformationWindow({
     functionName,
     sourceFileName,
     sourceLine,
-    countInclusive,
-    countExclusive,
-    selfAnnualCO2Kgs,
-    totalAnnualCO2Kgs,
-    selfAnnualCostUSD,
-    totalAnnualCostUSD,
   } = frame;
 
   const informationRows = getInformationRows({
@@ -100,24 +91,57 @@ export function FrameInformationWindow({
     sourceLine,
   });
 
-  const impactRows = getImpactRows({
-    countInclusive,
-    countExclusive,
-    totalSamples,
-    totalSeconds,
-    calculateImpactEstimates,
-    shouldUseLegacyCo2Calculation,
-    selfAnnualCO2Kgs,
-    totalAnnualCO2Kgs,
-    selfAnnualCostUSD,
-    totalAnnualCostUSD,
+  const impactRows = getComparisonImpactRow({
+    base: {
+      countInclusive: frame.countInclusive,
+      countExclusive: frame.countExclusive,
+      selfAnnualCO2Kgs: frame.selfAnnualCO2Kgs,
+      totalAnnualCO2Kgs: frame.totalAnnualCO2Kgs,
+      selfAnnualCostUSD: frame.selfAnnualCostUSD,
+      totalAnnualCostUSD: frame.totalAnnualCostUSD,
+      rank,
+      totalSamples,
+      totalSeconds,
+      calculateImpactEstimates,
+    },
+    comparison:
+      comparisonFrame &&
+      comparisonTotalSamples !== undefined &&
+      comparisonTotalSeconds !== undefined
+        ? {
+            countInclusive: comparisonFrame.countInclusive,
+            countExclusive: comparisonFrame.countExclusive,
+            selfAnnualCO2Kgs: comparisonFrame.selfAnnualCO2Kgs,
+            totalAnnualCO2Kgs: comparisonFrame.totalAnnualCO2Kgs,
+            selfAnnualCostUSD: comparisonFrame.selfAnnualCostUSD,
+            totalAnnualCostUSD: comparisonFrame.totalAnnualCostUSD,
+            rank: comparisonRank,
+            totalSamples: comparisonTotalSamples,
+            totalSeconds: comparisonTotalSeconds,
+            calculateImpactEstimates,
+          }
+        : undefined,
   });
 
   return (
     <FrameInformationPanel>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <KeyValueList data-test-subj="informationRows" rows={informationRows} />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {informationRows.map((item, index) => (
+              <EuiFlexItem key={index}>
+                <EuiStat
+                  title={
+                    <span data-test-subj={`informationRows_${item['data-test-subj']}`}>
+                      {item.value}
+                    </span>
+                  }
+                  description={item.label}
+                  titleSize="xs"
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <FrameInformationAIAssistant frame={frame} />
@@ -127,6 +151,29 @@ export function FrameInformationWindow({
             <MissingSymbolsCallout frameType={frame.frameType} />
           </EuiFlexItem>
         ) : null}
+        <EuiFlexItem>
+          <FramesSummary
+            compressed={compressed}
+            hasBorder
+            isLoading={false}
+            baseValue={{
+              totalCount: frame.countInclusive,
+              scaleFactor: 1, // isNormalizedByTime ? baselineTime : baseline,
+              totalAnnualCO2Kgs: frame.totalAnnualCO2Kgs,
+              totalAnnualCostUSD: frame.totalAnnualCostUSD,
+            }}
+            comparisonValue={
+              comparisonFrame
+                ? {
+                    totalCount: comparisonFrame.countInclusive,
+                    scaleFactor: 1, // isNormalizedByTime ? baselineTime : baseline,
+                    totalAnnualCO2Kgs: comparisonFrame.totalAnnualCO2Kgs,
+                    totalAnnualCostUSD: comparisonFrame.totalAnnualCostUSD,
+                  }
+                : undefined
+            }
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>

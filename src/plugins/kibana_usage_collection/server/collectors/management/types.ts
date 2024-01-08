@@ -46,6 +46,7 @@ export interface UsageStats {
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
+  'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:apmAgentExplorerView': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -159,7 +160,6 @@ export interface UsageStats {
   'observability:profilingPervCPUWattArm64': number;
   'observability:profilingCo2PerKWH': number;
   'observability:profilingDatacenterPUE': number;
-  'observability:profilingUseLegacyCo2Calculation': boolean;
   'observability:profilingCostPervCPUPerHour': number;
   'observability:profilingAWSCostDiscountRate': number;
 }
