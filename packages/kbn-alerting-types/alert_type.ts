@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-export * from './builtin_action_groups_types';
-export * from './rule_type';
-export * from './action_group_types';
-export * from './alert_type';
+import { TechnicalRuleDataFieldName } from '@kbn/rule-data-utils';
+
+export interface BasicFields {
+  _id: string;
+  _index: string;
+}
+
+export type Alert = BasicFields & {
+  [Property in TechnicalRuleDataFieldName]?: string[];
+} & {
+  [x: string]: unknown[];
+};
