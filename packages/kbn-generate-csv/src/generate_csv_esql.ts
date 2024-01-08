@@ -11,11 +11,10 @@ import type { Writable } from 'stream';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
 import {
   cellHasFormulas,
   ESQL_SEARCH_STRATEGY,
-  ESQLSearchParams,
-  ESQLSearchResponse,
   getEsQueryConfig,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -104,7 +103,7 @@ export class CsvESQLGenerator {
       const { rawResponse, warning } = await lastValueFrom(
         this.clients.data.search<
           IKibanaSearchRequest<ESQLSearchParams>,
-          IKibanaSearchResponse<ESQLSearchResponse>
+          IKibanaSearchResponse<ESQLSearchReponse>
         >(searchParams, {
           strategy: ESQL_SEARCH_STRATEGY,
         })
