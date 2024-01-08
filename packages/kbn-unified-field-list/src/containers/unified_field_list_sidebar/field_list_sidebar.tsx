@@ -22,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { DataViewField, FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataViewField, type FieldSpec } from '@kbn/data-views-plugin/common';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
 import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { FieldList } from '../../components/field_list';
