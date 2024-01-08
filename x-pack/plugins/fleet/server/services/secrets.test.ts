@@ -1018,9 +1018,11 @@ describe('secrets', () => {
       it('returns single secret reference for required secret', async () => {
         const mockPackagePolicy = {
           vars: {
-            'pkg-secret-1': {
-              value: 'pkg-secret-1-val',
+            'pkg-secret-1': {},
+            'pkg-secret-2': {
+              value: 'pkg-secret-2-val',
             },
+            'dot-notation.stream.pkg-secret-3': {},
           },
           inputs: [],
         } as unknown as NewPackagePolicy;
@@ -1198,6 +1200,7 @@ describe('secrets', () => {
               value: 'pkg-secret-1-val',
             },
             'pkg-secret-2': {},
+            'dot-notation.pkg-secret-3': {},
           },
           inputs: [],
         } as unknown as PackagePolicy;
