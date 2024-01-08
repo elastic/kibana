@@ -20,6 +20,7 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 
 // FLAKY: https://github.com/elastic/kibana/issues/174384
 // FLAKY: https://github.com/elastic/kibana/issues/174385
+// FLAKY: https://github.com/elastic/kibana/issues/174386
 describe.skip('RegisteredAttachmentsPropertyActions', () => {
   let appMock: AppMockRenderer;
 
