@@ -14,9 +14,18 @@ interface Props {
   prompt: string | undefined;
   onChange: (message: Message['message']) => void;
   onChangeHeight: (height: number) => void;
+  onFocus: () => void;
+  onBlur: () => void;
 }
 
-export function ChatPromptEditorPrompt({ disabled, prompt, onChange, onChangeHeight }: Props) {
+export function PromptEditorNaturalLanguage({
+  disabled,
+  prompt,
+  onChange,
+  onChangeHeight,
+  onFocus,
+  onBlur,
+}: Props) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -44,6 +53,7 @@ export function ChatPromptEditorPrompt({ disabled, prompt, onChange, onChangeHei
 
     if (textarea) {
       textarea.focus();
+      textarea.select();
     }
   }, [handleResizeTextArea]);
 
@@ -65,6 +75,8 @@ export function ChatPromptEditorPrompt({ disabled, prompt, onChange, onChangeHei
       rows={1}
       value={prompt || ''}
       onChange={handleChange}
+      onFocus={onFocus}
+      onBlur={onBlur}
     />
   );
 }
