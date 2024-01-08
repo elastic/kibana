@@ -21,6 +21,22 @@ export interface BatchProcessorOptions<T = unknown> {
 /**
  * Process an un-bound amount of items in batches. Each batch is process once the queued updates
  * reach the `batchSize`.
+ *
+ * @example
+ * const processor = new BatchProcessor<{ id: string }>({
+ *   batchHandler: ({ data, batch }) => {
+ *     // data === array of `{ id: string }`
+ *     // batch === batch number
+ *   }
+ * });
+ *
+ * const myIdList = [ .... ]; // Array with 50 string;
+ *
+ * for (const id of myIdList) {
+ *   batchHandler.addToQueue({ id: id});
+ * }
+ *
+ * await processor.complete();
  */
 export class BatchProcessor<T = unknown> {
   private readonly batchSize: number;

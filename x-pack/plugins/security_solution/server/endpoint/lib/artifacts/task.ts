@@ -177,6 +177,7 @@ export class ManifestTask {
 
       // Try dispatching to ingest-manager package policies
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
+
       if (dispatchErrors.length) {
         reportErrors(this.logger, dispatchErrors);
         throw new Error('Error dispatching manifest.');
@@ -186,9 +187,11 @@ export class ManifestTask {
       const deleteErrors = await manifestManager.deleteArtifacts(
         diff.removals.map((artifact) => getArtifactId(artifact))
       );
+
       if (deleteErrors.length) {
         reportErrors(this.logger, deleteErrors);
       }
+
       await manifestManager.cleanup(newManifest);
     } catch (err) {
       this.logger.error(wrapErrorIfNeeded(err));
