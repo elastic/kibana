@@ -76,7 +76,7 @@ const deprecatedPolicyTooltips = {
   badgeTooltip: i18n.translate(
     'xpack.indexLifecycleMgmt.policyTable.templateBadgeType.deprecatedDescription',
     {
-      defaultMessage: 'This policy is deprecated and should not be relied on.',
+      defaultMessage: 'This policy is no longer supported and might be removed in a future release. Instead, use one of the other policies available or create a new one.',
     }
   ),
 };

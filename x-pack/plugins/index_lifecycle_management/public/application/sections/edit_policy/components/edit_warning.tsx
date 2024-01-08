@@ -119,7 +119,7 @@ export const EditWarning: FunctionComponent = () => {
               <p>
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicyModal.deprecatedPolicyDescription"
-                  defaultMessage="This policy is deprecated and should not be relied on."
+                  defaultMessage="This policy is no longer supported and might be removed in a future release. Instead, use one of the other policies available or create a new one."
                 />
               </p>
             </EuiCallOut>
