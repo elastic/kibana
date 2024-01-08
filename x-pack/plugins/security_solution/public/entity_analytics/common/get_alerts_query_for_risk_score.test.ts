@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getAlertsQueryFromRiskScore } from './get_alerts_query_from_risk_score';
+import { getAlertsQueryForRiskScore } from './get_alerts_query_for_risk_score';
 import { RiskSeverity } from '../../../common/search_strategy/security_solution/risk_score/all';
 
 const risk = {
@@ -14,10 +14,10 @@ const risk = {
   multipliers: [],
 };
 
-describe('getAlertsQueryFromRiskScore', () => {
+describe('getAlertsQueryForRiskScore', () => {
   it('should return query from host risk score', () => {
     expect(
-      getAlertsQueryFromRiskScore({
+      getAlertsQueryForRiskScore({
         riskScore: {
           host: {
             name: 'host-1',
@@ -25,7 +25,7 @@ describe('getAlertsQueryFromRiskScore', () => {
           },
           '@timestamp': '2023-08-10T14:00:00.000Z',
         },
-        from: 'now-30d',
+        riskRangeStart: 'now-30d',
       })
     ).toEqual({
       _source: false,
@@ -35,7 +35,11 @@ describe('getAlertsQueryFromRiskScore', () => {
         bool: {
           filter: [
             { term: { 'host.name': 'host-1' } },
-            { range: { '@timestamp': { gte: 'now-30d', lte: '2023-08-10T14:00:00.000Z' } } },
+            {
+              range: {
+                '@timestamp': { gte: '2023-07-11T14:00:00.000Z', lte: '2023-08-10T14:00:00.000Z' },
+              },
+            },
           ],
         },
       },
@@ -44,7 +48,7 @@ describe('getAlertsQueryFromRiskScore', () => {
 
   it('should return query from user risk score', () => {
     expect(
-      getAlertsQueryFromRiskScore({
+      getAlertsQueryForRiskScore({
         riskScore: {
           user: {
             name: 'user-1',
@@ -52,7 +56,7 @@ describe('getAlertsQueryFromRiskScore', () => {
           },
           '@timestamp': '2023-08-10T14:00:00.000Z',
         },
-        from: 'now-30d',
+        riskRangeStart: 'now-30d',
       })
     ).toEqual({
       _source: false,
@@ -62,7 +66,11 @@ describe('getAlertsQueryFromRiskScore', () => {
         bool: {
           filter: [
             { term: { 'user.name': 'user-1' } },
-            { range: { '@timestamp': { gte: 'now-30d', lte: '2023-08-10T14:00:00.000Z' } } },
+            {
+              range: {
+                '@timestamp': { gte: '2023-07-11T14:00:00.000Z', lte: '2023-08-10T14:00:00.000Z' },
+              },
+            },
           ],
         },
       },
@@ -70,7 +78,7 @@ describe('getAlertsQueryFromRiskScore', () => {
   });
 
   it('should return query with custom fields', () => {
-    const query = getAlertsQueryFromRiskScore({
+    const query = getAlertsQueryForRiskScore({
       riskScore: {
         user: {
           name: 'user-1',
@@ -78,7 +86,7 @@ describe('getAlertsQueryFromRiskScore', () => {
         },
         '@timestamp': '2023-08-10T14:00:00.000Z',
       },
-      from: 'now-30d',
+      riskRangeStart: 'now-30d',
       fields: ['event.category', 'event.action'],
     });
     expect(query.fields).toEqual(['event.category', 'event.action']);

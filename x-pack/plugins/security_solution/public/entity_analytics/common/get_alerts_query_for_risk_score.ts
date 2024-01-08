@@ -12,18 +12,19 @@ import type {
   UserRiskScore,
   HostRiskScore,
 } from '../../../common/search_strategy/security_solution/risk_score/all';
+import { getStartDateFromRiskScore } from './get_start_date_from_risk_score';
 
 const ALERTS_SIZE = 1000;
 
 /**
  * return query to fetch alerts related to the risk score
  */
-export const getAlertsQueryFromRiskScore = ({
-  from,
+export const getAlertsQueryForRiskScore = ({
+  riskRangeStart,
   riskScore,
   fields,
 }: {
-  from: string;
+  riskRangeStart: string;
   riskScore: UserRiskScore | HostRiskScore;
   fields?: string[];
 }) => {
@@ -37,6 +38,11 @@ export const getAlertsQueryFromRiskScore = ({
     entityField = RiskScoreFields.hostName;
     entityValue = riskScore.host.name;
   }
+
+  const from = getStartDateFromRiskScore({
+    riskScoreTimestamp: riskScore['@timestamp'],
+    riskRangeStart,
+  });
 
   const riskScoreTimestamp = riskScore['@timestamp'];
 

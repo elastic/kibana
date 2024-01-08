@@ -13,8 +13,8 @@ import type {
   UserRiskScore,
   HostRiskScore,
 } from '../../../common/search_strategy/security_solution/risk_score/all';
-import { getAlertsQueryFromRiskScore } from '../common/get_alerts_query_from_risk_score';
-import { getStartDateFromRiskScore } from '../common/get_start_date_from_risk_score';
+import { getAlertsQueryForRiskScore } from '../common/get_alerts_query_for_risk_score';
+
 import { useRiskEngineSettings } from '../api/hooks/use_risk_engine_settings';
 
 interface UseRiskContributingAlerts {
@@ -53,11 +53,8 @@ export const useRiskContributingAlerts = ({
     if (!riskEngineSettings?.range?.start || !riskScore) return;
 
     setQuery(
-      getAlertsQueryFromRiskScore({
-        from: getStartDateFromRiskScore({
-          riskScoreTimestamp: riskScore['@timestamp'],
-          riskRangeStart: riskEngineSettings.range.start,
-        }),
+      getAlertsQueryForRiskScore({
+        riskRangeStart: riskEngineSettings.range.start,
         riskScore,
         fields,
       })
