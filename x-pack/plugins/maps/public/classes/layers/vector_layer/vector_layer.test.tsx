@@ -44,20 +44,20 @@ describe('isVectorLayer', () => {
     expect(isVectorLayer(mockVectorLayer)).toBe(true);
   });
 
-  test('Should return false when Layer instance implements IVectorLayer interface', async () => {
+  test('Should return false when Layer instance does not implement IVectorLayer interface', async () => {
     expect(isVectorLayer({} as unknown as ILayer)).toBe(false);
   });
 });
 
 describe('hasVectorLayerMethod', () => {
-  test('Should return true when Layer instance implements specific method IVectorLayer interface', async () => {
+  test('Should return true when Layer instance implements specific method', async () => {
     const mockLayer = {
       getJoins: () => {},
     } as unknown as ILayer;
     expect(hasVectorLayerMethod(mockLayer, 'getJoins')).toBe(true);
   });
 
-  test('Should return true when Layer instance implements specific method IVectorLayer interface', async () => {
+  test('Should return false when Layer instance does not implement specific method', async () => {
     const mockLayer = {} as unknown as ILayer;
     expect(hasVectorLayerMethod(mockLayer, 'getJoins')).toBe(false);
   });
