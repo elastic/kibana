@@ -152,40 +152,23 @@
       "children": [
         {
           "parentPluginId": "unifiedDocViewer",
-          "id": "def-public.UnifiedDocViewerSetup.addDocView",
-          "type": "Function",
+          "id": "def-public.UnifiedDocViewerSetup.registry",
+          "type": "Object",
           "tags": [],
-          "label": "addDocView",
+          "label": "registry",
           "description": [],
           "signature": [
-            "(docViewRaw: ",
-            "DocViewInput",
-            " | ",
-            "DocViewInputFn",
-            ") => void"
+            {
+              "pluginId": "@kbn/unified-doc-viewer",
+              "scope": "common",
+              "docId": "kibKbnUnifiedDocViewerPluginApi",
+              "section": "def-common.DocViewsRegistry",
+              "text": "DocViewsRegistry"
+            }
           ],
           "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
           "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "unifiedDocViewer",
-              "id": "def-public.UnifiedDocViewerSetup.addDocView.$1",
-              "type": "CompoundType",
-              "tags": [],
-              "label": "docViewRaw",
-              "description": [],
-              "signature": [
-                "DocViewInput",
-                " | ",
-                "DocViewInputFn"
-              ],
-              "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -204,38 +187,23 @@
       "children": [
         {
           "parentPluginId": "unifiedDocViewer",
-          "id": "def-public.UnifiedDocViewerStart.getDocViews",
-          "type": "Function",
+          "id": "def-public.UnifiedDocViewerStart.registry",
+          "type": "Object",
           "tags": [],
-          "label": "getDocViews",
+          "label": "registry",
           "description": [],
           "signature": [
-            "(hit: ",
-            "DataTableRecord",
-            ") => ",
-            "DocView",
-            "[]"
+            {
+              "pluginId": "@kbn/unified-doc-viewer",
+              "scope": "common",
+              "docId": "kibKbnUnifiedDocViewerPluginApi",
+              "section": "def-common.DocViewsRegistry",
+              "text": "DocViewsRegistry"
+            }
           ],
           "path": "src/plugins/unified_doc_viewer/public/plugin.tsx",
           "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "unifiedDocViewer",
-              "id": "def-public.UnifiedDocViewerStart.getDocViews.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "hit",
-              "description": [],
-              "signature": [
-                "DataTableRecord"
-              ],
-              "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

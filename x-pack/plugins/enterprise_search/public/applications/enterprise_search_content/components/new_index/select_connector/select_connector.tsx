@@ -13,8 +13,8 @@ import { css } from '@emotion/react';
 import { useValues } from 'kea';
 
 import {
-  EuiBadge,
   EuiButton,
+  EuiCallOut,
   EuiFacetButton,
   EuiFacetGroup,
   EuiFieldSearch,
@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   CONNECTOR_CLIENTS_TYPE,
@@ -55,6 +56,7 @@ import { CONNECTORS } from '../../search_index/connector/constants';
 import { baseBreadcrumbs } from '../../search_indices';
 
 import { ConnectorCheckable } from './connector_checkable';
+import { ConnectorDescriptionBadge } from './connector_description_badge_popout';
 
 export type ConnectorFilter = typeof CONNECTOR_NATIVE_TYPE | typeof CONNECTOR_CLIENTS_TYPE;
 
@@ -108,7 +110,12 @@ export const SelectConnector: React.FC = () => {
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[...baseBreadcrumbs, 'Select connector']}
+      pageChrome={[
+        ...baseBreadcrumbs,
+        i18n.translate('xpack.enterpriseSearch.content.indices.selectConnector.breadcrumb', {
+          defaultMessage: 'Select connector',
+        }),
+      ]}
       pageViewTelemetry="select_connector"
       isLoading={false}
       pageHeader={{
@@ -210,11 +217,7 @@ export const SelectConnector: React.FC = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
-                <EuiBadge iconSide="right" iconType="iInCircle">
-                  {i18n.translate('xpack.enterpriseSearch.selectConnector.nativeBadgeLabel', {
-                    defaultMessage: 'Native',
-                  })}
-                </EuiBadge>
+                <ConnectorDescriptionBadge isNative />
                 <EuiSpacer size="s" />
                 <EuiText size="xs" grow={false}>
                   <p>
@@ -222,7 +225,7 @@ export const SelectConnector: React.FC = () => {
                       'xpack.enterpriseSearch.selectConnector.p.areAvailableDirectlyWithinLabel',
                       {
                         defaultMessage:
-                          'Are available directly within Elastic Cloud deployments No additional infrastructure is required You can also convert them as self hosted Connectors client at any moment',
+                          'Available directly within Elastic Cloud deployments. No additional infrastructure is required. You can also convert native connectors to self-hosted connector clients.',
                       }
                     )}
                   </p>
@@ -248,12 +251,7 @@ export const SelectConnector: React.FC = () => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
-                <EuiBadge iconSide="right" iconType="iInCircle">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.selectConnector.connectorClientBadgeLabel',
-                    { defaultMessage: 'Connector client' }
-                  )}
-                </EuiBadge>
+                <ConnectorDescriptionBadge isNative={false} />
                 <EuiSpacer size="s" />
                 <EuiText size="xs" grow={false}>
                   <p>
@@ -261,7 +259,7 @@ export const SelectConnector: React.FC = () => {
                       'xpack.enterpriseSearch.selectConnector.p.deployConnectorsOnYourLabel',
                       {
                         defaultMessage:
-                          'Deploy connectors on your own infrastructure You can also customize existing Connector clients or build your own using our connector framework',
+                          'Deploy connectors on your own infrastructure. You can also customize existing connector clients, or build your own using our connector framework.',
                       }
                     )}
                   </p>
@@ -327,6 +325,41 @@ export const SelectConnector: React.FC = () => {
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
+          {!hasNativeAccess && useNativeFilter && (
+            <>
+              <EuiSpacer />
+              <EuiCallOut
+                size="m"
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.selectConnector.cloudCallout.title',
+                  {
+                    defaultMessage: 'Elastic Cloud',
+                  }
+                )}
+                iconType="iInCircle"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.indices.selectConnector.cloudCallout.description"
+                    defaultMessage="Native connectors are hosted on Elastic Cloud. Get started with a free day trial."
+                  />
+                </p>
+                <EuiButton
+                  color="primary"
+                  fill
+                  href="https://www.elastic.co/cloud/cloud-trial-overview"
+                  iconType="popout"
+                  iconSide="right"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.indices.selectConnector.cloudCallout.trialLink"
+                    defaultMessage="Elastic Cloud Trial"
+                  />
+                </EuiButton>
+              </EuiCallOut>
+            </>
+          )}
           <EuiSpacer />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>

@@ -9,7 +9,7 @@ import { omit } from 'lodash/fp';
 import type { DraggableLocation } from '@hello-pangea/dnd';
 import type { Dispatch } from 'redux';
 
-import { updateProviders } from '../../../store/timeline/actions';
+import { updateProviders } from '../../../store/actions';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import { isPrimitiveArray } from '../helpers';
 

@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { useCloneSlo } from '../../../../hooks/slo/use_clone_slo';
 import { rulesLocatorID, sloFeatureId } from '../../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
@@ -28,7 +29,6 @@ import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/slo/query_key_factory';
 import { useCapabilities } from '../../../../hooks/slo/use_capabilities';
-import { useCloneSlo } from '../../../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../../../hooks/slo/use_delete_slo';
 import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/slo/use_fetch_historical_summary';
@@ -37,10 +37,6 @@ import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule
 import { RulesParams } from '../../../../locators/rules';
 import { useKibana } from '../../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
-import {
-  transformCreateSLOFormToCreateSLOInput,
-  transformSloResponseToCreateSloForm,
-} from '../../../slo_edit/helpers/process_slo_form_values';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
@@ -72,7 +68,6 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const filteredRuleTypes = useGetFilteredRuleTypes();
 
   const queryClient = useQueryClient();
-  const { mutate: cloneSlo } = useCloneSlo();
   const { mutate: deleteSlo } = useDeleteSlo();
 
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
@@ -101,6 +96,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     useFetchHistoricalSummary({
       list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
     });
+
+  const navigateToClone = useCloneSlo();
 
   const actions: Array<DefaultItemAction<SLOWithSummaryResponse>> = [
     {
@@ -180,11 +177,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       'data-test-subj': 'sloActionsClone',
       enabled: (_) => hasWriteCapabilities,
       onClick: (slo: SLOWithSummaryResponse) => {
-        const newSlo = transformCreateSLOFormToCreateSLOInput(
-          transformSloResponseToCreateSloForm({ ...slo, name: `[Copy] ${slo.name}` })!
-        );
-
-        cloneSlo({ slo: newSlo, originalSloId: slo.id });
+        navigateToClone(slo);
       },
     },
     {

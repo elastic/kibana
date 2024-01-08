@@ -16,7 +16,7 @@ import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import { i18n } from '@kbn/i18n';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
 import { TimelineId } from '../../../../common/types';
 import { DefaultCellActionTypes } from '../../constants';

@@ -27,6 +27,8 @@ type LatestFindingsTableProps = FindingsBaseProps & {
   height?: number;
   showDistributionBar?: boolean;
   nonPersistedFilters?: Filter[];
+  dataViewRefetch?: () => void;
+  dataViewIsRefetching?: boolean;
 };
 
 /**
@@ -87,9 +89,11 @@ export const LatestFindingsTable = ({
   height,
   showDistributionBar = true,
   nonPersistedFilters,
+  dataViewRefetch,
+  dataViewIsRefetching,
 }: LatestFindingsTableProps) => {
   const {
-    cloudPostureTable,
+    cloudPostureDataTable,
     rows,
     error,
     isFetching,
@@ -134,12 +138,14 @@ export const LatestFindingsTable = ({
             rows={rows}
             total={total}
             flyoutComponent={flyoutComponent}
-            cloudPostureTable={cloudPostureTable}
+            cloudPostureDataTable={cloudPostureDataTable}
             loadMore={fetchNextPage}
             title={title}
             customCellRenderer={customCellRenderer}
             groupSelectorComponent={groupSelectorComponent}
             height={height}
+            dataViewRefetch={dataViewRefetch}
+            dataViewIsRefetching={dataViewIsRefetching}
           />
         </>
       )}

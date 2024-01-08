@@ -136,7 +136,7 @@ export function collectVariables(
           // just save the entire expression as variable string
           const expressionType = 'number';
           addToVariableOccurrencies(variables, {
-            name: expressionOperation.text,
+            name: expressionOperation.text.replace(/`/g, ''),
             type: expressionType,
             location: expressionOperation.location,
           });

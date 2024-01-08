@@ -21,7 +21,7 @@ import { StatefulOverview } from './pages/overview';
 import { DataQuality } from './pages/data_quality';
 import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { EntityAnalyticsPage } from './pages/entity_analytics';
+import { EntityAnalyticsPage } from '../entity_analytics/pages/entity_analytics_dashboard';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { LandingPage } from './pages/landing';
 

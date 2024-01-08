@@ -18,6 +18,8 @@ import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../..
 import { ErrorWithReason, getReasonFromError } from '../lib/error_with_reason';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { mockedRawRuleSO, mockedRule } from './fixtures';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 // create mocks
 const rulesClient = rulesClientMock.create();
@@ -141,6 +143,7 @@ describe('rule_loader', () => {
       } catch (err) {
         outcome = 'failure';
         expect(getReasonFromError(err)).toBe(RuleExecutionStatusErrorReasons.Disabled);
+        expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
       }
       expect(outcome).toBe('failure');
     });
@@ -161,6 +164,7 @@ describe('rule_loader', () => {
         outcome = 'failure';
         expect(err.message).toBe('rule-type-not-enabled: 2112');
         expect(getReasonFromError(err)).toBe(RuleExecutionStatusErrorReasons.License);
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
       }
       expect(outcome).toBe('failure');
     });
@@ -177,6 +181,7 @@ describe('rule_loader', () => {
         outcome = 'failure';
         expect(err.message).toMatch('[bar]: expected value of type [boolean] but got [string]');
         expect(getReasonFromError(err)).toBe(RuleExecutionStatusErrorReasons.Validate);
+        expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
       }
       expect(outcome).toBe('failure');
     });
@@ -199,7 +204,7 @@ describe('rule_loader', () => {
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual(['default']);
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
-      expect(esoArgs).toEqual(['alert', ruleId, { namespace: undefined }]);
+      expect(esoArgs).toEqual([RULE_SAVED_OBJECT_TYPE, ruleId, { namespace: undefined }]);
     });
 
     test('succeeds with non-default space', async () => {
@@ -218,7 +223,7 @@ describe('rule_loader', () => {
       });
 
       const esoArgs = encryptedSavedObjects.getDecryptedAsInternalUser.mock.calls[0];
-      expect(esoArgs).toEqual(['alert', ruleId, { namespace: spaceId }]);
+      expect(esoArgs).toEqual([RULE_SAVED_OBJECT_TYPE, ruleId, { namespace: spaceId }]);
     });
 
     test('fails', async () => {
@@ -228,8 +233,12 @@ describe('rule_loader', () => {
         }
       );
 
-      const promise = getRuleAttributes(context, ruleId, spaceId);
-      await expect(promise).rejects.toThrow('wops');
+      try {
+        await getRuleAttributes(context, ruleId, spaceId);
+      } catch (e) {
+        expect(e.message).toMatch('wops');
+        expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+      }
     });
   });
 

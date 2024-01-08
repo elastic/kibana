@@ -542,7 +542,6 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   }}
                 />
               }
-              disabled={isRemoteESOutput}
             />
           </EuiFormRow>
           <EuiFormRow fullWidth {...inputs.defaultMonitoringOutputInput.formRowProps}>
