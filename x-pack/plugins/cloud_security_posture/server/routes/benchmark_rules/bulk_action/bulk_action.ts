@@ -8,7 +8,6 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   CspBenchmarkRulesBulkActionRequestSchema,
-  CspBenchmarkRulesStates,
   cspBenchmarkRulesBulkActionRequestSchema,
   CspBenchmarkRulesBulkActionResponse,
 } from '../../../../common/types/rules/v4';
@@ -77,11 +76,8 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
             cspContext.logger
           );
 
-          const updatedBenchmarkRules: CspBenchmarkRulesStates =
-            handlerResponse.newCspSettings.attributes.rules!;
-
           const body: CspBenchmarkRulesBulkActionResponse = {
-            updated_benchmark_rules: updatedBenchmarkRules,
+            updated_benchmark_rules: handlerResponse.updatedBenchmarkRulesStates,
             message: 'The bulk operation has been executed successfully.',
           };
 
