@@ -7,7 +7,11 @@
  */
 
 import { RetryOnStaleProvider } from './retry_on_stale';
+import { RemoteProvider } from './remote';
+import { FindProvider } from './find';
 
 export const services = {
   retryOnStale: RetryOnStaleProvider,
+  __webdriver__: RemoteProvider,
+  find: FindProvider,
 };

@@ -192,6 +192,12 @@ export const addEqlToTimeline = (eql: string) => {
   });
 };
 
+export const clearEqlInTimeline = () => {
+  cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
+  cy.get(TIMELINE_CORRELATION_INPUT).clear();
+  cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
+};
+
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(ADD_FILTER).click();
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
