@@ -209,7 +209,6 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         )}
       />
       <Settings
-        theme={charts.theme.useChartsTheme()}
         baseTheme={charts.theme.useChartsBaseTheme()}
         showLegend={false}
         legendPosition="right"

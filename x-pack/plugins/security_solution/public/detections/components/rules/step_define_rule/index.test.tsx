@@ -393,16 +393,15 @@ describe('StepDefineRule', () => {
     );
     expect(getByTestId(`eqlQueryBarTextInput`).textContent).toEqual(eqlQuery.queryBar.query.query);
     fireEvent.click(getByTestId(`eql-settings-trigger`));
-    expect(
-      within(getByTestId(`eql-event-category-field`)).queryByText(
-        eqlQuery.eqlOptions.eventCategoryField
-      )
-    ).toBeInTheDocument();
-    expect(
-      within(getByTestId(`eql-tiebreaker-field`)).queryByText(eqlQuery.eqlOptions.tiebreakerField)
-    ).toBeInTheDocument();
-    expect(
-      within(getByTestId(`eql-timestamp-field`)).queryByText(eqlQuery.eqlOptions.timestampField)
-    ).toBeInTheDocument();
+
+    expect(within(getByTestId(`eql-event-category-field`)).queryByRole('combobox')).toHaveValue(
+      eqlQuery.eqlOptions.eventCategoryField
+    );
+    expect(within(getByTestId(`eql-tiebreaker-field`)).queryByRole('combobox')).toHaveValue(
+      eqlQuery.eqlOptions.tiebreakerField
+    );
+    expect(within(getByTestId(`eql-timestamp-field`)).queryByRole('combobox')).toHaveValue(
+      eqlQuery.eqlOptions.timestampField
+    );
   });
 });

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
 import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
@@ -17,28 +18,22 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from 'styled-components';
-import { useTheme, useKibanaSpace } from '@kbn/observability-shared-plugin/public';
-import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
-import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
-import { AllSeries, ReportTypes } from '../../../..';
-import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
+import { AllSeries } from '../../../..';
 import { AppDataType, ReportViewType } from '../types';
-import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import { DataViewState } from '../hooks/use_app_data_view';
 import { ReportConfigMap } from '../contexts/exploratory_view_config';
-import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ActionTypes, useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
+import { useEmbeddableAttributes } from './use_embeddable_attributes';
 
 export interface ExploratoryEmbeddableProps {
   id?: string;
   appendTitle?: JSX.Element;
-  attributes?: AllSeries;
+  attributes: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   gridlinesVisibilitySettings?: XYState['gridlinesVisibilitySettings'];
   customHeight?: string;
-  customLensAttrs?: any; // Takes LensAttributes
   customTimeRange?: { from: string; to: string }; // required if rendered with LensAttributes
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   isSingleMetric?: boolean;
@@ -69,77 +64,42 @@ export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddab
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function Embeddable({
-  appendTitle,
-  attributes = [],
-  axisTitlesVisibility,
-  gridlinesVisibilitySettings,
-  customHeight,
-  customLensAttrs,
-  customTimeRange,
-  dataViewState,
-  legendIsVisible,
-  legendPosition,
-  lens,
-  onBrushEnd,
-  caseOwner = observabilityFeatureId,
-  reportConfigMap = {},
-  reportType,
-  showCalculationMethod = false,
-  title,
-  withActions = true,
-  lensFormulaHelper,
-  hideTicks,
-  align,
-  noLabel,
-  fontSize = 27,
-  lineHeight = 32,
-  searchSessionId,
-  onLoad,
-}: ExploratoryEmbeddableComponentProps) {
+export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
+  const {
+    appendTitle,
+    attributes = [],
+    axisTitlesVisibility,
+    gridlinesVisibilitySettings,
+    customHeight,
+    customTimeRange,
+    legendIsVisible,
+    legendPosition,
+    lens,
+    onBrushEnd,
+    caseOwner = observabilityFeatureId,
+    reportType,
+    showCalculationMethod = false,
+    title,
+    withActions = true,
+    hideTicks,
+    align,
+    noLabel,
+    fontSize = 27,
+    lineHeight = 32,
+    searchSessionId,
+    onLoad,
+  } = props;
   const LensComponent = lens?.EmbeddableComponent;
   const LensSaveModalComponent = lens?.SaveModalComponent;
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [isAddToCaseOpen, setAddToCaseOpen] = useState(false);
 
-  const spaceId = useKibanaSpace();
-
   const series = Object.entries(attributes)[0]?.[1];
 
   const [operationType, setOperationType] = useState(series?.operationType);
-  const theme = useTheme();
 
-  const layerConfigs: LayerConfig[] = getLayerConfigs(
-    attributes,
-    reportType,
-    theme,
-    dataViewState,
-    { ...reportConfigMap, ...obsvReportConfigMap },
-    spaceId.space?.id
-  );
-
-  let lensAttributes;
-  let attributesJSON = customLensAttrs;
-  if (!customLensAttrs) {
-    try {
-      if (reportType === ReportTypes.SINGLE_METRIC) {
-        lensAttributes = new SingleMetricLensAttributes(
-          layerConfigs,
-          reportType,
-          lensFormulaHelper!
-        );
-        attributesJSON = lensAttributes?.getJSON('lnsLegacyMetric');
-      } else if (reportType === ReportTypes.HEATMAP) {
-        lensAttributes = new HeatMapLensAttributes(layerConfigs, reportType, lensFormulaHelper!);
-        attributesJSON = lensAttributes?.getJSON('lnsHeatmap');
-      } else {
-        lensAttributes = new LensAttributes(layerConfigs, reportType, lensFormulaHelper);
-        attributesJSON = lensAttributes?.getJSON();
-      }
-      // eslint-disable-next-line no-empty
-    } catch (error) {}
-  }
+  const attributesJSON = useEmbeddableAttributes(props);
 
   const timeRange = customTimeRange ?? series?.time;
 
@@ -182,16 +142,19 @@ export default function Embeddable({
     };
   }
 
-  if (!attributesJSON && layerConfigs.length < 1) {
+  if (!attributesJSON) {
     return null;
   }
 
   if (!LensComponent) {
-    return <EuiText>No lens component</EuiText>;
+    return (
+      <EuiText>
+        {i18n.translate('xpack.exploratoryView.embeddable.noLensComponentTextLabel', {
+          defaultMessage: 'No lens component',
+        })}
+      </EuiText>
+    );
   }
-
-  attributesJSON.state.searchSessionId = searchSessionId;
-  attributesJSON.searchSessionId = searchSessionId;
 
   return (
     <Wrapper
@@ -229,7 +192,7 @@ export default function Embeddable({
         data-test-subj="exploratoryView"
         style={{ height: '100%' }}
         timeRange={timeRange}
-        attributes={{ ...attributesJSON, title: undefined, hidePanelTitles: true, description: '' }}
+        attributes={{ ...attributesJSON, title: '', description: '' }}
         onBrushEnd={onBrushEnd}
         withDefaultActions={Boolean(withActions)}
         extraActions={actions}

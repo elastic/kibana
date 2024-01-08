@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import { createMockedIndexPattern } from '../../../mocks';
 import {
   formulaOperation,
@@ -15,7 +16,6 @@ import type { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { FormBasedLayer } from '../../../types';
 import { IndexPattern } from '../../../../../types';
-import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
 import { MovingAverageIndexPatternColumn } from '../calculations';
 import { StaticValueIndexPatternColumn } from '../static_value';
@@ -82,7 +82,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   }),
 };
 
-describe('formula', () => {
+describe('[Lens] formula', () => {
   let layer: FormBasedLayer;
 
   beforeEach(() => {

@@ -581,6 +581,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInfrastructureProfilingIntegration': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:enableGroupedNav': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -594,10 +598,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableLegacyUptimeApp': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:profilingUseLegacyCo2Calculation': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

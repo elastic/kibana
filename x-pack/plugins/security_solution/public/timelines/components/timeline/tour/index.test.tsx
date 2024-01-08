@@ -6,20 +6,44 @@
  */
 
 import React from 'react';
+import type { TimelineTourProps } from '.';
 import { TimelineTour } from '.';
 import { TIMELINE_TOUR_CONFIG_ANCHORS } from './step_config';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
+import {
+  createSecuritySolutionStorageMock,
+  kibanaObservable,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+  TestProviders,
+} from '../../../../common/mock';
+import { TimelineTabs } from '../../../../../common/types';
+import { TimelineType } from '../../../../../common/api/timeline';
+import { createStore } from '../../../../common/store';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock(
   '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted'
 );
+jest.mock('../../../../common/lib/kibana');
 
-const TestComponent = () => {
+const mockedUseKibana = mockUseKibana();
+
+const switchTabMock = jest.fn();
+const { storage: storageMock } = createSecuritySolutionStorageMock();
+const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storageMock);
+
+const TestComponent = (props: Partial<TimelineTourProps> = {}) => {
   return (
-    <TestProviders>
-      <TimelineTour />
+    <TestProviders store={mockStore}>
+      <TimelineTour
+        activeTab={TimelineTabs.query}
+        switchToTab={switchTabMock}
+        timelineType={TimelineType.default}
+        {...props}
+      />
       {Object.values(TIMELINE_TOUR_CONFIG_ANCHORS).map((anchor) => {
         return <div id={anchor} key={anchor} />;
       })}
@@ -32,6 +56,18 @@ describe('Timeline Tour', () => {
     (useIsElementMounted as jest.Mock).mockReturnValue(true);
   });
 
+  beforeEach(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        storage: storageMock,
+      },
+    });
+
+    storageMock.clear();
+  });
+
   it('should not render tour steps when element are not mounted', () => {
     (useIsElementMounted as jest.Mock).mockReturnValueOnce(false);
     render(<TestComponent />);
@@ -40,6 +76,37 @@ describe('Timeline Tour', () => {
 
   it('should  render tour steps when element are  mounted', async () => {
     render(<TestComponent />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('timeline-tour-step-1')).toBeVisible();
+    });
+
+    fireEvent.click(screen.getByText('Next'));
+    await waitFor(() => {
+      expect(screen.getByTestId('timeline-tour-step-2')).toBeVisible();
+    });
+
+    fireEvent.click(screen.getByText('Next'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('timeline-tour-step-3')).toBeVisible();
+    });
+
+    fireEvent.click(screen.getByText('Next'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('timeline-tour-step-4')).toBeVisible();
+    });
+
+    fireEvent.click(screen.getByText('Next'));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Finish tour')).toBeVisible();
+    });
+  });
+
+  it('should render different tour steps when timeline type is template', async () => {
+    render(<TestComponent timelineType={TimelineType.template} />);
 
     await waitFor(() => {
       expect(screen.getByTestId('timeline-tour-step-1')).toBeVisible();

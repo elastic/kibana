@@ -130,7 +130,7 @@ describe('Storage Explorer', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(mainAliasNames);
 
-      cy.getByTestSubj('environmentFilter').type('production');
+      cy.getByTestSubj('environmentFilter').type('{selectall}production');
 
       cy.contains('button', 'production').click({ force: true });
 

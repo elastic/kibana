@@ -12,10 +12,10 @@ import {
   EuiFormRow,
   EuiIconTip,
 } from '@elastic/eui';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../helpers/aggregation_options';
 import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
@@ -55,7 +55,7 @@ interface MetricInputProps {
   metricIndex: number;
   indexPattern: string;
   isLoadingIndex: boolean;
-  indexFields: Field[];
+  indexFields: FieldSpec[];
 }
 
 export function MetricInput({

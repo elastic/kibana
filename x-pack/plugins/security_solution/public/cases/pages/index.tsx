@@ -28,7 +28,7 @@ import {
   ENABLE_EXPANDABLE_FLYOUT_SETTING,
   SecurityPageName,
 } from '../../../common/constants';
-import { timelineActions } from '../../timelines/store/timeline';
+import { timelineActions } from '../../timelines/store';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';

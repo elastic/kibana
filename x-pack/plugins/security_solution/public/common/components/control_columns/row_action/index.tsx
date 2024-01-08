@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { timelineActions } from '../../../../timelines/store/timeline';
+import { timelineActions } from '../../../../timelines/store';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
 import type {

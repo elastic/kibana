@@ -116,7 +116,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                  { defaultMessage: 'New Connectors Client' }
+                  { defaultMessage: 'New Connector Client' }
                 )}
               </EuiButton>,
             ]

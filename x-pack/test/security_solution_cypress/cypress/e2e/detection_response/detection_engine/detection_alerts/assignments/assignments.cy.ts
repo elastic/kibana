@@ -23,12 +23,12 @@ import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
   alertDetailsFlyoutShowsAssignees,
   alertDetailsFlyoutShowsAssigneesBadge,
-  alertsTableShowsAssigneesBadgeForAlert,
+  alertsTableShowsAssigneesBadgeForFirstAlert,
   alertsTableShowsAssigneesForAlert,
-  updateAssigneesForAlert,
+  updateAssigneesForFirstAlert,
   checkEmptyAssigneesStateInAlertDetailsFlyout,
   checkEmptyAssigneesStateInAlertsTable,
-  removeAllAssigneesForAlert,
+  removeAllAssigneesForFirstAlert,
   bulkUpdateAssignees,
   alertsTableShowsAssigneesForAllAlerts,
   bulkRemoveAllAssignees,
@@ -42,10 +42,7 @@ import {
 } from '../../../../../tasks/alert_assignments';
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 
-// FLAKY: https://github.com/elastic/kibana/issues/172611
-// FLAKY: https://github.com/elastic/kibana/issues/172623
-// FLAKY: https://github.com/elastic/kibana/issues/172663
-describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
 
@@ -81,13 +78,13 @@ describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@ser
 
     it('alert with some assignees in alerts table', () => {
       const users = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(users);
+      updateAssigneesForFirstAlert(users);
       alertsTableShowsAssigneesForAlert(users);
     });
 
     it(`alert with some assignees in alert's details flyout`, () => {
       const users = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(users);
+      updateAssigneesForFirstAlert(users);
       expandFirstAlert();
       alertDetailsFlyoutShowsAssignees(users);
     });
@@ -100,13 +97,13 @@ describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@ser
         ROLES.soc_manager,
         ROLES.detections_admin,
       ];
-      updateAssigneesForAlert(users);
-      alertsTableShowsAssigneesBadgeForAlert(users);
+      updateAssigneesForFirstAlert(users);
+      alertsTableShowsAssigneesBadgeForFirstAlert(users);
     });
 
     it(`alert with many assignees (collapsed into badge) in alert's details flyout`, () => {
       const users = [ROLES.detections_admin, ROLES.t1_analyst, ROLES.t2_analyst];
-      updateAssigneesForAlert(users);
+      updateAssigneesForFirstAlert(users);
       expandFirstAlert();
       alertDetailsFlyoutShowsAssigneesBadge(users);
     });
@@ -116,7 +113,7 @@ describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@ser
     it('adding new assignees via `More actions` in alerts table', () => {
       // Assign users
       const users = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(users);
+      updateAssigneesForFirstAlert(users);
 
       // Assignees should appear in the alerts table
       alertsTableShowsAssigneesForAlert(users);
@@ -159,12 +156,12 @@ describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@ser
     it('updating assignees via `More actions` in alerts table', () => {
       // Initially assigned users
       const initialAssignees = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(initialAssignees);
+      updateAssigneesForFirstAlert(initialAssignees);
       alertsTableShowsAssigneesForAlert(initialAssignees);
 
       // Update assignees
       const updatedAssignees = [ROLES.t1_analyst, ROLES.t2_analyst];
-      updateAssigneesForAlert(updatedAssignees);
+      updateAssigneesForFirstAlert(updatedAssignees);
 
       const expectedAssignees = [ROLES.detections_admin, ROLES.t2_analyst];
 
@@ -223,10 +220,10 @@ describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@ser
     it('removing all assignees via `More actions` in alerts table', () => {
       // Initially assigned users
       const initialAssignees = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(initialAssignees);
+      updateAssigneesForFirstAlert(initialAssignees);
       alertsTableShowsAssigneesForAlert(initialAssignees);
 
-      removeAllAssigneesForAlert();
+      removeAllAssigneesForFirstAlert();
 
       // Alert should not show any assignee in alerts table or in details flyout
       checkEmptyAssigneesStateInAlertsTable();

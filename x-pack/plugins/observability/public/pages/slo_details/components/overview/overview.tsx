@@ -48,7 +48,7 @@ export function Overview({ slo }: Props) {
   switch (slo.indicator.type) {
     case 'sli.apm.transactionDuration':
     case 'sli.apm.transactionErrorRate':
-      IndicatorOverview = <ApmIndicatorOverview indicator={slo.indicator} />;
+      IndicatorOverview = <ApmIndicatorOverview slo={slo} />;
       break;
   }
 

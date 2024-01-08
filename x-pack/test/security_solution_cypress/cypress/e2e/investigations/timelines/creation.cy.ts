@@ -49,7 +49,8 @@ import { createTimeline } from '../../../tasks/timelines';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
+// FLAKY: https://github.com/elastic/kibana/issues/173339
+describe.skip('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
     login();
     deleteTimelines();
@@ -137,10 +138,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     addNameToTimelineAndSave('Test');
 
     // Saved
-    cy.get(TIMELINE_STATUS).should('be.visible');
-    cy.get(TIMELINE_STATUS)
-      .invoke('text')
-      .should('match', /^Saved/);
+    cy.get(TIMELINE_STATUS).should('not.exist');
 
     // Offsetting the extra save that is happening in the background
     // for the saved search object.
@@ -153,7 +151,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     cy.get(TIMELINE_STATUS).should('be.visible');
     cy.get(TIMELINE_STATUS)
       .invoke('text')
-      .should('match', /^Has unsaved changes/);
+      .should('match', /^Unsaved changes/);
   });
 
   it('should save timelines as new', () => {

@@ -20,7 +20,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { useChartTheme } from '../../../../../hooks/use_chart_theme';
+import { useBaseChartTheme } from '../../../../../hooks/use_base_chart_theme';
 import { WaterfallChartFixedAxisContainer } from './styles';
 import { WaterfallChartMarkers } from './waterfall_markers';
 
@@ -31,13 +31,19 @@ interface Props {
 }
 
 export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }: Props) => {
-  const theme = useChartTheme();
+  const baseChartTheme = useBaseChartTheme();
 
   return (
     <WaterfallChartFixedAxisContainer>
       <Chart className="axis-only-chart" data-test-subj="axisOnlyChart">
         <Tooltip type={TooltipType.None} />
-        <Settings showLegend={false} rotation={90} theme={theme} locale={i18n.getLocale()} />
+        <Settings
+          showLegend={false}
+          rotation={90}
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={baseChartTheme}
+          locale={i18n.getLocale()}
+        />
 
         <Axis
           id="time"

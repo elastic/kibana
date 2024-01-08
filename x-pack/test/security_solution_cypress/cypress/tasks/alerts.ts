@@ -273,7 +273,7 @@ export const selectCountTable = () => {
 };
 
 export const selectAlertsHistogram = () => {
-  cy.get(SELECT_HISTOGRAM).click({ force: true });
+  cy.get(SELECT_HISTOGRAM).click();
 };
 
 export const goToAcknowledgedAlerts = () => {

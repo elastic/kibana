@@ -655,6 +655,82 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    // should work correctly if one of the suppressed fields is keyword, another - number
+    it('should update an existing alert in the time window with multiple fields of different types', async () => {
+      const id = uuidv4();
+      const timestamp = '2020-10-28T05:45:00.000Z';
+      const firstRunDoc = {
+        id,
+        '@timestamp': timestamp,
+        agent: {
+          name: 'agent-1',
+        },
+        host: {
+          uptime: 100,
+        },
+      };
+
+      const secondRunDoc = {
+        ...firstRunDoc,
+        '@timestamp': '2020-10-28T06:15:00.000Z',
+      };
+
+      await indexListOfDocuments([firstRunDoc, firstRunDoc, secondRunDoc, secondRunDoc]);
+
+      const rule: ThresholdRuleCreateProps = {
+        ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+        query: `id:${id}`,
+        threshold: {
+          field: ['agent.name', 'host.uptime'],
+          value: 2,
+        },
+        alert_suppression: {
+          duration: {
+            value: 2,
+            unit: 'h',
+          },
+        },
+        from: 'now-35m',
+        interval: '30m',
+      };
+
+      const { previewId } = await previewRule({
+        supertest,
+        rule,
+        timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        invocationCount: 2,
+      });
+
+      const previewAlerts = await getPreviewAlerts({
+        es,
+        previewId,
+        sort: ['agent.type', ALERT_ORIGINAL_TIME],
+      });
+
+      expect(previewAlerts.length).toEqual(1);
+
+      expect(previewAlerts[0]._source).toEqual(
+        expect.objectContaining({
+          [ALERT_SUPPRESSION_TERMS]: [
+            {
+              field: 'agent.name',
+              value: 'agent-1',
+            },
+            {
+              field: 'host.uptime',
+              value: 100,
+            },
+          ],
+          [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+          [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z',
+          [ALERT_ORIGINAL_TIME]: timestamp,
+          [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
+          [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+        })
+      );
+    });
+
     it('should correctly suppress when using a timestamp override', async () => {
       const id = uuidv4();
       const timestamp = '2020-10-28T05:45:00.000Z';
