@@ -107,6 +107,11 @@ import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
 import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create_action';
+import {
+  inAppEmbeddableEditTrigger,
+  IN_APP_EMBEDDABLE_EDIT_TRIGGER,
+} from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
+import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
@@ -575,6 +580,10 @@ export class LensPlugin {
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
     }
+
+    // this trigger enables external consumers to use the inline editing flyout
+    startDependencies.uiActions.registerTrigger(inAppEmbeddableEditTrigger);
+
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_FIELD_TRIGGER,
       visualizeFieldAction(core.application)
@@ -600,7 +609,16 @@ export class LensPlugin {
       core.overlays,
       core.theme
     );
+    // dashboard edit panel action
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+
+    // Allows the Lens embeddable to easily open the inapp editing flyout
+    const editLensEmbeddableAction = new EditLensEmbeddableAction(startDependencies, core);
+    // embeddable edit panel action
+    startDependencies.uiActions.addTriggerAction(
+      IN_APP_EMBEDDABLE_EDIT_TRIGGER,
+      editLensEmbeddableAction
+    );
 
     // Displays the add ESQL panel in the dashboard add Panel menu
     const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
