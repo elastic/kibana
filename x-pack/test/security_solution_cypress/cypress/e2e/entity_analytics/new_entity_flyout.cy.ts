@@ -42,7 +42,7 @@ describe(
     before(() => {
       login();
       enableRiskEngine();
-      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
+      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
