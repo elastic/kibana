@@ -26,11 +26,8 @@ export const useJsonEditorModel = ({
   const [initialJsonValue, setInitialJsonValue] = useState<string | undefined>(initialJson);
 
   const SCHEMA_URI = `http://elastic.co/${functionName}.json`;
-  const [modelUri, setModelUri] = useState<monaco.Uri | undefined>();
 
-  useEffect(() => {
-    setModelUri(Uri.parse(SCHEMA_URI));
-  }, [SCHEMA_URI, functionName]);
+  const modelUri = useMemo(() => Uri.parse(SCHEMA_URI), [SCHEMA_URI]);
 
   useEffect(() => {
     setInitialJsonValue(initialJson);

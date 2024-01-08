@@ -258,10 +258,6 @@ export function ChatBody({
                   currentUser={currentUser}
                   chatState={state}
                   hasConnector={!!connectors.connectors?.length}
-                  onEditing={(editing) => {
-                    setStickToBottom(false);
-                    setIsEditing(editing);
-                  }}
                   onEdit={(editedMessage, newMessage) => {
                     setStickToBottom(true);
                     const indexOf = messages.indexOf(editedMessage);

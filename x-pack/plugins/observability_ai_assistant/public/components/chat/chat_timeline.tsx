@@ -54,7 +54,6 @@ export interface ChatTimelineProps {
   chatState: ChatState;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
-  onEditing: (editing: boolean) => void;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (message: Message, feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
@@ -69,7 +68,6 @@ export function ChatTimeline({
   hasConnector,
   currentUser,
   startedFrom,
-  onEditing,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -122,7 +120,6 @@ export function ChatTimeline({
             key={index}
             consolidatedItem={item}
             onActionClick={onActionClick}
-            onEditing={onEditing}
             onEditSubmit={onEdit}
             onFeedback={onFeedback}
             onRegenerate={onRegenerate}
@@ -141,7 +138,6 @@ export function ChatTimeline({
             onRegenerateClick={() => {
               onRegenerate(item.message);
             }}
-            onEditing={onEditing}
             onEditSubmit={(message) => {
               onEdit(item.message, message);
             }}
