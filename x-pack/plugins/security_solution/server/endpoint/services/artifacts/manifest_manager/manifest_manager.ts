@@ -6,15 +6,16 @@
  */
 
 import semver from 'semver';
-import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
+import { isEmpty, isEqual, keyBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { AppFeatureKey } from '@kbn/security-solution-features/keys';
+import { BatchProcessor } from '../../../utils/batch_processor';
 import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
@@ -67,24 +68,6 @@ const iterateArtifactsBuildResult = (
     for (const artifact of result.policySpecificArtifacts[policyId]) {
       callback(artifact, policyId);
     }
-  }
-};
-
-const iterateAllListItems = async <T>(
-  pageSupplier: (page: number, perPage: number) => Promise<ListResult<T>>,
-  itemCallback: (items: T[]) => void
-) => {
-  let paging = true;
-  let page = 1;
-  const perPage = 1000;
-
-  while (paging) {
-    const { items, total } = await pageSupplier(page, perPage);
-
-    itemCallback(items);
-
-    paging = (page - 1) * perPage + items.length < total;
-    page++;
   }
 };
 
@@ -592,81 +575,90 @@ export class ManifestManager {
    * @returns {Promise<Error[]>} Any errors encountered.
    */
   public async tryDispatch(manifest: Manifest): Promise<Error[]> {
-    const allPackagePolicies: PackagePolicy[] = [];
-    await iterateAllListItems(
-      (page, perPage) => this.listEndpointPolicies(page, perPage),
-      (packagePoliciesBatch) => {
-        allPackagePolicies.push(...packagePoliciesBatch);
-      }
-    );
-
-    const packagePoliciesToUpdate: PackagePolicy[] = [];
-
     const errors: Error[] = [];
-    allPackagePolicies.forEach((packagePolicy) => {
-      const { id } = packagePolicy;
-      if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
-        const oldManifest = packagePolicy.inputs[0].config.artifact_manifest ?? {
-          value: {},
-        };
-
-        const newManifestVersion = manifest.getSemanticVersion();
-        if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
-          const serializedManifest = manifest.toPackagePolicyManifest(id);
-
-          if (!manifestDispatchSchema.is(serializedManifest)) {
-            errors.push(new EndpointError(`Invalid manifest for policy ${id}`, serializedManifest));
-          } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
-            packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
-            packagePoliciesToUpdate.push(packagePolicy);
-          } else {
-            this.logger.debug(
-              `No change in manifest content for package policy: ${id}. Staying on old version`
-            );
-          }
-        } else {
-          this.logger.debug(`No change in manifest version for package policy: ${id}`);
-        }
-      } else {
-        errors.push(
-          new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, packagePolicy)
+    const updatedPolicies: string[] = [];
+    const unChangedPolicies: string[] = [];
+    const manifestVersion = manifest.getSemanticVersion();
+    const policyUpdateBatchProcessor = new BatchProcessor<PackagePolicy>({
+      batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
+      logger: this.logger,
+      key: 'tryDispatch',
+      batchHandler: async ({ data: currentBatch }) => {
+        const response = await this.packagePolicyService.bulkUpdate(
+          this.savedObjectsClient,
+          this.esClient,
+          currentBatch
         );
-      }
+
+        if (!isEmpty(response.failedPolicies)) {
+          errors.push(
+            ...response.failedPolicies.map((failedPolicy) => {
+              if (failedPolicy.error instanceof Error) {
+                return failedPolicy.error;
+              } else {
+                return new Error(failedPolicy.error.message);
+              }
+            })
+          );
+        }
+
+        if (response.updatedPolicies) {
+          updatedPolicies.push(
+            ...response.updatedPolicies.map((policy) => {
+              return `[${policy.id}][${policy.name}] updated with manifest version: [${manifestVersion}]`;
+            })
+          );
+        }
+      },
     });
 
-    // Split updates in batches with batch size: packagerTaskPackagePolicyUpdateBatchSize
-    const updateBatches = chunk(
-      packagePoliciesToUpdate,
-      this.packagerTaskPackagePolicyUpdateBatchSize
-    );
+    for await (const policies of this.fetchAllPolicies()) {
+      for (const packagePolicy of policies) {
+        const { id, name } = packagePolicy;
 
-    for (const currentBatch of updateBatches) {
-      const response = await this.packagePolicyService.bulkUpdate(
-        this.savedObjectsClient,
-        this.esClient,
-        currentBatch
-      );
+        if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
+          const oldManifest = packagePolicy.inputs[0].config.artifact_manifest ?? {
+            value: {},
+          };
 
-      // Update errors
-      if (!isEmpty(response.failedPolicies)) {
-        errors.push(
-          ...response.failedPolicies.map((failedPolicy) => {
-            if (failedPolicy.error instanceof Error) {
-              return failedPolicy.error;
+          const newManifestVersion = manifest.getSemanticVersion();
+
+          if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
+            const serializedManifest = manifest.toPackagePolicyManifest(id);
+
+            if (!manifestDispatchSchema.is(serializedManifest)) {
+              errors.push(
+                new EndpointError(`Invalid manifest for policy ${id}`, serializedManifest)
+              );
+            } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
+              packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
+              policyUpdateBatchProcessor.addToQueue(packagePolicy);
             } else {
-              return new Error(failedPolicy.error.message);
+              unChangedPolicies.push(`[${id}][${name}] No change in manifest content`);
             }
-          })
-        );
+          } else {
+            unChangedPolicies.push(`[${id}][${name}] No change in manifest version`);
+          }
+        } else {
+          errors.push(
+            new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, packagePolicy)
+          );
+        }
       }
-      // Log success updates
-      for (const updatedPolicy of response.updatedPolicies || []) {
-        this.logger.debug(
-          `Updated package policy ${
-            updatedPolicy.id
-          } with manifest version ${manifest.getSemanticVersion()}`
-        );
-      }
+    }
+
+    await policyUpdateBatchProcessor.complete();
+
+    this.logger.info(`Policies updated: [${updatedPolicies.length}]`);
+
+    if (updatedPolicies.length) {
+      this.logger.debug(`  ${updatedPolicies.join('\n  ')}`);
+    }
+
+    this.logger.info(`Policies un-changed: [${unChangedPolicies.length}]`);
+
+    if (unChangedPolicies.length) {
+      this.logger.debug(`  ${unChangedPolicies.join('\n  ')}`);
     }
 
     return errors;
@@ -696,13 +688,8 @@ export class ManifestManager {
     this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
   }
 
-  private async listEndpointPolicies(
-    page: number,
-    perPage: number
-  ): Promise<ListResult<PackagePolicy>> {
-    return this.packagePolicyService.list(this.savedObjectsClient, {
-      page,
-      perPage,
+  private fetchAllPolicies(): AsyncIterable<PackagePolicy[]> {
+    return this.packagePolicyService.fetchAllItems(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
   }
