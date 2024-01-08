@@ -20,8 +20,7 @@ import {
 
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import type { FleetProxy } from '../../../../types';
-
-const URL_REGEX = /^(http)(s)?:\/\/[^\s$.?#].[^\s]*$/gm;
+import { PROXY_URL_REGEX } from '../../../../../../../common/constants';
 
 const ConfirmTitle = () => (
   <FormattedMessage
@@ -46,7 +45,7 @@ function validateUrl(value: string) {
     ];
   }
 
-  if (!value.match(URL_REGEX)) {
+  if (!value.match(PROXY_URL_REGEX)) {
     return [
       i18n.translate('xpack.fleet.settings.fleetProxyFlyoutUrlError', {
         defaultMessage: 'Invalid URL',
