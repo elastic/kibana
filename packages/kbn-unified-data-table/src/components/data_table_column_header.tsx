@@ -116,6 +116,7 @@ const ColumnHeaderTruncateContainer = ({
         white-space: normal;
         word-break: break-all;
         line-height: ${euiThemeVars.euiSize};
+        text-align: left;
         .euiDataGridHeaderCell--numeric & {
           float: right;
         }
