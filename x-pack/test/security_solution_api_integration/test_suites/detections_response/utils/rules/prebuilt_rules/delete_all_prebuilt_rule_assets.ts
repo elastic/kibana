@@ -17,7 +17,7 @@ export const deleteAllPrebuiltRuleAssets = async (
   es: Client,
   logger: ToolingLog
 ): Promise<void> => {
-  await retryIfDeleteByQueryConflicts(logger, 'deleteAllPrebuiltRuleAssets', async () => {
+  await retryIfDeleteByQueryConflicts(logger, deleteAllPrebuiltRuleAssets.name, async () => {
     return await es.deleteByQuery({
       index: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
       q: 'type:security-rule',

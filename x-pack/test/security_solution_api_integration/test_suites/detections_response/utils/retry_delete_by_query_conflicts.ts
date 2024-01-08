@@ -26,11 +26,11 @@ export async function retryIfDeleteByQueryConflicts<T>(
   retryDelay: number = RetryForConflictsDelay
 ): Promise<DeleteByQueryResponse> {
   const operationResult = await operation();
-  if (!operationResult.failures) {
+  if (!operationResult.failures || operationResult.failures?.length === 0) {
     return operationResult;
   }
 
-  for (const failure of operationResult?.failures) {
+  for (const failure of operationResult.failures) {
     if (failure.status === 409) {
       // if no retries left, throw it
       if (retries <= 0) {
