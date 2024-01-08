@@ -32,6 +32,7 @@ import { getLatestTransformId, createTransform } from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
+import { RiskScoreSynchronousUpgrader } from './risk_score_synchronous_upgrader';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -42,7 +43,6 @@ interface RiskScoringDataClientOpts {
 }
 
 export class RiskScoreDataClient {
-  private alreadyUpgraded = false;
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskScoringDataClientOpts) {}
 
@@ -168,25 +168,22 @@ export class RiskScoreDataClient {
   /**
    * Ensures that configuration migrations for risk score indices are seamlessly handled across Kibana upgrades.
    * This function is meant to be mostly idempotent. However, to reduce unnecessary processing, it will only execute once
-   * across the lifecycle of a {@link RiskScoreDataClient} instance.
+   * across the lifecycle of a {@link RiskScoreDataClient} instance, utilizing the {@link RiskScoreSynchronousUpgrader}.
    *
-   * Included upgrades:
+   * Upgrades:
    * - Migrating to 8.12+ requires a change to the risk score latest transform index's 'dynamic' setting to ensure that
    * unmapped fields are allowed within stored documents.
    *
    */
   public async upgrade() {
-    try {
-      if (this.alreadyUpgraded) {
-        return;
+    await RiskScoreSynchronousUpgrader.upgrade(
+      this.options.namespace,
+      this.options.logger,
+      async () => {
+        this.options.logger.info('Upgrading risk score indices.');
+        await this.setRiskScoreLatestIndexDynamicConfiguration(false);
       }
-      this.alreadyUpgraded = true;
-      await this.setRiskScoreLatestIndexDynamicConfiguration(false);
-    } catch (error) {
-      this.options.logger.error(`Error upgrading risk engine resources: ${error.message}`);
-      this.alreadyUpgraded = false;
-      throw error;
-    }
+    );
   }
 
   private async setRiskScoreLatestIndexDynamicConfiguration(dynamic: MappingDynamicMapping) {
