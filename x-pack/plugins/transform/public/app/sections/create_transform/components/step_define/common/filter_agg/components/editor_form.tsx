@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FilterAggConfigEditor } from '../types';
 
