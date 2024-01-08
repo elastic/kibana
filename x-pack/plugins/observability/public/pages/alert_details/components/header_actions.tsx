@@ -20,7 +20,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_STATUS_ACTIVE, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
@@ -173,7 +173,7 @@ export function HeaderActions({ alert, alertStatus, onAlertStatusChange }: Heade
                   iconType="eyeClosed"
                   onClick={handleUntrackAlert}
                   data-test-subj="untrack-alert-button"
-                  disabled={alertStatus === 'untracked'}
+                  disabled={alertStatus !== ALERT_STATUS_ACTIVE}
                 >
                   <EuiText size="s">
                     {i18n.translate('xpack.observability.alertDetails.untrackAlert', {
