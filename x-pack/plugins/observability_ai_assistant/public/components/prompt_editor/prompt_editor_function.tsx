@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
-import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { EuiCode, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { CodeEditor } from '@kbn/code-editor';
+import { monaco } from '@kbn/monaco';
+import { i18n } from '@kbn/i18n';
+import { EuiCode, EuiPanel } from '@elastic/eui';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
 import { type Message, MessageRole } from '../../../common';
 
@@ -17,13 +18,22 @@ export interface Props {
   functionName: string;
   functionPayload?: string;
   onChange: (message: Message['message']) => void;
+  onFocus: () => void;
+  onBlur: () => void;
 }
 
 const functionNameClassName = css`
   display: inline-block;
 `;
 
-export function ChatPromptEditorFunction({ functionName, functionPayload, onChange }: Props) {
+export function PromptEditorFunction({
+  functionName,
+  functionPayload,
+  onChange,
+  onFocus,
+  onBlur,
+}: Props) {
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [functionEditorLineCount, setFunctionEditorLineCount] = useState<number>(0);
 
   const previousPayload = usePrevious(functionPayload);
@@ -33,8 +43,8 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
     initialJson: functionPayload,
   });
 
-  const handleChangeFunctionPayload = (params: string) => {
-    recalculateFunctionEditorLineCount();
+  const handleChangePayload = (args: string) => {
+    recalculateLineCount();
 
     onChange({
       role: MessageRole.Assistant,
@@ -42,12 +52,12 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
       function_call: {
         name: functionName,
         trigger: MessageRole.User,
-        arguments: params,
+        arguments: args,
       },
     });
   };
 
-  const recalculateFunctionEditorLineCount = useCallback(() => {
+  const recalculateLineCount = useCallback(() => {
     const newLineCount = model?.getLineCount() || 0;
     if (newLineCount !== functionEditorLineCount) {
       setFunctionEditorLineCount(newLineCount + 1);
@@ -55,8 +65,8 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
   }, [functionEditorLineCount, model]);
 
   useEffect(() => {
-    recalculateFunctionEditorLineCount();
-  }, [model, recalculateFunctionEditorLineCount]);
+    recalculateLineCount();
+  }, [model, recalculateLineCount]);
 
   useEffect(() => {
     if (previousPayload === undefined && initialJsonString) {
@@ -72,6 +82,10 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
     }
   }, [functionName, functionPayload, initialJsonString, onChange, previousPayload]);
 
+  editorRef.current?.onDidBlurEditorWidget(() => {
+    onBlur();
+  });
+
   return (
     <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
       <EuiCode className={functionNameClassName}>{functionName}</EuiCode>
@@ -81,10 +95,15 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
           { defaultMessage: 'payloadEditor' }
         )}
         data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
+        editorDidMount={(editor) => {
+          editorRef.current = editor;
+          editor.focus();
+          onFocus();
+        }}
         fullWidth
         height={'180px'}
-        languageId="json"
         isCopyable
+        languageId="json"
         languageConfiguration={{
           autoClosingPairs: [
             {
@@ -92,9 +111,6 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
               close: '}',
             },
           ],
-        }}
-        editorDidMount={(editor) => {
-          editor.focus();
         }}
         options={{
           accessibilitySupport: 'off',
@@ -121,7 +137,7 @@ export function ChatPromptEditorFunction({ functionName, functionPayload, onChan
         }}
         transparentBackground
         value={functionPayload || ''}
-        onChange={handleChangeFunctionPayload}
+        onChange={handleChangePayload}
       />
     </EuiPanel>
   );
