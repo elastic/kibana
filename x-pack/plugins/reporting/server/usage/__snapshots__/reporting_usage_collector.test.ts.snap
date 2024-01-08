@@ -2951,7 +2951,14 @@ Object {
     "error_codes": undefined,
     "execution_times": undefined,
     "layout": undefined,
-    "metrics": Object {},
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
     "output_size": Object {
       "1.0": null,
       "25.0": null,
@@ -3077,7 +3084,14 @@ Object {
       "error_codes": undefined,
       "execution_times": undefined,
       "layout": undefined,
-      "metrics": Object {},
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
       "output_size": Object {
         "1.0": null,
         "25.0": null,
@@ -3422,7 +3436,14 @@ Object {
     "error_codes": undefined,
     "execution_times": undefined,
     "layout": undefined,
-    "metrics": Object {},
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
     "output_size": Object {
       "1.0": null,
       "25.0": null,
@@ -3548,7 +3569,14 @@ Object {
       "error_codes": undefined,
       "execution_times": undefined,
       "layout": undefined,
-      "metrics": Object {},
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
       "output_size": Object {
         "1.0": null,
         "25.0": null,
@@ -3881,7 +3909,14 @@ Object {
     "error_codes": undefined,
     "execution_times": undefined,
     "layout": undefined,
-    "metrics": Object {},
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
     "output_size": Object {
       "1.0": null,
       "25.0": null,
@@ -4007,7 +4042,14 @@ Object {
       "error_codes": undefined,
       "execution_times": undefined,
       "layout": undefined,
-      "metrics": Object {},
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
       "output_size": Object {
         "1.0": null,
         "25.0": null,
@@ -4374,7 +4416,14 @@ Object {
     "error_codes": undefined,
     "execution_times": undefined,
     "layout": undefined,
-    "metrics": Object {},
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
     "output_size": Object {
       "1.0": null,
       "25.0": null,
@@ -4500,7 +4549,14 @@ Object {
       "error_codes": undefined,
       "execution_times": undefined,
       "layout": undefined,
-      "metrics": Object {},
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
       "output_size": Object {
         "1.0": null,
         "25.0": null,
@@ -4855,7 +4911,14 @@ Object {
     "error_codes": undefined,
     "execution_times": undefined,
     "layout": undefined,
-    "metrics": Object {},
+    "metrics": Object {
+      "csv_rows": Object {
+        "50.0": null,
+        "75.0": null,
+        "95.0": null,
+        "99.0": null,
+      },
+    },
     "output_size": Object {
       "1.0": null,
       "25.0": null,
@@ -4981,7 +5044,14 @@ Object {
       "error_codes": undefined,
       "execution_times": undefined,
       "layout": undefined,
-      "metrics": Object {},
+      "metrics": Object {
+        "csv_rows": Object {
+          "50.0": null,
+          "75.0": null,
+          "95.0": null,
+          "99.0": null,
+        },
+      },
       "output_size": Object {
         "1.0": null,
         "25.0": null,
