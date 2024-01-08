@@ -3,24 +3,14 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
+      queue: kibana-default
 
   - wait
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
+      queue: kibana-default
     timeout_in_minutes: 10
     env:
       FTR_CONFIGS_DEPS: ''
@@ -31,12 +21,7 @@ steps:
   - command: .buildkite/scripts/steps/code_coverage/ingest.sh
     label: 'Merge and Ingest'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on:
       - jest
       - jest-integration

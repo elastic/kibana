@@ -2,13 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/check_types.sh
     label: 'Check Types'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-16
-        buildPath: /dev/shm/builds
+      queue: n2-16-spot
     timeout_in_minutes: 60
     retry:
       automatic:

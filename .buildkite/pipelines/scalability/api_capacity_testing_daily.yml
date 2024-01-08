@@ -2,25 +2,14 @@ steps:
   - label: 'Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
+      queue: kibana-default
 
   - wait
 
   - label: 'Build Kibana Distribution and Plugins'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-16
-        buildPath: /dev/shm/builds
+      queue: n2-16-spot
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
@@ -32,11 +21,7 @@ steps:
   - label: ':kibana: APIs Capacity Tests'
     command: .buildkite/scripts/steps/scalability/api_capacity_testing.sh
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
+      queue: kb-static-scalability
     depends_on: build
     timeout_in_minutes: 90
     retry:
@@ -50,9 +35,4 @@ steps:
   - label: 'Post-Build'
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
+      queue: kibana-default

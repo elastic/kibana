@@ -2,13 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/build.sh
     label: Build Kibana Artifacts
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: c2-standard-16
-        buildPath: /dev/shm/builds
+      queue: c2-16
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -20,12 +14,7 @@ steps:
   - command: TEST_PACKAGE=deb .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-4
+      queue: n2-4-virt
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -35,12 +24,7 @@ steps:
   - command: TEST_PACKAGE=rpm .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-4
+      queue: n2-4-virt
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -50,12 +34,7 @@ steps:
   - command: TEST_PACKAGE=docker .buildkite/scripts/steps/package_testing/test.sh
     label: Artifact Testing
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-4
+      queue: n2-4-virt
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -65,12 +44,17 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=default .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
+      queue: n2-2
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: KIBANA_DOCKER_CONTEXT=ubi8 .buildkite/scripts/steps/artifacts/docker_context.sh
+    label: 'Docker Context Verification'
+    agents:
+      queue: n2-2
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -80,12 +64,7 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=ubi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
+      queue: n2-2
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -95,12 +74,7 @@ steps:
   - command: KIBANA_DOCKER_CONTEXT=ironbank .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
+      queue: n2-2
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -113,12 +87,7 @@ steps:
       - exit_status: 255
       - exit_status: -1
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
+      queue: n2-2
     timeout_in_minutes: 60
     if: "build.env('RELEASE_BUILD') == null || build.env('RELEASE_BUILD') == '' || build.env('RELEASE_BUILD') == 'false'"
     retry:
@@ -140,10 +109,5 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/publish.sh
     label: 'Publish Kibana Artifacts'
     agents:
-      queue:
-        provider: gcp
-        preemptible: true
-        image: family/kibana-ubuntu-2004
-        imageProject: elastic-images-qa
-        machineType: n2-standard-2
+      queue: n2-2
     timeout_in_minutes: 30
