@@ -61,7 +61,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             >
               {name}
             </EuiLink>
-            {item.deprecated === false && (
+            {item.deprecated && (
               <>
                 &nbsp;
                 <TemplateDeprecatedBadge />

@@ -101,7 +101,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
     } = template;
 
     isSystemTemplate = templateName && templateName.startsWith('.');
-    isDeprecatedTemplate = template?.deprecated === false;
+    isDeprecatedTemplate = template?.deprecated;
 
     if (type === 'cloudManaged') {
       return (

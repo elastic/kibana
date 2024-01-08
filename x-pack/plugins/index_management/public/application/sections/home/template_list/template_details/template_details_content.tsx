@@ -120,7 +120,7 @@ export const TemplateDetailsContent = ({
             {templateName}
             {templateDetails && (
               <>
-                {templateDetails.deprecated === false && (
+                {templateDetails.deprecated && (
                   <>
                     &nbsp;
                     <TemplateDeprecatedBadge />
