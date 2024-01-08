@@ -59,10 +59,10 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with new risk score', () => {
     before(() => {
-      login();
-      enableRiskEngine();
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
+      login();
+      enableRiskEngine();
     });
 
     beforeEach(() => {

@@ -95,11 +95,11 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
     describe('from new risk scores', () => {
       beforeEach(() => {
         disableExpandableFlyout();
-        login();
-        enableRiskEngine();
         cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
         deleteAlertsAndRules();
         createRule(getNewRule({ rule_id: 'rule1' }));
+        login();
+        enableRiskEngine();
         visitWithTimeRange(ALERTS_URL);
         waitForAlertsToPopulate();
       });

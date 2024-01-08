@@ -76,9 +76,9 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with new risk score', () => {
     before(() => {
+      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
       login();
       enableRiskEngine();
-      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     });
 
     beforeEach(() => {
