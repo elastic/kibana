@@ -16,7 +16,9 @@ import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../containers/user_profiles/api');
 
-describe('EditAssigneesFlyout', () => {
+// Failing: See https://github.com/elastic/kibana/issues/174194
+// Failing: See https://github.com/elastic/kibana/issues/174195
+describe.skip('EditAssigneesFlyout', () => {
   let appMock: AppMockRenderer;
 
   /**

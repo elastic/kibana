@@ -9,10 +9,12 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { CalculateAndPersistScoresParams, CalculateAndPersistScoresResponse } from '../types';
+import type { AssetCriticalityService } from '../asset_criticality/asset_criticality_service';
 import { calculateRiskScores } from './calculate_risk_scores';
 
 export const calculateAndPersistRiskScores = async (
   params: CalculateAndPersistScoresParams & {
+    assetCriticalityService: AssetCriticalityService;
     esClient: ElasticsearchClient;
     logger: Logger;
     spaceId: string;

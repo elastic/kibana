@@ -16,7 +16,7 @@ import { useStartServices } from '../../../../hooks';
 import { EditOutputFlyout } from '.';
 
 // mock yaml code editor
-jest.mock('@kbn/kibana-react-plugin/public/code_editor', () => ({
+jest.mock('@kbn/code-editor', () => ({
   CodeEditor: () => <>CODE EDITOR</>,
 }));
 jest.mock('../../../../../../hooks/use_fleet_status', () => ({
