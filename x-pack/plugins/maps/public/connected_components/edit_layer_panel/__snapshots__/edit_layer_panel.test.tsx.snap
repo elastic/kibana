@@ -66,18 +66,26 @@ exports[`EditLayerPanel is rendered 1`] = `
         <LayerSettings
           layer={
             Object {
+              "addFeature": [Function],
               "canShowTooltip": [Function],
+              "deleteFeature": [Function],
               "getDescriptor": [Function],
               "getDisplayName": [Function],
+              "getFields": [Function],
               "getId": [Function],
+              "getJoins": [Function],
               "getLayerTypeIconName": [Function],
+              "getLeftJoinFields": [Function],
+              "getMbTooltipLayerIds": [Function],
               "getSource": [Function],
               "getStyleForEditing": [Function],
               "getType": [Function],
+              "getValidJoins": [Function],
               "hasErrors": [Function],
               "hasJoins": [Function],
               "renderSourceSettingsEditor": [Function],
               "supportsElasticsearchFilters": [Function],
+              "supportsFeatureEditing": [Function],
               "supportsFitToBounds": [Function],
             }
           }
@@ -86,6 +94,40 @@ exports[`EditLayerPanel is rendered 1`] = `
         <div>
           mockSourceSettings
         </div>
+        <EuiPanel>
+          <JoinEditor
+            layer={
+              Object {
+                "addFeature": [Function],
+                "canShowTooltip": [Function],
+                "deleteFeature": [Function],
+                "getDescriptor": [Function],
+                "getDisplayName": [Function],
+                "getFields": [Function],
+                "getId": [Function],
+                "getJoins": [Function],
+                "getLayerTypeIconName": [Function],
+                "getLeftJoinFields": [Function],
+                "getMbTooltipLayerIds": [Function],
+                "getSource": [Function],
+                "getStyleForEditing": [Function],
+                "getType": [Function],
+                "getValidJoins": [Function],
+                "hasErrors": [Function],
+                "hasJoins": [Function],
+                "renderSourceSettingsEditor": [Function],
+                "supportsElasticsearchFilters": [Function],
+                "supportsFeatureEditing": [Function],
+                "supportsFitToBounds": [Function],
+              }
+            }
+            layerDisplayName="layer 1"
+            leftJoinFields={Array []}
+          />
+        </EuiPanel>
+        <EuiSpacer
+          size="s"
+        />
         <StyleSettings />
       </div>
     </div>
