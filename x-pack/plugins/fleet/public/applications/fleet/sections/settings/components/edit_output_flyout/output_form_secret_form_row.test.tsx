@@ -62,7 +62,7 @@ describe('SecretFormRow', () => {
     expect(cancelEdit).toHaveBeenCalled();
   });
 
-  it('should call the onUsePlainText function when the revert link is clicked', () => {
+  it('should call the onToggleSecretStorage function when the revert link is clicked', () => {
     const { getByText } = render(
       <SecretFormRow
         title={title}
@@ -95,5 +95,24 @@ describe('SecretFormRow', () => {
     );
 
     expect(queryByTestId('secretCancelChangeBtn')).not.toBeInTheDocument();
+  });
+
+  it('should call the onToggleSecretStorage function when the use secret storage button is clicked in plain text mode', () => {
+    const { getByText, queryByTestId } = render(
+      <SecretFormRow
+        label={<div>Test Field</div>}
+        useSecretsStorage={false}
+        onToggleSecretStorage={onToggleSecretStorage}
+      >
+        <input type="text" />
+      </SecretFormRow>
+    );
+
+    expect(queryByTestId('lockIcon')).not.toBeInTheDocument();
+    expect(getByText('Test Field')).toBeInTheDocument();
+
+    fireEvent.click(getByText('Click to use secret storage instead'));
+
+    expect(onToggleSecretStorage).toHaveBeenCalledWith(true);
   });
 });

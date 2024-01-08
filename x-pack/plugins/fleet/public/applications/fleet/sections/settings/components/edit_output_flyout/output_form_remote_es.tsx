@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiCallOut, EuiCodeBlock, EuiFieldText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -24,13 +24,15 @@ interface Props {
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
 
-  // populate the secret input with the value of the plain input in order to re-save the output with secret storage
-  if (useSecretsStorage) {
-    if (inputs.serviceTokenInput.value && !inputs.serviceTokenSecretInput.value) {
-      inputs.serviceTokenSecretInput.setValue(inputs.serviceTokenInput.value);
-      inputs.serviceTokenInput.clear();
+  useEffect(() => {
+    // populate the secret input with the value of the plain input in order to re-save the output with secret storage
+    if (useSecretsStorage) {
+      if (inputs.serviceTokenInput.value && !inputs.serviceTokenSecretInput.value) {
+        inputs.serviceTokenSecretInput.setValue(inputs.serviceTokenInput.value);
+        inputs.serviceTokenInput.clear();
+      }
     }
-  }
+  }, [useSecretsStorage, inputs.serviceTokenInput, inputs.serviceTokenSecretInput]);
 
   return (
     <>

@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
 import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
 import { ExperimentalFeaturesService } from '../../../../../../services';
-import { useStartServices } from '../../../../hooks';
+import { useStartServices, sendPutOutput } from '../../../../hooks';
 
 import { EditOutputFlyout } from '.';
 
@@ -31,9 +32,15 @@ jest.mock('../../../../hooks', () => {
     ...jest.requireActual('../../../../hooks'),
     useBreadcrumbs: jest.fn(),
     useStartServices: jest.fn(),
+    sendPutOutput: jest.fn(),
   };
 });
 
+jest.mock('./confirm_update', () => ({
+  confirmUpdate: () => Promise.resolve(true),
+}));
+
+const mockSendPutOutput = sendPutOutput as jest.MockedFunction<typeof sendPutOutput>;
 const mockUseStartServices = useStartServices as jest.Mock;
 
 const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
@@ -80,7 +87,11 @@ const remoteEsOutputLabels = ['Hosts', 'Service Token'];
 describe('EditOutputFlyout', () => {
   const mockStartServices = (isServerlessEnabled?: boolean) => {
     mockUseStartServices.mockReturnValue({
-      notifications: { toasts: {} },
+      notifications: {
+        toasts: {
+          addError: jest.fn(),
+        },
+      },
       docLinks: {
         links: { fleet: {}, logstash: {}, kibana: {} },
       },
@@ -212,6 +223,36 @@ describe('EditOutputFlyout', () => {
     );
 
     expect(utils.queryByTestId('serviceTokenSecretInput')).not.toBeNull();
+  });
+
+  it('should populate secret service token input with plain text value when editing remote ES output', async () => {
+    jest
+      .spyOn(ExperimentalFeaturesService, 'get')
+      .mockReturnValue({ remoteESOutput: true, outputSecretsStorage: true });
+    const { utils } = renderFlyout({
+      type: 'remote_elasticsearch',
+      name: 'remote es output',
+      id: 'outputR',
+      is_default: false,
+      is_default_monitoring: false,
+      service_token: '1234',
+      hosts: ['https://localhost:9200'],
+    });
+
+    expect((utils.getByTestId('serviceTokenSecretInput') as HTMLInputElement).value).toEqual(
+      '1234'
+    );
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput.mock.calls[0][1]).toEqual(
+        expect.objectContaining({
+          secrets: { service_token: '1234' },
+          service_token: undefined,
+        })
+      );
+    });
   });
 
   it('should not display remote ES output in type lists if serverless', async () => {

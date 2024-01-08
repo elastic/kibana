@@ -81,7 +81,7 @@ export const SecretFormRow: React.FC<{
     <EuiButtonEmpty
       onClick={() => {
         setEditMode(false);
-        cancelEdit();
+        if (cancelEdit) cancelEdit();
       }}
       color="primary"
       iconType="refresh"
@@ -111,7 +111,7 @@ export const SecretFormRow: React.FC<{
 
   const secretLabel = (
     <span>
-      <EuiIcon type="lock" />
+      <EuiIcon type="lock" data-test-subj="lockIcon" />
       &nbsp;
       {title}
       &nbsp;
