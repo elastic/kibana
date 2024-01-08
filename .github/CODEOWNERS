@@ -66,7 +66,6 @@ x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
 x-pack/plugins/cases @elastic/response-ops
 packages/kbn-cell-actions @elastic/security-threat-hunting-explore
-packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 packages/kbn-chart-icons @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
@@ -321,6 +320,7 @@ src/plugins/dashboard @elastic/kibana-presentation
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
+packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
@@ -353,9 +353,9 @@ packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
-packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-explore
-x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
-x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
+packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
+x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
+x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 packages/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 x-pack/packages/kbn-elastic-assistant @elastic/security-solution
 x-pack/packages/kbn-elastic-assistant-common @elastic/security-solution
