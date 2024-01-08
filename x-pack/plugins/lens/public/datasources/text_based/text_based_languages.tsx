@@ -341,8 +341,9 @@ export function getTextBasedDatasource({
     // at this case we don't suggest all columns in a table but the first
     // MAX_NUM_OF_COLUMNS
     suggestsLimitedColumns(state: TextBasedPrivateState) {
-      const fieldList = retrieveFromCache();
-      return fieldList?.length >= MAX_NUM_OF_COLUMNS;
+      const layers = Object.values(state.layers);
+      const allColumns = layers[0].allColumns;
+      return allColumns.length >= MAX_NUM_OF_COLUMNS;
     },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
@@ -421,18 +422,14 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      const fields = retrieveFromCache();
       const allColumns = props.state.layers[props.layerId]?.allColumns;
-      // in case the cache is empty, get the fields list from state
-      if (fields.length === 0) {
-        allColumns.forEach((col) => {
-          fields.push({
-            id: col.columnId,
-            name: col.fieldName,
-            meta: col?.meta ?? { type: 'number' },
-          });
-        });
-      }
+      const fields = allColumns.map((col) => {
+        return {
+          id: col.columnId,
+          name: col.fieldName,
+          meta: col?.meta ?? { type: 'number' },
+        };
+      });
       const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
       const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
 
