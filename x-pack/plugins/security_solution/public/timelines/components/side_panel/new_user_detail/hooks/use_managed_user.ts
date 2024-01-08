@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
+import type { ManagedUserHits } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useInstalledIntegrations } from '../../../../../detections/components/rules/related_integrations/use_installed_integrations';
 import { UsersQueries } from '../../../../../../common/search_strategy';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
@@ -20,11 +21,20 @@ import {
   MANAGED_USER_QUERY_ID,
 } from '../constants';
 import * as i18n from '../translations';
-import type { ObserverUser } from './use_observed_user';
 
 const packages = [ENTRA_ID_PACKAGE_NAME, OKTA_PACKAGE_NAME];
 
-export const useManagedUser = (userName: string, observedUser: ObserverUser) => {
+interface ManagedUserData {
+  data: ManagedUserHits;
+  isLoading: boolean;
+  isIntegrationEnabled: boolean;
+}
+
+export const useManagedUser = (
+  userName: string,
+  email: string[] | undefined,
+  isLoading?: boolean
+): ManagedUserData => {
   const { to, from, isInitializing, deleteQuery, setQuery } = useGlobalTime();
   const spaceId = useSpaceId();
   const {
@@ -47,23 +57,14 @@ export const useManagedUser = (userName: string, observedUser: ObserverUser) => 
   );
 
   useEffect(() => {
-    if (!isInitializing && defaultIndex.length > 0 && !observedUser.isLoading && userName) {
+    if (!isInitializing && defaultIndex.length > 0 && !isLoading && userName) {
       search({
         defaultIndex,
-        userEmail: observedUser.details.user?.email,
+        userEmail: email,
         userName,
       });
     }
-  }, [
-    from,
-    search,
-    to,
-    isInitializing,
-    defaultIndex,
-    userName,
-    observedUser.isLoading,
-    observedUser.details.user?.email,
-  ]);
+  }, [from, search, to, isInitializing, defaultIndex, userName, isLoading, email]);
 
   const { data: installedIntegrations, isLoading: loadingIntegrations } = useInstalledIntegrations({
     packages,

@@ -103,6 +103,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           pathname: '/app/discover',
           hash: '/context',
         },
+        searchProfiler: {
+          pathname: '/app/dev_tools',
+          hash: '/searchprofiler',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {

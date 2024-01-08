@@ -12,7 +12,11 @@ import { AssistantProvider, useAssistantContext } from '.';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { AssistantAvailability } from '../..';
+import { useLocalStorage } from 'react-use';
 
+jest.mock('react-use', () => ({
+  useLocalStorage: jest.fn().mockReturnValue(['456', jest.fn()]),
+}));
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockGetInitialConversations = jest.fn(() => ({}));
 const mockGetComments = jest.fn(() => []);
@@ -69,5 +73,24 @@ describe('AssistantContext', () => {
     await http.fetch(path);
 
     expect(mockHttp.fetch).toBeCalledWith(path);
+  });
+
+  test('getConversationId defaults to provided id', async () => {
+    const { result } = renderHook(useAssistantContext, { wrapper: ContextWrapper });
+    const id = result.current.getConversationId('123');
+    expect(id).toEqual('123');
+  });
+
+  test('getConversationId uses local storage id when no id is provided ', async () => {
+    const { result } = renderHook(useAssistantContext, { wrapper: ContextWrapper });
+    const id = result.current.getConversationId();
+    expect(id).toEqual('456');
+  });
+
+  test('getConversationId defaults to Welcome when no local storage id and no id is provided ', async () => {
+    (useLocalStorage as jest.Mock).mockReturnValue([undefined, jest.fn()]);
+    const { result } = renderHook(useAssistantContext, { wrapper: ContextWrapper });
+    const id = result.current.getConversationId();
+    expect(id).toEqual('Welcome');
   });
 });

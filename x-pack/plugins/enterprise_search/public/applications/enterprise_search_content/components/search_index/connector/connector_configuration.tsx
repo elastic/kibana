@@ -319,7 +319,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
                     {
-                      defaultMessage: 'Advanced configuration',
+                      defaultMessage: 'Sync your data',
                     }
                   ),
                   titleSize: 'xs',

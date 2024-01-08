@@ -75,7 +75,12 @@ interface UseConversation {
 }
 
 export const useConversation = (): UseConversation => {
-  const { allSystemPrompts, assistantTelemetry, setConversations } = useAssistantContext();
+  const {
+    allSystemPrompts,
+    assistantTelemetry,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
+    setConversations,
+  } = useAssistantContext();
 
   /**
    * Removes the last message of conversation[] for a given conversationId
@@ -140,7 +145,12 @@ export const useConversation = (): UseConversation => {
    */
   const appendMessage = useCallback(
     ({ conversationId, message }: AppendMessageProps): Message[] => {
-      assistantTelemetry?.reportAssistantMessageSent({ conversationId, role: message.role });
+      assistantTelemetry?.reportAssistantMessageSent({
+        conversationId,
+        role: message.role,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+      });
       let messages: Message[] = [];
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
@@ -161,7 +171,7 @@ export const useConversation = (): UseConversation => {
       });
       return messages;
     },
-    [assistantTelemetry, setConversations]
+    [isEnabledKnowledgeBase, isEnabledRAGAlerts, assistantTelemetry, setConversations]
   );
 
   const appendReplacements = useCallback(

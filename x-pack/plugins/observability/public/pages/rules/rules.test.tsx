@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from './rules';
@@ -19,10 +20,17 @@ import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
 jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
+  useKibana: jest.fn(() => ({
+    ...mockUseKibanaReturnValue,
+    services: {
+      ...mockUseKibanaReturnValue.services,
+      observabilityAIAssistant: mockObservabilityAIAssistant,
+    },
+  })),
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');

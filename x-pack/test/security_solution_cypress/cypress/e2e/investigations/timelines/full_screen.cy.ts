@@ -18,8 +18,7 @@ import { populateTimeline } from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165638
-describe('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));

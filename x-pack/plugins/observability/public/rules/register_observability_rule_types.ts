@@ -145,18 +145,21 @@ export const registerObservabilityRuleTypes = async (
       const dataViewId = getDataViewId(searchConfiguration);
       return {
         reason: fields[ALERT_REASON] ?? '-',
-        link: getViewInAppUrl(
+        link: getViewInAppUrl({
           metrics,
-          fields[ALERT_START],
+          startedAt: fields[ALERT_START],
           logExplorerLocator,
-          (searchConfiguration?.query as { query: string }).query,
-          dataViewId
-        ),
+          filter: (searchConfiguration?.query as { query: string }).query,
+          dataViewId,
+        }),
         hasBasePath: true,
       };
     },
     alertDetailsAppSection: lazy(
-      () => import('../components/custom_threshold/components/alert_details_app_section')
+      () =>
+        import(
+          '../components/custom_threshold/components/alert_details_app_section/alert_details_app_section'
+        )
     ),
     priority: 5,
   });

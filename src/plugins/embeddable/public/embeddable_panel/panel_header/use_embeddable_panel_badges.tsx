@@ -106,18 +106,30 @@ export const useEmbeddablePanelBadges = (
 
   const badgeComponents = useMemo(
     () =>
-      badges?.map((badge) => (
-        <EuiBadge
-          key={badge.id}
-          className="embPanel__headerBadge"
-          iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
-          onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
-          onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
-          data-test-subj={`embeddablePanelBadge-${badge.id}`}
-        >
-          {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
-        </EuiBadge>
-      )),
+      badges?.map((badge) => {
+        const badgeComponent = (
+          <EuiBadge
+            key={badge.id}
+            className="embPanel__headerBadge"
+            iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
+            onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
+            onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
+            data-test-subj={`embeddablePanelBadge-${badge.id}`}
+          >
+            {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
+          </EuiBadge>
+        );
+
+        const tooltip = badge.getDisplayNameTooltip
+          ? badge.getDisplayNameTooltip({ embeddable, trigger: panelBadgeTrigger })
+          : '';
+
+        return tooltip ? (
+          <EuiToolTip content={tooltip}>{badgeComponent}</EuiToolTip>
+        ) : (
+          badgeComponent
+        );
+      }),
     [badges, embeddable]
   );
 

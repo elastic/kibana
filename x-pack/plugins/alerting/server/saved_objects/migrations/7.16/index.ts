@@ -9,6 +9,7 @@ import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core-saved-obje
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isString } from 'lodash/fp';
+import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { RawRule, RawRuleAction } from '../../../types';
 import { extractRefsFromGeoContainmentAlert } from '../../geo_containment/migrations';
 import { createEsoMigration, isSecuritySolutionLegacyNotification, pipeMigrations } from '../utils';
@@ -126,7 +127,7 @@ function addRuleIdsToLegacyNotificationReferences(
   } else {
     const existingReferences = references ?? [];
     const existingReferenceFound = existingReferences.find((reference) => {
-      return reference.id === ruleAlertId && reference.type === 'alert';
+      return reference.id === ruleAlertId && reference.type === RULE_SAVED_OBJECT_TYPE;
     });
     if (existingReferenceFound) {
       // skip this if the references already exists for some uncommon reason so we do not add an additional one.
@@ -135,7 +136,7 @@ function addRuleIdsToLegacyNotificationReferences(
       const savedObjectReference: SavedObjectReference = {
         id: ruleAlertId,
         name: 'param:alert_0',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
       };
       const newReferences = [...existingReferences, savedObjectReference];
       return { ...doc, references: newReferences };

@@ -6710,7 +6710,15 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined>; openInspector: () => ",
+          " | undefined>; getFilters: () => Promise<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]>; openInspector: () => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "common",
@@ -6876,15 +6884,7 @@
           },
           " | undefined; updateOutput: (outputChanges: Partial<",
           "VisualizeOutput",
-          ">) => void; supportedTriggers: () => string[]; getFilters: () => Promise<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]>; getVis: () => ",
+          ">) => void; supportedTriggers: () => string[]; getVis: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",

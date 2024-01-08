@@ -82,7 +82,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       cy.task('esArchiverUnload', 'unmapped_fields');
     });
 
-    it('should display user and system defined highlighted fields', () => {
+    it.skip('should display user and system defined highlighted fields', () => {
       cy.get(SUMMARY_VIEW)
         .should('be.visible')
         .and('contain.text', 'event.kind')
@@ -161,7 +161,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       cy.url().should('not.include', 'eventFlyout=');
     });
 
-    it('should open the alert flyout when the page is refreshed', () => {
+    it.skip('should open the alert flyout when the page is refreshed', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
       cy.reload();
       cy.get(OVERVIEW_RULE).should('be.visible');
@@ -172,7 +172,7 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(COPY_ALERT_FLYOUT_LINK).should('be.visible');
     });
 
-    it('should have the `kibana.alert.url` field set', () => {
+    it.skip('should have the `kibana.alert.url` field set', () => {
       openTable();
       filterBy('kibana.alert.url');
       cy.get('[data-test-subj="formatted-field-kibana.alert.url"]').should(

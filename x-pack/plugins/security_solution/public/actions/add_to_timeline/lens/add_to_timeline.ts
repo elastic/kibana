@@ -10,7 +10,7 @@ import { isErrorEmbeddable, isFilterableEmbeddable } from '@kbn/embeddable-plugi
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { KibanaServices } from '../../../common/lib/kibana';
 import type { SecurityAppStore } from '../../../common/store/types';
-import { addProvider } from '../../../timelines/store/timeline/actions';
+import { addProvider } from '../../../timelines/store/actions';
 import type { DataProvider } from '../../../../common/types';
 import { EXISTS_OPERATOR, TimelineId } from '../../../../common/types';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';

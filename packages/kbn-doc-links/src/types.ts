@@ -391,6 +391,7 @@ export interface DocLinks {
     cronExpressions: string;
     executeWatchActionModes: string;
     indexExists: string;
+    inferTrainedModel: string;
     multiSearch: string;
     openIndex: string;
     putComponentTemplate: string;
@@ -622,6 +623,8 @@ export interface DocLinks {
     readonly integrations: string;
     readonly integrationsBeats: string;
     readonly integrationsConnectorClient: string;
+    readonly integrationsConnectorClientRunFromSource: string;
+    readonly integrationsConnectorClientRunWithDocker: string;
     readonly integrationsLogstash: string;
   };
   readonly serverlessSecurity: {

@@ -39838,7 +39838,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; type: \"kibana_context\"; query?: ",
+              "[]; type: \"kibana_context\"; now?: number | undefined; query?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -40181,7 +40181,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; type: \"kibana_context\"; query?: ",
+              "[]; type: \"kibana_context\"; now?: number | undefined; query?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",

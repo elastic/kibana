@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EuiText } from '@elastic/eui';
+import { FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
@@ -20,5 +22,11 @@ export function QualityPercentageIndicator({ percentage = 0 }: { percentage?: nu
       ? 'degraded'
       : 'good';
 
-  return <QualityIndicator quality={quality} />;
+  const description = (
+    <EuiText>
+      <FormattedNumber value={percentage} />%
+    </EuiText>
+  );
+
+  return <QualityIndicator quality={quality} description={description} />;
 }
