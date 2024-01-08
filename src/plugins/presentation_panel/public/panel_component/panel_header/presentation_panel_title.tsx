@@ -11,8 +11,9 @@ import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
 import { ViewMode } from '@kbn/presentation-publishing';
-import { customizePanelAction } from '../../panel_actions/panel_actions';
 import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
+import { isApiCompatibleWithCustomizePanelAction } from '../../panel_actions/customize_panel_action';
+import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
 
 export const PresentationPanelTitle = ({
   api,
@@ -37,26 +38,32 @@ export const PresentationPanelTitle = ({
     if (viewMode !== 'edit') {
       return <span className={titleClassNames}>{panelTitle}</span>;
     }
-    if (customizePanelAction) {
-      return (
-        <EuiLink
-          color="text"
-          className={titleClassNames}
-          aria-label={getEditTitleAriaLabel(panelTitle)}
-          data-test-subj={'presentationPanelTitleLink'}
-          onClick={() => customizePanelAction.execute({ embeddable: api })}
-        >
-          {panelTitle || placeholderTitle}
-        </EuiLink>
-      );
-    }
-    return null;
+
+    return (
+      <EuiLink
+        color="text"
+        className={titleClassNames}
+        aria-label={getEditTitleAriaLabel(panelTitle)}
+        data-test-subj={'embeddablePanelTitleLink'}
+        onClick={
+          isApiCompatibleWithCustomizePanelAction(api)
+            ? () =>
+                openCustomizePanelFlyout({
+                  api,
+                  focusOnTitle: true,
+                })
+            : undefined
+        }
+      >
+        {panelTitle || placeholderTitle}
+      </EuiLink>
+    );
   }, [hideTitle, panelTitle, viewMode, api]);
 
   const describedPanelTitleElement = useMemo(() => {
     if (!panelDescription)
       return (
-        <span data-test-subj="presentationPanelTitle" className="embPanel__titleInner">
+        <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
           {panelTitleElement}
         </span>
       );
@@ -66,8 +73,9 @@ export const PresentationPanelTitle = ({
         delay="regular"
         position="top"
         anchorClassName="embPanel__titleTooltipAnchor"
+        anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
       >
-        <span data-test-subj="presentationPanelTitle" className="embPanel__titleInner">
+        <span data-test-subj="embeddablePanelTitleInner" className="embPanel__titleInner">
           {panelTitleElement}{' '}
           <EuiIcon
             type="iInCircle"

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   EuiButton,
@@ -44,8 +44,10 @@ interface TimePickerQuickRange {
 export const CustomizePanelEditor = ({
   api,
   onClose,
+  focusOnTitle,
 }: {
   onClose: () => void;
+  focusOnTitle?: boolean;
   api: CustomizePanelActionApi;
 }) => {
   /**
@@ -63,6 +65,13 @@ export const CustomizePanelEditor = ({
   const [localTimeRange, setLocalTimeRange] = useState(
     api.localTimeRange?.value ?? api?.getFallbackTimeRange?.()
   );
+  const initialFocusRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (focusOnTitle && initialFocusRef.current) {
+      initialFocusRef.current.focus();
+    }
+  }, [initialFocusRef, focusOnTitle]);
 
   const [hasOwnTimeRange, setHasOwnTimeRange] = useState<boolean>(
     Boolean(api.localTimeRange?.value)
@@ -104,7 +113,7 @@ export const CustomizePanelEditor = ({
     if (!editMode) return null;
 
     return (
-      <>
+      <div data-test-subj="customEmbeddableTitleComponent">
         <EuiFormRow>
           <EuiSwitch
             checked={!hideTitle}
@@ -148,6 +157,7 @@ export const CustomizePanelEditor = ({
           }
         >
           <EuiFieldText
+            inputRef={initialFocusRef}
             id="panelTitleInput"
             className="panelTitleInputText"
             data-test-subj="customEmbeddablePanelTitleInput"
@@ -209,7 +219,7 @@ export const CustomizePanelEditor = ({
             )}
           />
         </EuiFormRow>
-      </>
+      </div>
     );
   };
 
@@ -284,7 +294,7 @@ export const CustomizePanelEditor = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm>
+        <EuiForm data-test-subj="customizePanelForm">
           {renderCustomTitleComponent()}
           {renderCustomTimeRangeComponent()}
           {renderFilterDetails()}

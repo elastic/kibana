@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { panAnimationDuration } from '@kbn/security-solution-plugin/public/resolver/store/camera/scaling_constants';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 

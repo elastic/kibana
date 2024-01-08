@@ -92,7 +92,9 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getAttributeService: <
     A extends { title: string },
-    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+    V extends EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,

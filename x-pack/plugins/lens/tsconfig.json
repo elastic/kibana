@@ -97,10 +97,14 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
     "@kbn/presentation-containers",
+    "@kbn/discover-utils",
+    "@kbn/code-editor",
     "@kbn/calculate-width-from-char-count",
     "@kbn/discover-utils",
     "@kbn/lens-formula-docs",
-    "@kbn/visualization-utils"
+    "@kbn/visualization-utils",
+    "@kbn/test-eui-helpers",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": ["target/**/*"]
 }

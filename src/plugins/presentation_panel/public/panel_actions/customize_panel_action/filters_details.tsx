@@ -66,6 +66,7 @@ export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
     <>
       {queryString !== '' && (
         <EuiFormRow
+          data-test-subj="panelCustomQueryRow"
           label={filterDetailsActionStrings.getQueryTitle()}
           display="rowCompressed"
           labelAppend={
@@ -90,6 +91,7 @@ export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
           }
         >
           <EuiCodeBlock
+            data-test-subj="customPanelQuery"
             language={queryLanguage}
             paddingSize="s"
             fontSize="s"
@@ -102,6 +104,7 @@ export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
       )}
       {filters.length > 0 && (
         <EuiFormRow
+          data-test-subj="panelCustomFiltersRow"
           label={filterDetailsActionStrings.getFiltersTitle()}
           labelAppend={
             showEditButton ? (
