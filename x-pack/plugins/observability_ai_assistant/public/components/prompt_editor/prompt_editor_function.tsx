@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
+import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { EuiCode, EuiPanel } from '@elastic/eui';
 import { useJsonEditorModel } from '../../hooks/use_json_editor_model';
@@ -32,6 +33,7 @@ export function PromptEditorFunction({
   onFocus,
   onBlur,
 }: Props) {
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [functionEditorLineCount, setFunctionEditorLineCount] = useState<number>(0);
 
   const previousPayload = usePrevious(functionPayload);
@@ -80,11 +82,9 @@ export function PromptEditorFunction({
     }
   }, [functionName, functionPayload, initialJsonString, onChange, previousPayload]);
 
-  useEffect(() => {
-    return () => {
-      onBlur();
-    };
-  }, [onBlur]);
+  editorRef.current?.onDidBlurEditorWidget(() => {
+    onBlur();
+  });
 
   return (
     <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
@@ -96,6 +96,7 @@ export function PromptEditorFunction({
         )}
         data-test-subj="observabilityAiAssistantChatPromptEditorCodeEditor"
         editorDidMount={(editor) => {
+          editorRef.current = editor;
           editor.focus();
           onFocus();
         }}

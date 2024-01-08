@@ -75,7 +75,7 @@ export function FunctionListPopover({
       anchorPosition="downLeft"
       button={
         <EuiToolTip
-          key={mode}
+          key={mode} // this is added to prevent the tooltip from flickering when the mode stays the same
           content={
             mode === 'prompt'
               ? i18n.translate(
