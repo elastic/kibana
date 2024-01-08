@@ -7,11 +7,8 @@
  */
 
 import React from 'react';
-import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
 
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { pluginServices } from '../../services/plugin_services';
 
 export const DashboardAppNoDataPage = ({
@@ -23,7 +20,7 @@ export const DashboardAppNoDataPage = ({
     application,
     data: { dataViews },
     dataViewEditor,
-    http: { basePath },
+    http: { basePath, get },
     documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink },
     customBranding,
     noDataPage,
@@ -38,7 +35,7 @@ export const DashboardAppNoDataPage = ({
         },
       },
       application,
-      http: { basePath },
+      http: { basePath, get },
       customBranding: {
         hasCustomBranding$: customBranding.hasCustomBranding$,
       },
@@ -47,6 +44,23 @@ export const DashboardAppNoDataPage = ({
     dataViewEditor,
     noDataPage,
   };
+
+  const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+  const AnalyticsNoDataPageKibanaProvider = withSuspense(
+    React.lazy(() =>
+      importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+        return { default: NoDataProvider };
+      })
+    )
+  );
+  const AnalyticsNoDataPage = withSuspense(
+    React.lazy(() =>
+      importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+        return { default: NoDataPage };
+      })
+    )
+  );
+
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
       <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
