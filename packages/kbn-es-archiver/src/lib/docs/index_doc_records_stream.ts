@@ -95,12 +95,7 @@ export function createIndexDocRecordsStream(
   });
 }
 
-export interface HiFi {
-  highWaterMark: 5000;
-  concurrency: 4;
+export interface LoadActionPerfOptions {
+  highWaterMark: number;
+  concurrency: number;
 }
-export interface LoFi {
-  highWaterMark: 300;
-  concurrency: 1;
-}
-export type LoadActionPerfOptions = HiFi | LoFi;

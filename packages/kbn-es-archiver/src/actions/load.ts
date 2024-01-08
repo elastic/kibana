@@ -59,7 +59,7 @@ export async function loadAction({
   client,
   log,
   kbnClient,
-  performance = { highWaterMark: 5000, concurrency: 4 },
+  performance,
 }: {
   inputDir: string;
   skipExisting: boolean;
@@ -68,7 +68,7 @@ export async function loadAction({
   client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
-  performance: LoadActionPerfOptions;
+  performance?: LoadActionPerfOptions;
 }) {
   const name = relative(REPO_ROOT, inputDir);
   const isArchiveInExceptionList = soOverrideAllowedList.includes(name);

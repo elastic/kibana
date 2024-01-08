@@ -88,7 +88,7 @@ export class EsArchiver {
       skipExisting = false,
       useCreate = false,
       docsOnly = false,
-      performance = { concurrency: 4, highWaterMark: 5000 },
+      performance,
     }: {
       skipExisting?: boolean;
       useCreate?: boolean;
