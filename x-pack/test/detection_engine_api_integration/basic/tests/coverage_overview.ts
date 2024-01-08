@@ -19,8 +19,8 @@ import {
   deleteAllRules,
   getSimpleRule,
   installPrebuiltRulesAndTimelines,
+  createNonSecurityRule,
 } from '../../utils';
-import { createNonSecurityRule } from '../../utils/create_non_security_rule';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

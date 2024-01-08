@@ -11,10 +11,6 @@ export const datasetQualityAppTitle = i18n.translate('xpack.datasetQuality.appTi
   defaultMessage: 'Datasets',
 });
 
-export const onboardingLinkTitle = i18n.translate('xpack.datasetQuality.onboardingLinkTitle', {
-  defaultMessage: 'Add data',
-});
-
 export const noDatasetsDescription = i18n.translate('xpack.datasetQuality.noDatasetsDescription', {
   defaultMessage: 'Try adjusting your time or filter.',
 });

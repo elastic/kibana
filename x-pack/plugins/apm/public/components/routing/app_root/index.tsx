@@ -8,11 +8,10 @@
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   KibanaContextProvider,
-  useUiSetting$,
+  useDarkMode,
 } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   HeaderMenuPortal,
   InspectorContextProvider,
@@ -22,6 +21,7 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import { useKibanaEnvironmentContextProvider } from '../../../context/kibana_environment_context/use_kibana_environment_context';
 import { AnomalyDetectionJobsContextProvider } from '../../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
   ApmPluginContext,
@@ -55,7 +55,9 @@ export function ApmAppRoot({
   pluginsStart: ApmPluginStartDeps;
   apmServices: ApmServices;
 }) {
-  const { appMountParameters, core } = apmPluginContextValue;
+  const { appMountParameters, kibanaEnvironment, core } = apmPluginContextValue;
+  const KibanaEnvironmentContextProvider =
+    useKibanaEnvironmentContextProvider(kibanaEnvironment);
   const { history } = appMountParameters;
   const i18nCore = core.i18n;
 
@@ -74,10 +76,10 @@ export function ApmAppRoot({
           <KibanaContextProvider
             services={{ ...core, ...pluginsStart, storage, ...apmServices }}
           >
-            <i18nCore.Context>
-              <ObservabilityAIAssistantProvider
-                value={apmPluginContextValue.observabilityAIAssistant.service}
-              >
+            <KibanaEnvironmentContextProvider
+              kibanaEnvironment={kibanaEnvironment}
+            >
+              <i18nCore.Context>
                 <TimeRangeIdContextProvider>
                   <RouterProvider history={history} router={apmRouter as any}>
                     <ApmErrorBoundary>
@@ -116,8 +118,8 @@ export function ApmAppRoot({
                     </ApmErrorBoundary>
                   </RouterProvider>
                 </TimeRangeIdContextProvider>
-              </ObservabilityAIAssistantProvider>
-            </i18nCore.Context>
+              </i18nCore.Context>
+            </KibanaEnvironmentContextProvider>
           </KibanaContextProvider>
         </ApmPluginContext.Provider>
       </RedirectAppLinks>
@@ -137,7 +139,7 @@ function MountApmHeaderActionMenu() {
 }
 
 export function ApmThemeProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const darkMode = useDarkMode(false);
 
   return (
     <ThemeProvider

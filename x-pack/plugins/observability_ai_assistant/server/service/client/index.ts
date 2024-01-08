@@ -10,12 +10,9 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { compact, isEmpty, last, merge, omit, pick } from 'lodash';
-import type {
-  ChatCompletionRequestMessage,
-  CreateChatCompletionRequest,
-  CreateChatCompletionResponse,
-} from 'openai';
+import type OpenAI from 'openai';
+import { decode, encode } from 'gpt-tokenizer';
+import { compact, isEmpty, last, merge, omit, pick, take } from 'lodash';
 import { isObservable, lastValueFrom } from 'rxjs';
 import { PassThrough, Readable } from 'stream';
 import { v4 } from 'uuid';
@@ -53,7 +50,10 @@ export class ObservabilityAIAssistantClient {
     private readonly dependencies: {
       actionsClient: PublicMethodsOf<ActionsClient>;
       namespace: string;
-      esClient: ElasticsearchClient;
+      esClient: {
+        asInternalUser: ElasticsearchClient;
+        asCurrentUser: ElasticsearchClient;
+      };
       resources: ObservabilityAIAssistantResourceNames;
       logger: Logger;
       user: {
@@ -67,7 +67,7 @@ export class ObservabilityAIAssistantClient {
   private getConversationWithMetaFields = async (
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
-    const response = await this.dependencies.esClient.search<Conversation>({
+    const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
       index: this.dependencies.resources.aliases.conversations,
       query: {
         bool: {
@@ -113,7 +113,7 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
-    await this.dependencies.esClient.delete({
+    await this.dependencies.esClient.asInternalUser.delete({
       id: conversation._id,
       index: conversation._index,
       refresh: true,
@@ -173,6 +173,11 @@ export class ObservabilityAIAssistantClient {
       });
     }
 
+    let numFunctionsCalled: number = 0;
+
+    const MAX_FUNCTION_CALLS = 3;
+    const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
+
     const next = async (nextMessages: Message[]): Promise<void> => {
       const lastMessage = last(nextMessages);
 
@@ -219,9 +224,12 @@ export class ObservabilityAIAssistantClient {
               connectorId,
               stream: true,
               signal,
-              functions: functionClient
-                .getFunctions()
-                .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
+              functions:
+                numFunctionsCalled >= MAX_FUNCTION_CALLS
+                  ? []
+                  : functionClient
+                      .getFunctions()
+                      .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
             })
           ).pipe(processOpenAiStream()),
         });
@@ -229,22 +237,52 @@ export class ObservabilityAIAssistantClient {
       }
 
       if (isAssistantMessageWithFunctionRequest) {
-        const functionResponse = await functionClient
-          .executeFunction({
-            connectorId,
-            name: lastMessage.message.function_call!.name,
-            messages: nextMessages,
-            args: lastMessage.message.function_call!.arguments,
-            signal,
-          })
-          .catch((error): FunctionResponse => {
-            return {
-              content: {
-                message: error.toString(),
-                error,
-              },
-            };
-          });
+        const functionResponse =
+          numFunctionsCalled >= MAX_FUNCTION_CALLS
+            ? {
+                content: {
+                  error: {},
+                  message: 'Function limit exceeded, ask the user what to do next',
+                },
+              }
+            : await functionClient
+                .executeFunction({
+                  connectorId,
+                  name: lastMessage.message.function_call!.name,
+                  messages: nextMessages,
+                  args: lastMessage.message.function_call!.arguments,
+                  signal,
+                })
+                .then((response) => {
+                  if (isObservable(response)) {
+                    return response;
+                  }
+
+                  const encoded = encode(JSON.stringify(response.content || {}));
+
+                  if (encoded.length <= MAX_FUNCTION_RESPONSE_TOKEN_COUNT) {
+                    return response;
+                  }
+
+                  return {
+                    data: response.data,
+                    content: {
+                      message:
+                        'Function response exceeded the maximum length allowed and was truncated',
+                      truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
+                    },
+                  };
+                })
+                .catch((error): FunctionResponse => {
+                  return {
+                    content: {
+                      message: error.toString(),
+                      error,
+                    },
+                  };
+                });
+
+        numFunctionsCalled++;
 
         if (signal.aborted) {
           return;
@@ -377,8 +415,12 @@ export class ObservabilityAIAssistantClient {
     functionCall?: string;
     stream?: TStream;
     signal: AbortSignal;
-  }): Promise<TStream extends false ? CreateChatCompletionResponse : Readable> => {
-    const messagesForOpenAI: ChatCompletionRequestMessage[] = compact(
+  }): Promise<TStream extends false ? OpenAI.ChatCompletion : Readable> => {
+    const messagesForOpenAI: Array<
+      Omit<OpenAI.ChatCompletionMessageParam, 'role'> & {
+        role: MessageRole;
+      }
+    > = compact(
       messages
         .filter((message) => message.message.content || message.message.function_call?.name)
         .map((message) => {
@@ -398,13 +440,16 @@ export class ObservabilityAIAssistantClient {
 
     const functionsForOpenAI = functions;
 
-    const request: Omit<CreateChatCompletionRequest, 'model'> & { model?: string } = {
-      messages: messagesForOpenAI,
+    const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
+      messages: messagesForOpenAI as OpenAI.ChatCompletionCreateParams['messages'],
       ...(stream ? { stream: true } : {}),
       ...(!!functions?.length ? { functions: functionsForOpenAI } : {}),
       temperature: 0,
       function_call: functionCall ? { name: functionCall } : undefined,
     };
+
+    this.dependencies.logger.debug(`Sending conversation to connector`);
+    this.dependencies.logger.trace(JSON.stringify(request, null, 2));
 
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
@@ -423,19 +468,17 @@ export class ObservabilityAIAssistantClient {
 
     const response = stream
       ? (executeResult.data as Readable)
-      : (executeResult.data as CreateChatCompletionResponse);
+      : (executeResult.data as OpenAI.ChatCompletion);
 
-    if (response instanceof PassThrough) {
-      signal.addEventListener('abort', () => {
-        response.end();
-      });
+    if (response instanceof Readable) {
+      signal.addEventListener('abort', () => response.destroy());
     }
 
     return response as any;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
-    const response = await this.dependencies.esClient.search<Conversation>({
+    const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
       index: this.dependencies.resources.aliases.conversations,
       allow_no_indices: true,
       query: {
@@ -472,7 +515,7 @@ export class ObservabilityAIAssistantClient {
       this.getConversationUpdateValues(new Date().toISOString())
     );
 
-    await this.dependencies.esClient.update({
+    await this.dependencies.esClient.asInternalUser.update({
       id: document._id,
       index: document._index,
       doc: updatedConversation,
@@ -544,7 +587,7 @@ export class ObservabilityAIAssistantClient {
       this.getConversationUpdateValues(new Date().toISOString())
     );
 
-    await this.dependencies.esClient.update({
+    await this.dependencies.esClient.asInternalUser.update({
       id: document._id,
       index: document._index,
       doc: { conversation: { title } },
@@ -567,7 +610,7 @@ export class ObservabilityAIAssistantClient {
       this.getConversationUpdateValues(now)
     );
 
-    await this.dependencies.esClient.index({
+    await this.dependencies.esClient.asInternalUser.index({
       index: this.dependencies.resources.aliases.conversations,
       document: createdConversation,
       refresh: true,
@@ -588,6 +631,7 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       queries,
       contexts,
+      asCurrentUser: this.dependencies.esClient.asCurrentUser,
     });
   };
 

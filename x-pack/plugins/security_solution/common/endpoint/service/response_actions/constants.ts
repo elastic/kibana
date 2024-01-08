@@ -11,6 +11,10 @@ export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 
 export const RESPONSE_ACTION_TYPE = ['automated', 'manual'] as const;
 export type ResponseActionType = typeof RESPONSE_ACTION_TYPE[number];
+
+export const RESPONSE_ACTION_AGENT_TYPE = ['endpoint', 'sentinel_one'] as const;
+export type ResponseActionAgentType = typeof RESPONSE_ACTION_AGENT_TYPE[number];
+
 /**
  * The Command names that are used in the API payload for the `{ command: '' }` attribute
  */

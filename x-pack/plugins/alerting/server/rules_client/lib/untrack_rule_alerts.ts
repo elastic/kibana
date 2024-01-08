@@ -15,6 +15,7 @@ import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { createAlertEventLogRecordObject } from '../../lib/create_alert_event_log_record_object';
 import { RulesClientContext } from '../types';
 import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const untrackRuleAlerts = async (
   context: RulesClientContext,
@@ -67,7 +68,7 @@ export const untrackRuleAlerts = async (
           savedObjects: [
             {
               id,
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
               typeId: attributes.alertTypeId,
               relation: SAVED_OBJECT_REL_PRIMARY,
             },

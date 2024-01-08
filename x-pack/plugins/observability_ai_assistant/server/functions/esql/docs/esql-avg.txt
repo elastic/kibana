@@ -1,0 +1,6 @@
+AVG
+
+The average of a numeric field.
+FROM employees
+| STATS AVG(height)
+The result is always a double not matter the input type.

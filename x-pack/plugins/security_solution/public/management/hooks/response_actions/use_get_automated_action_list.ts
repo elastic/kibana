@@ -152,6 +152,7 @@ const combineResponse = (
   return {
     id: action.EndpointActions.action_id,
     agents: action.agent.id as string[],
+    agentType: 'endpoint',
     parameters,
     ...(alertId?.length ? { alertIds: alertId } : {}),
     ...(rule

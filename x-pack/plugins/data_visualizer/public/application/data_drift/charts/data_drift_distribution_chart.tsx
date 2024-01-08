@@ -13,6 +13,7 @@ import {
   Position,
   ScaleType,
   Settings,
+  LEGACY_LIGHT_THEME,
   AreaSeries,
   CurveType,
 } from '@elastic/charts';
@@ -108,7 +109,11 @@ export const DataDriftDistributionChart = ({
       <EuiSpacer size="s" />
       <Chart>
         <Tooltip body={DataComparisonChartTooltipBody} />
-        <Settings locale={i18n.getLocale()} />
+        <Settings
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={LEGACY_LIGHT_THEME}
+          locale={i18n.getLocale()}
+        />
         <Axis
           id="bottom"
           position={Position.Bottom}

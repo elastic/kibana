@@ -174,7 +174,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.advancedConfigurationTitle',
                     {
-                      defaultMessage: 'Advanced configuration',
+                      defaultMessage: 'Sync your data',
                     }
                   ),
                   titleSize: 'xs',

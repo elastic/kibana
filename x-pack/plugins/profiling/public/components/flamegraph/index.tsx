@@ -14,6 +14,7 @@ import {
   PartialTheme,
   Settings,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -87,6 +88,7 @@ export function FlameGraph({
   };
 
   const totalSamples = columnarData.viewModel.value[0];
+  const comparisonTotalSamples = comparisonFlamegraph?.CountInclusive[0];
 
   const [highlightedVmIndex, setHighlightedVmIndex] = useState<number | undefined>(undefined);
 
@@ -108,6 +110,31 @@ export function FlameGraph({
           totalAnnualCostUSD: primaryFlamegraph.TotalAnnualCostsUSDItems[highlightedVmIndex],
         }
       : undefined;
+  const primaryFlamegraphNodeId =
+    highlightedVmIndex !== undefined ? primaryFlamegraph?.ID[highlightedVmIndex] : undefined;
+  const comparisonFlamegraphNode =
+    primaryFlamegraphNodeId !== undefined
+      ? columnarData.comparisonNodesById[primaryFlamegraphNodeId]
+      : undefined;
+
+  const comparisonSelected: Frame | undefined =
+    comparisonFlamegraphNode !== undefined
+      ? {
+          fileID: comparisonFlamegraphNode.FileID,
+          frameType: comparisonFlamegraphNode.FrameType,
+          exeFileName: comparisonFlamegraphNode.ExeFileName,
+          addressOrLine: comparisonFlamegraphNode.AddressOrLine,
+          functionName: comparisonFlamegraphNode.FunctionName,
+          sourceFileName: comparisonFlamegraphNode.SourceFileName,
+          sourceLine: comparisonFlamegraphNode.SourceLine,
+          countInclusive: comparisonFlamegraphNode.CountInclusive,
+          countExclusive: comparisonFlamegraphNode.CountExclusive,
+          selfAnnualCO2Kgs: comparisonFlamegraphNode.SelfAnnualCO2Kgs,
+          totalAnnualCO2Kgs: comparisonFlamegraphNode.TotalAnnualCO2Kgs,
+          selfAnnualCostUSD: comparisonFlamegraphNode.SelfAnnualCostUSD,
+          totalAnnualCostUSD: comparisonFlamegraphNode.TotalAnnualCostUSD,
+        }
+      : undefined;
 
   useEffect(() => {
     setHighlightedVmIndex(undefined);
@@ -123,6 +150,8 @@ export function FlameGraph({
                 <Chart key={columnarData.key}>
                   <Settings
                     theme={chartTheme}
+                    // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                    baseTheme={LEGACY_LIGHT_THEME}
                     onElementClick={(elements) => {
                       const selectedElement = elements[0] as Maybe<FlameLayerValue>;
                       if (Number.isNaN(selectedElement?.vmIndex)) {
@@ -217,7 +246,11 @@ export function FlameGraph({
       </EuiFlexGroup>
       {showInformationWindow && (
         <FrameInformationTooltip
+          compressed
           onClose={toggleShowInformationWindow}
+          comparisonFrame={comparisonSelected}
+          comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
+          comparisonTotalSamples={comparisonTotalSamples}
           frame={selected}
           totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
           totalSamples={totalSamples}

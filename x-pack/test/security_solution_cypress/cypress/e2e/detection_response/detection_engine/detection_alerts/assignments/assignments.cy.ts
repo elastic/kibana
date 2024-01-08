@@ -23,12 +23,12 @@ import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
   alertDetailsFlyoutShowsAssignees,
   alertDetailsFlyoutShowsAssigneesBadge,
-  alertsTableShowsAssigneesBadgeForAlert,
+  alertsTableShowsAssigneesBadgeForFirstAlert,
   alertsTableShowsAssigneesForAlert,
-  updateAssigneesForAlert,
+  updateAssigneesForFirstAlert,
   checkEmptyAssigneesStateInAlertDetailsFlyout,
   checkEmptyAssigneesStateInAlertsTable,
-  removeAllAssigneesForAlert,
+  removeAllAssigneesForFirstAlert,
   bulkUpdateAssignees,
   alertsTableShowsAssigneesForAllAlerts,
   bulkRemoveAllAssignees,
@@ -78,13 +78,13 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
 
     it('alert with some assignees in alerts table', () => {
       const users = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(users);
+      updateAssigneesForFirstAlert(users);
       alertsTableShowsAssigneesForAlert(users);
     });
 
     it(`alert with some assignees in alert's details flyout`, () => {
       const users = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(users);
+      updateAssigneesForFirstAlert(users);
       expandFirstAlert();
       alertDetailsFlyoutShowsAssignees(users);
     });
@@ -97,13 +97,13 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
         ROLES.soc_manager,
         ROLES.detections_admin,
       ];
-      updateAssigneesForAlert(users);
-      alertsTableShowsAssigneesBadgeForAlert(users);
+      updateAssigneesForFirstAlert(users);
+      alertsTableShowsAssigneesBadgeForFirstAlert(users);
     });
 
     it(`alert with many assignees (collapsed into badge) in alert's details flyout`, () => {
       const users = [ROLES.detections_admin, ROLES.t1_analyst, ROLES.t2_analyst];
-      updateAssigneesForAlert(users);
+      updateAssigneesForFirstAlert(users);
       expandFirstAlert();
       alertDetailsFlyoutShowsAssigneesBadge(users);
     });
@@ -113,7 +113,7 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
     it('adding new assignees via `More actions` in alerts table', () => {
       // Assign users
       const users = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(users);
+      updateAssigneesForFirstAlert(users);
 
       // Assignees should appear in the alerts table
       alertsTableShowsAssigneesForAlert(users);
@@ -156,12 +156,12 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
     it('updating assignees via `More actions` in alerts table', () => {
       // Initially assigned users
       const initialAssignees = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(initialAssignees);
+      updateAssigneesForFirstAlert(initialAssignees);
       alertsTableShowsAssigneesForAlert(initialAssignees);
 
       // Update assignees
       const updatedAssignees = [ROLES.t1_analyst, ROLES.t2_analyst];
-      updateAssigneesForAlert(updatedAssignees);
+      updateAssigneesForFirstAlert(updatedAssignees);
 
       const expectedAssignees = [ROLES.detections_admin, ROLES.t2_analyst];
 
@@ -220,10 +220,10 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
     it('removing all assignees via `More actions` in alerts table', () => {
       // Initially assigned users
       const initialAssignees = [ROLES.detections_admin, ROLES.t1_analyst];
-      updateAssigneesForAlert(initialAssignees);
+      updateAssigneesForFirstAlert(initialAssignees);
       alertsTableShowsAssigneesForAlert(initialAssignees);
 
-      removeAllAssigneesForAlert();
+      removeAllAssigneesForFirstAlert();
 
       // Alert should not show any assignee in alerts table or in details flyout
       checkEmptyAssigneesStateInAlertsTable();

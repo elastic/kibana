@@ -191,10 +191,7 @@ export const buildDatasourceStates = async (
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
   dataViewsAPI: DataViewsPublicPluginStart
 ) => {
-  const layers: LensAttributes['state']['datasourceStates'] = {
-    textBased: { layers: {} },
-    formBased: { layers: {} },
-  };
+  let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   const mainDataset = config.dataset;
   const configLayers = 'layers' in config ? config.layers : [config];
@@ -226,7 +223,14 @@ export const buildDatasourceStates = async (
         getValueColumns
       );
       if (layerConfig) {
-        layers[type]!.layers[layerId] = layerConfig;
+        layers = {
+          ...layers,
+          [type]: {
+            layers: {
+              [layerId]: layerConfig,
+            },
+          },
+        };
       }
     }
   }

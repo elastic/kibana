@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import moment from 'moment';
+import expect from '@kbn/expect';
 import { cleanup, generate } from '@kbn/infra-forge';
 import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from '../helpers/data_view';
 import {
@@ -22,7 +24,8 @@ import {
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument } from './typings';
+import { ISO_DATE_REGEX } from './constants';
+import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -95,14 +98,14 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
+                metrics: [{ name: 'A', filter: 'container.id:*', aggType: Aggregators.COUNT }],
               },
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
             searchConfiguration: {
               query: {
-                query: '',
+                query: 'host.name:*',
                 language: 'kuery',
               },
               index: DATA_VIEW_ID,
@@ -119,6 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
                     alertDetailsUrl: '{{context.alertDetailsUrl}}',
                     reason: '{{context.reason}}',
                     value: '{{context.value}}',
+                    viewInAppUrl: '{{context.viewInAppUrl}}',
                   },
                 ],
               },
@@ -190,12 +194,15 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', filter: '', aggType: 'count' }],
+                metrics: [{ name: 'A', filter: 'container.id:*', aggType: 'count' }],
               },
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
+            searchConfiguration: {
+              index: 'data-view-id',
+              query: { query: 'host.name:*', language: 'kuery' },
+            },
           });
       });
 
@@ -214,6 +221,18 @@ export default function ({ getService }: FtrProviderContext) {
           `Document count is 3, not between the threshold of 1 and 2. (duration: 1 min, data view: ${DATE_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('3');
+
+        const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
+        );
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
+        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
+          dataset: DATA_VIEW_ID,
+          timeRange: { to: 'now' },
+          query: { query: 'host.name:* and container.id:*', language: 'kuery' },
+        });
+        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
     });
   });

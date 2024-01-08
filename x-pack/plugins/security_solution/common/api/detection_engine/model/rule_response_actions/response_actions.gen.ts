@@ -52,6 +52,7 @@ export const OsqueryParams = z.object({
   queries: z.array(OsqueryQuery).optional(),
   pack_id: z.string().optional(),
   saved_query_id: z.string().optional(),
+  timeout: z.number().optional(),
 });
 
 export type OsqueryParamsCamelCase = z.infer<typeof OsqueryParamsCamelCase>;
@@ -61,6 +62,7 @@ export const OsqueryParamsCamelCase = z.object({
   queries: z.array(OsqueryQuery).optional(),
   packId: z.string().optional(),
   savedQueryId: z.string().optional(),
+  timeout: z.number().optional(),
 });
 
 export type OsqueryResponseAction = z.infer<typeof OsqueryResponseAction>;

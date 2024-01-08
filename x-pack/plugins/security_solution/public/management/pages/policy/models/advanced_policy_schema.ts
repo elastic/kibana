@@ -682,6 +682,16 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.process_handle',
+    first_supported_version: '8.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.process_handle',
+      {
+        defaultMessage: 'Capture process and thread handle events. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.diagnostic.enabled',
     first_supported_version: '7.11',
     documentation: i18n.translate(
@@ -1159,6 +1169,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.registry',
       {
         defaultMessage: 'Collect callstacks during registry events?  Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.callstacks.timeout_microseconds',
+    first_supported_version: '8.12',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.timeout_microseconds',
+      {
+        defaultMessage:
+          'Maximum runtime of inline callstack collection/enrichment.  Default: 100000',
       }
     ),
   },

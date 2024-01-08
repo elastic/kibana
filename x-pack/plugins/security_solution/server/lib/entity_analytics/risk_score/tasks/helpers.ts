@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 
-import type { Range } from '../../../../../common/risk_engine';
+import type { Range } from '../../../../../common/entity_analytics/risk_engine';
 
 export const convertDateToISOString = (dateString: string): string => {
   const date = datemath.parse(dateString);

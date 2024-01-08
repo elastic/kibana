@@ -190,28 +190,12 @@
           },
           {
             "parentPluginId": "@kbn/deeplinks-observability",
-            "id": "def-common.LogExplorerNavigationParams.sort",
-            "type": "Array",
-            "tags": [],
-            "label": "sort",
-            "description": [
-              "\nArray of the used sorting [[field,direction],...]"
-            ],
-            "signature": [
-              "string[][] | undefined"
-            ],
-            "path": "packages/deeplinks/observability/locators/log_explorer.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/deeplinks-observability",
             "id": "def-common.LogExplorerNavigationParams.filters",
             "type": "Array",
             "tags": [],
             "label": "filters",
             "description": [
-              "\nOptionally apply filters."
+              "\nOptionally apply free-form filters."
             ],
             "signature": [
               {
@@ -222,6 +206,29 @@
                 "text": "Filter"
               },
               "[] | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/log_explorer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.LogExplorerNavigationParams.filterControls",
+            "type": "Object",
+            "tags": [],
+            "label": "filterControls",
+            "description": [
+              "\nOptionally apply curated filter controls"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.FilterControls",
+                "text": "FilterControls"
+              },
+              " | undefined"
             ],
             "path": "packages/deeplinks/observability/locators/log_explorer.ts",
             "deprecated": false,
@@ -497,6 +504,44 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.FilterControls",
+        "type": "Type",
+        "tags": [],
+        "label": "FilterControls",
+        "description": [],
+        "signature": [
+          "{ namespace?: ",
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.ListFilterControl",
+            "text": "ListFilterControl"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/deeplinks/observability/locators/log_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.ListFilterControl",
+        "type": "Type",
+        "tags": [],
+        "label": "ListFilterControl",
+        "description": [],
+        "signature": [
+          "{ mode: \"include\"; values: string[]; }"
+        ],
+        "path": "packages/deeplinks/observability/locators/log_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.LOG_EXPLORER_LOCATOR_ID",
         "type": "string",
         "tags": [],
@@ -527,10 +572,10 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
-        "id": "def-common.OBSERVABILITY_LOG_EXPLORER",
+        "id": "def-common.OBSERVABILITY_LOG_EXPLORER_APP_ID",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_LOG_EXPLORER",
+        "label": "OBSERVABILITY_LOG_EXPLORER_APP_ID",
         "description": [],
         "signature": [
           "\"observability-log-explorer\""

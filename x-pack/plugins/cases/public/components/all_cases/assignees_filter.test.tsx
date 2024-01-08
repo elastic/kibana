@@ -51,19 +51,13 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(screen.getByText('WD'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "data": Object {},
-              "enabled": true,
-              "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
-              "user": Object {
-                "email": "wet_dingo@elastic.co",
-                "full_name": "Wet Dingo",
-                "username": "wet_dingo",
-              },
-            },
-          ]
-      `);
+      Object {
+        "filterId": "assignees",
+        "selectedOptionKeys": Array [
+          "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
+        ],
+      }
+    `);
   });
 
   it('calls onSelectionChange with a single user when different users are selected', async () => {
@@ -83,32 +77,20 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(screen.getByText('damaged_raccoon@elastic.co'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data": Object {},
-          "enabled": true,
-          "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
-          "user": Object {
-            "email": "wet_dingo@elastic.co",
-            "full_name": "Wet Dingo",
-            "username": "wet_dingo",
-          },
-        },
-      ]
+      Object {
+        "filterId": "assignees",
+        "selectedOptionKeys": Array [
+          "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
+        ],
+      }
     `);
     expect(onSelectionChange.mock.calls[1][0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data": Object {},
-          "enabled": true,
-          "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-          "user": Object {
-            "email": "damaged_raccoon@elastic.co",
-            "full_name": "Damaged Raccoon",
-            "username": "damaged_raccoon",
-          },
-        },
-      ]
+      Object {
+        "filterId": "assignees",
+        "selectedOptionKeys": Array [
+          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+        ],
+      }
     `);
   });
 
@@ -128,7 +110,7 @@ describe('AssigneesFilterPopover', () => {
   it('shows the 1 assigned total when the users are passed in', async () => {
     const props = {
       ...defaultProps,
-      selectedAssignees: [userProfiles[0]],
+      selectedAssignees: [userProfiles[0].uid],
     };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
@@ -145,7 +127,7 @@ describe('AssigneesFilterPopover', () => {
   it('shows the total when the multiple users are selected', async () => {
     const props = {
       ...defaultProps,
-      selectedAssignees: [userProfiles[0], userProfiles[1]],
+      selectedAssignees: [userProfiles[0].uid, userProfiles[1].uid],
     };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
 
@@ -239,9 +221,12 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(screen.getByText('No assignees'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Array [
-        null,
-      ]
+      Object {
+        "filterId": "assignees",
+        "selectedOptionKeys": Array [
+          null,
+        ],
+      }
     `);
   });
 
@@ -261,39 +246,30 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(screen.getByText('damaged_raccoon@elastic.co'));
 
     expect(onSelectionChange.mock.calls[0][0]).toMatchInlineSnapshot(`
-      Array [
-        null,
-      ]
+      Object {
+        "filterId": "assignees",
+        "selectedOptionKeys": Array [
+          null,
+        ],
+      }
     `);
 
     expect(onSelectionChange.mock.calls[1][0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data": Object {},
-          "enabled": true,
-          "uid": "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
-          "user": Object {
-            "email": "wet_dingo@elastic.co",
-            "full_name": "Wet Dingo",
-            "username": "wet_dingo",
-          },
-        },
-      ]
+      Object {
+        "filterId": "assignees",
+        "selectedOptionKeys": Array [
+          "u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0",
+        ],
+      }
     `);
 
     expect(onSelectionChange.mock.calls[2][0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "data": Object {},
-          "enabled": true,
-          "uid": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
-          "user": Object {
-            "email": "damaged_raccoon@elastic.co",
-            "full_name": "Damaged Raccoon",
-            "username": "damaged_raccoon",
-          },
-        },
-      ]
+      Object {
+        "filterId": "assignees",
+        "selectedOptionKeys": Array [
+          "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0",
+        ],
+      }
     `);
   });
 
@@ -313,7 +289,7 @@ describe('AssigneesFilterPopover', () => {
   });
 
   it('shows warning message when reaching maximum limit to filter', async () => {
-    const maxAssignees = Array(MAX_ASSIGNEES_FILTER_LENGTH).fill(userProfiles[0]);
+    const maxAssignees = Array(MAX_ASSIGNEES_FILTER_LENGTH).fill(userProfiles[0].uid);
     const props = {
       ...defaultProps,
       selectedAssignees: maxAssignees,

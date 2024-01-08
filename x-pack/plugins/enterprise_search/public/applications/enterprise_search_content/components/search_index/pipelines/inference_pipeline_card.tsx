@@ -11,16 +11,14 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiPopover,
   EuiText,
-  EuiTextColor,
   EuiTitle,
-  EuiToolTip,
+  useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -39,20 +37,18 @@ import { TrainedModelHealth } from './ml_model_health';
 import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
 
-export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
+export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
+
+  const { deleteMlPipeline, detachMlPipeline } = useActions(PipelinesLogic);
+
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const { deleteMlPipeline, detachMlPipeline } = useActions(PipelinesLogic);
-  const showConfirmDeleteModal = () => {
-    setShowConfirmDelete(true);
-    setIsPopOverOpen(false);
-  };
-  const { modelId, pipelineName, types: modelTypes } = pipeline;
-  const modelType = getMLType(modelTypes);
-  const modelTitle = getModelDisplayTitle(modelType);
+
+  const { pipelineName } = pipeline;
+
   const actionButton = (
     <EuiButtonEmpty
       iconSide="right"
@@ -67,119 +63,88 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
     </EuiButtonEmpty>
   );
 
+  const showConfirmDeleteModal = () => {
+    setShowConfirmDelete(true);
+    setIsPopOverOpen(false);
+  };
+
   return (
-    <EuiPanel color="subdued">
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="xs">
+    <>
+      <EuiPopover
+        button={actionButton}
+        isOpen={isPopOverOpen}
+        closePopover={() => setIsPopOverOpen(false)}
+      >
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {pipeline.modelState === TrainedModelState.NotDeployed && (
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h4>{pipelineName ?? modelTitle}</h4>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {modelTitle && (
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiTextColor color="subdued">{modelId}</EuiTextColor>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <span>
-                      <MLModelTypeBadge type={modelType} />
-                    </span>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            button={actionButton}
-            isOpen={isPopOverOpen}
-            closePopover={() => setIsPopOverOpen(false)}
-          >
-            {pipeline.modelState === TrainedModelState.NotDeployed && (
-              <EuiFlexItem grow={false} style={{ paddingRight: '1rem' }}>
-                <EuiToolTip
-                  position="top"
-                  content={i18n.translate(
-                    'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
-                    { defaultMessage: 'Fix issue in Trained Models' }
-                  )}
+              <span>
+                <EuiButtonEmpty
+                  data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
+                  size="s"
+                  flush="both"
+                  iconType="wrench"
+                  color="text"
+                  href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
                 >
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
-                      {
-                        defaultMessage: 'Fix issue in Trained Models',
-                      }
-                    )}
-                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
-                    href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
-                    display="base"
-                    size="xs"
-                    iconType="wrench"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <div>
-                  <EuiButtonEmpty
-                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-stackManagement`}
-                    size="s"
-                    flush="both"
-                    iconType="eye"
-                    color="text"
-                    href={http.basePath.prepend(
-                      `/app/management/ingest/ingest_pipelines/?pipeline=${pipelineName}`
-                    )}
-                  >
-                    {i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.action.view', {
-                      defaultMessage: 'View in Stack Management',
-                    })}
-                  </EuiButtonEmpty>
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <div>
-                  <EuiButtonEmpty
-                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
-                    size="s"
-                    flush="both"
-                    iconType="unlink"
-                    color="text"
-                    onClick={() => {
-                      detachMlPipeline({ indexName, pipelineName });
-                      setIsPopOverOpen(false);
-                    }}
-                  >
-                    {i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.action.detach', {
-                      defaultMessage: 'Detach pipeline',
-                    })}
-                  </EuiButtonEmpty>
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <div>
-                  <DeleteInferencePipelineButton
-                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
-                    onClick={showConfirmDeleteModal}
-                    pipeline={pipeline}
-                  />
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
+                    {
+                      defaultMessage: 'Fix issue in Trained Models',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              </span>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <span>
+              <EuiButtonEmpty
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-stackManagement`}
+                size="s"
+                flush="both"
+                iconType="eye"
+                color="text"
+                href={http.basePath.prepend(
+                  `/app/management/ingest/ingest_pipelines/?pipeline=${pipelineName}`
+                )}
+              >
+                {i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.action.view', {
+                  defaultMessage: 'View in Stack Management',
+                })}
+              </EuiButtonEmpty>
+            </span>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <span>
+              <EuiButtonEmpty
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
+                size="s"
+                flush="both"
+                iconType="unlink"
+                color="text"
+                onClick={() => {
+                  detachMlPipeline({ indexName, pipelineName });
+                  setIsPopOverOpen(false);
+                }}
+              >
+                {i18n.translate('xpack.enterpriseSearch.inferencePipelineCard.action.detach', {
+                  defaultMessage: 'Detach pipeline',
+                })}
+              </EuiButtonEmpty>
+            </span>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <span>
+              <DeleteInferencePipelineButton
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
+                onClick={showConfirmDeleteModal}
+                pipeline={pipeline}
+              />
+            </span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopover>
 
       {showConfirmDelete && (
         <EuiConfirmModal
@@ -217,6 +182,48 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
           </EuiText>
         </EuiConfirmModal>
       )}
+    </>
+  );
+};
+
+export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
+  const { modelId, pipelineName, types: modelTypes } = pipeline;
+  const modelType = getMLType(modelTypes);
+  const modelTitle = getModelDisplayTitle(modelType);
+  const isSmallScreen = useIsWithinMaxBreakpoint('s');
+
+  return (
+    <EuiPanel color="subdued">
+      <EuiFlexGroup alignItems="center" gutterSize={isSmallScreen ? 'xs' : undefined}>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h4>{pipelineName ?? modelTitle}</h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            {modelTitle && (
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      {modelId}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <span>
+                      <MLModelTypeBadge type={modelType} />
+                    </span>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <TrainedModelHealthPopover {...pipeline} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

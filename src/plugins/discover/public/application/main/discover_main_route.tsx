@@ -9,15 +9,16 @@
 import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { redirectWhenMissing, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
+  type IKbnUrlStateStorage,
+  redirectWhenMissing,
+  SavedObjectNotFound,
+} from '@kbn/kibana-utils-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -46,6 +47,7 @@ interface DiscoverLandingParams {
 
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
+  stateStorageContainer?: IKbnUrlStateStorage;
   isDev: boolean;
   customizationContext: DiscoverCustomizationContext;
 }
@@ -53,6 +55,7 @@ export interface MainRouteProps {
 export function DiscoverMainRoute({
   customizationCallbacks,
   customizationContext,
+  stateStorageContainer,
 }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
@@ -70,6 +73,7 @@ export function DiscoverMainRoute({
       history,
       services,
       customizationContext,
+      stateStorageContainer,
     })
   );
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
@@ -275,6 +279,22 @@ export function DiscoverMainRoute({
 
   const mainContent = useMemo(() => {
     if (showNoDataPage) {
+      const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+      const AnalyticsNoDataPageKibanaProvider = withSuspense(
+        React.lazy(() =>
+          importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+            return { default: NoDataProvider };
+          })
+        )
+      );
+      const AnalyticsNoDataPage = withSuspense(
+        React.lazy(() =>
+          importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+            return { default: NoDataPage };
+          })
+        )
+      );
+
       return (
         <AnalyticsNoDataPageKibanaProvider {...noDataDependencies}>
           <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
