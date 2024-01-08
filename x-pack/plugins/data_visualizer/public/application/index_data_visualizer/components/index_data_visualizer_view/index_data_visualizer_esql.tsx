@@ -34,10 +34,9 @@ import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { debounce, first } from 'lodash';
+import { debounce } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESQLSearchReponse } from '@kbn/es-types';
@@ -78,6 +77,7 @@ import { MAX_PERCENT, PERCENTILE_SPACING } from '../../search_strategy/requests/
 import { processDistributionData } from '../../utils/process_distribution_data';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import type { DocumentCountStats } from '../../../common/hooks/use_document_count_stats';
+import { getDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 
 type BucketCount = number;
 type BucketTerm = string;
@@ -87,31 +87,6 @@ const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
   KBN_FIELD_TYPES.GEO_POINT,
   KBN_FIELD_TYPES.HISTOGRAM,
 ]);
-
-export async function getDataViewByIndexPattern(
-  dataViews: DataViewsContract,
-  indexPatternFromQuery: string | undefined,
-  currentDataView: DataView | undefined
-) {
-  if (indexPatternFromQuery) {
-    const matched = await dataViews.find(indexPatternFromQuery);
-    if (matched) return first(matched);
-  }
-  if (
-    indexPatternFromQuery &&
-    (currentDataView?.isPersisted() || indexPatternFromQuery !== currentDataView?.getIndexPattern())
-  ) {
-    const dataViewObj = await dataViews.create({
-      title: indexPatternFromQuery,
-    });
-
-    if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-      dataViewObj.timeFieldName = '@timestamp';
-    }
-    return dataViewObj;
-  }
-  return currentDataView;
-}
 
 interface Column {
   type: string;
