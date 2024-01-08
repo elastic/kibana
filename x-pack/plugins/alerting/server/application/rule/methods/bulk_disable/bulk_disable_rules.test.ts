@@ -6,7 +6,11 @@
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
-import { savedObjectsClientMock, savedObjectsRepositoryMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';

@@ -74,7 +74,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
-  uiSettings: uiSettingsServiceMock.createStartContract(),  
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 setGlobalDate();
