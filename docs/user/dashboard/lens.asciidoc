@@ -627,7 +627,9 @@ If you have selected *Value type: Number* in the palette editor, colors will be 
 
 The *Primary metric* refers to the large number that is displayed in each tile:
 
-<TODO image>
+[role="screenshot"]
+image:images/lens_primaryMetric.png[Illustration of where to find the primary metric in a metric visualization.]
+
 
 If you have selected *Value type: Percent*, the primary metric values are mapped to a range between 0 and 100 percent. The bounds of the range depend on your configuration.
 
