@@ -45,18 +45,13 @@ export function getTranslatableValueFromString(str: string) {
     return '';
   }
 
-  // Numbers
-  if (strTrimmed.replace(/[0-9]+/g, '').length === 0) {
-    return '';
-  }
-
   // Markdown
   if (strTrimmed.replace(/```\w*```/g, '').length === 0) {
     return '';
   }
 
-  // Special characters
-  if (strTrimmed.replace(/[!\@\#\$\%\^\&\*\(\)\_\+\{\}\|]+/g, '').length === 0) {
+  // Special characters, numbers, and white spaces
+  if (strTrimmed.replace(/[!\@\#\$\%\^\&\*\(\)\_\+\{\}\|]|[0-9]|\s+/g, '').length === 0) {
     return '';
   }
 

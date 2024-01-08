@@ -99,6 +99,8 @@ describe('Utils', () => {
       expect(geti18nIdentifierFromString('!!!!')).toBe('');
       expect(geti18nIdentifierFromString('@')).toBe('');
       expect(geti18nIdentifierFromString('!@#$%^&*()_+{}|')).toBe('');
+      expect(geti18nIdentifierFromString('!@#$%^&*()_+{}| 123 456 789')).toBe('');
+      expect(geti18nIdentifierFromString('!@#$%^&*()_+{}|123456789')).toBe('');
 
       expect(geti18nIdentifierFromString('Hey, you.')).toBe('heyYou');
       expect(geti18nIdentifierFromString('Hey, "you".')).toBe('heyYou');
