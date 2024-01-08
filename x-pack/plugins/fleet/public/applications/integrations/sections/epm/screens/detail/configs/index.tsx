@@ -26,9 +26,10 @@ import { useGetInputsTemplatesQuery, useStartServices } from '../../../../../hoo
 
 interface ConfigsProps {
   packageInfo: PackageInfo;
+  prerelease?: boolean;
 }
 
-export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
+export const Configs: React.FC<ConfigsProps> = ({ packageInfo, prerelease }) => {
   const { notifications, docLinks } = useStartServices();
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
   const notInstalled = packageInfo.status !== 'installing';
@@ -37,7 +38,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
     data: configs,
     error,
     isLoading,
-  } = useGetInputsTemplatesQuery({ pkgName, pkgVersion }, { format: 'yaml' });
+  } = useGetInputsTemplatesQuery({ pkgName, pkgVersion }, { format: 'yaml', prerelease });
 
   if (error) {
     notifications.toasts.addError(error, {
