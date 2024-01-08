@@ -68,6 +68,10 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
 ];
 
 export const getItems: (entityData: EntityData | undefined) => TableItem[] = (entityData) => {
+  const alerts = entityData?.risk?.inputs ?? [];
+
+  console.log('data', entityData);
+
   return [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
@@ -75,6 +79,13 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
       }),
       score: entityData?.risk.category_1_score ?? 0,
       count: entityData?.risk.category_1_count ?? 0,
+    },
+    {
+      category: i18n.translate('xpack.securitySolution.flyout.entityDetails.contextGroupLabel', {
+        defaultMessage: 'Contexts',
+      }),
+      score: alerts.reduce((total, alert) => total + normalizeRiskScore(alert.risk_score), 0),
+      count: alerts.length,
     },
   ];
 };
