@@ -423,6 +423,16 @@ export function getTextBasedDatasource({
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
       const fields = retrieveFromCache();
       const allColumns = props.state.layers[props.layerId]?.allColumns;
+      // in case the cache is empty, get the fields list from state
+      if (fields.length === 0) {
+        allColumns.forEach((col) => {
+          fields.push({
+            id: col.columnId,
+            name: col.fieldName,
+            meta: col?.meta ?? { type: 'number' },
+          });
+        });
+      }
       const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
       const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
 

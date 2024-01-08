@@ -13,5 +13,5 @@ export const addToCache = (list: DatatableColumn[]) => {
 };
 
 export const retrieveFromCache = () => {
-  return fieldListCache;
+  return fieldListCache ?? [];
 };
