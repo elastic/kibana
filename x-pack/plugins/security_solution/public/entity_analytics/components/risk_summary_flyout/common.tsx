@@ -68,15 +68,13 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
 ];
 
 export const getItems: (entityData: EntityData | undefined) => TableItem[] = (entityData) => {
-  const alerts = entityData?.risk?.inputs ?? [];
-
   return [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
         defaultMessage: 'Alerts',
       }),
-      score: alerts.reduce((total, alert) => total + normalizeRiskScore(alert.risk_score), 0),
-      count: alerts.length,
+      score: entityData?.risk.category_1_score ?? 0,
+      count: entityData?.risk.category_1_count ?? 0,
     },
   ];
 };
