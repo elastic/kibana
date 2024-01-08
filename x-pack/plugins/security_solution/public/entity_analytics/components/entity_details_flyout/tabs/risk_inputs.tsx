@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
-import { EuiSpacer, EuiInMemoryTable, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
@@ -37,6 +37,7 @@ const FIRST_RECORD_PAGINATION = {
 
 export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) => {
   const [selectedItems, setSelectedItems] = useState<AlertRawData[]>([]);
+
   const nameFilterQuery = useMemo(() => {
     if (entityType === RiskScoreEntity.host) {
       return buildHostNamesFilter([entityName]);
@@ -45,7 +46,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     }
   }, [entityName, entityType]);
 
-  const { data: riskScoreData } = useRiskScore({
+  const { data: riskScoreData, error: riskScoreError } = useRiskScore({
     riskEntity: entityType,
     filterQuery: nameFilterQuery,
     onlyLatest: false,
@@ -54,7 +55,11 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
   });
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
-  const { loading, data: alertsData } = useRiskContributingAlerts({ riskScore });
+  const {
+    loading,
+    data: alertsData,
+    error: riskAlertsError,
+  } = useRiskContributingAlerts({ riskScore });
 
   const euiTableSelectionProps = useMemo(
     () => ({
@@ -130,6 +135,28 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     }),
     [currentPage.index, currentPage.size, alertsData?.length]
   );
+
+  if (riskScoreError || riskAlertsError) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorTitle"
+            defaultMessage="Something went wrong"
+          />
+        }
+        color="danger"
+        iconType="error"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorBody"
+            defaultMessage="Error while fetching risk inputs. Please try again later."
+          />
+        </p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <>
