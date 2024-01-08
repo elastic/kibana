@@ -35,7 +35,7 @@ describe('AggConfig Filters', () => {
       return new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn());
     };
 
-    test('should return a range filter for ip_prefix agg', () => {
+    test('should return a range filter for ip_prefix agg - ipv4', () => {
       const aggConfigs = getAggConfigs([
         {
           type: BUCKET_TYPES.IP_PREFIX,
@@ -60,6 +60,60 @@ describe('AggConfig Filters', () => {
       expect(filter.query.range).toHaveProperty('ip');
       expect(filter.query.range.ip).toHaveProperty('gte', '10.0.0.0');
       expect(filter.query.range.ip).toHaveProperty('lte', '10.255.255.255');
+    });
+
+    test('should return a range filter for ip_prefix agg - ipv4 mapped to ipv6', () => {
+      const aggConfigs = getAggConfigs([
+        {
+          type: BUCKET_TYPES.IP_PREFIX,
+          schema: 'segment',
+          params: {
+            field: 'ip',
+            address: '0.0.0.0',
+            prefix_length: 96,
+          },
+        },
+      ]);
+
+      const filter = createFilterIpPrefix(aggConfigs.aggs[0] as IBucketAggConfig, {
+        type: 'ip_prefix',
+        address: '0.0.0.0',
+        prefix_length: 96,
+      }) as RangeFilter;
+
+      expect(filter.query).toHaveProperty('range');
+      expect(filter).toHaveProperty('meta');
+      expect(filter.meta).toHaveProperty('index', '1234');
+      expect(filter.query.range).toHaveProperty('ip');
+      expect(filter.query.range.ip).toHaveProperty('gte', '::ffff:0:0');
+      expect(filter.query.range.ip).toHaveProperty('lte', '::ffff:ffff:ffff');
+    });
+
+    test('should return a range filter for ip_prefix agg - ipv6', () => {
+      const aggConfigs = getAggConfigs([
+        {
+          type: BUCKET_TYPES.IP_PREFIX,
+          schema: 'segment',
+          params: {
+            field: 'ip',
+            address: '1989:1337:c0de:7e57::',
+            prefix_length: 56,
+          },
+        },
+      ]);
+
+      const filter = createFilterIpPrefix(aggConfigs.aggs[0] as IBucketAggConfig, {
+        type: 'ip_prefix',
+        address: '1989:1337:c0de:7e57::',
+        prefix_length: 56,
+      }) as RangeFilter;
+
+      expect(filter.query).toHaveProperty('range');
+      expect(filter).toHaveProperty('meta');
+      expect(filter.meta).toHaveProperty('index', '1234');
+      expect(filter.query.range).toHaveProperty('ip');
+      expect(filter.query.range.ip).toHaveProperty('gte', '1989:1337:c0de:7e00::');
+      expect(filter.query.range.ip).toHaveProperty('lte', '1989:1337:c0de:7eff:ffff:ffff:ffff:ffff');
     });
   });
 });
