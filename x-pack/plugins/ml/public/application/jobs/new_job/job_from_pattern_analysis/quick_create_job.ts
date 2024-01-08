@@ -22,6 +22,7 @@ import type { JobCreatorType } from '../common/job_creator';
 
 export const CATEGORIZATION_TYPE = {
   COUNT: ML_JOB_AGGREGATION.COUNT,
+  HIGH_COUNT: ML_JOB_AGGREGATION.HIGH_COUNT,
   RARE: ML_JOB_AGGREGATION.RARE,
 } as const;
 
