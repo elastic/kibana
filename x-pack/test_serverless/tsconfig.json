@@ -87,5 +87,6 @@
     "@kbn/slo-schema",
     "@kbn/core",
     "@kbn/alerting-plugin",
+    "@kbn/ftr-common-functional-ui-services",
   ]
 }
