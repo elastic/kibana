@@ -25,6 +25,7 @@ export const REMOVED_TYPES: string[] = [
   'search_sessions_expire',
 
   'cleanup_failed_action_executions',
+  'reports:monitor',
 ];
 
 /**
