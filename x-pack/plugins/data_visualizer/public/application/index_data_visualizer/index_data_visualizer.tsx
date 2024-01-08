@@ -446,7 +446,6 @@ export const IndexDataVisualizer: FC<Props> = ({
   showFrozenDataTierChoice = true,
   esql,
 }) => {
-  console.log('IndexDataVisualizer props', esql);
   const coreStart = getCoreStart();
   const {
     data,
