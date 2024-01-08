@@ -457,13 +457,13 @@ describe('RiskScoreDataClient', () => {
   describe('upgrade process', () => {
     beforeEach(() => {
       jest.spyOn(riskScoreDataClient, 'upgrade');
-      spyOnPrivateMethod(riskScoreDataClient, 'upsertRiskScoreLatestIndex');
+      spyOnPrivateMethod(riskScoreDataClient, 'setRiskScoreLatestIndexDynamicConfiguration');
     });
     it('upserts the configuration for the latest risk score index when upgrading', async () => {
       await riskScoreDataClient.upgrade();
 
       expect(
-        getPrivateMethod(riskScoreDataClient, 'upsertRiskScoreLatestIndex')
+        getPrivateMethod(riskScoreDataClient, 'setRiskScoreLatestIndexDynamicConfiguration')
       ).toHaveBeenCalled();
     });
     it('upserts the configuration for the latest risk score index only a single time, no matter how many times upgrade is called', async () => {
@@ -473,7 +473,7 @@ describe('RiskScoreDataClient', () => {
         })
       );
       expect(
-        getPrivateMethod(riskScoreDataClient, 'upsertRiskScoreLatestIndex')
+        getPrivateMethod(riskScoreDataClient, 'setRiskScoreLatestIndexDynamicConfiguration')
       ).toHaveBeenCalledTimes(1);
     });
   });
