@@ -27,7 +27,6 @@ import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plug
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -185,7 +184,6 @@ export interface DiscoverStartPlugins {
   share?: SharePluginStart;
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
-  savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;

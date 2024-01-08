@@ -59,7 +59,8 @@
     "@kbn/ml-plugin",
     "@kbn/expect",
     "@kbn/apm-synthtrace-client",
-    "@kbn/apm-synthtrace"
+    "@kbn/apm-synthtrace",
+    "@kbn/code-editor"
   ],
   "exclude": ["target/**/*"]
 }
