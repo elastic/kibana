@@ -241,7 +241,11 @@ export async function extractAndWriteSecrets(opts: {
     values: secretsToCreate.map((secretPath) => secretPath.value.value),
   });
 
-  const policyWithSecretRefs = getPolicyWithSecretReferences(secretPaths, secrets, packagePolicy);
+  const policyWithSecretRefs = getPolicyWithSecretReferences(
+    secretsToCreate,
+    secrets,
+    packagePolicy
+  );
 
   return {
     packagePolicy: policyWithSecretRefs,
