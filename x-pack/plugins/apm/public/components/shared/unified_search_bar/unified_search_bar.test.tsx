@@ -11,7 +11,7 @@ import { useLocation } from 'react-router-dom';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
-import * as useApmDataViewHook from '../../../hooks/use_apm_data_view';
+import * as useApmDataViewHook from '../../../hooks/use_adhoc_apm_data_view';
 import * as useApmParamsHook from '../../../hooks/use_apm_params';
 import * as useProcessorEventHook from '../../../hooks/use_processor_event';
 import { fromQuery } from '../links/url_helpers';
@@ -69,7 +69,7 @@ function setup({
 
   // mock transaction types
   jest
-    .spyOn(useApmDataViewHook, 'useApmDataView')
+    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
     .mockReturnValue({ dataView: undefined });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
