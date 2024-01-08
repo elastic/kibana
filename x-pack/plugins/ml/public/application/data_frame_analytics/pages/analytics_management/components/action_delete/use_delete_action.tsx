@@ -59,7 +59,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const checkDataViewExists = async () => {
     try {
-      const dv = (await dataViews.getIdsWithTitle()).find(({ title }) => title === indexName);
+      const dv = (await dataViews.getIdsWithTitle(true)).find(({ title }) => title === indexName);
       if (dv !== undefined) {
         setDataViewExists(true);
       } else {
