@@ -72,7 +72,11 @@ import {
   selectExecutionContextSearch,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
-import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
+import {
+  inferTimeField,
+  DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS,
+  EXPRESSION_BUILD_ERROR_ID,
+} from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { WorkspaceErrors } from './workspace_errors';
 
@@ -112,8 +116,6 @@ const executionContext: KibanaExecutionContext = {
     type: 'lens',
   },
 };
-
-const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';
 
 export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
   const { getSuggestionForField, ...restProps } = props;
@@ -295,11 +297,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = useCallback(() => {
-    return getUserMessages(['visualization', 'visualizationInEditor'], {
-      severity: 'error',
-    });
-  }, [getUserMessages]);
+  const workspaceErrors = useCallback(
+    () =>
+      getUserMessages(['visualization', 'visualizationInEditor'], {
+        severity: 'error',
+      }),
+    [getUserMessages]
+  );
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
