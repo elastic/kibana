@@ -51,6 +51,7 @@
       "stackConnectors",
       "discover",
       "notifications",
+      "savedObjects",
       "savedSearch",
       "unifiedDocViewer",
     ],
@@ -78,8 +79,7 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch",
-      "savedObjects"
+      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"
