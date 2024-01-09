@@ -165,7 +165,7 @@ APM::
 * Adds the KQL bar to embeddables ({kibana-pull}171016[#171016]).
 * Enables the average mobile app launch time panel ({kibana-pull}170773[#170773]).
 * Enables the mobile most launches panel ({kibana-pull}168925[#168925]).
-* Improves the Differential TopN functions grid view ({kibana-pull}170008[#170008]).
+* Improves the Differential Top N functions grid view ({kibana-pull}170008[#170008]).
 Cases::
 * Users can copy to the clipboard the hashes of files uploaded to cases ({kibana-pull}172450[#172450]).
 * Allow users to configure which columns are displayed in the cases list including custom fields ({kibana-pull}170950[#170950]).
