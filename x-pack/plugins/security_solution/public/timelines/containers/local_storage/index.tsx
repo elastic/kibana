@@ -12,6 +12,7 @@ import type {
   DataTableModel,
   TableIdLiteral,
 } from '@kbn/securitysolution-data-table';
+import { tableEntity, TableEntityType } from '@kbn/securitysolution-data-table';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { assigneesColumn } from '../../../detections/configurations/security_solution_detections/columns';
@@ -247,7 +248,13 @@ export const addAssigneesSpecsToSecurityDataTableIfNeeded = (
 ) => {
   // Add "Assignees" column specs to the table data model
   let updatedTableModel = false;
-  for (const [_, tableModel] of Object.entries(dataTableState)) {
+  for (const [tableId, tableModel] of Object.entries(dataTableState)) {
+    // Only add "Assignees" column specs to alerts tables
+    if (tableEntity[tableId as TableId] !== TableEntityType.alert) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
     // We added a new base column for "Assignees" in 8.12
     // In order to show correct custom header label after user upgrades to 8.12 we need to make sure the appropriate specs are in the table model.
     const columns = tableModel.columns;
