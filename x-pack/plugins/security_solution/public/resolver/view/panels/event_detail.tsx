@@ -21,7 +21,6 @@ import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
-  SecurityCellActionType,
 } from '../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
@@ -228,14 +227,11 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
               field: data.title,
               value: data.description,
             }}
+            visibleCellActions={5}
             triggerId={SecurityCellActionsTrigger.DEFAULT}
             mode={CellActionsMode.HOVER_DOWN}
             sourcererScopeId={getSourcererScopeId(id)}
             metadata={{ scopeId: id }}
-            disabledActionTypes={[
-              SecurityCellActionType.FILTER,
-              SecurityCellActionType.TOGGLE_COLUMN,
-            ]}
           >
             {data.description}
           </SecurityCellActions>
@@ -248,6 +244,7 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
       items={descriptions}
       columns={columns}
       search={search}
+      pagination={true}
       sorting
     />
   );

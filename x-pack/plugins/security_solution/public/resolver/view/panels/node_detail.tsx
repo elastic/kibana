@@ -28,7 +28,6 @@ import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
-  SecurityCellActionType,
 } from '../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../helpers';
 import { Breadcrumbs } from './breadcrumbs';
@@ -79,6 +78,7 @@ export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: s
 export interface NodeDetailsTableView {
   title: string;
   description: string;
+  value?: string | number;
 }
 /**
  * A description list view of all the Metadata that goes with a particular process event, like:
@@ -108,6 +108,7 @@ const NodeDetailView = memo(function ({
     const createdEntry = {
       title: '@timestamp',
       description: dateTime,
+      value: eventTime,
     };
 
     const pathEntry = {
@@ -191,7 +192,7 @@ const NodeDetailView = memo(function ({
       });
 
     return processDescriptionListData;
-  }, [dateTime, processEvent]);
+  }, [dateTime, eventTime, processEvent]);
 
   const nodesLinkNavProps = useLinkProps(id, {
     panelView: 'nodes',
@@ -258,16 +259,13 @@ const NodeDetailView = memo(function ({
           <SecurityCellActions
             data={{
               field: data.title,
-              value: data.description,
+              value: data.value ?? data.description,
             }}
             triggerId={SecurityCellActionsTrigger.DEFAULT}
             mode={CellActionsMode.HOVER_DOWN}
+            visibleCellActions={5}
             sourcererScopeId={getSourcererScopeId(id)}
             metadata={{ scopeId: id }}
-            disabledActionTypes={[
-              SecurityCellActionType.FILTER,
-              SecurityCellActionType.TOGGLE_COLUMN,
-            ]}
           >
             {data.description}
           </SecurityCellActions>
