@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { KueryNode } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
@@ -606,8 +607,29 @@ function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
   return objToReturn;
 }
 
+function validTotalHitsLimitationOnExecutionLog(esHitsTotal: estypes.SearchTotalHits) {
+  if (
+    esHitsTotal &&
+    esHitsTotal.relation &&
+    esHitsTotal.value &&
+    esHitsTotal.relation === 'gte' &&
+    esHitsTotal.value === 10000
+  ) {
+    throw Boom.entityTooLarge(
+      i18n.translate('xpack.alerting.feature.executionLogAggs.limitationQueryMsg', {
+        defaultMessage:
+          'Results are limited to 10,000 documents, refine your search to see others.',
+      }),
+      EMPTY_EXECUTION_LOG_RESULT
+    );
+  }
+}
+
 export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
-  const { aggregations } = results;
+  const { aggregations, hits } = results;
+
+  validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
+
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_KPI_RESULT;
   }
@@ -619,7 +641,9 @@ export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectRe
 export function formatExecutionLogResult(
   results: AggregateEventsBySavedObjectResult
 ): IExecutionLogResult {
-  const { aggregations } = results;
+  const { aggregations, hits } = results;
+
+  validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
 
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_LOG_RESULT;
