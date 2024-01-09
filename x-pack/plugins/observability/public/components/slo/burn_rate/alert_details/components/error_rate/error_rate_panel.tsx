@@ -13,7 +13,7 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionGroup, WindowSchema } from '@kbn/observability-plugin/public/typings';
+import { ActionGroup, WindowSchema } from '../../../../../../typings';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { ErrorRateChart } from '../../../../error_rate_chart';

@@ -8,13 +8,12 @@
 import { EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { AlertSummaryField } from '@kbn/observability-plugin/public/pages/alert_details/components/alert_summary';
-import { TopAlert } from '@kbn/observability-plugin/public/typings/alerts';
-import { BurnRateRuleParams } from '@kbn/observability-plugin/public/typings/slo';
 import React, { useEffect } from 'react';
 import { useFetchSloDetails } from '../../../../hooks/slo/use_fetch_slo_details';
+import { AlertSummaryField } from '../../../../pages/alert_details/components/alert_summary';
+import { TopAlert } from '../../../../typings/alerts';
+import { BurnRateRuleParams } from '../../../../typings/slo';
 import { useKibana } from '../../../../utils/kibana_react';
-
 import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
 
 export type BurnRateRule = Rule<BurnRateRuleParams>;
