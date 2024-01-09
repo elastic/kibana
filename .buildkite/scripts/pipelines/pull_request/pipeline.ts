@@ -265,6 +265,34 @@ const uploadPipeline = (pipelineContent: string | object) => {
       );
     }
 
+    if (
+      (await doAnyChangesMatch([
+        /^package.json/,
+        /^packages\/kbn-securitysolution-.*/,
+        /^x-pack\/plugins\/threat_intelligence/,
+        /^x-pack\/packages\/security-solution/,
+        /^x-pack\/test\/security_solution_cypress/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/threat_intelligence.yml')
+      );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^package.json/,
+        /^packages\/kbn-securitysolution-.*/,
+        /^x-pack\/plugins\/osquery/,
+        /^x-pack\/packages\/security-solution/,
+        /^x-pack\/test\/security_solution_cypress/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/osquery.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     // remove duplicated steps
