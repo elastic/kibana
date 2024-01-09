@@ -22,6 +22,10 @@ import { wrapErrorIfNeeded } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
 export const ManifestTaskConstants = {
+  /**
+   * No longer used. Timeout value now comes from `xpack.securitySolution.packagerTaskTimeout`
+   * @deprecated
+   */
   TIMEOUT: '1m',
   TYPE: 'endpoint:user-artifact-packager',
   VERSION: '1.0.0',
@@ -44,24 +48,34 @@ export class ManifestTask {
   constructor(setupContract: ManifestTaskSetupContract) {
     this.endpointAppContext = setupContract.endpointAppContext;
     this.logger = this.endpointAppContext.logFactory.get(this.getTaskId());
+    const { packagerTaskInterval, packagerTaskTimeout } = this.endpointAppContext.serverConfig;
+
+    this.logger.info(
+      `Registering ${ManifestTaskConstants.TYPE} task with timeout of [${packagerTaskTimeout}] and interval of [${packagerTaskInterval}]`
+    );
 
     setupContract.taskManager.registerTaskDefinitions({
       [ManifestTaskConstants.TYPE]: {
         title: 'Security Solution Endpoint Exceptions Handler',
-        timeout: ManifestTaskConstants.TIMEOUT,
+        timeout: packagerTaskTimeout,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              const taskInterval = (await this.endpointAppContext.config()).packagerTaskInterval;
+              const taskInterval = packagerTaskInterval;
               const startTime = new Date();
+
               await this.runTask(taskInstance.id);
+
               const endTime = new Date().getTime();
+
               this.logger.info(
                 `Complete. Task run took ${
                   endTime - startTime.getTime()
                 }ms [ stated: ${startTime.toISOString()} ]`
               );
+
               const nextRun = new Date();
+
               if (taskInterval.endsWith('s')) {
                 const seconds = parseInt(taskInterval.slice(0, -1), 10);
                 nextRun.setSeconds(nextRun.getSeconds() + seconds);
@@ -72,6 +86,7 @@ export class ManifestTask {
                 this.logger.error(`Invalid task interval: ${taskInterval}`);
                 return;
               }
+
               return {
                 state: {},
                 runAt: nextRun,
@@ -79,6 +94,7 @@ export class ManifestTask {
             },
             cancel: async () => {
               // TODO:PT add support for AbortController to Task manager
+              this.logger.debug(`Task run was canceled.`);
             },
           };
         },
@@ -95,7 +111,7 @@ export class ManifestTask {
         taskType: ManifestTaskConstants.TYPE,
         scope: ['securitySolution'],
         schedule: {
-          interval: (await this.endpointAppContext.config()).packagerTaskInterval,
+          interval: this.endpointAppContext.serverConfig.packagerTaskInterval,
         },
         state: {},
         params: { version: ManifestTaskConstants.VERSION },
