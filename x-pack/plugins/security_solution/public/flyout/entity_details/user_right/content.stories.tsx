@@ -13,10 +13,10 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
   mockManagedUserData,
-  mockObservedUser,
   mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
 import { UserPanelContent } from './content';
+import { mockObservedUser } from './mocks';
 
 const flyoutContextValue = {
   openLeftPanel: () => window.alert('openLeftPanel called'),
