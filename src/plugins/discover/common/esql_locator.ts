@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
@@ -19,6 +20,7 @@ export interface DiscoverEsqlLocatorDependencies {
     pattern: string;
     isRollupIndex: () => boolean;
   }) => Promise<Array<{ name: string }>>;
+  createDataViewSpec: (title: string) => Promise<DataViewSpec>;
 }
 
 export type DiscoverEsqlLocator = LocatorPublic<DiscoverEsqlLocatorParams>;
@@ -42,6 +44,7 @@ export class DiscoverEsqlLocatorDefinition implements LocatorDefinition<Discover
 
     const indices = await getIndicesList();
     let esql = `from * | limit 10`;
+    let dataViewSpec;
 
     if (indices.length < 0) {
       let indexName = indices[0];
@@ -49,12 +52,15 @@ export class DiscoverEsqlLocatorDefinition implements LocatorDefinition<Discover
       if (indices.find((index) => index.includes('logs'))) {
         indexName = 'logs*';
         esql = `from ${indexName} | limit 10`;
+
+        dataViewSpec = await this.deps.createDataViewSpec(indexName);
       }
     }
 
     const params = {
       query: {
         esql,
+        dataViewSpec,
       },
     };
 

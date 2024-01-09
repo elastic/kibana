@@ -405,11 +405,17 @@ export class DiscoverPlugin
       return this.getDiscoverServices(core, plugins);
     };
 
-    if (plugins.share && this.locator) {
+    const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
+
+    if (plugins.share && this.locator && isEsqlEnabled) {
       plugins.share?.url.locators.create(
         new DiscoverEsqlLocatorDefinition({
           discoverAppLocator: this.locator,
           getIndices: plugins.dataViews.getIndices,
+          createDataViewSpec: async (title: string) => {
+            const dataView = await plugins.dataViews.create({ title });
+            return dataView?.toSpec();
+          },
         })
       );
     }
