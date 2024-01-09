@@ -264,21 +264,27 @@ export function registerAnomalyDetectionAlertType({
       const { isHealthy, name, context, payload } = executionResult;
 
       if (!isHealthy) {
-        alertsClient.report({
+        const { alertDoc } = alertsClient.report({
           id: name,
           actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
-          context,
-          payload: {
-            [ALERT_URL]: payload[ALERT_URL],
-            [ALERT_REASON]: payload[ALERT_REASON],
-            [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
-            [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
-            [ALERT_ANOMALY_IS_INTERIM]: payload.is_interim,
-            [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
-            [ALERT_TOP_RECORDS]: payload.top_records,
-            [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
-          },
         });
+
+        if (alertDoc) {
+          alertsClient.setAlertData({
+            id: name,
+            context,
+            payload: {
+              [ALERT_URL]: payload[ALERT_URL],
+              [ALERT_REASON]: payload[ALERT_REASON],
+              [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
+              [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
+              [ALERT_ANOMALY_IS_INTERIM]: payload.is_interim,
+              [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
+              [ALERT_TOP_RECORDS]: payload.top_records,
+              [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
+            },
+          });
+        }
       }
 
       // Set context for recovered alerts
