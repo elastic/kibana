@@ -61,7 +61,7 @@ export class EcsDataQualityDashboardPlugin
       DataQualityDashboardRequestHandlerContext,
       'dataQualityDashboard'
     >('dataQualityDashboard', (_context, request) => {
-      const spaceId = plugins.spaces.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+      const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       return {
         spaceId,
         getResultsIndexName: async (): Promise<string> => {

@@ -15,7 +15,7 @@ export interface EcsDataQualityDashboardPluginSetup {} // eslint-disable-line @t
 export interface EcsDataQualityDashboardPluginStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export interface PluginSetupDependencies {
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export type DataQualityDashboardRequestHandlerContext = CustomRequestHandlerContext<{
