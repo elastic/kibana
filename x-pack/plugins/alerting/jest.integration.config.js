@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export {
-  registerGainsightRoute,
-  registerGainsightStyleRoute,
-  registerGainsightWidgetRoute,
-} from './gainsight';
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../..',
+  roots: ['<rootDir>/x-pack/plugins/alerting'],
+};

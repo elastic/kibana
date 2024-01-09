@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { CloudGainsightPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new CloudGainsightPlugin(initializerContext);
-}
+export { setupTestServers } from './setup_test_servers';

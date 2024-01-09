@@ -39,7 +39,6 @@ packages/analytics/shippers/elastic_v3/browser @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
-packages/analytics/shippers/gainsight @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/plugins/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/apm @elastic/obs-ux-infra_services-team
@@ -81,7 +80,6 @@ x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/platform-onboard
 x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
-x-pack/plugins/cloud_integrations/cloud_gain_sight @elastic/kibana-core
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/plugins/cloud @elastic/kibana-core
