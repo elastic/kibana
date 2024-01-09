@@ -82,8 +82,6 @@
     "@kbn/es-types",
     "@kbn/data-service",
     "@kbn/code-editor",
-    "@kbn/presentation-panel-plugin",
-    "@kbn/presentation-publishing",
   ],
   "exclude": [
     "target/**/*",
