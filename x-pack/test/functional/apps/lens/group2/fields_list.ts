@@ -260,6 +260,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      // todo
       it('should show new fields Available fields', async () => {
         await es.transport.request({
           path: '/field-update-test/_doc',
