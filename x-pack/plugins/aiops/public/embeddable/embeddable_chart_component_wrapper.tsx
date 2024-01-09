@@ -49,7 +49,7 @@ export interface EmbeddableInputTrackerProps {
   reload$: Observable<number>;
   onOutputChange: (output: Partial<EmbeddableChangePointChartOutput>) => void;
   onRenderComplete: () => void;
-  onLoading: () => void;
+  onLoading: (isLoading: boolean) => void;
   onError: (error: Error) => void;
 }
 
@@ -130,7 +130,7 @@ export const ChartGridEmbeddableWrapper: FC<
   EmbeddableChangePointChartProps & {
     visType: EmbeddableChangePointType;
     onRenderComplete: () => void;
-    onLoading: () => void;
+    onLoading: (isLoading: boolean) => void;
     onError: (error: Error) => void;
   }
 > = ({
@@ -213,9 +213,7 @@ export const ChartGridEmbeddableWrapper: FC<
   );
 
   useEffect(() => {
-    if (isLoading) {
-      onLoading();
-    }
+    onLoading(isLoading);
   }, [onLoading, isLoading]);
 
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {
@@ -260,11 +258,13 @@ export const ChartGridEmbeddableWrapper: FC<
             onRenderComplete={onRenderComplete}
           />
         ) : null
-      ) : emptyState ? (
-        emptyState
-      ) : (
-        <NoChangePointsWarning onRenderComplete={onRenderComplete} />
-      )}
+      ) : !isLoading ? (
+        emptyState ? (
+          emptyState
+        ) : (
+          <NoChangePointsWarning onRenderComplete={onRenderComplete} />
+        )
+      ) : null}
     </div>
   );
 };

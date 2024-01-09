@@ -92,9 +92,9 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     return true;
   }
 
-  public onLoading() {
+  public onLoading(isLoading: boolean) {
     this.renderComplete.dispatchInProgress();
-    this.updateOutput({ loading: true, error: undefined });
+    this.updateOutput({ loading: isLoading, error: undefined });
   }
 
   public onError(error: Error) {
@@ -104,7 +104,7 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
 
   public onRenderComplete() {
     this.renderComplete.dispatchComplete();
-    this.updateOutput({ loading: false, error: undefined });
+    this.updateOutput({ loading: false, rendered: true, error: undefined });
   }
 
   render(el: HTMLElement): void {

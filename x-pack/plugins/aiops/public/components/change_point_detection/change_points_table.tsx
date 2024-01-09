@@ -110,9 +110,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
    * to report when all charts on the current page are ready.
    */
   const onChartRenderCompleteCallback = useCallback(
-    (isLoading: boolean) => {
+    (isLoadingChart: boolean) => {
       if (!onRenderComplete) return;
-      if (!isLoading) {
+      if (!isLoadingChart) {
         chartLoadingCount.current++;
       }
       if (chartLoadingCount.current === pagination.pageSize) {
