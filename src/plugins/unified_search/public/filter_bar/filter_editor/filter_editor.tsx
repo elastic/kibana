@@ -144,7 +144,7 @@ export interface FilterEditorComponentProps {
   suggestionsAbstraction?: SuggestionsAbstraction;
   docLinks: DocLinksStart;
   filtersCount?: number;
-  dataViews: DataViewsContract;
+  dataViews?: DataViewsContract;
 }
 
 export type FilterEditorProps = WithEuiThemeProps & FilterEditorComponentProps;
@@ -183,10 +183,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     this.props.onLocalFilterUpdate?.(localFilter);
     if (!selectedDataView) {
       const dataViewId = this.props.filter.meta.index;
-      if (!dataViewId) {
+      if (!dataViewId || !this.props.dataViews) {
         this.setState({ isLoadingDataView: false });
       } else {
-        this.loadDataView(dataViewId);
+        this.loadDataView(dataViewId, this.props.dataViews);
       }
     }
   }
@@ -199,9 +199,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
    * @param dataViewId
    * @private
    */
-  private async loadDataView(dataViewId: string) {
+  private async loadDataView(dataViewId: string, dataViews: DataViewsContract) {
     try {
-      const dataView = await this.props.dataViews.get(dataViewId, false);
+      const dataView = await dataViews.get(dataViewId, false);
       this.setState({
         selectedDataView: dataView,
         isLoadingDataView: false,

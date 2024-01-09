@@ -62,7 +62,7 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   readOnly?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
   filtersCount?: number;
-  dataViews: DataViewsContract;
+  dataViews?: DataViewsContract;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
