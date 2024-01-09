@@ -8,14 +8,18 @@
 import React from 'react';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { Flyout } from '../../../../timelines/components/flyout';
+import { TimelineWrapper } from '../../../../timelines/wrapper';
 import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirect';
 
-// eslint-disable-next-line react/display-name
-export const SecuritySolutionBottomBar = React.memo(() => {
+/**
+ * Adding timeline to the Security Solution plugin
+ */
+export const Timeline = React.memo(() => {
   useResolveRedirect();
 
   const { onAppLeave } = useKibana().services;
 
-  return <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />;
+  return <TimelineWrapper timelineId={TimelineId.active} onAppLeave={onAppLeave} />;
 });
+
+Timeline.displayName = 'Timeline';
