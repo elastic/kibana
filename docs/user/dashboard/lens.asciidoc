@@ -625,7 +625,7 @@ Specifying the color for a single data point, such as a single bar or line, is u
 ====
 In the color palette editor, if you select *Value type: Number* the colors are applied based on the *Primary metric* value.
 
-The *Primary metric* refers to the large number that is displayed in each tile:
+The *Primary metric* refers to the large number displayed in each tile.
 
 [role="screenshot"]
 image:images/lens_primaryMetric.png[Illustration of where to find the primary metric in a metric visualization.]
