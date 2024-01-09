@@ -15,8 +15,8 @@ import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
+  hasVectorLayerMethod,
   BlendedVectorLayer,
-  IVectorLayer,
   MvtVectorLayer,
   GeoJsonVectorLayer,
 } from '../classes/layers/vector_layer';
@@ -351,7 +351,7 @@ export const getLayerList = createSelector(
       if (!parentLayer || !isLayerGroup(parentLayer)) {
         return;
       }
-      (parentLayer as LayerGroup).setChildren(children);
+      parentLayer.setChildren(children);
     });
 
     return layers;
@@ -402,11 +402,11 @@ export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
 );
 
 export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, (selectedLayer) => {
-  if (!selectedLayer || !('getJoins' in selectedLayer)) {
+  if (!selectedLayer || !hasVectorLayerMethod(selectedLayer, 'getJoins')) {
     return [];
   }
 
-  return (selectedLayer as IVectorLayer).getJoins().map((join: InnerJoin) => {
+  return selectedLayer.getJoins().map((join: InnerJoin) => {
     return join.toDescriptor();
   });
 });

@@ -1237,7 +1237,7 @@
           "section": "def-common.DataFrameAnalyticsConfig",
           "text": "DataFrameAnalyticsConfig"
         },
-        ">): Promise<any>; deleteDataFrameAnalytics(analyticsId: string): Promise<any>; deleteDataFrameAnalyticsAndDestIndex(analyticsId: string, deleteDestIndex: boolean, deleteDestDataView: boolean): Promise<",
+        ">): Promise<any>; deleteDataFrameAnalytics(analyticsId: string, force?: boolean): Promise<any>; deleteDataFrameAnalyticsAndDestIndex(analyticsId: string, deleteDestIndex: boolean, deleteDestDataView: boolean, force?: boolean): Promise<",
         "DeleteDataFrameAnalyticsWithIndexResponse",
         ">; startDataFrameAnalytics(analyticsId: string): Promise<any>; stopDataFrameAnalytics(analyticsId: string, force?: boolean): Promise<any>; getAnalyticsAuditMessages(analyticsId: string): Promise<",
         "JobMessage",
