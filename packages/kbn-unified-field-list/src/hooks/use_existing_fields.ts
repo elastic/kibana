@@ -121,7 +121,7 @@ export const useExistingFieldsFetcher = (
 
       setActiveRequests((value) => value + 1);
 
-      const hasRestrictions = Boolean(dataView?.getAggregationRestrictions?.());
+      const hasRestrictions = Boolean(dataView.getAggregationRestrictions?.());
       const info: ExistingFieldsInfo = {
         ...unknownInfo,
         numberOfFetches,

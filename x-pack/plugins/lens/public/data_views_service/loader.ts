@@ -34,9 +34,10 @@ export function convertDataViewIntoLensIndexPattern(
   dataView: DataView,
   restrictionRemapper: (name: string) => string = onRestrictionMapping
 ): IndexPattern {
+  const metaKeys = new Set(dataView.metaFields);
   const newFields = dataView.fields
     .filter(isFieldLensCompatible)
-    .map((field) => buildIndexPatternField(field, dataView))
+    .map((field) => buildIndexPatternField(field, metaKeys))
     .concat(documentField);
 
   const { typeMeta, title, name, timeFieldName, fieldFormatMap } = dataView;
@@ -80,9 +81,9 @@ export function convertDataViewIntoLensIndexPattern(
 
 export function buildIndexPatternField(
   field: DataViewField,
-  dataView: DataView | null
+  metaKeys?: Set<string>
 ): IndexPatternField {
-  const meta = dataView?.metaFields.includes(field.name);
+  const meta = metaKeys ? metaKeys.has(field.name) : false;
   // Convert the getters on the index pattern service into plain JSON
   const base = {
     name: field.name,

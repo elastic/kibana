@@ -421,10 +421,12 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
 };
 
 function getNewFieldsBySpec(spec: FieldSpec[], dataView: DataView | null) {
+  const metaKeys = dataView ? new Set(dataView.metaFields) : undefined;
+
   return spec.reduce((result: IndexPatternField[], fieldSpec: FieldSpec) => {
     const field = new DataViewField(fieldSpec);
     if (isFieldLensCompatible(field)) {
-      result.push(buildIndexPatternField(field, dataView));
+      result.push(buildIndexPatternField(field, metaKeys));
     }
     return result;
   }, []);
