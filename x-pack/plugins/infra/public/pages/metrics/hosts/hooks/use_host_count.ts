@@ -7,10 +7,11 @@
 
 import * as rt from 'io-ts';
 import { ES_SEARCH_STRATEGY, IKibanaSearchResponse } from '@kbn/data-plugin/common';
-import { useCallback, useEffect } from 'react';
-import { catchError, map, Observable, of, startWith } from 'rxjs';
+import { useCallback, useEffect, useMemo } from 'react';
+import { catchError, map, Observable, of, startWith, tap } from 'rxjs';
 import createContainer from 'constate';
 import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ITelemetryClient } from '../../../../services/telemetry';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
@@ -79,7 +80,23 @@ export const useHostCount = () => {
       searchCriteria.dateRange.from,
       searchCriteria.dateRange.to,
     ]),
-    parseResponses: normalizeDataSearchResponse,
+    parseResponses: useMemo(
+      () =>
+        normalizeDataSearchResponse({
+          telemetry,
+          telemetryData: {
+            withQuery: !!searchCriteria.query.query,
+            withFilters:
+              searchCriteria.filters.length > 0 || searchCriteria.panelFilters.length > 0,
+          },
+        }),
+      [
+        searchCriteria.filters.length,
+        searchCriteria.panelFilters.length,
+        searchCriteria.query.query,
+        telemetry,
+      ]
+    ),
   });
 
   const { isRequestRunning, isResponsePartial, latestResponseData, latestResponseErrors } =
@@ -88,14 +105,6 @@ export const useHostCount = () => {
   useEffect(() => {
     fetchHostCount();
   }, [fetchHostCount]);
-
-  useEffect(() => {
-    if (latestResponseData) {
-      telemetry.reportHostsViewTotalHostCountRetrieved({
-        total: latestResponseData.count.value,
-      });
-    }
-  }, [latestResponseData, telemetry]);
 
   return {
     errors: latestResponseErrors,
@@ -116,27 +125,42 @@ const INITIAL_STATE = {
   loaded: 0,
   total: undefined,
 };
-const normalizeDataSearchResponse = (
-  response$: Observable<IKibanaSearchResponse<SearchResponse<Record<string, unknown>>>>
-) =>
-  response$.pipe(
-    map((response) => ({
-      data: decodeOrThrow(HostCountResponseRT)(response.rawResponse.aggregations),
-      errors: [],
-      isPartial: response.isPartial ?? false,
-      isRunning: response.isRunning ?? false,
-      loaded: response.loaded,
-      total: response.total,
-    })),
-    startWith(INITIAL_STATE),
-    catchError((error) =>
-      of({
-        ...INITIAL_STATE,
-        errors: [error.message ?? error],
-        isRunning: false,
-      })
-    )
-  );
+
+const normalizeDataSearchResponse =
+  ({
+    telemetry,
+    telemetryData,
+  }: {
+    telemetry: ITelemetryClient;
+    telemetryData: { withQuery: boolean; withFilters: boolean };
+  }) =>
+  (response$: Observable<IKibanaSearchResponse<SearchResponse<Record<string, unknown>>>>) => {
+    return response$.pipe(
+      map((response) => ({
+        data: decodeOrThrow(HostCountResponseRT)(response.rawResponse.aggregations),
+        errors: [],
+        isPartial: response.isPartial ?? false,
+        isRunning: response.isRunning ?? false,
+        loaded: response.loaded,
+        total: response.total,
+      })),
+      tap(({ data }) => {
+        telemetry.reportHostsViewTotalHostCountRetrieved({
+          total: data.count.value,
+          with_query: telemetryData.withQuery,
+          with_filters: telemetryData.withFilters,
+        });
+      }),
+      startWith(INITIAL_STATE),
+      catchError((error) =>
+        of({
+          ...INITIAL_STATE,
+          errors: [error.message ?? error],
+          isRunning: false,
+        })
+      )
+    );
+  };
 
 const HostCountResponseRT = rt.type({
   count: rt.type({

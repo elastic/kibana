@@ -201,37 +201,33 @@ export function MobileCrashesOverview() {
             <EuiFlexGroup direction="column" gutterSize="s">
               <ChartPointerEventContextProvider>
                 <EuiFlexItem>
-                  <EuiPanel hasBorder={true}>
-                    <ErrorDistribution
-                      fetchStatus={status}
-                      distribution={crashDistributionData}
-                      height={375}
-                      title={i18n.translate(
-                        'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
-                        { defaultMessage: 'Crash occurrences' }
-                      )}
-                      tip={i18n.translate(
-                        'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
-                        {
-                          defaultMessage: `Crash occurrence is measured in crashes per minute.`,
-                        }
-                      )}
-                    />
-                  </EuiPanel>
+                  <ErrorDistribution
+                    fetchStatus={status}
+                    distribution={crashDistributionData}
+                    height={375}
+                    title={i18n.translate(
+                      'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
+                      { defaultMessage: 'Crash occurrences' }
+                    )}
+                    tip={i18n.translate(
+                      'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
+                      {
+                        defaultMessage: `Crash occurrence is measured in crashes per minute.`,
+                      }
+                    )}
+                  />
                 </EuiFlexItem>
               </ChartPointerEventContextProvider>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiPanel hasBorder={true}>
-              <MobileErrorsAndCrashesTreemap
-                serviceName={serviceName}
-                kuery={kueryForTreemap}
-                environment={environment}
-                start={start}
-                end={end}
-              />
-            </EuiPanel>
+            <MobileErrorsAndCrashesTreemap
+              serviceName={serviceName}
+              kuery={kueryForTreemap}
+              environment={environment}
+              start={start}
+              end={end}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

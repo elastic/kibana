@@ -75,4 +75,20 @@ describe('SecretFormRow', () => {
 
     expect(onUsePlainText).toHaveBeenCalled();
   });
+
+  it('should not display the cancel change button when no initial value is provided', () => {
+    const { queryByTestId } = render(
+      <SecretFormRow
+        title={title}
+        clear={clear}
+        onUsePlainText={onUsePlainText}
+        cancelEdit={cancelEdit}
+        initialValue={''}
+      >
+        <input type="text" />
+      </SecretFormRow>
+    );
+
+    expect(queryByTestId('secretCancelChangeBtn')).not.toBeInTheDocument();
+  });
 });

@@ -16,6 +16,7 @@ import type {
 
 export interface FleetConfigType {
   enabled: boolean;
+  isAirGapped?: boolean;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
@@ -45,6 +46,7 @@ export interface FleetConfigType {
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;
     testSecretsIndex?: string;
+    disableBundledPackagesCache?: boolean;
   };
   internal?: {
     disableILMPolicies: boolean;

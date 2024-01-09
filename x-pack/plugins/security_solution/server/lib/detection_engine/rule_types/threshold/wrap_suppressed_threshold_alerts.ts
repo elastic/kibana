@@ -6,6 +6,7 @@
  */
 
 import objectHash from 'object-hash';
+import sortBy from 'lodash/sortBy';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
@@ -79,9 +80,7 @@ export const wrapSuppressedThresholdALerts = ({
       completeRule.ruleParams.ruleId
     );
 
-    const suppressedValues = Object.entries(bucket.key)
-      .map(([key, value]) => value)
-      .sort((a, b) => a.localeCompare(b));
+    const suppressedValues = sortBy(Object.entries(bucket.key).map(([_, value]) => value));
 
     const id = objectHash([
       hit._index,

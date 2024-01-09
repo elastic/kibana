@@ -11,9 +11,12 @@ fi
 
 echo "--- Creating deploy tag $DEPLOY_TAG at $KIBANA_COMMIT_SHA"
 
+echo "Fetching user identity from GitHub..."
+IDENTITY_JSON=$(ts-node .buildkite/scripts/serverless/create_deploy_tag/get_github_identity.ts)
+
 # Set git identity to whomever triggered the buildkite job
-git config user.email "$BUILDKITE_BUILD_CREATOR_EMAIL"
-git config user.name "$BUILDKITE_BUILD_CREATOR"
+git config user.email "${BUILDKITE_BUILD_CREATOR_EMAIL:-$(echo ${IDENTITY_JSON} | jq .email)}"
+git config user.name "${BUILDKITE_BUILD_CREATOR:-$(echo ${IDENTITY_JSON} | jq .name)}"
 
 # Create a tag for the deploy
 git tag -a "$DEPLOY_TAG" "$KIBANA_COMMIT_SHA" \

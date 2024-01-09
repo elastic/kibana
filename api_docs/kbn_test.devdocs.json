@@ -2550,6 +2550,23 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.runCheckFtrCodeOwnersCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCheckFtrCodeOwnersCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/run_check_ftr_code_owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.runCheckFtrConfigsCli",
         "type": "Function",
         "tags": [],

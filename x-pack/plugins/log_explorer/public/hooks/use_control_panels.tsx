@@ -13,16 +13,16 @@ import { Query, TimeRange } from '@kbn/es-query';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
-import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
 
 export const useControlPanels = (
-  logExplorerProfileStateService: LogExplorerProfileStateService,
+  logExplorerControllerStateService: LogExplorerControllerStateService,
   data: DataPublicPluginStart
 ) => {
   const { query, filters, fromDate, toDate } = useQuerySubscriber({ data });
   const timeRange: TimeRange = { from: fromDate!, to: toDate! };
 
-  const controlPanels = useSelector(logExplorerProfileStateService, (state) => {
+  const controlPanels = useSelector(logExplorerControllerStateService, (state) => {
     if (!('controlPanels' in state.context)) return;
     return state.context.controlPanels;
   });
@@ -45,12 +45,12 @@ export const useControlPanels = (
 
   const setControlGroupAPI = useCallback(
     (controlGroupAPI: ControlGroupAPI) => {
-      logExplorerProfileStateService.send({
+      logExplorerControllerStateService.send({
         type: 'INITIALIZE_CONTROL_GROUP_API',
         controlGroupAPI,
       });
     },
-    [logExplorerProfileStateService]
+    [logExplorerControllerStateService]
   );
 
   return { getInitialInput, setControlGroupAPI, query, filters, timeRange };

@@ -7,20 +7,19 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { DataStreamStat } from '../../types/data_stream';
-import { dataStreamTypesRt, rangeRt } from '../../types/default_api_types';
-import { Integration } from '../../types/integration';
+import { typeRt, rangeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
-import { getMalformedDocsPaginated } from './get_malformed_docs';
-import { MalformedDocs } from '../../../common/api_types';
+import { getDegradedDocsPaginated } from './get_degraded_docs';
+import { DegradedDocs, DataStreamStat, Integration } from '../../../common/api_types';
+import { getIntegrations } from './get_integrations';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
     query: t.intersection([
-      dataStreamTypesRt,
+      typeRt,
       t.partial({
         datasetQuery: t.string,
       }),
@@ -41,7 +40,6 @@ const statsRoute = createDatasetQualityServerRoute({
 
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asInternalUser;
-    const packages = await packageClient.getPackages();
 
     const [dataStreams, dataStreamsStats] = await Promise.all([
       getDataStreams({
@@ -52,32 +50,21 @@ const statsRoute = createDatasetQualityServerRoute({
       getDataStreamsStats({ esClient, ...params.query }),
     ]);
 
-    const installedPackages = dataStreams.items.map((item) => item.integration);
-
-    const integrations = packages
-      .filter((pkg) => installedPackages.includes(pkg.name))
-      .map((p) => ({
-        name: p.name,
-        title: p.title,
-        version: p.version,
-        icons: p.icons,
-      }));
-
     return {
       dataStreamsStats: values(
         merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))
       ),
-      integrations,
+      integrations: await getIntegrations({ packageClient, dataStreams: dataStreams.items }),
     };
   },
 });
 
-const malformedDocsRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/malformed_docs',
+const degradedDocsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
   params: t.type({
     query: t.intersection([
       rangeRt,
-      dataStreamTypesRt,
+      typeRt,
       t.partial({
         datasetQuery: t.string,
       }),
@@ -87,25 +74,25 @@ const malformedDocsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<{
-    malformedDocs: MalformedDocs[];
+    degradedDocs: DegradedDocs[];
   }> {
     const { context, params } = resources;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const malformedDocs = await getMalformedDocsPaginated({
+    const degradedDocs = await getDegradedDocsPaginated({
       esClient,
       ...params.query,
     });
 
     return {
-      malformedDocs,
+      degradedDocs,
     };
   },
 });
 
 export const dataStreamsRouteRepository = {
   ...statsRoute,
-  ...malformedDocsRoute,
+  ...degradedDocsRoute,
 };

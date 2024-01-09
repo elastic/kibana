@@ -471,7 +471,7 @@
         "label": "Props",
         "description": [],
         "signature": [
-          "{ fullWidth?: boolean | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; size?: \"m\" | \"s\" | undefined; as?: \"standard\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; iconSide?: ",
+          "{ fullWidth?: boolean | undefined; 'aria-label'?: string | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; size?: \"m\" | \"s\" | undefined; as?: \"standard\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; iconSide?: ",
           "ButtonContentIconSide",
           "; groupPosition?: ButtonPositions | undefined; hasArrow?: boolean | undefined; }"
         ],

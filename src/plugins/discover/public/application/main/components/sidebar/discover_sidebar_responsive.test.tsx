@@ -471,7 +471,7 @@ describe('discover responsive sidebar', function () {
 
     expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('1');
     expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
-      '1 popular field. 1 available field. 0 empty fields. 0 meta fields.'
+      '1 popular field. 1 available field. 0 meta fields.'
     );
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });

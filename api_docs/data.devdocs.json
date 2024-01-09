@@ -5214,14 +5214,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -5266,14 +5258,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -5320,14 +5304,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -5372,14 +5348,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -5426,14 +5394,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -5478,14 +5438,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -5532,14 +5484,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -5584,14 +5528,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -5638,14 +5574,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -5690,14 +5618,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -5744,14 +5664,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -5796,14 +5708,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -5850,14 +5754,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -5902,14 +5798,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -5956,14 +5844,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6008,14 +5888,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -6062,14 +5934,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6114,14 +5978,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -6168,14 +6024,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6220,14 +6068,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -6274,14 +6114,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6326,14 +6158,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -6380,14 +6204,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6432,14 +6248,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -6486,14 +6294,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6538,14 +6338,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -6592,14 +6384,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6644,14 +6428,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -6698,14 +6474,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6750,14 +6518,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -6804,14 +6564,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6856,14 +6608,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -6910,14 +6654,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -6962,14 +6698,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -7016,14 +6744,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -7068,14 +6788,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -7122,14 +6834,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -7174,14 +6878,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -7228,14 +6924,6 @@
                 "section": "def-common.Adapters",
                 "text": "Adapters"
               },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
               ">>"
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -7280,14 +6968,6 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-common.Adapters",
                 "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
               },
               ">>"
             ],
@@ -9799,14 +9479,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/esaggs/esaggs_fn.ts",
@@ -9849,53 +9521,6 @@
           "; }"
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.ExecutionContextSearch",
-        "type": "Type",
-        "tags": [],
-        "label": "ExecutionContextSearch",
-        "description": [],
-        "signature": [
-          "{ filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined; query?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          "[] | undefined; timeRange?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; disableWarningToasts?: boolean | undefined; }"
-        ],
-        "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9946,14 +9571,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ExecutionContextSearch",
-            "text": "ExecutionContextSearch"
           },
           ">>"
         ],
@@ -10009,14 +9626,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ExecutionContextSearch",
-            "text": "ExecutionContextSearch"
-          },
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
@@ -10062,14 +9671,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
           },
           ">>"
         ],
@@ -10117,14 +9718,6 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
           ">>"
         ],
         "path": "src/plugins/data/common/search/expressions/lucene.ts",
@@ -10142,9 +9735,9 @@
         "signature": [
           "{ type: \"kibana_context\"; } & ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnEsQueryPluginApi",
             "section": "def-common.ExecutionContextSearch",
             "text": "ExecutionContextSearch"
           }
@@ -10331,14 +9924,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
           },
           ">>"
         ],
@@ -10705,9 +10290,9 @@
         "signature": [
           "{ type: \"kibana_context\"; } & ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnEsQueryPluginApi",
             "section": "def-common.ExecutionContextSearch",
             "text": "ExecutionContextSearch"
           }
@@ -25478,14 +25063,6 @@
             "docId": "kibInspectorPluginApi",
             "section": "def-common.Adapters",
             "text": "Adapters"
-          },
-          ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
           },
           ">>"
         ],

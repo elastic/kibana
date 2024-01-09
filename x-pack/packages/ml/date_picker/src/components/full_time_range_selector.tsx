@@ -118,14 +118,15 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         callback(fullTimeRange);
       }
     } catch (e) {
-      toasts.addDanger(
-        i18n.translate(
+      toasts.addError(e, {
+        title: i18n.translate(
           'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
           {
-            defaultMessage: 'An error occurred setting the time range.',
+            defaultMessage:
+              'An error occurred setting the time range. Please set the desired start and end times.',
           }
-        )
-      );
+        ),
+      });
     }
   }, [
     timefilter,

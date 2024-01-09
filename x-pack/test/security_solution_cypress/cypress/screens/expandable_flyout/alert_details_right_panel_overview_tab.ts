@@ -40,8 +40,6 @@ import {
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
   RESPONSE_BUTTON_TEST_ID,
-  WORKFLOW_STATUS_TITLE_TEST_ID,
-  WORKFLOW_STATUS_DETAILS_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/document_details/right/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
@@ -69,10 +67,6 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE = getDataTe
 export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS = getDataTestSubjectSelector(
   MITRE_ATTACK_DETAILS_TEST_ID
 );
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE =
-  getDataTestSubjectSelector(WORKFLOW_STATUS_TITLE_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS =
-  getDataTestSubjectSelector(WORKFLOW_STATUS_DETAILS_TEST_ID);
 
 /* Investigation section */
 

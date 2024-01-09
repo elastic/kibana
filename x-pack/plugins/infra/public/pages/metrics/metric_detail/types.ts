@@ -8,6 +8,7 @@
 import rt from 'io-ts';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { InventoryFormatterTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { LinkProps } from '@kbn/observability-shared-plugin/public/hooks/use_link_props';
 import { MetricsTimeInput } from './hooks/use_metrics_time';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 
@@ -61,3 +62,8 @@ export type VisSectionProps = rt.TypeOf<typeof VisSectionPropsRT> & {
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
 };
+
+export interface BreadcrumbOptions {
+  text: string;
+  link: LinkProps;
+}

@@ -50,7 +50,7 @@ export function RuleDetailsPage() {
   const {
     application: { capabilities, navigateToUrl },
     charts: {
-      theme: { useChartsBaseTheme, useChartsTheme },
+      theme: { useChartsBaseTheme },
     },
     http: { basePath },
     share: {
@@ -70,7 +70,6 @@ export function RuleDetailsPage() {
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { search } = useLocation();
 
-  const theme = useChartsTheme();
   const baseTheme = useChartsBaseTheme();
 
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
@@ -234,7 +233,7 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartProps={{ theme, baseTheme }}
+            chartProps={{ baseTheme }}
             featureIds={featureIds}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}

@@ -24,6 +24,7 @@ import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
 import { TopErrors } from '../../../app/transaction_details/top_errors';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import {
+  isMobileAgentName,
   isOpenTelemetryAgentName,
   isRumAgentName,
 } from '../../../../../common/agent_name';
@@ -55,6 +56,7 @@ export function TransactionCharts({
   const { agentName } = useApmServiceContext();
   const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
   const isRumAgent = isRumAgentName(agentName as AgentName);
+  const isMobileAgent = isMobileAgentName(agentName as AgentName);
   const rowDirection = isLarge ? 'column' : 'row';
 
   const latencyChart = (
@@ -112,7 +114,7 @@ export function TransactionCharts({
               <EuiFlexGroup gutterSize="s">
                 {latencyChart}
                 {serviceOverviewThroughputChart}
-                {coldStartRateOrBreakdownChart}
+                {!isMobileAgent && coldStartRateOrBreakdownChart}
               </EuiFlexGroup>
               <EuiSpacer size="l" />
               <EuiFlexGroup

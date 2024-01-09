@@ -18,11 +18,17 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import {
+  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
+  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
+} from '../../test_subjects';
 
 export const SetupTechnologySelector = ({
+  disabled,
   setupTechnology,
   onSetupTechnologyChange,
 }: {
+  disabled: boolean;
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
@@ -87,15 +93,18 @@ export const SetupTechnologySelector = ({
     <>
       <EuiSpacer size="l" />
       <EuiAccordion
+        isDisabled={disabled}
+        initialIsOpen={disabled}
         id={useGeneratedHtmlId({ prefix: 'setup-type' })}
         buttonContent={
-          <EuiLink>
+          <EuiLink disabled={disabled}>
             <FormattedMessage
               id="xpack.csp.fleetIntegration.setupTechnology.advancedOptionsLabel"
               defaultMessage="Advanced options"
             />
           </EuiLink>
         }
+        data-test-subj={SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ}
       >
         <EuiSpacer size="l" />
         <EuiFormRow
@@ -108,6 +117,7 @@ export const SetupTechnologySelector = ({
           }
         >
           <EuiSuperSelect
+            disabled={disabled}
             options={options}
             valueOfSelected={setupTechnology}
             placeholder={
@@ -120,6 +130,7 @@ export const SetupTechnologySelector = ({
             itemLayoutAlign="top"
             hasDividers
             fullWidth
+            data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
           />
         </EuiFormRow>
       </EuiAccordion>
