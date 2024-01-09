@@ -21,8 +21,8 @@ import {
   NETWORK_PROFILES,
   type NetworkOptions,
   type NetworkProfile,
-} from '@kbn/ftr-common-functional-ui-services';
-import { FtrService, type FtrProviderContext } from '../../ftr_provider_context';
+} from '..';
+import { FtrService, type FtrProviderContext } from './ftr_provider_context';
 
 export type Browser = BrowserService;
 
