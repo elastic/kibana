@@ -238,6 +238,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               return canWriteIntegrationPolicies ? (
                 <PackagePolicyActionsMenu
                   agentPolicy={agentPolicy}
+                  from={'fleet-policy-list'}
                   packagePolicy={packagePolicy}
                   upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
                     policyId: agentPolicy.id,
