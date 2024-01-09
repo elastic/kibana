@@ -21,7 +21,7 @@ import { createMigratorMock, KibanaMigratorMock } from './migrator.mock';
 export type ApiExecutionContextMock = Pick<ApiExecutionContext, 'allowedTypes' | 'mappings'> & {
   registry: SavedObjectTypeRegistry;
   helpers: RepositoryHelpersMock;
-  extensions: Partial<ReturnType<typeof savedObjectsExtensionsMock.create>>;
+  extensions: ReturnType<typeof savedObjectsExtensionsMock.create>;
   client: ElasticsearchClientMock;
   serializer: ReturnType<typeof serializerMock.create>;
   migrator: KibanaMigratorMock;

@@ -71,7 +71,7 @@ describe('internalBulkResolve', () => {
       ({ document }) => Promise.resolve(document as SavedObject)
     );
 
-    apiContext.extensions = {};
+    apiContext.extensions = {} as unknown as typeof apiContext.extensions;
 
     client = apiContext.client;
 
