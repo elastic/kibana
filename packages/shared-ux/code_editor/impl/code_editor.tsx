@@ -8,7 +8,9 @@
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
-import ReactMonacoEditor from 'react-monaco-editor';
+import ReactMonacoEditor, {
+  type MonacoEditorProps as ReactMonacoEditorProps,
+} from 'react-monaco-editor';
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -318,8 +320,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     );
   }, [isHintActive, isReadOnly, euiTheme, startEditing, onKeyDownHint, ariaLabel]);
 
-  const _editorWillMount = useCallback(
-    (__monaco: unknown) => {
+  const _editorWillMount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillMount']>>(
+    (__monaco) => {
       if (__monaco !== monaco) {
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
@@ -368,8 +370,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     ]
   );
 
-  const _editorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
+  const _editorDidMount = useCallback<NonNullable<ReactMonacoEditorProps['editorDidMount']>>(
+    (editor, __monaco) => {
       if (__monaco !== monaco) {
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
@@ -422,6 +424,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       editorDidMount?.(editor);
     },
     [editorDidMount, onBlurMonaco, onKeydownMonaco, readOnlyMessage]
+  );
+
+  const _editorWillUnmount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillUnmount']>>(
+    (editor) => {
+      const model = editor.getModel();
+      model?.dispose();
+    },
+    []
   );
 
   useEffect(() => {
@@ -492,6 +502,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           height={isFullScreen ? '100vh' : height}
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}
+          editorWillUnmount={_editorWillUnmount}
           options={{
             padding: allowFullScreen || isCopyable ? { top: 24 } : {},
             renderLineHighlight: 'none',
