@@ -7,7 +7,6 @@
 
 import { memo, useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { parsedPidOrEntityIdParameter } from '../lib/utils';
 import type {
   KillOrSuspendProcessRequestBody,
@@ -28,7 +27,7 @@ export const SuspendProcessActionResult = memo<
   const actionRequestBody = useMemo<undefined | KillOrSuspendProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
-    const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
+    const agentType = command.commandDefinition?.meta?.agentType;
 
     return endpointId
       ? {

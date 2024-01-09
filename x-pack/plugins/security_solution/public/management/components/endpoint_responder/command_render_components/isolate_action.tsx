@@ -7,7 +7,6 @@
 
 import { memo, useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from '../types';
 import { useSendIsolateEndpointRequest } from '../../../hooks/response_actions/use_send_isolate_endpoint_request';
@@ -22,7 +21,7 @@ export const IsolateActionResult = memo<ActionRequestComponentProps>(
     const actionRequestBody = useMemo(() => {
       const endpointId = command.commandDefinition?.meta?.endpointId;
       const comment = command.args.args?.comment?.[0];
-      const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
+      const agentType = command.commandDefinition?.meta?.agentType;
 
       return endpointId
         ? {

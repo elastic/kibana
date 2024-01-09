@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   GetProcessesActionOutputContent,
@@ -52,7 +51,7 @@ export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
     );
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const actionCreator = useSendGetEndpointProcessesRequest();
-    const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
+    const agentType = command.commandDefinition?.meta?.agentType;
 
     const actionRequestBody = useMemo(() => {
       return endpointId

@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
@@ -36,7 +35,7 @@ export const UploadActionResult = memo<
   const actionRequestBody = useMemo<undefined | UploadActionUIRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const { comment, overwrite, file } = command.args.args;
-    const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
+    const agentType = command.commandDefinition?.meta?.agentType;
 
     if (!endpointId) {
       return;

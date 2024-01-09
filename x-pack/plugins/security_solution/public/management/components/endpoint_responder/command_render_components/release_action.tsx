@@ -7,7 +7,6 @@
 
 import { memo, useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { ActionRequestComponentProps } from '../types';
 import { useSendReleaseEndpointRequest } from '../../../hooks/response_actions/use_send_release_endpoint_request';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -22,7 +21,7 @@ export const ReleaseActionResult = memo<ActionRequestComponentProps>(
     const actionRequestBody = useMemo(() => {
       const endpointId = command.commandDefinition?.meta?.endpointId;
       const comment = command.args.args?.comment?.[0];
-      const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
+      const agentType = command.commandDefinition?.meta?.agentType;
 
       return endpointId
         ? {

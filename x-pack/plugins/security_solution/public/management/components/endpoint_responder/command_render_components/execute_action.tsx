@@ -10,7 +10,6 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { ExecuteActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
@@ -38,7 +37,7 @@ export const ExecuteActionResult = memo<
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
-    const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
+    const agentType = command.commandDefinition?.meta?.agentType;
 
     if (!endpointId) {
       return;

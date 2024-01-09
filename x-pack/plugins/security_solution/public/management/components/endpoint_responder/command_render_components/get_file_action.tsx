@@ -8,7 +8,6 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSendGetFileRequest } from '../../../hooks/response_actions/use_send_get_file_request';
 import type { ResponseActionGetFileRequestBody } from '../../../../../common/api/endpoint';
@@ -30,7 +29,7 @@ export const GetFileActionResult = memo<
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const { path, comment } = command.args.args;
-    const agentType = command.commandDefinition?.meta?.agentType as ResponseActionAgentType;
+    const agentType = command.commandDefinition?.meta?.agentType;
 
     return endpointId
       ? {
