@@ -7,7 +7,6 @@
  */
 
 import { firstValueFrom, type Observable } from 'rxjs';
-import type { Logger } from '@kbn/core/server';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 
@@ -15,7 +14,6 @@ interface InstallWithTimeoutOpts {
   description?: string;
   installFn: () => Promise<void>;
   pluginStop$: Observable<void>;
-  logger: Logger;
   timeoutMs?: number;
 }
 
@@ -30,7 +28,6 @@ export const installWithTimeout = async ({
   description,
   installFn,
   pluginStop$,
-  logger,
   timeoutMs = INSTALLATION_TIMEOUT,
 }: InstallWithTimeoutOpts): Promise<void> => {
   try {
@@ -59,10 +56,8 @@ export const installWithTimeout = async ({
     await Promise.race([install(), throwTimeoutException()]);
   } catch (e) {
     if (e instanceof InstallShutdownError) {
-      logger.debug(e.message);
       throw e;
     } else {
-      logger.error(e);
       const reason = e?.message || 'Unknown reason';
       throw new Error(
         `Failure during installation${description ? ` of ${description}` : ''}. ${reason}`

@@ -88,17 +88,22 @@ export class DataStreamAdapter {
   }
 
   protected getInstallFn({ logger, pluginStop$, tasksTimeoutMs }: GetInstallFnParams) {
-    return async (promise: Promise<void>, description?: string) =>
-      installWithTimeout({
-        installFn: () =>
-          promise.catch((e) =>
-            e instanceof InstallShutdownError ? Promise.resolve() : Promise.reject(e)
-          ),
-        logger,
-        timeoutMs: tasksTimeoutMs,
-        pluginStop$,
-        description,
-      });
+    return async (promise: Promise<void>, description?: string): Promise<void> => {
+      try {
+        await installWithTimeout({
+          installFn: () => promise,
+          description,
+          timeoutMs: tasksTimeoutMs,
+          pluginStop$,
+        });
+      } catch (err) {
+        if (err instanceof InstallShutdownError) {
+          logger.info(err.message);
+        } else {
+          throw err;
+        }
+      }
+    };
   }
 
   public async install({ logger, esClient, pluginStop$, tasksTimeoutMs }: InstallParams) {
