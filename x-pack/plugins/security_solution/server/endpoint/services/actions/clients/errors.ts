@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
-import { dump } from '../../../utils/dump';
+import { stringify } from '../../../utils/stringify';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
 /**
@@ -25,7 +25,7 @@ export class ResponseActionsClientError extends CustomHttpRequestError {
   }
 
   toString() {
-    return JSON.stringify(dump(this.toJSON()), null, 2);
+    return JSON.stringify(stringify(this.toJSON()), null, 2);
   }
 }
 

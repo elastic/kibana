@@ -21,6 +21,7 @@ import { defineGetCspStatusRoute } from './status/status';
 import { defineFindCspBenchmarkRuleRoute } from './benchmark_rules/find/find';
 import { defineGetDetectionEngineAlertsStatus } from './detection_engine/get_detection_engine_alerts_count_by_rule_tags';
 import { defineBulkActionCspBenchmarkRulesRoute } from './benchmark_rules/bulk_action/bulk_action';
+import { defineGetCspBenchmarkRulesStatesRoute } from './benchmark_rules/get_states/get_states';
 
 /**
  * 1. Registers routes
@@ -43,6 +44,7 @@ export async function setupRoutes({
   defineFindCspBenchmarkRuleRoute(router);
   defineGetDetectionEngineAlertsStatus(router);
   defineBulkActionCspBenchmarkRulesRoute(router);
+  defineGetCspBenchmarkRulesStatesRoute(router);
 
   core.http.registerRouteHandlerContext<CspRequestHandlerContext, typeof PLUGIN_ID>(
     PLUGIN_ID,

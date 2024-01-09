@@ -42,6 +42,8 @@ interface TaskRunCounts extends JsonObject {
   [TaskRunKeys.SUCCESS]: number;
   [TaskRunKeys.NOT_TIMED_OUT]: number;
   [TaskRunKeys.TOTAL]: number;
+  [TaskRunKeys.USER_ERRORS]: number;
+  [TaskRunKeys.FRAMEWORK_ERRORS]: number;
 }
 
 export interface TaskRunMetrics extends JsonObject {
