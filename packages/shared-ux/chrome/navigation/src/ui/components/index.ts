@@ -7,6 +7,7 @@
  */
 
 export { Navigation } from './navigation';
+export { RecentlyAccessed } from './recently_accessed';
 export type { Props as RecentlyAccessedProps } from './recently_accessed';
 export type {
   PanelContent,

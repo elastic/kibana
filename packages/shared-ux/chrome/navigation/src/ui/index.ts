@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { Navigation } from './components';
+export { Navigation, RecentlyAccessed } from './components';
 export type { PanelContent, PanelComponentProps, PanelContentProvider } from './components';
 
 export { DefaultNavigation } from './default_navigation';

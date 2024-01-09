@@ -14,37 +14,35 @@ import type {
   SideNavNodeStatus,
   NodeDefinition,
   CloudLinks,
-  CloudLink,
   NavigationTreeDefinition,
-  CloudUrls,
   RootNavigationItemDefinition,
   PresetDefinition,
   GroupDefinition,
   ItemDefinition,
   RecentlyAccessedDefinition,
 } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
+import { getPresets } from './ui';
 
 let uniqueId = 0;
 
-export function generateUniqueNodeId() {
+function generateUniqueNodeId() {
   const id = `node${uniqueId++}`;
   return id;
 }
 
-export function isAbsoluteLink(link: string) {
+function isAbsoluteLink(link: string) {
   return link.startsWith('http://') || link.startsWith('https://');
 }
 
-export function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
+function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children !== undefined;
 }
 
-export function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
+function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children === undefined;
 }
 
-export function getNavigationNodeId(
+function getNavigationNodeId(
   { id: _id, link }: Pick<NodeDefinition, 'id' | 'link'>,
   idGenerator = generateUniqueNodeId
 ): string {
@@ -52,7 +50,7 @@ export function getNavigationNodeId(
   return id ?? idGenerator();
 }
 
-export function getNavigationNodeHref({
+function getNavigationNodeHref({
   href,
   deepLink,
 }: Pick<ChromeProjectNavigationNode, 'href' | 'deepLink'>): string | undefined {
@@ -66,7 +64,7 @@ function isSamePath(pathA: string | null, pathB: string | null) {
   return pathA === pathB;
 }
 
-export function isActiveFromUrl(nodePath: string, activeNodes: ChromeProjectNavigationNode[][]) {
+function isActiveFromUrl(nodePath: string, activeNodes: ChromeProjectNavigationNode[][]) {
   return activeNodes.reduce((acc, nodesBranch) => {
     return acc === true ? acc : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
   }, false);
@@ -159,7 +157,7 @@ function validateNodeProps<
   }
 }
 
-export const initNavNode = <
+const initNavNode = <
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
@@ -219,88 +217,7 @@ export const initNavNode = <
   return navNode;
 };
 
-const stripTrailingForwardSlash = (str: string) => {
-  return str[str.length - 1] === '/' ? str.substring(0, str.length - 1) : str;
-};
-
-const parseCloudURLs = (cloudLinks: CloudLinks): CloudLinks => {
-  const { userAndRoles, billingAndSub, deployment, performance } = cloudLinks;
-
-  // We remove potential trailing forward slash ("/") at the end of the URL
-  // because it breaks future navigation in Cloud console once we navigate there.
-  const parseLink = (link?: CloudLink): CloudLink | undefined => {
-    if (!link) return undefined;
-    return { ...link, href: stripTrailingForwardSlash(link.href) };
-  };
-
-  return {
-    ...cloudLinks,
-    userAndRoles: parseLink(userAndRoles),
-    billingAndSub: parseLink(billingAndSub),
-    deployment: parseLink(deployment),
-    performance: parseLink(performance),
-  };
-};
-
-const getCloudLinks = (
-  cloud: {
-    billingUrl?: string;
-    deploymentUrl?: string;
-    performanceUrl?: string;
-    usersAndRolesUrl?: string;
-  } = {}
-): CloudLinks => {
-  const { billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl } = cloud;
-
-  const links: CloudLinks = {};
-
-  if (usersAndRolesUrl) {
-    links.userAndRoles = {
-      title: i18n.translate(
-        'sharedUXPackages.chrome.sideNavigation.cloudLinks.usersAndRolesLinkText',
-        {
-          defaultMessage: 'Users and roles',
-        }
-      ),
-      href: usersAndRolesUrl,
-    };
-  }
-
-  if (performanceUrl) {
-    links.performance = {
-      title: i18n.translate(
-        'sharedUXPackages.chrome.sideNavigation.cloudLinks.performanceLinkText', // TODO change i18n prefix
-        {
-          defaultMessage: 'Performance',
-        }
-      ),
-      href: performanceUrl,
-    };
-  }
-
-  if (billingUrl) {
-    links.billingAndSub = {
-      title: i18n.translate('sharedUXPackages.chrome.sideNavigation.cloudLinks.billingLinkText', {
-        defaultMessage: 'Billing and subscription',
-      }),
-      href: billingUrl,
-    };
-  }
-
-  if (deploymentUrl) {
-    links.deployment = {
-      title: i18n.translate(
-        'sharedUXPackages.chrome.sideNavigation.cloudLinks.deploymentLinkText',
-        {
-          defaultMessage: 'Project',
-        }
-      ),
-      href: deploymentUrl,
-    };
-  }
-
-  return links;
-};
+const navTreePresets = getPresets('all');
 
 const isPresetDefinition = (
   item: RootNavigationItemDefinition | NodeDefinition
@@ -322,65 +239,90 @@ const isRecentlyAccessedDefinition = (
   return (item as RootNavigationItemDefinition).type === 'recentlyAccessed';
 };
 
+export interface NavigationTreeUI {
+  body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+  footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+}
+
 export const parseNavigationTree = (
   navigationTreeDef: NavigationTreeDefinition,
-  { deepLinks, cloudUrls }: { deepLinks: Readonly<ChromeNavLink[]>; cloudUrls?: CloudUrls }
-): ChromeProjectNavigationNode[] => {
-  const cloudLinks = parseCloudURLs(getCloudLinks(cloudUrls));
-
-  const deepLinksToMap = deepLinks.reduce((acc, navLink) => {
-    acc[navLink.id] = navLink;
-    return acc;
-  }, {} as Record<string, ChromeNavLink>);
-
+  { deepLinks, cloudLinks }: { deepLinks: Record<string, ChromeNavLink>; cloudLinks: CloudLinks }
+): { navigationTree: ChromeProjectNavigationNode[]; navigationTreeUI: NavigationTreeUI } => {
+  // The navigation tree that represents the global navigation and will be used by the Chrome service
   const navigationTree: ChromeProjectNavigationNode[] = [];
+
+  // Contains UI layout information (body, footer) and render "special" blocks like recently accessed.
+  const navigationTreeUI: NavigationTreeUI = { body: [] };
 
   const initNodeAndChildren = (
     node: GroupDefinition | ItemDefinition | NodeDefinition,
     { index = 0, parentPath = [] }: { index?: number; parentPath?: string[] } = {}
-  ): ChromeProjectNavigationNode | null => {
-    const navNode = initNavNode(node, {
+  ): ChromeProjectNavigationNode | RecentlyAccessedDefinition | null => {
+    if (isRecentlyAccessedDefinition(node)) {
+      return node;
+    }
+
+    let nodeSerialized: NodeDefinition | GroupDefinition | ItemDefinition = node;
+
+    if (isPresetDefinition(node)) {
+      // Get the navGroup definition from the preset
+      const { preset, type, ...rest } = node;
+      nodeSerialized = { ...navTreePresets[preset], type: 'navGroup', ...rest };
+    }
+
+    const navNode = initNavNode(nodeSerialized, {
       cloudLinks,
-      deepLinks: deepLinksToMap,
+      deepLinks,
       parentNodePath: parentPath.length > 0 ? parentPath.join('.') : undefined,
       index,
     });
 
-    if (navNode) {
-      if (isGroupDefinition(node) && node.children) {
-        navNode.children = node.children
-          .map((child, i) =>
-            initNodeAndChildren(child, {
-              index: i,
-              parentPath: [...parentPath, navNode.id],
-            })
-          )
-          .filter((child): child is ChromeProjectNavigationNode => child !== null);
-      }
+    if (navNode && isGroupDefinition(nodeSerialized) && nodeSerialized.children) {
+      navNode.children = nodeSerialized.children
+        .map((child, i) =>
+          initNodeAndChildren(child, {
+            index: i,
+            parentPath: [...parentPath, navNode.id],
+          })
+        )
+        .filter((child): child is ChromeProjectNavigationNode => child !== null);
     }
+
     return navNode;
   };
 
-  const onNodeInitiated = (navNode: ChromeProjectNavigationNode | null) => {
+  const onNodeInitiated = (
+    navNode: ChromeProjectNavigationNode | RecentlyAccessedDefinition | null,
+    section: 'body' | 'footer' = 'body'
+  ) => {
     if (navNode) {
-      navigationTree.push(navNode);
+      if (!isRecentlyAccessedDefinition(navNode)) {
+        // Add the node to the global navigation tree
+        navigationTree.push(navNode);
+      }
+
+      // Add the node to the Side Navigation UI tree
+      if (!navigationTreeUI[section]) {
+        navigationTreeUI[section] = [];
+      }
+      navigationTreeUI[section]!.push(navNode);
     }
   };
 
-  const parseNodesArray = (nodes?: RootNavigationItemDefinition[]): void => {
+  const parseNodesArray = (
+    nodes?: RootNavigationItemDefinition[],
+    section: 'body' | 'footer' = 'body'
+  ): void => {
     if (!nodes) return;
 
     nodes.forEach((node) => {
-      if (isPresetDefinition(node) || isRecentlyAccessedDefinition(node)) return;
-
       const navNode = initNodeAndChildren(node);
-
-      onNodeInitiated(navNode);
+      onNodeInitiated(navNode, section);
     });
   };
 
-  parseNodesArray(navigationTreeDef.body);
-  parseNodesArray(navigationTreeDef.footer);
+  parseNodesArray(navigationTreeDef.body, 'body');
+  parseNodesArray(navigationTreeDef.footer, 'footer');
 
-  return navigationTree;
+  return { navigationTree, navigationTreeUI };
 };

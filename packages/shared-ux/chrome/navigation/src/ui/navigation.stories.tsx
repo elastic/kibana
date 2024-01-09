@@ -130,80 +130,6 @@ const deepLinks$ = of({
   }, {}),
 });
 
-const simpleNavigationDefinition: ProjectNavigationDefinition<any> = {
-  projectNavigationTree: [
-    {
-      id: 'example_projet',
-      title: 'Example project',
-      icon: 'logoObservability',
-      defaultIsCollapsed: false,
-      children: [
-        {
-          link: 'item1',
-          title: 'Get started',
-        },
-        {
-          link: 'item2',
-          title: 'Alerts',
-        },
-        {
-          link: 'item3',
-          title: 'Dashboards',
-        },
-        {
-          id: 'item4',
-          title: 'External link',
-          href: 'https://elastic.co',
-        },
-        {
-          link: 'item5',
-          title: 'Another link',
-        },
-        {
-          id: 'group:settings',
-          title: 'Settings',
-          children: [
-            {
-              link: 'item1',
-              title: 'Logs',
-            },
-            {
-              link: 'item2',
-              title: 'Signals',
-            },
-            {
-              link: 'item3',
-              title: 'Tracing',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
-
-export const SimpleObjectDefinition = (args: NavigationServices) => {
-  const services = storybookMock.getServices({
-    ...args,
-    deepLinks$,
-    onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
-    },
-    recentlyAccessed$: of([
-      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
-      { label: 'Another example', link: '/app/example/5235', id: '5235' },
-    ]),
-  });
-
-  return (
-    <NavigationWrapper>
-      <NavigationProvider {...services}>
-        <DefaultNavigation {...simpleNavigationDefinition} />
-      </NavigationProvider>
-    </NavigationWrapper>
-  );
-};
-
 const groupExamplesDefinition: ProjectNavigationDefinition<any> = {
   navigationTree: {
     body: [
@@ -430,9 +356,9 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
             ],
           },
           {
-            id: 'group:settings',
+            id: 'group:settings-panelOpener',
             link: 'item1',
-            title: 'Settings as panel opener',
+            title: 'Settings panel opener',
             renderAs: 'panelOpener',
             children: [
               {
@@ -545,13 +471,10 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
         type: 'navGroup',
         ...getPresets('analytics'),
         title: 'My analytics', // Change the title
-        children: getPresets('analytics').children.map((child) => ({
-          ...child,
-          children: child.children?.filter((item) => {
-            // Hide discover and dashboard
-            return item.link !== 'discover' && item.link !== 'dashboards';
-          }),
-        })),
+        children: getPresets('analytics').children.filter((item) => {
+          // Hide discover and dashboard
+          return item.link !== 'discover' && item.link !== 'dashboards';
+        }),
       },
     ],
     footer: [
@@ -595,9 +518,11 @@ export const ComplexObjectDefinition = (args: NavigationServices) => {
 
   return (
     <NavigationWrapper>
-      <NavigationProvider {...services}>
-        <DefaultNavigation {...navigationDefinition} />
-      </NavigationProvider>
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <DefaultNavigation {...navigationDefinition} />
+        </NavigationProvider>
+      )}
     </NavigationWrapper>
   );
 };
@@ -1349,5 +1274,5 @@ export default {
       page: mdx,
     },
   },
-  component: WithUIComponents,
-} as ComponentMeta<typeof WithUIComponents>;
+  component: ComplexObjectDefinition,
+} as ComponentMeta<typeof ComplexObjectDefinition>;

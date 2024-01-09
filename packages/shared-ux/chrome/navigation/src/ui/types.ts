@@ -153,16 +153,10 @@ export interface ProjectNavigationDefinition<
 > {
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
-   * for a project. Use it if you only need to configure your project navigation and leave
-   * all the other navigation items to the default (Recently viewed items, Management, etc.)
-   */
-  projectNavigationTree?: ProjectNavigationTreeDefinition<LinkId, Id, ChildrenId>;
-  /**
-   * A navigation tree structure with object items containing labels, links, and sub-items
    * that defines a complete side navigation. This configuration overrides `projectNavigationTree`
    * if both are provided.
    */
-  navigationTree?: NavigationTreeDefinition<LinkId, Id, ChildrenId>;
+  navigationTree: NavigationTreeDefinition<LinkId, Id, ChildrenId>;
 }
 
 /**
