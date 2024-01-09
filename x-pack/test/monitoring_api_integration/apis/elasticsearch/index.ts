@@ -13,8 +13,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     before(() => installPackage(getService('supertest'), 'elasticsearch'));
 
     loadTestFile(require.resolve('./ccr'));
-    // @klacabane will handle un-skipping the tests wittin ./indices
-    // loadTestFile(require.resolve('./indices'));
+    loadTestFile(require.resolve('./indices'));
     loadTestFile(require.resolve('./ml_jobs'));
     loadTestFile(require.resolve('./nodes'));
     loadTestFile(require.resolve('./overview'));
