@@ -9,6 +9,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
@@ -24,6 +25,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { pick } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { PartitionsSelector } from '../components/change_point_detection/partitions_selector';
 import { DEFAULT_SERIES } from './const';
 import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
@@ -47,6 +49,29 @@ export interface AnomalyChartsInitializerProps {
   onCancel: () => void;
 }
 
+const viewTypeOptions: EuiButtonGroupOptionProps[] = [
+  {
+    id: `charts`,
+    label: (
+      <FormattedMessage
+        id="xpack.aiops.embeddableChangePointChart.viewTypeSelector.chartsLabel"
+        defaultMessage="Charts"
+      />
+    ),
+    iconType: 'visLine',
+  },
+  {
+    id: `table`,
+    label: (
+      <FormattedMessage
+        id="xpack.aiops.embeddableChangePointChart.viewTypeSelector.tableLabel"
+        defaultMessage="Table"
+      />
+    ),
+    iconType: 'visTable',
+  },
+];
+
 export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   initialInput,
   onCreate,
@@ -59,6 +84,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   } = useAiopsAppContext();
 
   const [dataViewId, setDataViewId] = useState(initialInput?.dataViewId ?? '');
+  const [viewType, setViewType] = useState(initialInput?.viewType ?? 'charts');
 
   const [formInput, setFormInput] = useState<FormControlsProps>(
     pick(initialInput ?? {}, [
@@ -75,6 +101,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
   const updatedProps = useMemo(() => {
     return {
       ...formInput,
+      viewType,
       title: isPopulatedObject(formInput)
         ? i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
             defaultMessage: 'Change point: {function}({metric}){splitBy}',
@@ -92,7 +119,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
         : '',
       dataViewId,
     };
-  }, [formInput, dataViewId]);
+  }, [formInput, dataViewId, viewType]);
 
   return (
     <EuiModal onClose={onCancel} data-test-subj={'aiopsChangePointChartEmbeddableInitializer'}>
@@ -100,13 +127,27 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="xpack.aiops.embeddableChangePointChart.modalTitle"
-            defaultMessage="Change point charts configuration"
+            defaultMessage="Change point detection configuration"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiForm>
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate('xpack.aiops.embeddableChangePointChart.viewTypeLabel', {
+              defaultMessage: 'View type',
+            })}
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend="This is a basic group"
+              options={viewTypeOptions}
+              idSelected={viewType}
+              onChange={setViewType as (id: string) => void}
+            />
+          </EuiFormRow>
           <EuiFormRow
             fullWidth
             label={i18n.translate('xpack.aiops.embeddableChangePointChart.dataViewLabel', {
