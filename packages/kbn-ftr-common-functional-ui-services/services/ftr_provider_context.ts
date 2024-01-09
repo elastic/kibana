@@ -15,7 +15,5 @@ const services = {
   retry: RetryService,
 };
 
-type Services = typeof services;
-
-export type FtrProviderContext = GenericFtrProviderContext<Services, {}>;
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
 export class FtrService extends GenericFtrService<FtrProviderContext> {}

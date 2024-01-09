@@ -28,7 +28,7 @@ import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors'
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { type Conversation, type Message, MessageRole } from '../../../common/types';
 import { ChatHeader } from './chat_header';
-import { ChatPromptEditor } from './chat_prompt_editor';
+import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
@@ -214,7 +214,7 @@ export function ChatBody({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatPromptEditor
+            <PromptEditor
               hidden={connectors.loading || connectors.connectors?.length === 0}
               loading={isLoading}
               disabled
@@ -257,6 +257,7 @@ export function ChatBody({
                   chatState={state}
                   hasConnector={!!connectors.connectors?.length}
                   onEdit={(editedMessage, newMessage) => {
+                    setStickToBottom(true);
                     const indexOf = messages.indexOf(editedMessage);
                     next(messages.slice(0, indexOf).concat(newMessage));
                   }}
@@ -313,14 +314,14 @@ export function ChatBody({
             color="subdued"
             className={promptEditorContainerClassName}
           >
-            <ChatPromptEditor
+            <PromptEditor
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
               hidden={connectors.loading || connectors.connectors?.length === 0}
               loading={isLoading}
+              onChangeHeight={handleChangeHeight}
               onSendTelemetry={(eventWithPayload) =>
                 sendEvent(chatService.analytics, eventWithPayload)
               }
-              onChangeHeight={handleChangeHeight}
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));
