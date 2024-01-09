@@ -18,7 +18,12 @@ import {
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
-describe('RegisteredAttachmentsPropertyActions', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174384
+// FLAKY: https://github.com/elastic/kibana/issues/174385
+// FLAKY: https://github.com/elastic/kibana/issues/174386
+// FLAKY: https://github.com/elastic/kibana/issues/174387
+// FLAKY: https://github.com/elastic/kibana/issues/174388
+describe.skip('RegisteredAttachmentsPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {
