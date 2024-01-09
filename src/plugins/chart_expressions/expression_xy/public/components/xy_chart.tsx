@@ -301,14 +301,17 @@ export function XYChart({
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
 
-  const chartSizeSpec = {
-    aspectRatio: isHorizontalChart(dataLayers)
-      ? { x: 9, y: 16 }
-      : {
-          x: 16,
-          y: 9,
-        },
-  };
+  const isTimeViz = isTimeChart(dataLayers);
+
+  const chartSizeSpec: ChartSizeSpec =
+    isTimeViz && !isHorizontalChart(dataLayers)
+      ? {
+          aspectRatio: {
+            x: 16,
+            y: 9,
+          },
+        }
+      : { maxDimensions: { x: 100, y: 100, unit: 'percentage' } };
 
   const { veil, onResize } = useSizeTransitionVeil(chartSizeSpec, setChartSize);
 
@@ -389,8 +392,6 @@ export function XYChart({
     filteredBarLayers.some(
       (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
     );
-
-  const isTimeViz = isTimeChart(dataLayers);
 
   const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 

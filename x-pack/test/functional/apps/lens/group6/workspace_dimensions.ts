@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  describe('lens workspace dimensions', () => {
+  describe('lens workspace size', () => {
     let originalWindowSize: {
       height: number;
       width: number;
@@ -23,9 +23,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       y: number;
     };
 
+    const DEFAULT_WINDOW_SIZE = [1400, 900];
+
     before(async () => {
       originalWindowSize = await browser.getWindowSize();
-      await browser.setWindowSize(1400, 900);
 
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -36,6 +37,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
+    });
+
+    beforeEach(async () => {
+      await browser.setWindowSize(DEFAULT_WINDOW_SIZE[0], DEFAULT_WINDOW_SIZE[1]);
     });
 
     after(async () => {
@@ -75,15 +80,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     const VERTICAL_16_9 = 16 / 9;
-    const HORIZONTAL_16_9 = 9 / 16;
     const outerWorkspaceDimensions = { width: 690, height: 400 };
     const UNCONSTRAINED = outerWorkspaceDimensions.width / outerWorkspaceDimensions.height;
 
-    it('adjusts dimension for various chart types', async () => {
+    it('workspace size recovers from special vis types', async () => {
       /**
        * This list is specifically designed to test dimension transitions.
        *
        * I have attempted to order the vis types to maximize the number of transitions.
+       *
+       * Excluding XY charts since they are tested separately.
        */
       const visTypes: Array<{
         id: string;
@@ -92,33 +98,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectedWidth?: string;
         aspectRatio?: number;
       }> = [
-        { id: 'lnsDatatable', aspectRatio: UNCONSTRAINED },
-        { id: 'line', aspectRatio: VERTICAL_16_9 },
-        {
-          id: 'bar_horizontal_percentage_stacked',
-          searchText: 'bar',
-          aspectRatio: HORIZONTAL_16_9,
-        },
-        { id: 'lnsLegacyMetric', aspectRatio: UNCONSTRAINED },
-        { id: 'bar_horizontal_stacked', aspectRatio: HORIZONTAL_16_9 },
-        { id: 'donut', aspectRatio: UNCONSTRAINED },
-        { id: 'bar', aspectRatio: VERTICAL_16_9 },
-        { id: 'mosaic', aspectRatio: UNCONSTRAINED },
-        { id: 'bar_percentage_stacked', searchText: 'bar', aspectRatio: VERTICAL_16_9 },
-        { id: 'pie', aspectRatio: UNCONSTRAINED },
-        { id: 'bar_stacked', aspectRatio: VERTICAL_16_9 },
         {
           id: 'lnsMetric',
           expectedWidth: '300px',
           expectedHeight: '300px',
         },
-        { id: 'area', aspectRatio: VERTICAL_16_9 },
+        { id: 'lnsDatatable', aspectRatio: UNCONSTRAINED },
+        {
+          id: 'lnsMetric',
+          expectedWidth: '300px',
+          expectedHeight: '300px',
+        },
+        { id: 'lnsLegacyMetric', aspectRatio: UNCONSTRAINED },
+        {
+          id: 'lnsMetric',
+          expectedWidth: '300px',
+          expectedHeight: '300px',
+        },
+        { id: 'donut', aspectRatio: UNCONSTRAINED },
+        {
+          id: 'lnsMetric',
+          expectedWidth: '300px',
+          expectedHeight: '300px',
+        },
+        { id: 'mosaic', aspectRatio: UNCONSTRAINED },
+        {
+          id: 'lnsMetric',
+          expectedWidth: '300px',
+          expectedHeight: '300px',
+        },
+        { id: 'pie', aspectRatio: UNCONSTRAINED },
+        {
+          id: 'lnsMetric',
+          expectedWidth: '300px',
+          expectedHeight: '300px',
+        },
         { id: 'treemap', aspectRatio: UNCONSTRAINED },
-        { id: 'area_percentage_stacked', searchText: 'area', aspectRatio: VERTICAL_16_9 },
+        {
+          id: 'lnsMetric',
+          expectedWidth: '300px',
+          expectedHeight: '300px',
+        },
         { id: 'waffle', aspectRatio: UNCONSTRAINED },
-        { id: 'area_stacked', aspectRatio: VERTICAL_16_9 },
-
-        { id: 'bar_horizontal', aspectRatio: HORIZONTAL_16_9 },
         // { id: 'heatmap', ...UNCONSTRAINED }, // heatmap blocks render unless it's given two dimensions. This stops the expression renderer from requesting new dimensions.
         // { id: 'lnsChoropleth', ...UNCONSTRAINED }, // choropleth currently erases all dimensions
         // { id: 'lnsTagcloud', ...UNCONSTRAINED }, // tag cloud currently erases all dimensions
@@ -140,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    it('metric dimensions (absolute pixels)', async () => {
+    it('metric size (absolute pixels)', async () => {
       await retry.try(async () => {
         await PageObjects.lens.switchToVisualization('lnsMetric');
       });
@@ -161,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceDimensions('266.664px', '400px');
     });
 
-    it('gauge dimensions (absolute pixels)', async () => {
+    it('gauge size (absolute pixels)', async () => {
       await retry.try(async () => {
         await PageObjects.lens.switchToVisualization('horizontalBullet', 'gauge');
       });
@@ -206,11 +227,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.switchToVisualization('bar');
       });
 
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
       // plenty of height, constrained width
       await changeWindowAndAssertAspectRatio(1200, 1000, VERTICAL_16_9);
 
       // plenty of width, constrained height
       await changeWindowAndAssertAspectRatio(2000, 600, VERTICAL_16_9);
+
+      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+    });
+
+    it('XY chart size', async () => {
+      // XY charts should have 100% width and 100% height unless they are a vertical chart with a time dimension
+      await retry.try(async () => {
+        // not important that this is specifically a line chart
+        await PageObjects.lens.switchToVisualization('line');
+      });
+
+      await assertWorkspaceAspectRatio(UNCONSTRAINED);
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await assertWorkspaceAspectRatio(VERTICAL_16_9);
+
+      await retry.try(async () => {
+        await PageObjects.lens.switchToVisualization('bar_horizontal_stacked');
+      });
+
+      await assertWorkspaceAspectRatio(UNCONSTRAINED);
     });
   });
 }
