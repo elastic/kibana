@@ -210,7 +210,7 @@ Machine Learning::
 * Validates and limits threading parameters for starting a model deployment ({kibana-pull}171921[#171921]).
 * Trained models: Adds a missing job node to models map view when original job has been deleted ({kibana-pull}171590[#171590]).
 * Trained models list: Disables the View training data action if data frame analytics job no longer exists ({kibana-pull}171061[#171061]).
-* Adds a Add a trained model flyout with available models to download for in the Trained Models UI ({kibana-pull}171024[#171024]).
+* Adds a trained model flyout with available models to download for in the Trained Models UI ({kibana-pull}171024[#171024]).
 * Allows temporary data views in the anomaly detection jobs wizards ({kibana-pull}170112[#170112]).
 * Assigns downloaded ELSER models to the `*` space ({kibana-pull}169939[#169939]).
 * Adds pattern analysis to the anomaly action menu ({kibana-pull}169400[#169400]).
