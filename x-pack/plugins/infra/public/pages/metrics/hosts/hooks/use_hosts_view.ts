@@ -41,7 +41,7 @@ const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const {
-    services: { http, data },
+    services: { http, data, telemetry },
   } = useKibanaContextForPlugin();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const abortCtrlRef = useRef(new AbortController());
@@ -72,7 +72,13 @@ export const useHostsView = () => {
         }
       );
       const duration = performance.now() - start;
-      return { response: metricsResponse, duration };
+      telemetry.reportPerformanceMetricEvent(
+        'infra_hosts_table_load',
+        duration,
+        { key1: 'data_load', value1: duration },
+        { limit: searchCriteria.limit }
+      );
+      return metricsResponse;
     },
     [baseRequest, http],
     { loading: true }
@@ -88,9 +94,8 @@ export const useHostsView = () => {
   return {
     loading,
     error,
-    hostNodes: value?.response?.nodes ?? [],
+    hostNodes: value?.nodes ?? [],
     searchSessionId,
-    duration: value?.duration,
   };
 };
 

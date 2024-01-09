@@ -13,38 +13,12 @@ import { Tabs } from './tabs/tabs';
 import { AlertsQueryProvider } from '../hooks/use_alerts_query';
 import { HostsViewProvider } from '../hooks/use_hosts_view';
 import { HostsTableProvider } from '../hooks/use_hosts_table';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { ErrorCallout } from './error_callout';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { HostCountProvider } from '../hooks/use_host_count';
 
 export const HostsContent = () => {
-  const { error, searchCriteria } = useUnifiedSearchContext();
-  const {
-    services: { telemetry },
-  } = useKibanaContextForPlugin();
-
-  const renderHostsTable = () => {
-    const startTime = performance.now();
-    return (
-      <HostsTable
-        onRender={({ dataLoadDuration }) => {
-          const totalDuration = performance.now() - startTime;
-          telemetry.reportPerformanceMetricEvent(
-            'infra_hosts_table_load',
-            totalDuration,
-            {
-              key1: 'data_load',
-              value1: dataLoadDuration,
-              key2: 'render_time',
-              value2: totalDuration - (dataLoadDuration ?? 0),
-            },
-            { limit: searchCriteria.limit }
-          );
-        }}
-      />
-    );
-  };
+  const { error } = useUnifiedSearchContext();
 
   return (
     <>
@@ -59,7 +33,9 @@ export const HostsContent = () => {
                   <KPIGrid />
                 </HostCountProvider>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{renderHostsTable()}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <HostsTable />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AlertsQueryProvider>
                   <Tabs />

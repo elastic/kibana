@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiEmptyPrompt } from '@elastic/eui';
@@ -17,12 +17,8 @@ import { FilterAction } from './table/filter_action';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
-interface HostsTableOptions {
-  onRender?: ({ dataLoadDuration }: { dataLoadDuration?: number }) => void;
-}
-
-export const HostsTable = ({ onRender }: HostsTableOptions) => {
-  const { loading, duration } = useHostsViewContext();
+export const HostsTable = () => {
+  const { loading } = useHostsViewContext();
 
   const {
     columns,
@@ -39,12 +35,6 @@ export const HostsTable = ({ onRender }: HostsTableOptions) => {
     filterSelectedHosts,
     refs,
   } = useHostsTableContext();
-
-  useEffect(() => {
-    if (!loading) {
-      onRender?.({ dataLoadDuration: duration });
-    }
-  }, [loading, onRender, duration]);
 
   return (
     <>
