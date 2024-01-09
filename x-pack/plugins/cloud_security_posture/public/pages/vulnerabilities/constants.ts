@@ -12,8 +12,19 @@ import { GROUPING_LABELS } from './translations';
 
 export const DEFAULT_TABLE_HEIGHT = 512;
 
-export const GROUPING_OPTIONS = {
+export const VULNERABILITY_FIELDS = {
+  VULNERABILITY_ID: 'vulnerability.id',
+  SCORE_BASE: 'vulnerability.score.base',
   RESOURCE_NAME: 'resource.name',
+  RESOURCE_ID: 'resource.id',
+  SEVERITY: 'vulnerability.severity',
+  PACKAGE_NAME: 'package.name',
+  PACKAGE_VERSION: 'package.version',
+  PACKAGE_FIXED_VERSION: 'package.fixed_version',
+} as const;
+
+export const GROUPING_OPTIONS = {
+  RESOURCE_NAME: VULNERABILITY_FIELDS.RESOURCE_NAME,
 };
 
 export const defaultGroupingOptions: GroupOption[] = [
@@ -32,18 +43,18 @@ export const getDefaultQuery = ({
   query,
   filters,
   sort: [
-    ['vulnerability.severity', 'desc'],
-    ['vulnerability.score.base', 'desc'],
+    [VULNERABILITY_FIELDS.SEVERITY, 'desc'],
+    [VULNERABILITY_FIELDS.SCORE_BASE, 'desc'],
   ],
 });
 
 export const defaultColumns: CloudSecurityDefaultColumn[] = [
-  { id: 'vulnerability.id', width: 130 },
-  { id: 'vulnerability.score.base', width: 80 },
-  { id: 'resource.name' },
-  { id: 'resource.id' },
-  { id: 'vulnerability.severity', width: 100 },
-  { id: 'package.name' },
-  { id: 'package.version' },
-  { id: 'package.fixed_version' },
+  { id: VULNERABILITY_FIELDS.VULNERABILITY_ID, width: 130 },
+  { id: VULNERABILITY_FIELDS.SCORE_BASE, width: 80 },
+  { id: VULNERABILITY_FIELDS.RESOURCE_NAME },
+  { id: VULNERABILITY_FIELDS.RESOURCE_ID },
+  { id: VULNERABILITY_FIELDS.SEVERITY, width: 100 },
+  { id: VULNERABILITY_FIELDS.PACKAGE_NAME },
+  { id: VULNERABILITY_FIELDS.PACKAGE_VERSION },
+  { id: VULNERABILITY_FIELDS.PACKAGE_FIXED_VERSION },
 ];

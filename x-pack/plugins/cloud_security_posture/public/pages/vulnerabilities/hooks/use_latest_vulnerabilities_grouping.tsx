@@ -21,7 +21,12 @@ import {
   VulnerabilitiesRootGroupingAggregation,
   useGroupedVulnerabilities,
 } from './use_grouped_vulnerabilities';
-import { defaultGroupingOptions, getDefaultQuery, GROUPING_OPTIONS } from '../constants';
+import {
+  defaultGroupingOptions,
+  getDefaultQuery,
+  GROUPING_OPTIONS,
+  VULNERABILITY_FIELDS,
+} from '../constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { VULNERABILITIES_UNIT, groupingTitle } from '../translations';
 
@@ -47,7 +52,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 
   switch (field) {
     case GROUPING_OPTIONS.RESOURCE_NAME:
-      return [...aggMetrics, getTermAggregation('resourceId', 'resource.id')];
+      return [...aggMetrics, getTermAggregation('resourceId', VULNERABILITY_FIELDS.RESOURCE_ID)];
   }
   return aggMetrics;
 };

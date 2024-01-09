@@ -25,6 +25,8 @@ import {
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { FindingsBaseEsQuery } from '../../../common/types';
+import { VULNERABILITY_FIELDS } from '../constants';
+import { getCaseInsensitiveSortScript, severitySortScript } from '../utils/custom_sort_script';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
   SearchResponse<CspVulnerabilityFinding, FindingsAggs>
@@ -39,7 +41,18 @@ interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
 }
 
 const getMultiFieldsSort = (sort: string[][]) => {
-  return sort.map(([id, direction]) => ({ [id]: direction }));
+  return sort.map(([id, direction]) => {
+    if (id === VULNERABILITY_FIELDS.SEVERITY) {
+      return severitySortScript(direction);
+    }
+    if (id === VULNERABILITY_FIELDS.PACKAGE_NAME) {
+      return getCaseInsensitiveSortScript(id, direction);
+    }
+
+    return {
+      [id]: direction,
+    };
+  });
 };
 
 export const getVulnerabilitiesQuery = (
