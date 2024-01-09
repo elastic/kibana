@@ -9,7 +9,6 @@ import { GroupOption } from '@kbn/securitysolution-grouping';
 import { FindingsBaseURLQuery } from '../../common/types';
 import { CloudSecurityDefaultColumn } from '../../components/cloud_security_data_table';
 import { GROUPING_LABELS } from './translations';
-import { vulnerabilitiesColumns } from './vulnerabilities_table_columns';
 
 export const DEFAULT_TABLE_HEIGHT = 512;
 
@@ -33,8 +32,8 @@ export const getDefaultQuery = ({
   query,
   filters,
   sort: [
-    [vulnerabilitiesColumns.severity, 'desc'],
-    [vulnerabilitiesColumns.cvss, 'desc'],
+    ['vulnerability.severity', 'desc'],
+    ['vulnerability.score.base', 'desc'],
   ],
 });
 

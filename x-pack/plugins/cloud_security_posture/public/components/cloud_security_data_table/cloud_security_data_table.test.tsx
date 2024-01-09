@@ -6,6 +6,8 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { DataViewContext } from '../../common/contexts/data_view_context';
 import { TestProvider } from '../../test/test_provider';
 import { CloudSecurityDataTable, CloudSecurityDataTableProps } from './cloud_security_data_table';
 
@@ -47,7 +49,6 @@ const mockCloudPostureDataTable = {
 
 const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
   const defaultProps: CloudSecurityDataTableProps = {
-    dataView: mockDataView,
     isLoading: false,
     defaultColumns: mockDefaultColumns,
     rows: [],
@@ -60,7 +61,9 @@ const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
 
   return render(
     <TestProvider>
-      <CloudSecurityDataTable {...defaultProps} {...props} />
+      <DataViewContext.Provider value={{ dataView: mockDataView }}>
+        <CloudSecurityDataTable {...defaultProps} {...props} />
+      </DataViewContext.Provider>
     </TestProvider>
   );
 };
@@ -90,13 +93,15 @@ describe('CloudSecurityDataTable', () => {
         },
       },
     ] as any;
-    const { getByTestId, getByText } = renderDataTable({
-      rows: mockRows,
-      total: mockRows.length,
-    });
+    act(() => {
+      const { getByTestId, getByText } = renderDataTable({
+        rows: mockRows,
+        total: mockRows.length,
+      });
 
-    expect(getByTestId('discoverDocTable')).toBeInTheDocument();
-    expect(getByText('Label 1')).toBeInTheDocument();
-    expect(getByText('Label 2')).toBeInTheDocument();
+      expect(getByTestId('discoverDocTable')).toBeInTheDocument();
+      expect(getByText('Label 1')).toBeInTheDocument();
+      expect(getByText('Label 2')).toBeInTheDocument();
+    });
   });
 });
