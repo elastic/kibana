@@ -562,7 +562,7 @@ describe('When using the artifacts services', () => {
           q: options.kuery,
           size: options.perPage,
           body: expect.objectContaining({
-            sort: [{ [options.sortField]: { order: options.sortOrder } }],
+            sort: [{ [options.sortField!]: { order: options.sortOrder } }],
           }),
         })
       );

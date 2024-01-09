@@ -39,6 +39,10 @@ import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { Artifact } from '@kbn/fleet-plugin/server';
 import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types/src/response/exception_list_item_schema';
+import {
+  createFetchAllArtifactsIterableMock,
+  generateArtifactMock,
+} from '@kbn/fleet-plugin/server/services/artifacts/mocks';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -200,9 +204,7 @@ describe('ManifestManager', () => {
 
       (
         manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
-      ).listArtifacts.mockImplementation(async () => {
-        return { items: ARTIFACTS as Artifact[], total: 100, page: 1, perPage: 100 };
-      });
+      ).fetchAll.mockReturnValue(createFetchAllArtifactsIterableMock([ARTIFACTS as Artifact[]]));
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -259,20 +261,17 @@ describe('ManifestManager', () => {
 
       (
         manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
-      ).listArtifacts.mockImplementation(async () => {
-        // report the MACOS Exceptions artifact as not found
-        return {
-          items: [
+      ).fetchAll.mockReturnValue(
+        createFetchAllArtifactsIterableMock([
+          // report the MACOS Exceptions artifact as not found
+          [
             ARTIFACT_TRUSTED_APPS_MACOS,
             ARTIFACT_EXCEPTIONS_WINDOWS,
             ARTIFACT_TRUSTED_APPS_WINDOWS,
             ARTIFACTS_BY_ID[ARTIFACT_ID_EXCEPTIONS_LINUX],
           ] as Artifact[],
-          total: 100,
-          page: 1,
-          perPage: 100,
-        };
-      });
+        ])
+      );
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -1556,6 +1555,10 @@ describe('ManifestManager', () => {
     test('Successfully removes orphan artifacts', async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
+
+      (context.artifactClient.fetchAll as jest.Mock).mockReturnValue(
+        createFetchAllArtifactsIterableMock([[generateArtifactMock()]])
+      );
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
       context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
