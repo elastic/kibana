@@ -103,3 +103,8 @@ export const pipeStreamingResponse = (response: AxiosResponse<IncomingMessage>) 
   };
   return response.data;
 };
+
+export const getAzureApiVersionParameter = (url: string): string | undefined => {
+  const urlSearchParams = new URLSearchParams(new URL(url).search);
+  return urlSearchParams.get('api-version') ?? undefined;
+};

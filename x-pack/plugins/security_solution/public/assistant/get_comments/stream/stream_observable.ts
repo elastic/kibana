@@ -61,6 +61,10 @@ export const getStreamObservable = ({
             }
 
             const decoded = decoder.decode(value);
+            console.log('inside read', {
+              value,
+              decoded,
+            });
             let nextChunks;
             if (isError) {
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
@@ -69,6 +73,7 @@ export const getStreamObservable = ({
               lines[0] = openAIBuffer + lines[0];
               openAIBuffer = lines.pop() || '';
               nextChunks = getOpenAIChunks(lines);
+              console.log('nextChunks', nextChunks);
             }
             nextChunks.forEach((chunk: string) => {
               chunks.push(chunk);
@@ -216,17 +221,15 @@ export const getStreamObservable = ({
  * @returns {string[]} - Parsed string array from the OpenAI response.
  */
 const getOpenAIChunks = (lines: string[]): string[] => {
-  const nextChunk = lines
-    .map((str) => str.substring(6))
-    .filter((str) => !!str && str !== '[DONE]')
-    .map((line) => {
-      try {
-        const openaiResponse = JSON.parse(line);
-        return openaiResponse.choices[0]?.delta.content ?? '';
-      } catch (err) {
-        return '';
-      }
-    });
+  console.log('getOpenAIChunks', lines);
+  const nextChunk = lines.map((line) => {
+    try {
+      const openaiResponse = JSON.parse(line);
+      return openaiResponse.choices[0]?.delta.content ?? '';
+    } catch (err) {
+      return '';
+    }
+  });
   return nextChunk;
 };
 
