@@ -14,6 +14,9 @@ const resetSynchronousUpgrader = () => {
   RiskScoreSynchronousUpgrader.upgradesConducted = {};
 };
 
+const sleep = (ms: number) => (valueToResolve: unknown) =>
+  new Promise((resolve) => setTimeout(() => resolve(valueToResolve), ms));
+
 describe('RiskScoreSynchronousUpgrader', () => {
   let logger: Logger;
 
@@ -59,12 +62,9 @@ describe('RiskScoreSynchronousUpgrader', () => {
     const immediateStub = jest.fn();
 
     const delayedUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          delayedStub();
-          return resolve(undefined);
-        }, 1000);
-      });
+      return Promise.resolve(undefined)
+        .then(sleep(1000))
+        .then(() => delayedStub());
     });
 
     const immediateUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
@@ -77,5 +77,41 @@ describe('RiskScoreSynchronousUpgrader', () => {
     // although the `immediateUpgrade` resolves immediately, it will never be invoked, because the `delayedUpgrade` is called first.
     expect(delayedStub).toBeCalledTimes(1);
     expect(immediateStub).toBeCalledTimes(0);
+  });
+
+  it(`handles errors`, async () => {
+    const stubInErrorPath = jest.fn();
+    const stubInSuccessfulPath = jest.fn();
+
+    const processUpgradeHavingErrors = async () => {
+      const failedUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+        return Promise.resolve(undefined)
+          .then(sleep(1000))
+          .then(() => stubInErrorPath())
+          .then(() => {
+            throw new Error('Error in upgrading');
+          });
+      });
+
+      const normalUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+        stubInErrorPath();
+        return Promise.resolve(undefined);
+      });
+
+      await Promise.all([failedUpgrade, normalUpgrade]);
+    };
+
+    await expect(processUpgradeHavingErrors).rejects.toThrow('Error in upgrading');
+
+    // the stubbed method should only be called once, as the second upgrade was called while still waiting for the first to resolve
+    expect(stubInErrorPath).toBeCalledTimes(1);
+
+    // however, now that all promises have resolved, we should be able to successfully upgrade.
+    await RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+      stubInSuccessfulPath();
+      return Promise.resolve(undefined);
+    });
+
+    expect(stubInSuccessfulPath).toBeCalledTimes(1);
   });
 });

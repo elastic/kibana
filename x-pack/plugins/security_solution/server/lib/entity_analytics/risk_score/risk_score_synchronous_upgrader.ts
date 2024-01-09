@@ -19,14 +19,13 @@ export class RiskScoreSynchronousUpgrader {
    * this {@link upgrade} function, or the promise returned by the {@link upgradeFunction} if one hasn't been provided yet.
    */
   static async upgrade(namespace: string, logger: Logger, upgradeFunction: () => Promise<void>) {
-    try {
-      if (!RiskScoreSynchronousUpgrader.upgradesConducted[namespace]) {
-        RiskScoreSynchronousUpgrader.upgradesConducted[namespace] = upgradeFunction();
-      }
-      return RiskScoreSynchronousUpgrader.upgradesConducted[namespace];
-    } catch (error) {
-      logger.error(`Error upgrading risk engine resources: ${error.message}`);
-      throw error;
+    if (!RiskScoreSynchronousUpgrader.upgradesConducted[namespace]) {
+      RiskScoreSynchronousUpgrader.upgradesConducted[namespace] = upgradeFunction().catch((err) => {
+        logger.error(`Error upgrading risk engine resources. ${err.message}`);
+        delete RiskScoreSynchronousUpgrader.upgradesConducted[namespace];
+        throw err;
+      });
     }
+    return RiskScoreSynchronousUpgrader.upgradesConducted[namespace];
   }
 }
