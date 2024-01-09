@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { Navigation, RecentlyAccessed } from './components';
-export type { PanelContent, PanelComponentProps, PanelContentProvider } from './components';
-
 export { DefaultNavigation } from './default_navigation';
 
+export { RecentlyAccessed } from './components';
+
 export { getPresets } from './nav_tree_presets';
+
+export type { PanelContent, PanelComponentProps, PanelContentProvider } from './components';
 
 export type {
   GroupDefinition,
@@ -19,7 +20,6 @@ export type {
   ItemDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
-  ProjectNavigationDefinition,
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
 } from './types';

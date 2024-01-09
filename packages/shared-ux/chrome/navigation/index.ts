@@ -8,7 +8,7 @@
 
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 
-export { DefaultNavigation, getPresets, Navigation } from './src/ui';
+export { DefaultNavigation, getPresets } from './src/ui';
 
 export type {
   GroupDefinition,
@@ -16,7 +16,6 @@ export type {
   ItemDefinition,
   NavigationGroupPreset,
   NavigationTreeDefinition,
-  ProjectNavigationDefinition,
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
   PanelComponentProps,
