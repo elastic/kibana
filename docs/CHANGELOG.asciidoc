@@ -289,6 +289,8 @@ Lens & Visualizations::
 * Fixes filters being lost when navigating from dashboard -> editor -> *Lens* in *TSVB* ({kibana-pull}172566[#172566]).
 * Ignore drop commands for date histogram in discover ({kibana-pull}171769[#171769]).
 Machine Learning::
+* Ensures data frame analytics job can be deleted from analytics map ({kibana-pull}174212[#174212]).
+* Fixes filter for boolean fields filtering for numbers in Field statistics / Data Visualizer ({kibana-pull}174212[#174050])
 * Fixes registering of the ML alerting rules with the basic license ({kibana-pull}173644[#173644]).
 * Fixes display of actions column in the datafeed chart flyout ({kibana-pull}173365[#173365]).
 * Fixes View in Discover option in Anomaly explorer not handling multiple field values or values with quotation marks ({kibana-pull}172897[#172897]).
