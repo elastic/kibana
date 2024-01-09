@@ -31,7 +31,6 @@ export const Policy = memo(() => {
 
   let from: EditPackagePolicyFrom | undefined;
 
-  // Shorten query strings to make them more presentable in the URL
   if (fromQs && fromQs === 'fleet-policy-list') {
     from = 'edit';
   } else {
