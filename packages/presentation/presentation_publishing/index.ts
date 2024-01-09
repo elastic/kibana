@@ -95,8 +95,8 @@ export {
 } from './interfaces/publishes_view_mode';
 export { useBatchedPublishingSubjects } from './publishing_batcher';
 export {
-  useApiPublisher,
-  useReactiveVarFromSubject,
-  useSubjectFromReactiveVar,
+  useStateFromPublishingSubject,
+  usePublishingSubject,
   type PublishingSubject,
 } from './publishing_utils';
+export { useApiPublisher } from './publishing_utils';

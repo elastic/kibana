@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
 
 export interface PublishesPanelTitle {
   panelTitle: PublishingSubject<string | undefined>;
@@ -46,16 +46,16 @@ export const apiPublishesWritablePanelTitle = (
  * A hook that gets this API's panel title as a reactive variable which will cause re-renders on change.
  */
 export const usePanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
-  useReactiveVarFromSubject<string | undefined>(api?.panelTitle);
+  useStateFromPublishingSubject<string | undefined>(api?.panelTitle);
 
 /**
  * A hook that gets this API's hide panel title setting as a reactive variable which will cause re-renders on change.
  */
 export const useHidePanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
-  useReactiveVarFromSubject<boolean | undefined>(api?.hidePanelTitle);
+  useStateFromPublishingSubject<boolean | undefined>(api?.hidePanelTitle);
 
 /**
  * A hook that gets this API's default title as a reactive variable which will cause re-renders on change.
  */
 export const useDefaultPanelTitle = (api: Partial<PublishesPanelTitle> | undefined) =>
-  useReactiveVarFromSubject<string | undefined>(api?.defaultPanelTitle);
+  useStateFromPublishingSubject<string | undefined>(api?.defaultPanelTitle);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
 
 export interface PublishesBlockingError {
   blockingError: PublishingSubject<Error | undefined>;
@@ -22,6 +22,6 @@ export const apiPublishesBlockingError = (
  * Gets this API's fatal error as a reactive variable which will cause re-renders on change.
  */
 export const useBlockingError = (api: Partial<PublishesBlockingError> | undefined) =>
-  useReactiveVarFromSubject<Error | undefined, PublishesBlockingError['blockingError']>(
+  useStateFromPublishingSubject<Error | undefined, PublishesBlockingError['blockingError']>(
     api?.blockingError
   );

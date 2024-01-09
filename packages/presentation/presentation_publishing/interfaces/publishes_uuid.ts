@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
 
 export interface PublishesUniqueId {
   uuid: PublishingSubject<string>;
@@ -26,6 +26,6 @@ export const useUniqueId = <
 >(
   api: ApiType
 ) =>
-  useReactiveVarFromSubject<string, ApiType['uuid']>(
+  useStateFromPublishingSubject<string, ApiType['uuid']>(
     apiPublishesUniqueId(api) ? api.uuid : undefined
   );

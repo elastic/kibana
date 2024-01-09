@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
 
 export interface PublishesPanelDescription {
   panelDescription: PublishingSubject<string | undefined>;
@@ -39,7 +39,7 @@ export const apiPublishesWritablePanelDescription = (
  * A hook that gets this API's panel description as a reactive variable which will cause re-renders on change.
  */
 export const usePanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
-  useReactiveVarFromSubject<string | undefined, PublishesPanelDescription['panelDescription']>(
+  useStateFromPublishingSubject<string | undefined, PublishesPanelDescription['panelDescription']>(
     api?.panelDescription
   );
 
@@ -47,7 +47,7 @@ export const usePanelDescription = (api: Partial<PublishesPanelDescription> | un
  * A hook that gets this API's default panel description as a reactive variable which will cause re-renders on change.
  */
 export const useDefaultPanelDescription = (api: Partial<PublishesPanelDescription> | undefined) =>
-  useReactiveVarFromSubject<
+  useStateFromPublishingSubject<
     string | undefined,
     PublishesPanelDescription['defaultPanelDescription']
   >(api?.defaultPanelDescription);

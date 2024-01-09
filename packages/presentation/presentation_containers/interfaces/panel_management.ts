@@ -8,7 +8,7 @@
 
 import {
   PublishingSubject,
-  useReactiveVarFromSubject,
+  useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing/publishing_utils';
 
 export interface CanDuplicatePanels {
@@ -34,6 +34,6 @@ export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is Ca
  * Gets this API's expanded panel state as a reactive variable which will cause re-renders on change.
  */
 export const useExpandedPanelId = (api: Partial<CanExpandPanels> | undefined) =>
-  useReactiveVarFromSubject<string | undefined, CanExpandPanels['expandedPanelId']>(
+  useStateFromPublishingSubject<string | undefined, CanExpandPanels['expandedPanelId']>(
     apiCanExpandPanels(api) ? api.expandedPanelId : undefined
   );

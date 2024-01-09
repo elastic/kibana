@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
 
 export type ViewMode = 'view' | 'edit' | 'print' | 'preview';
 
@@ -48,4 +48,4 @@ export const useViewMode = <
   ApiType extends Partial<PublishesViewMode> = Partial<PublishesViewMode>
 >(
   api: ApiType | undefined
-) => useReactiveVarFromSubject<ViewMode, ApiType['viewMode']>(api?.viewMode);
+) => useStateFromPublishingSubject<ViewMode, ApiType['viewMode']>(api?.viewMode);

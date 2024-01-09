@@ -7,7 +7,7 @@
  */
 
 import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
 
 export interface PublishesLocalUnifiedSearch {
   isCompatibleWithLocalUnifiedSearch?: () => boolean;
@@ -62,16 +62,16 @@ export const apiPublishesWritableLocalUnifiedSearch = (
  * A hook that gets this API's local time range as a reactive variable which will cause re-renders on change.
  */
 export const useLocalTimeRange = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  useReactiveVarFromSubject<TimeRange | undefined>(api?.localTimeRange);
+  useStateFromPublishingSubject<TimeRange | undefined>(api?.localTimeRange);
 
 /**
  * A hook that gets this API's local filters as a reactive variable which will cause re-renders on change.
  */
 export const useLocalFilters = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  useReactiveVarFromSubject<Filter[] | undefined>(api?.localFilters);
+  useStateFromPublishingSubject<Filter[] | undefined>(api?.localFilters);
 
 /**
  * A hook that gets this API's local query as a reactive variable which will cause re-renders on change.
  */
 export const useLocalQuery = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  useReactiveVarFromSubject<Query | AggregateQuery | undefined>(api?.localQuery);
+  useStateFromPublishingSubject<Query | AggregateQuery | undefined>(api?.localQuery);

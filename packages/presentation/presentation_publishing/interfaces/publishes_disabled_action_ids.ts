@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
 
 export interface PublishesDisabledActionIds {
   disabledActionIds: PublishingSubject<string[] | undefined>;
@@ -29,6 +29,6 @@ export const apiPublishesDisabledActionIds = (
  * Gets this API's disabled action IDs as a reactive variable which will cause re-renders on change.
  */
 export const useDisabledActionIds = (api: Partial<PublishesDisabledActionIds> | undefined) =>
-  useReactiveVarFromSubject<string[] | undefined, PublishesDisabledActionIds['disabledActionIds']>(
+  useStateFromPublishingSubject<string[] | undefined, PublishesDisabledActionIds['disabledActionIds']>(
     api?.disabledActionIds
   );
