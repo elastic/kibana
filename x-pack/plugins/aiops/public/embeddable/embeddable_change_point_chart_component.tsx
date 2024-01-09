@@ -15,13 +15,16 @@ import {
   useEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
-import { type EmbeddableChangePointType } from '../../common/constants';
+import {
+  type ChanegPointDetectionViewType,
+  type EmbeddableChangePointType,
+} from '../../common/constants';
 import type { AiopsPluginStartDeps } from '../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';
 
 export interface EmbeddableChangePointChartProps {
-  viewType?: 'charts' | 'table';
+  viewType?: ChanegPointDetectionViewType;
   dataViewId: string;
   timeRange: TimeRange;
   fn: 'avg' | 'sum' | 'min' | 'max' | string;

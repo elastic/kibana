@@ -139,7 +139,6 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
             <DatePickerContextProvider {...datePickerDeps}>
               <Suspense fallback={null}>
                 <EmbeddableInputTracker
-                  type={this.type}
                   input$={input$}
                   initialInput={input}
                   reload$={this.reload$}
