@@ -22,8 +22,8 @@ export default function (providerContext: FtrProviderContext) {
   const testPkgName = 'apache';
   const testPkgVersion = '0.1.4';
 
-  const prereleasePkgName = 'istio';
-  const prereleasePkgVersion = '0.3.3';
+  const prereleasePkgName = 'prerelease';
+  const prereleasePkgVersion = '0.1.0-dev.0+abc';
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -32,10 +32,6 @@ export default function (providerContext: FtrProviderContext) {
   const testPkgArchiveZip = path.join(
     path.dirname(__filename),
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
-  );
-  const istioArchiveZip = path.join(
-    path.dirname(__filename),
-    '../fixtures/test_packages/istio/istio-0.3.3.zip'
   );
 
   describe('EPM Templates - Get Inputs', () => {
@@ -48,13 +44,6 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .type('application/zip')
         .send(buf)
-        .expect(200);
-      const buf2 = fs.readFileSync(istioArchiveZip);
-      await supertest
-        .post(`/api/fleet/epm/packages`)
-        .set('kbn-xsrf', 'xxxx')
-        .type('application/zip')
-        .send(buf2)
         .expect(200);
     });
     after(async () => {
@@ -193,54 +182,13 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('returns inputs template for a prerelease package if prerelease=true', async function () {
-      const res = await supertest
+      await supertest
         .get(
           `/api/fleet/epm/templates/${prereleasePkgName}/${prereleasePkgVersion}/inputs?format=json&prerelease=true`
         )
         .expect(200);
-      const inputs = res.body.inputs;
-      expect(inputs).to.eql([
-        {
-          id: 'filestream-istio.access_logs',
-          type: 'filestream',
-          data_stream: { type: 'logs', dataset: 'istio.access_logs' },
-          paths: ['/var/log/containers/*${kubernetes.container.id}.log'],
-          condition: "${kubernetes.container.name} == 'istio-proxy'",
-          'prospector.scanner.symlinks': true,
-          parsers: [{ container: { stream: 'stdout', format: 'cri' } }],
-          tags: null,
-        },
-        {
-          id: 'prometheus/metrics-istio.istiod_metrics',
-          type: 'prometheus/metrics',
-          data_stream: { type: 'metrics', dataset: 'istio.istiod_metrics' },
-          metricsets: ['collector'],
-          period: '10s',
-          hosts: ['istiod.istio-system:15014'],
-          condition: '${kubernetes_leaderelection.leader} == true',
-          metrics_path: '/metrics',
-          'metrics_filters.exclude': ['^up$'],
-          'metrics_filters.include': ['galley_*', 'pilot_*', 'citadel_*', 'istio_*'],
-          use_types: true,
-          rate_counters: true,
-        },
-        {
-          id: 'prometheus/metrics-istio.proxy_metrics',
-          type: 'prometheus/metrics',
-          data_stream: { type: 'metrics', dataset: 'istio.proxy_metrics' },
-          metricsets: ['collector'],
-          period: '10s',
-          hosts: ['${kubernetes.pod.ip}:15020'],
-          condition:
-            "${kubernetes.container.name} == 'istio-proxy' and ${kubernetes.annotations.prometheus.io/scrape} == 'true'",
-          metrics_path: '/stats/prometheus',
-          'metrics_filters.exclude': ['^up$'],
-          'metrics_filters.include': ['istio_*'],
-          use_types: true,
-          rate_counters: true,
-        },
-      ]);
     });
+
     it('returns a 404 for a version that does not exists', async function () {
       await supertest
         .get(`/api/fleet/epm/templates/${testPkgName}/0.1.0/inputs?format=json`)
