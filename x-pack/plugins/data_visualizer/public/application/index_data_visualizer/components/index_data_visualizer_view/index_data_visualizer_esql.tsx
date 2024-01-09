@@ -42,6 +42,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { ESQLSearchReponse } from '@kbn/es-types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { getFieldType } from '@kbn/field-utils';
+import { i18n } from '@kbn/i18n';
 import { SupportedFieldType } from '../../../../../common/types';
 import { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
@@ -141,9 +142,11 @@ const getPercentileESQLQuery = (fieldName: string) =>
 export const useESQLFieldStatsData = ({
   searchQuery,
   columns,
+  filter,
 }: {
   searchQuery?: AggregateQuery;
   columns?: Column[];
+  filter?: QueryDslQueryContainer;
 }) => {
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
 
@@ -168,8 +171,26 @@ export const useESQLFieldStatsData = ({
           error: undefined,
         });
         try {
-          // GETTING STATS FOR NUMERIC FIELDS
           const esqlBaseQuery = searchQuery.esql;
+
+          const totalFieldsCnt = columns.length;
+
+          let fieldsLoaded = 0;
+
+          // @TODO: GETTING 500 DOCS FOR ONLY TEXT FIELDS
+
+          // const textFields = columns.filter((f) => f.secondaryType === 'text');
+          // const textFieldsResp = await runRequest(
+          //   {
+          //     params: {
+          //       query: esqlBaseQuery + `| KEEP ${textFields.map((f) => f.name).join(',')}`,
+          //       ...(filter ? { filter } : {}),
+          //     },
+          //   },
+          //   { strategy: ESQL_SEARCH_STRATEGY }
+          // );
+
+          // GETTING STATS FOR NUMERIC FIELDS
 
           const numericFields = columns
             .filter((f) => f.secondaryType === 'number')
@@ -201,18 +222,16 @@ export const useESQLFieldStatsData = ({
               params: {
                 query: esqlBaseQuery + fieldStatsQuery,
                 locale: 'en',
-                filter: {
-                  bool: {
-                    must: [],
-                    filter: [],
-                    should: [],
-                    must_not: [],
-                  },
-                },
+                ...(filter ? { filter } : {}),
               },
             },
             { strategy: ESQL_SEARCH_STRATEGY }
           );
+
+          fieldsLoaded += numericFields.length;
+          setFetchState({
+            loaded: (fieldsLoaded / totalFieldsCnt) * 100,
+          });
 
           if (!unmounted && fieldStatsResp) {
             const values = fieldStatsResp.rawResponse.values[0];
@@ -247,7 +266,9 @@ export const useESQLFieldStatsData = ({
               .map((field) => {
                 return {
                   field,
-                  query: `| STATS ${field.name}_terms = count(${field.name}) by ${field.name} | LIMIT 10`,
+                  query: `| STATS ${field.name}_terms = count(${field.name}) BY ${field.name}
+                  | LIMIT 10
+                  | SORT ${field.name}_terms DESC`,
                 };
               });
 
@@ -257,15 +278,7 @@ export const useESQLFieldStatsData = ({
                   {
                     params: {
                       query: esqlBaseQuery + query,
-                      locale: 'en',
-                      filter: {
-                        bool: {
-                          must: [],
-                          filter: [],
-                          should: [],
-                          must_not: [],
-                        },
-                      },
+                      ...(filter ? { filter } : {}),
                     },
                   },
                   { strategy: ESQL_SEARCH_STRATEGY }
@@ -296,13 +309,19 @@ export const useESQLFieldStatsData = ({
               });
             }
 
+            fieldsLoaded += keywordFields.length;
+            setFetchState({
+              loaded: (fieldsLoaded / totalFieldsCnt) * 100,
+            });
+
             // GETTING STATS FOR BOOLEAN FIELDS
             const booleanFields = columns
               .filter((f) => f.secondaryType === 'boolean')
               .map((field) => {
                 return {
                   field,
-                  query: `| STATS ${field.name}_terms = count(${field.name}) by ${field.name} | LIMIT 3`,
+                  query: `| STATS ${field.name}_terms = count(${field.name}) BY ${field.name}
+                  | LIMIT 3`,
                 };
               });
 
@@ -313,14 +332,7 @@ export const useESQLFieldStatsData = ({
                     params: {
                       query: esqlBaseQuery + query,
                       locale: 'en',
-                      filter: {
-                        bool: {
-                          must: [],
-                          filter: [],
-                          should: [],
-                          must_not: [],
-                        },
-                      },
+                      ...(filter ? { filter } : {}),
                     },
                   },
                   { strategy: ESQL_SEARCH_STRATEGY }
@@ -398,21 +410,17 @@ export const useESQLDataVisualizerGridData = (
         searchQuery: AggregateQuery;
         indexPattern: string | undefined;
         timeFieldName: string | undefined;
-        // aggregatableFields: string[];
-        // nonAggregatableFields: string[];
-        // fieldsToFetch: string[];
         lastRefresh: number;
         filter?: QueryDslQueryContainer;
       }
     | undefined
 ) => {
   const {
-    services: { data },
+    services: {
+      data,
+      notifications: { toasts },
+    },
   } = useDataVisualizerKibana();
-  const [fetchState, setFetchState] = useReducer(
-    getReducer<DataStatsFetchProgress>(),
-    getInitialProgress()
-  );
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
   const [overallStatsProgress, setOverallStatsProgress] = useReducer(
@@ -429,12 +437,6 @@ export const useESQLDataVisualizerGridData = (
       searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
       abortCtrl.current = new AbortController();
-
-      setFetchState({
-        ...getInitialProgress(),
-        isRunning: true,
-        error: undefined,
-      });
 
       if (!fieldStatsRequest) {
         return;
@@ -628,8 +630,15 @@ export const useESQLDataVisualizerGridData = (
         });
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('An error occured fetching ESQL data\n', error);
+      const title = i18n.translate(
+        'xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage',
+        {
+          defaultMessage: 'Error fetching stats for ES|QL data',
+        }
+      );
+      toasts.addError(error, {
+        title,
+      });
     }
   }, [data.search, JSON.stringify({ fieldStatsRequest })]);
 
@@ -894,13 +903,14 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const { fieldStats, fieldStatsProgress } = useESQLFieldStatsData({
     searchQuery: fieldStatsRequest?.searchQuery,
     columns,
+    filter: fieldStatsRequest?.filter,
   });
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
-  const [metricsLoaded, setMetricsLoaded] = useState(defaults.metricsLoaded);
+  const [metricsLoaded] = useState(defaults.metricsLoaded);
   const [metricsStats, setMetricsStats] = useState<undefined | MetricFieldsStats>();
 
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
-  const [nonMetricsLoaded, setNonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
+  const [nonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
@@ -1152,6 +1162,11 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     },
   });
 
+  const combinedProgress = useMemo(
+    () => overallStatsProgress.loaded * 0.3 + fieldStatsProgress.loaded * 0.7,
+    [overallStatsProgress.loaded, fieldStatsProgress.loaded]
+  );
+
   return (
     <EuiPageTemplate
       offset={0}
@@ -1235,7 +1250,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 metricsStats={metricsStats}
               />
               <EuiSpacer size="m" />
-              <EuiProgress value={50} max={100} size="xs" />
+              <EuiProgress value={combinedProgress} max={100} size="xs" />
               <DataVisualizerTable<FieldVisConfig>
                 items={configs}
                 pageState={dataVisualizerListState}
