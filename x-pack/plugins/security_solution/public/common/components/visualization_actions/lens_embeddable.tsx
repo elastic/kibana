@@ -14,7 +14,6 @@ import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
-import { ACTION_CUSTOMIZE_PANEL } from '@kbn/presentation-panel-plugin/public';
 import type { EmbeddableComponentProps, XYState } from '@kbn/lens-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
@@ -30,7 +29,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
 const HOVER_ACTIONS_PADDING = 24;
-const DISABLED_ACTIONS = [ACTION_CUSTOMIZE_PANEL];
+const DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL'];
 
 const LensComponentWrapper = styled.div<{
   $height?: number;
