@@ -141,25 +141,6 @@ export interface NavigationTreeDefinition<
 }
 
 /**
- * @public
- *
- * A project navigation definition that can be passed to the `<DefaultNavigation />` component
- * or when calling `setNavigation()` on the serverless plugin.
- */
-export interface ProjectNavigationDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> {
-  /**
-   * A navigation tree structure with object items containing labels, links, and sub-items
-   * that defines a complete side navigation. This configuration overrides `projectNavigationTree`
-   * if both are provided.
-   */
-  navigationTree: NavigationTreeDefinition<LinkId, Id, ChildrenId>;
-}
-
-/**
  * @internal
  *
  * Function to unregister a navigation node from its parent.

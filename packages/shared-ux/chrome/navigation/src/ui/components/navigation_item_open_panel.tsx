@@ -24,8 +24,8 @@ import {
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { usePanel } from './panel';
 import { isActiveFromUrl } from '../../utils';
+import { usePanel } from './panel';
 
 const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   * {

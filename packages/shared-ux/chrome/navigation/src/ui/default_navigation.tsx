@@ -12,9 +12,9 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import type {
-  ProjectNavigationDefinition,
   RootNavigationItemDefinition,
   RecentlyAccessedDefinition,
+  NavigationTreeDefinition,
 } from './types';
 import {
   RecentlyAccessed,
@@ -22,7 +22,7 @@ import {
   PanelProvider,
   type PanelContentProvider,
 } from './components';
-import { parseNavigationTree } from '../navnode_utils_2';
+import { parseNavigationTree } from '../utils';
 import { useNavigation as useNavigationService } from '../services';
 import { NavigationSectionUI } from './components/navigation_section_ui';
 
@@ -41,11 +41,12 @@ const NavigationContext = createContext<Context>({
 });
 
 interface Props {
+  navigationTree: NavigationTreeDefinition;
   dataTestSubj?: string;
   panelContentProvider?: PanelContentProvider;
 }
 
-const DefaultNavigationComp: FC<ProjectNavigationDefinition & Props> = ({
+const DefaultNavigationComp: FC<Props> = ({
   navigationTree: _navigationTree,
   dataTestSubj,
   panelContentProvider,
