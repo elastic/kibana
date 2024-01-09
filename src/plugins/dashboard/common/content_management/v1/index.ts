@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { DashboardCrudTypes } from './types';
 export type {
   GridData,
+  DashboardItem,
   DashboardCrudTypes,
   DashboardAttributes,
   SavedDashboardPanel,
 } from './types';
-export type DashboardItem = DashboardCrudTypes['Item'];
+
+export {
+  serviceDefinition as serviceDefinitionV1,
+  dashboardSavedObjectSchema as dashboardSOSchemaV1,
+  controlGroupInputSchema as controlGroupInputSchemaV1,
+  dashboardAttributesSchema as dashboardAttributesSchemaV1,
+} from './cm_services';

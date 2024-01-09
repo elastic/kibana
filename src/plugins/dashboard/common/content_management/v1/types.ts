@@ -28,6 +28,8 @@ export type DashboardCrudTypes = ContentManagementCrudTypes<
   }
 >;
 
+export type DashboardItem = DashboardCrudTypes['Item'];
+
 /**
  * Grid type for React Grid Layout
  */

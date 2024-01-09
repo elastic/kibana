@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-// Latest version is 2
-export * from './v2';
+export {
+  serviceDefinition as serviceDefinitionV2,
+  dashboardSavedObjectSchema as dashboardSOSchemaV2,
+  dashboardAttributesSchema as dashboardAttributesSchemaV2,
+} from './cm_services';
+
+export * from '../v1/types'; // no changes made to types from v1 to v2

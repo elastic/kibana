@@ -78,6 +78,9 @@ export class ContentCrud<T = unknown> {
       options,
     });
 
+    // console.log('BEFORE DEBUGGER');
+    // debugger;
+
     try {
       const result = await this.storage.get(ctx, contentId, options);
 

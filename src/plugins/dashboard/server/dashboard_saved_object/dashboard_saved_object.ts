@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
+
+import { dashboardAttributesSchemaV1 } from '../../common/content_management/v1';
+import { dashboardAttributesSchemaV2 } from '../../common/content_management/v2';
 import {
   createDashboardSavedObjectTypeMigrations,
   DashboardSavedObjectTypeMigrationsDeps,
@@ -23,6 +25,7 @@ export const createDashboardSavedObjectType = ({
   indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
+  switchToModelVersionAt: '8.10.0',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'dashboardApp',
@@ -36,6 +39,34 @@ export const createDashboardSavedObjectType = ({
         path: `/app/dashboards#/view/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'dashboard.show',
       };
+    },
+  },
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: dashboardAttributesSchemaV1,
+        create: dashboardAttributesSchemaV1,
+      },
+    },
+    2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            controlGroupInput: {
+              properties: {
+                showSelectionReset: { type: 'boolean', index: false },
+                showApplySelections: { type: 'boolean', index: false },
+              },
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: dashboardAttributesSchemaV2,
+        create: dashboardAttributesSchemaV2,
+      },
     },
   },
   mappings: {
@@ -60,6 +91,8 @@ export const createDashboardSavedObjectType = ({
           controlStyle: { type: 'keyword', index: false, doc_values: false },
           chainingSystem: { type: 'keyword', index: false, doc_values: false },
           panelsJSON: { type: 'text', index: false },
+          showSelectionReset: { type: 'boolean', index: false },
+          showApplySelections: { type: 'boolean', index: false },
           ignoreParentSettingsJSON: { type: 'text', index: false },
         },
       },
@@ -71,45 +104,7 @@ export const createDashboardSavedObjectType = ({
     },
   },
   schemas: {
-    '8.9.0': schema.object({
-      // General
-      title: schema.string(),
-      description: schema.string({ defaultValue: '' }),
-
-      // Search
-      kibanaSavedObjectMeta: schema.object({
-        searchSourceJSON: schema.maybe(schema.string()),
-      }),
-
-      // Time
-      timeRestore: schema.maybe(schema.boolean()),
-      timeFrom: schema.maybe(schema.string()),
-      timeTo: schema.maybe(schema.string()),
-      refreshInterval: schema.maybe(
-        schema.object({
-          pause: schema.boolean(),
-          value: schema.number(),
-          display: schema.maybe(schema.string()),
-          section: schema.maybe(schema.number()),
-        })
-      ),
-
-      // Dashboard Content
-      controlGroupInput: schema.maybe(
-        schema.object({
-          panelsJSON: schema.maybe(schema.string()),
-          controlStyle: schema.maybe(schema.string()),
-          chainingSystem: schema.maybe(schema.string()),
-          ignoreParentSettingsJSON: schema.maybe(schema.string()),
-        })
-      ),
-      panelsJSON: schema.string({ defaultValue: '[]' }),
-      optionsJSON: schema.string({ defaultValue: '{}' }),
-
-      // Legacy
-      hits: schema.maybe(schema.number()),
-      version: schema.maybe(schema.number()),
-    }),
+    '8.9.0': dashboardAttributesSchemaV1,
   },
   migrations: () => createDashboardSavedObjectTypeMigrations(migrationDeps),
 });

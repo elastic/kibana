@@ -90,7 +90,7 @@ export const saveDashboardState = async ({
     query,
     title,
     filters,
-    version,
+    // version,
     timeRestore,
     description,
 
@@ -151,8 +151,9 @@ export const saveDashboardState = async ({
       ]) as RefreshInterval)
     : undefined;
 
+  // console.log('VERSION', version, LATEST_DASHBOARD_CONTAINER_VERSION);
   const rawDashboardAttributes: DashboardAttributes = {
-    version: convertDashboardVersionToNumber(version ?? LATEST_DASHBOARD_CONTAINER_VERSION),
+    version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
     controlGroupInput: serializeControlGroupInput(controlGroupInput),
     kibanaSavedObjectMeta: { searchSourceJSON },
     description: description ?? '',

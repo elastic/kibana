@@ -50,7 +50,7 @@ export const syncReduxEmbeddable = <
     outputA: ReduxEmbeddableStateType['output'],
     outputB: ReduxEmbeddableStateType['output']
   ) => (outputEqualityCheck ? outputEqualityCheck(outputA, outputB) : deepEqual(outputA, outputB));
-  console.log('INPUT EQUAL', inputEqual, settings);
+
   // when the redux store changes, diff, and push updates to the embeddable input or to the output.
   const unsubscribeFromStore = store.subscribe(() => {
     if (embeddableToReduxInProgress) return;
