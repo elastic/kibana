@@ -86,7 +86,7 @@ export class InputControlVisPlugin
     );
   }
 
-  public start(_core: CoreStart) {
+  public start(_core: CoreStart, deps: InputControlVisPluginStartDependencies) {
     // nothing to do here
     const { uiActions } = deps;
 
