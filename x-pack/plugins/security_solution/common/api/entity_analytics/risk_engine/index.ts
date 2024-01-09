@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export {
-  registerGainsightRoute,
-  registerGainsightStyleRoute,
-  registerGainsightWidgetRoute,
-} from './gainsight';
+export * from './engine_settings_route.gen';
