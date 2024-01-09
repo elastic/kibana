@@ -18,7 +18,6 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const testSubjects = getService('testSubjects');
   const owner = OBSERVABILITY_OWNER;
   let caseIdMonitoring: string;
-  let caseOwnerMonitoring: string;
 
   describe('list view', function () {
     before(async () => {
@@ -49,7 +48,6 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         })
       );
       caseIdMonitoring = caseMonitoring.id;
-      caseOwnerMonitoring = caseMonitoring.owner;
     });
 
     after(async () => {
@@ -77,10 +75,10 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await cases.casesFilesTable.addFile(require.resolve('./testfile.png'));
       await testSubjects.getVisibleText('cases-files-name-link');
       await svlCommonScreenshots.takeScreenshot(
-        'observabiity-case-files',
+        'cases-files-tab',
         screenshotDirectories,
-        1700,
-        1024
+        1024,
+        768
       );
     });
 
