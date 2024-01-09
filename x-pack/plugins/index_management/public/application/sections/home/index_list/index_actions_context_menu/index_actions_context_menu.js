@@ -68,6 +68,7 @@ export class IndexActionsContextMenu extends Component {
       indices,
       reloadIndices,
       unfreezeIndices,
+      indicesListParams,
     } = this.props;
     const allOpen = every(indexNames, (indexName) => {
       return indexStatusByName[indexName] === INDEX_OPEN;
@@ -82,7 +83,9 @@ export class IndexActionsContextMenu extends Component {
           defaultMessage: 'Show index overview',
         }),
         onClick: () => {
-          history.push(getIndexDetailsLink(indexNames[0], IndexDetailsSection.Overview));
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListParams, IndexDetailsSection.Overview)
+          );
         },
       });
       items.push({
@@ -91,7 +94,9 @@ export class IndexActionsContextMenu extends Component {
           defaultMessage: 'Show index settings',
         }),
         onClick: () => {
-          history.push(getIndexDetailsLink(indexNames[0], IndexDetailsSection.Settings));
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListParams, IndexDetailsSection.Settings)
+          );
         },
       });
       items.push({
@@ -100,7 +105,9 @@ export class IndexActionsContextMenu extends Component {
           defaultMessage: 'Show index mapping',
         }),
         onClick: () => {
-          history.push(getIndexDetailsLink(indexNames[0], IndexDetailsSection.Mappings));
+          history.push(
+            getIndexDetailsLink(indexNames[0], indicesListParams, IndexDetailsSection.Mappings)
+          );
         },
       });
       if (allOpen && enableIndexActions) {
@@ -110,7 +117,9 @@ export class IndexActionsContextMenu extends Component {
             defaultMessage: 'Show index stats',
           }),
           onClick: () => {
-            history.push(getIndexDetailsLink(indexNames[0], IndexDetailsSection.Stats));
+            history.push(
+              getIndexDetailsLink(indexNames[0], indicesListParams, IndexDetailsSection.Stats)
+            );
           },
         });
       }

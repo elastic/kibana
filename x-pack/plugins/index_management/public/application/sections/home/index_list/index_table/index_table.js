@@ -206,6 +206,10 @@ export class IndexTable extends Component {
     if (error) {
       this.setState({ filterError: error });
     } else {
+      const { pathname, search } = this.props.location;
+      const params = qs.parse(search);
+      params.filter = query.text;
+      this.props.history.push(pathname + '?' + qs.stringify(params));
       this.props.filterChanged(query);
       this.setState({ filterError: null });
     }
@@ -282,7 +286,8 @@ export class IndexTable extends Component {
   }
 
   buildRowCell(fieldName, value, index, appServices) {
-    const { filterChanged, history } = this.props;
+    const { filterChanged, history, filter } = this.props;
+    const { includeHiddenIndices } = this.readURLParams();
 
     if (fieldName === 'health') {
       return <DataHealth health={value} />;
@@ -291,7 +296,11 @@ export class IndexTable extends Component {
         <Fragment>
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
-            onClick={() => history.push(getIndexDetailsLink(value))}
+            onClick={() =>
+              history.push(
+                getIndexDetailsLink(value, { filter: filter.text, includeHiddenIndices })
+              )
+            }
           >
             {value}
           </EuiLink>
@@ -565,6 +574,10 @@ export class IndexTable extends Component {
                         <IndexActionsContextMenu
                           indexNames={Object.keys(selectedIndicesMap)}
                           isOnListView={true}
+                          indicesListParams={{
+                            filter: filter.text,
+                            includeHiddenIndices,
+                          }}
                           resetSelection={() => {
                             this.setState({ selectedIndicesMap: {} });
                           }}

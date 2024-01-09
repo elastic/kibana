@@ -95,6 +95,7 @@ export const DetailsPage: FunctionComponent<
       tab={tab}
       fetchIndexDetails={fetchIndexDetails}
       history={history}
+      search={search}
     />
   );
 };

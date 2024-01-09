@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import qs from 'query-string';
 import { renderBadges } from '../../../../lib/render_badges';
 import { Index } from '../../../../../../common';
 import {
@@ -24,9 +25,8 @@ import {
   IndexDetailsSection,
   IndexDetailsTab,
   IndexDetailsTabId,
-  Section,
 } from '../../../../../../common/constants';
-import { getIndexDetailsLink } from '../../../../services/routing';
+import { getIndexDetailsLink, getIndexListUri } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { ManageIndexButton } from './manage_index_button';
@@ -78,12 +78,14 @@ interface Props {
   index: Index;
   tab: IndexDetailsTabId;
   history: RouteComponentProps['history'];
+  search: string;
   fetchIndexDetails: () => Promise<void>;
 }
 export const DetailsPageContent: FunctionComponent<Props> = ({
   index,
   tab,
   history,
+  search,
   fetchIndexDetails,
 }) => {
   const {
@@ -108,16 +110,22 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     return sortedTabs;
   }, [enableIndexStats, extensionsService.indexDetailsTabs, index]);
 
+  const { filter: filterParam, includeHiddenIndices: includeHiddenParam } = qs.parse(search);
+  const filter = String(filterParam);
+  const includeHiddenIndices = Boolean(includeHiddenParam);
+
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
-      return history.push(getIndexDetailsLink(index.name, newSection));
+      return history.push(
+        getIndexDetailsLink(index.name, { filter, includeHiddenIndices }, newSection)
+      );
     },
-    [history, index]
+    [history, index.name, filter, includeHiddenIndices]
   );
 
   const navigateToAllIndices = useCallback(() => {
-    history.push(`/${Section.Indices}`);
-  }, [history]);
+    history.push(getIndexListUri(filter, includeHiddenIndices));
+  }, [history, filter, includeHiddenIndices]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     return tabs.map((tabConfig) => ({
