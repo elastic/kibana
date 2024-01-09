@@ -48,7 +48,7 @@ describe('CryptoService', () => {
     expect(nextBackOff).not.toBeCalled();
   });
 
-  it('should not retry after the trying more than the max attempts', async () => {
+  it('should not retry after trying more than the max attempts', async () => {
     const maxAttempts = 3;
     service = new CaseConnectorRetryService(backOffFactory, maxAttempts);
 

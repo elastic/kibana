@@ -74,7 +74,7 @@ describe('CasesConnector', () => {
     });
   });
 
-  it('calls creates the CasesConnectorExecutor correctly', async () => {
+  it('creates the CasesConnectorExecutor correctly', async () => {
     await connector.run({
       alerts: [],
       groupingBy,

@@ -17,7 +17,7 @@ export class CaseConnectorRetryService {
    *
    * Full list of errors: packages/core/saved-objects/core-saved-objects-server/src/saved_objects_error_helpers.ts
    */
-  private readonly RETRY_STATUS_CODES: number[] = [409, 429, 503];
+  private readonly RETRY_ERROR_STATUS_CODES: number[] = [409, 429, 503];
   private readonly backOffStrategy: BackoffStrategy;
 
   private timer: NodeJS.Timeout | null = null;
@@ -52,7 +52,7 @@ export class CaseConnectorRetryService {
   private isRetryableError(error: Error) {
     if (
       error instanceof CasesConnectorError &&
-      this.RETRY_STATUS_CODES.includes(error.statusCode)
+      this.RETRY_ERROR_STATUS_CODES.includes(error.statusCode)
     ) {
       return true;
     }

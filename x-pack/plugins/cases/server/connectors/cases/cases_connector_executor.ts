@@ -381,6 +381,9 @@ export class CasesConnectorExecutor {
       }
     }
 
+    /**
+     * cases.bulkCreate throws an error on errors
+     */
     const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
       cases: bulkCreateReq,
     });
@@ -483,6 +486,9 @@ export class CasesConnectorExecutor {
       status: CaseStatuses.open,
     }));
 
+    /**
+     * cases.bulkUpdate throws an error on errors
+     */
     const bulkUpdateCasesResponse = await this.casesClient.cases.bulkUpdate({
       cases: bulkUpdateReq,
     });
@@ -533,6 +539,9 @@ export class CasesConnectorExecutor {
       this.getCreateCaseRequest(params, record)
     );
 
+    /**
+     * cases.bulkCreate throws an error on errors
+     */
     const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
       cases: bulkCreateReq,
     });
@@ -576,6 +585,9 @@ export class CasesConnectorExecutor {
 
     await pMap(
       bulkCreateAlertsRequest,
+      /**
+       * attachments.bulkCreate throws an error on errors
+       */
       (req: BulkCreateAlertsReq) => this.casesClient.attachments.bulkCreate(req),
       {
         concurrency: MAX_CONCURRENT_ES_REQUEST,

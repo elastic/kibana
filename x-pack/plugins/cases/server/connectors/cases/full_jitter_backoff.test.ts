@@ -21,7 +21,7 @@ describe('FullJitterBackoff', () => {
   });
 
   it('starts with minimum of 1ms', () => {
-    const backoff = fullJitterBackoffFactory({ baseDelay: 1, maxBackoffTime: 4 }).create();
+    const backoff = fullJitterBackoffFactory({ baseDelay: 0, maxBackoffTime: 4 }).create();
     expect(backoff.nextBackOff()).toBeGreaterThanOrEqual(1);
   });
 
@@ -53,8 +53,8 @@ describe('FullJitterBackoff', () => {
   it('returns a random number between the expected range correctly', () => {
     const baseDelay = 5;
     const maxBackoffTime = 2000;
-    // 2^11 = 2048 < maxBackoffTime
-    const totalTries = 11;
+    // 2^11 = 4096 > maxBackoffTime
+    const totalTries = 12;
 
     const backoff = fullJitterBackoffFactory({ baseDelay, maxBackoffTime }).create();
 

@@ -54,6 +54,9 @@ export class CasesConnector extends SubActionConnector<
 
     this.casesService = new CasesService();
 
+    /**
+     * We should wait at least 5ms before retrying and no more that 2sec
+     */
     const backOffFactory = fullJitterBackoffFactory({ baseDelay: 5, maxBackoffTime: 2000 });
     this.retryService = new CaseConnectorRetryService(backOffFactory);
 

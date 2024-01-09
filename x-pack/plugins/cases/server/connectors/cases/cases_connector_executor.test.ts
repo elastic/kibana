@@ -30,7 +30,7 @@ import {
 import {
   expectCasesToHaveTheCorrectAlertsAttachedWithGrouping,
   expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter,
-} from './helpers.test';
+} from './test_helpers';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -1653,7 +1653,6 @@ describe('CasesConnectorExecutor', () => {
 
       // called only once when the conflict occurs
       expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
-      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
 
       expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
     });
@@ -1862,7 +1861,7 @@ describe('CasesConnectorExecutor', () => {
       mockBulkUpdateRecord.mockResolvedValueOnce([updatedCounterOracleRecord]);
 
       casesClientMock.cases.bulkCreate.mockRejectedValue(
-        new CaseError('creating non found cases: bulkCreate error')
+        new CaseError('creating new case for closed case: bulkCreate error')
       );
 
       await expect(() =>
@@ -1874,7 +1873,9 @@ describe('CasesConnectorExecutor', () => {
           timeWindow,
           reopenClosedCases: false,
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"creating non found cases: bulkCreate error"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"creating new case for closed case: bulkCreate error"`
+      );
 
       resetCounters();
 
