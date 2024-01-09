@@ -20,7 +20,13 @@ export interface PageProps {
 
 const RESULTS_PER_PAGE = 20;
 
-export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
+export const Page: FC<PageProps> = ({
+  nextStepPath,
+  extraButtons,
+}: {
+  nextStepPath: string;
+  extraButtons?: React.ReactNode;
+}) => {
   const { contentManagement, uiSettings } = useMlKibana().services;
   const navigateToPath = useNavigateToPath();
 

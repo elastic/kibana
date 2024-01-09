@@ -6,7 +6,6 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -170,6 +169,7 @@ export const DatavisualizerSelector: FC = () => {
                       defaultMessage="Visualize data using ES|QL"
                     />{' '}
                     <EuiBetaBadge
+                      label=""
                       iconType="beaker"
                       size="m"
                       color="hollow"

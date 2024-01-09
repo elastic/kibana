@@ -9,7 +9,13 @@ import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useNavigateToPath } from '../../contexts/kibana';
 
-export const NavigateToPageButton = ({ nextStepPath, title }) => {
+export const NavigateToPageButton = ({
+  nextStepPath,
+  title,
+}: {
+  nextStepPath: string;
+  title: string;
+}) => {
   const navigateToPath = useNavigateToPath();
   const onClick = useCallback(() => {
     navigateToPath(nextStepPath);
