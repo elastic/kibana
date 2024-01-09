@@ -59,10 +59,10 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with new risk score', () => {
     before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
-      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
       login();
       enableRiskEngine();
+      cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
     });
 
     beforeEach(() => {
@@ -70,7 +70,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new');
+      cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
       cy.task('esArchiverUnload', 'query_alert');
       deleteRiskEngineConfiguration();
     });
