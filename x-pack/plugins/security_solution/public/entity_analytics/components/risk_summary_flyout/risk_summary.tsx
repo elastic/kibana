@@ -34,6 +34,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
+import { useRiskContributingAlerts } from '../../hooks/use_risk_contributing_alerts';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
@@ -47,6 +48,7 @@ interface TableItem {
 }
 const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
+const ALERTS_FIELDS: string[] = [];
 
 function isUserRiskData(
   riskData: UserRiskScore | HostRiskScore | undefined
@@ -75,7 +77,10 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData(riskData);
   const { euiTheme } = useEuiTheme();
-
+  const { data: alertsData } = useRiskContributingAlerts({
+    riskScore: riskData,
+    fields: ALERTS_FIELDS,
+  });
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = isUserRiskData(riskData) ? 'user.name' : 'host.name';
@@ -127,10 +132,10 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
         category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
           defaultMessage: 'Alerts',
         }),
-        count: entityData?.risk.inputs?.length ?? 0,
+        count: alertsData?.length ?? 0,
       },
     ],
-    [entityData?.risk.inputs?.length]
+    [alertsData?.length]
   );
 
   return (
