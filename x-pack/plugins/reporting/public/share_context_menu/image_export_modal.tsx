@@ -28,11 +28,13 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useEffect, useState } from 'react';
-import type { LayoutParams } from '@kbn/screenshotting-plugin/common/layout';
 import useMountedState from 'react-use/lib/useMountedState';
+import type { BaseParams } from '@kbn/reporting-common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
+import type { JobParamsProviderOptions } from '.';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
 export interface ReportingModalProps {
   apiClient: ReportingAPIClient;
@@ -40,29 +42,89 @@ export interface ReportingModalProps {
   uiSettings: IUiSettingsClient;
   reportType?: string;
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
-  getJobParams: any; // (() => JobParamsCSV) |(() => JobParamsPNGV2 )| (() => JobParamsPDFV2);
   objectId?: string;
   isDirty?: boolean;
   onClose: () => void;
   theme: ThemeServiceSetup;
   layoutOption?: 'print' | 'canvas';
+  jobProviderOptions: JobParamsProviderOptions;
 }
 
 export type Props = ReportingModalProps & { intl?: InjectedIntl };
 
-const renderDescription = (objectType: string) => {
-  return objectType === 'dashboard'
-    ? `Reports can take a few minutes to generate based upon the size of your dashboard.`
-    : `CSV exports can take a few minutes to generate based upon the size of your report.`;
-};
+const getJobsParams =
+  (
+    apiClient: ReportingAPIClient,
+    opts: JobParamsProviderOptions,
+    type: 'pngV2' | 'printablePdf' | 'printablePdfV2'
+  ) =>
+  () => {
+    const {
+      objectType,
+      sharingData: { title, layout, locatorParams },
+    } = opts;
+
+    const baseParams = {
+      objectType,
+      layout,
+      title,
+    };
+
+    if (type === 'printablePdfV2') {
+      // multi locator for PDF V2
+      return { ...baseParams, locatorParams: [locatorParams] };
+    } else if (type === 'pngV2') {
+      // single locator for PNG V2
+      return { ...baseParams, locatorParams };
+    }
+
+    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
+    // Replace hashes with original RISON values.
+    const relativeUrl = opts.shareableUrl.replace(
+      window.location.origin + apiClient.getServerBasePath(),
+      ''
+    );
+
+    if (type === 'printablePdf') {
+      // multi URL for PDF
+      return { ...baseParams, relativeUrls: [relativeUrl] };
+    }
+
+    // single URL for PNG
+    return { ...baseParams, relativeUrl };
+  };
+
+ const getLayout = (): LayoutParams => {
+  const { layout } = getJobsParams()
+
+  let dimensions = layout?.dimensions;
+
+  if (!dimensions) {
+    const el = document.querySelector('[data-shared-items-container]');
+    const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+    dimensions = { height, width }
+  }
+  if (usePrintLayout) {
+    return { id: 'print', dimensions };
+  }
+
+  if (useCanvasLayout) {
+    return { id: 'canvas', dimensions };
+  }
+
+  return { id: 'preserve_layout', dimensions };
+ }
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
-  const { apiClient, getJobParams, intl, toasts, theme, onClose, objectId, layoutOption } = props;
+  const { apiClient, intl, toasts, theme, onClose, objectId, layoutOption, jobProviderOptions } =
+    props;
 
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
-  const [selectedRadio, setSelectedRadio] = useState<string>('printablePdfV2');
+  const [selectedRadio, setSelectedRadio] = useState<'pngV2' | 'printablePdfV2' | 'printablePdf'>(
+    'printablePdfV2'
+  );
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [useCanvasLayout, setCanvasLayout] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
@@ -70,15 +132,24 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const [objectType] = useState<string>('dashboard');
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
-  const getAbsoluteReportGenerationUrl = () => {
-    if (getJobParams(apiClient, getJobParams, selectedRadio) !== undefined) {
+  const getJobParams = (
+    shareableUrl?: boolean
+  ): Omit<BaseParams, 'browserTimezone' | 'version'> => {
+    return { ...getJobsParams(apiClient, jobProviderOptions, selectedRadio), layout: getLayout()}
+  }
+  ;
+  ;
+
+  function getAbsoluteReportGenerationUrl() {
+    console.log({ selectedRadio });
+    if (getJobsParams(apiClient, jobProviderOptions, selectedRadio) !== undefined) {
       const relativePath = apiClient.getReportingPublicJobPath(
         selectedRadio,
-        apiClient.getDecoratedJobParams(getJobParams(apiClient, getJobParams, selectedRadio)!)
+        apiClient.getDecoratedJobParams(getJobParams(true))
       );
       return url.resolve(window.location.href, relativePath);
     }
-  };
+  }
 
   const setAbsoluteReportGenerationUrl = () => {
     if (!isMounted || !getAbsoluteReportGenerationUrl()) {
@@ -98,31 +169,24 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     markAsStale();
   });
 
-  const getLayout = (): LayoutParams => {
-    let dimensions = getJobParams(apiClient, getJobParams, selectedRadio)?.layout?.dimensions;
-    if (!dimensions) {
-      const el = document.querySelector('[data-shared-items-container]');
-      const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-      dimensions = { height, width };
-    }
+  // const getLayout = (): LayoutParams => {
+  //   let dimensions = getJobsParams(apiClient, getJobParams(), selectedRadio)?.layout?.dimensions;
+  //   if (!dimensions) {
+  //     const el = document.querySelector('[data-shared-items-container]');
+  //     const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
+  //     dimensions = { height, width };
+  //   }
 
-    if (usePrintLayout) {
-      return { id: 'print', dimensions };
-    }
+  //   if (usePrintLayout) {
+  //     return { id: 'print', dimensions };
+  //   }
 
-    if (useCanvasLayout) {
-      return { id: 'canvas', dimensions };
-    }
+  //   if (useCanvasLayout) {
+  //     return { id: 'canvas', dimensions };
+  //   }
 
-    return { id: 'preserve_layout', dimensions };
-  };
-
-  const getJobsParams = () => {
-    return {
-      ...getJobParams(apiClient, getJobParams, selectedRadio),
-      layout: getLayout(),
-    };
-  };
+  //   return { id: 'preserve_layout', dimensions };
+  // };
 
   // issue generating reports with locator params
   const generateReportingJob = () => {
@@ -169,7 +233,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       .catch((error) => {
         toasts.addError(error, {
           title: intl!.formatMessage({
-            id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
+            id: 'xpack.reporting.modalContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
           toastMessage: (
@@ -269,7 +333,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             data-test-subj="shareReportingCopyURL"
           >
             <FormattedMessage
-              id="xpack.reporting.panelContent.copyUrlButtonLabel"
+              id="xpack.reporting.modalContent.copyUrlButtonLabel"
               defaultMessage="Copy URL  "
             />
           </EuiButtonEmpty>
@@ -278,12 +342,18 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     );
   };
 
+  const renderDescription = (objectType: string) => {
+    return objectType === 'dashboard'
+      ? `Reports can take a few minutes to generate based upon the size of your dashboard.`
+      : `CSV exports can take a few minutes to generate based upon the size of your report.`;
+  };
+
   const saveWarningMessageWithButton =
     objectId === undefined || objectId === '' || !isSaved || props.isDirty || isStale ? (
       <EuiFormRow
         helpText={
           <FormattedMessage
-            id="xpack.reporting.panelContent.saveWorkDescription"
+            id="xpack.reporting.modalContent.saveWorkDescription"
             defaultMessage="Please save your work before generating a report."
           />
         }
@@ -331,7 +401,10 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
                   { id: 'printablePdfV2', label: 'PDF' },
                   { id: 'pngV2', label: 'PNG' },
                 ]}
-                onChange={(id) => setSelectedRadio(id)}
+                onChange={(id) => {
+                  console.log({ id });
+                  setSelectedRadio(id as 'printablePdfV2' | 'pngV2');
+                }}
                 name="image reporting radio group"
                 idSelected={selectedRadio}
                 legend={{

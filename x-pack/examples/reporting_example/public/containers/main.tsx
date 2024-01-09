@@ -212,7 +212,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 2,
       title: 'Default layout',
       content: (
-        <reporting.components.ReportingPanelPDF
+        <reporting.components.ReportingModalPDFV2
           getJobParams={getPDFJobParamsDefault}
           onClose={closePopover}
         />
@@ -222,7 +222,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 3,
       title: 'Canvas Layout Option',
       content: (
-        <reporting.components.ReportingPanelPDF
+        <reporting.components.ReportingModalPNGV2
           layoutOption="canvas"
           getJobParams={getPDFJobParamsDefault}
           onClose={closePopover}
@@ -233,7 +233,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 4,
       title: 'Default layout V2',
       content: (
-        <reporting.components.ReportingPanelPDFV2
+        <reporting.components.ReportingModalPDFV2
           getJobParams={getPDFJobParamsDefaultV2}
           onClose={closePopover}
         />
@@ -243,7 +243,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 5,
       title: 'Default layout V2',
       content: (
-        <reporting.components.ReportingPanelPNGV2
+        <reporting.components.ReportingModalPNGV2
           getJobParams={getPNGJobParamsDefaultV2}
           onClose={closePopover}
         />
@@ -253,7 +253,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 9,
       title: 'Test A',
       content: (
-        <reporting.components.ReportingPanelPNGV2
+        <reporting.components.ReportingModalPNGV2
           getJobParams={getCaptureTestPNGJobParams}
           onClose={closePopover}
         />
@@ -263,7 +263,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 10,
       title: 'Test A',
       content: (
-        <reporting.components.ReportingPanelPDFV2
+        <reporting.components.ReportingModalPDFV2
           getJobParams={getCaptureTestPDFJobParams(false)}
           onClose={closePopover}
         />
@@ -273,7 +273,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
       id: 11,
       title: 'Test A',
       content: (
-        <reporting.components.ReportingPanelPDFV2
+        <reporting.components.ReportingModalPDFV2
           layoutOption="print"
           getJobParams={getCaptureTestPDFJobParams(true)}
           onClose={closePopover}
