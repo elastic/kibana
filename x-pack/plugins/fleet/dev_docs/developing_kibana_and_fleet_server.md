@@ -399,3 +399,20 @@ fi
 Another option is to use a lightweight virtualization provider like https://multipass.run/ and enrolling agents using an enrollment token generated via Fleet UI. You will need to add a Fleet Server Host entry + Output to your Fleet settings that corresponds with your Multipass bridge network interface, similar to how we've set up Docker above.
 
 _To do: add specific docs for enrolling Multipass agents and link here_
+
+## Running in serverless mode
+
+If you want to run your local stack in serverless mode, you'll only need to alter the commands used to start Elasticsearch and Kibana. Fleet Server does not require any changes outside of what's listed above to run in a serverless context. From your Kibana, start a serverless Elasticsearch snapshot, and then run Kibana as either a security or observability project.
+
+```bash
+# Start Elasticsearch in serverless mode
+yarn es serverless --kill
+
+# Run kibana as a security project
+yarn serverless-security
+
+# Run kibana as an observability project
+yarn serverless-oblt
+```
+
+Once running, you can login with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme`.
