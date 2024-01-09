@@ -505,7 +505,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const [rule1, rule2, rule3, exportDetailsJson] = body.toString().split(/\n/);
         log.debug('RULE1');
+        log.error('RULE1');
+        log.info('RULE1');
+        log.warning('RULE1');
         log.debug(rule1);
+        log.error(rule1);
+        log.info(rule1);
+        log.warning(rule1);
+        log.debug(body);
+        log.error(body);
+        log.info(body);
+        log.warning(body);
 
         const ruleToCompareWithLegacyInvestigationField = removeServerGeneratedProperties(
           JSON.parse(rule1)
