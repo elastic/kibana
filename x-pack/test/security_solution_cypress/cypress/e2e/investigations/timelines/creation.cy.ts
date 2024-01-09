@@ -45,7 +45,7 @@ import {
   addNameToTimelineAndSave,
   addNameToTimelineAndSaveAsNew,
 } from '../../../tasks/timeline';
-import { createTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
+import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
@@ -117,7 +117,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   it('should show the different timeline states', () => {
     login();
     visitWithTimeRange(TIMELINES_URL);
-    createTimeline();
+    openTimelineUsingToggle();
 
     // Unsaved
     cy.get(TIMELINE_PANEL).should('be.visible');
@@ -150,7 +150,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     visitWithTimeRange(TIMELINES_URL);
     cy.get(ROWS).should('have.length', '0');
 
-    createTimeline();
+    openTimelineUsingToggle();
     addNameToTimelineAndSave('First');
 
     // Offsetting the extra save that is happening in the background

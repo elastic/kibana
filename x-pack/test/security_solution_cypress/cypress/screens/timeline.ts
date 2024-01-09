@@ -30,8 +30,6 @@ export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
-export const CREATE_NEW_TIMELINE_WITH_BORDER = '[data-test-subj="timeline-new-with-border"]';
-
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
 export const DATA_PROVIDERS = '.field-value';
