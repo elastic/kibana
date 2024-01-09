@@ -203,7 +203,7 @@ Machine Learning::
 * Removes the beta badge from ML alerting rules ({kibana-pull}173545[#173545]).
 * Removes the technical preview badge from AIOps log rate analysis ({kibana-pull}172722[#172722]).
 * Adds anomaly description as an alert message for the anomaly detection rule type ({kibana-pull}172473[#172473]).
-* Adds a sampled percentage of documents, and cardinality, for text fields for the Data Visualizer Field statistics tab and addresses and issue with a missing bucket in the document count chart ({kibana-pull}172378[#172378]).
+* Adds a sampled percentage of documents, and cardinality, for text fields for the Data Visualizer Field statistics tab and addresses an issue with a missing bucket in the document count chart ({kibana-pull}172378[#172378]).
 * Adds option to display an overlay chart on the data drift expanded row ({kibana-pull}172239[#172239]).
 * AIOps: Shows top N results when no documents are in baseline or deviation in log rate analysis({kibana-pull}171924[#171924]).
 * AIOps: Adds support to restore baseline and deviation from URL state on page refresh for log rate analysis ({kibana-pull}171398[#171398]).
