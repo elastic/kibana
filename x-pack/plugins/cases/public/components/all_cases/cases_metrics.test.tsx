@@ -37,27 +37,25 @@ describe('Cases metrics', () => {
     appMockRenderer = createAppMockRenderer();
   });
 
-  for (let index = 0; index < 100; index++) {
-    it('renders the correct stats', async () => {
-      appMockRenderer.render(<CasesMetrics />);
+  it('renders the correct stats', async () => {
+    appMockRenderer.render(<CasesMetrics />);
 
-      expect(await screen.findByTestId('cases-metrics-stats')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-metrics-stats')).toBeInTheDocument();
 
-      expect(
-        within(await screen.findByTestId('openStatsHeader')).getByText('20')
-      ).toBeInTheDocument();
+    expect(
+      within(await screen.findByTestId('openStatsHeader')).getByText('20')
+    ).toBeInTheDocument();
 
-      expect(
-        within(await screen.findByTestId('inProgressStatsHeader')).getByText('40')
-      ).toBeInTheDocument();
+    expect(
+      within(await screen.findByTestId('inProgressStatsHeader')).getByText('40')
+    ).toBeInTheDocument();
 
-      expect(
-        within(await screen.findByTestId('closedStatsHeader')).getByText('130')
-      ).toBeInTheDocument();
+    expect(
+      within(await screen.findByTestId('closedStatsHeader')).getByText('130')
+    ).toBeInTheDocument();
 
-      expect(
-        within(await screen.findByTestId('mttrStatsHeader')).getByText('2ms')
-      ).toBeInTheDocument();
-    });
-  }
+    expect(
+      within(await screen.findByTestId('mttrStatsHeader')).getByText('2ms')
+    ).toBeInTheDocument();
+  });
 });
