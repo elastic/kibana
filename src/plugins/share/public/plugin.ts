@@ -9,7 +9,6 @@
 import './index.scss';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public/types';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
 import { UrlService } from '../common/url_service';
@@ -61,10 +60,8 @@ export type SharePublicStart = ShareMenuManagerStart & {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SharePublicSetupDependencies {}
-
-export interface SharePublicStartDependencies {
-  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SharePublicStartDependencies {}
 
 export class SharePlugin
   implements
@@ -138,18 +135,13 @@ export class SharePlugin
     };
   }
 
-  public start(
-    core: CoreStart,
-    { savedObjectsTaggingOss }: SharePublicStartDependencies
-  ): SharePublicStart {
+  public start(core: CoreStart): SharePublicStart {
     const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    const taggingApi = savedObjectsTaggingOss?.getTaggingApi();
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
       this.shareMenuRegistry.start(),
       disableEmbed,
-      taggingApi,
       this.anonymousAccessServiceProvider
     );
 
