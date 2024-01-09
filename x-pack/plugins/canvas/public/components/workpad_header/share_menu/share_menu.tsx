@@ -46,10 +46,10 @@ export const ShareMenu = () => {
     ReportingModalComponent !== null
       ? ({ onClose }: { onClose: () => void }) => (
           <ReportingModalComponent
-            getJobParams={() => getPdfJobParams(sharingData, platformService.getKibanaVersion())}
             layoutOption="canvas"
             onClose={onClose}
             objectId={workpad.id}
+            getJobParams={getPdfJobParams(sharingData, platformService.getKibanaVersion())}
           />
         )
       : null;

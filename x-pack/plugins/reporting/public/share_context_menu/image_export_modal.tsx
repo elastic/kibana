@@ -29,12 +29,13 @@ import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { BaseParams } from '@kbn/reporting-common/types';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import type { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
 import type { JobParamsProviderOptions } from '.';
+import { AppParams } from '../lib/reporting_api_client/reporting_api_client';
 
 export interface ReportingModalProps {
   apiClient: ReportingAPIClient;
@@ -49,56 +50,11 @@ export interface ReportingModalProps {
   layoutOption?: 'print' | 'canvas';
   // canvas breaks if required
   jobProviderOptions?: JobParamsProviderOptions;
+  // needed for canvas
+  getJobParams?: JobAppParamsPDFV2;
 }
 
 export type Props = ReportingModalProps & { intl?: InjectedIntl };
-
-const getJobsParams = (
-  apiClient: ReportingAPIClient,
-  type: 'pngV2' | 'printablePdf' | 'printablePdfV2',
-  opts?: JobParamsProviderOptions
-) => {
-  if (!opts) {
-    const el = document.querySelector('[data-shared-items-container]');
-    const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-    const dimensions = { height, width };
-    return { objectType: 'canvas', layout: { id: 'canvas', dimensions }, title: 'Canvas Workpad' };
-  }
-
-  const {
-    objectType,
-    sharingData: { title, layout, locatorParams },
-  } = opts;
-
-  const baseParams = {
-    objectType,
-    layout,
-    title,
-  };
-
-  if (type === 'printablePdfV2') {
-    // multi locator for PDF V2
-    return { ...baseParams, locatorParams: [locatorParams] };
-  } else if (type === 'pngV2') {
-    // single locator for PNG V2
-    return { ...baseParams, locatorParams };
-  }
-
-  // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-  // Replace hashes with original RISON values.
-  const relativeUrl = opts?.shareableUrl.replace(
-    window.location.origin + apiClient.getServerBasePath(),
-    ''
-  );
-
-  if (type === 'printablePdf') {
-    // multi URL for PDF
-    return { ...baseParams, relativeUrls: [relativeUrl] };
-  }
-
-  // single URL for PNG
-  return { ...baseParams, relativeUrl };
-};
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const { apiClient, intl, toasts, theme, onClose, objectId, layoutOption, jobProviderOptions } =
@@ -117,8 +73,52 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const [objectType] = useState<string>('dashboard');
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
+  const getJobsParams = (
+    type: 'pngV2' | 'printablePdf' | 'printablePdfV2',
+    opts?: JobParamsProviderOptions
+  ) => {
+    // catch for canvas
+    if (!opts) {
+      return { ...props.getJobParams };
+    }
+
+    const {
+      objectType: jobObjectType,
+      sharingData: { title, layout, locatorParams },
+    } = opts;
+
+    const baseParams = {
+      jobObjectType,
+      layout,
+      title,
+    };
+
+    if (type === 'printablePdfV2') {
+      // multi locator for PDF V2
+      return { ...baseParams, locatorParams: [locatorParams] };
+    } else if (type === 'pngV2') {
+      // single locator for PNG V2
+      return { ...baseParams, locatorParams };
+    }
+
+    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
+    // Replace hashes with original RISON values.
+    const relativeUrl = opts?.shareableUrl.replace(
+      window.location.origin + apiClient.getServerBasePath(),
+      ''
+    );
+
+    if (type === 'printablePdf') {
+      // multi URL for PDF
+      return { ...baseParams, relativeUrls: [relativeUrl] };
+    }
+
+    // single URL for PNG
+    return { ...baseParams, relativeUrl };
+  };
+
   const getLayout = (): LayoutParams => {
-    const { layout } = getJobsParams(apiClient, selectedRadio, jobProviderOptions);
+    const { layout } = getJobsParams(selectedRadio, jobProviderOptions);
 
     let dimensions = layout?.dimensions;
 
@@ -138,16 +138,17 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     return { id: 'preserve_layout', dimensions };
   };
 
-  const getJobParams = (
-    shareableUrl?: boolean
-  ): Omit<BaseParams, 'browserTimezone' | 'version'> => {
-    return { ...getJobsParams(apiClient, selectedRadio, jobProviderOptions), layout: getLayout() };
+  const getJobParams = (shareableUrl?: boolean) => {
+    return { ...getJobsParams(selectedRadio, jobProviderOptions), layout: getLayout() };
   };
   function getAbsoluteReportGenerationUrl() {
-    if (getJobsParams(apiClient, selectedRadio, jobProviderOptions) !== undefined) {
+    if (
+      getJobsParams(selectedRadio, jobProviderOptions) !== undefined &&
+      objectType !== 'canvas workpad'
+    ) {
       const relativePath = apiClient.getReportingPublicJobPath(
         selectedRadio,
-        apiClient.getDecoratedJobParams(getJobParams(true))
+        apiClient.getDecoratedJobParams(getJobParams(true) as unknown as AppParams)
       );
       return url.resolve(window.location.href, relativePath);
     }
@@ -172,7 +173,9 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   });
 
   const generateReportingJob = () => {
-    const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
+    const decoratedJobParams = apiClient.getDecoratedJobParams(
+      getJobParams(false) as unknown as AppParams
+    );
     setCreatingReportJob(true);
     return apiClient
       .createReportingJob(selectedRadio, decoratedJobParams)

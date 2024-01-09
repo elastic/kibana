@@ -9,7 +9,11 @@ import React, { Component, ReactElement } from 'react';
 import url from 'url';
 
 import { CSV_REPORT_TYPE } from '@kbn/reporting-export-types-csv-common';
-import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import {
+  JobAppParamsPDFV2,
+  PDF_REPORT_TYPE,
+  PDF_REPORT_TYPE_V2,
+} from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 import {
@@ -48,7 +52,9 @@ export interface ReportingPanelProps {
   layoutId?: string;
   objectId?: string;
 
-  getJobParams: (forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>;
+  getJobParams: (
+    forShareUrl?: boolean
+  ) => Omit<BaseParams, 'browserTimezone' | 'version'> | JobAppParamsPDFV2;
 
   options?: ReactElement | null;
   isDirty?: boolean;

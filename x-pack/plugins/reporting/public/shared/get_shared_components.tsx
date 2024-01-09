@@ -7,6 +7,7 @@
 
 import { CoreSetup } from '@kbn/core/public';
 import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
+import { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import React from 'react';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { CsvModalContent } from '../share_context_menu/csv_export_modal';
@@ -18,8 +19,9 @@ import { ReportingModalContent } from '../share_context_menu/reporting_panel_con
 export interface ApplicationProps {
   /**
    * A function that Reporting calls to get the sharing data from the application.
+   * Needed for CSV exports and Canvas PDF reports.
    */
-  getJobParams: ReportingPanelProps['getJobParams'];
+  getJobParams?: ReportingPanelProps['getJobParams'] | JobAppParamsPDFV2;
 
   /**
    * Option to control how the screenshot(s) is/are placed in the PDF
@@ -90,6 +92,7 @@ export function getSharedComponents(
     },
     ReportingModalCSV(props: ApplicationProps) {
       return (
+        // @ts-ignore getJobParams is not required for image reports but needed for CSV
         <CsvModalContent
           requiresSavedState={false}
           apiClient={apiClient}
