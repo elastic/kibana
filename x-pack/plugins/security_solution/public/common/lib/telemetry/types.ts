@@ -47,6 +47,9 @@ export type {
   ReportEntityAlertsClickedParams,
   ReportEntityDetailsClickedParams,
   ReportEntityRiskFilteredParams,
+  ReportRiskInputsExpandedFlyoutOpenedParams,
+  ReportToggleRiskSummaryClickedParams,
+  ReportAddRiskInputToTimelineClickedParams,
 } from './events/entity_analytics/types';
 
 export interface TelemetryServiceSetupParams {

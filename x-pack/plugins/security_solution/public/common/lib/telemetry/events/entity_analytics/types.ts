@@ -34,7 +34,8 @@ export type ReportEntityAnalyticsTelemetryEventParams =
   | ReportEntityAlertsClickedParams
   | ReportEntityRiskFilteredParams
   | ReportToggleRiskSummaryClickedParams
-  | ReportRiskInputsExpandedFlyoutOpenedParams;
+  | ReportRiskInputsExpandedFlyoutOpenedParams
+  | ReportAddRiskInputToTimelineClickedParams;
 
 export type EntityAnalyticsTelemetryEvent =
   | {
