@@ -21,6 +21,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/config-schema",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/saved-objects-management-plugin",
   ],
   "exclude": [
     "target/**/*",
