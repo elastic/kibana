@@ -15,6 +15,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const svlCases = getService('svlCases');
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'security_cases'];
+  const testSubjects = getService('testSubjects');
   const owner = SECURITY_SOLUTION_OWNER;
 
   describe('list view', function () {
@@ -63,5 +64,33 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await pageObjects.header.waitUntilLoadingHasFinished();
       await svlCommonScreenshots.takeScreenshot('cases-home-page', screenshotDirectories);
     });
+
+    it('case settings screenshot', async () => {
+      await navigateToCasesApp(getPageObject, getService, owner);
+      await testSubjects.click('configure-case-button');
+      await svlCommonScreenshots.takeScreenshot('case-settings', screenshotDirectories);
+    });
+
+    // it('case detail screenshot', async () => {
+    //   await pageObjects.common.navigateToUrlWithBrowserHistory(
+    //     'observability',
+    //     `/cases/${caseIdMonitoring}`,
+    //     undefined
+    //   );
+    //   await pageObjects.header.waitUntilLoadingHasFinished();
+    //   await testSubjects.existOrFail('case-view-title');
+    //   const collapseNav = await testSubjects.find('euiCollapsibleNavButton');
+    //   await collapseNav.click();
+    //   const filesTab = await testSubjects.find('case-view-tab-title-files');
+    //   await filesTab.click();
+    //   await cases.casesFilesTable.addFile(require.resolve('./testfile.png'));
+    //   await testSubjects.getVisibleText('cases-files-name-link');
+    //   await svlCommonScreenshots.takeScreenshot(
+    //     'cases-files-tab',
+    //     screenshotDirectories,
+    //     1024,
+    //     768
+    //   );
+    // });
   });
 }
