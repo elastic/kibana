@@ -100,6 +100,7 @@ export const generateArtifactEsGetSingleHitMock = (
     _version: 1,
     _score: 1,
     _source,
+    sort: [1704401869241],
   };
 };
 

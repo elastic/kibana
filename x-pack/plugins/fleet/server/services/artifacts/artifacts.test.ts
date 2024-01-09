@@ -11,6 +11,8 @@ import { errors } from '@elastic/elasticsearch';
 
 import type { TransportResult } from '@elastic/elasticsearch';
 
+import { set } from 'lodash';
+
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
@@ -33,6 +35,7 @@ import {
   createArtifact,
   deleteArtifact,
   encodeArtifactContent,
+  fetchAllArtifacts,
   generateArtifactContentHash,
   getArtifact,
   listArtifacts,
@@ -486,6 +489,24 @@ describe('When using the artifacts services', () => {
         encodedSha256: 'b411ccf0a7bf4e015d849ee82e3512683d72c5a3c9bd233db9c885b229b8adf4',
         encodedSize: 24,
       });
+    });
+  });
+
+  describe('and calling `fetchAllArtifacts()`', () => {
+    beforeEach(() => {
+      esClientMock.search
+        .mockResponseOnce(generateArtifactEsSearchResultHitsMock())
+        .mockResponseOnce(generateArtifactEsSearchResultHitsMock())
+        .mockResponseOnce(set(generateArtifactEsSearchResultHitsMock(), 'hits.hits', []));
+    });
+
+    // FIXME:PT implement tests
+    it('dev', async () => {
+      expect(true).toBe(false);
+
+      for await (const artifacts of fetchAllArtifacts(esClientMock)) {
+        debugger;
+      }
     });
   });
 });
