@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import './setup_jest_mocks';
-import React from 'react';
 import { type RenderResult, act } from '@testing-library/react';
 import { of, BehaviorSubject } from 'rxjs';
 import type {
@@ -14,7 +13,6 @@ import type {
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
 
-import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
 import { NavigationServices } from '../types';
 import { renderNavigation, errorHandler, TestType } from './utils';
@@ -97,44 +95,25 @@ describe('Active node', () => {
     };
 
     // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'group1',
-          children: [
-            { link: 'item1', title: 'Item 1' },
-            { link: 'item2', title: 'Item 2' },
-          ],
-        },
-      ];
+    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      {
+        type: 'navGroup',
+        id: 'group1',
+        children: [
+          { link: 'item1', title: 'Item 1' },
+          { link: 'item2', title: 'Item 2' },
+        ],
+      },
+    ];
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        services: { deepLinks$, activeNodes$: getActiveNodes$() },
-      });
+    const renderResult = renderNavigation({
+      navTreeDef: { body: navigationBody },
+      services: { deepLinks$, activeNodes$: getActiveNodes$() },
+    });
 
-      await runTests('treeDef', renderResult);
+    await runTests('treeDef', renderResult);
 
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="group1">
-              <Navigation.Item<any> link="item1" title="Item 1" />
-              <Navigation.Item<any> link="item2" title="Item 2" />
-            </Navigation.Group>
-          </Navigation>
-        ),
-        services: { deepLinks$, activeNodes$: getActiveNodes$() },
-      });
-
-      await runTests('uiComponents', renderResult);
-    }
+    renderResult.unmount();
   });
 
   test('should override the URL location to set the active node', async () => {
@@ -176,56 +155,30 @@ describe('Active node', () => {
       }
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'group1',
-          children: [
-            {
-              link: 'item1',
-              title: 'Item 1',
-              getIsActive: () => {
-                return true; // Always active
-              },
+    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      {
+        type: 'navGroup',
+        id: 'group1',
+        children: [
+          {
+            link: 'item1',
+            title: 'Item 1',
+            getIsActive: () => {
+              return true; // Always active
             },
-          ],
-        },
-      ];
+          },
+        ],
+      },
+    ];
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        services: { deepLinks$, activeNodes$: getActiveNodes$() },
-        onProjectNavigationChange,
-      });
+    const renderResult = renderNavigation({
+      navTreeDef: { body: navigationBody },
+      services: { deepLinks$, activeNodes$: getActiveNodes$() },
+      onProjectNavigationChange,
+    });
 
-      await runTests('treeDef', renderResult);
+    await runTests('treeDef', renderResult);
 
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="group1">
-              <Navigation.Item<any>
-                link="item1"
-                title="Item 1"
-                getIsActive={() => {
-                  return true;
-                }}
-              />
-            </Navigation.Group>
-          </Navigation>
-        ),
-        onProjectNavigationChange,
-        services: { deepLinks$, activeNodes$: getActiveNodes$() },
-      });
-
-      await runTests('uiComponents', renderResult);
-    }
+    renderResult.unmount();
   });
 });

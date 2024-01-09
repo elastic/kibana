@@ -11,7 +11,6 @@ import { type RenderResult } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
 import { PanelContentProvider } from '../src/ui';
 import {
@@ -55,50 +54,28 @@ describe('Panel', () => {
       }
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: RootNavigationItemDefinition[] = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          isCollapsible: false,
-          children: [
-            {
-              id: 'group1',
-              link: 'dashboards',
-              renderAs: 'panelOpener',
-              children: [{ link: 'management' }],
-            },
-          ],
-        },
-      ];
+    const navigationBody: RootNavigationItemDefinition[] = [
+      {
+        type: 'navGroup',
+        id: 'root',
+        isCollapsible: false,
+        children: [
+          {
+            id: 'group1',
+            link: 'dashboards',
+            renderAs: 'panelOpener',
+            children: [{ link: 'management' }],
+          },
+        ],
+      },
+    ];
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        onProjectNavigationChange,
-      });
+    const renderResult = renderNavigation({
+      navTreeDef: { body: navigationBody },
+      onProjectNavigationChange,
+    });
 
-      await runTests('treeDef', renderResult);
-
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="root" isCollapsible={false}>
-              <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                <Navigation.Item link="management" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        onProjectNavigationChange,
-      });
-      await runTests('uiComponents', renderResult);
-    }
+    await runTests('treeDef', renderResult);
   });
 
   test('should not render group if all children are hidden', async () => {
@@ -114,68 +91,40 @@ describe('Panel', () => {
       }
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          isCollapsible: false,
-          children: [
-            {
-              id: 'group1',
-              link: 'dashboards',
-              renderAs: 'panelOpener',
-              children: [{ link: 'unknown' }],
-            },
-            {
-              id: 'group2',
-              link: 'dashboards',
-              renderAs: 'panelOpener',
-              children: [{ link: 'management', sideNavStatus: 'hidden' }],
-            },
-            {
-              id: 'group3',
-              link: 'dashboards',
-              renderAs: 'panelOpener',
-              children: [{ link: 'management' }], // sideNavStatus is "visible" by default
-            },
-          ],
-        },
-      ];
+    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      {
+        type: 'navGroup',
+        id: 'root',
+        isCollapsible: false,
+        children: [
+          {
+            id: 'group1',
+            link: 'dashboards',
+            renderAs: 'panelOpener',
+            children: [{ link: 'unknown' }],
+          },
+          {
+            id: 'group2',
+            link: 'dashboards',
+            renderAs: 'panelOpener',
+            children: [{ link: 'management', sideNavStatus: 'hidden' }],
+          },
+          {
+            id: 'group3',
+            link: 'dashboards',
+            renderAs: 'panelOpener',
+            children: [{ link: 'management' }], // sideNavStatus is "visible" by default
+          },
+        ],
+      },
+    ];
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        onProjectNavigationChange,
-      });
+    const renderResult = renderNavigation({
+      navTreeDef: { body: navigationBody },
+      onProjectNavigationChange,
+    });
 
-      await runTests('treeDef', renderResult);
-
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="root" isCollapsible={false}>
-              <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                <Navigation.Item<any> link="unknown" />
-              </Navigation.Group>
-              <Navigation.Group id="group2" link="dashboards" renderAs="panelOpener">
-                <Navigation.Item link="management" sideNavStatus="hidden" />
-              </Navigation.Group>
-              <Navigation.Group id="group3" link="dashboards" renderAs="panelOpener">
-                <Navigation.Item link="management" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        onProjectNavigationChange,
-      });
-      await runTests('uiComponents', renderResult);
-    }
+    await runTests('treeDef', renderResult);
   });
 
   describe('custom content', () => {
@@ -236,51 +185,29 @@ describe('Panel', () => {
         }
       };
 
-      // -- Default navigation
-      {
-        const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-          {
-            type: 'navGroup',
-            id: 'root',
-            isCollapsible: false,
-            children: [
-              {
-                id: 'group1',
-                link: 'dashboards',
-                renderAs: 'panelOpener',
-                children: [{ link: 'management' }],
-              },
-            ],
-          },
-        ];
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          isCollapsible: false,
+          children: [
+            {
+              id: 'group1',
+              link: 'dashboards',
+              renderAs: 'panelOpener',
+              children: [{ link: 'management' }],
+            },
+          ],
+        },
+      ];
 
-        const renderResult = renderNavigation({
-          navTreeDef: { body: navigationBody },
-          panelContentProvider,
-          services: { activeNodes$ },
-        });
+      const renderResult = renderNavigation({
+        navTreeDef: { body: navigationBody },
+        panelContentProvider,
+        services: { activeNodes$ },
+      });
 
-        await runTests('treeDef', renderResult);
-
-        renderResult.unmount();
-      }
-
-      // -- With UI Components
-      {
-        const renderResult = renderNavigation({
-          navigationElement: (
-            <Navigation panelContentProvider={panelContentProvider}>
-              <Navigation.Group id="root" isCollapsible={false}>
-                <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                  <Navigation.Item link="management" />
-                </Navigation.Group>
-              </Navigation.Group>
-            </Navigation>
-          ),
-          services: { activeNodes$ },
-        });
-        await runTests('uiComponents', renderResult);
-      }
+      await runTests('treeDef', renderResult);
     });
   });
 
@@ -307,67 +234,37 @@ describe('Panel', () => {
         }
       };
 
-      // -- Default navigation
-      {
-        const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-          {
-            type: 'navGroup',
-            id: 'root',
-            isCollapsible: false,
-            children: [
-              {
-                id: 'group1',
-                link: 'dashboards',
-                renderAs: 'panelOpener',
-                children: [
-                  {
-                    id: 'foo',
-                    title: 'Foo',
-                    children: [
-                      { id: 'item1', link: 'management', title: 'Item 1' },
-                      { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
-                      { id: 'item3', link: 'management', title: 'Item 3' },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ];
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          isCollapsible: false,
+          children: [
+            {
+              id: 'group1',
+              link: 'dashboards',
+              renderAs: 'panelOpener',
+              children: [
+                {
+                  id: 'foo',
+                  title: 'Foo',
+                  children: [
+                    { id: 'item1', link: 'management', title: 'Item 1' },
+                    { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
+                    { id: 'item3', link: 'management', title: 'Item 3' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ];
 
-        const renderResult = renderNavigation({
-          navTreeDef: { body: navigationBody },
-        });
+      const renderResult = renderNavigation({
+        navTreeDef: { body: navigationBody },
+      });
 
-        await runTests('treeDef', renderResult);
-
-        renderResult.unmount();
-      }
-
-      // -- With UI Components
-      {
-        const renderResult = renderNavigation({
-          navigationElement: (
-            <Navigation>
-              <Navigation.Group id="root" isCollapsible={false}>
-                <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                  <Navigation.Group id="foo" title="Foo">
-                    <Navigation.Item id="item1" link="management" title="Item 1" />
-                    <Navigation.Item
-                      id="item2"
-                      link="management"
-                      sideNavStatus="hidden"
-                      title="Item 2"
-                    />
-                    <Navigation.Item id="item3" link="management" title="Item 3" />
-                  </Navigation.Group>
-                </Navigation.Group>
-              </Navigation.Group>
-            </Navigation>
-          ),
-        });
-        await runTests('uiComponents', renderResult);
-      }
+      await runTests('treeDef', renderResult);
     });
 
     test('should rendre block groups without title', async () => {
@@ -391,66 +288,36 @@ describe('Panel', () => {
         }
       };
 
-      // -- Default navigation
-      {
-        const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-          {
-            type: 'navGroup',
-            id: 'root',
-            isCollapsible: false,
-            children: [
-              {
-                id: 'group1',
-                link: 'dashboards',
-                renderAs: 'panelOpener',
-                children: [
-                  {
-                    id: 'foo',
-                    children: [
-                      { id: 'item1', link: 'management', title: 'Item 1' },
-                      { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
-                      { id: 'item3', link: 'management', title: 'Item 3' },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ];
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          isCollapsible: false,
+          children: [
+            {
+              id: 'group1',
+              link: 'dashboards',
+              renderAs: 'panelOpener',
+              children: [
+                {
+                  id: 'foo',
+                  children: [
+                    { id: 'item1', link: 'management', title: 'Item 1' },
+                    { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
+                    { id: 'item3', link: 'management', title: 'Item 3' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ];
 
-        const renderResult = renderNavigation({
-          navTreeDef: { body: navigationBody },
-        });
+      const renderResult = renderNavigation({
+        navTreeDef: { body: navigationBody },
+      });
 
-        await runTests('treeDef', renderResult);
-
-        renderResult.unmount();
-      }
-
-      // -- With UI Components
-      {
-        // const renderResult = renderNavigation({
-        //   navigationElement: (
-        //     <Navigation>
-        //       <Navigation.Group id="root" isCollapsible={false}>
-        //         <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-        //           <Navigation.Group id="foo" title="Foo">
-        //             <Navigation.Item id="item1" link="management" title="Item 1" />
-        //             <Navigation.Item
-        //               id="item2"
-        //               link="management"
-        //               sideNavStatus="hidden"
-        //               title="Item 2"
-        //             />
-        //             <Navigation.Item id="item3" link="management" title="Item 3" />
-        //           </Navigation.Group>
-        //         </Navigation.Group>
-        //       </Navigation.Group>
-        //     </Navigation>
-        //   ),
-        // });
-        // await runTests('uiComponents', renderResult);
-      }
+      await runTests('treeDef', renderResult);
     });
 
     test('should rendre accordion groups', async () => {
@@ -478,68 +345,38 @@ describe('Panel', () => {
         }
       };
 
-      // -- Default navigation
-      {
-        const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-          {
-            type: 'navGroup',
-            id: 'root',
-            isCollapsible: false,
-            children: [
-              {
-                id: 'group1',
-                link: 'dashboards',
-                renderAs: 'panelOpener',
-                children: [
-                  {
-                    id: 'foo',
-                    title: 'Foo',
-                    renderAs: 'accordion',
-                    children: [
-                      { id: 'item1', link: 'management', title: 'Item 1' },
-                      { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
-                      { id: 'item3', link: 'management', title: 'Item 3' },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ];
+      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+        {
+          type: 'navGroup',
+          id: 'root',
+          isCollapsible: false,
+          children: [
+            {
+              id: 'group1',
+              link: 'dashboards',
+              renderAs: 'panelOpener',
+              children: [
+                {
+                  id: 'foo',
+                  title: 'Foo',
+                  renderAs: 'accordion',
+                  children: [
+                    { id: 'item1', link: 'management', title: 'Item 1' },
+                    { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
+                    { id: 'item3', link: 'management', title: 'Item 3' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ];
 
-        const renderResult = renderNavigation({
-          navTreeDef: { body: navigationBody },
-        });
+      const renderResult = renderNavigation({
+        navTreeDef: { body: navigationBody },
+      });
 
-        await runTests('treeDef', renderResult);
-
-        renderResult.unmount();
-      }
-
-      // -- With UI Components
-      {
-        const renderResult = renderNavigation({
-          navigationElement: (
-            <Navigation>
-              <Navigation.Group id="root" isCollapsible={false}>
-                <Navigation.Group id="group1" link="dashboards" renderAs="panelOpener">
-                  <Navigation.Group id="foo" title="Foo" renderAs="accordion">
-                    <Navigation.Item id="item1" link="management" title="Item 1" />
-                    <Navigation.Item
-                      id="item2"
-                      link="management"
-                      sideNavStatus="hidden"
-                      title="Item 2"
-                    />
-                    <Navigation.Item id="item3" link="management" title="Item 3" />
-                  </Navigation.Group>
-                </Navigation.Group>
-              </Navigation.Group>
-            </Navigation>
-          ),
-        });
-        await runTests('uiComponents', renderResult);
-      }
+      await runTests('treeDef', renderResult);
     });
   });
 });

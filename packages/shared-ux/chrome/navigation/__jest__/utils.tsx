@@ -14,7 +14,7 @@ import { getServicesMock } from '../mocks/src/jest';
 import { NavigationProvider } from '../src/services';
 import { DefaultNavigation } from '../src/ui/default_navigation';
 import type { PanelContentProvider } from '../src/ui';
-import type { NavigationTreeDefinition, ProjectNavigationTreeDefinition } from '../src/ui/types';
+import type { NavigationTreeDefinition } from '../src/ui/types';
 import { NavigationServices } from '../types';
 
 const services = getServicesMock();
@@ -24,27 +24,15 @@ export type TestType = 'treeDef' | 'uiComponents';
 
 export const renderNavigation = ({
   navTreeDef,
-  projectNavigationTree,
-  navigationElement,
   services: overrideServices = {},
   onProjectNavigationChange = () => undefined,
   panelContentProvider,
 }: {
-  navTreeDef?: NavigationTreeDefinition;
-  projectNavigationTree?: ProjectNavigationTreeDefinition;
-  navigationElement?: React.ReactElement;
+  navTreeDef: NavigationTreeDefinition;
   services?: Partial<NavigationServices>;
   onProjectNavigationChange?: ProjectNavigationChangeListener;
   panelContentProvider?: PanelContentProvider;
 }): RenderResult => {
-  const element = navigationElement ?? (
-    <DefaultNavigation
-      projectNavigationTree={projectNavigationTree}
-      navigationTree={navTreeDef}
-      panelContentProvider={panelContentProvider}
-    />
-  );
-
   const renderResult = render(
     <EuiThemeProvider>
       <NavigationProvider
@@ -52,7 +40,10 @@ export const renderNavigation = ({
         {...overrideServices}
         onProjectNavigationChange={onProjectNavigationChange}
       >
-        {element}
+        <DefaultNavigation
+          navigationTree={navTreeDef}
+          panelContentProvider={panelContentProvider}
+        />
       </NavigationProvider>
     </EuiThemeProvider>
   );

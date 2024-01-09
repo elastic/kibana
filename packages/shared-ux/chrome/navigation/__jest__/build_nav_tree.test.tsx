@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 import './setup_jest_mocks';
-import React from 'react';
 import { type RenderResult } from '@testing-library/react';
 import { of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { navLinksMock } from '../mocks/src/navlinks';
-import { Navigation } from '../src/ui/components/navigation';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
 import {
   getMockFn,
@@ -53,236 +51,135 @@ describe('builds navigation tree', () => {
       }
     };
 
-    // -- Default navigation
-    {
-      const renderResult = renderNavigation({
-        navTreeDef: {
-          body: [
-            {
-              type: 'navGroup',
-              id: 'group1',
-              defaultIsCollapsed: false,
-              children: [
-                {
-                  id: 'item1',
-                  title: 'Item 1',
-                  href: 'https://foo',
+    const renderResult = renderNavigation({
+      navTreeDef: {
+        body: [
+          {
+            type: 'navGroup',
+            id: 'group1',
+            defaultIsCollapsed: false,
+            children: [
+              {
+                id: 'item1',
+                title: 'Item 1',
+                href: 'https://foo',
+              },
+              {
+                id: 'item2',
+                title: 'Item 2',
+                href: 'https://foo',
+              },
+              {
+                id: 'group1A',
+                title: 'Group1A',
+                defaultIsCollapsed: false,
+                children: [
+                  {
+                    id: 'item1',
+                    title: 'Group 1A Item 1',
+                    href: 'https://foo',
+                  },
+                  {
+                    id: 'group1A_1',
+                    title: 'Group1A_1',
+                    children: [
+                      {
+                        id: 'item1',
+                        title: 'Group 1A_1 Item 1',
+                        href: 'https://foo',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      onProjectNavigationChange,
+    });
+
+    const navigationTree = await runTests('treeDef', renderResult);
+
+    expect(navigationTree).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "children": Array [
+            Object {
+              "deepLink": undefined,
+              "href": "https://foo",
+              "id": "item1",
+              "isElasticInternalLink": false,
+              "path": "group1.item1",
+              "sideNavStatus": "visible",
+              "title": "Item 1",
+            },
+            Object {
+              "deepLink": undefined,
+              "href": "https://foo",
+              "id": "item2",
+              "isElasticInternalLink": false,
+              "path": "group1.item2",
+              "sideNavStatus": "visible",
+              "title": "Item 2",
+            },
+            Object {
+              "children": Array [
+                Object {
+                  "deepLink": undefined,
+                  "href": "https://foo",
+                  "id": "item1",
+                  "isElasticInternalLink": false,
+                  "path": "group1.group1A.item1",
+                  "sideNavStatus": "visible",
+                  "title": "Group 1A Item 1",
                 },
-                {
-                  id: 'item2',
-                  title: 'Item 2',
-                  href: 'https://foo',
-                },
-                {
-                  id: 'group1A',
-                  title: 'Group1A',
-                  defaultIsCollapsed: false,
-                  children: [
-                    {
-                      id: 'item1',
-                      title: 'Group 1A Item 1',
-                      href: 'https://foo',
-                    },
-                    {
-                      id: 'group1A_1',
-                      title: 'Group1A_1',
-                      children: [
-                        {
-                          id: 'item1',
-                          title: 'Group 1A_1 Item 1',
-                          href: 'https://foo',
-                        },
-                      ],
+                Object {
+                  "children": Array [
+                    Object {
+                      "deepLink": undefined,
+                      "href": "https://foo",
+                      "id": "item1",
+                      "isElasticInternalLink": false,
+                      "path": "group1.group1A.group1A_1.item1",
+                      "sideNavStatus": "visible",
+                      "title": "Group 1A_1 Item 1",
                     },
                   ],
+                  "deepLink": undefined,
+                  "href": undefined,
+                  "id": "group1A_1",
+                  "isElasticInternalLink": false,
+                  "path": "group1.group1A.group1A_1",
+                  "sideNavStatus": "visible",
+                  "title": "Group1A_1",
                 },
               ],
+              "deepLink": undefined,
+              "defaultIsCollapsed": false,
+              "href": undefined,
+              "id": "group1A",
+              "isElasticInternalLink": false,
+              "path": "group1.group1A",
+              "sideNavStatus": "visible",
+              "title": "Group1A",
             },
           ],
+          "deepLink": undefined,
+          "defaultIsCollapsed": false,
+          "href": undefined,
+          "id": "group1",
+          "isElasticInternalLink": false,
+          "path": "group1",
+          "sideNavStatus": "visible",
+          "title": "",
+          "type": "navGroup",
         },
-        onProjectNavigationChange,
-      });
+      ]
+    `);
 
-      const navigationTree = await runTests('treeDef', renderResult);
-
-      expect(navigationTree).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "children": Array [
-              Object {
-                "deepLink": undefined,
-                "href": "https://foo",
-                "id": "item1",
-                "isElasticInternalLink": false,
-                "path": "group1.item1",
-                "sideNavStatus": "visible",
-                "title": "Item 1",
-              },
-              Object {
-                "deepLink": undefined,
-                "href": "https://foo",
-                "id": "item2",
-                "isElasticInternalLink": false,
-                "path": "group1.item2",
-                "sideNavStatus": "visible",
-                "title": "Item 2",
-              },
-              Object {
-                "children": Array [
-                  Object {
-                    "deepLink": undefined,
-                    "href": "https://foo",
-                    "id": "item1",
-                    "isElasticInternalLink": false,
-                    "path": "group1.group1A.item1",
-                    "sideNavStatus": "visible",
-                    "title": "Group 1A Item 1",
-                  },
-                  Object {
-                    "children": Array [
-                      Object {
-                        "deepLink": undefined,
-                        "href": "https://foo",
-                        "id": "item1",
-                        "isElasticInternalLink": false,
-                        "path": "group1.group1A.group1A_1.item1",
-                        "sideNavStatus": "visible",
-                        "title": "Group 1A_1 Item 1",
-                      },
-                    ],
-                    "deepLink": undefined,
-                    "href": undefined,
-                    "id": "group1A_1",
-                    "isElasticInternalLink": false,
-                    "path": "group1.group1A.group1A_1",
-                    "sideNavStatus": "visible",
-                    "title": "Group1A_1",
-                  },
-                ],
-                "deepLink": undefined,
-                "defaultIsCollapsed": false,
-                "href": undefined,
-                "id": "group1A",
-                "isElasticInternalLink": false,
-                "path": "group1.group1A",
-                "sideNavStatus": "visible",
-                "title": "Group1A",
-              },
-            ],
-            "deepLink": undefined,
-            "defaultIsCollapsed": false,
-            "href": undefined,
-            "id": "group1",
-            "isElasticInternalLink": false,
-            "path": "group1",
-            "sideNavStatus": "visible",
-            "title": "",
-            "type": "navGroup",
-          },
-        ]
-      `);
-
-      onProjectNavigationChange.mockReset();
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="group1" defaultIsCollapsed={false}>
-              <Navigation.Item id="item1" title="Item 1" href="https://foo" />
-              <Navigation.Item id="item2" title="Item 2" href="https://foo" />
-              <Navigation.Group id="group1A" title="Group1A">
-                <Navigation.Item id="item1" title="Group 1A Item 1" href="https://foo" />
-                <Navigation.Group id="group1A_1" title="Group1A_1">
-                  <Navigation.Item id="item1" title="Group 1A_1 Item 1" href="https://foo" />
-                </Navigation.Group>
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        onProjectNavigationChange,
-      });
-
-      const navigationTree = await runTests('uiComponents', renderResult);
-
-      expect(navigationTree).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "children": Array [
-              Object {
-                "deepLink": undefined,
-                "href": "https://foo",
-                "id": "item1",
-                "isElasticInternalLink": false,
-                "path": "group1.item1",
-                "sideNavStatus": "visible",
-                "title": "Item 1",
-              },
-              Object {
-                "deepLink": undefined,
-                "href": "https://foo",
-                "id": "item2",
-                "isElasticInternalLink": false,
-                "path": "group1.item2",
-                "sideNavStatus": "visible",
-                "title": "Item 2",
-              },
-              Object {
-                "children": Array [
-                  Object {
-                    "deepLink": undefined,
-                    "href": "https://foo",
-                    "id": "item1",
-                    "isElasticInternalLink": false,
-                    "path": "group1.group1A.item1",
-                    "sideNavStatus": "visible",
-                    "title": "Group 1A Item 1",
-                  },
-                  Object {
-                    "children": Array [
-                      Object {
-                        "deepLink": undefined,
-                        "href": "https://foo",
-                        "id": "item1",
-                        "isElasticInternalLink": false,
-                        "path": "group1.group1A.group1A_1.item1",
-                        "sideNavStatus": "visible",
-                        "title": "Group 1A_1 Item 1",
-                      },
-                    ],
-                    "deepLink": undefined,
-                    "href": undefined,
-                    "id": "group1A_1",
-                    "isElasticInternalLink": false,
-                    "path": "group1.group1A.group1A_1",
-                    "sideNavStatus": "visible",
-                    "title": "Group1A_1",
-                  },
-                ],
-                "deepLink": undefined,
-                "href": undefined,
-                "id": "group1A",
-                "isElasticInternalLink": false,
-                "path": "group1.group1A",
-                "sideNavStatus": "visible",
-                "title": "Group1A",
-              },
-            ],
-            "deepLink": undefined,
-            "defaultIsCollapsed": false,
-            "href": undefined,
-            "id": "group1",
-            "isElasticInternalLink": false,
-            "path": "group1",
-            "sideNavStatus": "visible",
-            "title": "",
-          },
-        ]
-      `);
-    }
+    onProjectNavigationChange.mockReset();
+    renderResult.unmount();
   });
 
   test('should read the title from deeplink, prop or React children', async () => {
@@ -325,80 +222,50 @@ describe('builds navigation tree', () => {
       return groupChildren;
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          children: [
-            {
-              id: 'group1',
-              children: [
-                {
-                  id: 'item1',
-                  link: 'item1', // Title from deeplink
-                },
-                {
-                  id: 'item2',
-                  link: 'item1', // Overwrite title from deeplink
-                  title: 'Overwrite deeplink title',
-                },
-                {
-                  id: 'item3',
-                  title: 'Title in props',
-                },
-                {
-                  id: 'item4',
-                  link: 'unknown', // Unknown deeplink
-                  title: 'Should not be rendered',
-                },
-              ],
-            },
-          ],
-        },
-      ];
+    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      {
+        type: 'navGroup',
+        id: 'root',
+        children: [
+          {
+            id: 'group1',
+            children: [
+              {
+                id: 'item1',
+                link: 'item1', // Title from deeplink
+              },
+              {
+                id: 'item2',
+                link: 'item1', // Overwrite title from deeplink
+                title: 'Overwrite deeplink title',
+              },
+              {
+                id: 'item3',
+                title: 'Title in props',
+              },
+              {
+                id: 'item4',
+                link: 'unknown', // Unknown deeplink
+                title: 'Should not be rendered',
+              },
+            ],
+          },
+        ],
+      },
+    ];
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        services: { deepLinks$ },
-        onProjectNavigationChange,
-      });
+    const renderResult = renderNavigation({
+      navTreeDef: { body: navigationBody },
+      services: { deepLinks$ },
+      onProjectNavigationChange,
+    });
 
-      const groupChildren = runTests('treeDef');
-      expect(groupChildren.length).toBe(3);
-      expect(groupChildren[3]).toBeUndefined(); // Unknown deeplink, has not been rendered
+    const groupChildren = runTests('treeDef');
+    expect(groupChildren.length).toBe(3);
+    expect(groupChildren[3]).toBeUndefined(); // Unknown deeplink, has not been rendered
 
-      onProjectNavigationChange.mockReset();
-      renderResult.unmount();
-    }
-
-    // -- With UI components
-    {
-      renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                {/* Title from deeplink */}
-                <Navigation.Item<any> id="item1" link="item1" />
-                <Navigation.Item<any> id="item2" link="item1" title="Overwrite deeplink title" />
-                <Navigation.Item id="item3" title="Title in props" />
-                <Navigation.Item<any> id="item4" link="unknown" title="Should not be rendered" />
-                <Navigation.Item id="item5">Title in children</Navigation.Item>
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        services: { deepLinks$ },
-        onProjectNavigationChange,
-      });
-
-      const groupChildren = runTests('uiComponents');
-      expect(groupChildren.length).toBe(4);
-      // "item4" has been skipped as it is an unknown deeplink and we have the next item in the list
-      expect(groupChildren[3].title).toBe('Title in children');
-    }
+    onProjectNavigationChange.mockReset();
+    renderResult.unmount();
   });
 
   test('should not render the group if it does not have children AND no href or deeplink', async () => {
@@ -429,7 +296,7 @@ describe('builds navigation tree', () => {
         expect(rootNode.id).toBe('root');
         expect(rootNode.children?.length).toBe(2);
         expect(rootNode.children?.[0]?.id).toBe('group1');
-        expect(rootNode.children?.[0]?.children).toBeUndefined(); // No children mounted and registered itself
+        expect(rootNode.children?.[0]?.children).toEqual([]); // No children mounted
         expect(rootNode.children?.[1]?.id).toBe('group2');
         return navTree;
       } catch (e) {
@@ -437,59 +304,34 @@ describe('builds navigation tree', () => {
       }
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          isCollapsible: false,
-          children: [
-            {
-              id: 'group1',
-              children: [{ link: 'notRegistered' }],
-            },
-            {
-              id: 'group2',
-              children: [{ link: 'item1' }],
-            },
-          ],
-        },
-      ];
+    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      {
+        type: 'navGroup',
+        id: 'root',
+        isCollapsible: false,
+        children: [
+          {
+            id: 'group1',
+            children: [{ link: 'notRegistered' }],
+          },
+          {
+            id: 'group2',
+            children: [{ link: 'item1' }],
+          },
+        ],
+      },
+    ];
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        services: { deepLinks$ },
-        onProjectNavigationChange,
-      });
+    const renderResult = renderNavigation({
+      navTreeDef: { body: navigationBody },
+      services: { deepLinks$ },
+      onProjectNavigationChange,
+    });
 
-      await runTests('treeDef', renderResult);
+    await runTests('treeDef', renderResult);
 
-      onProjectNavigationChange.mockReset();
-      renderResult.unmount();
-    }
-
-    // -- With UI components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="root" isCollapsible={false}>
-              <Navigation.Group id="group1" title="Hello">
-                <Navigation.Item<any> link="notRegistered" />
-              </Navigation.Group>
-              <Navigation.Group id="group2">
-                <Navigation.Item<any> link="item1" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        ),
-        services: { deepLinks$ },
-        onProjectNavigationChange,
-      });
-
-      await runTests('uiComponents', renderResult);
-    }
+    onProjectNavigationChange.mockReset();
+    renderResult.unmount();
   });
 
   test('should render group preset (analytics, ml...)', async () => {
@@ -510,54 +352,34 @@ describe('builds navigation tree', () => {
       }
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'preset',
-          preset: 'analytics',
-        },
-        {
-          type: 'preset',
-          preset: 'ml',
-        },
-        {
-          type: 'preset',
-          preset: 'devtools',
-        },
-        {
-          type: 'preset',
-          preset: 'management',
-        },
-      ];
+    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      {
+        type: 'preset',
+        preset: 'analytics',
+      },
+      {
+        type: 'preset',
+        preset: 'ml',
+      },
+      {
+        type: 'preset',
+        preset: 'devtools',
+      },
+      {
+        type: 'preset',
+        preset: 'management',
+      },
+    ];
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        onProjectNavigationChange,
-      });
+    const renderResult = renderNavigation({
+      navTreeDef: { body: navigationBody },
+      onProjectNavigationChange,
+    });
 
-      await runTests('treeDef');
+    await runTests('treeDef');
 
-      renderResult.unmount();
-      onProjectNavigationChange.mockReset();
-    }
-
-    // -- With UI Components
-    {
-      renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group preset="analytics" />
-            <Navigation.Group preset="ml" />
-            <Navigation.Group preset="devtools" />
-            <Navigation.Group preset="management" />
-          </Navigation>
-        ),
-        onProjectNavigationChange,
-      });
-
-      await runTests('uiComponents');
-    }
+    renderResult.unmount();
+    onProjectNavigationChange.mockReset();
   });
 
   test('should render recently accessed items', async () => {
@@ -577,36 +399,18 @@ describe('builds navigation tree', () => {
       }
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'recentlyAccessed',
-        },
-      ];
+    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      {
+        type: 'recentlyAccessed',
+      },
+    ];
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-        services: { recentlyAccessed$ },
-      });
+    const renderResult = renderNavigation({
+      navTreeDef: { body: navigationBody },
+      services: { recentlyAccessed$ },
+    });
 
-      await runTests('treeDef', renderResult);
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.RecentlyAccessed />
-          </Navigation>
-        ),
-        services: { recentlyAccessed$ },
-      });
-
-      await runTests('uiComponents', renderResult);
-    }
+    await runTests('treeDef', renderResult);
   });
 
   test('should render the cloud links', async () => {
@@ -650,46 +454,24 @@ describe('builds navigation tree', () => {
       }
     };
 
-    // -- Default navigation
-    {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'group1',
-          defaultIsCollapsed: false,
-          children: [
-            { id: 'cloudLink1', cloudLink: 'userAndRoles' },
-            { id: 'cloudLink2', cloudLink: 'performance' },
-            { id: 'cloudLink3', cloudLink: 'billingAndSub' },
-            { id: 'cloudLink4', cloudLink: 'deployment' },
-          ],
-        },
-      ];
+    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+      {
+        type: 'navGroup',
+        id: 'group1',
+        defaultIsCollapsed: false,
+        children: [
+          { id: 'cloudLink1', cloudLink: 'userAndRoles' },
+          { id: 'cloudLink2', cloudLink: 'performance' },
+          { id: 'cloudLink3', cloudLink: 'billingAndSub' },
+          { id: 'cloudLink4', cloudLink: 'deployment' },
+        ],
+      },
+    ];
 
-      const renderResult = renderNavigation({
-        navTreeDef: { body: navigationBody },
-      });
+    const renderResult = renderNavigation({
+      navTreeDef: { body: navigationBody },
+    });
 
-      await runTests('treeDef', renderResult);
-      renderResult.unmount();
-    }
-
-    // -- With UI Components
-    {
-      const renderResult = renderNavigation({
-        navigationElement: (
-          <Navigation>
-            <Navigation.Group id="group1" defaultIsCollapsed={false}>
-              <Navigation.Item id="cloudLink1" cloudLink="userAndRoles" />
-              <Navigation.Item id="cloudLink2" cloudLink="performance" />
-              <Navigation.Item id="cloudLink3" cloudLink="billingAndSub" />
-              <Navigation.Item id="cloudLink4" cloudLink="deployment" />
-            </Navigation.Group>
-          </Navigation>
-        ),
-      });
-
-      await runTests('uiComponents', renderResult);
-    }
+    await runTests('treeDef', renderResult);
   });
 });
