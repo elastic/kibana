@@ -155,11 +155,6 @@ export function WorkspacePanelWrapper({
   }
 
   if (maxDimensions) {
-    // if the maxDimensions are in pixels, we apply a matching aspect ratio
-    visDimensionsCSS =
-      maxDimensions.unit === 'pixels'
-        ? getAspectRatioStyles(aspectRatio ?? maxDimensions, workspaceDimensions)
-        : {};
     visDimensionsCSS.maxWidth = `${maxDimensions.x}${unitToCSSUnit[maxDimensions.unit]}`;
     visDimensionsCSS.maxHeight = `${maxDimensions.y}${unitToCSSUnit[maxDimensions.unit]}`;
   }

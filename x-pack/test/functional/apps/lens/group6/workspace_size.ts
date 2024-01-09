@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openDimensionEditor('lnsMetric_breakdownByDimensionPanel');
       await testSubjects.setValue('lnsMetric_max_cols', '2');
 
-      await assertWorkspaceDimensions('266.664px', '400px');
+      await assertWorkspaceDimensions('400px', '400px');
     });
 
     it('gauge size (absolute pixels)', async () => {
@@ -193,13 +193,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.switchToVisualization('verticalBullet', 'gauge');
       });
 
-      // these dimensions are slightly below the requested 300x600
+      // this height is below the requested 600px
       // that is because the window size isn't large enough to fit the requested dimensions
       // and the chart is forced to shrink.
       //
-      // this is a good thing because it makes this a test case for aspect ratio preservation
-      // even when specific pixel dimensions are requested.
-      await assertWorkspaceDimensions('200px', '400px');
+      // this is a good thing because it makes this a test case for that scenario
+      await assertWorkspaceDimensions('300px', '400px');
     });
 
     it('preserves aspect ratio when either dimension is constrained', async () => {
