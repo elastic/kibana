@@ -29,6 +29,7 @@ export const apiPublishesDisabledActionIds = (
  * Gets this API's disabled action IDs as a reactive variable which will cause re-renders on change.
  */
 export const useDisabledActionIds = (api: Partial<PublishesDisabledActionIds> | undefined) =>
-  useStateFromPublishingSubject<string[] | undefined, PublishesDisabledActionIds['disabledActionIds']>(
-    api?.disabledActionIds
-  );
+  useStateFromPublishingSubject<
+    string[] | undefined,
+    PublishesDisabledActionIds['disabledActionIds']
+  >(api?.disabledActionIds);
