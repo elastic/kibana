@@ -197,7 +197,7 @@ export const DatavisualizerSelector: FC = () => {
                   data-test-subj="mlDataVisualizerSelectESQLButton"
                 >
                   <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
+                    id="xpack.ml.datavisualizer.selector.useESQLButtonLabel"
                     defaultMessage="Use ES|QL"
                   />
                 </EuiButton>

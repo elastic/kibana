@@ -36,14 +36,13 @@ export const indexBasedRouteFactory = (
   ],
 });
 
-console.log('createPath(ML_PAGES.DATA_VISUALIZER_ESQL)', createPath(ML_PAGES.DATA_VISUALIZER_ESQL));
 export const indexESQLBasedRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
   id: 'data_view_datavisualizer_esql',
   path: createPath(ML_PAGES.DATA_VISUALIZER_ESQL),
-  title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
+  title: i18n.translate('xpack.ml.dataVisualizer.esql.docTitle', {
     defaultMessage: 'Index Data Visualizer (ESQL)',
   }),
   render: () => <PageWrapper esql={true} />,
@@ -51,7 +50,7 @@ export const indexESQLBasedRouteFactory = (
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.dataViewLabel', {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.esqlLabel', {
         defaultMessage: 'Index Data Visualizer (ESQL)',
       }),
     },

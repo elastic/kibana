@@ -122,7 +122,7 @@ export const defaultNavigation: MlNodeDefinition = {
           },
         },
         {
-          title: i18n.translate('defaultNavigation.ml.dataView', {
+          title: i18n.translate('defaultNavigation.ml.esqlDataVisualizer', {
             defaultMessage: 'ES|QL',
           }),
           link: 'ml:esqlDataVisualizer',

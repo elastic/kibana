@@ -644,9 +644,9 @@ export const useESQLDataVisualizerGridData = (
       }
     } catch (error) {
       const title = i18n.translate(
-        'xpack.dataVisualizer.index.errorFetchingFieldStatisticsMessage',
+        'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
         {
-          defaultMessage: 'Error fetching stats for ES|QL data',
+          defaultMessage: 'Error fetching field statistics for ES|QL query',
         }
       );
       toasts.addError(error, {
