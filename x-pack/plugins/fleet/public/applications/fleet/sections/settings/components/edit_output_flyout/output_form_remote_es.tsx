@@ -24,7 +24,11 @@ interface Props {
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
 
+  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+
   useEffect(() => {
+    if (!isFirstLoad) return;
+    setIsFirstLoad(false);
     // populate the secret input with the value of the plain input in order to re-save the output with secret storage
     if (useSecretsStorage) {
       if (inputs.serviceTokenInput.value && !inputs.serviceTokenSecretInput.value) {
@@ -32,7 +36,22 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         inputs.serviceTokenInput.clear();
       }
     }
-  }, [useSecretsStorage, inputs.serviceTokenInput, inputs.serviceTokenSecretInput]);
+  }, [
+    useSecretsStorage,
+    inputs.serviceTokenInput,
+    inputs.serviceTokenSecretInput,
+    isFirstLoad,
+    setIsFirstLoad,
+  ]);
+
+  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.serviceTokenInput.clear();
+    } else {
+      inputs.serviceTokenSecretInput.setValue('');
+    }
+    onToggleSecretStorage(secretEnabled);
+  };
 
   return (
     <>
@@ -62,7 +81,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           }
           {...inputs.serviceTokenInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleSecretStorage}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
         >
           <EuiFieldText
             fullWidth
@@ -85,7 +104,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           {...inputs.serviceTokenSecretInput.formRowProps}
           cancelEdit={inputs.serviceTokenSecretInput.cancelEdit}
           useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleSecretStorage}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
         >
           <EuiFieldText
             data-test-subj="serviceTokenSecretInput"
