@@ -72,6 +72,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionUploadEnabled: true,
 
   /**
+   * Enables the ability to send Response actions to SentinelOne
+   */
+  responseActionsSentinelOneV1Enabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
@@ -94,16 +99,17 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
-  /**
-   * Enables Retrieval Augmented Generation (RAG) on Alerts in the assistant
-   */
-  assistantRagOnAlerts: false,
-
   /*
-   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   * Enables the new user details flyout displayed on the Alerts table.
    *
    **/
   newUserDetailsFlyout: false,
+
+  /*
+   * Enables the new host details flyout displayed on the Alerts table.
+   *
+   **/
+  newHostDetailsFlyout: false,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
@@ -124,11 +130,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
-
-  /**
-   * Enables alerts suppression for threshold rules
-   */
-  alertSuppressionForThresholdRuleEnabled: false,
 
   /**
    * Disables the timeline save tour.
@@ -163,6 +164,11 @@ export const allowedExperimentalValues = Object.freeze({
    * version and the latest available version.
    */
   jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
