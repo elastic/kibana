@@ -228,3 +228,4 @@ export const ALERT_DETAILS_ASSIGN_BUTTON =
 export const ALERT_DETAILS_TAKE_ACTION_BUTTON = '[data-test-subj="take-action-dropdown-btn"]';
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
+export const TOOLTIP = '[data-test-subj="message-tool-tip"]';
