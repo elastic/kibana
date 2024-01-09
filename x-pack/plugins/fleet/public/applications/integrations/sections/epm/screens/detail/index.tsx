@@ -779,7 +779,7 @@ export function Detail() {
             <AssetsPage packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_configs}>
-            <Configs packageInfo={packageInfo} prerelease={prereleaseIntegrationsEnabled} />
+            <Configs packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
             <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
