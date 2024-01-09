@@ -39,6 +39,8 @@ export function generatePdfObservableV2(
   /**
    * For each locator we get the relative URL to the redirect app
    */
+
+  console.log({ locatorParams });
   const urls = locatorParams.map((locator) => [
     getFullRedirectAppUrl(config, serverInfo, job.spaceId, job.forceNow),
     locator,

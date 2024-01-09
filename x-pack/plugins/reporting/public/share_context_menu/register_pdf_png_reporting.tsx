@@ -101,7 +101,6 @@ export const reportingScreenshotShareProvider = ({
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
             jobProviderOptions={jobProviderOptions}
             isDirty={isDirty}
-            getJobsParamsFunction={}
             onClose={() => {
               session.close();
             }}
