@@ -89,9 +89,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
       openLeftPanel({
         id: UserDetailsPanelKey,
         params: {
-          riskInputs: {
-            alertIds: userRiskData?.user.risk.inputs?.map(({ id }) => id) ?? [],
-          },
+          isRiskScoreExist: !!userRiskData?.user?.risk,
           user: {
             name: userName,
             email,
@@ -100,7 +98,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         path: tab ? { tab } : undefined,
       });
     },
-    [email, openLeftPanel, telemetry, userName, userRiskData?.user.risk.inputs]
+    [telemetry, email, openLeftPanel, userName, userRiskData]
   );
 
   const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
