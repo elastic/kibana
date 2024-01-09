@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import {
   BULK_ACTIONS,
   EXPORT_TIMELINE,
@@ -24,6 +25,7 @@ import {
   CREATE_NEW_TIMELINE_WITH_BORDER,
   TIMELINE_COLLAPSED_ITEMS_BTN,
   TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
+  TIMELINE_WRAPPER,
 } from '../screens/timeline';
 
 export const expandNotes = () => {
@@ -68,7 +70,15 @@ export const exportSelectedTimelines = () => {
   cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 
-export const createTimeline = () => cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).click();
+export const createTimeline = () =>
+  recurse(
+    () => {
+      cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).click();
+      return cy.get(TIMELINE_WRAPPER);
+    },
+    // Retry if somehow the timeline wrapper is still hidden
+    ($timelineWrapper) => !$timelineWrapper.hasClass('timeline-wrapper--hidden')
+  );
 
 export const createTimelineFromFirstTemplateInList = () => {
   cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();

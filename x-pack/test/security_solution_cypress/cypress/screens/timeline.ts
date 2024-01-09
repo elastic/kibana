@@ -218,6 +218,8 @@ export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-scre
 
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
 
+export const TIMELINE_WRAPPER = '[data-test-subj="timeline-wrapper"]';
+
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
 export const TIMELINE_PROGRESS_BAR = '[data-test-subj="progress-bar"]';
