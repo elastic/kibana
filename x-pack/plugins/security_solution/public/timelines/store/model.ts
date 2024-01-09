@@ -21,7 +21,6 @@ import type {
   DataProvider,
   SerializedFilterQuery,
   TimelineEventsType,
-  RowRenderer,
   NotesMap,
 } from '../../../common/types/timeline';
 import type {
@@ -152,7 +151,6 @@ export interface TimelineModel {
   notesMap: NotesMap;
   /** the note id pending deletion */
   confirmingNoteId?: string | null;
-  enabledRowRenderers?: RowRenderer[];
 }
 
 export type SubsetTimelineModel = Readonly<
