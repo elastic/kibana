@@ -13,8 +13,6 @@ import type {
   ChromeNavLink,
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
-  NavigationTreeDefinition,
-  AppDeepLinkId,
 } from '@kbn/core-chrome-browser';
 import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
 import type { CloudLinks } from '../src/cloud_links';
@@ -57,13 +55,6 @@ export interface NavigationKibanaDependencies {
   };
   serverless: {
     setNavigationDeprecated: (projectNavigation: ChromeProjectNavigation) => void;
-    setSideNavigationDefinition: <
-      LinkId extends AppDeepLinkId = AppDeepLinkId,
-      Id extends string = string,
-      ChildrenId extends string = Id
-    >(
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
-    ) => void;
     getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
   };
   cloud: CloudStart;

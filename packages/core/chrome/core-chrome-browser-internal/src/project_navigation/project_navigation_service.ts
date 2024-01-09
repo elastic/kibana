@@ -15,7 +15,6 @@ import type {
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
-  NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -28,7 +27,6 @@ import {
   skip,
   distinctUntilChanged,
   skipWhile,
-  of,
 } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -54,7 +52,6 @@ export class ProjectNavigationService {
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
   private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
-  private sideNavigationDefinition$: Observable<NavigationTreeDefinition<any>> | undefined;
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
     breadcrumbs: ChromeProjectBreadcrumb[];
@@ -91,16 +88,6 @@ export class ProjectNavigationService {
         this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
       });
 
-    const setSideNavigationDefinition = (
-      sideNavigationDefinition$: Observable<NavigationTreeDefinition>
-    ) => {
-      if (this.sideNavigationDefinition$) {
-        throw new Error('Project navigation has already been set.');
-      }
-
-      this.sideNavigationDefinition$ = sideNavigationDefinition$.pipe(takeUntil(this.stop$));
-    };
-
     return {
       setProjectHome: (homeHref: string) => {
         this.projectHome$.next(homeHref);
@@ -127,13 +114,6 @@ export class ProjectNavigationService {
         this.projectNavigation$.next(projectNavigation);
         this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
         this.setActiveProjectNavigationNodes();
-      },
-      setSideNavigationDefinition,
-      getSideNavigationDefinition$: (): Observable<NavigationTreeDefinition> => {
-        if (!this.sideNavigationDefinition$) {
-          return of({});
-        }
-        return this.sideNavigationDefinition$;
       },
       getActiveNodes$: () => {
         return this.activeNodes$.pipe(takeUntil(this.stop$));

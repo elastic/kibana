@@ -11,8 +11,6 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
   SideNavComponent,
   ChromeProjectNavigationNode,
-  NavigationTreeDefinition,
-  AppDeepLinkId,
 } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
@@ -25,15 +23,8 @@ export interface ServerlessPluginStart {
     breadcrumbs: ChromeProjectBreadcrumb | ChromeProjectBreadcrumb[],
     params?: Partial<ChromeSetProjectBreadcrumbsParams>
   ) => void;
-  setNavigationDeprecated(projectNavigation: ChromeProjectNavigation): void;
-  setSideNavigationDefinition<
-    LinkId extends AppDeepLinkId = AppDeepLinkId,
-    Id extends string = string,
-    ChildrenId extends string = Id
-  >(
-    navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
-  ): void;
   setProjectHome(homeHref: string): void;
+  setNavigationDeprecated(projectNavigation: ChromeProjectNavigation): void;
   setSideNavComponentDeprecated: (navigation: SideNavComponent) => void;
   getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
 }
