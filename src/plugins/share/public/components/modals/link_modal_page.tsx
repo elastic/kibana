@@ -300,7 +300,7 @@ export class LinkModal extends Component<LinkModalProps, State> {
         {
           useShortUrl: false,
           isCreatingShortUrl: false,
-          shortUrlErrorMsg: i18n.translate('share.linkModal.unableCreateShortUrlErrorMessage', {
+          shortUrlErrorMsg: i18n.translate('share.urlModal.unableCreateShortUrlErrorMessage', {
             defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
             values: {
               errorMessage: fetchError.message,
@@ -373,7 +373,7 @@ export class LinkModal extends Component<LinkModalProps, State> {
       return null;
     }
     const shortUrlLabel = (
-      <FormattedMessage id="share.linkModal.shortUrlLabel" defaultMessage="Short URL" />
+      <FormattedMessage id="share.urlModal.shortUrlLabel" defaultMessage="Short URL" />
     );
     const switchLabel = this.state.isCreatingShortUrl ? (
       <span>
@@ -392,7 +392,7 @@ export class LinkModal extends Component<LinkModalProps, State> {
     );
     const tipContent = (
       <FormattedMessage
-        id="share.linkModal.shortUrlHelpText"
+        id="share.urlModal.shortUrlHelpText"
         defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
         Internet Explorer has URL length restrictions,
         and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,

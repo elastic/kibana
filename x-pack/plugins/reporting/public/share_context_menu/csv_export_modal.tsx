@@ -7,7 +7,10 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiModalBody,
   EuiModalFooter,
@@ -66,7 +69,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.reporting.exportModal.successfullyQueuedReportNotificationDescription"
+              id="xpack.reporting.modalContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in {path}."
               values={{
                 path: (
@@ -93,7 +96,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       .catch((error) => {
         toasts.addError(error, {
           title: intl!.formatMessage({
-            id: 'xpack.reporting.exportModal.notification.reportingErrorTitle',
+            id: 'xpack.reporting.modalContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
           toastMessage: (
@@ -118,18 +121,27 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton
-          disabled={Boolean(createReportingJob)}
-          fill
-          onClick={() => generateReportingJob()}
-          data-test-subj="generateReportButton"
-          isLoading={Boolean(createReportingJob)}
-        >
-          <FormattedMessage
-            id="xpack.reporting.generateButtonLabel"
-            defaultMessage="Generate Export"
-          />
-        </EuiButton>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiButtonEmpty onClick={props.onClose}>
+              <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton
+              disabled={Boolean(createReportingJob)}
+              fill
+              onClick={() => generateReportingJob()}
+              data-test-subj="generateReportButton"
+              isLoading={Boolean(createReportingJob)}
+            >
+              <FormattedMessage
+                id="xpack.reporting.generateButtonLabel"
+                defaultMessage="Export as CSV"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalFooter>
     </>
   );
