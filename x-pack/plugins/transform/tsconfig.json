@@ -72,6 +72,7 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/ml-data-view-utils",
     "@kbn/ml-creation-wizard-utils",
+    "@kbn/alerts-as-data-utils",
     "@kbn/code-editor"
   ],
   "exclude": [
