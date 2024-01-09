@@ -10,6 +10,7 @@ import moment from 'moment';
 
 import type { DataViewBase } from '@kbn/es-query';
 import { fields } from '@kbn/data-plugin/common/mocks';
+import { render } from '@testing-library/react';
 
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import {
@@ -27,7 +28,6 @@ import { useTimelineEvents } from '../../../../common/components/events_viewer/u
 import { TableId } from '@kbn/securitysolution-data-table';
 import { createStore } from '../../../../common/store';
 import { mockEventViewerResponse } from '../../../../common/components/events_viewer/mock';
-import { mount } from 'enzyme';
 import type { UseFieldBrowserOptionsProps } from '../../../../timelines/components/fields_browser';
 import type { TransformColumnsProps } from '../../../../common/components/control_columns';
 import { INSPECT_ACTION } from '../../../../common/components/visualization_actions/use_actions';
@@ -118,7 +118,7 @@ describe('PreviewHistogram', () => {
         responses: [{ hits: { total: 1 } }],
       });
 
-      const wrapper = mount(
+      const { getByTestId } = render(
         <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
@@ -131,7 +131,7 @@ describe('PreviewHistogram', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toBeTruthy();
+      expect(getByTestId('visualization-embeddable')).toBeInTheDocument();
     });
 
     test('should render inspect action', () => {
@@ -141,7 +141,7 @@ describe('PreviewHistogram', () => {
         responses: [{ hits: { total: 1 } }],
       });
 
-      mount(
+      render(
         <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
@@ -157,6 +157,29 @@ describe('PreviewHistogram', () => {
       expect(mockVisualizationEmbeddable.mock.calls[0][0].withActions).toEqual(INSPECT_ACTION);
     });
 
+    test('should disable filter when clicking on the chart', () => {
+      (useVisualizationResponse as jest.Mock).mockReturnValue({
+        loading: false,
+        requests: [],
+        responses: [{ hits: { total: 1 } }],
+      });
+
+      render(
+        <TestProviders store={store}>
+          <PreviewHistogram
+            addNoiseWarning={jest.fn()}
+            timeframeOptions={getLastMonthTimeframe()}
+            previewId={'test-preview-id'}
+            spaceId={'default'}
+            ruleType={'query'}
+            indexPattern={getMockIndexPattern()}
+          />
+        </TestProviders>
+      );
+
+      expect(mockVisualizationEmbeddable.mock.calls[0][0].disableOnClickFilter).toBeTruthy();
+    });
+
     test('should show chart legend when if it is not EQL rule', () => {
       (useVisualizationResponse as jest.Mock).mockReturnValue({
         loading: false,
@@ -164,7 +187,7 @@ describe('PreviewHistogram', () => {
         responses: [{ hits: { total: 1 } }],
       });
 
-      mount(
+      render(
         <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}
@@ -199,7 +222,7 @@ describe('PreviewHistogram', () => {
         responses: [{ hits: { total: 0 } }],
       });
 
-      mount(
+      render(
         <TestProviders store={store}>
           <PreviewHistogram
             addNoiseWarning={jest.fn()}

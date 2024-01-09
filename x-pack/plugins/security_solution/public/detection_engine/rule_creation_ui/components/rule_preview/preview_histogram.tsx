@@ -159,6 +159,7 @@ const PreviewHistogramComponent = ({
           <EuiFlexItem grow={1}>
             <VisualizationEmbeddable
               applyGlobalQueriesAndFilters={false}
+              disableOnClickFilter={true}
               enableLegendActions={false}
               extraOptions={extraVisualizationOptions}
               getLensAttributes={getRulePreviewLensAttributes}

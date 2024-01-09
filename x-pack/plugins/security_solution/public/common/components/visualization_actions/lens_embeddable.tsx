@@ -168,31 +168,33 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [dispatch, inputsModelId]
   );
 
-  const onFilterCallback = useCallback(() => {
-    const callback: EmbeddableComponentProps['onFilter'] = async (e) => {
-      if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area' || disableOnClickFilter) {
-        e.preventDefault();
+  const onFilterCallback = useCallback(
+    (event) => {
+      if (disableOnClickFilter) {
+        event.preventDefault();
         return;
       }
-      // Update timerange when clicking on a dot in an area chart
-      const [{ query }] = await createFiltersFromValueClickAction({
-        data: e.data,
-        negate: e.negate,
-      });
-      const rangeFilter: RangeFilterParams = query?.range['@timestamp'];
-      if (rangeFilter?.gte && rangeFilter?.lt) {
-        updateDateRange({
-          range: [rangeFilter.gte, rangeFilter.lt],
+      const callback: EmbeddableComponentProps['onFilter'] = async (e) => {
+        if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area') {
+          e.preventDefault();
+          return;
+        }
+        // Update timerange when clicking on a dot in an area chart
+        const [{ query }] = await createFiltersFromValueClickAction({
+          data: e.data,
+          negate: e.negate,
         });
-      }
-    };
-    return callback;
-  }, [
-    createFiltersFromValueClickAction,
-    updateDateRange,
-    preferredSeriesType,
-    disableOnClickFilter,
-  ]);
+        const rangeFilter: RangeFilterParams = query?.range['@timestamp'];
+        if (rangeFilter?.gte && rangeFilter?.lt) {
+          updateDateRange({
+            range: [rangeFilter.gte, rangeFilter.lt],
+          });
+        }
+      };
+      return callback;
+    },
+    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType, disableOnClickFilter]
+  );
 
   const adHocDataViews = useMemo(
     () =>
