@@ -115,7 +115,7 @@ APM::
 Elastic Security::
 For the Elastic Security 8.12.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Elastic Search::
-* Display E5 Multilingual Callout ({kibana-pull}171887[#171887]).
+* Display E5 multilingual callout ({kibana-pull}171887[#171887]).
 * Replace model selection dropdown with list ({kibana-pull}171436[#171436]).
 Fleet::
 * Adds support for preconfigured output secrets (Scrypt edition) ({kibana-pull}172041[#172041]).
@@ -125,7 +125,7 @@ Fleet::
 * Adds an integrations configs tab to display input templates ({kibana-pull}168827[#168827]).
 * Adds a {kib} task to publish Agent metrics ({kibana-pull}168435[#168435]).
 Lens & Visualizations::
-* Adds the ability to edit ES|QL queries in Dashboard ({kibana-pull}169911[#169911]).
+* Adds the ability to edit charts made by {esql} queries in Dashboard ({kibana-pull}169911[#169911]).
 Machine Learning::
 * Adds E5 model configurations ({kibana-pull}172053[#172053]).
 * Adds the ability to create a categorization anomaly detection job from pattern analysis ({kibana-pull}170567[#170567]).
@@ -194,11 +194,11 @@ Fleet::
 * Implements Elastic Agent upgrade states UI ({kibana-pull}167539[#167539]).
 * Use default component templates from Elasticsearch ({kibana-pull}163731[#163731]).
 Lens & Visualizations::
+* Moves the tagcloud visualization in *Lens* out of experimental status ({kibana-pull}168824[#168824]).
 * Allows coloring an entire metric panel when applying a maximum value to the metric visualization in **Lens** ({kibana-pull}172531[#172531]).
 * Adds truncation for data view pickers and field lists with many characters ({kibana-pull}172296[#172296]).
-* Allows searching in the documentation description ({kibana-pull}171916[#171916]).
+* Allows searching in the {esql} inline documentation description ({kibana-pull}171916[#171916]).
 * Allows setting non-numeric metrics for metric visualizations in *Lens* ({kibana-pull}169258[#169258]).
-* Moves the tagcloud visualization in *Lens* out of experimental status ({kibana-pull}168824[#168824]).
 Machine Learning::
 * Removes the beta badge from ML alerting rules ({kibana-pull}173545[#173545]).
 * Removes the technical preview badge from AIOps log rate analysis ({kibana-pull}172722[#172722]).
@@ -242,7 +242,7 @@ Reporting::
 * Makes searches used for CSV export inspectable ({kibana-pull}171248[#171248]).
 * Adds `max_concurrent_shards` setting to schema for the point in time CSV report generation ({kibana-pull}170344[#170344]).
 Security::
-* Allows using JWT credentials to grant API keys ({kibana-pull}172444[#172444]).
+* The default value of the `elasticsearch.requestHeadersWhitelist` configuration option has been expanded to include the `es-client-authentication` HTTP header, in addition to `authorization` ({kibana-pull}172444[#172444]).
 * Adds risk engine missing privileges callout ({kibana-pull}171250[#171250]).
 * Implements Asset Criticality Create, Read & Delete APIs ({kibana-pull}172073[#172073]).
 
