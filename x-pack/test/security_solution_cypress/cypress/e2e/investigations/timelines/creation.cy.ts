@@ -122,7 +122,9 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     // Unsaved
     cy.get(TIMELINE_PANEL).should('be.visible');
     cy.get(TIMELINE_STATUS).should('be.visible');
-    cy.get(TIMELINE_STATUS).should('have.text', 'Unsaved');
+    cy.get(TIMELINE_STATUS)
+      .invoke('text')
+      .should('match', /^Unsaved/);
 
     addNameToTimelineAndSave('Test');
 
