@@ -11,7 +11,6 @@ import { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import React from 'react';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { CsvModalContent } from '../share_context_menu/csv_export_modal';
-import { ReportingPanelProps } from '../share_context_menu/reporting_panel_content';
 import { ReportingModalContent } from '../share_context_menu/reporting_panel_content_lazy';
 /**
  * Properties for displaying a share menu with Reporting features.
@@ -21,7 +20,7 @@ export interface ApplicationProps {
    * A function that Reporting calls to get the sharing data from the application.
    * Needed for CSV exports and Canvas PDF reports.
    */
-  getJobParams?: ReportingPanelProps['getJobParams'] | JobAppParamsPDFV2;
+  getJobParams?: JobAppParamsPDFV2;
 
   /**
    * Option to control how the screenshot(s) is/are placed in the PDF

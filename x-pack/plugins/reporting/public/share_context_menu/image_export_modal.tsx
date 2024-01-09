@@ -364,8 +364,8 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         isLoading={Boolean(createReportingJob)}
       >
         <FormattedMessage
-          id="xpack.reporting.generateButtonLabel"
-          defaultMessage="Generate export"
+          id="xpack.reporting.generateReportButtonLabel"
+          defaultMessage="Generate report"
         />
       </EuiButton>
     );
