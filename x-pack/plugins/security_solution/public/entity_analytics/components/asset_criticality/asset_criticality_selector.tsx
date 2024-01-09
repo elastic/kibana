@@ -56,7 +56,6 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
 
   return (
     <>
-      <EuiHorizontalRule />
       <EuiAccordion
         id="asset-criticality-selector"
         buttonContent={

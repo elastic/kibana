@@ -49,11 +49,14 @@ export const UserPanelContent = ({
   return (
     <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
-        <RiskSummary
-          riskScoreData={riskScoreState}
-          queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
-          openDetailsPanel={openDetailsPanel}
-        />
+        <>
+          <RiskSummary
+            riskScoreData={riskScoreState}
+            queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule />
+        </>
       )}
       <AssetCriticalitySelector entity={{ name: userName, type: 'user' }} />
       <ObservedEntity
