@@ -177,12 +177,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await reporting.initLogs();
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
-        const from = 'Nov 26, 1981 @ 21:54:15.526';
-        const to = 'Mar 5, 1982 @ 18:17:44.821';
-        await PageObjects.common.setTime({ from, to });
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata', {
+          performance: {
+            highWaterMark: 300,
+            concurrency: 1,
+          },
+        });
+
         await navigateToDashboardApp();
         await PageObjects.dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Nov 26, 1981 @ 21:54:15.526',
+          'Mar 5, 1982 @ 18:17:44.821'
+        );
 
         await PageObjects.common.sleep(1000);
         await filterBar.addFilter({ field: 'name.keyword', operation: 'is', value: 'Fethany' });
