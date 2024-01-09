@@ -46,3 +46,4 @@ export * from './es_raw_response';
 export * from './eql_raw_response';
 export * from './esdsl';
 export * from './eql';
+export * from './esql';

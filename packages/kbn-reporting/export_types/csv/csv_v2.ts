@@ -12,7 +12,7 @@ import { Writable } from 'stream';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import { CsvGenerator } from '@kbn/generate-csv';
+import { CsvGenerator, CsvESQLGenerator } from '@kbn/generate-csv';
 import {
   CancellationToken,
   LICENSE_TYPE_BASIC,
@@ -87,14 +87,10 @@ export class CsvV2ExportType extends ExportType<
       throw Boom.badRequest('Invalid Job params: must contain a single Discover App locator');
     }
 
-    if (!params || !params.savedSearchId || typeof params.savedSearchId !== 'string') {
-      throw Boom.badRequest('Invalid Discover App locator: must contain a savedSearchId');
-    }
-
     // use Discover contract to get the title of the report from job params
     const { discover: discoverPluginStart } = this.startDeps;
     const locatorClient = await discoverPluginStart.locator.asScopedClient(req);
-    const title = await locatorClient.titleFromLocator(params);
+    const title = jobParams.title || (await locatorClient.titleFromLocator(params));
 
     return { ...jobParams, title, objectType: 'search', isDeprecated: false };
   };
@@ -121,6 +117,36 @@ export class CsvV2ExportType extends ExportType<
 
     // use Discover contract to convert the job params into inputs for CsvGenerator
     const locatorClient = await discoverPluginStart.locator.asScopedClient(fakeRequest);
+
+    const query = await locatorClient.queryFromLocator(params);
+
+    if (query && 'esql' in query) {
+      // TODO: use columnsFromLocator
+      // We don't implement it now because it might be a breaking change for csv_v2 api that for non esql only works with saved search
+      // https://github.com/elastic/kibana/issues/151190
+      // const columns = await locatorClient.columnsFromLocator(params);
+      const columns = params.columns as string[] | undefined;
+      const filters = await locatorClient.filtersFromLocator(params);
+      const es = this.startDeps.esClient.asScoped(fakeRequest);
+
+      const clients = { uiSettings, data, es };
+
+      const csv = new CsvESQLGenerator(
+        {
+          columns,
+          query,
+          filters,
+          ...job,
+        },
+        csvConfig,
+        clients,
+        cancellationToken,
+        logger,
+        stream
+      );
+      return await csv.generateData();
+    }
+
     const columns = await locatorClient.columnsFromLocator(params);
     const searchSource = await locatorClient.searchSourceFromLocator(params);
 
