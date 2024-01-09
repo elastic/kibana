@@ -18,7 +18,7 @@ import type {
 interface TableItem {
   category: string;
   count: number;
-  score: number;
+  score: string;
 }
 
 interface EntityData {
@@ -73,14 +73,14 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
         defaultMessage: 'Alerts',
       }),
-      score: entityData?.risk.category_1_score ?? 0,
+      score: displayNumber(entityData?.risk.category_1_score ?? 0),
       count: entityData?.risk.category_1_count ?? 0,
     },
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.contextGroupLabel', {
         defaultMessage: 'Contexts',
       }),
-      score: entityData?.risk.category_2_score ?? 0,
+      score: displayNumber(entityData?.risk.category_2_score ?? 0),
       count: entityData?.risk.category_2_count ?? 0,
     },
   ];
@@ -105,6 +105,8 @@ export const getEntityData = (
 
   return riskData.host;
 };
+
+const displayNumber = (num: number) => num.toFixed(2);
 
 export const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 export const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
