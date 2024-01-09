@@ -217,7 +217,7 @@ Machine Learning::
 * Adds test pipeline action for data frame analysis trained models in models list ({kibana-pull}168400[#168400]).
 Management::
 * Adds a search bar to the Clusters and shards tab ({kibana-pull}171806[#171806]).
-* Aligns data view and destination index creation workflows in Transforms and Data Fame Analytics wizards ({kibana-pull}171202[#171202]).
+* Aligns data view and destination index creation workflows in Transforms and Data Frame Analytics wizards ({kibana-pull}171202[#171202]).
 * The index lifecycle summary on the Index lifecycle page is now displayed in a separate tab ({kibana-pull}170726[#170726]).
 * Adds the ability to view mappings conflicts in data views on the data view management page ({kibana-pull}169381[#169381]).
 * Implements index overview cards ({kibana-pull}168153[#168153]).
