@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { recurse } from 'cypress-recurse';
 import {
   BULK_ACTIONS,
   EXPORT_TIMELINE,
@@ -24,7 +23,6 @@ import { SELECT_ALL_CHECKBOX } from '../screens/shared';
 import {
   TIMELINE_COLLAPSED_ITEMS_BTN,
   TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
-  TIMELINE_WRAPPER,
 } from '../screens/timeline';
 
 export const expandNotes = () => {
