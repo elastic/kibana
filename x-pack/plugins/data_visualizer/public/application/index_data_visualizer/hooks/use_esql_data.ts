@@ -97,6 +97,12 @@ export const useESQLFieldStatsData = ({
 
   const { runRequest, cancelRequest } = useCancellableSearch();
 
+  const {
+    services: {
+      notifications: { toasts },
+    },
+  } = useDataVisualizerKibana();
+
   useEffect(
     function updateFieldStats() {
       let unmounted = false;
@@ -189,7 +195,7 @@ export const useESQLFieldStatsData = ({
 
             // GETTING STATS FOR KEYWORD FIELDS
             const keywordFields = columns
-              .filter((f) => f.secondaryType === 'keyword')
+              .filter((f) => f.secondaryType === 'keyword' || f.secondaryType === 'ip')
               .map((field) => {
                 return {
                   field,
@@ -283,7 +289,7 @@ export const useESQLFieldStatsData = ({
                       trueCount = row[0];
                     }
                     return {
-                      key_as_string: row[1].toString(),
+                      key_as_string: row[1]?.toString(),
                       doc_count: row[0],
                       percent: row[0] / topValuesSampleSize,
                     };
@@ -333,6 +339,19 @@ export const useESQLFieldStatsData = ({
             });
           }
         } catch (e) {
+          const title = i18n.translate(
+            'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
+            {
+              defaultMessage: 'Error fetching field statistics for ES|QL query',
+            }
+          );
+          toasts.addError(e, {
+            title,
+          });
+
+          // Log error to console for better debugging
+          // eslint-disable-next-line no-console
+          console.error(`${title}: fetchFieldStats`, e);
           setFetchState({
             loaded: 100,
             isRunning: false,
@@ -384,215 +403,224 @@ export const useESQLOverallStatsData = (
 
   const searchSubscription$ = useRef<Subscription>();
 
-  const startFetch = useCallback(async () => {
-    try {
-      searchSubscription$.current?.unsubscribe();
-      abortCtrl.current.abort();
-      abortCtrl.current = new AbortController();
+  const startFetch = useCallback(
+    async function fetchOverallStats() {
+      try {
+        searchSubscription$.current?.unsubscribe();
+        abortCtrl.current.abort();
+        abortCtrl.current = new AbortController();
 
-      if (!fieldStatsRequest) {
-        return;
-      }
-
-      const { searchQuery, intervalMs, filter } = fieldStatsRequest;
-
-      const searchOptions = {
-        abortSignal: abortCtrl.current.signal,
-        // No sessionId here because ES|QL not yet supported (?)
-      };
-
-      if (!isESQLQuery(searchQuery)) {
-        return;
-      }
-
-      const intervalInMs = intervalMs === 0 ? 60 * 60 * 60 * 10 : intervalMs;
-      const esqlBaseQuery = searchQuery.esql;
-
-      // @TODO: potentially change the limit of this one to get sampled top values
-      const columnsResp = await lastValueFrom(
-        data.search.search(
-          {
-            params: {
-              query: esqlBaseQuery + '| LIMIT 0',
-              locale: 'en',
-              ...(filter ? { filter } : {}),
-            },
-          },
-          { ...searchOptions, strategy: ESQL_SEARCH_STRATEGY }
-        )
-      );
-
-      // @ts-expect-error ES types need to be updated with columns for ESQL queries
-      const columns = columnsResp.rawResponse.columns.map((c) => ({
-        ...c,
-        secondaryType: getSupportedFieldType(c.type),
-      })) as Column[];
-
-      const timeFields = columns.filter((d) => d.type === 'date');
-
-      const dataViewTimeField = timeFields.find((f) => f.name === fieldStatsRequest?.timeFieldName)
-        ? fieldStatsRequest?.timeFieldName
-        : undefined;
-
-      // If a date field named '@timestamp' exists, set that as default time field
-      // Else, use the default time view defined by data view
-      // Else, use first available date field as default
-      const timeFieldName =
-        timeFields.length > 0
-          ? timeFields.find((f) => f.name === '@timestamp')
-            ? '@timestamp'
-            : dataViewTimeField ?? timeFields[0].name
-          : undefined;
-
-      setTableData({ columns, timeFieldName });
-
-      const { totalCount, documentCountStats } = await getESQLDocumentCountStats(
-        data.search,
-        searchQuery,
-        filter,
-        timeFieldName,
-        intervalInMs,
-        searchOptions
-      );
-      setTableData({ totalCount, documentCountStats });
-      setOverallStatsProgress({
-        ...getInitialProgress(),
-        isRunning: true,
-        error: undefined,
-      });
-      const aggregatableFields: Array<{
-        fieldName: string;
-        name: string;
-        type: string;
-        supportedAggs: Set<string>;
-        secondaryType: string;
-        aggregatable: boolean;
-      }> = [];
-      const nonAggregatableFields: Array<{
-        fieldName: string;
-        name: string;
-        type: string;
-        secondaryType: string;
-      }> = [];
-
-      const fields = columns
-        // Some field types are not supported by ESQL yet
-        .filter((c) => c.type !== 'unsupported')
-        .map((field) => {
-          return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
-        });
-
-      fields?.forEach((field) => {
-        const fieldName = field.name;
-        if (!OMIT_FIELDS.includes(fieldName)) {
-          if (!field.aggregatable) {
-            nonAggregatableFields.push({
-              ...field,
-              fieldName: field.name,
-              secondaryType: getSupportedFieldType(field.type),
-            });
-          } else {
-            aggregatableFields.push({
-              ...field,
-              fieldName: field.name,
-              secondaryType: getSupportedFieldType(field.type),
-              supportedAggs: getESQLSupportedAggs(field, true),
-              aggregatable: true,
-            });
-          }
+        if (!fieldStatsRequest) {
+          return;
         }
-      });
-      // COUNT + CARDINALITY
-      setTableData({ aggregatableFields, nonAggregatableFields });
 
-      if (fields.length > 0) {
-        const aggregatableFieldsToQuery = fields.filter((f) => f.aggregatable);
-        let countQuery = '| STATS ';
-        countQuery += aggregatableFieldsToQuery
-          .map((field) => {
-            return `${field.name}_count = count(${field.name}), ${field.name}_cardinality = count_distinct(${field.name})`;
-          })
-          .join(',');
+        const { searchQuery, intervalMs, filter } = fieldStatsRequest;
 
-        const esqlResults = await lastValueFrom(
+        const searchOptions = {
+          abortSignal: abortCtrl.current.signal,
+          // No sessionId here because ES|QL not yet supported (?)
+        };
+
+        if (!isESQLQuery(searchQuery)) {
+          return;
+        }
+
+        const intervalInMs = intervalMs === 0 ? 60 * 60 * 60 * 10 : intervalMs;
+        const esqlBaseQuery = searchQuery.esql;
+
+        const columnsResp = await lastValueFrom(
           data.search.search(
             {
               params: {
-                query: searchQuery.esql + countQuery,
+                query: esqlBaseQuery + '| LIMIT 0',
                 locale: 'en',
                 ...(filter ? { filter } : {}),
               },
             },
-            { strategy: ESQL_SEARCH_STRATEGY }
+            { ...searchOptions, strategy: ESQL_SEARCH_STRATEGY }
           )
         );
 
-        const stats = {
-          aggregatableExistsFields: [] as AggregatableField[],
-          aggregatableNotExistsFields: [] as AggregatableField[],
-          nonAggregatableExistsFields: [] as NonAggregatableField[],
-          nonAggregatableNotExistsFields: [] as NonAggregatableField[],
-        };
+        // @ts-expect-error ES types need to be updated with columns for ESQL queries
+        const columns = columnsResp.rawResponse.columns.map((c) => ({
+          ...c,
+          secondaryType: getSupportedFieldType(c.type),
+        })) as Column[];
 
-        const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
+        const timeFields = columns.filter((d) => d.type === 'date');
 
-        aggregatableFieldsToQuery.forEach((field, idx) => {
-          const count = esqlResultsResp.values[0][idx * 2] as number;
-          const cardinality = esqlResultsResp.values[0][idx * 2 + 1] as number;
+        const dataViewTimeField = timeFields.find(
+          (f) => f.name === fieldStatsRequest?.timeFieldName
+        )
+          ? fieldStatsRequest?.timeFieldName
+          : undefined;
 
-          if (field.aggregatable === true) {
-            if (count > 0) {
-              stats.aggregatableExistsFields.push({
+        // If a date field named '@timestamp' exists, set that as default time field
+        // Else, use the default time view defined by data view
+        // Else, use first available date field as default
+        const timeFieldName =
+          timeFields.length > 0
+            ? timeFields.find((f) => f.name === '@timestamp')
+              ? '@timestamp'
+              : dataViewTimeField ?? timeFields[0].name
+            : undefined;
+
+        setTableData({ columns, timeFieldName });
+
+        const { totalCount, documentCountStats } = await getESQLDocumentCountStats(
+          data.search,
+          searchQuery,
+          filter,
+          timeFieldName,
+          intervalInMs,
+          searchOptions
+        );
+
+        setTableData({ totalCount, documentCountStats });
+        setOverallStatsProgress({
+          ...getInitialProgress(),
+          isRunning: true,
+          error: undefined,
+        });
+        const aggregatableFields: Array<{
+          fieldName: string;
+          name: string;
+          type: string;
+          supportedAggs: Set<string>;
+          secondaryType: string;
+          aggregatable: boolean;
+        }> = [];
+        const nonAggregatableFields: Array<{
+          fieldName: string;
+          name: string;
+          type: string;
+          secondaryType: string;
+        }> = [];
+
+        const fields = columns
+          // Some field types are not supported by ESQL yet
+          .filter((c) => c.type !== 'unsupported')
+          .map((field) => {
+            return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
+          });
+
+        fields?.forEach((field) => {
+          const fieldName = field.name;
+          if (!OMIT_FIELDS.includes(fieldName)) {
+            if (!field.aggregatable) {
+              nonAggregatableFields.push({
                 ...field,
                 fieldName: field.name,
-                existsInDocs: true,
-                stats: {
-                  sampleCount: totalCount,
-                  count,
-                  cardinality,
-                },
+                secondaryType: getSupportedFieldType(field.type),
               });
             } else {
-              stats.aggregatableNotExistsFields.push({
+              aggregatableFields.push({
                 ...field,
                 fieldName: field.name,
-                existsInDocs: false,
-                stats: undefined,
+                secondaryType: getSupportedFieldType(field.type),
+                supportedAggs: getESQLSupportedAggs(field, true),
+                aggregatable: true,
               });
-            }
-          } else {
-            const fieldData = {
-              fieldName: field.name,
-              existsInDocs: true,
-            };
-            if (count > 0) {
-              stats.nonAggregatableExistsFields.push(fieldData);
-            } else {
-              stats.nonAggregatableNotExistsFields.push(fieldData);
             }
           }
         });
+        // COUNT + CARDINALITY
+        setTableData({ aggregatableFields, nonAggregatableFields });
 
-        setTableData({ overallStats: stats });
-        setOverallStatsProgress({
-          loaded: 100,
-          isRunning: false,
-          error: undefined,
-        });
-      }
-    } catch (error) {
-      const title = i18n.translate(
-        'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
-        {
-          defaultMessage: 'Error fetching field statistics for ES|QL query',
+        if (fields.length > 0) {
+          const aggregatableFieldsToQuery = fields.filter((f) => f.aggregatable);
+
+          let countQuery = aggregatableFieldsToQuery.length > 0 ? '| STATS ' : '';
+          countQuery += aggregatableFieldsToQuery
+            .map((field) => {
+              return `${field.name}_count = COUNT(${field.name}), ${field.name}_cardinality = COUNT_DISTINCT(${field.name})`;
+            })
+            .join(',');
+
+          const esqlResults = await lastValueFrom(
+            data.search.search(
+              {
+                params: {
+                  query: searchQuery.esql + countQuery,
+                  locale: 'en',
+                  ...(filter ? { filter } : {}),
+                },
+              },
+              { strategy: ESQL_SEARCH_STRATEGY }
+            )
+          );
+
+          const stats = {
+            aggregatableExistsFields: [] as AggregatableField[],
+            aggregatableNotExistsFields: [] as AggregatableField[],
+            nonAggregatableExistsFields: [] as NonAggregatableField[],
+            nonAggregatableNotExistsFields: [] as NonAggregatableField[],
+          };
+
+          const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
+
+          aggregatableFieldsToQuery.forEach((field, idx) => {
+            const count = esqlResultsResp.values[0][idx * 2] as number;
+            const cardinality = esqlResultsResp.values[0][idx * 2 + 1] as number;
+
+            if (field.aggregatable === true) {
+              if (count > 0) {
+                stats.aggregatableExistsFields.push({
+                  ...field,
+                  fieldName: field.name,
+                  existsInDocs: true,
+                  stats: {
+                    sampleCount: totalCount,
+                    count,
+                    cardinality,
+                  },
+                });
+              } else {
+                stats.aggregatableNotExistsFields.push({
+                  ...field,
+                  fieldName: field.name,
+                  existsInDocs: false,
+                  stats: undefined,
+                });
+              }
+            } else {
+              const fieldData = {
+                fieldName: field.name,
+                existsInDocs: true,
+              };
+              if (count > 0) {
+                stats.nonAggregatableExistsFields.push(fieldData);
+              } else {
+                stats.nonAggregatableNotExistsFields.push(fieldData);
+              }
+            }
+          });
+
+          setTableData({ overallStats: stats });
+          setOverallStatsProgress({
+            loaded: 100,
+            isRunning: false,
+            error: undefined,
+          });
         }
-      );
-      toasts.addError(error, {
-        title,
-      });
-    }
+      } catch (error) {
+        const title = i18n.translate(
+          'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
+          {
+            defaultMessage: 'Error fetching field statistics for ES|QL query',
+          }
+        );
+        toasts.addError(error, {
+          title,
+        });
+        // Log error to console for better debugging
+        // eslint-disable-next-line no-console
+        console.error(`${title}: fetchOverallStats`, error);
+      }
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.search, toasts, JSON.stringify({ fieldStatsRequest })]);
+    [data.search, toasts, JSON.stringify({ fieldStatsRequest })]
+  );
 
   // auto-update
   useEffect(() => {

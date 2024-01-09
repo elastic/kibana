@@ -15,8 +15,10 @@ export async function getDataViewByIndexPattern(
 ) {
   if (indexPatternFromQuery) {
     const matched = await dataViews.find(indexPatternFromQuery);
-    if (matched) return first(matched);
+
+    if (matched.length > 0) return first(matched);
   }
+
   if (
     indexPatternFromQuery &&
     (currentDataView?.isPersisted() || indexPatternFromQuery !== currentDataView?.getIndexPattern())

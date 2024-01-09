@@ -35,7 +35,6 @@ import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { debounce } from 'lodash';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFieldType } from '@kbn/field-utils';
 import { SupportedFieldType } from '../../../../../common/types';
@@ -136,11 +135,14 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const { data } = services;
   const euiTheme = useCurrentEuiTheme();
 
-  const [_, setEditableQuery] = useState<AggregateQuery>({ esql: '' });
-
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
 
+  const updateDataView = (dv: DataView) => {
+    if (dv.id !== currentDataView?.id) {
+      setCurrentDataView(dv);
+    }
+  };
   const [lastRefresh, setLastRefresh] = useState(0);
 
   const _timeBuckets = useTimeBuckets();
@@ -176,9 +178,11 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       let unmounted = false;
 
       const update = async () => {
+        if (!indexPattern) return;
         const dv = await getDataViewByIndexPattern(data.dataViews, indexPattern, currentDataView);
+
         if (dv) {
-          setCurrentDataView(dv);
+          updateDataView(dv);
         }
       };
 
@@ -619,17 +623,17 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 />
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem grow={false}>
-              <DatePickerWrapper isAutoRefreshOnly={false} showRefresh={false} width="full" />
-            </EuiFlexItem>
+            {hasValidTimeField ? (
+              <EuiFlexItem grow={false}>
+                <DatePickerWrapper isAutoRefreshOnly={false} showRefresh={false} width="full" />
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
         <EuiSpacer size="m" />
         <TextBasedLangEditor
           query={query}
-          onTextLangQueryChange={debounce((q: AggregateQuery) => {
-            setEditableQuery(q);
-          }, 1000)}
+          onTextLangQueryChange={() => {}}
           onTextLangQuerySubmit={(q?: AggregateQuery) => {
             if (q) {
               setQuery(q);
@@ -678,15 +682,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
               />
             </EuiPanel>
           </EuiFlexItem>
-          {/* {isWithinLargeBreakpoint ? <EuiSpacer size="m" /> : null}
-          <EuiFlexItem grow={false}>
-            <ActionsPanel
-              dataView={currentDataView}
-              searchQueryLanguage={searchQueryLanguage}
-              searchString={searchString}
-              getAdditionalLinks={getAdditionalLinks}
-            />
-          </EuiFlexItem> */}
         </EuiFlexGroup>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
