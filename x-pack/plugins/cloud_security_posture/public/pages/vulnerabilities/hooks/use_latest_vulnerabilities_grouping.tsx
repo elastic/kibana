@@ -47,12 +47,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 
   switch (field) {
     case GROUPING_OPTIONS.RESOURCE_NAME:
-      return [
-        ...aggMetrics,
-        getTermAggregation('resourceName', 'resource.id'),
-        getTermAggregation('resourceSubType', 'resource.sub_type'),
-        getTermAggregation('resourceType', 'resource.type'),
-      ];
+      return [...aggMetrics, getTermAggregation('resourceId', 'resource.id')];
   }
   return aggMetrics;
 };
