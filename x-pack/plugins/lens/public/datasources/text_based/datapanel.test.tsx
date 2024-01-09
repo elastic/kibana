@@ -106,7 +106,6 @@ const initialState: TextBasedPrivateState = {
     first: {
       index: '1',
       columns: [],
-      allColumns: [],
       query: { esql: 'SELECT * FROM foo' },
     },
   },
@@ -117,7 +116,7 @@ const initialState: TextBasedPrivateState = {
   ],
 };
 
-addColumnsToCache('SELECT * FROM my-fake-index-pattern', fieldsFromQuery);
+addColumnsToCache({ esql: 'SELECT * FROM my-fake-index-pattern' }, fieldsFromQuery);
 
 function getFrameAPIMock({
   indexPatterns,

@@ -12,7 +12,7 @@ import { isEqual } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
-import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -74,8 +74,7 @@ export function TextBasedDataPanel({
     }
     fetchData();
   }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews]);
-  const language = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : null;
-  const fieldList = language ? getColumnsFromCache(query[language]) : [];
+  const fieldList = isOfAggregateQueryType(query) ? getColumnsFromCache(query) : [];
 
   const onSelectedFieldFilter = useCallback(
     (field: DatatableColumn): boolean => {
