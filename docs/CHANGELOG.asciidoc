@@ -174,7 +174,7 @@ Dashboard::
 * Adds Links to the Visualization library ({kibana-pull}170810[#170810]).
 Discover::
 * Adds a field tokens column in the grid header ({kibana-pull}167179[#167179]).
-* Enables the addition of columns from the document viewer ({kibana-pull}171083[#171083]).
+* Enables the addition of columns from the document viewer when using ES|QL ({kibana-pull}171083[#171083]).
 * Adds field search via wildcards in the document viewer ({kibana-pull}168616[#168616]).
 * Improves search for field names by handling spaces like wildcards ({kibana-pull}168381[#168381]).
 * Updates mapping conflict popover with types list ({kibana-pull}169855[#169855]).
