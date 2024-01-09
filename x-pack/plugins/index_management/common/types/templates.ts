@@ -27,7 +27,6 @@ export interface TemplateSerialized {
   _meta?: { [key: string]: any };
   data_stream?: {};
   allow_auto_create?: boolean;
-  deprecated?: boolean;
 }
 
 /**
@@ -43,7 +42,6 @@ export interface TemplateDeserialized {
     aliases?: Aliases;
     mappings?: Mappings;
   };
-  deprecated?: boolean;
   lifecycle?: DataRetention;
   composedOf?: string[]; // Composable template only
   version?: number;

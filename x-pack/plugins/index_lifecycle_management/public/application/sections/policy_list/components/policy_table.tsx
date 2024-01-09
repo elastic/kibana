@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiLink,
@@ -15,6 +15,7 @@ import {
   EuiBadge,
   EuiFlexItem,
   EuiSwitch,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -76,7 +77,8 @@ const deprecatedPolicyTooltips = {
   badgeTooltip: i18n.translate(
     'xpack.indexLifecycleMgmt.policyTable.templateBadgeType.deprecatedDescription',
     {
-      defaultMessage: 'This policy is no longer supported and might be removed in a future release. Instead, use one of the other policies available or create a new one.',
+      defaultMessage:
+        'This policy is no longer supported and might be removed in a future release. Instead, use one of the other policies available or create a new one.',
     }
   ),
 };
@@ -88,6 +90,8 @@ interface Props {
 const SHOW_MANAGED_POLICIES_BY_DEFAULT = 'ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT';
 
 export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
+  const [query, setQuery] = useState('');
+
   const history = useHistory();
   const {
     services: { getUrlForApp },
@@ -97,9 +101,27 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
     false
   );
   const { setListAction } = usePolicyListContext();
+
+  const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
+    if (!error) {
+      setQuery(queryText);
+    }
+  };
+
   const searchOptions = useMemo(
     () => ({
+      query,
+      onChange: handleOnChange,
       box: { incremental: true, 'data-test-subj': 'ilmSearchBar' },
+      filters: [
+        {
+          type: 'is',
+          field: 'policy.deprecated',
+          name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.isDeprecatedFilterLabel', {
+            defaultMessage: 'Deprecated',
+          }),
+        },
+      ],
       toolsRight: (
         <EuiFlexItem grow={false}>
           <EuiSwitch
@@ -117,14 +139,26 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         </EuiFlexItem>
       ),
     }),
-    [managedPoliciesVisible, setManagedPoliciesVisible]
+    [managedPoliciesVisible, setManagedPoliciesVisible, query]
   );
 
   const filteredPolicies = useMemo(() => {
-    return managedPoliciesVisible
-      ? policies
-      : policies.filter((item) => !item.policy?._meta?.managed);
-  }, [policies, managedPoliciesVisible]);
+    let result = policies;
+
+    if (managedPoliciesVisible) {
+      result = result.filter((item) => !item.policy?._meta?.managed);
+    }
+
+    // When the query includes 'is:policy.deprecated', we want to show deprecated policies.
+    // Otherwise hide them all since they wont be supported in the future.
+    if (query.includes('is:policy.deprecated')) {
+      result = result.filter((item) => item.policy?.deprecated);
+    } else {
+      result = result.filter((item) => !item.policy?.deprecated);
+    }
+
+    return result;
+  }, [policies, managedPoliciesVisible, query]);
 
   const columns: Array<EuiBasicTableColumn<PolicyFromES>> = [
     {
