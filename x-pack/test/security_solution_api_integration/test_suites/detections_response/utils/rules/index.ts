@@ -7,6 +7,7 @@
 export * from './fetch_rule';
 export * from './get_simple_rule';
 export * from './create_rule';
+export * from './create_non_security_rule';
 export * from './delete_all_rules';
 export * from './delete_rule';
 export * from './get_rule_params';
