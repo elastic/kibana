@@ -459,6 +459,7 @@ packages/kbn-import-resolver @elastic/kibana-operations
 x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-management
 x-pack/plugins/index_management @elastic/platform-deployment-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
+x-pack/packages/kbn-data-forge @elastic/obs-ux-management-team
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/plugins/infra @elastic/infra-monitoring-ui @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
