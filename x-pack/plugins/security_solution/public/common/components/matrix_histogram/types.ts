@@ -15,7 +15,7 @@ import type { InputsModelId } from '../../store/inputs/constants';
 import type { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import type { UpdateDateRange } from '../charts/common';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
-import type { FieldValueThreshold } from '../../../detections/components/rules/threshold_input';
+import type { FieldValueThreshold } from '../../../detection_engine/rule_creation_ui/components/threshold_input';
 import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 
 export type MatrixHistogramMappingTypes = Record<

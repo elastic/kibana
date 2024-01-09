@@ -479,7 +479,7 @@ export function dataFrameAnalyticsRoutes(
         async ({ mlClient, client, request, response, getDataViewsService }) => {
           try {
             const { analyticsId } = request.params;
-            const { deleteDestIndex, deleteDestDataView } = request.query;
+            const { deleteDestIndex, deleteDestDataView, force } = request.query;
             let destinationIndex: string | undefined;
             const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
             const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
@@ -499,7 +499,7 @@ export function dataFrameAnalyticsRoutes(
                 destinationIndex = body.data_frame_analytics[0].dest.index;
               }
             } catch (e) {
-              // exist early if the job doesn't exist
+              // exit early if the job doesn't exist
               return response.customError(wrapError(e));
             }
 
@@ -537,6 +537,7 @@ export function dataFrameAnalyticsRoutes(
             try {
               await mlClient.deleteDataFrameAnalytics({
                 id: analyticsId,
+                force,
               });
               analyticsJobDeleted.success = true;
             } catch ({ body }) {
