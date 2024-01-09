@@ -167,7 +167,7 @@ export class RiskScoreDataClient {
   }
   /**
    * Ensures that configuration migrations for risk score indices are seamlessly handled across Kibana upgrades.
-   * This function is meant to be mostly idempotent. However, to reduce unnecessary processing, it will only execute once
+   * This function is meant to be idempotent, with an exception: to reduce unnecessary processing, it will only execute once
    * across the lifecycle of a {@link RiskScoreDataClient} instance, utilizing the {@link RiskScoreSynchronousUpgrader}.
    *
    * Upgrades:

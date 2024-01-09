@@ -9,7 +9,13 @@ import type { RiskScoreDataClient } from './risk_score_data_client';
 
 const createRiskScoreDataClientMock = () =>
   ({
-    getWriter: jest.fn(),
+    getWriter: () => ({
+      bulk: () => ({
+        errors: [],
+        docs_written: 0,
+        took: 0,
+      }),
+    }),
     init: jest.fn(),
     getRiskInputsIndex: jest.fn(),
     upgrade: jest.fn(),

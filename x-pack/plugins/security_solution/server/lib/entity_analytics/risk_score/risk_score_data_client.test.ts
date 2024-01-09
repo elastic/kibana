@@ -15,14 +15,13 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
-import { times } from 'lodash';
-
 import { RiskScoreDataClient } from './risk_score_data_client';
 
 import { createDataStream } from '../utils/create_datastream';
 
 import * as transforms from '../utils/transforms';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
+import { RiskScoreSynchronousUpgrader } from './risk_score_synchronous_upgrader';
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
@@ -456,35 +455,21 @@ describe('RiskScoreDataClient', () => {
   });
   describe('upgrade process', () => {
     beforeEach(() => {
-      jest.spyOn(riskScoreDataClient, 'upgrade');
-      spyOnPrivateMethod(riskScoreDataClient, 'setRiskScoreLatestIndexDynamicConfiguration');
+      // @ts-ignore accessing the private member in order to reset the upgrades without increasing its visibility
+      RiskScoreSynchronousUpgrader.upgradesConducted = {};
     });
     it('upserts the configuration for the latest risk score index when upgrading', async () => {
       await riskScoreDataClient.upgrade();
 
-      expect(
-        getPrivateMethod(riskScoreDataClient, 'setRiskScoreLatestIndexDynamicConfiguration')
-      ).toHaveBeenCalled();
-    });
-    it('upserts the configuration for the latest risk score index only a single time, no matter how many times upgrade is called', async () => {
-      await Promise.all(
-        times(3, () => {
-          return riskScoreDataClient.upgrade();
+      expect(createOrUpdateIndex).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: expect.objectContaining({
+            mappings: expect.objectContaining({
+              dynamic: false,
+            }),
+          }),
         })
       );
-      expect(
-        getPrivateMethod(riskScoreDataClient, 'setRiskScoreLatestIndexDynamicConfiguration')
-      ).toHaveBeenCalledTimes(1);
     });
   });
 });
-
-const getPrivateMethod = (target: unknown, method: string) => {
-  // @ts-expect-error intentionally retrieve a method, despite its visibility
-  return target[method];
-};
-
-const spyOnPrivateMethod = (target: unknown, method: string) => {
-  // @ts-expect-error intentionally allow spying on a method, despite its visibility
-  jest.spyOn(target, method);
-};

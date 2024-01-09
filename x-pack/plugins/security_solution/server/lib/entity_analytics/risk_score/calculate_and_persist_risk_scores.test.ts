@@ -14,6 +14,7 @@ import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
 import { riskScoreDataClientMock } from './risk_score_data_client.mock';
 import type { RiskScoreDataClient } from './risk_score_data_client';
+import type { RiskScore } from '../../../../common/entity_analytics/risk_engine/types';
 
 jest.mock('./calculate_risk_scores');
 
@@ -55,10 +56,10 @@ describe('calculateAndPersistRiskScores', () => {
       );
     });
 
-    it('upgrades configurations when persisting risk scores', async () => {
+    it('does not upgrade configurations when there are no risk scores', async () => {
       await calculateAndPersistRecentHostRiskScores(esClient, logger, riskScoreDataClient);
 
-      expect(riskScoreDataClient.upgrade).toHaveBeenCalled();
+      expect(riskScoreDataClient.upgrade).not.toHaveBeenCalled();
     });
 
     it('returns an appropriate response', async () => {
@@ -69,6 +70,18 @@ describe('calculateAndPersistRiskScores', () => {
       );
 
       expect(results).toEqual({ after_keys: {}, errors: [], scores_written: 0 });
+    });
+  });
+  describe('with risk scores to persist', () => {
+    beforeEach(() => {
+      (calculateRiskScores as jest.Mock).mockResolvedValueOnce(
+        calculateRiskScoresMock.buildResponse({ scores: { host: [{} as RiskScore] } })
+      );
+    });
+    it('upgrades configurations when persisting risk scores', async () => {
+      await calculateAndPersistRecentHostRiskScores(esClient, logger, riskScoreDataClient);
+
+      expect(riskScoreDataClient.upgrade).toHaveBeenCalled();
     });
   });
 });

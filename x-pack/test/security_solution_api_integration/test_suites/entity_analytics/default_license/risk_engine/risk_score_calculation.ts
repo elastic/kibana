@@ -99,12 +99,18 @@ export default ({ getService }: FtrProviderContext): void => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+
+        await cleanRiskEngine({ kibanaServer, es, log });
+        await riskEngineRoutes.init();
       });
 
       afterEach(async () => {
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+
+        await cleanRiskEngine({ kibanaServer, es, log });
+        await riskEngineRoutes.init();
       });
 
       it('calculates and persists risk score', async () => {
@@ -139,11 +145,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('upgrades latest risk score index dynamic before persisting risk scores', async () => {
-        await cleanRiskEngine({ kibanaServer, es, log });
-
-        await riskEngineRoutes.init();
-
+      it('upgrades latest risk score index dynamic setting before persisting risk scores', async () => {
         const documentId = uuidv4();
         await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
 
@@ -170,7 +172,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // after all processing is complete, the mapping should be exactly the same as before
         expect(unmodifiedIndexMapping).to.eql(finalIndexMapping);
-        await cleanRiskEngine({ kibanaServer, es, log });
       });
 
       describe('paging through calculations', () => {

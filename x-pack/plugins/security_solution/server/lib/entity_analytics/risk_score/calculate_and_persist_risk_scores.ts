@@ -23,8 +23,6 @@ export const calculateAndPersistRiskScores = async (
 ): Promise<CalculateAndPersistScoresResponse> => {
   const { riskScoreDataClient, spaceId, ...rest } = params;
 
-  await riskScoreDataClient.upgrade();
-
   const writer = await riskScoreDataClient.getWriter({
     namespace: spaceId,
   });
@@ -33,6 +31,8 @@ export const calculateAndPersistRiskScores = async (
   if (!scores.host?.length && !scores.user?.length) {
     return { after_keys: {}, errors: [], scores_written: 0 };
   }
+
+  await riskScoreDataClient.upgrade();
 
   const { errors, docs_written: scoresWritten } = await writer.bulk(scores);
 

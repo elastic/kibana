@@ -63,7 +63,7 @@ describe('RiskScoreSynchronousUpgrader', () => {
 
     const delayedUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
       return Promise.resolve(undefined)
-        .then(sleep(1000))
+        .then(sleep(20))
         .then(() => delayedStub());
     });
 
@@ -86,7 +86,7 @@ describe('RiskScoreSynchronousUpgrader', () => {
     const processUpgradeHavingErrors = async () => {
       const failedUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
         return Promise.resolve(undefined)
-          .then(sleep(1000))
+          .then(sleep(20))
           .then(() => stubInErrorPath())
           .then(() => {
             throw new Error('Error in upgrading');
