@@ -11,12 +11,14 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
 
 export default function ({ getPageObject, getPageObjects, getService }: FtrProviderContext) {
+  const cases = getService('cases');
   const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage']);
   const svlCases = getService('svlCases');
   const svlCommonScreenshots = getService('svlCommonScreenshots');
   const screenshotDirectories = ['response_ops_docs', 'security_cases'];
   const testSubjects = getService('testSubjects');
   const owner = SECURITY_SOLUTION_OWNER;
+  let caseIdSuspiciousEmail: string;
 
   describe('list view', function () {
     before(async () => {
@@ -30,7 +32,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         })
       );
 
-      await svlCases.api.createCase(
+      const caseSuspiciousEmail = await svlCases.api.createCase(
         svlCases.api.getPostCaseRequest(owner, {
           title: 'Suspicious emails reported',
           tags: ['email', 'phishing'],
@@ -38,6 +40,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
           owner,
         })
       );
+      caseIdSuspiciousEmail = caseSuspiciousEmail.id;
 
       await svlCases.api.createCase(
         svlCases.api.getPostCaseRequest(owner, {
@@ -71,26 +74,22 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await svlCommonScreenshots.takeScreenshot('case-settings', screenshotDirectories);
     });
 
-    // it('case detail screenshot', async () => {
-    //   await pageObjects.common.navigateToUrlWithBrowserHistory(
-    //     'observability',
-    //     `/cases/${caseIdMonitoring}`,
-    //     undefined
-    //   );
-    //   await pageObjects.header.waitUntilLoadingHasFinished();
-    //   await testSubjects.existOrFail('case-view-title');
-    //   const collapseNav = await testSubjects.find('euiCollapsibleNavButton');
-    //   await collapseNav.click();
-    //   const filesTab = await testSubjects.find('case-view-tab-title-files');
-    //   await filesTab.click();
-    //   await cases.casesFilesTable.addFile(require.resolve('./testfile.png'));
-    //   await testSubjects.getVisibleText('cases-files-name-link');
-    //   await svlCommonScreenshots.takeScreenshot(
-    //     'cases-files-tab',
-    //     screenshotDirectories,
-    //     1024,
-    //     768
-    //   );
-    // });
+    it('case detail screenshot', async () => {
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        'securitySolution',
+        `/cases/${caseIdSuspiciousEmail}`,
+        undefined
+      );
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('case-view-title');
+      const collapseNav = await testSubjects.find('euiCollapsibleNavButton');
+      await collapseNav.click();
+      await svlCommonScreenshots.takeScreenshot('cases-ui-open', screenshotDirectories, 1400, 1024);
+      const filesTab = await testSubjects.find('case-view-tab-title-files');
+      await filesTab.click();
+      await cases.casesFilesTable.addFile(require.resolve('./testfile.png'));
+      await testSubjects.getVisibleText('cases-files-name-link');
+      await svlCommonScreenshots.takeScreenshot('cases-files', screenshotDirectories, 1400, 1024);
+    });
   });
 }
