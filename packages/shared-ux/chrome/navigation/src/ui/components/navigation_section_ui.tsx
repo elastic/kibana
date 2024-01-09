@@ -23,7 +23,7 @@ import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/projec
 
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { useNavigation } from './navigation';
+import { useNavigation } from '../default_navigation';
 import { isAbsoluteLink, isActiveFromUrl } from '../../utils';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';

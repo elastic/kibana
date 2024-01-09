@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC, useCallback, useEffect, useMemo } from 'react';
+import React, { createContext, FC, useCallback, useContext, useEffect, useMemo } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 import useObservable from 'react-use/lib/useObservable';
@@ -16,10 +16,14 @@ import type {
   RootNavigationItemDefinition,
   RecentlyAccessedDefinition,
 } from './types';
-import { RecentlyAccessed } from './components/recently_accessed';
-import { ContentProvider, NavigationPanel, PanelProvider } from './components/panel';
+import {
+  RecentlyAccessed,
+  NavigationPanel,
+  PanelProvider,
+  type PanelContentProvider,
+} from './components';
 import { parseNavigationTree } from '../navnode_utils_2';
-import { useNavigation } from '../services';
+import { useNavigation as useNavigationService } from '../services';
 import { NavigationSectionUI } from './components/navigation_section_ui';
 
 const isRecentlyAccessedDefinition = (
@@ -38,7 +42,7 @@ const NavigationContext = createContext<Context>({
 
 interface Props {
   dataTestSubj?: string;
-  panelContentProvider?: ContentProvider;
+  panelContentProvider?: PanelContentProvider;
 }
 
 const DefaultNavigationComp: FC<ProjectNavigationDefinition & Props> = ({
@@ -46,7 +50,8 @@ const DefaultNavigationComp: FC<ProjectNavigationDefinition & Props> = ({
   dataTestSubj,
   panelContentProvider,
 }) => {
-  const { cloudLinks, deepLinks$, activeNodes$, onProjectNavigationChange } = useNavigation();
+  const { cloudLinks, deepLinks$, activeNodes$, onProjectNavigationChange } =
+    useNavigationService();
 
   const deepLinks = useObservable(deepLinks$, {});
   const activeNodes = useObservable(activeNodes$, []);
@@ -108,3 +113,11 @@ const DefaultNavigationComp: FC<ProjectNavigationDefinition & Props> = ({
 };
 
 export const DefaultNavigation = React.memo(DefaultNavigationComp) as typeof DefaultNavigationComp;
+
+export function useNavigation() {
+  const context = useContext(NavigationContext);
+  if (!context) {
+    throw new Error('useNavigation must be used within a Navigation provider');
+  }
+  return context;
+}
