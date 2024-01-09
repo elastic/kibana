@@ -633,18 +633,16 @@ image:images/lens_primaryMetric.png[Illustration of where to find the primary me
 
 If you select *Value type: Percent*, the primary metric values are mapped to a range between 0 and 100 percent. The bounds of the range depend on your configuration.
 
-The logic is as follows:
+The logic is as follows. If there is a Breakdown dimension for multiple visualization tiles:
 
-If there is a Breakdown dimension (multiple visualization tiles)
+* When there is a *Maximum dimension*, the range is from zero to the value of your *Maximum dimension*.
 
-* If there is a **Maximum dimension**, the range is from zero to the value of your *Maximum dimension*.
+* When there is no *Maximum dimension*, the range is from the smallest primary metric values to the greatest primary metric values.
 
-* If there is no *Maximum dimension*, the range is from the smallest of your primary metric values to the greatest of your primary metric values.
+If there is no Breakdown dimension for a single visualization tile:
 
-If there is no Breakdown dimension (single visualization tile)
+* When there is a *Maximum dimension*, the range is from zero to the value of your *Maximum dimension*.
 
-* If there is a *Maximum dimension*, the range is from zero to the value of your *Maximum dimension*.
-
-* If there is no *Maximum dimension*, *Value type: Percent* cannot be selected (there's no way for us to determine a range).
+* When there is no *Maximum dimension*, *Value type: Percent* cannot be selected because there's no way to determine a range.
 
 ====
