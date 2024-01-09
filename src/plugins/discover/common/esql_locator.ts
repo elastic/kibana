@@ -41,16 +41,15 @@ export class DiscoverEsqlLocatorDefinition implements LocatorDefinition<Discover
     };
 
     const indices = await getIndicesList();
-    let esql = '';
+    let esql = `from * | limit 10`;
 
     if (indices.length < 0) {
       let indexName = indices[0];
 
       if (indices.find((index) => index.includes('logs'))) {
         indexName = 'logs*';
+        esql = `from ${indexName} | limit 10`;
       }
-
-      esql = `from ${indexName} | limit 10`;
     }
 
     const params = {
