@@ -12,8 +12,8 @@ import { parseInterval } from '@kbn/data-plugin/common';
 import { Environment } from '../../../common/environment_rt';
 import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
 import {
-  ApmMlDetectorType,
-  getApmMlDetectorType,
+  AnomalyDetectorType,
+  getAnomalyDetectorType,
 } from '../../../common/anomaly_detection/apm_ml_detectors';
 import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { apmMlJobsQuery } from './apm_ml_jobs_query';
@@ -203,10 +203,10 @@ export async function getAnomalyTimeseries({
         return undefined;
       }
 
-      const type = getApmMlDetectorType(Number(bucket.key.detectorIndex));
+      const type = getAnomalyDetectorType(Number(bucket.key.detectorIndex));
 
       // ml failure rate is stored as 0-100, we calculate failure rate as 0-1
-      const divider = type === ApmMlDetectorType.txFailureRate ? 100 : 1;
+      const divider = type === AnomalyDetectorType.txFailureRate ? 100 : 1;
 
       return {
         jobId,
