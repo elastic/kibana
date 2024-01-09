@@ -14,7 +14,6 @@ import { BurnRateRuleParams } from '@kbn/observability-plugin/public/typings/slo
 import React, { useEffect } from 'react';
 import { useFetchSloDetails } from '../../../../hooks/slo/use_fetch_slo_details';
 import { useKibana } from '../../../../utils/kibana_react';
-import { BurnRates } from '../burn_rates';
 
 export type BurnRateRule = Rule<BurnRateRuleParams>;
 export type BurnRateAlert = TopAlert;
@@ -100,7 +99,10 @@ export default function AlertDetailsAppSection({
   return (
     <EuiFlexGroup direction="column" data-test-subj="alertOverviewSection">
       <EuiFlexItem>
-        <BurnRates slo={slo} isAutoRefreshing={false} burnRateOptions={burnRateOptions} />
+        <pre>{JSON.stringify(alert, null, 2)}</pre>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <pre>{JSON.stringify(rule, null, 2)}</pre>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

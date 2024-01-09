@@ -164,6 +164,8 @@ export const getRuleExecutor = ({
             sloId: slo.id,
             sloName: slo.name,
             sloInstanceId: instanceId,
+            slo,
+            actionGroupName: windowDef.actionGroup,
           };
 
           alert.scheduleActions(windowDef.actionGroup, context);

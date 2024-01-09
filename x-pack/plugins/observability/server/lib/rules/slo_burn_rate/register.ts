@@ -82,6 +82,7 @@ export function sloBurnRateRuleType(
         { name: 'sloId', description: sloIdActionVariableDescription },
         { name: 'sloName', description: sloNameActionVariableDescription },
         { name: 'sloInstanceId', description: sloInstanceIdActionVariableDescription },
+        { name: 'actionGroupName', description: actionGroupNameVariableDescription },
       ],
     },
     alerts: {
@@ -155,5 +156,12 @@ export const sloInstanceIdActionVariableDescription = i18n.translate(
   'xpack.observability.slo.alerting.sloInstanceIdDescription',
   {
     defaultMessage: 'The SLO instance id.',
+  }
+);
+
+export const actionGroupNameVariableDescription = i18n.translate(
+  'xpack.observability.slo.alerting.actionGroupNameDescription',
+  {
+    defaultMessage: 'The action group of the burn rate window definition that triggered the alert.',
   }
 );
