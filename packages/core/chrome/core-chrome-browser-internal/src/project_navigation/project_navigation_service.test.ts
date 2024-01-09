@@ -7,24 +7,56 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { firstValueFrom, lastValueFrom, take, BehaviorSubject } from 'rxjs';
+import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import type { ChromeNavLinks, ChromeBreadcrumb, AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type {
+  ChromeNavLinks,
+  ChromeNavLink,
+  ChromeBreadcrumb,
+  AppDeepLinkId,
+} from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
-const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) => {
+const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
+  id: 'kibana',
+  title: 'Kibana',
+  baseUrl: '/app/kibana',
+  url: `/app/${partial.id ?? 'kibana'}`,
+  href: `/app/${partial.id ?? 'kibana'}`,
+  ...partial,
+});
+
+const getNavLinks = (ids: Readonly<string[]> = []) => {
+  const navLinks = ids.map((id) => getNavLink({ id, title: id.toUpperCase() }));
+
+  const navLinksMock: ChromeNavLinks = {
+    getNavLinks$: jest.fn().mockReturnValue(of(navLinks)),
+    has: jest.fn(),
+    get: jest.fn(),
+    getAll: jest.fn().mockReturnValue(navLinks),
+    enableForcedAppSwitcherNavigation: jest.fn(),
+    getForceAppSwitcherNavigation$: jest.fn(),
+  };
+  return navLinksMock;
+};
+
+const setup = ({
+  locationPathName = '/',
+  navLinkIds,
+}: { locationPathName?: string; navLinkIds?: Readonly<string[]> } = {}) => {
   const projectNavigationService = new ProjectNavigationService();
   const history = createMemoryHistory();
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
 
+  const navLinks = getNavLinks(navLinkIds);
   history.replace(locationPathName);
   const projectNavigation = projectNavigationService.start({
     application: {
       ...applicationServiceMock.createInternalStartContract(),
       history,
     },
-    navLinks: {} as unknown as ChromeNavLinks,
+    navLinks,
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
   });
