@@ -405,7 +405,7 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
 };
 
 export const openActiveTimeline = () => {
-  cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click({ force: true });
+  cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click();
 };
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
