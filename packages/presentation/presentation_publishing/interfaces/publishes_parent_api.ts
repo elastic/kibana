@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
 
 export interface PublishesParentApi<ParentApiType extends unknown = unknown> {
   parentApi: PublishingSubject<ParentApiType>;
@@ -30,6 +30,6 @@ export const useParentApi = <
 >(
   api: ApiType
 ): UnwrapParent<ApiType> =>
-  useReactiveVarFromSubject<unknown, ApiType['parentApi']>(
+  useStateFromPublishingSubject<unknown, ApiType['parentApi']>(
     apiPublishesParentApi(api) ? api.parentApi : undefined
   ) as UnwrapParent<ApiType>;

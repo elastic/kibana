@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { PublishingSubject, useReactiveVarFromSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
 
 export interface PublishesDataViews {
   dataViews: PublishingSubject<DataView[] | undefined>;
@@ -23,6 +23,6 @@ export const apiPublishesDataViews = (
  * Gets this API's data views as a reactive variable which will cause re-renders on change.
  */
 export const useDataViews = (api: Partial<PublishesDataViews> | undefined) =>
-  useReactiveVarFromSubject<DataView[] | undefined, PublishesDataViews['dataViews']>(
+  useStateFromPublishingSubject<DataView[] | undefined, PublishesDataViews['dataViews']>(
     apiPublishesDataViews(api) ? api.dataViews : undefined
   );
