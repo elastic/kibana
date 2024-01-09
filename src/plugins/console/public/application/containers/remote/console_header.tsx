@@ -13,11 +13,13 @@ import { i18n } from '@kbn/i18n';
 export const ConsoleHeader = ({
   isConsoleOpen,
   rightSideItem,
+  onClick,
 }: {
   isConsoleOpen: boolean;
   rightSideItem?: React.ReactNode;
+  onClick?: () => void;
 }) => (
-  <EuiFlexGroup justifyContent="spaceBetween">
+  <EuiFlexGroup justifyContent="spaceBetween" onClick={onClick}>
     <EuiFlexItem grow={false}>
       <EuiIcon type={isConsoleOpen ? 'arrowUp' : 'arrowDown'} size="l" />
     </EuiFlexItem>
@@ -32,8 +34,5 @@ export const ConsoleHeader = ({
     </EuiFlexItem>
     <EuiFlexItem />
     {rightSideItem && <EuiFlexItem grow={false}>{rightSideItem}</EuiFlexItem>}
-    <EuiFlexItem grow={false}>
-      <EuiIcon type="grab" size="l" />
-    </EuiFlexItem>
   </EuiFlexGroup>
 );

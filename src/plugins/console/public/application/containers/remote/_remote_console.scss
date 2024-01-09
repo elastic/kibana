@@ -1,0 +1,143 @@
+.remoteConsole {
+  background: $remoteConsoleBackground;
+  color: $remoteConsoleText;
+  display: flex;
+  flex-direction: column;
+  // This large box shadow helps prevent a flicker of dark
+  // background when the content is shown and hidden
+  box-shadow: inset 0 $remoteConsoleInitialHeight 0 $remoteConsoleBackground, inset 0 600rem 0 $euiPageBackgroundColor;
+  bottom: 0;
+  right: 0;
+  left: var(--euiCollapsibleNavOffset, 0);
+  transform: translateY(0);
+  height: $remoteConsoleInitialHeight;
+  max-height: $remoteConsoleMaxHeight;
+
+  &--fixed {
+    position: fixed;
+    z-index: $euiZLevel1;
+  }
+
+  &-isOpen {
+    animation-duration: $euiAnimSpeedNormal;
+    animation-timing-function: $euiAnimSlightResistance;
+    animation-fill-mode: forwards;
+  }
+
+  &-isOpen.remoteConsole--large {
+    animation-name: remoteConsoleOpenPanelLarge;
+    height: $remoteConsoleMaxHeight;
+    bottom: map-get($remoteConsoleHeights, 'l') * -1;
+  }
+
+  &-isOpen.remoteConsole--medium {
+    animation-name: remoteConsoleOpenPanelMedium;
+    height: map-get($remoteConsoleHeights, 'm');
+    bottom: map-get($remoteConsoleHeights, 'm') * -1;
+  }
+
+  &-isOpen.remoteConsole--small {
+    animation-name: remoteConsoleOpenPanelSmall;
+    height: map-get($remoteConsoleHeights, 's');
+    bottom: map-get($remoteConsoleHeights, 's') * -1;
+  }
+}
+
+.remoteConsole__controls {
+  height: $remoteConsoleInitialHeight;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  overflow-y: hidden; // Ensures the movement of buttons in :focus don't cause scrollbars
+  overflow-x: auto;
+  padding: 0 $euiSizeM;
+}
+
+.remoteConsole__content {
+  @include euiScrollBar;
+  overflow-y: auto;
+  width: 100%;
+  height: calc(100% - #{$remoteConsoleInitialHeight});
+  background-color: $euiPageBackgroundColor;
+  animation-name: remoteConsoleShowContent;
+  animation-duration: $euiAnimSpeedSlow;
+  animation-iteration-count: 1;
+  animation-timing-function: $euiAnimSlightResistance;
+  color: $euiColorDarkestShade;
+
+  #consoleRoot {
+    height: 100%;
+  }
+}
+
+@each $colorName, $colorValue in $euiButtonTypes {
+  .remoteConsole__controls {
+    .euiLink.euiLink--#{$colorName} {
+      color: makeHighContrastColor($colorValue, $remoteConsoleBackground);
+
+      &:hover {
+        color: tintOrShade($colorValue, 30%, 30%);
+      }
+    }
+
+    .euiLink.euiLink--text {
+      color: $euiColorGhost;
+    }
+
+    .remoteConsole__button.euiButton[class*='#{$colorName}']:enabled:not(.euiButton--fill) {
+      color: makeHighContrastColor($colorValue, $remoteConsoleBackground);
+      border-color: makeHighContrastColor($colorValue, $remoteConsoleBackground);
+    }
+
+    .euiButtonIcon[class*='#{$colorName}'] {
+      color: makeHighContrastColor($colorValue, $remoteConsoleBackground);
+    }
+  }
+}
+
+@include euiBreakpoint('xs', 's') {
+  .remoteConsole:not(.remoteConsole--showOnMobile) {
+    display: none;
+  }
+}
+
+@keyframes remoteConsoleOpenPanelLarge {
+  0% {
+    // Accounts for the initial height offset from the top
+    transform: translateY(calc((#{$remoteConsoleInitialHeight} * 3) * -1));
+  }
+
+  100% {
+    transform: translateY(map-get($remoteConsoleHeights, 'l') * -1);
+  }
+}
+
+@keyframes remoteConsoleOpenPanelMedium {
+  0% {
+    transform: translateY(-$remoteConsoleInitialHeight);
+  }
+
+  100% {
+    transform: translateY(map-get($remoteConsoleHeights, 'm') * -1);
+  }
+}
+
+@keyframes remoteConsoleOpenPanelSmall {
+  0% {
+    transform: translateY(-$remoteConsoleInitialHeight);
+  }
+
+  100% {
+    transform: translateY(map-get($remoteConsoleHeights, 's') * -1);
+  }
+}
+
+@keyframes remoteConsoleShowContent {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

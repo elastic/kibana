@@ -7,12 +7,13 @@
  */
 
 import React, { useState } from 'react';
+import classNames from 'classnames';
 import {
-  EuiPageTemplate,
-  EuiPanel,
+  EuiPortal,
   EuiScreenReaderOnly,
   EuiThemeProvider,
-  useEuiTheme,
+  EuiWindowEvent,
+  keys,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -20,7 +21,8 @@ import { RemoteConsoleProps, RemoteConsoleDependencies } from '../../../types/re
 
 import { ConsoleHeader } from './console_header';
 import { ConsoleWrapper } from './console_wrapper';
-import { remoteConsoleStyles } from './remote_console.styles';
+
+import './_index.scss';
 
 const landmarkHeading = i18n.translate('console.remoteConsole.landmarkHeading', {
   defaultMessage: 'Developer console',
@@ -28,30 +30,51 @@ const landmarkHeading = i18n.translate('console.remoteConsole.landmarkHeading', 
 
 export const RemoteConsole = ({
   headerRightSideItem,
+  size = 'm',
   core,
   usageCollection,
 }: RemoteConsoleProps & RemoteConsoleDependencies) => {
-  const euiTheme = useEuiTheme();
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
   const toggleConsole = () => setIsConsoleOpen(!isConsoleOpen);
-  const consoleStyles = remoteConsoleStyles(euiTheme);
+
+  const onKeyDown = (event: any) => {
+    if (event.key === keys.ESCAPE) {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsConsoleOpen(false);
+    }
+  };
+
+  const classes = classNames('remoteConsole', {
+    'remoteConsole-isOpen': isConsoleOpen,
+    'remoteConsole--large': size === 'l',
+    'remoteConsole--medium': size === 'm',
+    'remoteConsole--small': size === 's',
+    'remoteConsole--fixed': true,
+    'remoteConsole--showOnMobile': false,
+  });
 
   return (
-    <>
-      <section aria-label={landmarkHeading} css={consoleStyles.container}>
+    <EuiPortal>
+      <section aria-label={landmarkHeading} className={classes}>
         <EuiScreenReaderOnly>
           <h2>{landmarkHeading}</h2>
         </EuiScreenReaderOnly>
         <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
-          <EuiPanel borderRadius="none" hasShadow={false} onClick={toggleConsole}>
-            <ConsoleHeader isConsoleOpen={isConsoleOpen} rightSideItem={headerRightSideItem} />
-          </EuiPanel>
+          <div className="remoteConsole__controls">
+            <ConsoleHeader
+              isConsoleOpen={isConsoleOpen}
+              rightSideItem={headerRightSideItem}
+              onClick={toggleConsole}
+            />
+          </div>
         </EuiThemeProvider>
-        {isConsoleOpen && (
-          <EuiPageTemplate offset={0} grow>
+        {isConsoleOpen ? (
+          <div className="remoteConsole__content">
+            <EuiWindowEvent event="keydown" handler={onKeyDown} />
             <ConsoleWrapper core={core} usageCollection={usageCollection} />
-          </EuiPageTemplate>
-        )}
+          </div>
+        ) : null}
       </section>
       <EuiScreenReaderOnly>
         <p aria-live="assertive">
@@ -62,7 +85,7 @@ export const RemoteConsole = ({
           })}
         </p>
       </EuiScreenReaderOnly>
-    </>
+    </EuiPortal>
   );
 };
 

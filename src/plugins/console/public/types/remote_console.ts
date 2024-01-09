@@ -10,7 +10,14 @@ import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 export interface RemoteConsoleProps {
+  /**
+   * Set element displayed at the right of the remote console header.
+   */
   headerRightSideItem?: ReactNode;
+  /**
+   * The default height of the content area.
+   */
+  size?: 's' | 'm' | 'l';
 }
 
 export interface RemoteConsoleDependencies {
