@@ -3200,10 +3200,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-shippers-gainsight@link:packages/analytics/shippers/gainsight":
-  version "0.0.0"
-  uid ""
-
 "@kbn/analytics@link:packages/kbn-analytics":
   version "0.0.0"
   uid ""
@@ -3365,10 +3361,6 @@
   uid ""
 
 "@kbn/cloud-full-story-plugin@link:x-pack/plugins/cloud_integrations/cloud_full_story":
-  version "0.0.0"
-  uid ""
-
-"@kbn/cloud-gainsight-plugin@link:x-pack/plugins/cloud_integrations/cloud_gain_sight":
   version "0.0.0"
   uid ""
 
