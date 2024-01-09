@@ -22,15 +22,13 @@ describe('installWithTimeout', () => {
   });
 
   it(`should call installFn`, async () => {
+    const installFn = jest.fn();
     await installWithTimeout({
-      installFn: async () => {
-        logger.info(`running`);
-      },
+      installFn,
       pluginStop$,
-      logger,
       timeoutMs: 10,
     });
-    expect(logger.info).toHaveBeenCalled();
+    expect(installFn).toHaveBeenCalled();
   });
 
   it(`should short-circuit installFn if it exceeds configured timeout`, async () => {
@@ -38,16 +36,13 @@ describe('installWithTimeout', () => {
       installWithTimeout({
         installFn: async () => {
           await new Promise((r) => setTimeout(r, 20));
-          logger.info(`running`);
         },
         pluginStop$,
-        logger,
         timeoutMs: 10,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failure during installation. Timeout: it took more than 10ms"`
     );
-    expect(logger.info).not.toHaveBeenCalled();
   });
 
   it(`should short-circuit installFn if pluginStop$ signal is received`, async () => {
@@ -59,12 +54,10 @@ describe('installWithTimeout', () => {
           logger.info(`running`);
         },
         pluginStop$,
-        logger,
         timeoutMs: 10,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Server is stopping; must stop all async operations"`
     );
-    expect(logger.info).not.toHaveBeenCalled();
   });
 });
