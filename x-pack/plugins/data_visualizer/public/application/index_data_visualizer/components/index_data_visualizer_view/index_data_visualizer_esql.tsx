@@ -550,7 +550,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
               item={item}
               dataView={currentDataView}
               combinedQuery={{ searchQueryLanguage: 'kuery', searchString: '' }}
-              onAddFilter={() => {}}
               totalDocuments={totalCount}
               typeAccessor="secondaryType"
             />
