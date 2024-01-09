@@ -628,7 +628,9 @@ function validTotalHitsLimitationOnExecutionLog(esHitsTotal: estypes.SearchTotal
 export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
   const { aggregations, hits } = results;
 
-  validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
+  if (hits && hits.total) {
+    validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
+  }
 
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_KPI_RESULT;
@@ -643,7 +645,9 @@ export function formatExecutionLogResult(
 ): IExecutionLogResult {
   const { aggregations, hits } = results;
 
-  validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
+  if (hits && hits.total) {
+    validTotalHitsLimitationOnExecutionLog(hits.total as estypes.SearchTotalHits);
+  }
 
   if (!aggregations || !aggregations.excludeExecuteStart) {
     return EMPTY_EXECUTION_LOG_RESULT;

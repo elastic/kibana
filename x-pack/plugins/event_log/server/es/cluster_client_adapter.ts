@@ -82,7 +82,7 @@ export type AggregateEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySave
 };
 
 export interface AggregateEventsBySavedObjectResult {
-  hits: estypes.SearchHitsMetadata<unknown>;
+  hits?: estypes.SearchHitsMetadata<unknown>;
   aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 
