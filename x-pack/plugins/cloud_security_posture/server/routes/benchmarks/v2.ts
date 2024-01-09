@@ -18,7 +18,7 @@ import { CspBenchmarkRule, Benchmark } from '../../../common/types/latest';
 import { getClusters } from '../compliance_dashboard/get_clusters';
 import { getStats } from '../compliance_dashboard/get_stats';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
-import { buildMutedRulesFilter } from '../benchmark_rules/get_states/v1';
+import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
 
 export const getBenchmarksData = async (
   soClient: SavedObjectsClientContract,
@@ -55,7 +55,7 @@ export const getBenchmarksData = async (
   });
 
   const benchmarkAgg: any = benchmarksResponse.aggregations;
-  const rulesFilter = await buildMutedRulesFilter(encryptedSoClient);
+  const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
   const { id: pitId } = await esClient.openPointInTime({
     index: LATEST_FINDINGS_INDEX_DEFAULT_NS,

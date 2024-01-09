@@ -81,8 +81,8 @@ export const defineBulkActionCspBenchmarkRulesRoute = (router: CspRouter) =>
             message: 'The bulk operation has been executed successfully.',
           };
 
-          if (requestBody.action === 'mute' && handlerResponse.disabledRules) {
-            body.disabled_detection_rules = handlerResponse.disabledRules;
+          if (requestBody.action === 'mute' && handlerResponse.disabledDetectionRules) {
+            body.disabled_detection_rules = handlerResponse.disabledDetectionRules;
           }
 
           return response.ok({ body });

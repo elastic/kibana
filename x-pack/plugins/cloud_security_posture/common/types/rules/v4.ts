@@ -159,5 +159,5 @@ export type CspSettings = TypeOf<typeof cspSettingsSchema>;
 
 export interface BulkActionBenchmarkRulesResponse {
   updatedBenchmarkRulesStates: CspBenchmarkRulesStates;
-  disabledRules: string[];
+  disabledDetectionRules: string[];
 }

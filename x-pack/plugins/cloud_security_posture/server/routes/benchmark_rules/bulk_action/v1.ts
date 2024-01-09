@@ -50,5 +50,5 @@ export const bulkActionBenchmarkRulesHandler = async (
   const disabledDetectionRules =
     action === 'mute' ? await muteDetectionRules(soClient, detectionRulesClient, rulesIds) : [];
 
-  return { updatedBenchmarkRulesStates, disabledRules: disabledDetectionRules };
+  return { updatedBenchmarkRulesStates, disabledDetectionRules };
 };
