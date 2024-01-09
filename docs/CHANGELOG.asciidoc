@@ -267,7 +267,6 @@ Dashboard::
 Discover::
 * Fixes rendering of multi-line content ({kibana-pull}173524[#173524]).
 * Fixes item line breaks ({kibana-pull}172954[#172954]).
-* Fixes ES|QL visualization save modal title not defaulting after first open ({kibana-pull}171894[#171894]).
 * Fixes escaping column names when copying ({kibana-pull}170997[#170997]).
 * Discover sharing links now preserve customized column widths ({kibana-pull}172405[#172405]).
 * Fixes displaying the columns as they are returned from the query ({kibana-pull}171874[#171874]).
