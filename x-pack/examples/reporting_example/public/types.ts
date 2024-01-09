@@ -7,7 +7,7 @@
 
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { ReportingStart } from '@kbn/reporting-plugin/public';
 import type { MyForwardableState } from '../common';

@@ -14,7 +14,6 @@ import { EuiWrappingPopover } from '@elastic/eui';
 import type { HttpStart, OverlayStart, ThemeServiceStart, CoreStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { getAllowedTypes } from '@kbn/saved-objects-management-plugin/public/lib';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
@@ -33,7 +32,6 @@ export class ShareMenuManager {
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
     disableEmbed: boolean,
-    taggingApi?: SavedObjectsTaggingApi,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
     return {
@@ -61,7 +59,6 @@ export class ShareMenuManager {
           overlays: core.overlays,
           i18n: core.i18n,
           http: core.http,
-          taggingApi,
           allowedTypes: await getTypes(core),
         });
       },
@@ -104,7 +101,6 @@ export class ShareMenuManager {
     i18n: CoreStart['i18n'];
     overlays: OverlayStart;
     http: HttpStart;
-    taggingApi?: SavedObjectsTaggingApi;
     allowedTypes: SavedObjectManagementTypeInfo[];
   }) {
     if (this.isOpen) {
