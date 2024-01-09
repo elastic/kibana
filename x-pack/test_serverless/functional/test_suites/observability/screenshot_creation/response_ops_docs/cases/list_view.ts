@@ -70,6 +70,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         `/cases/${caseIdMonitoring}`,
         undefined
       );
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('case-view-title');
       const filesTab = await testSubjects.find('case-view-tab-title-files');
       await filesTab.click();
       await cases.casesFilesTable.addFile(require.resolve('./testfile.png'));
