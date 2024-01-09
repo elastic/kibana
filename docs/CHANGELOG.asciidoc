@@ -284,7 +284,7 @@ Lens & Visualizations::
 * Fixes an issue where the timerange panel wasn't correctly assigned during a conversion from dashboard to *Lens* ({kibana-pull}172647[#172647]).
 * Various fixes for heatmap in *Lens* ({kibana-pull}172602[#172602]).
 * Fixes filters being lost when navigating from dashboard -> editor -> *Lens* in *TSVB* ({kibana-pull}172566[#172566]).
-* Ignore drop commands for date histogram in discover ({kibana-pull}171769[#171769]).
+* Ignore drop ES|QL commands for date histogram in discover ({kibana-pull}171769[#171769]).
 Machine Learning::
 * Ensures data frame analytics job can be deleted from analytics map ({kibana-pull}174212[#174212]).
 * Fixes filter for boolean fields filtering for numbers in Field statistics / Data Visualizer ({kibana-pull}174212[#174050])
