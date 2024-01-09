@@ -18,7 +18,7 @@ import type { FieldMap } from './field_maps/types';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
 import { createOrUpdateDataStream } from './create_or_update_data_stream';
 import { createOrUpdateIndexTemplate } from './create_or_update_index_template';
-import { installWithTimeout } from './install_with_timeout';
+import { InstallShutdownError, installWithTimeout } from './install_with_timeout';
 import { getComponentTemplate, getIndexTemplate } from './resource_installer_utils';
 
 export interface DataStreamAdapterParams {
@@ -90,7 +90,10 @@ export class DataStreamAdapter {
   protected getInstallFn({ logger, pluginStop$, tasksTimeoutMs }: GetInstallFnParams) {
     return async (promise: Promise<void>, description?: string) =>
       installWithTimeout({
-        installFn: () => promise,
+        installFn: () =>
+          promise.catch((e) =>
+            e instanceof InstallShutdownError ? Promise.resolve() : Promise.reject(e)
+          ),
         logger,
         timeoutMs: tasksTimeoutMs,
         pluginStop$,
