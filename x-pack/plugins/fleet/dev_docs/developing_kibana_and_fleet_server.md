@@ -148,6 +148,7 @@ http.enabled: true
 $ DEV=true SNAPSHOT=true make release-darwin/amd64
 
 # Run dev build, provide your fingerprint and service token from before
+# Replace 8.13.0-SNAPSHOT with the latest version on main
 $ ./build/binaries/fleet-server-8.13.0-SNAPSHOT-darwin-x86_64/fleet-server -c fleet-server.dev.yml
 ```
 
