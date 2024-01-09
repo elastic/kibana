@@ -15,10 +15,13 @@ import {
 } from '@kbn/unified-search-plugin/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 import { InputControlPublicConfig } from '../config';
+import { InputControlDeprecationBadge } from './deprecation_badge';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
@@ -46,6 +49,7 @@ export interface InputControlVisPluginSetupDependencies {
 export interface InputControlVisPluginStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 
 /** @internal */
@@ -84,5 +88,12 @@ export class InputControlVisPlugin
 
   public start(_core: CoreStart) {
     // nothing to do here
+    const { uiActions } = deps;
+
+    const deprecationBadge = new InputControlDeprecationBadge();
+
+    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, deprecationBadge);
+
+    return {};
   }
 }
