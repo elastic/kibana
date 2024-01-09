@@ -347,24 +347,26 @@ export const useESQLFieldStatsData = ({
             isRunning: false,
           });
         } catch (e) {
-          const title = i18n.translate(
-            'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
-            {
-              defaultMessage: 'Error fetching field statistics for ES|QL query',
-            }
-          );
-          toasts.addError(e, {
-            title,
-          });
+          if (e.name !== 'AbortError') {
+            const title = i18n.translate(
+              'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
+              {
+                defaultMessage: 'Error fetching field statistics for ES|QL query',
+              }
+            );
+            toasts.addError(e, {
+              title,
+            });
 
-          // Log error to console for better debugging
-          // eslint-disable-next-line no-console
-          console.error(`${title}: fetchFieldStats`, e);
-          setFetchState({
-            loaded: 100,
-            isRunning: false,
-            error: e,
-          });
+            // Log error to console for better debugging
+            // eslint-disable-next-line no-console
+            console.error(`${title}: fetchFieldStats`, e);
+            setFetchState({
+              loaded: 100,
+              isRunning: false,
+              error: e,
+            });
+          }
         }
       };
       fetchFieldStats();
@@ -613,18 +615,21 @@ export const useESQLOverallStatsData = (
           });
         }
       } catch (error) {
-        const title = i18n.translate(
-          'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
-          {
-            defaultMessage: 'Error fetching field statistics for ES|QL query',
-          }
-        );
-        toasts.addError(error, {
-          title,
-        });
-        // Log error to console for better debugging
-        // eslint-disable-next-line no-console
-        console.error(`${title}: fetchOverallStats`, error);
+        if (error.name !== 'AbortError') {
+          const title = i18n.translate(
+            'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
+            {
+              defaultMessage: 'Error fetching field statistics for ES|QL query',
+            }
+          );
+          toasts.addError(error, {
+            title,
+          });
+
+          // Log error to console for better debugging
+          // eslint-disable-next-line no-console
+          console.error(`${title}: fetchOverallStats`, error);
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
