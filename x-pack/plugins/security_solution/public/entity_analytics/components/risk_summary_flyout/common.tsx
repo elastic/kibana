@@ -8,8 +8,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { SimpleRiskInput } from '../../../../common/entity_analytics/risk_engine';
-import { assertUnreachable } from '../../../../common/utility_types';
+
 import type {
   HostRiskScore,
   RiskStats,
@@ -19,6 +18,7 @@ import type {
 interface TableItem {
   category: string;
   count: number;
+  score: number;
 }
 
 interface EntityData {
@@ -68,10 +68,6 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
 ];
 
 export const getItems: (entityData: EntityData | undefined) => TableItem[] = (entityData) => {
-  const alerts = entityData?.risk?.inputs ?? [];
-
-  console.log('data', entityData);
-
   return [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
@@ -84,8 +80,8 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.contextGroupLabel', {
         defaultMessage: 'Contexts',
       }),
-      score: alerts.reduce((total, alert) => total + normalizeRiskScore(alert.risk_score), 0),
-      count: alerts.length,
+      score: entityData?.risk.category_2_score ?? 0,
+      count: entityData?.risk.category_2_count ?? 0,
     },
   ];
 };
@@ -108,19 +104,6 @@ export const getEntityData = (
   }
 
   return riskData.host;
-};
-
-const normalizeRiskScore = (score: SimpleRiskInput['risk_score']) => {
-  if (!score) {
-    return 0;
-  }
-  if (typeof score === 'number') {
-    return score;
-  }
-  if (typeof score === 'string') {
-    return parseFloat(score);
-  }
-  return assertUnreachable(score);
 };
 
 export const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
