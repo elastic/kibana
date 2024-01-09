@@ -1417,6 +1417,67 @@ Object {
     "presence": "optional",
   },
   "keys": Object {
+    "anomalyDetectorTypes": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "matches": Array [
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "txLatency",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "txThroughput",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "txFailureRate",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+          ],
+          "type": "alternatives",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 1,
+          },
+          "name": "min",
+        },
+      ],
+      "type": "array",
+    },
     "anomalySeverityType": Object {
       "flags": Object {
         "error": [Function],

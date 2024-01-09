@@ -24,7 +24,7 @@ import {
 import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -210,6 +210,12 @@ interface ComponentTemplateSpec {
 export type FormatAlert<AlertData extends RuleAlertData> = (
   alert: Partial<AlertData>
 ) => Partial<AlertData>;
+
+export const DEFAULT_AAD_CONFIG: IRuleTypeAlerts<DefaultAlert> = {
+  context: `default`,
+  mappings: { fieldMap: {} },
+  shouldWrite: true,
+};
 
 export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**
