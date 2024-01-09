@@ -10,7 +10,7 @@ import { Observable, Subscription } from 'rxjs';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ElasticsearchConfig } from '@kbn/core/server';
 
-export class ElasticsearchUrlService {
+export class GlobalConfigService {
   /**
    *
    */
