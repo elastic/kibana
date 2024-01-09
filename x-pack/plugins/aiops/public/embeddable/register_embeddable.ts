@@ -30,7 +30,7 @@ export const registerEmbeddable = (
 
   const changePointTableFactory = new EmbeddableChangePointChartFactory(
     EMBEDDABLE_CHANGE_POINT_TABLE_TYPE,
-    i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
+    i18n.translate('xpack.aiops.embeddableChangePointTableDisplayName', {
       defaultMessage: 'Change point detection table',
     }),
     core.getStartServices

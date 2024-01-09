@@ -6,19 +6,20 @@
  */
 
 import {
+  type DefaultItemAction,
   EuiBadge,
   type EuiBasicTableColumn,
   EuiEmptyPrompt,
   EuiIcon,
   EuiInMemoryTable,
   EuiToolTip,
-  type DefaultItemAction,
 } from '@elastic/eui';
-import React, { type FC, useMemo } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { type Filter, FilterStateStore } from '@kbn/es-query';
+import { useTableState } from '@kbn/ml-in-memory-table';
 import { NoChangePointsWarning } from './no_change_points_warning';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCommonChartProps } from './use_common_chart_props';
@@ -84,15 +85,42 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
+  const chartLoadingCount = useRef<number>(0);
+
+  const { onTableChange, pagination, sorting } = useTableState<ChangePointAnnotation>(
+    annotations ?? [],
+    'p_value',
+    'asc',
+    {
+      pageIndex: 0,
+      pageSize: 10,
+      pageSizeOptions: [5, 10, 15],
+    }
+  );
+
   const dateFormatter = useMemo(() => fieldFormats.deserialize({ id: 'date' }), [fieldFormats]);
 
-  const defaultSorting = {
-    sort: {
-      field: 'p_value',
-      // Lower p_value indicates a bigger change point, hence the asc sorting
-      direction: 'asc' as const,
+  useEffect(() => {
+    // Reset loading counter on pagination or sort change
+    chartLoadingCount.current = 0;
+  }, [pagination.pageIndex, pagination.pageSize, sorting.sort]);
+
+  /**
+   * Callback to track render of each chart component
+   * to report when all charts on the current page are ready.
+   */
+  const onChartRenderCompleteCallback = useCallback(
+    (isLoading: boolean) => {
+      if (!onRenderComplete) return;
+      if (!isLoading) {
+        chartLoadingCount.current++;
+      }
+      if (chartLoadingCount.current === pagination.pageSize) {
+        onRenderComplete();
+      }
     },
-  };
+    [onRenderComplete, pagination.pageSize]
+  );
 
   const hasActions = fieldConfig.splitField !== undefined;
 
@@ -133,6 +161,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             annotation={annotation}
             fieldConfig={fieldConfig}
             interval={bucketInterval.expression}
+            onRenderComplete={onChartRenderCompleteCallback.bind(null, false)}
           />
         );
       },
@@ -276,8 +305,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
       items={annotations}
       columns={columns}
-      pagination={{ pageSizeOptions: [5, 10, 15] }}
-      sorting={defaultSorting}
+      pagination={pagination}
+      sorting={sorting}
+      onTableChange={onTableChange}
       hasActions={hasActions}
       rowProps={(item) => ({
         'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
@@ -303,7 +333,12 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   );
 };
 
-export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotation }) => {
+export const MiniChartPreview: FC<ChartComponentProps> = ({
+  fieldConfig,
+  annotation,
+  onRenderComplete,
+  onLoading,
+}) => {
   const {
     lens: { EmbeddableComponent },
   } = useAiopsAppContext();
@@ -317,8 +352,31 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
     bucketInterval: bucketInterval.expression,
   });
 
+  const chartWrapperRef = useRef<HTMLDivElement>(null);
+
+  const renderCompleteListener = useCallback(
+    (event: Event) => {
+      if (event.target === chartWrapperRef.current) return;
+      if (onRenderComplete) {
+        onRenderComplete();
+      }
+    },
+    [onRenderComplete]
+  );
+
+  useEffect(() => {
+    if (!chartWrapperRef.current) {
+      throw new Error('Reference to the chart wrapper is not set');
+    }
+    const chartWrapper = chartWrapperRef.current;
+    chartWrapper.addEventListener('renderComplete', renderCompleteListener);
+    return () => {
+      chartWrapper.removeEventListener('renderComplete', renderCompleteListener);
+    };
+  }, [renderCompleteListener]);
+
   return (
-    <div data-test-subj={'aiopChangePointPreviewChart'}>
+    <div data-test-subj={'aiopChangePointPreviewChart'} ref={chartWrapperRef}>
       <EmbeddableComponent
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}
@@ -332,6 +390,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
           type: 'aiops_change_point_detection_chart',
           name: 'Change point detection',
         }}
+        onLoad={onLoading}
       />
     </div>
   );
