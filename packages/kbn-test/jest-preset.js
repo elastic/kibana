@@ -124,4 +124,10 @@ module.exports = {
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 
   resolver: '<rootDir>/packages/kbn-test/src/jest/resolver.js',
+
+  // Workaround to "TypeError: Cannot assign to read only property 'structuredClone' of object '[object global]'"
+  // This happens when we run jest tests with --watch after node20+
+  globals: {
+    structuredClone: {},
+  },
 };
