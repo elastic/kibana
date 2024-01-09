@@ -119,7 +119,7 @@ Elastic Search::
 * Replace model selection dropdown with list ({kibana-pull}171436[#171436]).
 Fleet::
 * Adds support for preconfigured output secrets (Scrypt edition) ({kibana-pull}172041[#172041]).
-* Adds UI components to crete and edit output secrets ({kibana-pull}169429[#169429]).
+* Adds UI components to create and edit output secrets ({kibana-pull}169429[#169429]).
 * Adds support for remote ES output ({kibana-pull}169252[#169252]).
 * Adds the ability to specify secrets in outputs ({kibana-pull}169221[#169221]).
 * Adds an integrations configs tab to display input templates ({kibana-pull}168827[#168827]).
