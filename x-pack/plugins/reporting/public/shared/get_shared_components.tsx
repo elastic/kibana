@@ -6,8 +6,9 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
-import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
-import { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { BaseParams } from '@kbn/reporting-common/types';
+import { CSV_JOB_TYPE, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import React from 'react';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { CsvModalContent } from '../share_context_menu/csv_export_modal';
@@ -20,7 +21,9 @@ export interface ApplicationProps {
    * A function that Reporting calls to get the sharing data from the application.
    * Needed for CSV exports and Canvas PDF reports.
    */
-  getJobParams?: JobAppParamsPDFV2;
+  getJobParams?:
+    | JobAppParamsPDFV2
+    | ((forShareUrl?: boolean | undefined) => Omit<BaseParams, 'browserTimezone' | 'version'>);
 
   /**
    * Option to control how the screenshot(s) is/are placed in the PDF
@@ -66,6 +69,7 @@ export function getSharedComponents(
 ): ReportingPublicComponents {
   return {
     ReportingModalPDFV2(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as JobAppParamsPDFV2;
       return (
         <ReportingModalContent
           requiresSavedState={false}
@@ -74,6 +78,7 @@ export function getSharedComponents(
           uiSettings={core.uiSettings}
           theme={core.theme}
           {...props}
+          getJobParams={getJobParams}
         />
       );
     },
@@ -86,12 +91,13 @@ export function getSharedComponents(
           uiSettings={core.uiSettings}
           theme={core.theme}
           {...props}
+          getJobParams={undefined}
         />
       );
     },
     ReportingModalCSV(props: ApplicationProps) {
+      const getJobParams = props.getJobParams as JobAppParamsCSV;
       return (
-        // @ts-ignore getJobParams is not required for image reports but needed for CSV
         <CsvModalContent
           requiresSavedState={false}
           apiClient={apiClient}
@@ -100,6 +106,7 @@ export function getSharedComponents(
           reportType={CSV_JOB_TYPE}
           theme={core.theme}
           {...props}
+          getJobParams={getJobParams}
         />
       );
     },

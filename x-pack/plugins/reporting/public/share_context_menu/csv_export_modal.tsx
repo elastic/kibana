@@ -14,12 +14,10 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-import { ToastsSetup } from '@kbn/core-notifications-browser';
-import { ThemeServiceSetup } from '@kbn/core-theme-browser';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { BaseParams } from '@kbn/reporting-common/types';
+import type { BaseParams } from '@kbn/reporting-common/types';
 import React, { FC, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { ReportingAPIClient } from '../lib/reporting_api_client';

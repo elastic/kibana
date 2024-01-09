@@ -28,7 +28,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -133,14 +133,14 @@ class ReportingPanelContentUi extends Component<Props, State> {
     isUnsaved: boolean;
     exceedsMaxLength: boolean;
   }) {
-    // if (isUnsaved) {
-    //   if (exceedsMaxLength) {
-    //     return <ErrorUrlTooLongPanel isUnsaved />;
-    //   }
-    //   return <ErrorUnsavedWorkPanel />;
-    // } else if (exceedsMaxLength) {
-    //   return <ErrorUrlTooLongPanel isUnsaved={false} />;
-    // }
+    if (isUnsaved) {
+      if (exceedsMaxLength) {
+        return <ErrorUrlTooLongPanel isUnsaved />;
+      }
+      return <ErrorUnsavedWorkPanel />;
+    } else if (exceedsMaxLength) {
+      return <ErrorUrlTooLongPanel isUnsaved={false} />;
+    }
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={0}>

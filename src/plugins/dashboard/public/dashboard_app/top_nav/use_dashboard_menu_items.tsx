@@ -12,7 +12,7 @@ import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
-import { HttpStart } from '@kbn/core-http-browser';
+import { HttpStart } from '@kbn/core/public';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardAPI } from '../dashboard_app';
 import { topNavStrings } from '../_dashboard_app_strings';

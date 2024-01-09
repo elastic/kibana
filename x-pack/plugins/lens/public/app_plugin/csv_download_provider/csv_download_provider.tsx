@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { tableHasFormulas } from '@kbn/data-plugin/common';
-import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import { downloadMultipleAs, ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { FormatFactory } from '../../../common/types';
 import { DownloadPanelContent } from './csv_download_panel_content_lazy';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';

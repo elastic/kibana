@@ -11,9 +11,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { Capabilities } from '@kbn/core-capabilities-common';
-import { OverlayStart } from '@kbn/core-overlays-browser';
+
+import { Capabilities, CoreStart, OverlayStart } from '@kbn/core/public';
 import type { LocatorPublic } from '../../common';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';

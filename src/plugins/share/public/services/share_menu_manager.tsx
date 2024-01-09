@@ -11,11 +11,10 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { HttpStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import type { HttpStart, OverlayStart, ThemeServiceStart, CoreStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { getAllowedTypes } from '@kbn/saved-objects-management-plugin/public/lib';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';

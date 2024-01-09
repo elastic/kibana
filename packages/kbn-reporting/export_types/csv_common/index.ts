@@ -13,6 +13,7 @@ import type {
   BasePayload,
   BasePayloadV2,
 } from '@kbn/reporting-common/types';
+import { Omit } from 'utility-types';
 
 export * from './constants';
 
@@ -53,3 +54,7 @@ export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
 
 export { getQueryFromCsvJob, type QueryInspection } from './lib/get_query_from_job';
+
+export type JobAppParamsCSV = (
+  forShareUrl?: boolean | undefined
+) => Omit<BaseParams, 'browserTimezone' | 'version'>;

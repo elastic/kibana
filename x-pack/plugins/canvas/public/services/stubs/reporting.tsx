@@ -9,7 +9,6 @@ import React from 'react';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 
 import { CanvasReportingService } from '../reporting';
-// import { reportingMock } from '@kbn/reporting-plugin/public/mocks';
 
 type CanvasReportingServiceFactory = PluginServiceFactory<CanvasReportingService>;
 
