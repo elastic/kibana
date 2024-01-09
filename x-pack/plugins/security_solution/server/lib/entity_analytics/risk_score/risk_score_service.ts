@@ -38,6 +38,7 @@ export interface RiskScoreServiceFactoryParams {
   riskEngineDataClient: RiskEngineDataClient;
   riskScoreDataClient: RiskScoreDataClient;
   spaceId: string;
+  forceUpgrade?: boolean;
 }
 
 export const riskScoreServiceFactory = ({
@@ -47,6 +48,7 @@ export const riskScoreServiceFactory = ({
   riskEngineDataClient,
   riskScoreDataClient,
   spaceId,
+  forceUpgrade = false,
 }: RiskScoreServiceFactoryParams): RiskScoreService => ({
   calculateScores: (params) =>
     calculateRiskScores({ ...params, assetCriticalityService, esClient, logger }),
@@ -58,6 +60,7 @@ export const riskScoreServiceFactory = ({
       logger,
       riskScoreDataClient,
       spaceId,
+      forceUpgrade,
     }),
   getConfiguration: async () => riskEngineDataClient.getConfiguration(),
   getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),

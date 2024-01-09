@@ -61,6 +61,7 @@ export const riskScoreCalculationRoute = (
           riskEngineDataClient,
           riskScoreDataClient,
           spaceId,
+          forceUpgrade: true,
         });
 
         const {

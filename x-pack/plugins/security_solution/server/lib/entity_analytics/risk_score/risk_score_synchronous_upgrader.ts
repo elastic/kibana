@@ -17,9 +17,15 @@ export class RiskScoreSynchronousUpgrader {
    *
    * @returns A promise returned by the {@link upgradeFunction} of a previous invocation of
    * this {@link upgrade} function, or the promise returned by the {@link upgradeFunction} if one hasn't been provided yet.
+   * This behavior can be changed by passing in `forceUpgrade=true`, which will always conduct the function provided.
    */
-  static async upgrade(namespace: string, logger: Logger, upgradeFunction: () => Promise<void>) {
-    if (!RiskScoreSynchronousUpgrader.upgradesConducted[namespace]) {
+  static async upgrade(
+    namespace: string,
+    logger: Logger,
+    forceUpgrade: boolean,
+    upgradeFunction: () => Promise<void>
+  ) {
+    if (forceUpgrade || !RiskScoreSynchronousUpgrader.upgradesConducted[namespace]) {
       RiskScoreSynchronousUpgrader.upgradesConducted[namespace] = upgradeFunction().catch((err) => {
         logger.error(`Error upgrading risk engine resources. ${err.message}`);
         delete RiskScoreSynchronousUpgrader.upgradesConducted[namespace];

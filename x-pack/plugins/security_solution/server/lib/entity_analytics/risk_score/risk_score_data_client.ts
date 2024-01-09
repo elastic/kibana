@@ -175,10 +175,11 @@ export class RiskScoreDataClient {
    * unmapped fields are allowed within stored documents.
    *
    */
-  public async upgrade() {
+  public async upgrade(forceUpgrade: boolean) {
     await RiskScoreSynchronousUpgrader.upgrade(
       this.options.namespace,
       this.options.logger,
+      forceUpgrade,
       async () => {
         this.options.logger.info('Upgrading risk score indices.');
         await this.setRiskScoreLatestIndexDynamicConfiguration(false);

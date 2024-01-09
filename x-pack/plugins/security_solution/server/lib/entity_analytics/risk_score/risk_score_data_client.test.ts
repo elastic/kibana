@@ -459,7 +459,7 @@ describe('RiskScoreDataClient', () => {
       RiskScoreSynchronousUpgrader.upgradesConducted = {};
     });
     it('upserts the configuration for the latest risk score index when upgrading', async () => {
-      await riskScoreDataClient.upgrade();
+      await riskScoreDataClient.upgrade(false);
 
       expect(createOrUpdateIndex).toHaveBeenCalledWith(
         expect.objectContaining({

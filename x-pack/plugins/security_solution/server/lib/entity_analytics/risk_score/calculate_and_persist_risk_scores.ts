@@ -19,6 +19,7 @@ export const calculateAndPersistRiskScores = async (
     logger: Logger;
     spaceId: string;
     riskScoreDataClient: RiskScoreDataClient;
+    forceUpgrade: boolean;
   }
 ): Promise<CalculateAndPersistScoresResponse> => {
   const { riskScoreDataClient, spaceId, ...rest } = params;
@@ -32,7 +33,7 @@ export const calculateAndPersistRiskScores = async (
     return { after_keys: {}, errors: [], scores_written: 0 };
   }
 
-  await riskScoreDataClient.upgrade();
+  await riskScoreDataClient.upgrade(params.forceUpgrade);
 
   const { errors, docs_written: scoresWritten } = await writer.bulk(scores);
 

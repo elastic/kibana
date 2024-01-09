@@ -28,12 +28,12 @@ describe('RiskScoreSynchronousUpgrader', () => {
   it(`only upgrades a single time for a single namespace, no matter how many times it's called`, () => {
     const stub = jest.fn();
 
-    RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+    RiskScoreSynchronousUpgrader.upgrade('default', logger, false, () => {
       stub();
       return Promise.resolve(undefined);
     });
     // call it again, although this time it should not be invoked
-    RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+    RiskScoreSynchronousUpgrader.upgrade('default', logger, false, () => {
       stub();
       return Promise.resolve(undefined);
     });
@@ -44,12 +44,12 @@ describe('RiskScoreSynchronousUpgrader', () => {
   it(`will upgrade a single time for each namespace`, () => {
     const stub = jest.fn();
 
-    RiskScoreSynchronousUpgrader.upgrade('namespace1', logger, () => {
+    RiskScoreSynchronousUpgrader.upgrade('namespace1', logger, false, () => {
       stub();
       return Promise.resolve(undefined);
     });
 
-    RiskScoreSynchronousUpgrader.upgrade('namespace2', logger, () => {
+    RiskScoreSynchronousUpgrader.upgrade('namespace2', logger, false, () => {
       stub();
       return Promise.resolve(undefined);
     });
@@ -61,13 +61,13 @@ describe('RiskScoreSynchronousUpgrader', () => {
     const delayedStub = jest.fn();
     const immediateStub = jest.fn();
 
-    const delayedUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+    const delayedUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, false, () => {
       return Promise.resolve(undefined)
         .then(sleep(20))
         .then(() => delayedStub());
     });
 
-    const immediateUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+    const immediateUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, false, () => {
       immediateStub();
       return Promise.resolve(undefined);
     });
@@ -84,7 +84,7 @@ describe('RiskScoreSynchronousUpgrader', () => {
     const stubInSuccessfulPath = jest.fn();
 
     const processUpgradeHavingErrors = async () => {
-      const failedUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+      const failedUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, false, () => {
         return Promise.resolve(undefined)
           .then(sleep(20))
           .then(() => stubInErrorPath())
@@ -93,7 +93,7 @@ describe('RiskScoreSynchronousUpgrader', () => {
           });
       });
 
-      const normalUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+      const normalUpgrade = RiskScoreSynchronousUpgrader.upgrade('default', logger, false, () => {
         stubInErrorPath();
         return Promise.resolve(undefined);
       });
@@ -107,7 +107,7 @@ describe('RiskScoreSynchronousUpgrader', () => {
     expect(stubInErrorPath).toBeCalledTimes(1);
 
     // however, now that all promises have resolved, we should be able to successfully upgrade.
-    await RiskScoreSynchronousUpgrader.upgrade('default', logger, () => {
+    await RiskScoreSynchronousUpgrader.upgrade('default', logger, false, () => {
       stubInSuccessfulPath();
       return Promise.resolve(undefined);
     });
