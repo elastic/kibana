@@ -31,7 +31,6 @@ export const ADD_THREAT_INTELLIGENCE_DATA_PATH = `/app/integrations/browse/threa
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern' as const;
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
-export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
@@ -264,6 +263,7 @@ export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
 export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
 export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
 export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
+export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings`;
 
 export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
 export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
