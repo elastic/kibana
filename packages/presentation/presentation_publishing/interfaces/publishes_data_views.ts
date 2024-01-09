@@ -7,7 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
 
 export interface PublishesDataViews {
   dataViews: PublishingSubject<DataView[] | undefined>;

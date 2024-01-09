@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
 
 export interface PublishesBlockingError {
   blockingError: PublishingSubject<Error | undefined>;

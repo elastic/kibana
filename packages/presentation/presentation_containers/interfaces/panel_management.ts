@@ -9,7 +9,7 @@
 import {
   PublishingSubject,
   useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing/publishing_utils';
+} from '@kbn/presentation-publishing/publishing_subject';
 
 export interface CanDuplicatePanels {
   duplicatePanel: (panelId: string) => void;

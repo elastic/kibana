@@ -98,5 +98,5 @@ export {
   useStateFromPublishingSubject,
   usePublishingSubject,
   type PublishingSubject,
-} from './publishing_utils';
+} from './publishing_subject';
 export { useApiPublisher } from './publishing_utils';

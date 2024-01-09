@@ -7,7 +7,7 @@
  */
 
 import { TimeRange, Filter, Query, AggregateQuery } from '@kbn/es-query';
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_utils';
+import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
 
 export interface PublishesLocalUnifiedSearch {
   isCompatibleWithLocalUnifiedSearch?: () => boolean;
