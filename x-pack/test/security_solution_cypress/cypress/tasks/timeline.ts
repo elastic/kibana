@@ -180,9 +180,6 @@ export const addNotesToTimeline = (notes: string) => {
 
       cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
     });
-
-  goToQueryTab();
-  goToNotesTab();
 };
 
 export const addEqlToTimeline = (eql: string) => {
@@ -303,7 +300,7 @@ export const clickIdToggleField = () => {
 };
 
 export const closeTimeline = () => {
-  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click();
+  cy.get(CLOSE_TIMELINE_BTN).click();
   cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
 };
 
@@ -409,7 +406,7 @@ export const openActiveTimeline = () => {
 };
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(PIN_EVENT).first().click({ force: true });
+  return cy.get(PIN_EVENT).first().click();
 };
 
 export const populateTimeline = () => {
@@ -470,11 +467,11 @@ export const refreshTimelinesUntilTimeLinePresent = (
 };
 
 export const clickingOnCreateTimelineFormTemplateBtn = () => {
-  cy.get(TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN).click({ force: true });
+  cy.get(TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN).click();
 };
 
 export const clickingOnCreateTemplateFromTimelineBtn = () => {
-  cy.get(TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN).click({ force: true });
+  cy.get(TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN).click();
 };
 
 export const expandEventAction = () => {
