@@ -6,6 +6,7 @@
  */
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { navigateToCasesApp } from '../../../../../../shared/lib/cases';
 
@@ -17,34 +18,36 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const owner = SECURITY_SOLUTION_OWNER;
 
   describe('list view', function () {
-    // before(async () => {
-    //   await svlCases.api.createCase(
-    //     svlCases.api.getPostCaseRequest(owner, {
-    //       title: 'Metrics inventory',
-    //       tags: ['IBM resilient'],
-    //       description: 'Test.',
-    //       owner,
-    //     })
-    //   );
+    before(async () => {
+      await svlCases.api.createCase(
+        svlCases.api.getPostCaseRequest(owner, {
+          title: 'Unusual processes identified',
+          tags: ['linux', 'os processes'],
+          description: 'Test.',
+          owner,
+          severity: CaseSeverity.HIGH,
+        })
+      );
 
-    //   await svlCases.api.createCase(
-    //     svlCases.api.getPostCaseRequest(owner, {
-    //       title: 'Logs threshold',
-    //       tags: ['jira'],
-    //       description: 'Test.',
-    //       owner,
-    //     })
-    //   );
+      await svlCases.api.createCase(
+        svlCases.api.getPostCaseRequest(owner, {
+          title: 'Suspicious emails reported',
+          tags: ['email', 'phishing'],
+          description: 'Several employees have received suspicious emails from an unknown address.',
+          owner,
+        })
+      );
 
-    //   await svlCases.api.createCase(
-    //     svlCases.api.getPostCaseRequest(owner, {
-    //       title: 'Monitor uptime',
-    //       tags: ['swimlane'],
-    //       description: 'Test.',
-    //       owner,
-    //     })
-    //   );
-    // });
+      await svlCases.api.createCase(
+        svlCases.api.getPostCaseRequest(owner, {
+          title: 'Malware investigation',
+          tags: ['malware'],
+          description: 'Test.',
+          owner,
+          severity: CaseSeverity.MEDIUM,
+        })
+      );
+    });
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
