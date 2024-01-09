@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { debounceTime, filter } from 'rxjs/operators';
-import { PublishingSubject } from './publishing_utils';
+import { PublishingSubject } from './publishing_subject';
 
 // Usage of any required here. We want to subscribe to the subject no matter the type.
 type AnyValue = any;

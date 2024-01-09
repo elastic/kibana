@@ -17,9 +17,7 @@ export type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubjec
 /**
  * A utility type that makes a type optional if another passed in type is optional.
  */
-type OptionalIfOptional<TestType, Type> = undefined extends TestType
-  ? Type | undefined
-  : Type;
+type OptionalIfOptional<TestType, Type> = undefined extends TestType ? Type | undefined : Type;
 
 /**
  * Declares a publishing subject, allowing external code to subscribe to react state changes.
