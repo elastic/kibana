@@ -30,7 +30,8 @@ export interface IDocumentMigrator {
   migrateAndConvert(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[];
 
   /**
-   * Returns true if the given document has a higher version that the last known version, false otherwise
+   * Returns true if the provided document has a higher version that the `targetTypeVersion`
+   * (defaulting to the last known version), false otherwise.
    */
   isDowngradeRequired(
     doc: SavedObjectUnsanitizedDoc,
