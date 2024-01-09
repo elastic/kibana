@@ -265,7 +265,6 @@ Cases::
 Dashboard::
 * Prevents unnecessary loss of dashboard unsaved state ({kibana-pull}167707[#167707]).
 Discover::
-* Fixes item line breaks ({kibana-pull}172954[#172954]).
 * Fixes escaping column names when copying ({kibana-pull}170997[#170997]).
 * Discover sharing links now preserve customized column widths ({kibana-pull}172405[#172405]).
 * Fixes displaying the columns as they are returned from the query ({kibana-pull}171874[#171874]).
