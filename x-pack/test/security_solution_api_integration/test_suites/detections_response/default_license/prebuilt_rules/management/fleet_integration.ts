@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
      * package storage and checks that they are installed.
      */
     // TODO: Fix and unskip https://github.com/elastic/kibana/issues/172107
-    it.skip('should install prebuilt rules from the package storage', async () => {
+    it('should install prebuilt rules from the package storage', async () => {
       // Verify that status is empty before package installation
       const statusBeforePackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
       expect(statusBeforePackageInstallation.rules_installed).toBe(0);
