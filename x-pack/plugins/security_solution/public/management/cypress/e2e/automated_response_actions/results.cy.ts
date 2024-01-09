@@ -15,50 +15,54 @@ import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts'
 
 import { login, ROLE } from '../../tasks/login';
 
-describe('Results', { tags: ['@ess', '@serverless'] }, () => {
-  let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
-  let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
-  const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
-
-  before(() => {
-    indexEndpointRuleAlerts({
-      endpointAgentId,
-      endpointHostname,
-      endpointIsolated: false,
-    }).then((indexedAlert) => {
-      alertData = indexedAlert;
-      const alertId = alertData.alerts[0]._id;
-      return indexEndpointHosts({
-        withResponseActions: true,
-        numResponseActions: 1,
-        alertIds: [alertId],
-      }).then((indexEndpoints) => {
-        endpointData = indexEndpoints;
-      });
-    });
-  });
-
-  after(() => {
-    if (endpointData) {
-      endpointData.cleanup();
-      endpointData = undefined;
-    }
-
-    if (alertData) {
-      alertData.cleanup();
-      alertData = undefined;
-    }
-  });
-
-  describe(
-    'see results when has RBAC',
-    {
+describe(
+  'Results',
+  {
+    tags: [
+      '@ess',
+      '@serverless',
       // Not supported in serverless!
       // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
       // `internal/kibana/settings` is not accessible in serverless
-      tags: ['@brokenInServerless'],
-    },
-    () => {
+      '@brokenInServerless',
+    ],
+  },
+  () => {
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
+    const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
+
+    before(() => {
+      indexEndpointRuleAlerts({
+        endpointAgentId,
+        endpointHostname,
+        endpointIsolated: false,
+      }).then((indexedAlert) => {
+        alertData = indexedAlert;
+        const alertId = alertData.alerts[0]._id;
+        return indexEndpointHosts({
+          withResponseActions: true,
+          numResponseActions: 1,
+          alertIds: [alertId],
+        }).then((indexEndpoints) => {
+          endpointData = indexEndpoints;
+        });
+      });
+    });
+
+    after(() => {
+      if (endpointData) {
+        endpointData.cleanup();
+        endpointData = undefined;
+      }
+
+      if (alertData) {
+        alertData.cleanup();
+        alertData = undefined;
+      }
+    });
+
+    describe('see results when has RBAC', () => {
       before(() => {
         login(ROLE.endpoint_response_actions_access);
         disableExpandableFlyoutAdvancedSettings();
@@ -73,17 +77,8 @@ describe('Results', { tags: ['@ess', '@serverless'] }, () => {
         cy.getByTestSubj('endpoint-results-comment');
         cy.contains(/isolate is pending|isolate completed successfully/g);
       });
-    }
-  );
-  describe(
-    'do not see results results when does not have RBAC',
-    {
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      tags: ['@brokenInServerless'],
-    },
-    () => {
+    });
+    describe('do not see results results when does not have RBAC', () => {
       before(() => {
         login(ROLE.endpoint_response_actions_no_access);
         disableExpandableFlyoutAdvancedSettings();
@@ -101,6 +96,6 @@ describe('Results', { tags: ['@ess', '@serverless'] }, () => {
           'To access these results, ask your administrator for Elastic Defend Kibana privileges.'
         );
       });
-    }
-  );
-});
+    });
+  }
+);
