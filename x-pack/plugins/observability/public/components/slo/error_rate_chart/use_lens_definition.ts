@@ -7,7 +7,7 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { ALL_VALUE, SLOResponse, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 
 export function useLensDefinition(
@@ -16,9 +16,7 @@ export function useLensDefinition(
 ): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
-  const interval = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-    ? slo.objective.timesliceWindow
-    : '60s';
+  const interval = 'auto';
 
   return {
     title: 'SLO Error Rate',

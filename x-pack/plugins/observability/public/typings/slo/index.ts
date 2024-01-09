@@ -14,13 +14,19 @@ interface Duration {
   unit: DurationUnit;
 }
 
+type ActionGroup =
+  | 'slo.burnRate.alert'
+  | 'slo.burnRate.high'
+  | 'slo.burnRate.medium'
+  | 'slo.burnRate.low';
+
 interface WindowSchema {
   id: string;
   burnRateThreshold: number;
   maxBurnRateThreshold: number;
   longWindow: Duration;
   shortWindow: Duration;
-  actionGroup: string;
+  actionGroup: ActionGroup;
 }
 
 interface BurnRateRuleParams extends RuleTypeParams {
@@ -33,4 +39,4 @@ interface ChartData {
   value: number | undefined;
 }
 
-export type { BurnRateRuleParams, ChartData, Duration, DurationUnit, WindowSchema };
+export type { ActionGroup, BurnRateRuleParams, ChartData, Duration, DurationUnit, WindowSchema };
