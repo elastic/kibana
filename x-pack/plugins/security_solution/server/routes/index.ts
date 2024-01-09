@@ -64,6 +64,7 @@ import {
   riskEngineEnableRoute,
   riskEngineStatusRoute,
   riskEnginePrivilegesRoute,
+  riskEngineSettingsRoute,
 } from '../lib/entity_analytics/risk_engine/routes';
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
@@ -159,12 +160,13 @@ export const initRoutes = (
   }
 
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
-    riskScorePreviewRoute(router, logger);
-    riskScoreCalculationRoute(router, logger);
+    riskScorePreviewRoute(router, logger, config.experimentalFeatures);
+    riskScoreCalculationRoute(router, logger, config.experimentalFeatures);
     riskEngineStatusRoute(router);
     riskEngineInitRoute(router, getStartServices);
     riskEngineEnableRoute(router, getStartServices);
     riskEngineDisableRoute(router, getStartServices);
+    riskEngineSettingsRoute(router);
     if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {
       riskEnginePrivilegesRoute(router, getStartServices);
     }

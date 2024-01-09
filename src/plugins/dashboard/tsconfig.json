@@ -70,7 +70,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/logging",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": ["target/**/*"]
 }
