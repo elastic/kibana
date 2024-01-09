@@ -52,9 +52,7 @@ export class ServerlessObservabilityPlugin
     const { observabilityShared, serverless, management, cloud } = setupDeps;
     observabilityShared.setIsSidebarEnabled(false);
     serverless.setProjectHome('/app/observability/landing');
-    serverless.setSideNavComponentDeprecated(
-      getObservabilitySideNavComponent(core, { serverless, cloud })
-    );
+    serverless.setSideNavComponent(getObservabilitySideNavComponent(core, { serverless, cloud }));
     management.setIsSidebarEnabled(false);
     management.setupCardsNavigation({
       enabled: true,

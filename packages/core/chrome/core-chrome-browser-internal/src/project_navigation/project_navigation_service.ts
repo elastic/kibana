@@ -110,7 +110,7 @@ export class ProjectNavigationService {
       setProjectUrl: (projectUrl: string) => {
         this.projectUrl$.next(projectUrl);
       },
-      setProjectNavigationDeprecated: (projectNavigation: ChromeProjectNavigation) => {
+      setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
         this.projectNavigation$.next(projectNavigation);
         this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
         this.setActiveProjectNavigationNodes();
@@ -118,7 +118,7 @@ export class ProjectNavigationService {
       getActiveNodes$: () => {
         return this.activeNodes$.pipe(takeUntil(this.stop$));
       },
-      setSideNavComponentDeprecated: (component: SideNavComponent | null) => {
+      setSideNavComponent: (component: SideNavComponent | null) => {
         this.customProjectSideNavComponent$.next({ current: component });
       },
       getProjectSideNavComponent$: () => {

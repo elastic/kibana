@@ -69,7 +69,7 @@ export interface InternalChromeStart extends ChromeStart {
      *
      * Use {@link ServerlessPluginStart.setNavigation} to set project navigation config.
      */
-    setNavigationDeprecated(projectNavigation: ChromeProjectNavigation): void;
+    setNavigation(projectNavigation: ChromeProjectNavigation): void;
 
     /**
      * Returns an observable of the active nodes in the project navigation.
@@ -84,7 +84,7 @@ export interface InternalChromeStart extends ChromeStart {
      *
      * Use {@link ServerlessPluginStart.setSideNavComponent} to set custom project navigation.
      */
-    setSideNavComponentDeprecated(component: SideNavComponent | null): void;
+    setSideNavComponent(component: SideNavComponent | null): void;
 
     /**
      * Set project breadcrumbs

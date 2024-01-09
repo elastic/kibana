@@ -24,8 +24,8 @@ export interface ServerlessPluginStart {
     params?: Partial<ChromeSetProjectBreadcrumbsParams>
   ) => void;
   setProjectHome(homeHref: string): void;
-  setNavigationDeprecated(projectNavigation: ChromeProjectNavigation): void;
-  setSideNavComponentDeprecated: (navigation: SideNavComponent) => void;
+  setNavigation(projectNavigation: ChromeProjectNavigation): void;
+  setSideNavComponent: (navigation: SideNavComponent) => void;
   getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
 }
 

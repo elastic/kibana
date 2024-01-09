@@ -263,14 +263,14 @@ export class ChromeService {
       }
     };
 
-    const setSideNavComponentDeprecated = (component: ISideNavComponent | null) => {
+    const setSideNavComponent = (component: ISideNavComponent | null) => {
       validateChromeStyle();
-      projectNavigation.setSideNavComponentDeprecated(component);
+      projectNavigation.setSideNavComponent(component);
     };
 
-    const setProjectNavigationDeprecated = (config: ChromeProjectNavigation) => {
+    const setProjectNavigation = (config: ChromeProjectNavigation) => {
       validateChromeStyle();
-      projectNavigation.setProjectNavigationDeprecated(config);
+      projectNavigation.setProjectNavigation(config);
     };
 
     const setProjectBreadcrumbs = (
@@ -525,8 +525,8 @@ export class ChromeService {
         setProjectsUrl,
         setProjectUrl,
         setProjectName,
-        setNavigationDeprecated: setProjectNavigationDeprecated,
-        setSideNavComponentDeprecated,
+        setNavigation: setProjectNavigation,
+        setSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
       },

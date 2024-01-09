@@ -119,7 +119,7 @@ export class ServerlessSearchPlugin
   ): ServerlessSearchPluginStart {
     const { serverless, management, cloud, indexManagement } = services;
     serverless.setProjectHome('/app/elasticsearch');
-    serverless.setSideNavComponentDeprecated(createComponent(core, { serverless, cloud }));
+    serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
     management.setIsSidebarEnabled(false);
     management.setupCardsNavigation({
       enabled: true,
