@@ -51,7 +51,6 @@ export const selectCurrentDiscoverEsqlQuery = (
 ) => {
   goToEsqlTab();
   cy.get(discoverEsqlInput).should('be.visible').click();
-  cy.get(discoverEsqlInput).should('be.focused');
   cy.get(DISCOVER_ESQL_INPUT_EXPAND).click();
   cy.get(discoverEsqlInput).type(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
 };

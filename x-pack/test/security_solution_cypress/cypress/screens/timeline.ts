@@ -284,6 +284,12 @@ export const HOVER_ACTIONS = {
   SHOW_TOP: '[data-test-subj=show-top-field]',
 };
 
+export const TIMELINE_FILTER_OUT = '[data-test-subj="filter-out-value"]';
+
+export const TIMELINE_FILTER_FOR = '[data-test-subj="filter-for-value"]';
+
+export const TIMELINE_FILTER_BADGE_ENABLED = '[data-test-subj~="filter-enabled"]';
+
 export const GET_TIMELINE_HEADER = (fieldName: string) => {
   return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
 };
