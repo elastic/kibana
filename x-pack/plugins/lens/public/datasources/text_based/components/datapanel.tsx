@@ -24,11 +24,11 @@ import {
   GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list';
-import type { DatasourceDataPanelProps } from '../../types';
-import type { TextBasedPrivateState } from './types';
-import { getStateFromAggregateQuery } from './utils';
-import { FieldItem } from '../common/field_item';
-import { getColumnsFromCache } from './fieldlist_cache';
+import type { DatasourceDataPanelProps } from '../../../types';
+import type { TextBasedPrivateState } from '../types';
+import { getStateFromAggregateQuery } from '../utils';
+import { FieldItem } from '../../common/field_item';
+import { getColumnsFromCache } from '../fieldlist_cache';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 

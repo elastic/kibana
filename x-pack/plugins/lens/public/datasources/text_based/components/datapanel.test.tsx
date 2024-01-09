@@ -23,14 +23,14 @@ import { EuiHighlight, EuiToken } from '@elastic/eui';
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import type { TextBasedPrivateState } from './types';
+import type { TextBasedPrivateState } from '../types';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
-import { createMockFramePublicAPI } from '../../mocks';
-import { DataViewsState } from '../../state_management';
-import { addColumnsToCache } from './fieldlist_cache';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
+import { createMockFramePublicAPI } from '../../../mocks';
+import { DataViewsState } from '../../../state_management';
+import { addColumnsToCache } from '../fieldlist_cache';
 
 const fieldsFromQuery = [
   {

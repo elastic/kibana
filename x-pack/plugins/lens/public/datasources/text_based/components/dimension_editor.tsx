@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { DatasourceDimensionEditorProps, DataType } from '../../types';
+import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
 import { FieldSelect } from './field_select';
-import type { TextBasedPrivateState } from './types';
-import { retrieveLayerColumnsFromCache } from './fieldlist_cache';
+import type { TextBasedPrivateState } from '../types';
+import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
@@ -32,24 +32,19 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
       id: col.columnId,
       name: col.fieldName,
       meta: col?.meta ?? { type: 'number' },
-    };
-  });
-  const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
-  const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
-
-  const updatedFields = fields?.map((f) => {
-    return {
-      ...f,
       compatible:
         props.isMetricDimension && hasNumberTypeColumns
           ? props.filterOperations({
-              dataType: f.meta.type as DataType,
-              isBucketed: Boolean(f?.meta?.type !== 'number'),
+              dataType: col?.meta?.type as DataType,
+              isBucketed: Boolean(col?.meta?.type !== 'number'),
               scale: 'ordinal',
             })
           : true,
     };
   });
+  const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
+  const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
+
   return (
     <>
       <EuiFormRow
@@ -61,7 +56,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         className="lnsIndexPatternDimensionEditor--padded"
       >
         <FieldSelect
-          existingFields={updatedFields ?? []}
+          existingFields={fields ?? []}
           selectedField={selectedField}
           onChoose={(choice) => {
             const meta = fields?.find((f) => f.name === choice.field)?.meta;

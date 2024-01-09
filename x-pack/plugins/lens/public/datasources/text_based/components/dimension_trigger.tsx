@@ -9,14 +9,14 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { DatasourceDimensionTriggerProps } from '../../types';
-import type { TextBasedPrivateState } from './types';
+import type { DatasourceDimensionTriggerProps } from '../../../types';
+import type { TextBasedPrivateState } from '../types';
 import {
   getColumnsFromCache,
   addColumnsToCache,
   retrieveLayerColumnsFromCache,
-} from './fieldlist_cache';
-import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
+} from '../fieldlist_cache';
+import { fetchFieldsFromESQL } from '../fetch_fields_from_esql';
 
 export type TextBasedDimensionTrigger = DatasourceDimensionTriggerProps<TextBasedPrivateState> & {
   columnLabelMap: Record<string, string>;
@@ -27,6 +27,7 @@ export function TextBasedDimensionTrigger(props: TextBasedDimensionTrigger) {
   const [dataHasLoaded, setDataHasLoaded] = useState(false);
   const query = props.state.layers[props.layerId]?.query;
   useEffect(() => {
+    // in case the columns are not in the cache, I refetch them
     async function fetchColumns() {
       const fieldList = query ? getColumnsFromCache(query) : [];
 
