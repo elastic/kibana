@@ -6,12 +6,16 @@
  */
 
 import type { ExistsFilter, Filter } from '@kbn/es-query';
+import { tableDefaults } from '@kbn/securitysolution-data-table';
+import { createLicenseServiceMock } from '../../../../common/license/mocks';
 import {
   buildAlertAssigneesFilter,
   buildAlertsFilter,
   buildAlertStatusesFilter,
   buildAlertStatusFilter,
   buildThreatMatchFilter,
+  getAlertsDefaultModel,
+  getAlertsPreviewDefaultModel,
 } from './default_config';
 
 jest.mock('./actions');
@@ -197,6 +201,272 @@ describe('alerts default_config', () => {
       };
       expect(filters).toHaveLength(1);
       expect(filters[0]).toEqual(expected);
+    });
+  });
+
+  describe('getAlertsDefaultModel', () => {
+    test('returns correct model for Basic license', () => {
+      const licenseServiceMock = createLicenseServiceMock();
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+      const model = getAlertsDefaultModel(licenseServiceMock);
+
+      const expected = {
+        ...tableDefaults,
+        showCheckboxes: true,
+        columns: [
+          { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Assignees',
+            id: 'kibana.alert.workflow_assignee_ids',
+            initialWidth: 190,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+      };
+      expect(model).toEqual(expected);
+    });
+
+    test('returns correct model for Plutinum license', () => {
+      const licenseServiceMock = createLicenseServiceMock();
+      const model = getAlertsDefaultModel(licenseServiceMock);
+
+      const expected = {
+        ...tableDefaults,
+        showCheckboxes: true,
+        columns: [
+          { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Assignees',
+            id: 'kibana.alert.workflow_assignee_ids',
+            initialWidth: 190,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'host.risk.calculated_level' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.risk.calculated_level' },
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.host.criticality_level' },
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.user.criticality_level' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+      };
+      expect(model).toEqual(expected);
+    });
+  });
+
+  describe('getAlertsPreviewDefaultModel', () => {
+    test('returns correct model for Basic license', () => {
+      const licenseServiceMock = createLicenseServiceMock();
+      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
+      const model = getAlertsPreviewDefaultModel(licenseServiceMock);
+
+      const expected = {
+        ...tableDefaults,
+        showCheckboxes: false,
+        defaultColumns: [
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.original_time', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        columns: [
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.original_time', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        sort: [
+          {
+            columnId: 'kibana.alert.original_time',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+      };
+      expect(model).toEqual(expected);
+    });
+
+    test('returns correct model for Plutinum license', () => {
+      const licenseServiceMock = createLicenseServiceMock();
+      const model = getAlertsPreviewDefaultModel(licenseServiceMock);
+
+      const expected = {
+        ...tableDefaults,
+        showCheckboxes: false,
+        defaultColumns: [
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.original_time', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'host.risk.calculated_level' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.risk.calculated_level' },
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.host.criticality_level' },
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.user.criticality_level' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        columns: [
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.original_time', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'host.risk.calculated_level' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.risk.calculated_level' },
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.host.criticality_level' },
+          { columnHeaderType: 'not-filtered', id: 'kibana.alert.user.criticality_level' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        sort: [
+          {
+            columnId: 'kibana.alert.original_time',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+      };
+      expect(model).toEqual(expected);
     });
   });
 

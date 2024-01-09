@@ -39,7 +39,6 @@ const getBaseColumns = (
 > => {
   const isPlatinumPlus = license?.isPlatinumPlus?.() ?? false;
   return [
-    assigneesColumn,
     {
       columnHeaderType: defaultColumnHeaderType,
       displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
@@ -133,6 +132,7 @@ export const getColumns = (
     initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
     linkField: 'kibana.alert.rule.uuid',
   },
+  assigneesColumn,
   ...getBaseColumns(license),
 ];
 
