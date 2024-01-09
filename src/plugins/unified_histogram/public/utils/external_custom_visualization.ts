@@ -33,12 +33,56 @@ export const extractExternalCustomVisualizationFromSuggestion = (
     customVisualization.visualizationState = {
       ...customVisualization.visualizationState,
       layers: customVisualization.visualizationState.layers.map((layer) => omit(layer, 'layerId')),
+      layerId: undefined,
     };
   }
 
   console.log('extracted custom vis', customVisualization);
 
   return customVisualization;
+};
+
+export const mergeCurrentSuggestionWithExternalCustomVisualization = ({
+  allSuggestions,
+  selectedSuggestion,
+  customVisualization,
+}: {
+  allSuggestions: Suggestion[];
+  selectedSuggestion?: Suggestion;
+  customVisualization?: ExternalCustomVisualization;
+}): Suggestion | undefined => {
+  let currentSuggestion = selectedSuggestion || allSuggestions?.[0];
+
+  if (customVisualization && typeof customVisualization.visualizationState === 'object') {
+    const matchingSuggestion = allSuggestions.find(
+      (suggestion) => suggestion.visualizationId === customVisualization.visualizationId
+    );
+
+    console.log(matchingSuggestion, customVisualization);
+
+    if (typeof matchingSuggestion === 'object') {
+      const layerId = matchingSuggestion.keptLayerIds[0];
+
+      currentSuggestion = {
+        ...matchingSuggestion,
+        visualizationState: {
+          ...(matchingSuggestion.visualizationState || {}),
+          ...(customVisualization.visualizationState || {}),
+          layers: customVisualization.visualizationState.layers
+            ? customVisualization.visualizationState.layers.map((layer) => ({
+                ...layer,
+                layerId,
+              }))
+            : matchingSuggestion.visualizationState.layers,
+          layerId: matchingSuggestion.visualizationState.layerId,
+        },
+      };
+
+      console.log('merged suggestion', currentSuggestion.visualizationState);
+    }
+  }
+
+  return currentSuggestion;
 };
 
 export const toExternalCustomVisualizationJSONString = (

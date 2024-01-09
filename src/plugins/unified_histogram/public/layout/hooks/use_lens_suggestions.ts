@@ -20,6 +20,7 @@ import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { computeInterval } from './compute_interval';
+import { mergeCurrentSuggestionWithExternalCustomVisualization } from '../../utils/external_custom_visualization';
 import { ExternalCustomVisualization } from '../../types';
 
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
@@ -64,38 +65,12 @@ export const useLensSuggestions = ({
   }, [dataView, isPlainRecord, lensSuggestionsApi, query, columns]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
-  let currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
 
-  if (
-    externalCustomVisualization &&
-    typeof externalCustomVisualization.visualizationState === 'object'
-  ) {
-    const matchingSuggestion = allSuggestions.find(
-      (suggestion) => suggestion.visualizationId === externalCustomVisualization.visualizationId
-    );
-
-    console.log(matchingSuggestion, externalCustomVisualization);
-
-    if (typeof matchingSuggestion === 'object') {
-      const layerId = matchingSuggestion.keptLayerIds[0];
-
-      currentSuggestion = {
-        ...matchingSuggestion,
-        visualizationState: {
-          ...(matchingSuggestion.visualizationState || {}),
-          ...(externalCustomVisualization.visualizationState || {}),
-          layers: externalCustomVisualization.visualizationState.layers
-            ? externalCustomVisualization.visualizationState.layers.map((layer) => ({
-                ...layer,
-                layerId,
-              }))
-            : matchingSuggestion.visualizationState.layers,
-        },
-      };
-
-      console.log('merged suggestion', currentSuggestion.visualizationState);
-    }
-  }
+  const currentSuggestion = mergeCurrentSuggestionWithExternalCustomVisualization({
+    allSuggestions,
+    selectedSuggestion: originalSuggestion,
+    customVisualization: externalCustomVisualization,
+  });
 
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
   const histogramQuery = useRef<AggregateQuery | undefined>();
@@ -165,7 +140,12 @@ export const useLensSuggestions = ({
     if (!isEqual(suggestionDeps.current, newSuggestionsDeps)) {
       setAllSuggestions(suggestions.allSuggestions);
       console.log('deps change triggers a new suggestion');
-      onSuggestionChange?.(suggestions.firstSuggestion);
+      onSuggestionChange?.(
+        mergeCurrentSuggestionWithExternalCustomVisualization({
+          allSuggestions: suggestions.allSuggestions,
+          customVisualization: externalCustomVisualization,
+        })
+      );
 
       suggestionDeps.current = newSuggestionsDeps;
     }
@@ -174,7 +154,7 @@ export const useLensSuggestions = ({
     dataView,
     onSuggestionChange,
     query,
-    suggestions.firstSuggestion,
+    externalCustomVisualization,
     suggestions.allSuggestions,
   ]);
 
