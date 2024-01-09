@@ -55,8 +55,9 @@ export const selectCurrentDiscoverEsqlQuery = (
 ) => {
   goToEsqlTab();
   // eslint-disable-next-line cypress/no-force
-  cy.get(discoverEsqlInput).should('be.visible').click({ force: true });
-  cy.get(DISCOVER_ESQL_INPUT_EXPAND).click();
+  cy.get(discoverEsqlInput).click({ force: true });
+  // eslint-disable-next-line cypress/no-force
+  cy.get(DISCOVER_ESQL_INPUT_EXPAND).click({ force: true });
   fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
 };
 

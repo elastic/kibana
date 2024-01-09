@@ -176,9 +176,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       "alert_id": "{{alert.id}}",
       "context_link": "{{context.link}}"
     }`);
-
-    // wait for models to be updated
-    // await PageObjects.common.sleep(300);
   };
 
   const openDiscoverAlertFlyout = async () => {
