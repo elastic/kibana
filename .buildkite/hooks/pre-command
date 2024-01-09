@@ -2,3 +2,4 @@
 
 source .buildkite/scripts/lifecycle/pre_command.sh
 export SONAR_LOGIN=$(vault read -field=token secret/ci/elastic-kibana/sonarqube)
+
