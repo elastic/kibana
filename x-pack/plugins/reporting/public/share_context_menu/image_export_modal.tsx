@@ -30,11 +30,11 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { BaseParams } from '@kbn/reporting-common/types';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
 import type { JobParamsProviderOptions } from '.';
-import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 
 export interface ReportingModalProps {
   apiClient: ReportingAPIClient;
@@ -94,15 +94,15 @@ const getJobsParams =
     return { ...baseParams, relativeUrl };
   };
 
- const getLayout = (): LayoutParams => {
-  const { layout } = getJobsParams()
+const getLayout = (): LayoutParams => {
+  const { layout } = getJobsParams();
 
   let dimensions = layout?.dimensions;
 
   if (!dimensions) {
     const el = document.querySelector('[data-shared-items-container]');
     const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-    dimensions = { height, width }
+    dimensions = { height, width };
   }
   if (usePrintLayout) {
     return { id: 'print', dimensions };
@@ -113,7 +113,7 @@ const getJobsParams =
   }
 
   return { id: 'preserve_layout', dimensions };
- }
+};
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const { apiClient, intl, toasts, theme, onClose, objectId, layoutOption, jobProviderOptions } =
@@ -135,11 +135,8 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const getJobParams = (
     shareableUrl?: boolean
   ): Omit<BaseParams, 'browserTimezone' | 'version'> => {
-    return { ...getJobsParams(apiClient, jobProviderOptions, selectedRadio), layout: getLayout()}
-  }
-  ;
-  ;
-
+    return { ...getJobsParams(apiClient, jobProviderOptions, selectedRadio), layout: getLayout() };
+  };
   function getAbsoluteReportGenerationUrl() {
     console.log({ selectedRadio });
     if (getJobsParams(apiClient, jobProviderOptions, selectedRadio) !== undefined) {
