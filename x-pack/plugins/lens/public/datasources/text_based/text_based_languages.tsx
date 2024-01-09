@@ -16,9 +16,9 @@ import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
-import { TextBasedDataPanel } from './datapanel';
-import { TextBasedDimensionEditor } from './dimension_editor';
-import { TextBasedDimensionTrigger } from './dimension_trigger';
+import { TextBasedDataPanel } from './components/datapanel';
+import { TextBasedDimensionEditor } from './components/dimension_editor';
+import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
 import {
   DatasourceDimensionEditorProps,
