@@ -40,50 +40,52 @@ describe('EditTagsFlyout', () => {
     useGetTagsMock.mockReturnValue({ isLoading: false, data: tags });
   });
 
-  it('renders correctly', async () => {
-    appMock.render(<EditTagsFlyout {...props} />);
+  for (let index = 0; index < 100; index++) {
+    it('renders correctly', async () => {
+      appMock.render(<EditTagsFlyout {...props} />);
 
-    expect(await screen.findByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-tags-flyout-title')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-tags-flyout-cancel')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-edit-tags-flyout-submit')).toBeInTheDocument();
-  });
-
-  it('calls onClose when pressing the cancel button', async () => {
-    appMock.render(<EditTagsFlyout {...props} />);
-
-    userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-cancel'));
-
-    await waitFor(() => {
-      expect(props.onClose).toHaveBeenCalled();
+      expect(await screen.findByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-edit-tags-flyout-title')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-edit-tags-flyout-cancel')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-edit-tags-flyout-submit')).toBeInTheDocument();
     });
-  });
 
-  it('calls onSaveTags when pressing the save selection button', async () => {
-    appMock.render(<EditTagsFlyout {...props} />);
+    it('calls onClose when pressing the cancel button', async () => {
+      appMock.render(<EditTagsFlyout {...props} />);
 
-    expect(await screen.findByText('coke')).toBeInTheDocument();
+      userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-cancel'));
 
-    userEvent.click(await screen.findByText('coke'));
-    userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-submit'));
-
-    await waitFor(() => {
-      expect(props.onSaveTags).toHaveBeenCalledWith({
-        selectedItems: ['pepsi'],
-        unSelectedItems: ['coke'],
+      await waitFor(() => {
+        expect(props.onClose).toHaveBeenCalled();
       });
     });
-  });
 
-  it('shows the case title when selecting one case', async () => {
-    appMock.render(<EditTagsFlyout {...props} />);
+    it('calls onSaveTags when pressing the save selection button', async () => {
+      appMock.render(<EditTagsFlyout {...props} />);
 
-    expect(screen.getByText(basicCase.title)).toBeInTheDocument();
-  });
+      expect(await screen.findByText('coke')).toBeInTheDocument();
 
-  it('shows the number of total selected cases in the title  when selecting multiple cases', async () => {
-    appMock.render(<EditTagsFlyout {...props} selectedCases={[basicCase, basicCase]} />);
+      userEvent.click(await screen.findByText('coke'));
+      userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-submit'));
 
-    expect(screen.getByText('Selected cases: 2')).toBeInTheDocument();
-  });
+      await waitFor(() => {
+        expect(props.onSaveTags).toHaveBeenCalledWith({
+          selectedItems: ['pepsi'],
+          unSelectedItems: ['coke'],
+        });
+      });
+    });
+
+    it('shows the case title when selecting one case', async () => {
+      appMock.render(<EditTagsFlyout {...props} />);
+
+      expect(screen.getByText(basicCase.title)).toBeInTheDocument();
+    });
+
+    it('shows the number of total selected cases in the title  when selecting multiple cases', async () => {
+      appMock.render(<EditTagsFlyout {...props} selectedCases={[basicCase, basicCase]} />);
+
+      expect(screen.getByText('Selected cases: 2')).toBeInTheDocument();
+    });
+  }
 });
