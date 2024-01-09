@@ -14,23 +14,31 @@ import {
   useEuiTheme,
   EuiSwitch,
   EuiTableSelectionType,
-  EuiButton,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CspBenchmarkRule } from '../../../common/types/latest';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleStatus } from './change_csp_rule_status';
+import { getSelectedAndUnselectedItems } from '@kbn/cases-plugin/public/components/actions/use_items_state';
 
 type RulesTableProps = Pick<
   RulesState,
-  'loading' | 'error' | 'rules_page' | 'total' | 'perPage' | 'page'
+  'loading' | 'error' | 'rules_page' | 'total' | 'perPage' | 'page' | 'all_rules'
 > & {
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   setSelectedRuleId(id: string | null): void;
   selectedRuleId: string | null;
   refetchStatus: () => void;
+  selectedRules: CspBenchmarkRule[];
+  setSelectedRules: (e: CspBenchmarkRule[]) => void;
 };
+
+type GetColumnProps = Pick<
+  RulesTableProps,
+  'setSelectedRuleId' | 'refetchStatus' | 'selectedRules'
+>;
 
 export const RulesTable = ({
   setPagination,
@@ -43,6 +51,9 @@ export const RulesTable = ({
   error,
   selectedRuleId,
   refetchStatus,
+  selectedRules,
+  setSelectedRules,
+  all_rules: allItems,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
   const euiPagination: EuiBasicTableProps<CspBenchmarkRule>['pagination'] = {
@@ -66,55 +77,51 @@ export const RulesTable = ({
 
   // SELECTION
 
-  const [selectedRules, setSelectedRules] = useState<CspBenchmarkRule[]>([]);
   const onSelectionChange = (selectedRule: CspBenchmarkRule[]) => {
+    // if (selectAllRules === false) setSelectedRules(selectedRule);
+    // else setSelectedRules(selectedRule);
+    console.log(selectedRule);
     setSelectedRules(selectedRule);
   };
 
   const selection: EuiTableSelectionType<CspBenchmarkRule> = {
-    selectable: (rule: CspBenchmarkRule) => rule.metadata.name.length !== 0,
+    // selectable: (rule: CspBenchmarkRule) => rule.metadata.name.length !== 0,
     onSelectionChange,
+    selected: selectedRules,
   };
 
-  const bulkSelectedRules = selectedRules.map((e) => ({
-    benchmark_id: e?.metadata.benchmark.id,
-    benchmark_version: e?.metadata.benchmark.version,
-    rule_number: e?.metadata.benchmark.rule_number,
-    rule_id: e?.metadata.id,
-  }));
+  const [selectAllRulesThisPage, setSelectAllRulesThisPage] = useState<boolean>(false);
   const postRequestChangeRulesStatus = useChangeCspRuleStatus();
-  const muteButton = () => {
-    const useChangeCspRuleStatusFn = async () => {
-      await postRequestChangeRulesStatus('mute', bulkSelectedRules);
-      await refetchStatus();
-    };
-    return selectedRules.length > 0 ? (
-      <EuiButton color="danger" iconType="trash" onClick={useChangeCspRuleStatusFn}>
-        Mute Button
-      </EuiButton>
-    ) : null;
-  };
-  const unmuteButton = () => {
-    const useChangeCspRuleStatusFn = async () => {
-      await postRequestChangeRulesStatus('unmute', bulkSelectedRules);
-      await refetchStatus();
-    };
-    return selectedRules.length > 0 ? (
-      <EuiButton color="danger" iconType="trash" onClick={useChangeCspRuleStatusFn}>
-        Unmute Button
-      </EuiButton>
-    ) : null;
-  };
+  // const selectAllRulesThISpageCheckboxFn = () => {
+  // setSelectAllRulesThisPage(!selectAllRulesThisPage);
+  // setSelectedRules(items);
+  // };
   const columns = useMemo(
-    () => getColumns({ setSelectedRuleId, refetchStatus, postRequestChangeRulesStatus }),
-    [refetchStatus, setSelectedRuleId, postRequestChangeRulesStatus]
+    () =>
+      getColumns({
+        setSelectedRuleId,
+        refetchStatus,
+        postRequestChangeRulesStatus,
+        selectedRules,
+        setSelectedRules,
+        items,
+        setSelectAllRulesThisPage,
+        selectAllRulesThisPage,
+      }),
+    [
+      setSelectedRuleId,
+      refetchStatus,
+      postRequestChangeRulesStatus,
+      selectedRules,
+      setSelectedRules,
+      items,
+      setSelectAllRulesThisPage,
+      selectAllRulesThisPage,
+    ]
   );
-  // TILL HERE
 
   return (
     <>
-      {muteButton()}
-      {unmuteButton()}
       <EuiBasicTable
         data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE}
         loading={loading}
@@ -125,20 +132,66 @@ export const RulesTable = ({
         onChange={onTableChange}
         itemId={(v) => v.metadata.id}
         rowProps={rowProps}
-        isSelectable={true}
-        selection={selection}
+        // isSelectable={true}
+        // selection={selection}
       />
     </>
   );
 };
 
-type GetColumnProps = Pick<RulesTableProps, 'setSelectedRuleId' | 'refetchStatus'>;
-
 const getColumns = ({
   setSelectedRuleId,
   refetchStatus,
   postRequestChangeRulesStatus,
-}): Array<EuiTableFieldDataColumnType<CspBenchmarkRule>> => [
+  selectedRules,
+  setSelectedRules,
+  items,
+  setSelectAllRulesThisPage,
+  selectAllRulesThisPage,
+}: GetColumnProps & any): Array<EuiTableFieldDataColumnType<CspBenchmarkRule>> => [
+  {
+    field: 'action',
+    name: (
+      <EuiCheckbox
+        id={`cloud-security-fields-selector-item-all`}
+        checked={selectAllRulesThisPage || selectedRules.length >= items.length}
+        onChange={() => {
+          const onChangeSelectAllThisPageFn = () => {
+            setSelectedRules(items);
+            setSelectAllRulesThisPage(!selectAllRulesThisPage);
+          };
+          const onChangeDeselectAllThisPageFn = () => {
+            setSelectedRules([]);
+            setSelectAllRulesThisPage(!selectAllRulesThisPage);
+          };
+          return selectAllRulesThisPage
+            ? onChangeDeselectAllThisPageFn()
+            : onChangeSelectAllThisPageFn();
+        }}
+      />
+    ),
+    width: '30px',
+    sortable: false,
+    render: (rules, item: CspBenchmarkRule) => {
+      return (
+        <EuiCheckbox
+          checked={selectedRules.some((e: CspBenchmarkRule) => e.metadata.id === item.metadata.id)}
+          id={`cloud-security-fields-selector-item-${item.metadata.id}`}
+          data-test-subj={`cloud-security-fields-selector-item-${item.metadata.id}`}
+          onChange={(e) => {
+            const isChecked = e.target.checked;
+            return isChecked
+              ? setSelectedRules([...selectedRules, item])
+              : setSelectedRules(
+                  selectedRules.filter(
+                    (rule: CspBenchmarkRule) => rule.metadata.id !== item.metadata.id
+                  )
+                );
+          }}
+        />
+      );
+    },
+  },
   {
     field: 'metadata.benchmark.rule_number',
     name: i18n.translate('xpack.csp.rules.rulesTable.ruleNumberColumnLabel', {
@@ -178,7 +231,7 @@ const getColumns = ({
   {
     field: 'metadata.name',
     name: i18n.translate('xpack.csp.rules.rulesTable.mutedColumnLabel', {
-      defaultMessage: 'Muted',
+      defaultMessage: 'Enabled',
     }),
     width: '10%',
     truncateText: true,

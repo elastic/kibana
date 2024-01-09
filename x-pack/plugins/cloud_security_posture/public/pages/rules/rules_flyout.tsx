@@ -83,7 +83,7 @@ export const RuleFlyout = ({ onClose, rule, refetchStatus }: RuleFlyoutProps) =>
           checked={rule?.status === 'muted' ? true : false}
           onChange={useChangeCspRuleStatusFn}
           data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
-          label={rule.status === 'muted' ? 'Muted' : 'Unmuted'}
+          label={rule.status === 'muted' ? 'Enabled' : 'Disabled'}
         />
         <EuiSpacer />
         <EuiTabs>

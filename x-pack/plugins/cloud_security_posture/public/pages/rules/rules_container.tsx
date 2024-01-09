@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { extractErrorMessage } from '../../../common/utils/helpers';
@@ -50,6 +50,26 @@ const getRulesPageData = (
   };
 };
 
+const getRulesPageData2 = (
+  data: any[],
+  status: string,
+  error: unknown,
+  query: RulesQuery
+): RulesPageData => {
+  const rules = data || ([] as CspBenchmarkRule[]);
+
+  const page = getPage(rules, query);
+
+  return {
+    loading: status === 'loading',
+    error: error ? extractErrorMessage(error) : undefined,
+    all_rules: rules,
+    rules_map: new Map(rules.map((rule) => [rule.metadata.id, rule])),
+    rules_page: page,
+    total: data?.length || 0,
+  };
+};
+
 const getPage = (data: CspBenchmarkRule[], { page, perPage }: RulesQuery) =>
   data.slice(page * perPage, (page + 1) * perPage);
 
@@ -59,6 +79,7 @@ export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
+  const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
     ruleNumber: undefined,
@@ -101,8 +122,9 @@ export const RulesContainer = () => {
       e.benchmark_id === params.benchmarkId && e.benchmark_version === 'v' + params.benchmarkVersion
   );
 
-  const newRulesItems: any[] = useMemo(() => {
-    return rulesPageData.rules_page.reduce((res: any[], obj1) => {
+  const allNewRulesItems: any[] = useMemo(() => {
+    if (data === undefined) return [];
+    return data?.items.reduce((res: any[], obj1) => {
       const rulesKey =
         obj1.metadata.benchmark.id +
         ';' +
@@ -120,7 +142,16 @@ export const RulesContainer = () => {
       }
       return res;
     }, []);
-  }, [rulesPageData.rules_page, rulesStates.data]);
+  }, [data, rulesStates?.data]);
+
+  const filteredAllNewRulesItems: any[] | undefined = useMemo(() => {
+    if (enabledDisabledItemsFilter === 'enabled')
+      return allNewRulesItems?.filter((e) => e?.status === 'muted');
+    else if (enabledDisabledItemsFilter === 'disabled')
+      return allNewRulesItems?.filter((e) => e?.status === 'unmuted');
+    else return allNewRulesItems;
+  }, [allNewRulesItems, enabledDisabledItemsFilter]);
+
   const sectionList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.section),
     [allRules.data]
@@ -132,6 +163,21 @@ export const RulesContainer = () => {
   const cleanedSectionList = [...new Set(sectionList)];
   const cleanedRuleNumberList = [...new Set(ruleNumberList)];
 
+  const rulesPageData2 = useMemo(
+    () => getRulesPageData2(filteredAllNewRulesItems, status, error, rulesQuery),
+    [filteredAllNewRulesItems, status, error, rulesQuery]
+  );
+
+  const [selectedRules, setSelectedRules] = useState<CspBenchmarkRule[]>([]);
+  // const [selectAllRules, setSelectAllRules] = useState<boolean>(false);
+console.log(rulesPageData2)
+  // useEffect(() => {
+  //   if (selectAllRules === true) setSelectedRules(rulesPageData2.all_rules);
+  // }, [rulesPageData2.all_rules, selectAllRules]);
+
+  const setSelectAllRules = () => {
+    setSelectedRules(rulesPageData2.all_rules);
+  };
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
       <EuiPanel hasBorder={false} hasShadow={false}>
@@ -146,16 +192,23 @@ export const RulesContainer = () => {
           ruleNumberSelectOptions={cleanedRuleNumberList}
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
           searchValue={rulesQuery.search || ''}
-          totalRulesCount={rulesPageData.all_rules.length}
-          pageSize={rulesPageData.rules_page.length}
+          totalRulesCount={rulesPageData2.all_rules.length}
+          pageSize={rulesPageData2.rules_page.length}
           isSearching={status === 'loading'}
+          selectedRules={selectedRules}
+          refetchStatus={rulesStates.refetch}
+          setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
+          currentEnabledDisabledItemsFilterState={enabledDisabledItemsFilter}
+          allRules={rulesPageData2.all_rules}
+          setSelectedRules={setSelectedRules}
+          setSelectAllRules={setSelectAllRules}
         />
         <EuiSpacer />
         <RulesTable
-          rules_page={newRulesItems}
-          total={rulesPageData.total}
-          error={rulesPageData.error}
-          loading={rulesPageData.loading}
+          rules_page={rulesPageData2.rules_page}
+          total={rulesPageData2.total}
+          error={rulesPageData2.error}
+          loading={rulesPageData2.loading}
           perPage={pageSize || rulesQuery.perPage}
           page={rulesQuery.page}
           setPagination={(paginationQuery) => {
@@ -165,6 +218,9 @@ export const RulesContainer = () => {
           setSelectedRuleId={setSelectedRuleId}
           selectedRuleId={selectedRuleId}
           refetchStatus={rulesStates.refetch}
+          selectedRules={selectedRules}
+          setSelectedRules={setSelectedRules}
+          all_rules={rulesPageData2.all_rules}
         />
       </EuiPanel>
       {selectedRuleId && (
