@@ -12,8 +12,7 @@ import type {
   DataTableModel,
   TableIdLiteral,
 } from '@kbn/securitysolution-data-table';
-import { tableEntity, TableEntityType } from '@kbn/securitysolution-data-table';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { tableEntity, TableEntityType, TableId } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { assigneesColumn } from '../../../detections/configurations/security_solution_detections/columns';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, VIEW_SELECTION } from '../../../../common/constants';
