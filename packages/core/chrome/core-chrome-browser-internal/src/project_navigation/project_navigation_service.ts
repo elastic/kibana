@@ -7,7 +7,7 @@
  */
 
 import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import {
+import type {
   ChromeNavLinks,
   ChromeProjectNavigation,
   SideNavComponent,

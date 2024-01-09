@@ -45,7 +45,7 @@ import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { RecentlyAccessedService } from './recently_accessed';
-import { Header, LoadingIndicator, ProjectHeader, ProjectSideNavigation } from './ui';
+import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
@@ -373,19 +373,18 @@ export class ChromeService {
           const activeNodes$ = projectNavigation.getActiveNodes$();
 
           const ProjectHeaderWithNavigationComponent = () => {
-            const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
+            const CustomSideNavComponent = useObservable(projectNavigationComponent$, {
+              current: null,
+            });
             const activeNodes = useObservable(activeNodes$, []);
 
             const currentProjectBreadcrumbs$ = projectBreadcrumbs$;
 
             let SideNavComponent: ISideNavComponent = () => null;
 
-            if (CustomSideNavComponent !== undefined) {
+            if (CustomSideNavComponent.current) {
               // We have the state from the Observable
-              SideNavComponent =
-                CustomSideNavComponent.current !== null
-                  ? CustomSideNavComponent.current
-                  : ProjectSideNavigation;
+              SideNavComponent = CustomSideNavComponent.current;
             }
 
             return (
