@@ -109,15 +109,6 @@ export type RootNavigationItemDefinition<
   | PresetDefinition<LinkId, Id, ChildrenId>
   | ItemDefinition<LinkId, Id, ChildrenId>;
 
-export type ProjectNavigationTreeDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> = Array<
-  | Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'type'>
-  | Omit<ItemDefinition<LinkId, Id, ChildrenId>, 'type'>
->;
-
 /**
  * @public
  *
