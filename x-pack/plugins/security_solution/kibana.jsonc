@@ -78,7 +78,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "savedObjects"
     ],
     "extraPublicDirs": [
       "common"
