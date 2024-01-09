@@ -46,9 +46,6 @@ export const ingestPipelineTabOnClick = async (
     const installPackage = () =>
       services.http!.post('/api/fleet/epm/packages/elasticsearch', {
         headers: { 'Elastic-Api-Version': '2023-10-31' },
-        body: JSON.stringify({
-          force: true,
-        }),
       });
 
     const ref = services.overlays!.openModal(
