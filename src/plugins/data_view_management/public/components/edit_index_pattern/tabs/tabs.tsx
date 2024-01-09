@@ -22,7 +22,7 @@ import {
   EuiFilterSelectItem,
   FilterChecked,
   EuiToolTip,
-  EuiButtonIcon,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '@kbn/kibana-utils-plugin/public';
@@ -337,13 +337,12 @@ export const Tabs: React.FC<TabsProps> = ({
   );
 
   const refreshRef = useRef<HTMLButtonElement>(null);
-  const addFieldRef = useRef<HTMLButtonElement>(null);
 
   const userEditPermission = dataViews.getCanSaveSync();
   const getFilterSection = useCallback(
     (type: string) => {
       return (
-        <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={true}>
             <EuiFieldSearch
               fullWidth
@@ -444,32 +443,9 @@ export const Tabs: React.FC<TabsProps> = ({
                   </EuiPopover>
                 </EuiFilterGroup>
               </EuiFlexItem>
-
-              {userEditPermission && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip content={<p>{addFieldButtonLabel}</p>}>
-                    <EuiButtonIcon
-                      buttonRef={addFieldRef}
-                      display="base"
-                      size="m"
-                      onClick={() => {
-                        openFieldEditor();
-                        // clear tooltip focus
-                        if (addFieldRef.current) {
-                          addFieldRef.current.blur();
-                        }
-                      }}
-                      data-test-subj="addField"
-                      iconType="plus"
-                      aria-label={addFieldButtonLabel}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={<p>{refreshTooltip}</p>}>
-                  <EuiButtonIcon
+                  <EuiButton
                     buttonRef={refreshRef}
                     onClick={() => {
                       refreshIndexPatternClick();
@@ -483,11 +459,28 @@ export const Tabs: React.FC<TabsProps> = ({
                     data-test-subj="refreshDataViewButton"
                     isLoading={isRefreshing}
                     isDisabled={isRefreshing}
-                    display="base"
                     size="m"
-                  />
+                    color="success"
+                  >
+                    Refresh
+                  </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>
+              {userEditPermission && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="m"
+                    onClick={() => openFieldEditor()}
+                    data-test-subj="addField"
+                    iconType="plusInCircle"
+                    aria-label={addFieldButtonLabel}
+                    color="primary"
+                    fill
+                  >
+                    Add field
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
             </>
           )}
           {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
