@@ -7,8 +7,9 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { WebElementWrapper, type TimeoutOpt } from '@kbn/ftr-common-functional-ui-services';
-import { FtrService } from '../../ftr_provider_context';
+import { WebElementWrapper } from './web_element_wrapper';
+import type { TimeoutOpt } from '../types';
+import { FtrService } from './ftr_provider_context';
 
 interface ExistsOptions {
   timeout?: number;
