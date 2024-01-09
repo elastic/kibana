@@ -181,10 +181,10 @@ vault_get() {
     fullPath="secret/kibana-issues/dev/$path"
   fi
 
-  if [[ -z "${2:-}" ]]; then
-    retry 5 5 vault read "$fullPath"
+  if [[ -z "${2:-}" || "${2:-}" =~ ^-.* ]]; then
+    retry 5 5 vault read "$fullPath" "${@:2}"
   else
-    retry 5 5 vault read -field="$field" "$fullPath"
+    retry 5 5 vault read -field="$field" "$fullPath" "${@:3}"
   fi
 }
 
