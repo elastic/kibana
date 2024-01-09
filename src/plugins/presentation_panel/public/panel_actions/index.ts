@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { CustomizePanelAction, CustomTimeRangeBadge } from './customize_panel_action';
+export {
+  ACTION_CUSTOMIZE_PANEL,
+  CustomizePanelAction,
+  CustomTimeRangeBadge,
+} from './customize_panel_action';
 export { EditPanelAction } from './edit_panel_action/edit_panel_action';
 export { InspectPanelAction } from './inspect_panel_action/inspect_panel_action';
 export { getEditPanelAction } from './panel_actions';

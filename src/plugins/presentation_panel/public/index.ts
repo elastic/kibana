@@ -12,7 +12,7 @@ export function plugin() {
   return new PresentationPanelPlugin();
 }
 
-export { getEditPanelAction } from './panel_actions';
+export { getEditPanelAction, ACTION_CUSTOMIZE_PANEL } from './panel_actions';
 export { PresentationPanel } from './panel_component';
 export type { PresentationPanelProps } from './panel_component/types';
 export { PresentationPanelError } from './panel_component/presentation_panel_error';
