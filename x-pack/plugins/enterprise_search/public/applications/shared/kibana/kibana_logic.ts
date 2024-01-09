@@ -19,6 +19,7 @@ import {
   IUiSettingsClient,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -26,6 +27,7 @@ import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/pub
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
+import { ESConfig } from '../../../plugin';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -40,6 +42,7 @@ export interface KibanaLogicProps {
   cloud?: CloudSetup;
   config: ClientConfigType;
   data: DataPublicPluginStart;
+  esConfig: ESConfig;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   isSidebarEnabled: boolean;
@@ -75,6 +78,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     cloud: [props.cloud || {}, {}],
     config: [props.config || {}, {}],
     data: [props.data, {}],
+    esConfig: [props.esConfig, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
