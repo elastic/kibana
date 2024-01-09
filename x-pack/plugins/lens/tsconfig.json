@@ -102,6 +102,7 @@
     "@kbn/discover-utils",
     "@kbn/lens-formula-docs",
     "@kbn/visualization-utils",
+    "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility"
   ],
   "exclude": [
