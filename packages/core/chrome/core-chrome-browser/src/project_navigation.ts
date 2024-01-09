@@ -50,15 +50,6 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
-export interface CloudLink {
-  title: string;
-  href: string;
-}
-
-export type CloudLinks = {
-  [id in CloudLinkId]?: CloudLink;
-};
-
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
@@ -377,11 +368,4 @@ export interface NavigationTreeDefinition<
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
   footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
-}
-
-export interface CloudUrls {
-  billingUrl?: string;
-  deploymentUrl?: string;
-  performanceUrl?: string;
-  usersAndRolesUrl?: string;
 }
