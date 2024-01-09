@@ -391,7 +391,7 @@ export class ManifestManager {
   }
 
   /**
-   * Writes new artifact SOs.
+   * Writes new artifact to Fleet
    *
    * @param artifacts An InternalArtifactCompleteSchema array representing the artifacts.
    * @param newManifest A Manifest representing the new manifest
@@ -558,15 +558,10 @@ export class ManifestManager {
 
     for (const result of results) {
       iterateArtifactsBuildResult(result, (artifact, policyId) => {
-        const artifactToAdd = baselineManifest.getArtifact(getArtifactId(artifact)) || artifact;
-        if (!internalArtifactCompleteSchema.is(artifactToAdd)) {
-          throw new EndpointError(
-            `Incomplete artifact detected: ${getArtifactId(artifactToAdd)}`,
-            artifactToAdd
-          );
-        }
-
-        manifest.addEntry(artifactToAdd, policyId);
+        manifest.addEntry(
+          baselineManifest.getArtifact(getArtifactId(artifact)) || artifact,
+          policyId
+        );
       });
     }
 
@@ -658,13 +653,13 @@ export class ManifestManager {
     this.logger.info(`Policies updated: [${updatedPolicies.length}]`);
 
     if (updatedPolicies.length) {
-      this.logger.debug(`  ${updatedPolicies.join('\n  ')}`);
+      this.logger.debug(`Updated Policies:\n  ${updatedPolicies.join('\n  ')}`);
     }
 
     this.logger.info(`Policies un-changed: [${unChangedPolicies.length}]`);
 
     if (unChangedPolicies.length) {
-      this.logger.debug(`  ${unChangedPolicies.join('\n  ')}`);
+      this.logger.debug(`Un-changed Policies:\n  ${unChangedPolicies.join('\n  ')}`);
     }
 
     return errors;
@@ -726,7 +721,7 @@ export class ManifestManager {
     const fleetArtifacts: Artifact[] = [];
     let total = 0;
 
-    for await (const artifacts of this.artifactClient.fetchAll()) {
+    for await (const artifacts of this.artifactClient.fetchAll({ includeArtifactBody: false })) {
       fleetArtifacts.push(...artifacts);
       total += artifacts.length;
     }

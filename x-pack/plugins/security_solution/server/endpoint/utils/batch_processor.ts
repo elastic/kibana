@@ -143,7 +143,8 @@ export class BatchProcessor<T = unknown> {
     await this.processQueue(true);
 
     this.log(
-      `Processed [${this.batchCount}] batches and a total of [${this.itemsProcessedCount}] items`
+      `Processed [${this.batchCount}] batches and a total of [${this.itemsProcessedCount}] items`,
+      'debug'
     );
   }
 }
