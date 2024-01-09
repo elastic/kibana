@@ -6,6 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { MAX_PERCENT, PERCENTILE_SPACING } from './constants';
 
 export interface ESQLQuery {
   esql: string;
@@ -13,3 +14,10 @@ export interface ESQLQuery {
 export function isESQLQuery(arg: unknown): arg is ESQLQuery {
   return isPopulatedObject(arg, ['esql']);
 }
+const PERCENTS = Array.from(
+  Array(MAX_PERCENT / PERCENTILE_SPACING + 1),
+  (_, i) => i * PERCENTILE_SPACING
+);
+
+export const getPercentileESQLQuery = (fieldName: string) =>
+  PERCENTS.map((p) => `${fieldName}_p${p} = PERCENTILE(${fieldName}, ${p})`);
