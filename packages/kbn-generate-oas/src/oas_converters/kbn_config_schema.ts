@@ -92,14 +92,27 @@ const MUTATEreplaceRecordType = (schema: OpenAPIV3.SchemaObject): void => {
   schema.type = 'object';
 };
 
+const arrayContainers: Array<keyof OpenAPIV3.SchemaObject> = ['allOf', 'oneOf', 'anyOf'];
+
 const walkSchema = (schema: OpenAPIV3.SchemaObject): void => {
   if (schema.type === 'array') {
     walkSchema(schema.items as OpenAPIV3.SchemaObject);
   } else if (schema.type === 'object') {
     MUTATEstripDefaultDeep(schema);
-    Object.values(schema.properties!).forEach((obj) => walkSchema(obj as OpenAPIV3.SchemaObject));
+    if (schema.properties) {
+      Object.values(schema.properties!).forEach((obj) => walkSchema(obj as OpenAPIV3.SchemaObject));
+    }
   } else if ((schema.type as string) === 'record') {
     MUTATEreplaceRecordType(schema);
+  } else if (schema.type) {
+    // Do nothing
+  } else {
+    for (const arrayContainer of arrayContainers) {
+      if (schema[arrayContainer]) {
+        schema[arrayContainer].forEach(walkSchema);
+        break;
+      }
+    }
   }
 };
 
