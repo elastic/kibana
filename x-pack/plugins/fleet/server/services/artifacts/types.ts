@@ -74,6 +74,8 @@ export type ListArtifactsProps = Pick<ListWithKuery, 'perPage' | 'page' | 'kuery
 
 export type FetchAllArtifactsOptions = Pick<ListWithKuery, 'perPage' | 'kuery' | 'sortOrder'> & {
   sortField?: string | keyof ArtifactElasticsearchProperties;
+  /** If false, then the `body` property of the Artifact will be excluded from the results. Default is `true` */
+  includeArtifactBody?: boolean;
 };
 
 /**

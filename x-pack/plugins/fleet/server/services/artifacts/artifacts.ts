@@ -303,9 +303,7 @@ export const fetchAllArtifacts = (
   esClient: ElasticsearchClient,
   options: FetchAllArtifactsOptions = {}
 ): AsyncIterable<Artifact[]> => {
-  // FIXME:PT add options to NOT return `body` (cut down on data)
-
-  const { kuery = '', perPage = 1000, sortField, sortOrder } = options;
+  const { kuery = '', perPage = 1000, sortField, sortOrder, includeArtifactBody = true } = options;
 
   return createEsSearchIterable<ArtifactElasticsearchProperties>({
     esClient,
@@ -324,10 +322,29 @@ export const fetchAllArtifacts = (
           },
         },
       ],
+      _source_excludes: includeArtifactBody ? undefined : 'body',
     },
     resultsMapper: (data): Artifact[] => {
-      // @ts-expect-error @elastic/elasticsearch _source is optional
-      return data.hits.hits.map((hit) => esSearchHitToArtifact(hit));
+      return data.hits.hits.map((hit) => {
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        const artifact = esSearchHitToArtifact(hit);
+
+        // If not body attribute is included, still create the property in the object (since the
+        // return type is `Artifact` and `body` is required), but throw an error is caller attempts
+        // to still access it.
+        if (!includeArtifactBody) {
+          Object.defineProperty(artifact, 'body', {
+            enumerable: false,
+            get(): string {
+              throw new Error(
+                `'body' attribute not included due to request to 'fetchAllArtifacts()' having options 'includeArtifactBody' set to 'false'`
+              );
+            },
+          });
+        }
+
+        return artifact;
+      });
     },
   });
 };

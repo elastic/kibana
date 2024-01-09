@@ -534,13 +534,12 @@ describe('When using the artifacts services', () => {
         expect(artifacts.length).toBeGreaterThan(0);
       }
 
-      expect(esClientMock.search).toHaveBeenCalledWith(
+      expect(esClientMock.search).toHaveBeenLastCalledWith(
         expect.objectContaining({
           q: '',
           size: 1000,
-          body: expect.objectContaining({
-            sort: [{ created: { order: 'asc' } }],
-          }),
+          sort: [{ created: { order: 'asc' } }],
+          _source_excludes: undefined,
         })
       );
     });
@@ -551,6 +550,7 @@ describe('When using the artifacts services', () => {
         sortOrder: 'desc',
         perPage: 500,
         sortField: 'someField',
+        includeArtifactBody: false,
       };
 
       for await (const artifacts of fetchAllArtifacts(esClientMock, options)) {
@@ -561,9 +561,8 @@ describe('When using the artifacts services', () => {
         expect.objectContaining({
           q: options.kuery,
           size: options.perPage,
-          body: expect.objectContaining({
-            sort: [{ [options.sortField!]: { order: options.sortOrder } }],
-          }),
+          sort: [{ [options.sortField!]: { order: options.sortOrder } }],
+          _source_excludes: 'body',
         })
       );
     });
@@ -583,7 +582,7 @@ describe('When using the artifacts services', () => {
       expect(esClientMock.search).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle throwing in loop', async () => {
+    it('should handle throwing in loop by setting `done` to `true`', async () => {
       const iterator = fetchAllArtifacts(esClientMock);
 
       try {
