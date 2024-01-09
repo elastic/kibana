@@ -410,7 +410,7 @@ describe('rule_event_log_list_table', () => {
     );
 
     fireEvent.click(screen.getByTestId('superDatePickerToggleQuickMenuButton'));
-    fireEvent.click(screen.getByTestId('superDatePickerCommonlyUsed_Last_30 minutes'));
+    fireEvent.click(screen.getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
 
     await waitFor(() => {
       expect(useLoadRuleEventLogs).toHaveBeenLastCalledWith(
@@ -420,7 +420,7 @@ describe('rule_event_log_list_table', () => {
           outcomeFilter: [],
           page: 0,
           perPage: 10,
-          dateStart: 'now-30m',
+          dateStart: 'now-15m',
           dateEnd: 'now',
         })
       );
