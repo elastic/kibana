@@ -47,6 +47,7 @@ import { SupportedFieldType } from '../../../../../common/types';
 import { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
   DataStatsFetchProgress,
+  FieldExamples,
   FieldStats,
   StringFieldStats,
 } from '../../../../../common/types/field_stats';
@@ -176,19 +177,6 @@ export const useESQLFieldStatsData = ({
           const totalFieldsCnt = columns.length;
 
           let fieldsLoaded = 0;
-
-          // @TODO: GETTING 500 DOCS FOR ONLY TEXT FIELDS
-
-          // const textFields = columns.filter((f) => f.secondaryType === 'text');
-          // const textFieldsResp = await runRequest(
-          //   {
-          //     params: {
-          //       query: esqlBaseQuery + `| KEEP ${textFields.map((f) => f.name).join(',')}`,
-          //       ...(filter ? { filter } : {}),
-          //     },
-          //   },
-          //   { strategy: ESQL_SEARCH_STRATEGY }
-          // );
 
           // GETTING STATS FOR NUMERIC FIELDS
 
@@ -374,6 +362,31 @@ export const useESQLFieldStatsData = ({
                 }
               });
             }
+
+            const textFields = columns.filter((f) => f.secondaryType === 'text');
+            const textFieldsResp = await runRequest(
+              {
+                params: {
+                  query:
+                    esqlBaseQuery +
+                    `| KEEP ${textFields.map((f) => f.name).join(',')}
+                | LIMIT 10`,
+                  ...(filter ? { filter } : {}),
+                },
+              },
+              { strategy: ESQL_SEARCH_STRATEGY }
+            );
+
+            textFields.forEach((textField, idx) => {
+              const examples = (textFieldsResp?.rawResponse.values as unknown[][]).map(
+                (row) => row[idx]
+              );
+
+              processedFieldStats.set(textField.name, {
+                fieldName: textField.name,
+                examples,
+              } as FieldExamples);
+            });
 
             setFetchState({
               loaded: 100,
