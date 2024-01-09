@@ -92,9 +92,15 @@ export const configSchema = schema.object({
   }),
 
   /**
-   * Artifacts Configuration
+   * Endpoint Artifacts Configuration: the interval between runs of the task that builds the
+   * artifacts and associated manifest.
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
+
+  /**
+   * Endpoint Artifacts Configuration: timeout value for how long the task should run.
+   */
+  packagerTaskTimeout: schema.string({ defaultValue: '5m' }),
 
   /**
    * Artifacts Configuration for package policy update concurrency
