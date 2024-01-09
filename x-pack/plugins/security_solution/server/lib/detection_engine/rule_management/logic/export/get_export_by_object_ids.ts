@@ -86,7 +86,7 @@ export const getExportByObjectIds = async (
   );
 
   return {
-    rulesNdjson,
+    rulesNdjson, // First item's investigation_fields ends up being undefined
     exportDetails,
     exceptionLists,
     actionConnectors,

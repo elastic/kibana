@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
 
   // Failing: See https://github.com/elastic/kibana/issues/173804
-  describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
+  describe('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -494,7 +494,8 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
+      // BROKEN
+      it.only('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionTypeEnum.export })
           .expect(200)
@@ -503,6 +504,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .parse(binaryToString);
 
         const [rule1, rule2, rule3, exportDetailsJson] = body.toString().split(/\n/);
+        log.debug('RULE1');
+        log.debug(rule1);
 
         const ruleToCompareWithLegacyInvestigationField = removeServerGeneratedProperties(
           JSON.parse(rule1)
