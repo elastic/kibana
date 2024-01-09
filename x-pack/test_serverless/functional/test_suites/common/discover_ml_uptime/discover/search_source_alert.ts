@@ -447,7 +447,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate to alert results via link provided in notification', async () => {
-      await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
+      // todo checking to see if this is needed after auto update code
+      // await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
       await openAlertResults(RULE_NAME);
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });

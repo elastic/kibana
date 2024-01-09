@@ -465,7 +465,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternByName(indexTitle);
-        await PageObjects.settings.refreshDataViewFieldList();
+        // todo checking to see if this is needed after auto update code
+        // await PageObjects.settings.refreshDataViewFieldList();
       });
 
       afterEach(async () => {

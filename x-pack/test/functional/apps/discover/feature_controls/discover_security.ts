@@ -452,6 +452,8 @@ export default function (ctx: FtrProviderContext) {
         // swapping index patterns so we get an updated field list
         // this is necessary since we don't have access to data view management
         // nor can we force reload the browser in a test
+        // todo checking to see if this is needed after auto update code
+        /**
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -462,6 +464,7 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.discover.selectIndexPattern('alias-logstash-discover');
 
         await new Promise((resolve) => setTimeout(resolve, 5000));
+        */
         await PageObjects.discover.selectIndexPattern('logstash-*');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('discoverNoResultsCheckIndices');

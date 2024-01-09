@@ -68,7 +68,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('field list pagination', function () {
       const EXPECTED_FIELD_COUNT = 85;
       it('makelogs data should have expected number of fields', async function () {
-        await testSubjects.click('refreshDataViewButton');
+        // todo checking to see if this is needed after auto update code
+        // await testSubjects.click('refreshDataViewButton');
         await retry.try(async function () {
           const TabCount = await PageObjects.settings.getFieldsTabCount();
           expect(TabCount).to.be('' + EXPECTED_FIELD_COUNT);

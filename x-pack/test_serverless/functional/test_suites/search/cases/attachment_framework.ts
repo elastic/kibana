@@ -34,7 +34,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
 
-        await settings.refreshDataViewFieldList('default:all-data');
+        // todo checking to see if this is needed after auto update code
+        // await settings.refreshDataViewFieldList('default:all-data');
 
         await svlSearchNavigation.navigateToLandingPage();
 
