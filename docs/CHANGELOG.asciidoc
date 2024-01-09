@@ -294,6 +294,8 @@ Machine Learning::
 * Fixes View in Discover option in Anomaly explorer not handling multiple field values or values with quotation marks ({kibana-pull}172897[#172897]).
 * Fixes field stats in Discover showing 0 sample count at times when switching data views ({kibana-pull}172734[#172734]).
 * Fixes long field names overflowing in Anomaly detection wizard detector selection ({kibana-pull}172715[#172715]).
+* Fixes data drift numeric fields not showing correctly ({kibana-pull}172504[#172504]).
+* Fixes Data Visualizer / ML field stats and Data Frame Analytics to exclude _tier fields ({kibana-pull}172223[#172223]).
 * Uses standard analyzer in log pattern analysis to ensure filter in Discover matches correct documents ({kibana-pull}172188[#172188]).
 * Fixes ML node check and checks user privileges to create job button in dashboard ({kibana-pull}172022[#172022]).
 * Fixes {kib} object list in new job from recognized index page ({kibana-pull}171935[#171935]).
