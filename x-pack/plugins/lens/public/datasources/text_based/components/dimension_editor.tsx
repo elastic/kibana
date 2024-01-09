@@ -27,6 +27,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     props.state.layers[props.layerId]?.columns ?? [],
     query
   );
+  const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
   const fields = allColumns.map((col) => {
     return {
       id: col.columnId,
@@ -43,7 +44,6 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     };
   });
   const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
-  const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
 
   return (
     <>
