@@ -64,6 +64,10 @@ export type InfraTelemetryEventParams =
 export interface PerformanceMetricInnerEvents {
   key1?: string;
   value1?: number;
+  key2?: string;
+  value2?: number;
+  key3?: string;
+  value3?: number;
 }
 
 export interface ITelemetryClient {
