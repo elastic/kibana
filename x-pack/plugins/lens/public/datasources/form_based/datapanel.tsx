@@ -28,6 +28,7 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import useLatest from 'react-use/lib/useLatest';
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import { buildIndexPatternField } from '../../data_views_service/loader';
 import type {
@@ -277,7 +278,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     };
   }, []);
 
-  const refreshFieldList = useCallback(async () => {
+  const refreshFieldList = useLatest(async () => {
     if (currentIndexPattern) {
       const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
         patterns: [currentIndexPattern.id],
@@ -293,21 +294,13 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     }
     // start a new session so all charts are refreshed
     data.search.session.start();
-  }, [
-    indexPatternService,
-    currentIndexPattern,
-    onIndexPatternRefresh,
-    frame.dataViews.indexPatterns,
-    data.search.session,
-  ]);
+  });
 
   useEffect(() => {
     if (hasNewFields) {
-      refreshFieldList();
+      refreshFieldList.current();
     }
-    // Preventing a race condition, making sure refreshFieldList is just executed once when hasNewFields is true
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasNewFields]);
+  }, [hasNewFields, refreshFieldList]);
 
   const editField = useMemo(
     () =>
@@ -321,7 +314,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
               fieldName,
               onSave: () => {
                 if (indexPatternInstance.isPersisted()) {
-                  refreshFieldList();
+                  refreshFieldList.current();
                   refetchFieldsExistenceInfo(indexPatternInstance.id);
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
@@ -353,7 +346,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
               fieldName,
               onDelete: () => {
                 if (indexPatternInstance.isPersisted()) {
-                  refreshFieldList();
+                  refreshFieldList.current();
                   refetchFieldsExistenceInfo(indexPatternInstance.id);
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
