@@ -228,8 +228,8 @@ export const performFind = async <T = unknown, A = unknown>(
     return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
   }
 
-  // Now that we have a full set of results with all existing namespaces for each object,
-  // we need an updated authorization type map to pass on to the redact method
+  // if extensions are enabled, we need to build an updated authorization type map
+  // to pass on to the redact method
   const redactTypeMapParams: GetFindRedactTypeMapParams | undefined = disableExtensions
     ? undefined
     : {
