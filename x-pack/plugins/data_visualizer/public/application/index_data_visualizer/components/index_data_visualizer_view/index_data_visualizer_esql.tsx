@@ -623,11 +623,14 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 />
               </EuiFlexItem>
             ) : null}
-            {hasValidTimeField ? (
-              <EuiFlexItem grow={false}>
-                <DatePickerWrapper isAutoRefreshOnly={false} showRefresh={false} width="full" />
-              </EuiFlexItem>
-            ) : null}
+            <EuiFlexItem grow={false}>
+              <DatePickerWrapper
+                isAutoRefreshOnly={false}
+                showRefresh={false}
+                width="full"
+                isDisabled={!hasValidTimeField}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
         <EuiSpacer size="m" />

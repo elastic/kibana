@@ -118,10 +118,8 @@ export const useESQLFieldStatsData = ({
         });
         try {
           const esqlBaseQuery = searchQuery.esql;
-
           const totalFieldsCnt = columns.length;
-
-          let fieldsLoaded = 0;
+          const processedFieldStats = new Map<string, FieldStats>();
 
           // GETTING STATS FOR NUMERIC FIELDS
 
@@ -148,63 +146,65 @@ export const useESQLFieldStatsData = ({
                 startIndex: idx * (percentiles.length + 2),
               };
             });
-          const fieldStatsQuery = '| STATS ' + numericFields.map(({ query }) => query).join(',');
 
-          const fieldStatsResp = await runRequest(
-            {
-              params: {
-                query: esqlBaseQuery + fieldStatsQuery,
-                locale: 'en',
-                ...(filter ? { filter } : {}),
+          if (numericFields.length > 0) {
+            const fieldStatsQuery = '| STATS ' + numericFields.map(({ query }) => query).join(',');
+
+            const fieldStatsResp = await runRequest(
+              {
+                params: {
+                  query: esqlBaseQuery + fieldStatsQuery,
+                  locale: 'en',
+                  ...(filter ? { filter } : {}),
+                },
               },
-            },
-            { strategy: ESQL_SEARCH_STRATEGY }
-          );
+              { strategy: ESQL_SEARCH_STRATEGY }
+            );
 
-          fieldsLoaded += numericFields.length;
-          setFetchState({
-            loaded: (fieldsLoaded / totalFieldsCnt) * 100,
-          });
+            if (fieldStatsResp && !unmounted) {
+              const values = fieldStatsResp.rawResponse.values[0];
 
-          if (!unmounted && fieldStatsResp) {
-            const values = fieldStatsResp.rawResponse.values[0];
+              numericFields.forEach(({ field, startIndex }, idx) => {
+                const min = values[startIndex + 0];
+                const max = values[startIndex + 1];
+                const median = values[startIndex + 12];
 
-            const processedFieldStats = new Map<string, FieldStats>();
-            numericFields.forEach(({ field, startIndex }, idx) => {
-              const min = values[startIndex + 0];
-              const max = values[startIndex + 1];
-              const median = values[startIndex + 12];
+                const percentiles = values
+                  .slice(startIndex + 2, startIndex + 23)
+                  .map((value: number) => ({ value }));
 
-              const percentiles = values
-                .slice(startIndex + 2, startIndex + 23)
-                .map((value: number) => ({ value }));
+                const distribution = processDistributionData(percentiles, PERCENTILE_SPACING, min);
 
-              const distribution = processDistributionData(percentiles, PERCENTILE_SPACING, min);
-
-              processedFieldStats.set(field.name, {
-                fieldName: field.name,
-                ...field,
-                min,
-                max,
-                median,
-                distribution,
+                processedFieldStats.set(field.name, {
+                  fieldName: field.name,
+                  ...field,
+                  min,
+                  max,
+                  median,
+                  distribution,
+                });
               });
-            });
 
-            setFieldStats(processedFieldStats);
+              setFieldStats(processedFieldStats);
+              setFetchState({
+                loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
+              });
+            }
+          }
 
-            // GETTING STATS FOR KEYWORD FIELDS
-            const keywordFields = columns
-              .filter((f) => f.secondaryType === 'keyword' || f.secondaryType === 'ip')
-              .map((field) => {
-                return {
-                  field,
-                  query: `| STATS ${field.name}_terms = count(${field.name}) BY ${field.name}
+          // GETTING STATS FOR KEYWORD FIELDS
+          const keywordFields = columns
+            .filter((f) => f.secondaryType === 'keyword' || f.secondaryType === 'ip')
+            .map((field) => {
+              return {
+                field,
+                query: `| STATS ${field.name}_terms = count(${field.name}) BY ${field.name}
                   | LIMIT 10
                   | SORT ${field.name}_terms DESC`,
-                };
-              });
+              };
+            });
 
+          if (keywordFields.length > 0) {
             const keywordTopTermsResp = await Promise.all(
               keywordFields.map(({ query }) =>
                 runRequest(
@@ -218,7 +218,7 @@ export const useESQLFieldStatsData = ({
                 )
               )
             );
-            if (keywordTopTermsResp) {
+            if (keywordTopTermsResp && !unmounted) {
               keywordFields.forEach(({ field }, idx) => {
                 const resp = keywordTopTermsResp[idx];
                 if (isDefined(resp)) {
@@ -242,22 +242,22 @@ export const useESQLFieldStatsData = ({
               });
             }
 
-            fieldsLoaded += keywordFields.length;
             setFetchState({
-              loaded: (fieldsLoaded / totalFieldsCnt) * 100,
+              loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
             });
+          }
 
-            // GETTING STATS FOR BOOLEAN FIELDS
-            const booleanFields = columns
-              .filter((f) => f.secondaryType === 'boolean')
-              .map((field) => {
-                return {
-                  field,
-                  query: `| STATS ${field.name}_terms = count(${field.name}) BY ${field.name}
+          // GETTING STATS FOR BOOLEAN FIELDS
+          const booleanFields = columns
+            .filter((f) => f.secondaryType === 'boolean')
+            .map((field) => {
+              return {
+                field,
+                query: `| STATS ${field.name}_terms = count(${field.name}) BY ${field.name}
                   | LIMIT 3`,
-                };
-              });
-
+              };
+            });
+          if (booleanFields.length > 0) {
             const booleanTopTermsResp = await Promise.all(
               booleanFields.map(({ query }) =>
                 runRequest(
@@ -272,7 +272,7 @@ export const useESQLFieldStatsData = ({
                 )
               )
             );
-            if (booleanTopTermsResp) {
+            if (booleanTopTermsResp && !unmounted) {
               booleanFields.forEach(({ field }, idx) => {
                 const resp = booleanTopTermsResp[idx];
                 if (isDefined(resp)) {
@@ -306,38 +306,46 @@ export const useESQLFieldStatsData = ({
                   } as StringFieldStats);
                 }
               });
+              setFetchState({
+                loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
+              });
             }
+          }
 
-            const textFields = columns.filter((f) => f.secondaryType === 'text');
+          const textFields = columns.filter((f) => f.secondaryType === 'text');
+
+          if (textFields.length > 0) {
             const textFieldsResp = await runRequest(
               {
                 params: {
                   query:
                     esqlBaseQuery +
                     `| KEEP ${textFields.map((f) => f.name).join(',')}
-                | LIMIT 10`,
+                  | LIMIT 10`,
                   ...(filter ? { filter } : {}),
                 },
               },
               { strategy: ESQL_SEARCH_STRATEGY }
             );
 
-            textFields.forEach((textField, idx) => {
-              const examples = (textFieldsResp?.rawResponse.values as unknown[][]).map(
-                (row) => row[idx]
-              );
+            if (textFieldsResp && !unmounted) {
+              textFields.forEach((textField, idx) => {
+                const examples = (textFieldsResp.rawResponse.values as unknown[][]).map(
+                  (row) => row[idx]
+                );
 
-              processedFieldStats.set(textField.name, {
-                fieldName: textField.name,
-                examples,
-              } as FieldExamples);
-            });
-
-            setFetchState({
-              loaded: 100,
-              isRunning: false,
-            });
+                processedFieldStats.set(textField.name, {
+                  fieldName: textField.name,
+                  examples,
+                } as FieldExamples);
+              });
+            }
           }
+
+          setFetchState({
+            loaded: 100,
+            isRunning: false,
+          });
         } catch (e) {
           const title = i18n.translate(
             'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
@@ -365,7 +373,8 @@ export const useESQLFieldStatsData = ({
         unmounted = true;
       };
     },
-    [cancelRequest, columns, runRequest, searchQuery, filter]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [columns, JSON.stringify({ filter })]
   );
 
   return { fieldStats, fieldStatsProgress: fetchState };
