@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type {
   HostRiskScore,
@@ -71,6 +72,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   queryId,
   openDetailsPanel,
 }: RiskSummaryProps<T>) => {
+  const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData(riskData);
@@ -135,6 +137,14 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
 
   return (
     <EuiAccordion
+      onToggle={(isOpen) => {
+        const entity = isUserRiskData(riskData) ? 'user' : 'host';
+
+        telemetry.reportToggleRiskSummaryClicked({
+          entity,
+          action: isOpen ? 'show' : 'hide',
+        });
+      }}
       initialIsOpen
       id={'risk_summary'}
       buttonProps={{
