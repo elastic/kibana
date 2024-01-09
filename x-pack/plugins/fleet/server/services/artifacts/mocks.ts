@@ -44,6 +44,7 @@ export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterfac
       encodedSha256: '446086d1609189c3ad93a943976e4b7474c028612e5ec4810a81cc01a631f0f9',
       encodedSize: 24,
     }),
+    fetchAll: jest.fn(),
   };
 };
 
@@ -100,6 +101,7 @@ export const generateArtifactEsGetSingleHitMock = (
     _version: 1,
     _score: 1,
     _source,
+    sort: ['abc'],
   };
 };
 
