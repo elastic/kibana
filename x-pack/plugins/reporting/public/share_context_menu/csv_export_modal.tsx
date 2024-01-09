@@ -66,7 +66,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
+              id="xpack.reporting.exportModal.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in {path}."
               values={{
                 path: (
@@ -93,7 +93,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       .catch((error) => {
         toasts.addError(error, {
           title: intl!.formatMessage({
-            id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
+            id: 'xpack.reporting.exportModal.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
           toastMessage: (
