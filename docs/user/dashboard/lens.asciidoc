@@ -623,7 +623,7 @@ Specifying the color for a single data point, such as a single bar or line, is u
 .*How does dynamic coloring work for the metric visualization?*
 [%collapsible]
 ====
-If you have selected *Value type: Number* in the palette editor, colors will be applied based on the *Primary Metric* value.
+In the color palette editor, if you select *Value type: Number* the colors are applied based on the *Primary metric* value.
 
 The *Primary metric* refers to the large number that is displayed in each tile:
 
