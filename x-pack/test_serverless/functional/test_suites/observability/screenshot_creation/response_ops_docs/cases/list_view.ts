@@ -64,6 +64,12 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       await svlCommonScreenshots.takeScreenshot('cases', screenshotDirectories, 1700, 1024);
     });
 
+    it('case settings screenshot', async () => {
+      await navigateToCasesApp(getPageObject, getService, owner);
+      await testSubjects.click('configure-case-button');
+      await svlCommonScreenshots.takeScreenshot('add-case-connector', screenshotDirectories);
+    });
+
     it('case detail screenshot', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory(
         'observability',
@@ -72,6 +78,8 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('case-view-title');
+      const collapseNav = await testSubjects.find('euiCollapsibleNavButton');
+      await collapseNav.click();
       const filesTab = await testSubjects.find('case-view-tab-title-files');
       await filesTab.click();
       await cases.casesFilesTable.addFile(require.resolve('./testfile.png'));
@@ -82,12 +90,6 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         1024,
         768
       );
-    });
-
-    it('case settings screenshot', async () => {
-      await navigateToCasesApp(getPageObject, getService, owner);
-      await testSubjects.click('configure-case-button');
-      await svlCommonScreenshots.takeScreenshot('add-case-connector', screenshotDirectories);
     });
   });
 }
