@@ -59,8 +59,7 @@ import { getFormattedFields } from '../body/renderers/formatted_field_udt';
 import { timelineBodySelector } from '../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from './styles';
-import type { NotesMap } from './render_custom_body';
-import CustomGridBodyControls, { TimelineDataTableContext } from './render_custom_body';
+import CustomGridBodyControls from './render_custom_body';
 import RowDetails from './row_details';
 import { timelineDefaults } from '../../../store/defaults';
 import { timelineActions } from '../../../store';
@@ -71,7 +70,6 @@ const DataGridMemoized = React.memo(UnifiedDataTable);
 
 interface Props {
   columns: ColumnHeaderOptions[];
-  // renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: string;
   itemsPerPage: number;
@@ -165,10 +163,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     }),
     [columns]
   );
-  const [notesMap, setNotesMap] = useState<NotesMap>({});
+  // const [notesMap, setNotesMap] = useState<NotesMap>({});
   const trGroupRef = useRef<HTMLDivElement | null>(null);
-
-  const [confirmingNoteId, setConfirmingNoteId] = useState<string | null | undefined>(null);
 
   const {
     timeline: {
@@ -180,6 +176,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
       excludedRowRendererIds,
       rowHeight,
       sampleSize,
+      notesMap,
     } = timelineDefaults,
   } = useSelector((state: State) => timelineBodySelector(state, timelineId));
 
@@ -306,26 +303,26 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
 
   const toggleShowNotesEvent = useCallback(
     (eventId: string) => {
-      setNotesMap((prevShowNotes: NotesMap) => {
-        const row = notesMap[eventId];
-        if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
-
-        if (prevShowNotes[eventId]) {
-          // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
-          setTimeout(() => {
-            const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
-              `.${NOTES_BUTTON_CLASS_NAME}`
-            );
-            notesButtonElement?.focus();
-          }, 0);
-        }
-        return {
-          ...prevShowNotes,
-          [eventId]: { ...row, isAddingNote: true },
-        };
-      });
+      const row = notesMap[eventId];
+      if (row?.isAddingNote !== true) {
+        dispatch(
+          timelineActions.setNotesMap({
+            id: timelineId,
+            notesMap: {
+              ...notesMap,
+              [eventId]: { ...row, isAddingNote: true },
+            },
+          })
+        );
+        setTimeout(() => {
+          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
+            `.${NOTES_BUTTON_CLASS_NAME}`
+          );
+          notesButtonElement?.focus();
+        }, 0);
+      }
     },
-    [notesMap, setNotesMap]
+    [notesMap, dispatch, timelineId]
   );
 
   const leadingControlColumns = useMemo(() => {
@@ -416,6 +413,19 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
+  // Row renderers
+  const enabledRowRenderers = useMemo(() => {
+    if (
+      excludedRowRendererIds &&
+      excludedRowRendererIds.length === Object.keys(RowRendererId).length
+    )
+      return [];
+
+    if (!excludedRowRendererIds) return rowRenderers;
+
+    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+  }, [excludedRowRendererIds, rowRenderers]);
+
   // The custom row details is actually a trailing control column cell with
   // a hidden header. This is important for accessibility and markup reasons
   // @see https://fuschia-stretch.glitch.me/ for more
@@ -440,12 +450,14 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
               event={discoverGridRows[rowIndex]}
               rowIndex={rowIndex}
               setCellProps={setCellProps}
+              timelineId={timelineId}
+              enabledRowRenderers={enabledRowRenderers}
             />
           );
         },
       },
     ],
-    [discoverGridRows]
+    [discoverGridRows, timelineId, enabledRowRenderers]
   );
 
   const getRowRendererBody = useCallback(
@@ -461,23 +473,12 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
         visibleColumns={visibleColumns}
         visibleRowData={visibleRowData}
         setCustomGridBodyProps={setCustomGridBodyProps}
+        enabledRowRenderers={enabledRowRenderers}
+        timelineId={timelineId}
       />
     ),
-    [discoverGridRows]
+    [discoverGridRows, enabledRowRenderers, timelineId]
   );
-
-  // Row renderers
-  const enabledRowRenderers = useMemo(() => {
-    if (
-      excludedRowRendererIds &&
-      excludedRowRendererIds.length === Object.keys(RowRendererId).length
-    )
-      return [];
-
-    if (!excludedRowRendererIds) return rowRenderers;
-
-    return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-  }, [excludedRowRendererIds, rowRenderers]);
 
   // Columns management
   const { onSetColumns } = useColumns({
@@ -604,24 +605,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     dataPluginContract,
   ]);
 
-  const timelineDataTableContextValue = useMemo(() => {
-    return {
-      notesMap,
-      setNotesMap,
-      confirmingNoteId,
-      setConfirmingNoteId,
-      timelineId,
-      enabledRowRenderers,
-    };
-  }, [
-    notesMap,
-    setNotesMap,
-    confirmingNoteId,
-    setConfirmingNoteId,
-    timelineId,
-    enabledRowRenderers,
-  ]);
-
   if (!dataView) {
     return null;
   }
@@ -633,53 +616,51 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           dataLoadingState === DataLoadingState.loadingMore) && (
           <StyledEuiProgress data-test-subj="discoverDataGridUpdating" size="xs" color="accent" />
         )}
-        <TimelineDataTableContext.Provider value={timelineDataTableContextValue}>
-          <DataGridMemoized
-            ariaLabelledBy="timelineDocumentsAriaLabel"
-            className={'udtTimeline'}
-            columns={defaultColumns}
-            expandedDoc={expandedDoc}
-            dataView={dataView}
-            loadingState={dataLoadingState}
-            onFilter={onAddFilter as DocViewFilterFn}
-            onResize={onResizeDataGrid}
-            onSetColumns={onSetColumns}
-            onSort={!isTextBasedQuery ? onSort : undefined}
-            rows={discoverGridRows}
-            sampleSizeState={sampleSize || 500}
-            onUpdateSampleSize={onUpdateSampleSize}
-            setExpandedDoc={onSetExpandedDoc}
-            settings={tableSettings}
-            showTimeCol={showTimeCol}
-            isSortEnabled={true}
-            sort={sortingColumns}
-            rowHeightState={3}
-            isPlainRecord={isTextBasedQuery}
-            rowsPerPageState={itemsPerPage}
-            onUpdateRowsPerPage={onChangeItemsPerPage}
-            onUpdateRowHeight={onUpdateRowHeight}
-            onFieldEdited={onFieldEdited}
-            cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-            services={services}
-            visibleCellActions={3}
-            externalCustomRenderers={customColumnRenderers}
-            renderDocumentView={() => <></>}
-            externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
-            externalAdditionalControls={additionalControls}
-            trailingControlColumns={trailingControlColumns}
-            renderCustomGridBody={getRowRendererBody}
-            rowsPerPageOptions={itemsPerPageOptions}
-            showFullScreenButton={false}
-            useNewFieldsApi={true}
-            maxDocFieldsDisplayed={50}
-            consumer="timeline"
-            totalHits={totalCount}
-            onFetchMoreRecords={handleFetchMoreRecords}
-            configRowHeight={3}
-            showMultiFields={true}
-            cellActionsMetadata={cellActionsMetadata}
-          />
-        </TimelineDataTableContext.Provider>
+        <DataGridMemoized
+          ariaLabelledBy="timelineDocumentsAriaLabel"
+          className={'udtTimeline'}
+          columns={defaultColumns}
+          expandedDoc={expandedDoc}
+          dataView={dataView}
+          loadingState={dataLoadingState}
+          onFilter={onAddFilter as DocViewFilterFn}
+          onResize={onResizeDataGrid}
+          onSetColumns={onSetColumns}
+          onSort={!isTextBasedQuery ? onSort : undefined}
+          rows={discoverGridRows}
+          sampleSizeState={sampleSize || 500}
+          onUpdateSampleSize={onUpdateSampleSize}
+          setExpandedDoc={onSetExpandedDoc}
+          settings={tableSettings}
+          showTimeCol={showTimeCol}
+          isSortEnabled={true}
+          sort={sortingColumns}
+          rowHeightState={3}
+          isPlainRecord={isTextBasedQuery}
+          rowsPerPageState={itemsPerPage}
+          onUpdateRowsPerPage={onChangeItemsPerPage}
+          onUpdateRowHeight={onUpdateRowHeight}
+          onFieldEdited={onFieldEdited}
+          cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+          services={services}
+          visibleCellActions={3}
+          externalCustomRenderers={customColumnRenderers}
+          renderDocumentView={() => <></>}
+          externalControlColumns={leadingControlColumns as unknown as EuiDataGridControlColumn[]}
+          externalAdditionalControls={additionalControls}
+          trailingControlColumns={trailingControlColumns}
+          renderCustomGridBody={getRowRendererBody}
+          rowsPerPageOptions={itemsPerPageOptions}
+          showFullScreenButton={false}
+          useNewFieldsApi={true}
+          maxDocFieldsDisplayed={50}
+          consumer="timeline"
+          totalHits={totalCount}
+          onFetchMoreRecords={handleFetchMoreRecords}
+          configRowHeight={3}
+          showMultiFields={true}
+          cellActionsMetadata={cellActionsMetadata}
+        />
         {showExpandedDetails && (
           <DetailsPanel
             browserFields={browserFields}

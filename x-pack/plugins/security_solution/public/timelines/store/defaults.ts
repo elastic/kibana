@@ -84,6 +84,7 @@ export const timelineDefaults: SubsetTimelineModel &
   sampleSize: 500,
   rowHeight: 1,
   isDataProviderVisible: false,
+  notesMap: {},
 };
 
 export const getTimelineManageDefaults = (id: string) => ({

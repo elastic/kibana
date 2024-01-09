@@ -6,14 +6,13 @@
  */
 import type { EuiDataGridCustomBodyProps } from '@elastic/eui';
 import { logicalCSS, EuiFlexItem } from '@elastic/eui';
-import React, { createContext, useContext, memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { useSelector } from 'react-redux';
 import type { State } from '../../../../common/store';
-import { TimelineId } from '../../../../../common/types';
-import type { RowRenderer } from '../../../../../common/types/timeline';
+import type { RowRenderer, NotesMap } from '../../../../../common/types/timeline';
 import { timelineBodySelector } from '../body/selectors';
 import { StatefulRowRenderer } from '../body/events/stateful_row_renderer';
 import { EventsTrSupplement } from '../styles';
@@ -22,6 +21,8 @@ import { timelineDefaults } from '../../../store/defaults';
 
 interface Props {
   discoverGridRows: DataTableRecord[];
+  timelineId: string;
+  enabledRowRenderers: RowRenderer[];
 }
 
 // Add styling needed for custom grid body rows
@@ -36,23 +37,6 @@ const styles = {
     text-align: center;
   `,
 };
-
-export type NotesMap = Record<string, { notes?: string[]; isAddingNote?: boolean }>;
-export const TimelineDataTableContext = createContext<{
-  notesMap: NotesMap;
-  setNotesMap: Function;
-  confirmingNoteId: string | null | undefined;
-  setConfirmingNoteId: Function;
-  timelineId: string;
-  enabledRowRenderers: RowRenderer[];
-}>({
-  notesMap: {},
-  setNotesMap: () => {},
-  confirmingNoteId: null,
-  setConfirmingNoteId: () => {},
-  timelineId: TimelineId.active,
-  enabledRowRenderers: [],
-});
 
 interface ExpandedRowProps {
   ariaRowIndex: number;
@@ -171,13 +155,14 @@ export const RenderCustomGridBodyComponent: React.FC<Props & EuiDataGridCustomBo
   visibleRowData,
   visibleColumns: visibleCols,
   Cell,
+  enabledRowRenderers,
+  timelineId,
 }) => {
-  const { notesMap, enabledRowRenderers, timelineId } = useContext(TimelineDataTableContext);
   // Ensure we're displaying correctly-paginated rows
   const visibleRows = discoverGridRows.slice(visibleRowData.startRow, visibleRowData.endRow);
 
-  const { timeline: { eventIdToNoteIds } = timelineDefaults } = useSelector((state: State) =>
-    timelineBodySelector(state, timelineId)
+  const { timeline: { eventIdToNoteIds, notesMap } = timelineDefaults } = useSelector(
+    (state: State) => timelineBodySelector(state, timelineId)
   );
 
   return (

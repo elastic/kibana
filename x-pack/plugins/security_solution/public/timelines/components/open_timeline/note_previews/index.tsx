@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -26,11 +26,10 @@ import { MarkdownRenderer } from '../../../../common/components/markdown_editor'
 import { timelineActions, timelineSelectors } from '../../../store';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { TimelineDataTableContext } from '../../timeline/unified_components/render_custom_body';
 import { useDeleteNote } from './hooks/use_delete_note';
 
 export const NotePreviewsContainer = styled.section`
@@ -97,57 +96,74 @@ const DeleteNoteConfirm = React.memo<{
 
 DeleteNoteConfirm.displayName = 'DeleteNoteConfirm';
 
-const DeleteNoteButton = React.memo<{ noteId?: string | null; eventId?: string | null }>(
-  ({ noteId, eventId }) => {
-    const { confirmingNoteId, setConfirmingNoteId } = useContext(TimelineDataTableContext);
-    const [showModal, setShowModal] = useState(false);
-    const { mutate, isLoading } = useDeleteNote(noteId, eventId);
+const DeleteNoteButton = React.memo<{
+  noteId?: string | null;
+  eventId?: string | null;
+  confirmingNoteId?: string | null;
+  timelineId?: string;
+}>(({ noteId, eventId, confirmingNoteId, timelineId }) => {
+  const dispatch = useDispatch();
+  const [showModal, setShowModal] = useState(false);
+  const { mutate, isLoading } = useDeleteNote(noteId, eventId);
 
-    const handleOpenDeleteModal = useCallback(() => {
-      setShowModal(true);
-      setConfirmingNoteId(noteId);
-    }, [noteId, setConfirmingNoteId]);
+  const handleOpenDeleteModal = useCallback(() => {
+    setShowModal(true);
+    dispatch(
+      timelineActions.setConfirmingNoteId({
+        confirmingNoteId: noteId,
+        id: timelineId ?? TimelineId.active,
+      })
+    );
+  }, [noteId, dispatch, timelineId]);
 
-    const handleCancelDelete = useCallback(() => {
-      setShowModal(false);
-      setConfirmingNoteId(null);
-    }, [setConfirmingNoteId]);
+  const handleCancelDelete = useCallback(() => {
+    setShowModal(false);
+    dispatch(
+      timelineActions.setConfirmingNoteId({
+        confirmingNoteId: null,
+        id: timelineId ?? TimelineId.active,
+      })
+    );
+  }, [dispatch, timelineId]);
 
-    const handleConfirmDelete = useCallback(() => {
-      mutate(noteId);
-      setShowModal(false);
-      setConfirmingNoteId(null);
-    }, [mutate, noteId, setConfirmingNoteId]);
+  const handleConfirmDelete = useCallback(() => {
+    mutate(noteId);
+    setShowModal(false);
+    dispatch(
+      timelineActions.setConfirmingNoteId({
+        confirmingNoteId: null,
+        id: timelineId ?? TimelineId.active,
+      })
+    );
+  }, [mutate, noteId, dispatch, timelineId]);
 
-    const disableDelete = useMemo(() => {
-      return isLoading || noteId == null;
-    }, [isLoading, noteId]);
-
-    return (
-      <>
-        <EuiButtonIcon
-          title={i18n.DELETE_NOTE}
-          aria-label={i18n.DELETE_NOTE}
-          data-test-subj={'delete-note'}
-          color="text"
-          iconType="trash"
-          onClick={handleOpenDeleteModal}
-          disabled={disableDelete}
-        />
-        {
-          /* modal cannot depend only on confirmingNoteId as confirmingNoteId is part of context and once that is populated all delete
+  const disableDelete = useMemo(() => {
+    return isLoading || noteId == null;
+  }, [isLoading, noteId]);
+  return (
+    <>
+      <EuiButtonIcon
+        title={i18n.DELETE_NOTE}
+        aria-label={i18n.DELETE_NOTE}
+        data-test-subj={'delete-note'}
+        color="text"
+        iconType="trash"
+        onClick={handleOpenDeleteModal}
+        disabled={disableDelete}
+      />
+      {
+        /* modal cannot depend only on confirmingNoteId as confirmingNoteId is part of context and once that is populated all delete
              button modals show up with the last delete button's modal on the top. There should be a local state such as `showModal` handling that.
 
              Why do we need global context holding confirmingNoteId? Revisit this design
            */
-          confirmingNoteId && showModal ? (
-            <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
-          ) : null
-        }
-      </>
-    );
-  }
-);
+        confirmingNoteId === noteId && showModal ? (
+          <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
+        ) : null
+      }
+    </>
+  );
+});
 
 DeleteNoteButton.displayName = 'DeleteNoteButton';
 
@@ -155,14 +171,25 @@ const NoteActions = React.memo<{
   eventId: string | null;
   timelineId?: string;
   noteId?: string | null;
-}>(({ eventId, timelineId, noteId }) => {
+  confirmingNoteId?: string | null;
+}>(({ eventId, timelineId, noteId, confirmingNoteId }) => {
   return eventId && timelineId ? (
     <>
       <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
-      <DeleteNoteButton noteId={noteId} eventId={eventId} />
+      <DeleteNoteButton
+        noteId={noteId}
+        eventId={eventId}
+        confirmingNoteId={confirmingNoteId}
+        timelineId={timelineId}
+      />
     </>
   ) : (
-    <DeleteNoteButton noteId={noteId} eventId={eventId} />
+    <DeleteNoteButton
+      noteId={noteId}
+      eventId={eventId}
+      confirmingNoteId={confirmingNoteId}
+      timelineId={timelineId}
+    />
   );
 });
 
@@ -242,7 +269,12 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
               </div>
             ),
             actions: (
-              <NoteActions eventId={eventId} timelineId={timelineId} noteId={note.savedObjectId} />
+              <NoteActions
+                eventId={eventId}
+                timelineId={timelineId}
+                noteId={note.savedObjectId}
+                confirmingNoteId={timeline?.confirmingNoteId}
+              />
             ),
             timelineAvatar: (
               <EuiAvatar
@@ -253,7 +285,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
             ),
           };
         }),
-      [eventIdToNoteIds, notes, timelineId]
+      [eventIdToNoteIds, notes, timelineId, timeline?.confirmingNoteId]
     );
 
     const commentList = useMemo(

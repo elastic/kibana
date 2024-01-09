@@ -10,6 +10,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { appActions } from '../../../../../common/store/app';
+import { timelineActions } from '../../../../store';
+import { TimelineId } from '../../../../../../common/types/timeline';
 import * as i18n from '../translations';
 
 export function useDeleteNote(
@@ -34,6 +36,14 @@ export function useDeleteNote(
         dispatch(
           appActions.deleteNote({
             id: noteId,
+          })
+        );
+      }
+      if (eventId) {
+        dispatch(
+          timelineActions.unPinEvent({
+            eventId,
+            id: TimelineId.active,
           })
         );
       }

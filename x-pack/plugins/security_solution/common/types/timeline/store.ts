@@ -33,6 +33,8 @@ export interface SortColumnTimeline {
   sortDirection: SortDirection;
 }
 
+export type NotesMap = Record<string, { notes?: string[]; isAddingNote?: boolean }>;
+
 export interface TimelinePersistInput {
   columns: ColumnHeaderOptions[];
   dataProviders?: DataProvider[];

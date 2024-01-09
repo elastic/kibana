@@ -29,6 +29,7 @@ import type {
   ToggleDetailPanel,
   ColumnHeaderOptions,
   SortColumnTimeline,
+  NotesMap,
 } from '../../../common/types/timeline';
 import type { RowRendererId } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
@@ -306,3 +307,10 @@ export const setDataProviderVisibility = actionCreator<{
 }>('SET_DATA_PROVIDER_VISIBLITY');
 
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');
+
+export const setNotesMap = actionCreator<{ id: string; notesMap: NotesMap }>('SET_NOTES_MAP');
+
+export const setConfirmingNoteId = actionCreator<{
+  id: string;
+  confirmingNoteId: string | null | undefined;
+}>('SET_CONFIRMING_NOTE_ID');

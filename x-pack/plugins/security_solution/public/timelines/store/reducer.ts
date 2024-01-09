@@ -66,6 +66,8 @@ import {
   setIsDiscoverSavedSearchLoaded,
   setDataProviderVisibility,
   setChanged,
+  setConfirmingNoteId,
+  setNotesMap,
 } from './actions';
 
 import {
@@ -605,6 +607,26 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         rowHeight,
+      },
+    },
+  }))
+  .case(setConfirmingNoteId, (state, { id, confirmingNoteId }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        confirmingNoteId,
+      },
+    },
+  }))
+  .case(setNotesMap, (state, { id, notesMap }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        notesMap,
       },
     },
   }))

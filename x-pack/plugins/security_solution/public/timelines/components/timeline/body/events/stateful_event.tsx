@@ -293,6 +293,7 @@ const StatefulEventComponent: React.FC<Props> = memo(
                 notes={notes}
                 showAddNote={!!showNotes[event._id]}
                 toggleShowAddNote={onToggleShowNotes}
+                timelineId={timelineId}
               />
             </EventsTrSupplement>
 
