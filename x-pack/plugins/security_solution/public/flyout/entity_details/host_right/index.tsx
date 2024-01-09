@@ -64,6 +64,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
 
   const { data: hostRisk, inspect: inspectRiskScore, refetch, loading } = riskScoreState;
   const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+  const isRiskScoreExist = !!hostRiskData?.host.risk;
 
   useQueryInspector({
     deleteQuery,
@@ -79,17 +80,13 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
       openLeftPanel({
         id: HostDetailsPanelKey,
         params: {
-          riskInputs: {
-            alertIds: hostRiskData?.host.risk.inputs?.map(({ id }) => id) ?? [],
-            host: {
-              name: hostName,
-            },
-          },
+          name: hostName,
+          isRiskScoreExist,
           path: tab ? { tab } : undefined,
         },
       });
     },
-    [openLeftPanel, hostRiskData?.host.risk.inputs, hostName]
+    [openLeftPanel, hostName, isRiskScoreExist]
   );
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
@@ -119,7 +116,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={!!hostRiskData?.host.risk}
+              flyoutIsExpandable={isRiskScoreExist}
               expandDetails={openDefaultPanel}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
