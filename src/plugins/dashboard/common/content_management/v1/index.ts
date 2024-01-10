@@ -15,8 +15,8 @@ export type {
 } from './types';
 
 export {
-  serviceDefinition as serviceDefinitionV1,
-  dashboardSavedObjectSchema as dashboardSOSchemaV1,
-  controlGroupInputSchema as controlGroupInputSchemaV1,
-  dashboardAttributesSchema as dashboardAttributesSchemaV1,
+  serviceDefinition,
+  dashboardSavedObjectSchema,
+  controlGroupInputSchema,
+  dashboardAttributesSchema,
 } from './cm_services';

@@ -14,26 +14,21 @@ import {
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import { omit } from 'lodash';
 import {
-  controlGroupInputSchemaV1,
-  dashboardAttributesSchemaV1,
-  DashboardCrudTypes,
-  serviceDefinitionV1,
+  controlGroupInputSchema as controlGroupInputSchemaV1,
+  dashboardAttributesSchema as dashboardAttributesSchemaV1,
+  DashboardCrudTypes as DashboardCrudTypesV1,
+  serviceDefinition as serviceDefinitionV1,
 } from '../v1';
+import { DashboardCrudTypes as DashboardCrudTypesV2 } from './types';
 
-export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
-  {
-    controlGroupInput: schema.maybe(
-      controlGroupInputSchemaV1.extends(
-        {
-          showSelectionReset: schema.maybe(schema.boolean()),
-          showApplySelections: schema.maybe(schema.boolean()),
-        },
-        { unknowns: 'ignore' }
-      )
-    ),
-  },
-  { unknowns: 'ignore' }
-);
+export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends({
+  controlGroupInput: schema.maybe(
+    controlGroupInputSchemaV1.extends({
+      showSelectionReset: schema.maybe(schema.boolean()),
+      showApplySelections: schema.maybe(schema.boolean()),
+    })
+  ),
+});
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 
@@ -43,11 +38,8 @@ export const serviceDefinition: ServicesDefinition = {
     out: {
       result: {
         schema: objectTypeToGetResultSchema(dashboardSavedObjectSchema),
-        down: (
-          result: DashboardCrudTypes['GetOut']
-        ): Omit<DashboardCrudTypes['GetOut'], 'showSelectionReset' | 'showApplySelections'> => {
+        down: (result: DashboardCrudTypesV2['GetOut']): DashboardCrudTypesV1['GetOut'] => {
           // Down transform the result to "v1" version
-          debugger;
           return {
             ...result,
             item: {
@@ -97,5 +89,3 @@ export const serviceDefinition: ServicesDefinition = {
     },
   },
 };
-
-// console.log('SERVICE DEF', serviceDefinition);

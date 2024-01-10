@@ -14,12 +14,15 @@ import {
   createResultSchema,
 } from '@kbn/content-management-utils';
 
-export const controlGroupInputSchema = schema.object({
-  panelsJSON: schema.maybe(schema.string()),
-  controlStyle: schema.maybe(schema.string()),
-  chainingSystem: schema.maybe(schema.string()),
-  ignoreParentSettingsJSON: schema.maybe(schema.string()),
-});
+export const controlGroupInputSchema = schema.object(
+  {
+    panelsJSON: schema.maybe(schema.string()),
+    controlStyle: schema.maybe(schema.string()),
+    chainingSystem: schema.maybe(schema.string()),
+    ignoreParentSettingsJSON: schema.maybe(schema.string()),
+  },
+  { unknowns: 'ignore' }
+);
 
 export const dashboardAttributesSchema = schema.object(
   {
@@ -54,7 +57,7 @@ export const dashboardAttributesSchema = schema.object(
     hits: schema.maybe(schema.number()),
     version: schema.maybe(schema.number()),
   },
-  { unknowns: 'forbid' }
+  { unknowns: 'ignore' }
 );
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);

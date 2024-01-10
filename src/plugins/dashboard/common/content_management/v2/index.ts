@@ -7,9 +7,10 @@
  */
 
 export {
-  serviceDefinition as serviceDefinitionV2,
-  dashboardSavedObjectSchema as dashboardSOSchemaV2,
-  dashboardAttributesSchema as dashboardAttributesSchemaV2,
+  serviceDefinition,
+  dashboardSavedObjectSchema,
+  dashboardAttributesSchema,
 } from './cm_services';
 
-export * from '../v1/types'; // no changes made to types from v1 to v2
+export type { GridData, DashboardItem, SavedDashboardPanel } from '../v1/types'; // no changes made to types from v1 to v2
+export type { DashboardCrudTypes, DashboardAttributes } from './types';
