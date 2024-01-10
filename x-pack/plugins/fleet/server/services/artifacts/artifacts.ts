@@ -161,8 +161,16 @@ export const bulkCreateArtifacts = async (
     if (res.errors) {
       nonConflictErrors.push(
         ...res.items.reduce<Error[]>((acc, item) => {
-          if (item.create?.status !== 409) {
-            acc.push(new Error(item.create?.error?.reason));
+          if (item.create && item.create.status !== 409) {
+            acc.push(
+              new Error(
+                `Create of artifact id [${item.create._id}] returned: result [${
+                  item.create.result
+                }], status [${item.create.status}], reason [${JSON.stringify(
+                  item.create?.error || ''
+                )}]`
+              )
+            );
           }
           return acc;
         }, [])
