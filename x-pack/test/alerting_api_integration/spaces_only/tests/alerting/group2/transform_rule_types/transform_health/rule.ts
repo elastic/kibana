@@ -8,19 +8,30 @@
 import expect from '@kbn/expect';
 import { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import {
+  ALERT_ACTION_GROUP,
+  ALERT_INSTANCE_ID,
+  ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  EVENT_ACTION,
+} from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { Spaces } from '../../../../../scenarios';
 
-const ACTION_TYPE_ID = '.index';
-const ALERT_TYPE_ID = 'transform_health';
+const CONNECTOR_TYPE_ID = '.index';
+const RULE_TYPE_ID = 'transform_health';
 const ES_TEST_INDEX_SOURCE = 'transform-alert:transform-health';
 const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-ts-output`;
 
-const ALERT_INTERVAL_SECONDS = 3;
+const RULE_INTERVAL_SECONDS = 3;
 
-interface CreateAlertParams {
+interface CreateRuleParams {
   name: string;
   includeTransforms: string[];
   excludeTransforms?: string[] | null;
@@ -52,7 +63,7 @@ export function generateTransformConfig(transformId: string): PutTransformsReque
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function alertTests({ getService }: FtrProviderContext) {
+export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
@@ -62,10 +73,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
+  const esTestIndexToolAAD = new ESTestIndexTool(
+    es,
+    retry,
+    `.internal.alerts-default.alerts-default-000001`
+  );
 
-  describe('alert', async () => {
+  describe('rule', async () => {
     const objectRemover = new ObjectRemover(supertest);
-    let actionId: string;
+    let connectorId: string;
     const transformId = 'test_transform_01';
     const destinationIndex = generateDestIndex(transformId);
 
@@ -76,10 +92,12 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await esTestIndexToolOutput.destroy();
       await esTestIndexToolOutput.setup();
 
+      await esTestIndexToolAAD.removeAll();
+
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
-      actionId = await createAction();
+      connectorId = await createConnector();
 
       await transform.api.createIndices(destinationIndex);
       await createTransform(transformId);
@@ -89,18 +107,19 @@ export default function alertTests({ getService }: FtrProviderContext) {
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
       await esTestIndexToolOutput.destroy();
+      await esTestIndexToolAAD.removeAll();
       await transform.api.cleanTransformIndices();
     });
 
     it('runs correctly', async () => {
-      await createAlert({
+      const ruleId = await createRule({
         name: 'Test all transforms',
         includeTransforms: ['*'],
       });
 
       await stopTransform(transformId);
 
-      log.debug('Checking created alert instances...');
+      log.debug('Checking created alerts...');
 
       const docs = await waitForDocs(1);
       for (const doc of docs) {
@@ -109,6 +128,18 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(name).to.be('Test all transforms');
         expect(message).to.be('Transform test_transform_01 is not started.');
       }
+
+      const aadDocs = await getAllAADDocs(1);
+      const alertDoc = aadDocs.body.hits.hits[0]._source;
+      expect(alertDoc[ALERT_REASON]).to.be(`Transform test_transform_01 is not started.`);
+      expect(alertDoc[ALERT_RULE_CATEGORY]).to.be(`Transform health`);
+      expect(alertDoc[ALERT_RULE_NAME]).to.be(`Test all transforms`);
+      expect(alertDoc[ALERT_RULE_TYPE_ID]).to.be(`transform_health`);
+      expect(alertDoc[ALERT_RULE_UUID]).to.be(ruleId);
+      expect(alertDoc[EVENT_ACTION]).to.be(`open`);
+      expect(alertDoc[ALERT_ACTION_GROUP]).to.be(`transform_issue`);
+      expect(alertDoc[ALERT_INSTANCE_ID]).to.be(`Transform is not started`);
+      expect(alertDoc[ALERT_STATUS]).to.be(`active`);
     });
 
     async function waitForDocs(count: number): Promise<any[]> {
@@ -119,15 +150,19 @@ export default function alertTests({ getService }: FtrProviderContext) {
       );
     }
 
+    async function getAllAADDocs(count: number): Promise<any> {
+      return await esTestIndexToolAAD.getAll(count);
+    }
+
     async function createTransform(id: string) {
       const config = generateTransformConfig(id);
       await transform.api.createAndRunTransform(id, config);
     }
 
-    async function createAlert(params: CreateAlertParams): Promise<string> {
+    async function createRule(params: CreateRuleParams): Promise<string> {
       log.debug(`Creating an alerting rule "${params.name}"...`);
       const action = {
-        id: actionId,
+        id: connectorId,
         group: 'transform_issue',
         params: {
           documents: [
@@ -143,15 +178,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
         },
       };
 
-      const { status, body: createdAlert } = await supertest
+      const { status, body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: params.name,
           consumer: 'alerts',
           enabled: true,
-          rule_type_id: ALERT_TYPE_ID,
-          schedule: { interval: `${ALERT_INTERVAL_SECONDS}s` },
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
           actions: [action],
           notify_when: 'onActiveAlert',
           params: {
@@ -160,29 +195,29 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
       // will print the error body, if an error occurred
-      // if (statusCode !== 200) console.log(createdAlert);
+      // if (statusCode !== 200) console.log(createdRule);
 
       expect(status).to.be(200);
 
-      const alertId = createdAlert.id;
-      objectRemover.add(Spaces.space1.id, alertId, 'rule', 'alerting');
+      const ruleId = createdRule.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
-      return alertId;
+      return ruleId;
     }
 
     async function stopTransform(id: string) {
       await transform.api.stopTransform(id);
     }
 
-    async function createAction(): Promise<string> {
-      log.debug('Creating an action...');
+    async function createConnector(): Promise<string> {
+      log.debug('Creating a connector...');
       // @ts-ignore
-      const { statusCode, body: createdAction } = await supertest
+      const { statusCode, body: createdConnector } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'index action for transform health FT',
-          connector_type_id: ACTION_TYPE_ID,
+          connector_type_id: CONNECTOR_TYPE_ID,
           config: {
             index: ES_TEST_OUTPUT_INDEX_NAME,
           },
@@ -191,9 +226,9 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
       expect(statusCode).to.be(200);
 
-      log.debug(`Action with id "${createdAction.id}" has been created.`);
+      log.debug(`Connector with id "${createdConnector.id}" has been created.`);
 
-      const resultId = createdAction.id;
+      const resultId = createdConnector.id;
       objectRemover.add(Spaces.space1.id, resultId, 'connector', 'actions');
 
       return resultId;
