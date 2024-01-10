@@ -17,21 +17,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { CspBenchmarkRule } from '../../../common/types/latest';
-import type { RulesState } from './rules_container';
+// import { CspBenchmarkRule } from '../../../common/types/latest';
+import type { CspBenchmarkRulesWithStatus, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleStatus } from './change_csp_rule_status';
 
 type RulesTableProps = Pick<
   RulesState,
-  'loading' | 'error' | 'rules_page' | 'total' | 'perPage' | 'page' | 'all_rules'
+  'loading' | 'error' | 'rules_page' | 'total' | 'perPage' | 'page'
 > & {
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   setSelectedRuleId(id: string | null): void;
   selectedRuleId: string | null;
   refetchStatus: () => void;
-  selectedRules: CspBenchmarkRule[];
-  setSelectedRules: (e: CspBenchmarkRule[]) => void;
+  selectedRules: CspBenchmarkRulesWithStatus[];
+  setSelectedRules: (e: CspBenchmarkRulesWithStatus[]) => void;
 };
 
 type GetColumnProps = Pick<
@@ -52,32 +52,34 @@ export const RulesTable = ({
   refetchStatus,
   selectedRules,
   setSelectedRules,
-  all_rules: allItems,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const euiPagination: EuiBasicTableProps<CspBenchmarkRule>['pagination'] = {
+  const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStatus>['pagination'] = {
     pageIndex: page,
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
 
-  const onTableChange = ({ page: pagination }: Criteria<CspBenchmarkRule>) => {
+  const onTableChange = ({ page: pagination }: Criteria<CspBenchmarkRulesWithStatus>) => {
     if (!pagination) return;
     setPagination({ page: pagination.index, perPage: pagination.size });
   };
 
-  const rowProps = (row: CspBenchmarkRule) => ({
-    ['data-test-subj']: TEST_SUBJECTS.getCspBenchmarkRuleTableRowItemTestId(row.metadata.id),
+  const rowProps = (row: CspBenchmarkRulesWithStatus) => ({
+    ['data-test-subj']: TEST_SUBJECTS.getCspBenchmarkRuleTableRowItemTestId(row.metadata?.id),
     style: {
-      background: row.metadata.id === selectedRuleId ? euiTheme.colors.highlight : undefined,
+      background: row.metadata?.id === selectedRuleId ? euiTheme.colors.highlight : undefined,
     },
   });
 
   const [selectAllRulesThisPage, setSelectAllRulesThisPage] = useState<boolean>(false);
   const postRequestChangeRulesStatus = useChangeCspRuleStatus();
 
-  const isArraySubset = (smallArr: CspBenchmarkRule[], bigArr: CspBenchmarkRule[]) => {
+  const isArraySubset = (
+    smallArr: CspBenchmarkRulesWithStatus[],
+    bigArr: CspBenchmarkRulesWithStatus[]
+  ) => {
     let i: number = 0;
     const newSmallArr = smallArr.map((e) => e.metadata);
     const newBigArr = bigArr.map((e) => e.metadata);
@@ -145,7 +147,7 @@ const getColumns = ({
   setSelectAllRulesThisPage,
   selectAllRulesThisPage,
   isArraySubset,
-}: GetColumnProps & any): Array<EuiTableFieldDataColumnType<CspBenchmarkRule>> => [
+}: GetColumnProps & any): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStatus>> => [
   {
     field: 'action',
     name: (
@@ -162,9 +164,10 @@ const getColumns = ({
             setSelectAllRulesThisPage(false);
             setSelectedRules(
               selectedRules.filter(
-                (element: CspBenchmarkRule) =>
+                (element: CspBenchmarkRulesWithStatus) =>
                   !items.find(
-                    (item: CspBenchmarkRule) => item.metadata?.id === element.metadata?.id
+                    (item: CspBenchmarkRulesWithStatus) =>
+                      item.metadata?.id === element.metadata?.id
                   )
               )
             );
@@ -177,11 +180,11 @@ const getColumns = ({
     ),
     width: '30px',
     sortable: false,
-    render: (rules, item: CspBenchmarkRule) => {
+    render: (rules, item: CspBenchmarkRulesWithStatus) => {
       return (
         <EuiCheckbox
           checked={selectedRules.some(
-            (e: CspBenchmarkRule) => e.metadata?.id === item.metadata?.id
+            (e: CspBenchmarkRulesWithStatus) => e.metadata?.id === item.metadata?.id
           )}
           id={`cloud-security-fields-selector-item-${item.metadata?.id}`}
           data-test-subj={`cloud-security-fields-selector-item-${item.metadata?.id}`}
@@ -191,7 +194,7 @@ const getColumns = ({
               ? setSelectedRules([...selectedRules, item])
               : setSelectedRules(
                   selectedRules.filter(
-                    (rule: CspBenchmarkRule) => rule.metadata?.id !== item.metadata?.id
+                    (rule: CspBenchmarkRulesWithStatus) => rule.metadata?.id !== item.metadata?.id
                   )
                 );
           }}
@@ -214,7 +217,7 @@ const getColumns = ({
     }),
     width: '60%',
     truncateText: true,
-    render: (name, rule) => (
+    render: (name, rule: CspBenchmarkRulesWithStatus) => (
       <EuiButtonEmpty
         className="eui-textTruncate"
         title={name}
@@ -242,7 +245,7 @@ const getColumns = ({
     }),
     width: '10%',
     truncateText: true,
-    render: (name: any, rule: CspBenchmarkRule & { status: string }) => {
+    render: (name, rule: CspBenchmarkRulesWithStatus) => {
       const rulesObjectRequest = {
         benchmark_id: rule?.metadata.benchmark.id,
         benchmark_version: rule?.metadata.benchmark.version,

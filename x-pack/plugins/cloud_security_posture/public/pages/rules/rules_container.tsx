@@ -10,53 +10,32 @@ import { useParams } from 'react-router-dom';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
-import {
-  useFindCspBenchmarkRule,
-  type RulesQuery,
-  type RulesQueryResult,
-} from './use_csp_benchmark_rules';
+import { useFindCspBenchmarkRule, type RulesQuery } from './use_csp_benchmark_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
 import type { CspBenchmarkRule, PageUrlParams } from '../../../common/types/latest';
 import { useCspGetRulesStates } from './use_csp_rules_state';
+
+export interface CspBenchmarkRulesWithStatus {
+  metadata: CspBenchmarkRule['metadata'];
+  status: 'muted' | 'unmuted';
+}
+
 interface RulesPageData {
-  rules_page: CspBenchmarkRule[];
-  all_rules: CspBenchmarkRule[];
-  rules_map: Map<string, CspBenchmarkRule>;
+  rules_page: CspBenchmarkRulesWithStatus[];
+  all_rules: CspBenchmarkRulesWithStatus[];
+  rules_map: Map<string, CspBenchmarkRulesWithStatus>;
   total: number;
   error?: string;
   loading: boolean;
 }
 
-export interface RulePageDataV2 {
-  metadata: CspBenchmarkRule;
-  status: string;
-}
-
 export type RulesState = RulesPageData & RulesQuery;
 
-const getRulesPageData = (
-  { status, data, error }: Pick<RulesQueryResult, 'data' | 'status' | 'error'>,
-  query: RulesQuery
-): RulesPageData => {
-  const rules = data?.items || ([] as CspBenchmarkRule[]);
-
-  const page = getPage(rules, query);
-
-  return {
-    loading: status === 'loading',
-    error: error ? extractErrorMessage(error) : undefined,
-    all_rules: rules,
-    rules_map: new Map(rules.map((rule) => [rule.metadata.id, rule])),
-    rules_page: page,
-    total: data?.total || 0,
-  };
-};
-
-const getRulesPageData2 = (
-  data: any[],
+const getRulesPage = (
+  data: CspBenchmarkRulesWithStatus[],
   status: string,
   error: unknown,
   query: RulesQuery
@@ -75,7 +54,7 @@ const getRulesPageData2 = (
   };
 };
 
-const getPage = (data: CspBenchmarkRule[], { page, perPage }: RulesQuery) =>
+const getPage = (data: CspBenchmarkRulesWithStatus[], { page, perPage }: RulesQuery) =>
   data.slice(page * perPage, (page + 1) * perPage);
 
 const MAX_ITEMS_PER_PAGE = 10000;
@@ -105,11 +84,6 @@ export const RulesContainer = () => {
     params.benchmarkVersion
   );
 
-  const rulesPageData = useMemo(
-    () => getRulesPageData({ data, error, status }, rulesQuery),
-    [data, error, status, rulesQuery]
-  );
-
   // We need to make this call again without the filters. this way the section list is always full
   const allRules = useFindCspBenchmarkRule(
     {
@@ -122,12 +96,12 @@ export const RulesContainer = () => {
 
   const rulesStates = useCspGetRulesStates();
   const arrayRulesStates = Object.values(rulesStates.data || {});
-  const filteredArrayRulesStates: any[] = arrayRulesStates.filter(
+  const filteredRulesStates: any[] = arrayRulesStates.filter(
     (e: any) =>
       e.benchmark_id === params.benchmarkId && e.benchmark_version === 'v' + params.benchmarkVersion
   );
 
-  const allNewRulesItems: any[] = useMemo(() => {
+  const allNewRulesItems: CspBenchmarkRulesWithStatus[] = useMemo(() => {
     if (data === undefined) return [];
     return data?.items.reduce((res: any[], obj1) => {
       const rulesKey =
@@ -149,7 +123,7 @@ export const RulesContainer = () => {
     }, []);
   }, [data, rulesStates?.data]);
 
-  const filteredAllNewRulesItems: RulePageDataV2[] | undefined = useMemo(() => {
+  const filteredAllNewRulesItems: CspBenchmarkRulesWithStatus[] = useMemo(() => {
     if (enabledDisabledItemsFilter === 'enabled')
       return allNewRulesItems?.filter((e) => e?.status === 'muted');
     else if (enabledDisabledItemsFilter === 'disabled')
@@ -168,15 +142,15 @@ export const RulesContainer = () => {
   const cleanedSectionList = [...new Set(sectionList)];
   const cleanedRuleNumberList = [...new Set(ruleNumberList)];
 
-  const rulesPageData2 = useMemo(
-    () => getRulesPageData2(filteredAllNewRulesItems, status, error, rulesQuery),
+  const rulesPageData = useMemo(
+    () => getRulesPage(filteredAllNewRulesItems, status, error, rulesQuery),
     [filteredAllNewRulesItems, status, error, rulesQuery]
   );
 
-  const [selectedRules, setSelectedRules] = useState<CspBenchmarkRule[]>([]);
+  const [selectedRules, setSelectedRules] = useState<CspBenchmarkRulesWithStatus[]>([]);
 
   const setSelectAllRules = () => {
-    setSelectedRules(rulesPageData2.all_rules);
+    setSelectedRules(rulesPageData.all_rules);
   };
 
   return (
@@ -193,23 +167,22 @@ export const RulesContainer = () => {
           ruleNumberSelectOptions={cleanedRuleNumberList}
           search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
           searchValue={rulesQuery.search || ''}
-          totalRulesCount={rulesPageData2.all_rules.length}
-          pageSize={rulesPageData2.rules_page.length}
+          totalRulesCount={rulesPageData.all_rules.length}
+          pageSize={rulesPageData.rules_page.length}
           isSearching={status === 'loading'}
           selectedRules={selectedRules}
           refetchStatus={rulesStates.refetch}
           setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
           currentEnabledDisabledItemsFilterState={enabledDisabledItemsFilter}
-          allRules={rulesPageData2.all_rules}
-          setSelectedRules={setSelectedRules}
           setSelectAllRules={setSelectAllRules}
+          setSelectedRules={setSelectedRules}
         />
         <EuiSpacer />
         <RulesTable
-          rules_page={rulesPageData2.rules_page}
-          total={rulesPageData2.total}
-          error={rulesPageData2.error}
-          loading={rulesPageData2.loading}
+          rules_page={rulesPageData.rules_page}
+          total={rulesPageData.total}
+          error={rulesPageData.error}
+          loading={rulesPageData.loading}
           perPage={pageSize || rulesQuery.perPage}
           page={rulesQuery.page}
           setPagination={(paginationQuery) => {
@@ -221,19 +194,18 @@ export const RulesContainer = () => {
           refetchStatus={rulesStates.refetch}
           selectedRules={selectedRules}
           setSelectedRules={setSelectedRules}
-          all_rules={rulesPageData2.all_rules}
         />
       </EuiPanel>
       {selectedRuleId && (
         <RuleFlyout
           rule={{
-            ...rulesPageData.rules_map.get(selectedRuleId!),
             ...{
               status:
-                filteredArrayRulesStates.find((e) => e.rule_id === selectedRuleId)?.muted === true
+                filteredRulesStates.find((e) => e.rule_id === selectedRuleId)?.muted === true
                   ? 'muted'
                   : 'unmuted',
             },
+            ...{ metadata: rulesPageData.rules_map.get(selectedRuleId!)?.metadata! },
           }}
           onClose={() => setSelectedRuleId(null)}
           refetchStatus={rulesStates.refetch}

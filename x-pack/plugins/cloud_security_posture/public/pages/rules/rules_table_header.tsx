@@ -26,8 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { CspBenchmarkRule } from '../../../common/types/latest';
 import { useChangeCspRuleStatus } from './change_csp_rule_status';
+import { CspBenchmarkRulesWithStatus } from './rules_container';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
@@ -39,23 +39,21 @@ interface RulesTableToolbarProps {
   searchValue: string;
   isSearching: boolean;
   pageSize: number;
-  selectedRules: CspBenchmarkRule[];
+  selectedRules: CspBenchmarkRulesWithStatus[];
   refetchStatus: () => void;
   setEnabledDisabledItemsFilter: (filterState: string) => void;
   currentEnabledDisabledItemsFilterState: string;
-  allRules: CspBenchmarkRule[];
-  setSelectedRules: (e: CspBenchmarkRule[]) => void;
   setSelectAllRules: () => void;
+  setSelectedRules: (rules: CspBenchmarkRulesWithStatus[]) => void;
 }
 
 interface RuleTableCount {
   pageSize: number;
   total: number;
-  selectedRules: CspBenchmarkRule[];
+  selectedRules: CspBenchmarkRulesWithStatus[];
   refetchStatus: () => void;
-  allRules: CspBenchmarkRule[];
-  setSelectedRules: (e: CspBenchmarkRule[]) => void;
   setSelectAllRules: () => void;
+  setSelectedRules: (rules: CspBenchmarkRulesWithStatus[]) => void;
 }
 
 export const RulesTableHeader = ({
@@ -72,9 +70,8 @@ export const RulesTableHeader = ({
   refetchStatus,
   setEnabledDisabledItemsFilter,
   currentEnabledDisabledItemsFilterState,
-  allRules,
-  setSelectedRules,
   setSelectAllRules,
+  setSelectedRules,
 }: RulesTableToolbarProps) => {
   const [selectedSection, setSelectedSection] = useState<EuiComboBoxOptionOption[]>([]);
   const [selectedRuleNumber, setSelectedRuleNumber] = useState<EuiComboBoxOptionOption[]>([]);
@@ -85,33 +82,25 @@ export const RulesTableHeader = ({
   const ruleNumberOptions = ruleNumberSelectOptions.map((option) => ({
     label: option,
   }));
-  // const [isEnabledFilterOn, setIsEnabledFilterOn] = useState(false);
-  // const [isDisabledFilterOn, setIsDisabledFilterOn] = useState(false);
 
-  // const toggleOnFilter = () => {
-  //   setIsEnabledFilterOn(!isEnabledFilterOn);
-  //   setIsDisabledFilterOn(isDisabledFilterOn && !isEnabledFilterOn ? false : isDisabledFilterOn);
-  // };
+  const [isEnabledRulesFilterOn, setIsEnabledRulesFilterOn] = useState(false);
+  const [isDisabledRulesFilterOn, setisDisabledRulesFilterOn] = useState(false);
 
-  // const toggleOffFilter = () => {
-  //   setIsDisabledFilterOn(!isDisabledFilterOn);
-  //   setIsEnabledFilterOn(isEnabledFilterOn && !isDisabledFilterOn ? false : isEnabledFilterOn);
-  // };
-
-  const [isOnFilterOn, setIsOnFilterOn] = useState(false);
-  const [isOffFilterOn, setIsOffFilterOn] = useState(false);
-
-  const toggleOnFilter = () => {
-    setIsOnFilterOn(!isOnFilterOn);
-    setIsOffFilterOn(isOffFilterOn && !isOnFilterOn ? false : isOffFilterOn);
+  const toggleEnabledRulesFilter = () => {
+    setIsEnabledRulesFilterOn(!isEnabledRulesFilterOn);
+    setisDisabledRulesFilterOn(
+      isDisabledRulesFilterOn && !isEnabledRulesFilterOn ? false : isDisabledRulesFilterOn
+    );
     if (currentEnabledDisabledItemsFilterState === 'enabled')
       setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('enabled');
   };
 
-  const toggleOffFilter = () => {
-    setIsOffFilterOn(!isOffFilterOn);
-    setIsOnFilterOn(isOnFilterOn && !isOffFilterOn ? false : isOnFilterOn);
+  const toggleDisabledRulesFilter = () => {
+    setisDisabledRulesFilterOn(!isDisabledRulesFilterOn);
+    setIsEnabledRulesFilterOn(
+      isEnabledRulesFilterOn && !isDisabledRulesFilterOn ? false : isEnabledRulesFilterOn
+    );
     if (currentEnabledDisabledItemsFilterState === 'disabled')
       setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('disabled');
@@ -128,9 +117,8 @@ export const RulesTableHeader = ({
           pageSize={pageSize}
           selectedRules={selectedRules}
           refetchStatus={refetchStatus}
-          allRules={allRules}
-          setSelectedRules={setSelectedRules}
           setSelectAllRules={setSelectAllRules}
+          setSelectedRules={setSelectedRules}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
@@ -185,19 +173,24 @@ export const RulesTableHeader = ({
             `}
           >
             <EuiFilterGroup>
-              <EuiFilterButton withNext hasActiveFilters={isOnFilterOn} onClick={toggleOnFilter}>
+              <EuiFilterButton
+                withNext
+                hasActiveFilters={isEnabledRulesFilterOn}
+                onClick={toggleEnabledRulesFilter}
+              >
                 <FormattedMessage
                   id="xpack.csp.rules.rulesTable.enabledRuleFilterButton"
                   defaultMessage="Enabled rule"
                 />
-                {/* Enabled rules */}
               </EuiFilterButton>
-              <EuiFilterButton hasActiveFilters={isOffFilterOn} onClick={toggleOffFilter}>
+              <EuiFilterButton
+                hasActiveFilters={isDisabledRulesFilterOn}
+                onClick={toggleDisabledRulesFilter}
+              >
                 <FormattedMessage
                   id="xpack.csp.rules.rulesTable.disabledRuleFilterButton"
                   defaultMessage="Disabled rule"
                 />
-                {/* Disabled rules */}
               </EuiFilterButton>
             </EuiFilterGroup>
           </EuiFlexItem>
@@ -217,9 +210,8 @@ const SearchField = ({
   pageSize,
   selectedRules,
   refetchStatus,
-  allRules,
-  setSelectedRules,
   setSelectAllRules,
+  setSelectedRules,
 }: Pick<
   RulesTableToolbarProps,
   | 'isSearching'
@@ -229,9 +221,8 @@ const SearchField = ({
   | 'pageSize'
   | 'selectedRules'
   | 'refetchStatus'
-  | 'allRules'
-  | 'setSelectedRules'
   | 'setSelectAllRules'
+  | 'setSelectedRules'
 >) => {
   const [localValue, setLocalValue] = useState(searchValue);
 
@@ -256,9 +247,8 @@ const SearchField = ({
         total={totalRulesCount}
         selectedRules={selectedRules}
         refetchStatus={refetchStatus}
-        allRules={allRules}
-        setSelectedRules={setSelectedRules}
         setSelectAllRules={setSelectAllRules}
+        setSelectedRules={setSelectedRules}
       />
     </div>
   );
@@ -269,9 +259,8 @@ const CurrentPageOfTotal = ({
   total,
   selectedRules,
   refetchStatus,
-  allRules,
-  setSelectedRules,
   setSelectAllRules,
+  setSelectedRules,
 }: RuleTableCount) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onPopoverClick = () => {
@@ -281,8 +270,8 @@ const CurrentPageOfTotal = ({
   const postRequestChangeRulesStatus = useChangeCspRuleStatus();
   const closePopover = () => setIsPopoverOpen(false);
   const changeRulesStatus = async (status: 'mute' | 'unmute') => {
-    const bulkSelectedRules = selectedRules.map((e) => ({
-      benchmark_id: e?.metadata.benchmark.id,
+    const bulkSelectedRules = selectedRules.map((e: CspBenchmarkRulesWithStatus) => ({
+      benchmark_id: e?.metadata?.benchmark.id,
       benchmark_version: e?.metadata.benchmark.version,
       rule_number: e?.metadata.benchmark.rule_number,
       rule_id: e?.metadata.id,
@@ -293,10 +282,14 @@ const CurrentPageOfTotal = ({
   };
   const changeCspRuleStatusMute = async () => {
     changeRulesStatus('mute');
+    // setSelectedRules([]);
   };
   const changeCspRuleStatusUnmute = async () => {
     changeRulesStatus('unmute');
+    // setSelectedRules([]);
   };
+  const areAllSelectedRulesMuted = selectedRules.find((e) => e?.status === 'muted');
+  const areAllSelectedRulesUnmuted = selectedRules.find((e) => e?.status === 'unmuted');
 
   const popoverButton = (
     <EuiButtonEmpty
@@ -313,7 +306,7 @@ const CurrentPageOfTotal = ({
   );
   const items = [
     <EuiContextMenuItem
-      disabled={selectedRules.length === 0 ? true : false}
+      disabled={selectedRules.length === 0 || !areAllSelectedRulesUnmuted ? true : false}
       onClick={changeCspRuleStatusMute}
     >
       <EuiText>
@@ -321,7 +314,7 @@ const CurrentPageOfTotal = ({
       </EuiText>
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      disabled={selectedRules.length === 0 ? true : false}
+      disabled={selectedRules.length === 0 || !areAllSelectedRulesMuted ? true : false}
       onClick={changeCspRuleStatusUnmute}
     >
       <EuiText key="disabled">
@@ -337,7 +330,7 @@ const CurrentPageOfTotal = ({
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} | Selected {selectedRulesAmount} rules"
+              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} \u2000|\u2000 Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
               values={{ pageSize, total, selectedRulesAmount: selectedRules.length || 0 }}
             />
           </EuiText>
@@ -346,14 +339,15 @@ const CurrentPageOfTotal = ({
           <EuiButtonEmpty
             onClick={setSelectAllRules}
             size="xs"
-            iconType="editorChecklist"
+            iconType="pagesSelect"
             css={css`
               padding-bottom: ${euiThemeVars.euiSizeS};
             `}
           >
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.selectAllRulesOption"
-              defaultMessage="Select All Rules"
+              defaultMessage="Select All {total, plural, one {# rule} other {# rules}}"
+              values={{ total }}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

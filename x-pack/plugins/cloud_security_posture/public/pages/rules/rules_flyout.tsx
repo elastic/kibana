@@ -20,15 +20,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CspBenchmarkRule, CspBenchmarkRuleMetadata } from '../../../common/types/latest';
+import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleStatus } from './change_csp_rule_status';
+import { CspBenchmarkRulesWithStatus } from './rules_container';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  rule: CspBenchmarkRule;
+  rule: CspBenchmarkRulesWithStatus;
   refetchStatus: () => void;
 }
 
@@ -54,15 +55,15 @@ type RuleTab = typeof tabs[number]['id'];
 export const RuleFlyout = ({ onClose, rule, refetchStatus }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
   const postRequestChangeRulesStatus = useChangeCspRuleStatus();
-  const rulesObjectRequest = {
-    benchmark_id: rule?.metadata.benchmark.id,
-    benchmark_version: rule?.metadata.benchmark.version,
-    rule_number: rule?.metadata.benchmark.rule_number,
-    rule_id: rule?.metadata.id,
-  };
-  const nextRuleStatus = rule?.status === 'muted' ? 'unmute' : 'mute';
 
-  const useChangeCspRuleStatusFn = async () => {
+  const switchRuleStatus = async () => {
+    const rulesObjectRequest = {
+      benchmark_id: rule?.metadata.benchmark.id,
+      benchmark_version: rule?.metadata.benchmark.version,
+      rule_number: rule?.metadata.benchmark.rule_number,
+      rule_id: rule?.metadata.id,
+    };
+    const nextRuleStatus = rule?.status === 'muted' ? 'unmute' : 'mute';
     await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
     await refetchStatus();
   };
@@ -81,7 +82,7 @@ export const RuleFlyout = ({ onClose, rule, refetchStatus }: RuleFlyoutProps) =>
         <EuiSwitch
           className="eui-textTruncate"
           checked={rule?.status === 'muted' ? true : false}
-          onChange={useChangeCspRuleStatusFn}
+          onChange={switchRuleStatus}
           data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
           label={rule.status === 'muted' ? 'Enabled' : 'Disabled'}
         />
