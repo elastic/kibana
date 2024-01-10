@@ -13,7 +13,7 @@ export const TemplateDeprecatedBadge = () => {
   return (
     <EuiToolTip
       content={i18n.translate('xpack.idxMgmt.templateList.table.deprecatedTemplateBadgeTooltip', {
-        defaultMessage: 'This index template is deprecated and should not be relied on.',
+        defaultMessage: 'This index template is no longer supported and might be removed in a future release. Instead, use one of the other index templates available or create a new one.',
       })}
     >
       <EuiBadge color="warning" data-test-subj="deprecatedTemplateBadge">

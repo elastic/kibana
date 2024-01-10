@@ -193,7 +193,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
           >
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningDescription"
-              defaultMessage="This component template is deprecated and should not be relied on."
+              defaultMessage="This component template is no longer supported and might be removed in a future release. Instead, use one of the other component templates available or create a new one."
             />
           </EuiCallOut>
           <EuiSpacer size="l" />

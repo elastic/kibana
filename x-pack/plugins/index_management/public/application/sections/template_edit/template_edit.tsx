@@ -166,7 +166,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
           >
             <FormattedMessage
               id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningDescription"
-              defaultMessage="This index template is deprecated and should not be relied on."
+              defaultMessage="This index template is no longer supported and might be removed in a future release. Instead, use one of the other index templates available or create a new one."
             />
           </EuiCallOut>
           <EuiSpacer size="l" />
