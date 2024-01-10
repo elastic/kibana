@@ -8,29 +8,32 @@
 import { ALL_DATASETS_LOCATOR_ID, AllDatasetsLocatorParams } from '@kbn/deeplinks-observability';
 import { LocatorDefinition } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service';
-
 import { INFRA_LOGS_LOCATOR_ID } from './infra';
-import { LogsLocatorParams } from './types';
-import { getLogsQuery, getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
+import { LogsLocatorParams, TraceLogsLocatorParams } from './types';
 
-export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
+import { getTraceQuery, getTimeRangeEndFromTime, getTimeRangeStartFromTime } from './helpers';
 
-export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
-  public readonly id = LOGS_LOCATOR_ID;
+export const TRACE_LOGS_LOCATOR_ID = 'TRACE_LOGS_LOCATOR';
+
+export class TraceLogsLocatorDefinition implements LocatorDefinition<TraceLogsLocatorParams> {
+  public readonly id = TRACE_LOGS_LOCATOR_ID;
 
   constructor(private readonly locators: LocatorClient) {}
 
-  public readonly getLocation = async (params: LogsLocatorParams) => {
+  public readonly getLocation = async (params: TraceLogsLocatorParams) => {
     const infraLogsLocator = this.locators.get<LogsLocatorParams>(INFRA_LOGS_LOCATOR_ID);
     if (infraLogsLocator) {
-      return infraLogsLocator.getLocation(params);
+      return infraLogsLocator.getLocation({
+        ...params,
+        filter: getTraceQuery(params).query,
+      });
     }
 
+    const { time } = params;
     const allDatasetsLocator =
       this.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)!;
-    const { time } = params;
     return allDatasetsLocator.getLocation({
-      query: getLogsQuery(params),
+      query: getTraceQuery(params),
       ...(time
         ? {
             timeRange: {
