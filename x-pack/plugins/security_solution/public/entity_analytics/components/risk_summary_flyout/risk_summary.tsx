@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   useEuiTheme,
@@ -140,16 +140,21 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
     [alertsData?.length]
   );
 
+  const onToggle = useCallback(
+    (isOpen) => {
+      const entity = isUserRiskData(riskData) ? 'user' : 'host';
+
+      telemetry.reportToggleRiskSummaryClicked({
+        entity,
+        action: isOpen ? 'show' : 'hide',
+      });
+    },
+    [riskData, telemetry]
+  );
+
   return (
     <EuiAccordion
-      onToggle={(isOpen) => {
-        const entity = isUserRiskData(riskData) ? 'user' : 'host';
-
-        telemetry.reportToggleRiskSummaryClicked({
-          entity,
-          action: isOpen ? 'show' : 'hide',
-        });
-      }}
+      onToggle={onToggle}
       initialIsOpen
       id={'risk_summary'}
       buttonProps={{
