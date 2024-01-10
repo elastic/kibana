@@ -7,28 +7,24 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { ExpressionsServerStart, ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { metricFunction } from '../common';
 
 interface SetupDeps {
   expressions: ExpressionsServerSetup;
 }
 
-interface StartDeps {
-  expression: ExpressionsServerStart;
-}
-
 export type ExpressionMetricPluginSetup = void;
 export type ExpressionMetricPluginStart = void;
 
 export class ExpressionMetricPlugin
-  implements Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps>
+  implements Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, {}>
 {
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
+  public setup(_core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
     expressions.registerFunction(metricFunction);
   }
 
-  public start(core: CoreStart): ExpressionMetricPluginStart {}
+  public start(_core: CoreStart): ExpressionMetricPluginStart {}
 
   public stop() {}
 }

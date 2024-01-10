@@ -10,11 +10,11 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
-  UnifiedSearchPublicPluginStart,
   UnifiedSearchPluginSetup,
+  UnifiedSearchPublicPluginStart,
 } from '@kbn/unified-search-plugin/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
@@ -47,15 +47,21 @@ export interface InputControlVisPluginSetupDependencies {
 
 /** @internal */
 export interface InputControlVisPluginStartDependencies {
-  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
-  visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
 }
 
 /** @internal */
-export class InputControlVisPlugin implements Plugin<void, void> {
+export class InputControlVisPlugin
+  implements
+    Plugin<
+      void,
+      void,
+      InputControlVisPluginSetupDependencies,
+      InputControlVisPluginStartDependencies
+    >
+{
   constructor(public initializerContext: PluginInitializerContext<InputControlPublicConfig>) {}
 
   public setup(
@@ -80,7 +86,7 @@ export class InputControlVisPlugin implements Plugin<void, void> {
     );
   }
 
-  public start(core: CoreStart, deps: InputControlVisPluginStartDependencies) {
+  public start(_core: CoreStart, deps: InputControlVisPluginStartDependencies) {
     // nothing to do here
     const { uiActions } = deps;
 

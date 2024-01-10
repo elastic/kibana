@@ -9,7 +9,7 @@
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import { getUISettings } from './ui_settings';
 
-export class PresentationUtilPlugin implements Plugin<object, object> {
+export class PresentationUtilPlugin implements Plugin<{}, {}, {}, {}> {
   public setup(core: CoreSetup) {
     core.uiSettings.register(getUISettings());
     return {};

@@ -22,20 +22,20 @@ export interface MarkdownPluginSetupDependencies {
 }
 
 /** @internal */
-export class MarkdownPlugin implements Plugin<void, void> {
+export class MarkdownPlugin implements Plugin<void, void, MarkdownPluginSetupDependencies, {}> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, { expressions, visualizations }: MarkdownPluginSetupDependencies) {
+  public setup(_core: CoreSetup, { expressions, visualizations }: MarkdownPluginSetupDependencies) {
     visualizations.createBaseVisualization(markdownVisDefinition);
     expressions.registerRenderer(markdownVisRenderer);
     expressions.registerFunction(createMarkdownVisFn);
   }
 
-  public start(core: CoreStart) {
+  public start(_core: CoreStart) {
     // nothing to do here yet
   }
 }

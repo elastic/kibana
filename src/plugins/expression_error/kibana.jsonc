@@ -8,11 +8,11 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
-      "expressions",
-      "presentationUtil"
+      "expressions"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "presentationUtil"
     ]
   }
 }

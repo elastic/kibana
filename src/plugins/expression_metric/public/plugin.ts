@@ -7,7 +7,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { metricFunction } from '../common/expression_functions';
 import { metricRendererFactory } from './expression_renderers';
 
@@ -15,15 +15,11 @@ interface SetupDeps {
   expressions: ExpressionsSetup;
 }
 
-interface StartDeps {
-  expression: ExpressionsStart;
-}
-
 export type ExpressionMetricPluginSetup = void;
 export type ExpressionMetricPluginStart = void;
 
 export class ExpressionMetricPlugin
-  implements Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, StartDeps>
+  implements Plugin<ExpressionMetricPluginSetup, ExpressionMetricPluginStart, SetupDeps, {}>
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionMetricPluginSetup {
     expressions.registerFunction(metricFunction);

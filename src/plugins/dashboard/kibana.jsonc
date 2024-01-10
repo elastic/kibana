@@ -9,17 +9,13 @@
     "browser": true,
     "requiredPlugins": [
       "data",
-      "dataViews",
       "dataViewEditor",
       "embeddable",
-      "controls",
       "inspector",
       "navigation",
       "savedObjects",
-      "savedObjectsFinder",
       "savedObjectsManagement",
       "contentManagement",
-      "share",
       "screenshotMode",
       "uiActions",
       "urlForwarding",
@@ -35,8 +31,16 @@
       "usageCollection",
       "taskManager",
       "serverless",
-      "noDataPage"
+      "noDataPage",
+      "share"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "presentationUtil",
+      "controls",
+      "savedObjectsFinder",
+      "share"
+    ]
   }
 }

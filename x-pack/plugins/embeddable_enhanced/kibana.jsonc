@@ -9,9 +9,8 @@
     "browser": true,
     "requiredPlugins": [
       "embeddable",
-      "kibanaReact",
-      "uiActions",
       "uiActionsEnhanced"
-    ]
+    ],
+    "requiredBundles": []
   }
 }

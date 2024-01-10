@@ -56,12 +56,12 @@ export interface Start {
   open: (adapters: Adapters, options?: InspectorOptions) => InspectorSession;
 }
 
-export class InspectorPublicPlugin implements Plugin<Setup, Start> {
+export class InspectorPublicPlugin implements Plugin<Setup, Start, {}, InspectorPluginStartDeps> {
   views: InspectorViewRegistry | undefined;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup) {
+  public setup(_core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
     this.views.register(getRequestsViewDescription());
