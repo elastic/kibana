@@ -87,8 +87,8 @@ describe('validators', () => {
       expect(() =>
         validateRequiredCustomFieldInRequest({
           requestCustomFields: [
-            { key: '1', required: true, default_value: false },
-            { key: '2', required: true, default_value: 'foobar' },
+            { key: '1', required: true, defaultValue: false },
+            { key: '2', required: true, defaultValue: 'foobar' },
           ],
         })
       ).not.toThrow();
@@ -98,7 +98,7 @@ describe('validators', () => {
       expect(() =>
         validateRequiredCustomFieldInRequest({
           requestCustomFields: [
-            { key: '1', required: true, default_value: null },
+            { key: '1', required: true, defaultValue: null },
             { key: '2', required: true },
             { key: '3', required: false },
           ],

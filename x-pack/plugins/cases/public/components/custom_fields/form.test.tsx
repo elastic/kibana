@@ -62,7 +62,7 @@ describe('CustomFieldsForm ', () => {
       target: { value: CustomFieldTypes.TOGGLE },
     });
 
-    expect(screen.getByTestId('toggle-custom-field-options')).toBeInTheDocument();
+    expect(screen.getByTestId('toggle-custom-field-required')).toBeInTheDocument();
     expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
@@ -78,7 +78,8 @@ describe('CustomFieldsForm ', () => {
     });
 
     userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
-    userEvent.click(screen.getByTestId('text-custom-field-options'));
+    userEvent.click(screen.getByTestId('text-custom-field-required'));
+    userEvent.paste(screen.getByTestId('text-custom-field-default-value'), 'Summary');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -88,6 +89,7 @@ describe('CustomFieldsForm ', () => {
         label: 'Summary',
         required: true,
         type: 'text',
+        defaultValue: 'Summary',
       });
     });
   });
@@ -136,7 +138,11 @@ describe('CustomFieldsForm ', () => {
       'value',
       customFieldsConfigurationMock[0].label
     );
-    expect(await screen.findByTestId('text-custom-field-options')).toHaveAttribute('checked');
+    expect(await screen.findByTestId('text-custom-field-required')).toHaveAttribute('checked');
+    expect(await screen.findByTestId('text-custom-field-default-value')).toHaveAttribute(
+      'value',
+      customFieldsConfigurationMock[0].defaultValue
+    );
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -164,7 +170,9 @@ describe('CustomFieldsForm ', () => {
       'value',
       customFieldsConfigurationMock[1].label
     );
-    expect(await screen.findByTestId('text-custom-field-options')).not.toHaveAttribute('checked');
+    expect(await screen.findByTestId('toggle-custom-field-required')).not.toHaveAttribute(
+      'checked'
+    );
 
     await act(async () => {
       const { data } = await formState!.submit();

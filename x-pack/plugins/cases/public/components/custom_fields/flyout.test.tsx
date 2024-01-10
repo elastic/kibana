@@ -45,7 +45,8 @@ describe('CustomFieldFlyout ', () => {
 
     userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-    userEvent.click(screen.getByTestId('text-custom-field-options'));
+    userEvent.click(screen.getByTestId('text-custom-field-required'));
+    userEvent.paste(screen.getByTestId('text-custom-field-default-value'), 'Summary');
 
     userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
@@ -55,6 +56,7 @@ describe('CustomFieldFlyout ', () => {
         label: 'Summary',
         required: true,
         type: 'text',
+        defaultValue: 'Summary',
       });
     });
   });
@@ -132,6 +134,6 @@ describe('CustomFieldFlyout ', () => {
       customFieldsConfigurationMock[0].label
     );
     expect(await screen.findByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
-    expect(await screen.findByTestId('text-custom-field-options')).toHaveAttribute('checked');
+    expect(await screen.findByTestId('text-custom-field-required')).toHaveAttribute('checked');
   });
 });

@@ -48,7 +48,7 @@ export const validateRequiredCustomFieldInRequest = ({
   requestCustomFields?: Array<{
     key: string;
     required: boolean;
-    default_value?: string | boolean | null;
+    defaultValue?: string | boolean | null;
   }>;
 }) => {
   if (!Array.isArray(requestCustomFields)) {
@@ -60,7 +60,7 @@ export const validateRequiredCustomFieldInRequest = ({
   requestCustomFields.forEach((requestField) => {
     if (
       requestField.required &&
-      (requestField.default_value === undefined || requestField.default_value === null)
+      (requestField.defaultValue === undefined || requestField.defaultValue === null)
     ) {
       invalidFields.push(requestField.key);
     }

@@ -45,9 +45,8 @@ describe('Configure ', () => {
       // data, isValid
       expect(onSubmit).toBeCalledWith(
         {
-          options: {
-            required: true,
-          },
+          required: true,
+          defaultValue: false,
         },
         true
       );

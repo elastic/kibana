@@ -90,6 +90,7 @@ describe('addOrReplaceCustomField ', () => {
       `
       Array [
         Object {
+          "defaultValue": "My default value",
           "key": "test_key_1",
           "label": "My test label 1",
           "required": true,
@@ -124,6 +125,7 @@ describe('addOrReplaceCustomField ', () => {
       `
       Array [
         Object {
+          "defaultValue": "My default value",
           "key": "test_key_1",
           "label": "My test label 1!!!",
           "required": true,
