@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { URL } from 'url';
 import moment from 'moment';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver, TelemetryReceiver } from '../receiver';
@@ -68,6 +70,15 @@ export const stubLicenseInfo: ESLicense = {
   start_date_in_millis: -1,
 };
 
+export const createMockTelemetryPluginSetup = (
+  diagnosticsAlert?: unknown,
+  emptyTimelineTree?: boolean
+): jest.Mocked<TelemetryPluginSetup> => {
+  return {
+    getTelemetryUrl: jest.fn(() => Promise.resolve(new URL('http://localhost/v3/send'))),
+  } as unknown as jest.Mocked<TelemetryPluginSetup>;
+};
+
 export const createMockTelemetryReceiver = (
   diagnosticsAlert?: unknown,
   emptyTimelineTree?: boolean
@@ -79,6 +90,7 @@ export const createMockTelemetryReceiver = (
   return {
     start: jest.fn(),
     fetchClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
+    getClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
     fetchLicenseInfo: jest.fn().mockReturnValue(stubLicenseInfo),
     copyLicenseFields: jest.fn(),
     fetchFleetAgents: jest.fn(),
