@@ -198,7 +198,6 @@ export const getTopNavLinks = ({
         },
         overlays: core.overlays,
         http: core.http,
-        allowedTypes: [],
       });
     },
   };

@@ -643,7 +643,6 @@ export const LensTopNavMenu = ({
               },
               overlays,
               http,
-              allowedTypes: [],
             });
           },
         },

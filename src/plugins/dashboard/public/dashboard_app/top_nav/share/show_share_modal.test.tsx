@@ -12,6 +12,7 @@ import { convertPanelMapToSavedPanels, DashboardContainerInput } from '../../../
 
 import { pluginServices } from '../../../services/plugin_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
+import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard" app is not available', () => {
@@ -74,6 +75,7 @@ describe('ShowShareModal', () => {
     return {
       isDirty: true,
       anchorElement: document.createElement('div'),
+      overlays: overlayServiceMock.createStartContract(),
     };
   };
 

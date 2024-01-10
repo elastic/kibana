@@ -202,6 +202,5 @@ export function ShowShareModal({
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,
     overlays,
-    allowedTypes: [],
   });
 }

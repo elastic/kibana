@@ -413,7 +413,6 @@ export const getTopNavConfig = (
             showPublicUrlSwitch,
             overlays,
             http,
-            allowedTypes: [],
           });
         }
       },
