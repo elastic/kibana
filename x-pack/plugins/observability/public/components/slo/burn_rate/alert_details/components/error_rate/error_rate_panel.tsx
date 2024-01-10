@@ -102,10 +102,11 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiLink
+                color="text"
                 data-test-subj="o11yErrorRatePanelSloDetailsLink"
                 href={http.basePath.prepend(alert.link!)}
               >
-                <EuiIcon type="sortRight" />
+                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
                 <FormattedMessage
                   id="xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.sloDetailsLink"
                   defaultMessage="SLO details"
@@ -129,6 +130,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                         'xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.thresholdBreachedTitle',
                         { defaultMessage: 'Threshold breached' }
                       )}
+                      <EuiIcon type="warning" style={{ marginLeft: '4px' }} />
                     </span>
                   </EuiText>
                 </EuiFlexItem>

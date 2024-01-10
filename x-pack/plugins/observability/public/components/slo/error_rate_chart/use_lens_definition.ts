@@ -9,6 +9,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
+import numeral from '@elastic/numeral';
 
 export function useLensDefinition(
   slo: SLOResponse,
@@ -335,7 +336,7 @@ export function useLensDefinition(
                   customLabel: true,
                 },
                 '0a42b72b-cd5a-4d59-81ec-847d97c268e6': {
-                  label: `${threshold}x`,
+                  label: `${numeral(threshold).format('0.[00]')}x`,
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
