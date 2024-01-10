@@ -55,7 +55,18 @@ export const DocumentViewModeToggle = ({
       responsive={false}
       css={containerCss}
     >
-      {prepend && <EuiFlexItem grow={false}>{prepend}</EuiFlexItem>}
+      {prepend && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            &:empty {
+              display: none;
+            }
+          `}
+        >
+          {prepend}
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         {isTextBasedQuery || !showViewModeToggle ? (
           <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
