@@ -18,6 +18,7 @@ import { AlertsClientError, DEFAULT_AAD_CONFIG, RuleType } from '@kbn/alerting-p
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { PLUGIN, type TransformHealth, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
@@ -140,7 +141,14 @@ export function getTransformHealthRuleType(
 
       if (unhealthyTests.length > 0) {
         unhealthyTests.forEach(({ name: alertInstanceName, context }) => {
-          alertsClient.report({ id: alertInstanceName, actionGroup: TRANSFORM_ISSUE, context });
+          alertsClient.report({
+            id: alertInstanceName,
+            actionGroup: TRANSFORM_ISSUE,
+            context,
+            payload: {
+              [ALERT_REASON]: context.message,
+            },
+          });
         });
       }
 
@@ -149,7 +157,13 @@ export function getTransformHealthRuleType(
         const recoveredAlertId = recoveredAlert.alert.getId();
         const testResult = executionResult.find((v) => v.name === recoveredAlertId);
         if (testResult) {
-          alertsClient.setAlertData({ id: recoveredAlertId, context: testResult.context });
+          alertsClient.setAlertData({
+            id: recoveredAlertId,
+            context: testResult.context,
+            payload: {
+              [ALERT_REASON]: testResult.context.message,
+            },
+          });
         }
       }
 

@@ -22,6 +22,7 @@ import type {
 import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
@@ -183,6 +184,9 @@ export function registerJobsMonitoringRuleType({
             id: alertName,
             actionGroup: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
             context,
+            payload: {
+              [ALERT_REASON]: context.message,
+            },
           });
         });
       }
@@ -195,6 +199,9 @@ export function registerJobsMonitoringRuleType({
           alertsClient.setAlertData({
             id: recoveredAlertId,
             context: testResult.context,
+            payload: {
+              [ALERT_REASON]: testResult.context.message,
+            },
           });
         }
       }
