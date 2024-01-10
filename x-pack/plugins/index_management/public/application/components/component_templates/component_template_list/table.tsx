@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiBadge,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
@@ -43,8 +44,29 @@ export const ComponentTable: FunctionComponent<Props> = ({
   history,
 }) => {
   const { trackMetric } = useComponentTemplatesContext();
+  const [query, setQuery] = useState('');
 
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
+
+  const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
+    if (!error) {
+      setQuery(queryText);
+    }
+  };
+
+  const filteredComponentTemplates = useMemo(() => {
+    let result = componentTemplates ?? [];
+
+    // When the query includes 'is:isDeprecated', we want to show deprecated component templates.
+    // Otherwise hide them all since they wont be supported in the future.
+    if (query.includes('is:isDeprecated')) {
+      result = result.filter((item) => item.isDeprecated);
+    } else {
+      result = result.filter((item) => !item.isDeprecated);
+    }
+
+    return result;
+  }, [componentTemplates, query]);
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     itemId: 'name',
@@ -108,12 +130,21 @@ export const ComponentTable: FunctionComponent<Props> = ({
       box: {
         incremental: true,
       },
+      query,
+      onChange: handleOnChange,
       filters: [
         {
           type: 'is',
           field: 'isManaged',
           name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isManagedFilterLabel', {
             defaultMessage: 'Managed',
+          }),
+        },
+        {
+          type: 'is',
+          field: 'isDeprecated',
+          name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isDeprecatedFilterLabel', {
+            defaultMessage: 'Deprecated',
           }),
         },
         {
@@ -297,7 +328,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
         ],
       },
     ],
-    items: componentTemplates ?? [],
+    items: filteredComponentTemplates,
   };
 
   return <EuiInMemoryTable {...tableProps} />;
