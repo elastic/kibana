@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
+import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
+
+interface TimeRange {
+  from: Date;
+  to: Date;
+}
 
 export function useLensDefinition(
   slo: SLOResponse,
-  threshold: number
+  threshold: number,
+  alertTimeRange?: TimeRange
 ): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
@@ -60,14 +67,14 @@ export function useLensDefinition(
             layerId: '8730e8af-7dac-430e-9cef-3b9989ff0866',
             accessors: ['9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14'],
             position: 'top',
-            seriesType: 'area',
+            seriesType: !!alertTimeRange ? 'line' : 'area',
             showGridlines: false,
             layerType: 'data',
             xAccessor: '627ded04-eae0-4437-83a1-bbb6138d2c3b',
             yConfig: [
               {
                 forAccessor: '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14',
-                color: euiTheme.colors.danger,
+                color: !!alertTimeRange ? euiTheme.colors.primary : euiTheme.colors.danger,
               },
             ],
           },
@@ -85,6 +92,41 @@ export function useLensDefinition(
               },
             ],
           },
+          ...(!!alertTimeRange
+            ? [
+                {
+                  layerId: '62dfc313-3922-4870-b568-ff0818da38b3',
+                  layerType: 'annotations',
+                  annotations: [
+                    {
+                      type: 'manual',
+                      id: 'ffe44253-a8c7-4755-821f-47be5bfac288',
+                      label: 'Alert',
+                      key: {
+                        type: 'point_in_time',
+                        timestamp: moment(alertTimeRange.from).toISOString(),
+                      },
+                      lineWidth: 3,
+                      color: euiTheme.colors.danger,
+                      icon: 'alert',
+                    },
+                    {
+                      type: 'manual',
+                      label: 'Alert',
+                      key: {
+                        type: 'range',
+                        timestamp: moment(alertTimeRange.from).toISOString(),
+                        endTimestamp: moment(alertTimeRange.to).toISOString(),
+                      },
+                      id: '07d15b13-4b6c-4d82-b45d-9d58ced1c2a8',
+                      color: transparentize(euiTheme.colors.danger, 0.2),
+                    },
+                  ],
+                  ignoreGlobalFilters: true,
+                  persistanceType: 'byValue',
+                },
+              ]
+            : []),
         ],
       },
       query: {

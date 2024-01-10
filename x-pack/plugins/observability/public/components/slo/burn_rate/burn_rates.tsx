@@ -52,7 +52,10 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
     setBurnRateOption(selected);
   };
 
-  const fromRange = moment().subtract(burnRateOption.duration, 'hour').toDate();
+  const dataTimeRange = {
+    from: moment().subtract(burnRateOption.duration, 'hour').toDate(),
+    to: new Date(),
+  };
   const threshold = burnRateOption.threshold;
   const burnRate = data?.burnRates.find((br) => br.name === burnRateOption.windowName)?.burnRate;
 
@@ -107,7 +110,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
             <BurnRate threshold={threshold} burnRate={burnRate} slo={slo} isLoading={isLoading} />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
-            <ErrorRateChart slo={slo} fromRange={fromRange} threshold={threshold} />
+            <ErrorRateChart slo={slo} dataTimeRange={dataTimeRange} threshold={threshold} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>

@@ -50,10 +50,25 @@ function getActionGroupFromReason(reason: string): string {
   }
 }
 
-function getAlertTimeRange(timeRange: { gte: string; lte?: string }, window: WindowSchema) {
+interface TimeRange {
+  from: Date;
+  to: Date;
+}
+
+function getDataTimeRange(
+  timeRange: { gte: string; lte?: string },
+  window: WindowSchema
+): TimeRange {
   const windowDurationInMs = window.longWindow.value * 60 * 60 * 1000;
   return {
     from: new Date(new Date(timeRange.gte).getTime() - windowDurationInMs),
+    to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
+  };
+}
+
+function getAlertTimeRange(timeRange: { gte: string; lte?: string }): TimeRange {
+  return {
+    from: new Date(timeRange.gte),
     to: timeRange.lte ? new Date(timeRange.lte) : new Date(),
   };
 }
@@ -75,7 +90,9 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
   ).find((window: WindowSchema) => window.actionGroup === actionGroup);
 
   // @ts-ignore
-  const alertTimeRange = getAlertTimeRange(alert.fields[ALERT_TIME_RANGE], actionGroupWindow);
+  const dataTimeRange = getDataTimeRange(alert.fields[ALERT_TIME_RANGE], actionGroupWindow);
+  // @ts-ignore
+  const alertTimeRange = getAlertTimeRange(alert.fields[ALERT_TIME_RANGE]);
   const burnRate = alert.fields['kibana.alert.evaluation.value'];
 
   if (isLoading) {
@@ -188,8 +205,8 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
           <EuiFlexItem grow={5}>
             <ErrorRateChart
               slo={slo}
-              fromRange={alertTimeRange.from}
-              toRange={alertTimeRange.to}
+              dataTimeRange={dataTimeRange}
+              alertTimeRange={alertTimeRange}
               threshold={actionGroupWindow!.burnRateThreshold}
             />
           </EuiFlexItem>
