@@ -277,14 +277,13 @@ export class IndexTable extends Component {
     return indexOfUnselectedItem === -1;
   };
 
-  buildHeader(config) {
+  buildHeader(headers) {
     const { sortField, isSortAscending } = this.props;
-    const headers = getHeaders({ showIndexStats: config.enableIndexStats });
     return Object.entries(headers).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
       // we only want to make index name column 25% width when there are more columns displayed
       const widthClassName =
-        fieldName === 'name' && config.enableIndexStats ? 'indTable__header__width' : '';
+        fieldName === 'name' && Object.keys(headers).length > 2 ? 'indTable__header__width' : '';
       return (
         <EuiTableHeaderCell
           key={fieldName}
@@ -474,6 +473,7 @@ export class IndexTable extends Component {
   render() {
     const {
       filter,
+      filterChanged,
       indices,
       loadIndices,
       indicesLoading,
@@ -532,7 +532,8 @@ export class IndexTable extends Component {
       <AppContextConsumer>
         {({ services, config }) => {
           const { extensionsService } = services;
-
+          const headers = getHeaders({ showIndexStats: config.enableIndexStats });
+          const columnsCount = Object.keys(headers).length + 1;
           return (
             <EuiPageSection paddingSize="none">
               <EuiFlexGroup alignItems="center">
@@ -614,6 +615,7 @@ export class IndexTable extends Component {
                               defaultMessage: 'Search',
                             }
                           ),
+                          'data-test-subj': 'indicesSearch',
                         }}
                         aria-label={i18n.translate(
                           'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
@@ -652,43 +654,54 @@ export class IndexTable extends Component {
 
               <EuiSpacer size="m" />
 
-              {indices.length > 0 ? (
-                <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                  <EuiTable className="indTable" data-test-subj="indexTable">
-                    <EuiScreenReaderOnly>
-                      <caption role="status" aria-relevant="text" aria-live="polite">
-                        <FormattedMessage
-                          id="xpack.idxMgmt.indexTable.captionText"
-                          defaultMessage="Below is the indices table containing {count, plural, one {# row} other {# rows}} out of {total}."
-                          values={{ count: indices.length, total: pager.totalItems }}
-                        />
-                      </caption>
-                    </EuiScreenReaderOnly>
+              <div style={{ maxWidth: '100%', overflow: 'auto' }}>
+                <EuiTable className="indTable" data-test-subj="indexTable">
+                  <EuiScreenReaderOnly>
+                    <caption role="status" aria-relevant="text" aria-live="polite">
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexTable.captionText"
+                        defaultMessage="Below is the indices table containing {count, plural, one {# row} other {# rows}} out of {total}."
+                        values={{ count: indices.length, total: pager.totalItems }}
+                      />
+                    </caption>
+                  </EuiScreenReaderOnly>
 
-                    <EuiTableHeader>
-                      <EuiTableHeaderCellCheckbox>
-                        <EuiCheckbox
-                          id="selectAllIndexes"
-                          checked={this.areAllItemsSelected()}
-                          onChange={this.toggleAll}
-                          type="inList"
-                          aria-label={i18n.translate(
-                            'xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel',
-                            {
-                              defaultMessage: 'Select all rows',
-                            }
-                          )}
-                        />
-                      </EuiTableHeaderCellCheckbox>
-                      {this.buildHeader(config)}
-                    </EuiTableHeader>
+                  <EuiTableHeader>
+                    <EuiTableHeaderCellCheckbox>
+                      <EuiCheckbox
+                        id="selectAllIndexes"
+                        checked={this.areAllItemsSelected()}
+                        onChange={this.toggleAll}
+                        type="inList"
+                        aria-label={i18n.translate(
+                          'xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel',
+                          {
+                            defaultMessage: 'Select all rows',
+                          }
+                        )}
+                      />
+                    </EuiTableHeaderCellCheckbox>
+                    {this.buildHeader(headers)}
+                  </EuiTableHeader>
 
-                    <EuiTableBody>{this.buildRows(services, config)}</EuiTableBody>
-                  </EuiTable>
-                </div>
-              ) : (
-                <NoMatch />
-              )}
+                  <EuiTableBody>
+                    {indices.length > 0 ? (
+                      this.buildRows(services, config)
+                    ) : (
+                      <EuiTableRow>
+                        <EuiTableRowCell align="center" colSpan={columnsCount}>
+                          <NoMatch
+                            loadIndices={loadIndices}
+                            filter={filter}
+                            resetFilter={() => filterChanged('')}
+                            extensionsService={extensionsService}
+                          />
+                        </EuiTableRowCell>
+                      </EuiTableRow>
+                    )}
+                  </EuiTableBody>
+                </EuiTable>
+              </div>
 
               <EuiSpacer size="m" />
 
