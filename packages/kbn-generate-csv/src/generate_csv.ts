@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
 
@@ -358,7 +359,8 @@ export class CsvGenerator {
     ]);
 
     this.logger.debug(
-      `Task started at: ${this.taskInstanceFields.startedAt}. Available until: ${this.taskInstanceFields.retryAt}`
+      `Task started at: ${moment(this.taskInstanceFields.startedAt).format()}.` +
+        ` Able to run until: ${moment(this.taskInstanceFields.retryAt).format()}`
     );
 
     const index = searchSource.getField('index');

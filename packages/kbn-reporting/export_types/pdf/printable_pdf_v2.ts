@@ -132,6 +132,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
                 : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
             ),
             taskInstanceFields,
+            logger,
           })
           .pipe(
             tap(({ metrics }) => {

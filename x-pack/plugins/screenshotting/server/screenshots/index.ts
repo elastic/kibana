@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { Logger } from '@kbn/logging';
 import type { Optional } from '@kbn/utility-types';
 import { LayoutParams } from '../../common';
 import { PerformanceMetrics, TaskInstanceFields } from '../../common/types';
@@ -41,6 +42,10 @@ export interface CaptureOptions extends Optional<ScreenshotObservableOptions, 'u
    * Source Kibana request object from where the headers will be extracted.
    */
   request?: KibanaRequest;
+  /**
+   * Optional logger object that could contain context from the caller for traceability
+   */
+  logger?: Logger;
 }
 
 export type CaptureMetrics = PerformanceMetrics;

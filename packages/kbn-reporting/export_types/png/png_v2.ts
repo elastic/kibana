@@ -127,6 +127,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
             layout: { ...payload.layout, id: 'preserve_layout' },
             urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
             taskInstanceFields,
+            logger,
           })
           .pipe(
             tap(({ metrics }) => {

@@ -110,6 +110,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             headers,
             layout,
             taskInstanceFields,
+            logger,
           })
           .pipe(
             tap(({ metrics }) => {
