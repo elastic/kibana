@@ -46,8 +46,6 @@
 }
 
 .lnsWorkspacePanel__dragDrop {
-  border: $euiBorderWidthThin solid transparent;
-
   &.domDragDrop-isDropTarget {
     p {
       transition: filter $euiAnimSpeedFast ease-in-out;
