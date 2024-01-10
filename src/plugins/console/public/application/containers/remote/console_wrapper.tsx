@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Observable } from 'rxjs';
 import {
   HttpSetup,
@@ -34,7 +34,6 @@ import {
 import { createUsageTracker } from '../../../services/tracker';
 import { MetricsTracker, RemoteConsoleDependencies } from '../../../types';
 
-import { EditorContentSpinner } from '../../components';
 import { createApi, createEsHostService } from '../../lib';
 import { EsHostService } from '../../lib/es_host_service';
 
@@ -106,16 +105,8 @@ const loadDependencies = ({
 };
 
 export const ConsoleWrapper = (props: RemoteConsoleDependencies): React.ReactElement => {
-  const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  useEffect(() => {
-    if (dependencies === null) {
-      setDependencies(loadDependencies(props));
-    }
-  }, [props, dependencies, setDependencies]);
+  const dependencies = useMemo(() => loadDependencies(props), [props]);
 
-  if (dependencies === null) {
-    return <EditorContentSpinner />;
-  }
   const {
     I18nContext,
     autocompleteInfo,
