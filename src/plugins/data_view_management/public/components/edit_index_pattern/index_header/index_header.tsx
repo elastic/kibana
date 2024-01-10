@@ -70,7 +70,6 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
             {editTooltip}
           </EuiButton>
         ),
-        ,
         defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
           <EuiButton
             onClick={setDefault}
