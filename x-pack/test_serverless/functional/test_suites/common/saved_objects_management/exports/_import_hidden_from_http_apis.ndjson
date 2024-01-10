@@ -1,0 +1,2 @@
+{"attributes": {"title": "I am hidden from http apis but the client can still see me"},"id": "hidden-from-http-apis-import1","references": [],"type":"test-hidden-from-http-apis-importable-exportable","version": 1}
+{"attributes": {"title": "I am not hidden from http apis"},"id": "not-hidden-from-http-apis-import1","references": [],"type": "test-not-hidden-from-http-apis-importable-exportable","version": 1}

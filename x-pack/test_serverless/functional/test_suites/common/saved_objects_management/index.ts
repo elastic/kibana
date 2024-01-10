@@ -9,6 +9,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Saved Objects Management', function () {
+    this.tags('skipMKI');
     // loadTestFile(require.resolve('./find'));
     // loadTestFile(require.resolve('./scroll_count'));
     // loadTestFile(require.resolve('./bulk_get'));
