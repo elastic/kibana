@@ -100,9 +100,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     find('closeDetailsButton').simulate('click');
   };
 
-  const toggleViewItem = (view: 'managed' | 'cloudManaged' | 'system') => {
+  const toggleViewItem = (view: 'managed' | 'deprecated' | 'cloudManaged' | 'system') => {
     const { find, component } = testBed;
-    const views = ['managed', 'cloudManaged', 'system'];
+    const views = ['managed', 'deprecated', 'cloudManaged', 'system'];
 
     // First open the pop over
     act(() => {
