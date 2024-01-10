@@ -6,10 +6,10 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
-import numeral from '@elastic/numeral';
 
 export function useLensDefinition(
   slo: SLOResponse,
