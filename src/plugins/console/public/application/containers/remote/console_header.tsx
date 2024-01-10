@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const ConsoleHeader = ({
@@ -19,20 +19,22 @@ export const ConsoleHeader = ({
   rightSideItem?: React.ReactNode;
   onClick?: () => void;
 }) => (
-  <EuiFlexGroup justifyContent="spaceBetween" onClick={onClick}>
-    <EuiFlexItem grow={false}>
-      <EuiIcon type={isConsoleOpen ? 'arrowUp' : 'arrowDown'} size="l" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiTitle size="xs">
-        <h4>
-          {i18n.translate('console.remoteConsole.title', {
-            defaultMessage: 'Console',
-          })}
-        </h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem />
-    {rightSideItem && <EuiFlexItem grow={false}>{rightSideItem}</EuiFlexItem>}
-  </EuiFlexGroup>
+  <EuiPanel borderRadius="none" onClick={onClick} grow>
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={isConsoleOpen ? 'arrowUp' : 'arrowDown'} size="l" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h4>
+            {i18n.translate('console.remoteConsole.title', {
+              defaultMessage: 'Console',
+            })}
+          </h4>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem />
+      {rightSideItem && <EuiFlexItem grow={false}>{rightSideItem}</EuiFlexItem>}
+    </EuiFlexGroup>
+  </EuiPanel>
 );
