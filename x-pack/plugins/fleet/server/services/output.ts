@@ -969,6 +969,15 @@ class OutputService {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 
+    if (
+      data.type === outputType.RemoteElasticsearch &&
+      updateData.type === outputType.RemoteElasticsearch
+    ) {
+      if (!data.service_token) {
+        updateData.service_token = null;
+      }
+    }
+
     if (!data.preset && data.type === outputType.Elasticsearch) {
       updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', safeLoad);
     }
