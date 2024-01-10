@@ -63,6 +63,51 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
       if (endpointRunningConsole) {
         endpointRunningConsole.show();
       } else {
+        const consoleProps = {
+          commands: getEndpointConsoleCommands({
+            agentType,
+            endpointAgentId: agentId,
+            endpointCapabilities: capabilities,
+            endpointPrivileges,
+          }).map((command) => {
+            if (command.name !== 'status') {
+              return {
+                ...command,
+                helpHidden: !isResponseActionSupported(
+                  agentType,
+                  getCommandKey(command.name as ConsoleResponseActionCommands),
+                  'manual'
+                ),
+              };
+            } else if (agentType !== 'endpoint') {
+              // do not show 'status' for non-endpoint agents
+              return {
+                ...command,
+                helpHidden: true,
+              };
+            }
+            return command;
+          }),
+          'data-test-subj': `${agentType}ResponseActionsConsole`,
+          storagePrefix: 'xpack.securitySolution.Responder',
+          TitleComponent: () => {
+            if (agentType === 'endpoint') {
+              return <HeaderEndpointInfo endpointId={agentId} />;
+            }
+            if (agentType === 'sentinel_one') {
+              return (
+                <HeaderSentinelOneInfo
+                  agentId={agentId}
+                  hostName={hostName}
+                  lastCheckin={props.lastCheckin}
+                  platform={props.platform}
+                />
+              );
+            }
+            return null;
+          },
+        };
+
         consoleManager
           .register({
             id: agentId,
@@ -70,40 +115,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               agentId,
               hostName,
             },
-            consoleProps: {
-              commands: getEndpointConsoleCommands({
-                agentType,
-                endpointAgentId: agentId,
-                endpointCapabilities: capabilities,
-                endpointPrivileges,
-              }).filter((command) =>
-                command.name !== 'status'
-                  ? isResponseActionSupported(
-                      agentType,
-                      getCommandKey(command.name as ConsoleResponseActionCommands),
-                      'manual'
-                    )
-                  : false
-              ),
-              'data-test-subj': `${agentType}ResponseActionsConsole`,
-              storagePrefix: 'xpack.securitySolution.Responder',
-              TitleComponent: () => {
-                if (agentType === 'endpoint') {
-                  return <HeaderEndpointInfo endpointId={agentId} />;
-                }
-                if (agentType === 'sentinel_one') {
-                  return (
-                    <HeaderSentinelOneInfo
-                      agentId={agentId}
-                      hostName={hostName}
-                      lastCheckin={props.lastCheckin}
-                      platform={props.platform}
-                    />
-                  );
-                }
-                return null;
-              },
-            },
+            consoleProps,
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             ActionComponents: endpointPrivileges.canReadActionsLogManagement
               ? [ActionLogButton]
