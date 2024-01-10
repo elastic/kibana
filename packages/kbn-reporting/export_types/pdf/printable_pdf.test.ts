@@ -15,7 +15,6 @@ import { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
-import { CaptureResult } from '@kbn/screenshotting-plugin/server/screenshots';
 import { PdfV1ExportType } from '.';
 
 let content: string;
