@@ -189,7 +189,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
             }
             iconType="warning"
             color="warning"
-            data-test-subj="deprecatedIndexTemplateCallout"
+            data-test-subj="deprecatedTemplateCallout"
           >
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningDescription"

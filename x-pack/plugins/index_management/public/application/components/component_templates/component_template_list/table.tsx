@@ -143,9 +143,12 @@ export const ComponentTable: FunctionComponent<Props> = ({
         {
           type: 'is',
           field: 'isDeprecated',
-          name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isDeprecatedFilterLabel', {
-            defaultMessage: 'Deprecated',
-          }),
+          name: i18n.translate(
+            'xpack.idxMgmt.componentTemplatesList.table.isDeprecatedFilterLabel',
+            {
+              defaultMessage: 'Deprecated',
+            }
+          ),
         },
         {
           type: 'field_value_toggle_group',

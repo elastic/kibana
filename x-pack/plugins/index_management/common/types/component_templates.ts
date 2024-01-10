@@ -25,7 +25,7 @@ export interface ComponentTemplateSerialized {
 
 export interface ComponentTemplateDeserialized extends ComponentTemplateSerialized {
   name: string;
-  isDeprecated: boolean;
+  isDeprecated?: boolean;
   _kbnMeta: {
     usedBy: string[];
     isManaged: boolean;
@@ -44,7 +44,7 @@ export interface ComponentTemplateListItem {
   hasAliases: boolean;
   hasSettings: boolean;
   isManaged: boolean;
-  isDeprecated: boolean;
+  isDeprecated?: boolean;
 }
 
 export interface ComponentTemplateDatastreams {

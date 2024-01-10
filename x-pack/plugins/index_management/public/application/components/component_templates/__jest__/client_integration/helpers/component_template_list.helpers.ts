@@ -104,4 +104,5 @@ export type ComponentTemplateTestSubjects =
   | 'sectionLoading'
   | 'componentTemplatesLoadError'
   | 'deleteComponentTemplateButton'
+  | 'deprecatedComponentTemplateBadge'
   | 'reloadButton';
