@@ -5001,7 +5001,8 @@
   uid ""
 
 "@kbn/lens-inline-editing-example-plugin@link:x-pack/examples/lens_embeddable_inline_editing_example":
-  
+  version "0.0.0"
+  uid ""
 
 "@kbn/lens-plugin@link:x-pack/plugins/lens":
   version "0.0.0"
@@ -26448,6 +26449,11 @@ redux@^4.0.0, redux@^4.0.4, redux@^4.1.2, redux@^4.2.0:
   integrity sha512-oSBmcKKIuIR4ME29/AeNUnl5L+hvBq7OaJWzaptTQJAntaPvxIJqfnjbaEiCzzaIz+XmVILfqAM3Ob0aXLPfjA==
   dependencies:
     "@babel/runtime" "^7.9.2"
+
+reflect-metadata@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.2.1.tgz#8d5513c0f5ef2b4b9c3865287f3c0940c1f67f74"
+  integrity sha512-i5lLI6iw9AU3Uu4szRNPPEkomnkjRTaVt9hy/bn5g/oSzekBSMeLZblcjP74AW0vBabqERLLIrz+gR8QYR54Tw==
 
 refractor@^3.2.0, refractor@^3.6.0:
   version "3.6.0"
