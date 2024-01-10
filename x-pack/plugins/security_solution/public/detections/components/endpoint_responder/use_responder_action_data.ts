@@ -10,11 +10,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
 import type { ThirdPartyAgentInfo } from '../../../../common/types';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
-import {
-  useGetEndpointDetails,
-  useWithShowEndpointResponder,
-  useWithShowResponder,
-} from '../../../management/hooks';
+import { useGetEndpointDetails, useWithShowResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
@@ -78,7 +74,6 @@ export const useResponderActionData = ({
   tooltip: ReactNode;
 } => {
   const isEndpointHost = agentType === 'endpoint';
-  const showEndpointActionsConsole = useWithShowEndpointResponder();
   const showResponseActionsConsole = useWithShowResponder();
 
   const {
@@ -124,20 +119,23 @@ export const useResponderActionData = ({
   const handleResponseActionsClick = useCallback(() => {
     if (!isEndpointHost) {
       const agentInfoFromAlert = getThirdPartyAgentInfo(eventData || null);
-      showResponseActionsConsole(agentInfoFromAlert);
+      showResponseActionsConsole({
+        agentId: agentInfoFromAlert.agent.id,
+        agentType,
+        hostName: agentInfoFromAlert.host.name,
+        platform: agentInfoFromAlert.host.os.family,
+        lastCheckin: agentInfoFromAlert.lastCheckin,
+      });
     }
     if (hostInfo) {
-      showEndpointActionsConsole(hostInfo.metadata);
+      showResponseActionsConsole({
+        agentId: hostInfo.metadata.agent.id,
+        agentType: 'endpoint',
+        hostName: hostInfo.metadata.host.name,
+      });
     }
     if (onClick) onClick();
-  }, [
-    isEndpointHost,
-    hostInfo,
-    onClick,
-    eventData,
-    showResponseActionsConsole,
-    showEndpointActionsConsole,
-  ]);
+  }, [isEndpointHost, hostInfo, onClick, eventData, showResponseActionsConsole, agentType]);
 
   return {
     handleResponseActionsClick,
