@@ -168,6 +168,7 @@ for (const testSuite of testSuites) {
         label: group.name,
         agents: { queue: agentQueue },
         depends_on: 'build',
+        timeout_in_minutes: 150,
         parallelism: testSuite.count,
         concurrency,
         concurrency_group: process.env.UUID,

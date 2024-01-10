@@ -12,7 +12,7 @@ import { isEqual } from 'lodash';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
@@ -28,6 +28,7 @@ import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
 import { FieldItem } from '../common/field_item';
+import { getColumnsFromCache } from './fieldlist_cache';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
@@ -67,15 +68,14 @@ export function TextBasedDataPanel({
           expressions,
           frameDataViews
         );
-
         setDataHasLoaded(true);
         setState(stateFromQuery);
       }
     }
     fetchData();
   }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews]);
-
-  const { fieldList } = state;
+  const language = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : null;
+  const fieldList = language ? getColumnsFromCache(query[language]) : [];
 
   const onSelectedFieldFilter = useCallback(
     (field: DatatableColumn): boolean => {
