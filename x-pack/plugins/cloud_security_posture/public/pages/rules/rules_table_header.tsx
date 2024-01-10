@@ -280,27 +280,22 @@ const CurrentPageOfTotal = ({
 
   const postRequestChangeRulesStatus = useChangeCspRuleStatus();
   const closePopover = () => setIsPopoverOpen(false);
-  const useChangeCspRuleStatusMuteFn = async () => {
+  const changeRulesStatus = async (status: 'mute' | 'unmute') => {
     const bulkSelectedRules = selectedRules.map((e) => ({
       benchmark_id: e?.metadata.benchmark.id,
       benchmark_version: e?.metadata.benchmark.version,
       rule_number: e?.metadata.benchmark.rule_number,
       rule_id: e?.metadata.id,
     }));
-    await postRequestChangeRulesStatus('mute', bulkSelectedRules);
+    await postRequestChangeRulesStatus(status, bulkSelectedRules);
     await refetchStatus();
     await closePopover();
   };
-  const useChangeCspRuleStatusUnmuteFn = async () => {
-    const bulkSelectedRules = selectedRules.map((e) => ({
-      benchmark_id: e?.metadata.benchmark.id,
-      benchmark_version: e?.metadata.benchmark.version,
-      rule_number: e?.metadata.benchmark.rule_number,
-      rule_id: e?.metadata.id,
-    }));
-    await postRequestChangeRulesStatus('unmute', bulkSelectedRules);
-    await refetchStatus();
-    await closePopover();
+  const changeCspRuleStatusMute = async () => {
+    changeRulesStatus('mute');
+  };
+  const changeCspRuleStatusUnmute = async () => {
+    changeRulesStatus('unmute');
   };
 
   const popoverButton = (
@@ -319,7 +314,7 @@ const CurrentPageOfTotal = ({
   const items = [
     <EuiContextMenuItem
       disabled={selectedRules.length === 0 ? true : false}
-      onClick={useChangeCspRuleStatusMuteFn}
+      onClick={changeCspRuleStatusMute}
     >
       <EuiText>
         <FormattedMessage id="xpack.csp.rules.rulesTable.optionEnable" defaultMessage="Enable" />
@@ -327,7 +322,7 @@ const CurrentPageOfTotal = ({
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       disabled={selectedRules.length === 0 ? true : false}
-      onClick={useChangeCspRuleStatusUnmuteFn}
+      onClick={changeCspRuleStatusUnmute}
     >
       <EuiText key="disabled">
         <FormattedMessage id="xpack.csp.rules.rulesTable.optionDisable" defaultMessage="Disable" />

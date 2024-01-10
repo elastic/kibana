@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { extractErrorMessage } from '../../../common/utils/helpers';
@@ -28,6 +28,11 @@ interface RulesPageData {
   total: number;
   error?: string;
   loading: boolean;
+}
+
+export interface RulePageDataV2 {
+  metadata: CspBenchmarkRule;
+  status: string;
 }
 
 export type RulesState = RulesPageData & RulesQuery;
@@ -144,7 +149,7 @@ export const RulesContainer = () => {
     }, []);
   }, [data, rulesStates?.data]);
 
-  const filteredAllNewRulesItems: any[] | undefined = useMemo(() => {
+  const filteredAllNewRulesItems: RulePageDataV2[] | undefined = useMemo(() => {
     if (enabledDisabledItemsFilter === 'enabled')
       return allNewRulesItems?.filter((e) => e?.status === 'muted');
     else if (enabledDisabledItemsFilter === 'disabled')
@@ -169,15 +174,11 @@ export const RulesContainer = () => {
   );
 
   const [selectedRules, setSelectedRules] = useState<CspBenchmarkRule[]>([]);
-  // const [selectAllRules, setSelectAllRules] = useState<boolean>(false);
-console.log(rulesPageData2)
-  // useEffect(() => {
-  //   if (selectAllRules === true) setSelectedRules(rulesPageData2.all_rules);
-  // }, [rulesPageData2.all_rules, selectAllRules]);
 
   const setSelectAllRules = () => {
     setSelectedRules(rulesPageData2.all_rules);
   };
+
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
       <EuiPanel hasBorder={false} hasShadow={false}>

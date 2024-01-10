@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Criteria,
   EuiButtonEmpty,
@@ -13,15 +13,14 @@ import {
   EuiBasicTableProps,
   useEuiTheme,
   EuiSwitch,
-  EuiTableSelectionType,
   EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { uniqBy } from 'lodash';
 import { CspBenchmarkRule } from '../../../common/types/latest';
 import type { RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleStatus } from './change_csp_rule_status';
-import { getSelectedAndUnselectedItems } from '@kbn/cases-plugin/public/components/actions/use_items_state';
 
 type RulesTableProps = Pick<
   RulesState,
@@ -75,27 +74,25 @@ export const RulesTable = ({
     },
   });
 
-  // SELECTION
-
-  const onSelectionChange = (selectedRule: CspBenchmarkRule[]) => {
-    // if (selectAllRules === false) setSelectedRules(selectedRule);
-    // else setSelectedRules(selectedRule);
-    console.log(selectedRule);
-    setSelectedRules(selectedRule);
-  };
-
-  const selection: EuiTableSelectionType<CspBenchmarkRule> = {
-    // selectable: (rule: CspBenchmarkRule) => rule.metadata.name.length !== 0,
-    onSelectionChange,
-    selected: selectedRules,
-  };
-
   const [selectAllRulesThisPage, setSelectAllRulesThisPage] = useState<boolean>(false);
   const postRequestChangeRulesStatus = useChangeCspRuleStatus();
-  // const selectAllRulesThISpageCheckboxFn = () => {
-  // setSelectAllRulesThisPage(!selectAllRulesThisPage);
-  // setSelectedRules(items);
-  // };
+
+  const isArraySubset = (smallArr: CspBenchmarkRule[], bigArr: CspBenchmarkRule[]) => {
+    let i: number = 0;
+    const newSmallArr = smallArr.map((e) => e.metadata);
+    const newBigArr = bigArr.map((e) => e.metadata);
+
+    while (i < newSmallArr.length) {
+      if (!newBigArr.includes(newSmallArr[i])) return false;
+      i++;
+    }
+    return true;
+  };
+
+  useEffect(() => {
+    if (selectedRules.length >= items.length) setSelectAllRulesThisPage(true);
+  }, [items.length, selectedRules.length]);
+
   const columns = useMemo(
     () =>
       getColumns({
@@ -107,6 +104,7 @@ export const RulesTable = ({
         items,
         setSelectAllRulesThisPage,
         selectAllRulesThisPage,
+        isArraySubset,
       }),
     [
       setSelectedRuleId,
@@ -132,8 +130,6 @@ export const RulesTable = ({
         onChange={onTableChange}
         itemId={(v) => v.metadata.id}
         rowProps={rowProps}
-        // isSelectable={true}
-        // selection={selection}
       />
     </>
   );
@@ -148,23 +144,32 @@ const getColumns = ({
   items,
   setSelectAllRulesThisPage,
   selectAllRulesThisPage,
+  isArraySubset,
 }: GetColumnProps & any): Array<EuiTableFieldDataColumnType<CspBenchmarkRule>> => [
   {
     field: 'action',
     name: (
       <EuiCheckbox
         id={`cloud-security-fields-selector-item-all`}
-        checked={selectAllRulesThisPage || selectedRules.length >= items.length}
-        onChange={() => {
+        checked={isArraySubset(items, selectedRules) && selectAllRulesThisPage}
+        onChange={(e) => {
+          const uniqueSelectedRules = uniqBy([...selectedRules, ...items], 'metadata.id');
           const onChangeSelectAllThisPageFn = () => {
-            setSelectedRules(items);
-            setSelectAllRulesThisPage(!selectAllRulesThisPage);
+            setSelectAllRulesThisPage(true);
+            setSelectedRules(uniqueSelectedRules);
           };
           const onChangeDeselectAllThisPageFn = () => {
-            setSelectedRules([]);
-            setSelectAllRulesThisPage(!selectAllRulesThisPage);
+            setSelectAllRulesThisPage(false);
+            setSelectedRules(
+              selectedRules.filter(
+                (element: CspBenchmarkRule) =>
+                  !items.find(
+                    (item: CspBenchmarkRule) => item.metadata?.id === element.metadata?.id
+                  )
+              )
+            );
           };
-          return selectAllRulesThisPage
+          return isArraySubset(items, selectedRules) && selectAllRulesThisPage
             ? onChangeDeselectAllThisPageFn()
             : onChangeSelectAllThisPageFn();
         }}
@@ -175,16 +180,18 @@ const getColumns = ({
     render: (rules, item: CspBenchmarkRule) => {
       return (
         <EuiCheckbox
-          checked={selectedRules.some((e: CspBenchmarkRule) => e.metadata.id === item.metadata.id)}
-          id={`cloud-security-fields-selector-item-${item.metadata.id}`}
-          data-test-subj={`cloud-security-fields-selector-item-${item.metadata.id}`}
+          checked={selectedRules.some(
+            (e: CspBenchmarkRule) => e.metadata?.id === item.metadata?.id
+          )}
+          id={`cloud-security-fields-selector-item-${item.metadata?.id}`}
+          data-test-subj={`cloud-security-fields-selector-item-${item.metadata?.id}`}
           onChange={(e) => {
             const isChecked = e.target.checked;
             return isChecked
               ? setSelectedRules([...selectedRules, item])
               : setSelectedRules(
                   selectedRules.filter(
-                    (rule: CspBenchmarkRule) => rule.metadata.id !== item.metadata.id
+                    (rule: CspBenchmarkRule) => rule.metadata?.id !== item.metadata?.id
                   )
                 );
           }}
@@ -235,7 +242,7 @@ const getColumns = ({
     }),
     width: '10%',
     truncateText: true,
-    render: (name, rule) => {
+    render: (name: any, rule: CspBenchmarkRule & { status: string }) => {
       const rulesObjectRequest = {
         benchmark_id: rule?.metadata.benchmark.id,
         benchmark_version: rule?.metadata.benchmark.version,
