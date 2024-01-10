@@ -16,6 +16,7 @@ import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
+import { CaseCustomFieldTextWithValidationValueRt } from '../case/v1';
 
 export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
   /**
@@ -39,11 +40,21 @@ export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
 export const TextCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldTextTypeRt }),
   CustomFieldConfigurationWithoutTypeRt,
+  rt.exact(
+    rt.partial({
+      default_value: rt.union([CaseCustomFieldTextWithValidationValueRt, rt.null]),
+    })
+  ),
 ]);
 
 export const ToggleCustomFieldConfigurationRt = rt.intersection([
   rt.strict({ type: CustomFieldToggleTypeRt }),
   CustomFieldConfigurationWithoutTypeRt,
+  rt.exact(
+    rt.partial({
+      default_value: rt.union([rt.boolean, rt.null]),
+    })
+  ),
 ]);
 
 export const CustomFieldsConfigurationRt = limitedArraySchema({
