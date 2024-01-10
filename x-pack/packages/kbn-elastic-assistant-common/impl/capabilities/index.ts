@@ -8,12 +8,12 @@
 /**
  * Interface for features available to the elastic assistant
  */
-export type AssistantFeatures = { [K in keyof typeof assistantFeatures]: boolean };
+export type AssistantFeatures = { [K in keyof typeof defaultAssistantFeatures]: boolean };
 
 /**
  * Default features available to the elastic assistant
  */
-export const assistantFeatures = Object.freeze({
+export const defaultAssistantFeatures = Object.freeze({
   assistantModelEvaluation: false,
   assistantStreamingEnabled: false,
 });

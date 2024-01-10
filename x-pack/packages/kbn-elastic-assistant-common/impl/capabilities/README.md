@@ -19,9 +19,9 @@ plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
 Default feature capabilities are declared in `x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts`:
 
 ```ts
-export type AssistantFeatures = { [K in keyof typeof assistantFeatures]: boolean };
+export type AssistantFeatures = { [K in keyof typeof defaultAssistantFeatures]: boolean };
 
-export const assistantFeatures = Object.freeze({
+export const defaultAssistantFeatures = Object.freeze({
   assistantModelEvaluation: false,
   assistantStreamingEnabled: false,
 });
@@ -32,7 +32,7 @@ Capabilities can be fetched client side using the `useCapabilities()` hook ala:
 
 ```ts
 const { data: capabilities } = useCapabilities({ http, toasts });
-const { assistantModelEvaluation: modelEvaluatorEnabled, assistantStreamingEnabled } = capabilities ?? assistantFeatures;
+const { assistantModelEvaluation: modelEvaluatorEnabled, assistantStreamingEnabled } = capabilities ?? defaultAssistantFeatures;
 ```
 
 ### Using Capabilities Server Side

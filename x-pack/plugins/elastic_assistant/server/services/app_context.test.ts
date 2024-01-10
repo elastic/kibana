@@ -8,7 +8,7 @@
 import { appContextService, ElasticAssistantAppContext } from './app_context';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AssistantTool } from '../types';
-import { AssistantFeatures, assistantFeatures } from '@kbn/elastic-assistant-common';
+import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 // Mock Logger
 const mockLogger = loggerMock.create();
@@ -59,7 +59,7 @@ describe('AppContextService', () => {
       appContextService.stop();
 
       expect(appContextService.getRegisteredFeatures('super')).toEqual(
-        expect.objectContaining(assistantFeatures)
+        expect.objectContaining(defaultAssistantFeatures)
       );
     });
   });
@@ -157,7 +157,7 @@ describe('AppContextService', () => {
       appContextService.start(mockAppContext);
 
       expect(appContextService.getRegisteredFeatures('super')).toEqual(
-        expect.objectContaining(assistantFeatures)
+        expect.objectContaining(defaultAssistantFeatures)
       );
     });
 
@@ -171,7 +171,7 @@ describe('AppContextService', () => {
       appContextService.registerFeatures(pluginName, featuresSubset);
 
       expect(appContextService.getRegisteredFeatures(pluginName)).toEqual(
-        expect.objectContaining({ ...assistantFeatures, ...featuresSubset })
+        expect.objectContaining({ ...defaultAssistantFeatures, ...featuresSubset })
       );
     });
   });

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { assistantFeatures, AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { defaultAssistantFeatures, AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { AssistantTool } from '../types';
 
 export type PluginName = string;
@@ -87,7 +87,7 @@ class AppContextService {
 
     if (!this.registeredFeatures.has(pluginName)) {
       this.logger?.debug('plugin has no features, initializing...');
-      this.registeredFeatures.set(pluginName, assistantFeatures);
+      this.registeredFeatures.set(pluginName, defaultAssistantFeatures);
     }
 
     const registeredFeatures = this.registeredFeatures.get(pluginName);
@@ -102,7 +102,7 @@ class AppContextService {
    * @param pluginName
    */
   public getRegisteredFeatures(pluginName: string): AssistantFeatures {
-    const features = this.registeredFeatures?.get(pluginName) ?? assistantFeatures;
+    const features = this.registeredFeatures?.get(pluginName) ?? defaultAssistantFeatures;
 
     this.logger?.debug('AppContextService:getRegisteredFeatures');
     this.logger?.debug(`pluginName: ${pluginName}`);
