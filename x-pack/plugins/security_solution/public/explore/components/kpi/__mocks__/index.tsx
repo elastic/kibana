@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type { HistogramBucket } from '../common';
+import React from 'react';
 
-export interface PreviewHistogramGroupData {
-  key: string;
-  doc_count: number;
-  preview: {
-    buckets: HistogramBucket[];
-  };
-}
+export const KpiBaseComponent = jest.fn().mockReturnValue(<div />);

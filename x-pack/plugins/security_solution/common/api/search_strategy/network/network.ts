@@ -11,8 +11,6 @@ export * from './dns';
 
 export * from './http';
 
-export * from './kpi';
-
 export * from './overview';
 
 export * from './tls';

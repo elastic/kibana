@@ -15,73 +15,31 @@ import { NetworkKpiUniqueFlows } from './unique_flows';
 import { NetworkKpiUniquePrivateIps } from './unique_private_ips';
 import type { NetworkKpiProps } from './types';
 
-export const NetworkKpiComponent = React.memo<NetworkKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem grow={1}>
-        <EuiFlexGroup wrap>
-          <EuiFlexItem>
-            <NetworkKpiNetworkEvents
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <NetworkKpiDns
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup wrap>
-          <EuiFlexItem>
-            <NetworkKpiUniqueFlows
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <NetworkKpiTlsHandshakes
-              filterQuery={filterQuery}
-              from={from}
-              indexNames={indexNames}
-              to={to}
-              updateDateRange={updateDateRange}
-              setQuery={setQuery}
-              skip={skip}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <NetworkKpiUniquePrivateIps
-          filterQuery={filterQuery}
-          from={from}
-          indexNames={indexNames}
-          to={to}
-          updateDateRange={updateDateRange}
-          setQuery={setQuery}
-          skip={skip}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  )
-);
+export const NetworkKpiComponent = React.memo<NetworkKpiProps>(({ from, to }) => (
+  <EuiFlexGroup wrap>
+    <EuiFlexItem grow={1}>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <NetworkKpiNetworkEvents from={from} to={to} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <NetworkKpiDns from={from} to={to} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <NetworkKpiUniqueFlows from={from} to={to} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <NetworkKpiTlsHandshakes from={from} to={to} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem grow={1}>
+      <NetworkKpiUniquePrivateIps from={from} to={to} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+));
 
 NetworkKpiComponent.displayName = 'NetworkKpiComponent';

@@ -14,7 +14,6 @@ import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
 import { EuiButton } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/api/search_strategy';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/events_viewer/translations';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
@@ -196,17 +195,10 @@ const EventsByDatasetComponent: React.FC<Props> = ({
       filterQuery={filterQuery}
       headerChildren={headerContent}
       id={uniqueQueryId}
-      indexNames={indexNames}
-      runtimeMappings={runtimeMappings as RunTimeMappings}
-      onError={toggleTopN}
       paddingSize={paddingSize}
-      setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
       setQuery={setQuery}
       showSpacer={showSpacer}
-      showLegend={showLegend}
-      skip={filterQuery === undefined}
       startDate={from}
-      scopeId={scopeId}
       sourcererScopeId={sourcererScopeId}
       {...eventsByDatasetHistogramConfigs}
       title={onlyField != null ? i18n.TOP(onlyField) : eventsByDatasetHistogramConfigs.title}
