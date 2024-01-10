@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiSwitch,
   EuiSearchBarProps,
+  EuiInMemoryTableProps,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -319,7 +320,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
           direction: 'asc',
         },
       }}
-      search={searchOptions}
+      search={searchOptions as EuiInMemoryTableProps<PolicyFromES>['search']}
       tableLayout="auto"
       items={filteredPolicies}
       columns={columns}
