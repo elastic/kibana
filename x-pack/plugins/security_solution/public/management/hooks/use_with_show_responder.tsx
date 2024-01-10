@@ -85,7 +85,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
                     )
                   : false
               ),
-              'data-test-subj': 'agentResponseActionsConsole',
+              'data-test-subj': `${agentType}ResponseActionsConsole`,
               storagePrefix: 'xpack.securitySolution.Responder',
               TitleComponent: () => {
                 if (agentType === 'endpoint') {
