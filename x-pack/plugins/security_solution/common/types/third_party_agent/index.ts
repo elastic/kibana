@@ -7,7 +7,7 @@
 
 import type { ResponseActionAgentType } from '../../endpoint/service/response_actions/constants';
 
-export interface SentinelOneAgentInfo {
+export interface ThirdPartyAgentInfo {
   agent: {
     id: string;
     type: ResponseActionAgentType;

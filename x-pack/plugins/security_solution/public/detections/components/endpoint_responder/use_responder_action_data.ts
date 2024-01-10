@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
-import type { SentinelOneAgentInfo } from '../../../../common/types';
+import type { ThirdPartyAgentInfo } from '../../../../common/types';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   useGetEndpointDetails,
@@ -31,9 +31,9 @@ export interface ResponderContextMenuItemProps {
   eventData?: TimelineEventsDetailsItem[] | null;
 }
 
-const getSentinelOneAgentInfo = (
+const getThirdPartyAgentInfo = (
   eventData: TimelineEventsDetailsItem[] | null
-): SentinelOneAgentInfo => {
+): ThirdPartyAgentInfo => {
   return {
     agent: {
       id: getSentinelOneAgentId(eventData) || '',
@@ -123,7 +123,7 @@ export const useResponderActionData = ({
 
   const handleResponseActionsClick = useCallback(() => {
     if (!isEndpointHost) {
-      const agentInfoFromAlert = getSentinelOneAgentInfo(eventData || null);
+      const agentInfoFromAlert = getThirdPartyAgentInfo(eventData || null);
       showResponseActionsConsole(agentInfoFromAlert);
     }
     if (hostInfo) {

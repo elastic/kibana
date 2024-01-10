@@ -18,17 +18,18 @@ import {
 } from '../components/endpoint_responder';
 import { useConsoleManager } from '../components/console';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
-import type { SentinelOneAgentInfo } from '../../../common/types';
+import type { ThirdPartyAgentInfo } from '../../../common/types';
 import { RESPONDER_PAGE_TITLE } from './translations';
 import { getCommandKey } from '../components/endpoint_response_actions_list/components/hooks';
 
-type ShowResponseActionsConsole = (agentInfo: SentinelOneAgentInfo) => void;
+type ShowResponseActionsConsole = (agentInfo: ThirdPartyAgentInfo) => void;
+
 export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const consoleManager = useConsoleManager();
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
 
   return useCallback(
-    (agentInfo: SentinelOneAgentInfo) => {
+    (agentInfo: ThirdPartyAgentInfo) => {
       // If no authz, just exit and log something to the console
       if (!endpointPrivileges.canAccessResponseConsole) {
         window.console.error(
