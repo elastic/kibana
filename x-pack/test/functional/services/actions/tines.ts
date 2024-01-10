@@ -21,7 +21,7 @@ export function ActionsTinesServiceProvider(
   common: ActionsCommon
 ) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
+  const monacoEditor = getService('monacoEditor');
 
   return {
     async createNewConnector(fields: ConnectorFormFields) {
@@ -51,10 +51,7 @@ export function ActionsTinesServiceProvider(
     async setJsonEditor(value: object) {
       const stringified = JSON.stringify(value);
 
-      await find.clickByCssSelector('.monaco-editor');
-      const input = await find.activeElement();
-      await input.clearValueWithKeyboard({ charByChar: true });
-      await input.type(stringified);
+      await monacoEditor.setCodeEditorValue(stringified);
     },
   };
 }
