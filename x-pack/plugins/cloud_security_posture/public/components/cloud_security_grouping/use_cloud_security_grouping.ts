@@ -48,7 +48,6 @@ export const useCloudSecurityGrouping = ({
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const { query, error } = useBaseEsQuery({
-    dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
   });

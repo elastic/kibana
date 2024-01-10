@@ -15,7 +15,6 @@ import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
 import { FindingsBaseURLQuery } from '../../types';
 import { useBaseEsQuery } from './use_base_es_query';
 import { usePersistedQuery } from './use_persisted_query';
-import { useDataViewContext } from '../../contexts/data_view_context';
 
 type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 
@@ -58,7 +57,6 @@ export const useCloudPostureDataTable = ({
   const getPersistedDefaultQuery = usePersistedQuery(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(paginationLocalStorageKey);
-  const { dataView } = useDataViewContext();
 
   const onChangeItemsPerPage = useCallback(
     (newPageSize) => {
@@ -115,7 +113,6 @@ export const useCloudPostureDataTable = ({
    * Page URL query to ES query
    */
   const baseEsQuery = useBaseEsQuery({
-    dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
     ...(nonPersistedFilters ? { nonPersistedFilters } : {}),
