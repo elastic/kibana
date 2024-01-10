@@ -132,7 +132,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: await getFindingsQuery(options, rulesStates!, pageParam), // ruleStates always exists since it under the `enabled` dependency.
+          params: getFindingsQuery(options, rulesStates!, pageParam), // ruleStates always exists since it under the `enabled` dependency.
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be an defined');
