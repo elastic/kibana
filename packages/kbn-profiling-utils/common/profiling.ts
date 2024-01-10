@@ -74,6 +74,9 @@ export interface StackTrace {
   AddressOrLines: number[];
   /** types */
   Types: number[];
+  selfAnnualCO2Kgs: number;
+  selfAnnualCostUSD: number;
+  Count: number;
 }
 /**
  * Empty stack trace
@@ -87,6 +90,9 @@ export const emptyStackTrace: StackTrace = {
   AddressOrLines: [],
   /** Types */
   Types: [],
+  selfAnnualCO2Kgs: 0,
+  selfAnnualCostUSD: 0,
+  Count: 0,
 };
 
 /** Stack frame */
@@ -241,14 +247,15 @@ function getExeFileName(metadata: StackFrameMetadata) {
  * @returns string
  */
 export function getCalleeLabel(metadata: StackFrameMetadata) {
+  const inlineLabel = metadata.Inline ? '-> ' : '';
   if (metadata.FunctionName !== '') {
     const sourceFilename = metadata.SourceFilename;
     const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
-    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL}#${
-      metadata.SourceLine
-    }`;
+    return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(
+      metadata
+    )} in ${sourceURL}#${metadata.SourceLine}`;
   }
-  return getExeFileName(metadata);
+  return `${inlineLabel}${getExeFileName(metadata)}`;
 }
 /**
  * Get callee function name

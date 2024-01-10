@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { max, memoize, isEmpty } from 'lodash';
+import { max, memoize } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -64,13 +64,14 @@ export class TaskValidator {
     const taskTypeDef = this.definitions.get(task.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
-    let state = task.state;
-
-    // Skip validating tasks that don't use state
-    if (!latestStateSchema && isEmpty(state)) {
+    // TODO: Remove once all task types have defined their state schema.
+    // https://github.com/elastic/kibana/issues/159347
+    // Otherwise, failures on read / write would occur. (don't forget to unskip test)
+    if (!latestStateSchema) {
       return task;
     }
 
+    let state = task.state;
     try {
       state = this.getValidatedStateSchema(
         this.migrateTaskState(task.state, task.stateVersion, taskTypeDef, latestStateSchema),
@@ -110,8 +111,10 @@ export class TaskValidator {
     const taskTypeDef = this.definitions.get(task.taskType);
     const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
 
-    // Skip validating tasks that don't use state
-    if (!latestStateSchema && isEmpty(task.state)) {
+    // TODO: Remove once all task types have defined their state schema.
+    // https://github.com/elastic/kibana/issues/159347
+    // Otherwise, failures on read / write would occur. (don't forget to unskip test)
+    if (!latestStateSchema) {
       return task;
     }
 

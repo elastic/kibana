@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   kqlQuery,
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { SERVICE_NAME, ERROR_TYPE } from '../../../common/es_fields/apm';
+import { ERROR_TYPE, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 
 interface Props {
   kuery: string;
@@ -64,7 +65,12 @@ export async function getCrashesByLocation({
   };
   const response = await apmEventClient.search('get_mobile_location_crashes', {
     apm: {
-      events: [ProcessorEvent.error],
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,
@@ -101,9 +107,7 @@ export async function getCrashesByLocation({
     timeseries:
       response.aggregations?.timeseries?.buckets.map((bucket) => ({
         x: bucket.key,
-        y:
-          response.aggregations?.crashes?.crashesByLocation?.buckets[0]
-            ?.doc_count ?? 0,
+        y: bucket?.crashes?.crashesByLocation?.buckets[0]?.doc_count ?? 0,
       })) ?? [],
   };
 }

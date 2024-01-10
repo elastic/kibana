@@ -167,16 +167,31 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'ARIA label and tooltip content describing a button that expands an actions menu',
       }
     ),
+    'euiCollapsedItemActions.allActionsDisabled': i18n.translate(
+      'core.euiCollapsedItemActions.allActionsDisabled',
+      {
+        defaultMessage: 'Individual item actions are disabled when rows are being selected.',
+        description: 'Title content when the actions popover toggle is disabled',
+      }
+    ),
     'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
       defaultMessage: 'Site menu',
     }),
+    'euiCollapsibleNavButton.ariaLabelExpand': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelExpand',
+      { defaultMessage: 'Expand navigation' }
+    ),
+    'euiCollapsibleNavButton.ariaLabelCollapse': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelCollapse',
+      { defaultMessage: 'Collapse navigation' }
+    ),
     'euiCollapsibleNavButton.ariaLabelClose': i18n.translate(
       'core.euiCollapsibleNavButton.ariaLabelClose',
-      { defaultMessage: 'Toggle navigation closed' }
+      { defaultMessage: 'Close navigation' }
     ),
     'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
       'core.euiCollapsibleNavButton.ariaLabelOpen',
-      { defaultMessage: 'Toggle navigation open' }
+      { defaultMessage: 'Open navigation' }
     ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
@@ -202,44 +217,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColorPicker.popoverLabel': i18n.translate('core.euiColorPicker.popoverLabel', {
       defaultMessage: 'Color selection dialog',
     }),
-    'euiColorStopThumb.removeLabel': i18n.translate('core.euiColorStopThumb.removeLabel', {
-      defaultMessage: 'Remove this stop',
-      description: 'Label accompanying a button whose action will remove the color stop',
-    }),
-    'euiColorStopThumb.screenReaderAnnouncement': i18n.translate(
-      'core.euiColorStopThumb.screenReaderAnnouncement',
-      {
-        defaultMessage:
-          'A popup with a color stop edit form opened. Tab forward to cycle through form controls or press escape to close this popup.',
-        description:
-          'Message when the color picker popover has opened for an individual color stop thumb.',
-      }
-    ),
-    'euiColorStopThumb.buttonAriaLabel': i18n.translate('core.euiColorStopThumb.buttonAriaLabel', {
-      defaultMessage: 'Press the Enter key to modify this stop. Press Escape to focus the group',
-      description: 'Screen reader text to describe picker interaction',
-    }),
-    'euiColorStopThumb.buttonTitle': i18n.translate('core.euiColorStopThumb.buttonTitle', {
-      defaultMessage: 'Click to edit, drag to reposition',
-      description: 'Screen reader text to describe button interaction',
-    }),
-    'euiColorStopThumb.stopLabel': i18n.translate('core.euiColorStopThumb.stopLabel', {
-      defaultMessage: 'Stop value',
-    }),
-    'euiColorStopThumb.stopErrorMessage': i18n.translate(
-      'core.euiColorStopThumb.stopErrorMessage',
-      {
-        defaultMessage: 'Value is out of range',
-      }
-    ),
-    'euiColorStops.screenReaderAnnouncement': ({ label, readOnly, disabled }: EuiValues) =>
-      i18n.translate('core.euiColorStops.screenReaderAnnouncement', {
-        defaultMessage:
-          '{label}: {readOnly} {disabled} Color stop picker. Each stop consists of a number and corresponding color value. Use the Down and Up arrow keys to select individual stops. Press the Enter key to create a new stop.',
-        values: { label, readOnly, disabled },
-        description:
-          'Screen reader text to describe the composite behavior of the color stops component.',
-      }),
     'euiColorPickerSwatch.ariaLabel': ({ color }: EuiValues) =>
       i18n.translate('core.euiColorPickerSwatch.ariaLabel', {
         defaultMessage: 'Select {color} as the color',
@@ -282,16 +259,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSelector.searchcolumns': i18n.translate('core.euiColumnSelector.searchcolumns', {
       defaultMessage: 'Search columns',
     }),
-    'euiColumnSelector.buttonActiveSingular': ({ numberOfHiddenFields }: EuiValues) =>
-      i18n.translate('core.euiColumnSelector.buttonActiveSingular', {
-        defaultMessage: '{numberOfHiddenFields} column hidden',
-        values: { numberOfHiddenFields },
-      }),
-    'euiColumnSelector.buttonActivePlural': ({ numberOfHiddenFields }: EuiValues) =>
-      i18n.translate('core.euiColumnSelector.buttonActivePlural', {
-        defaultMessage: '{numberOfHiddenFields} columns hidden',
-        values: { numberOfHiddenFields },
-      }),
     'euiColumnSorting.clearAll': i18n.translate('core.euiColumnSorting.clearAll', {
       defaultMessage: 'Clear sorting',
     }),
@@ -310,11 +277,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSorting.button': i18n.translate('core.euiColumnSorting.button', {
       defaultMessage: 'Sort fields',
     }),
-    'euiColumnSorting.buttonActive': ({ numberOfSortedFields }: EuiValues) =>
-      i18n.translate('core.euiColumnSorting.buttonActive', {
-        defaultMessage: '{numberOfSortedFields, plural, one {# field} other {# fields}} sorted',
-        values: { numberOfSortedFields },
-      }),
     'euiColumnSortingDraggable.activeSortLabel': ({ display }: EuiValues) =>
       i18n.translate('core.euiColumnSortingDraggable.activeSortLabel', {
         defaultMessage: '{display} is sorting this data grid',
@@ -703,6 +665,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending size label',
       }
     ),
+    'euiDataGridToolbarControl.badgeAriaLabel': ({ count }: EuiValues) =>
+      i18n.translate('core.euiDataGridToolbarControl.badgeAriaLabel', {
+        defaultMessage: 'Active: {count}',
+        values: { count },
+      }),
     'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
       i18n.translate('core.euiDatePopoverButton.invalidTitle', {
         defaultMessage: 'Invalid date: {title}',
@@ -860,11 +827,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiInlineEditForm.saveButtonAriaLabel',
       { defaultMessage: 'Save edit' }
     ),
-    'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
+    'euiExternalLinkIcon.ariaLabel': i18n.translate('core.euiExternalLinkIcon.ariaLabel', {
       defaultMessage: 'External link',
     }),
-    'euiLink.newTarget.screenReaderOnlyText': i18n.translate(
-      'core.euiLink.newTarget.screenReaderOnlyText',
+    'euiExternalLinkIcon.newTarget.screenReaderOnlyText': i18n.translate(
+      'core.euiExternalLinkIcon.newTarget.screenReaderOnlyText',
       {
         defaultMessage: '(opens in a new tab or window)',
       }
@@ -1464,7 +1431,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     ),
     'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) =>
       i18n.translate('core.euiAbsoluteTab.dateFormatError', {
-        defaultMessage: 'Expected format: {dateFormat}',
+        defaultMessage: 'Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp.',
         values: { dateFormat },
       }),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
@@ -1483,6 +1450,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiRelativeTab.dateInputError': i18n.translate('core.euiRelativeTab.dateInputError', {
       defaultMessage: 'Must be a valid range',
+    }),
+    'euiAbsoluteTab.dateFormatHint': i18n.translate('core.euiAbsoluteTab.dateFormatHint', {
+      defaultMessage: 'Press the Enter key to parse as a date.',
     }),
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',
@@ -1711,28 +1681,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} is loading',
         values: { number },
       }),
-    'euiSuggest.stateSavedTooltip': i18n.translate('core.euiSuggest.stateSavedTooltip', {
-      defaultMessage: 'Saved.',
-    }),
-
-    'euiSuggest.stateUnsavedTooltip': i18n.translate('core.euiSuggest.stateUnsavedTooltip', {
-      defaultMessage: 'Changes have not been saved.',
-    }),
-
-    'euiSuggest.stateLoading': i18n.translate('core.euiSuggest.stateLoading', {
-      defaultMessage: 'State: loading.',
-    }),
-
-    'euiSuggest.stateSaved': i18n.translate('core.euiSuggest.stateSaved', {
-      defaultMessage: 'State: saved.',
-    }),
-
-    'euiSuggest.stateUnsaved': i18n.translate('core.euiSuggest.stateUnsaved', {
-      defaultMessage: 'State: unsaved.',
-    }),
-    'euiSuggest.stateUnchanged': i18n.translate('core.euiSuggest.stateUnchanged', {
-      defaultMessage: 'State: unchanged.',
-    }),
     'euiSuperSelect.screenReaderAnnouncement': i18n.translate(
       'core.euiSuperSelect.screenReaderAnnouncement',
       {

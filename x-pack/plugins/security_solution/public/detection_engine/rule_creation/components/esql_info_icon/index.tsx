@@ -6,15 +6,12 @@
  */
 
 import React from 'react';
-import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { EuiPopover, EuiText, EuiButtonIcon, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
-
 import { useKibana } from '../../../../common/lib/kibana';
-
-const POPOVER_WIDTH = 640;
 
 /**
  * Icon and popover that gives hint to users how to get started with ES|QL rules
@@ -30,14 +27,20 @@ const EsqlInfoIconComponent = () => {
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <EuiText style={{ width: POPOVER_WIDTH }} size="s">
-        <Markdown
-          markdown={i18n.getTooltipContent(
-            docLinks.links.esql.statsBy,
-            // Docs team will provide actual link to a new page before release
-            // For now, it's just a mock
-            docLinks.links.esql.statsBy
-          )}
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent"
+          defaultMessage="Check out our {createEsqlRuleTypeLink} to get started using ES|QL rules."
+          values={{
+            createEsqlRuleTypeLink: (
+              <EuiLink href={docLinks.links.securitySolution.createEsqlRuleType} target="_blank">
+                <FormattedMessage
+                  id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipLink"
+                  defaultMessage="documentation"
+                />
+              </EuiLink>
+            ),
+          }}
         />
       </EuiText>
     </EuiPopover>

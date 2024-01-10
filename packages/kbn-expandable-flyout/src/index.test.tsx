@@ -8,9 +8,13 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Panel } from './types';
+import { ExpandableFlyoutContextValue, Panel } from './types';
 import { ExpandableFlyout } from '.';
-import { LEFT_SECTION, PREVIEW_SECTION, RIGHT_SECTION } from './components/test_ids';
+import {
+  LEFT_SECTION_TEST_ID,
+  PREVIEW_SECTION_TEST_ID,
+  RIGHT_SECTION_TEST_ID,
+} from './components/test_ids';
 import { ExpandableFlyoutContext } from './context';
 
 describe('ExpandableFlyout', () => {
@@ -22,13 +26,13 @@ describe('ExpandableFlyout', () => {
   ];
 
   it(`shouldn't render flyout if no panels`, () => {
-    const context: ExpandableFlyoutContext = {
+    const context = {
       panels: {
         right: undefined,
         left: undefined,
         preview: [],
       },
-    } as unknown as ExpandableFlyoutContext;
+    } as unknown as ExpandableFlyoutContextValue;
 
     const result = render(
       <ExpandableFlyoutContext.Provider value={context}>
@@ -40,7 +44,7 @@ describe('ExpandableFlyout', () => {
   });
 
   it('should render right section', () => {
-    const context: ExpandableFlyoutContext = {
+    const context = {
       panels: {
         right: {
           id: 'key',
@@ -48,7 +52,7 @@ describe('ExpandableFlyout', () => {
         left: {},
         preview: [],
       },
-    } as unknown as ExpandableFlyoutContext;
+    } as unknown as ExpandableFlyoutContextValue;
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={context}>
@@ -56,11 +60,11 @@ describe('ExpandableFlyout', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(getByTestId(RIGHT_SECTION)).toBeInTheDocument();
+    expect(getByTestId(RIGHT_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render left section', () => {
-    const context: ExpandableFlyoutContext = {
+    const context = {
       panels: {
         right: {},
         left: {
@@ -68,7 +72,7 @@ describe('ExpandableFlyout', () => {
         },
         preview: [],
       },
-    } as unknown as ExpandableFlyoutContext;
+    } as unknown as ExpandableFlyoutContextValue;
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={context}>
@@ -76,11 +80,11 @@ describe('ExpandableFlyout', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(getByTestId(LEFT_SECTION)).toBeInTheDocument();
+    expect(getByTestId(LEFT_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render preview section', () => {
-    const context: ExpandableFlyoutContext = {
+    const context: ExpandableFlyoutContextValue = {
       panels: {
         right: {},
         left: {},
@@ -90,7 +94,7 @@ describe('ExpandableFlyout', () => {
           },
         ],
       },
-    } as unknown as ExpandableFlyoutContext;
+    } as unknown as ExpandableFlyoutContextValue;
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={context}>
@@ -98,6 +102,6 @@ describe('ExpandableFlyout', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(getByTestId(PREVIEW_SECTION)).toBeInTheDocument();
+    expect(getByTestId(PREVIEW_SECTION_TEST_ID)).toBeInTheDocument();
   });
 });

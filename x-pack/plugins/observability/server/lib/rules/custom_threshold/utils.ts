@@ -16,9 +16,8 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { Group } from './custom_threshold_executor';
 import { ObservabilityConfig } from '../../..';
-import { AlertExecutionDetails } from './types';
+import { AlertExecutionDetails, Group } from './types';
 
 const ALERT_CONTEXT_CONTAINER = 'container';
 const ALERT_CONTEXT_ORCHESTRATOR = 'orchestrator';
@@ -58,8 +57,6 @@ export const validateKQLStringFilter = (value: string) => {
     });
   }
 };
-
-export const UNGROUPED_FACTORY_KEY = '*';
 
 export const createScopedLogger = (
   logger: Logger,
@@ -259,32 +256,6 @@ export const isTooManyBucketsPreviewException = (
   value: any
 ): value is TooManyBucketsPreviewExceptionMetadata =>
   Boolean(value && value.TOO_MANY_BUCKETS_PREVIEW_EXCEPTION);
-
-const intervalUnits = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
-const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + intervalUnits.join('|') + ')$');
-
-interface UnitsToSeconds {
-  [unit: string]: number;
-}
-
-const units: UnitsToSeconds = {
-  ms: 0.001,
-  s: 1,
-  m: 60,
-  h: 3600,
-  d: 86400,
-  w: 86400 * 7,
-  M: 86400 * 30,
-  y: 86400 * 356,
-};
-
-export const getIntervalInSeconds = (interval: string): number => {
-  const matches = interval.match(INTERVAL_STRING_RE);
-  if (matches) {
-    return parseFloat(matches[1]) * units[matches[2]];
-  }
-  throw new Error('Invalid interval string format.');
-};
 
 export const calculateRateTimeranges = (timerange: { to: number; from: number }) => {
   // This is the total number of milliseconds for the entire timerange

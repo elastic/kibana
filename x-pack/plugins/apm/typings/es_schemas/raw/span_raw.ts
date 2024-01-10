@@ -71,6 +71,9 @@ export interface SpanRaw extends APMBaseDoc {
     id: string;
   };
   child?: { id: string[] };
+  code?: {
+    stacktrace?: string;
+  };
   http?: Http;
   url?: Url;
 }

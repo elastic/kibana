@@ -30,7 +30,7 @@ import {
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-describe('Fleet preconfiguration reset', () => {
+describe('Fleet cloud preconfiguration', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
 
@@ -324,12 +324,16 @@ describe('Fleet preconfiguration reset', () => {
                     },
                   ],
                 },
+                'elastic-cloud-fleet-server': {
+                  indices: [],
+                },
               },
             },
             outputs: {
               'es-containerhost': {
                 hosts: ['https://cloudinternales:9200'],
                 type: 'elasticsearch',
+                preset: 'balanced',
               },
             },
             revision: 5,

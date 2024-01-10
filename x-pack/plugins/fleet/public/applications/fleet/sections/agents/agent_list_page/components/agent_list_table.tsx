@@ -31,6 +31,8 @@ import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
+import { AgentUpgradeStatus } from './agent_upgrade_status';
+
 import { EmptyPrompt } from './empty_prompt';
 
 const VERSION_FIELD = 'local_metadata.elastic.agent.version';
@@ -175,7 +177,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
-      width: '260px',
+      width: '185px',
       render: (policyId: string, agent: Agent) => {
         const agentPolicy = agentPoliciesIndexedById[policyId];
         const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
@@ -276,29 +278,28 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     {
       field: VERSION_FIELD,
       sortable: true,
-      width: '70px',
+      width: '180px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
         <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
-          <EuiFlexItem grow={false} className="eui-textNoWrap">
-            {safeMetadata(version)}
-          </EuiFlexItem>
-          {isAgentSelectable(agent) &&
-          latestAgentVersion &&
-          isAgentUpgradeable(agent, latestAgentVersion) ? (
-            <EuiFlexItem grow={false}>
-              <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                <EuiIcon size="m" type="warning" color="warning" />
-                &nbsp;
-                <FormattedMessage
-                  id="xpack.fleet.agentList.agentUpgradeLabel"
-                  defaultMessage="Upgrade available"
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" className="eui-textNoWrap">
+                  {safeMetadata(version)}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AgentUpgradeStatus
+                  isAgentUpgradable={!!(isAgentSelectable(agent) && isAgentUpgradeable(agent))}
+                  agent={agent}
+                  latestAgentVersion={latestAgentVersion}
                 />
-              </EuiText>
-            </EuiFlexItem>
-          ) : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
     },
@@ -326,12 +327,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       items={
         totalAgents
           ? showUpgradeable
-            ? agents.filter(
-                (agent) =>
-                  isAgentSelectable(agent) &&
-                  latestAgentVersion &&
-                  isAgentUpgradeable(agent, latestAgentVersion)
-              )
+            ? agents.filter((agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent))
             : agents
           : []
       }

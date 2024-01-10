@@ -245,17 +245,14 @@ export function getCategoryColor({
   return colors[stringhash(category)];
 }
 
-export function groupSamplesByCategory({
-  samples,
-  totalCount,
-  metadata,
-  labels,
-}: {
-  samples: TopNSample[];
-  totalCount: number;
-  metadata: Record<string, StackFrameMetadata[]>;
-  labels: Record<string, string>;
-}): TopNSubchart[] {
+export function groupSamplesByCategory(topNResponse: TopNResponse): { charts: TopNSubchart[] } {
+  const {
+    TotalCount: totalCount,
+    TopN: samples,
+    Metadata: metadata,
+    Labels: labels,
+  } = topNResponse;
+
   const seriesByCategory = new Map<string, CountPerTime[]>();
 
   for (let i = 0; i < samples.length; i++) {
@@ -289,17 +286,23 @@ export function groupSamplesByCategory({
     rotations: Math.ceil(subcharts.length / 10),
   });
 
-  return orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']).map((chart, index) => {
-    return {
-      ...chart,
-      Color: getCategoryColor({ category: chart.Category, colors, subChartSize: subcharts.length }),
-      Index: index + 1,
-      Series: chart.Series.map((value) => {
-        return {
-          ...value,
-          Category: chart.Category,
-        };
-      }),
-    };
-  });
+  return {
+    charts: orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']).map((chart, index) => {
+      return {
+        ...chart,
+        Color: getCategoryColor({
+          category: chart.Category,
+          colors,
+          subChartSize: subcharts.length,
+        }),
+        Index: index + 1,
+        Series: chart.Series.map((value) => {
+          return {
+            ...value,
+            Category: chart.Category,
+          };
+        }),
+      };
+    }),
+  };
 }

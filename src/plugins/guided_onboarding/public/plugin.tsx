@@ -34,8 +34,13 @@ export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
 {
   constructor() {}
-  public setup(core: CoreSetup): GuidedOnboardingPluginSetup {
-    return {};
+  public setup(
+    core: CoreSetup,
+    { cloud }: GuidedOnboardingPluginSetup
+  ): GuidedOnboardingPluginSetup {
+    return {
+      cloud,
+    };
   }
 
   public start(

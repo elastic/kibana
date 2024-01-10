@@ -20,15 +20,17 @@
     "@kbn/core-saved-objects-server",
     "@kbn/saved-objects-plugin",
     "@kbn/ui-actions-enhanced-plugin",
-    "@kbn/es-query",
-    "@kbn/share-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
     "@kbn/ui-actions-plugin",
     "@kbn/logging",
     "@kbn/core-plugins-server",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
+    "@kbn/visualizations-plugin",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": ["target/**/*"]
 }

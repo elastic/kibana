@@ -10,12 +10,13 @@ import {
   kqlQuery,
   rangeQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   NETWORK_CONNECTION_TYPE,
   SERVICE_NAME,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { ApmDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getNCT({
@@ -38,7 +39,12 @@ export async function getNCT({
 }) {
   return await apmEventClient.search('get_mobile_nct', {
     apm: {
-      events: [ProcessorEvent.span],
+      sources: [
+        {
+          documentType: ApmDocumentType.SpanEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,

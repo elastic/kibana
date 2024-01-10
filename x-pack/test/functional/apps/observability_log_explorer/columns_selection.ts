@@ -5,9 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import rison from '@kbn/rison';
-import querystring from 'querystring';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from './config';
 
 const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message'];
 
@@ -33,8 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it("should initialize the table columns to logs' default selection", async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
 
-        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql(defaultLogColumns);
         });
@@ -42,14 +38,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should restore the table columns from the URL state if exists', async () => {
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: querystring.stringify({
-            _a: rison.encode({
-              columns: ['service.name', 'host.name', 'message', 'data_stream.namespace'],
-            }),
-          }),
+          pageState: {
+            columns: [
+              { field: 'service.name' },
+              { field: 'host.name' },
+              { field: 'message' },
+              { field: 'data_stream.namespace' },
+            ],
+          },
         });
-
-        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([

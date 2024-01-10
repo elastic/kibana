@@ -15,9 +15,10 @@ import useAsync from 'react-use/lib/useAsync';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import {
   type LensVisualizationState,
-  type XYVisualOptions,
   type Chart,
   type LensAttributes,
+  type ChartModel,
+  type XYLayerConfig,
   LensAttributesBuilder,
   XYChart,
   MetricChart,
@@ -26,35 +27,17 @@ import {
   XYReferenceLinesLayer,
 } from '@kbn/lens-embeddable-utils';
 import { InfraClientSetupDeps } from '../types';
-import type { MetricChartLayerParams, XYChartLayerParams } from '../common/visualizations/types';
 
-interface UseLensAttributesBaseParams {
-  dataView?: DataView;
-  title?: string;
-}
-
-export interface UseLensAttributesXYChartParams extends UseLensAttributesBaseParams {
-  layers: XYChartLayerParams[];
-  visualizationType: 'lnsXY';
-  visualOptions?: XYVisualOptions;
-}
-
-export interface UseLensAttributesMetricChartParams extends UseLensAttributesBaseParams {
-  layers: MetricChartLayerParams;
-  visualizationType: 'lnsMetric';
-  subtitle?: string;
-}
-
-export type UseLensAttributesParams =
-  | UseLensAttributesXYChartParams
-  | UseLensAttributesMetricChartParams;
+export type UseLensAttributesParams = Omit<ChartModel, 'id'>;
 
 export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesParams) => {
   const {
     services: { lens },
   } = useKibana<InfraClientSetupDeps>();
   const { navigateToPrefilledEditor } = lens;
-  const { value, error } = useAsync(lens.stateHelperApi, [lens]);
+  const { value, error } = useAsync(() => {
+    return lens.stateHelperApi();
+  }, [lens]);
   const { formula: formulaAPI } = value ?? {};
 
   const attributes = useMemo(() => {
@@ -91,7 +74,17 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
   );
 
   const openInLensAction = useCallback(
-    ({ timeRange, query, filters }: { timeRange: TimeRange; filters: Filter[]; query: Query }) =>
+    ({
+        timeRange,
+        query,
+        filters,
+        searchSessionId,
+      }: {
+        timeRange: TimeRange;
+        filters: Filter[];
+        query: Query;
+        searchSessionId?: string;
+      }) =>
       () => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {
@@ -100,6 +93,7 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
               id: '',
               timeRange,
               attributes: injectedAttributes,
+              searchSessionId,
             },
             {
               openInNewTab: true,
@@ -115,12 +109,16 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
       timeRange,
       filters = [],
       query = { language: 'kuery', query: '' },
+      searchSessionId,
     }: {
       timeRange: TimeRange;
       filters?: Filter[];
       query?: Query;
+      searchSessionId?: string;
     }) => {
-      const openInLens = getOpenInLensAction(openInLensAction({ timeRange, filters, query }));
+      const openInLens = getOpenInLensAction(
+        openInLensAction({ timeRange, filters, query, searchSessionId })
+      );
       return [openInLens];
     },
     [openInLensAction]
@@ -129,7 +127,7 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
   const getFormula = () => {
     const firstDataLayer = [
       ...(Array.isArray(params.layers) ? params.layers : [params.layers]),
-    ].find((p) => p.type === 'visualization');
+    ].find((p) => p.layerType === 'data');
 
     if (!firstDataLayer) {
       return '';
@@ -159,32 +157,27 @@ const chartFactory = ({
         throw new Error(`Invalid layers type. Expected an array of layers.`);
       }
 
-      const xyLayerFactory = (layer: XYChartLayerParams) => {
-        switch (layer.type) {
-          case 'visualization': {
-            return new XYDataLayer({
-              data: layer.data,
-              options: layer.options,
-            });
+      const xyLayerFactory = (layer: XYLayerConfig) => {
+        switch (layer.layerType) {
+          case 'data': {
+            return new XYDataLayer(layer);
           }
-          case 'referenceLines': {
-            return new XYReferenceLinesLayer({
-              data: layer.data,
-            });
+          case 'referenceLine': {
+            return new XYReferenceLinesLayer(layer);
           }
           default:
             throw new Error(`Invalid layer type`);
         }
       };
 
+      const { layers, ...rest } = params;
       return new XYChart({
         dataView,
         formulaAPI,
-        layers: params.layers.map((layerItem) => {
+        layers: layers.map((layerItem) => {
           return xyLayerFactory(layerItem);
         }),
-        title: params.title,
-        visualOptions: params.visualOptions,
+        ...rest,
       });
 
     case 'lnsMetric':
@@ -197,7 +190,8 @@ const chartFactory = ({
         formulaAPI,
         layers: new MetricLayer({
           data: params.layers.data,
-          options: { ...params.layers.options, subtitle: params.subtitle },
+          options: { ...params.layers.options },
+          layerType: params.layers.layerType,
         }),
         title: params.title,
       });

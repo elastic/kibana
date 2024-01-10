@@ -15,18 +15,22 @@ import {
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
 import { UnifiedDataTableSettings } from '../types';
-import type { ValueToStringConverter } from '../types';
+import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton } from './data_table_document_selection';
 import { defaultTimeColumnWidth } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
+import { DataTableColumnHeader } from './data_table_column_header';
+
+const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 
 const openDetails = {
   id: 'openDetails',
@@ -80,6 +84,8 @@ function buildEuiGridColumn({
   editField,
   columnCellActions,
   visibleCellActions,
+  columnTypes,
+  showColumnTokens,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -95,6 +101,8 @@ function buildEuiGridColumn({
   editField?: (fieldName: string) => void;
   columnCellActions?: EuiDataGridColumnCellAction[];
   visibleCellActions?: number;
+  columnTypes?: DataTableColumnTypes;
+  showColumnTokens?: boolean;
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
@@ -118,10 +126,20 @@ function buildEuiGridColumn({
       : [];
   }
 
+  const columnType = columnTypes?.[columnName] ?? dataViewField?.type;
+
   const column: EuiDataGridColumn = {
     id: columnName,
-    schema: getSchemaByKbnType(dataViewField?.type),
+    schema: getSchemaByKbnType(columnType),
     isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
+    display: showColumnTokens ? (
+      <DataTableColumnHeaderMemoized
+        dataView={dataView}
+        columnName={columnName}
+        columnDisplayName={columnDisplayName}
+        columnTypes={columnTypes}
+      />
+    ) : undefined,
     displayAsText: columnDisplayName,
     actions: {
       showHide:
@@ -172,7 +190,12 @@ function buildEuiGridColumn({
     });
 
     column.display = (
-      <div aria-label={primaryTimeAriaLabel}>
+      <div
+        aria-label={primaryTimeAriaLabel}
+        css={css`
+          text-align: left;
+        `}
+      >
         <EuiToolTip content={primaryTimeTooltip}>
           <>
             {timeFieldName} <EuiIcon type="clock" />
@@ -203,6 +226,8 @@ export function getEuiGridColumns({
   onFilter,
   editField,
   visibleCellActions,
+  columnTypes,
+  showColumnTokens,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -221,6 +246,8 @@ export function getEuiGridColumns({
   onFilter: DocViewFilterFn;
   editField?: (fieldName: string) => void;
   visibleCellActions?: number;
+  columnTypes?: DataTableColumnTypes;
+  showColumnTokens?: boolean;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
@@ -240,8 +267,24 @@ export function getEuiGridColumns({
       onFilter,
       editField,
       visibleCellActions,
+      columnTypes,
+      showColumnTokens,
     })
   );
+}
+
+export function hasSourceTimeFieldValue(
+  columns: string[],
+  dataView: DataView,
+  columnTypes: DataTableColumnTypes | undefined,
+  showTimeCol: boolean,
+  isPlainRecord: boolean
+) {
+  const timeFieldName = dataView.timeFieldName;
+  if (!isPlainRecord || !columns.includes('_source') || !timeFieldName || !columnTypes) {
+    return showTimeCol;
+  }
+  return timeFieldName in columnTypes;
 }
 
 export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {

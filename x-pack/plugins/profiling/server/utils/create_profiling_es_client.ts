@@ -37,8 +37,9 @@ export interface ProfilingESClient {
   profilingStacktraces({}: {
     query: QueryDslQueryContainer;
     sampleSize: number;
+    durationSeconds: number;
   }): Promise<StackTraceResponse>;
-  profilingStatus(): Promise<ProfilingStatusResponse>;
+  profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;
   profilingFlamegraph({}: {
     query: QueryDslQueryContainer;
@@ -75,7 +76,7 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    profilingStacktraces({ query, sampleSize }) {
+    profilingStacktraces({ query, sampleSize, durationSeconds }) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
@@ -87,6 +88,7 @@ export function createProfilingEsClient({
               body: {
                 query,
                 sample_size: sampleSize,
+                requested_duration: durationSeconds,
               },
             },
             {
@@ -101,7 +103,7 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
     },
-    profilingStatus() {
+    profilingStatus({ waitForResourcesCreated = false } = {}) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/status', () => {
@@ -109,7 +111,9 @@ export function createProfilingEsClient({
           esClient.transport.request(
             {
               method: 'GET',
-              path: encodeURI('/_profiling/status'),
+              path: encodeURI(
+                `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}`
+              ),
             },
             {
               signal: controller.signal,

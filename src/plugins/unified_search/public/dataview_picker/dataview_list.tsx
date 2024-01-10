@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import { SortingService } from './sorting_service';
+import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
 
 const strings = {
   sortOrder: {
@@ -120,6 +121,10 @@ export function DataViewsList({
       checked?: 'on' | 'off' | undefined;
     }>
       {...selectableProps}
+      listProps={{
+        truncationProps: MIDDLE_TRUNCATION_PROPS,
+        ...(selectableProps?.listProps ? selectableProps.listProps : undefined),
+      }}
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"

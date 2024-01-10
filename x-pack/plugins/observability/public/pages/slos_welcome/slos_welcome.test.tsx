@@ -17,6 +17,7 @@ import { SlosWelcomePage } from './slos_welcome';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { paths } from '../../../common/locators/paths';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
@@ -33,16 +34,19 @@ const useGlobalDiagnosisMock = useFetchSloGlobalDiagnosis as jest.Mock;
 
 const mockNavigate = jest.fn();
 
+const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
-      theme: {},
       application: { navigateToUrl: mockNavigate },
+      theme: {},
       http: {
         basePath: {
           prepend: (url: string) => url,
         },
       },
+      observabilityAIAssistant: mockObservabilityAIAssistant,
     },
   });
 };
@@ -56,7 +60,7 @@ describe('SLOs Welcome Page', () => {
 
   describe('when the incorrect license is found', () => {
     it('renders the welcome message with subscription buttons', async () => {
-      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useGlobalDiagnosisMock.mockReturnValue({
         data: {
@@ -82,7 +86,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and no results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, emptySloList });
+        useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       });
 
       it('disables the create slo button when no write capabilities', async () => {
@@ -146,7 +150,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
         useGlobalDiagnosisMock.mockReturnValue({
           data: {
             userPrivileges: {

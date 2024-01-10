@@ -7,41 +7,42 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 
 import {
-  EuiForm,
   EuiBadge,
-  EuiTitle,
   EuiButton,
-  EuiSwitch,
-  EuiFormRow,
-  EuiToolTip,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiDroppable,
-  EuiDraggable,
-  EuiFlyoutBody,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiButtonGroupOptionProps,
   EuiDragDropContext,
   euiDragDropReorder,
-  EuiButtonGroupOptionProps,
+  EuiDraggable,
+  EuiDroppable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
+  EuiSwitch,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { LinksLayoutInfo } from '../../embeddable/types';
 import {
   Link,
   LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
+import { memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
+import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
+import { LinksLayoutInfo } from '../../embeddable/types';
 import { coreServices } from '../../services/kibana_services';
 import { LinksStrings } from '../links_strings';
-import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
-import { memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
 import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
 import { LinksEditorSingleLink } from './links_editor_single_link';
 
@@ -80,6 +81,7 @@ const LinksEditor = ({
   isByReference: boolean;
 }) => {
   const toasts = coreServices.notifications.toasts;
+  const isMounted = useMountedState();
   const editLinkFlyoutRef = useRef<HTMLDivElement>(null);
 
   const [currentLayout, setCurrentLayout] = useState<LinksLayoutType>(
@@ -294,7 +296,9 @@ const LinksEditor = ({
                             });
                           })
                           .finally(() => {
-                            setIsSaving(false);
+                            if (isMounted()) {
+                              setIsSaving(false);
+                            }
                           });
                       } else {
                         onAddToDashboard(orderedLinks, currentLayout);

@@ -18,6 +18,9 @@ export const initGetLogEntryCategoryExamplesRoute = ({
   framework,
   getStartServices,
 }: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
+  if (!framework.config.featureFlags.logsUIEnabled) {
+    return;
+  }
   framework
     .registerVersionedRoute({
       access: 'internal',
@@ -41,6 +44,7 @@ export const initGetLogEntryCategoryExamplesRoute = ({
             categoryId,
             exampleCount,
             logView,
+            idFormat,
             timeRange: { startTime, endTime },
           },
         } = request.body;
@@ -56,6 +60,7 @@ export const initGetLogEntryCategoryExamplesRoute = ({
           const { data: logEntryCategoryExamples, timing } = await getLogEntryCategoryExamples(
             { infra: await infraMlContext.infra, core: await infraMlContext.core },
             logView,
+            idFormat,
             startTime,
             endTime,
             categoryId,

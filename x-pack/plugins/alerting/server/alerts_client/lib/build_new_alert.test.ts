@@ -84,7 +84,7 @@ describe('buildNewAlert', () => {
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',
-      [ALERT_DURATION]: '0',
+      [ALERT_DURATION]: 0,
       [ALERT_START]: now,
       [ALERT_TIME_RANGE]: { gte: now },
       [SPACE_IDS]: ['default'],

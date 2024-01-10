@@ -27,6 +27,7 @@ import { paths } from '../../../common/locators/paths';
 import illustration from './assets/illustration.svg';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 
 export function SlosWelcomePage() {
   const {
@@ -40,8 +41,8 @@ export function SlosWelcomePage() {
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
-  const { isLoading, sloList } = useFetchSloList();
-  const { total } = sloList || { total: 0 };
+  const { isLoading, data: sloList } = useFetchSloList();
+  const { total } = sloList ?? { total: 0 };
 
   const hasRequiredWritePrivileges = !!globalDiagnosis?.userPrivileges.write.has_all_requested;
   const hasRequiredReadPrivileges = !!globalDiagnosis?.userPrivileges.read.has_all_requested;
@@ -62,6 +63,7 @@ export function SlosWelcomePage() {
   return hasSlosAndHasPermissions || isLoading ? null : (
     <ObservabilityPageTemplate data-test-subj="slosPageWelcomePrompt">
       <HeaderMenu />
+      <SloOutdatedCallout />
       <EuiPageTemplate.EmptyPrompt
         title={
           <EuiTitle size="l">

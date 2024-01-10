@@ -21,7 +21,8 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { useChartTheme } from '../../../../../../hooks/use_chart_theme';
+import { i18n } from '@kbn/i18n';
+import { useBaseChartTheme } from '../../../../../../hooks/use_base_chart_theme';
 import { BAR_HEIGHT } from './constants';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { WaterfallData } from '../../common/network_data/types';
@@ -76,7 +77,7 @@ export const WaterfallBarChart = ({
   barStyleAccessor,
   index,
 }: Props) => {
-  const theme = useChartTheme();
+  const baseChartTheme = useBaseChartTheme();
   const { euiTheme } = useEuiTheme();
   const { onElementClick, onProjectionClick } = useWaterfallContext();
   const handleElementClick = useMemo(() => onElementClick, [onElementClick]);
@@ -99,9 +100,12 @@ export const WaterfallBarChart = ({
         <Settings
           showLegend={false}
           rotation={90}
-          theme={{ ...theme, tooltip: { maxWidth: 500 } }}
+          theme={{ tooltip: { maxWidth: 500 } }}
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={baseChartTheme}
           onProjectionClick={handleProjectionClick}
           onElementClick={handleElementClick}
+          locale={i18n.getLocale()}
         />
 
         <Axis

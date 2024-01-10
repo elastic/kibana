@@ -9,8 +9,7 @@ import { catchError, from, map, of } from 'rxjs';
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { Sha256 } from '@kbn/crypto-browser';
-
-import type { AuthenticationServiceSetup } from '..';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 interface UserIdContext {
   userId?: string;

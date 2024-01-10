@@ -203,7 +203,7 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 key: 'valid_key_1',
                 type: CustomFieldTypes.TEXT,
-                value: ['this is a text field value'],
+                value: 'this is a text field value',
               },
               {
                 key: 'valid_key_2',
@@ -218,7 +218,7 @@ export default ({ getService }: FtrProviderContext): void => {
           {
             key: 'valid_key_1',
             type: CustomFieldTypes.TEXT,
-            value: ['this is a text field value'],
+            value: 'this is a text field value',
           },
           {
             key: 'valid_key_2',
@@ -438,12 +438,12 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   key: 'duplicated_key',
                   type: CustomFieldTypes.TEXT,
-                  value: ['this is a text field value'],
+                  value: 'this is a text field value',
                 },
                 {
                   key: 'duplicated_key',
                   type: CustomFieldTypes.TEXT,
-                  value: ['this is a text field value'],
+                  value: 'this is a text field value',
                 },
               ],
             }),
@@ -474,7 +474,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   key: 'invalid_key',
                   type: CustomFieldTypes.TEXT,
-                  value: ['this is a text field value'],
+                  value: 'this is a text field value',
                 },
               ],
             }),
@@ -482,14 +482,14 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
 
-        it('400s when trying to create case with a required custom field', async () => {
+        it('400s when creating a case with a missing required custom field', async () => {
           await createConfiguration(
             supertest,
             getConfigurationRequest({
               overrides: {
                 customFields: [
                   {
-                    key: 'test_custom_field',
+                    key: 'text_custom_field',
                     label: 'text',
                     type: CustomFieldTypes.TEXT,
                     required: false,
@@ -509,9 +509,40 @@ export default ({ getService }: FtrProviderContext): void => {
             getPostCaseRequest({
               customFields: [
                 {
-                  key: 'test_custom_field',
-                  type: CustomFieldTypes.TOGGLE,
-                  value: true,
+                  key: 'text_custom_field',
+                  type: CustomFieldTypes.TEXT,
+                  value: 'a',
+                },
+              ],
+            }),
+            400
+          );
+        });
+
+        it('400s when trying to create case with a required custom field as null', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'text_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+          await createCase(
+            supertest,
+            getPostCaseRequest({
+              customFields: [
+                {
+                  key: 'text_custom_field',
+                  type: CustomFieldTypes.TEXT,
+                  value: null,
                 },
               ],
             }),

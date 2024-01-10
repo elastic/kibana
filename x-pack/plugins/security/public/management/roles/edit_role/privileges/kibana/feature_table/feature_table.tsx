@@ -32,7 +32,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
-import type { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common';
 import type { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { NO_PRIVILEGE_VALUE } from '../constants';
 import { FeatureTableCell } from '../feature_table_cell';

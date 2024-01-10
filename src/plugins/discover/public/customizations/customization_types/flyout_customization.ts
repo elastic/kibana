@@ -5,6 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { EuiFlyoutProps } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import React, { type ComponentType } from 'react';
 
 export interface FlyoutDefaultActionItem {
   disabled?: boolean;
@@ -21,10 +25,20 @@ export interface FlyoutActionItem {
   enabled: boolean;
 }
 
+export interface FlyoutContentProps {
+  actions: Pick<DocViewRenderProps, 'filter' | 'onAddColumn' | 'onRemoveColumn'>;
+  doc: DataTableRecord;
+  renderDefaultContent: () => React.ReactNode;
+}
+
 export interface FlyoutCustomization {
   id: 'flyout';
+  size?: EuiFlyoutProps['size'];
+  title?: string;
   actions: {
     defaultActions?: FlyoutDefaultActions;
     getActionItems?: () => FlyoutActionItem[];
   };
+  Content?: ComponentType<FlyoutContentProps>;
+  docViewsRegistry?: DocViewRenderProps['docViewsRegistry'];
 }

@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { FILTER_CELL_ACTION_TYPE, COPY_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
+
 export enum SecurityCellActionsTrigger {
   DEFAULT = 'security-default-cellActions',
   DETAILS_FLYOUT = 'security-detailsFlyout-cellActions',
   ALERTS_COUNT = 'security-alertsCount-cellActions',
 }
 
-export enum DiscoverInTimelineTrigger {
+export enum EsqlInTimelineTrigger {
   HISTOGRAM_TRIGGER = 'security-discoverInTimeline-histogramTrigger',
 }
 
-export enum DiscoverInTimelineAction {
+export enum EsqlInTimelineAction {
   VIS_FILTER_ACTION = 'security-discoverInTimeline-visFilterAction',
 }
 
@@ -26,3 +29,8 @@ export enum SecurityCellActionType {
   SHOW_TOP_N = 'security-cellAction-type-showTopN',
   TOGGLE_COLUMN = 'security-cellAction-type-toggleColumn',
 }
+
+export const DefaultCellActionTypes = {
+  FILTER: FILTER_CELL_ACTION_TYPE,
+  COPY: COPY_CELL_ACTION_TYPE,
+} as const;

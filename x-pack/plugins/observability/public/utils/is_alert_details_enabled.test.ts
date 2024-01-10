@@ -31,7 +31,6 @@ import type { TopAlert } from '../typings/alerts';
 const defaultConfig = {
   unsafe: {
     alertDetails: {
-      logs: { enabled: false },
       metrics: { enabled: false },
       uptime: { enabled: false },
     },
@@ -63,15 +62,10 @@ describe('isAlertDetailsEnabled', () => {
       start: 1630587249674,
       lastUpdated: 1630588131750,
     } as unknown as TopAlert;
-    it('returns FALSE when logs: { enabled: false }', () => {
-      expect(isAlertDetailsEnabledPerApp(logsAlert, defaultConfig)).toBeFalsy();
-    });
-
-    it('returns TRUE when logs: { enabled: true }', () => {
+    it('returns TRUE when rule type is logs.alert.document.count', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: true },
             metrics: { enabled: false },
             uptime: { enabled: false },
           },
@@ -113,7 +107,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: false },
             metrics: { enabled: false },
             uptime: { enabled: false },
           },
@@ -159,7 +152,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: false },
             metrics: { enabled: true },
             uptime: { enabled: false },
           },
@@ -201,7 +193,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: false },
             metrics: { enabled: false },
             uptime: { enabled: true },
           },
@@ -243,7 +234,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: true },
             metrics: { enabled: true },
             uptime: { enabled: true },
           },
@@ -255,7 +245,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            logs: { enabled: true },
             metrics: { enabled: true },
             uptime: { enabled: true },
           },

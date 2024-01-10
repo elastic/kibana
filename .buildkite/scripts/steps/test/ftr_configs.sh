@@ -11,6 +11,9 @@ if [ "$FTR_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; the
   exit 1
 fi
 
+EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
+test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_ARGS"
+
 export JOB="$FTR_CONFIG_GROUP_KEY"
 
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
@@ -49,7 +52,9 @@ while read -r config; do
     continue;
   fi
 
-  echo "--- $ node scripts/functional_tests --bail --config $config"
+  FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
+  echo "--- $ $FULL_COMMAND"
+
   start=$(date +%s)
 
   # prevent non-zero exit code from breaking the loop
@@ -57,7 +62,8 @@ while read -r config; do
   node ./scripts/functional_tests \
     --bail \
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-    --config="$config"
+    --config="$config" \
+    "$EXTRA_ARGS"
   lastCode=$?
   set -e;
 

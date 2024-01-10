@@ -44,12 +44,7 @@ import type { IRuleExecutionLogForExecutors, IRuleMonitoringService } from '../r
 import type { RefreshTypes } from '../types';
 
 import type { Status } from '../../../../common/api/detection_engine';
-import type {
-  BaseHit,
-  RuleAlertAction,
-  SearchTypes,
-  EqlSequence,
-} from '../../../../common/detection_engine/types';
+import type { BaseHit, SearchTypes, EqlSequence } from '../../../../common/detection_engine/types';
 import type { GenericBulkCreateResponse } from './factories';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
@@ -57,7 +52,10 @@ import type {
   DetectionAlert,
   WrappedFieldsLatest,
 } from '../../../../common/api/detection_engine/model/alerts';
-import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleAction,
+  RuleResponse,
+} from '../../../../common/api/detection_engine/model/rule_schema';
 import type { EnrichEvents } from './utils/enrichments/types';
 import type { ThresholdResult } from './threshold/types';
 
@@ -102,6 +100,7 @@ export interface RunOpts<TParams extends RuleParams> {
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
   inputIndexFields: DataViewFieldBase[];
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 export type SecurityAlertType<
@@ -305,7 +304,7 @@ export interface SignalHit {
 }
 
 export interface AlertAttributes<T extends RuleParams = RuleParams> {
-  actions: RuleAlertAction[];
+  actions: RuleAction[];
   alertTypeId: string;
   enabled: boolean;
   name: string;

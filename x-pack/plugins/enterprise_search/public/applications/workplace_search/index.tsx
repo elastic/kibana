@@ -73,10 +73,80 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   return <WorkplaceSearchConfigured {...props} />;
 };
 
+export const WorkplaceSearchConfiguredRoutes: React.FC<{
+  isAdmin: boolean;
+  kibanaUIsEnabled: boolean;
+}> = ({ isAdmin, kibanaUIsEnabled }) => {
+  const isblockingRoutes = isAdmin && !kibanaUIsEnabled;
+  return !isblockingRoutes ? (
+    <Routes>
+      <Route exact path="/">
+        <Overview />
+      </Route>
+      <Route path={SETUP_GUIDE_PATH}>
+        <SetupGuide />
+      </Route>
+      <Route path={SOURCE_ADDED_PATH}>
+        <SourceAdded />
+      </Route>
+      <Route path={PERSONAL_PATH}>
+        <Routes>
+          <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
+          <Route path={PRIVATE_SOURCES_PATH}>
+            <SourcesRouter />
+          </Route>
+          <Route path={PERSONAL_SETTINGS_PATH}>
+            <AccountSettings />
+          </Route>
+          <Route path={OAUTH_AUTHORIZE_PATH}>
+            <OAuthAuthorize />
+          </Route>
+          <Route path={SEARCH_AUTHORIZE_PATH}>
+            <SearchAuthorize />
+          </Route>
+          <Route>
+            <NotFound isOrganization={false} />
+          </Route>
+        </Routes>
+      </Route>
+      <Route path={SOURCES_PATH}>
+        <SourcesRouter />
+      </Route>
+      <Route path={GROUPS_PATH}>
+        <GroupsRouter />
+      </Route>
+      <Route path={USERS_AND_ROLES_PATH}>
+        <RoleMappings />
+      </Route>
+      <Route path={API_KEYS_PATH}>
+        <ApiKeys />
+      </Route>
+      <Route path={SECURITY_PATH}>
+        <Security />
+      </Route>
+      <Route path={ORG_SETTINGS_PATH}>
+        <SettingsRouter />
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
+    </Routes>
+  ) : (
+    <Routes>
+      <Route exact path="/">
+        <Overview />
+      </Route>
+      <Route>
+        <NotFound />
+      </Route>
+    </Routes>
+  );
+};
 export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const {
     hasInitialized,
     organization: { kibanaUIsEnabled },
+    account: { isAdmin },
   } = useValues(AppLogic);
   const { initializeAppData, setContext } = useActions(AppLogic);
   const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);
@@ -100,65 +170,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
     }
   }, [hasInitialized]);
 
-  return (
-    <Routes>
-      <Route exact path="/">
-        <Overview />
-      </Route>
-      {kibanaUIsEnabled && (
-        <>
-          <Route path={SETUP_GUIDE_PATH}>
-            <SetupGuide />
-          </Route>
-          <Route path={SOURCE_ADDED_PATH}>
-            <SourceAdded />
-          </Route>
-          <Route path={PERSONAL_PATH}>
-            <Routes>
-              <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
-              <Route path={PRIVATE_SOURCES_PATH}>
-                <SourcesRouter />
-              </Route>
-              <Route path={PERSONAL_SETTINGS_PATH}>
-                <AccountSettings />
-              </Route>
-              <Route path={OAUTH_AUTHORIZE_PATH}>
-                <OAuthAuthorize />
-              </Route>
-              <Route path={SEARCH_AUTHORIZE_PATH}>
-                <SearchAuthorize />
-              </Route>
-              <Route>
-                <NotFound isOrganization={false} />
-              </Route>
-            </Routes>
-          </Route>
-          <Route path={SOURCES_PATH}>
-            <SourcesRouter />
-          </Route>
-          <Route path={GROUPS_PATH}>
-            <GroupsRouter />
-          </Route>
-          <Route path={USERS_AND_ROLES_PATH}>
-            <RoleMappings />
-          </Route>
-          <Route path={API_KEYS_PATH}>
-            <ApiKeys />
-          </Route>
-          <Route path={SECURITY_PATH}>
-            <Security />
-          </Route>
-          <Route path={ORG_SETTINGS_PATH}>
-            <SettingsRouter />
-          </Route>
-        </>
-      )}
-
-      <Route>
-        <NotFound />
-      </Route>
-    </Routes>
-  );
+  return <WorkplaceSearchConfiguredRoutes isAdmin={isAdmin} kibanaUIsEnabled={kibanaUIsEnabled} />;
 };
 
 export const WorkplaceSearchUnconfigured: React.FC = () => (

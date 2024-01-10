@@ -34,7 +34,14 @@ export const InvokeAIActionParamsSchema = schema.object({
   model: schema.maybe(schema.string()),
 });
 
-export const InvokeAIActionResponseSchema = schema.string();
+export const InvokeAIActionResponseSchema = schema.object({
+  message: schema.string(),
+});
+
+export const StreamActionParamsSchema = schema.object({
+  body: schema.string(),
+  model: schema.maybe(schema.string()),
+});
 
 export const RunActionResponseSchema = schema.object(
   {
@@ -43,3 +50,14 @@ export const RunActionResponseSchema = schema.object(
   },
   { unknowns: 'ignore' }
 );
+
+export const StreamingResponseSchema = schema.any();
+
+// Run action schema
+export const DashboardActionParamsSchema = schema.object({
+  dashboardId: schema.string(),
+});
+
+export const DashboardActionResponseSchema = schema.object({
+  available: schema.boolean(),
+});

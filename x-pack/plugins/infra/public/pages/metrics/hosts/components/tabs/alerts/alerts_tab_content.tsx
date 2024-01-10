@@ -51,12 +51,10 @@ export const AlertsTabContent = () => {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
               featureIds={infraAlertFeatureIds}
-              flyoutSize="s"
               id={ALERTS_TABLE_ID}
               pageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
               showAlertStatusWithFlapping
-              showExpandToDetails={false}
             />
           </EuiFlexItem>
         )}
@@ -93,7 +91,6 @@ const MemoAlertSummaryWidget = React.memo(
     };
 
     const chartProps = {
-      theme: charts.theme.useChartsTheme(),
       baseTheme: charts.theme.useChartsBaseTheme(),
       onBrushEnd,
     };

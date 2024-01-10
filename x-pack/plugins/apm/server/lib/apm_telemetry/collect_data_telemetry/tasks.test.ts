@@ -801,6 +801,58 @@ describe('data telemetry collection tasks', () => {
     });
   });
 
+  describe('custom dashboards', () => {
+    const task = tasks.find((t) => t.name === 'custom_dashboards');
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    it('returns custom dashboards stats from all spaces', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 500,
+        total: 2,
+        saved_objects: [
+          {
+            type: 'apm-custom-dashboards',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['default'],
+            attributes: {
+              dashboardSavedObjectId: 'foo-id',
+              serviceEnvironmentFilterEnabled: true,
+              serviceNameFilterEnabled: true,
+              kuery: 'service.name: frontend and service.environment: prod',
+            },
+            references: [],
+            score: 1,
+          },
+          {
+            type: 'apm-custom-dashboards',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['space-1'],
+            attributes: {
+              dashboardSavedObjectId: 'bar-id',
+              serviceEnvironmentFilterEnabled: true,
+              serviceNameFilterEnabled: true,
+              kuery: 'service.name: frontend',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      });
+
+      expect(
+        await task?.executor({
+          savedObjectsClient,
+        } as any)
+      ).toEqual({
+        custom_dashboards: {
+          kuery_fields: ['service.name', 'service.environment'],
+          total: 2,
+        },
+      });
+    });
+  });
+
   describe('top_traces', () => {
     const task = tasks.find((t) => t.name === 'top_traces');
 

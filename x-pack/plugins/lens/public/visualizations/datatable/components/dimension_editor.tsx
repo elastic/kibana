@@ -56,7 +56,7 @@ export function TableDimensionEditor(
     paletteService: PaletteRegistry;
   }
 ) {
-  const { state, setState, frame, accessor } = props;
+  const { state, setState, frame, accessor, isInlineEditing } = props;
   const column = state.columns.find(({ columnId }) => accessor === columnId);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
@@ -256,6 +256,7 @@ export function TableDimensionEditor(
                     title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
                       defaultMessage: 'Color',
                     })}
+                    isInlineEditing={isInlineEditing}
                   >
                     <CustomizablePalette
                       palettes={props.paletteService}

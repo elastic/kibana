@@ -15,6 +15,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { CONNECTORS_LABEL } from '../../common/i18n_string';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
@@ -25,36 +26,23 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Elasticsearch',
       icon: 'logoElasticsearch',
       defaultIsCollapsed: false,
-      accordionProps: {
-        arrowProps: { css: { display: 'none' } },
-      },
+      isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
-        {
-          id: 'search_getting_started',
-          title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-            defaultMessage: 'Getting started',
-          }),
-          link: 'serverlessElasticsearch',
-        },
         {
           id: 'dev_tools',
           title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
-          isGroupTitle: true,
-        },
-        { link: 'dev_tools:console' },
-        { link: 'dev_tools:searchprofiler' },
-        {
-          id: 'explore',
-          title: i18n.translate('xpack.serverlessSearch.nav.explore', {
-            defaultMessage: 'Explore',
-          }),
-          isGroupTitle: true,
+          link: 'dev_tools:console',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+          },
+          spaceBefore: 'l',
         },
         {
           link: 'discover',
+          spaceBefore: 'm',
         },
         {
           link: 'dashboards',
@@ -64,6 +52,9 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           link: 'visualize',
+          title: i18n.translate('xpack.serverlessSearch.nav.visualize', {
+            defaultMessage: 'Visualizations',
+          }),
           getIsActive: ({ pathNameSerialized, prepend }) => {
             return (
               pathNameSerialized.startsWith(prepend('/app/visualize')) ||
@@ -78,20 +69,13 @@ const navigationTree: NavigationTreeDefinition = {
             defaultMessage: 'Alerts',
           }),
         },
-
-        {
-          id: 'content',
-          title: i18n.translate('xpack.serverlessSearch.nav.content', {
-            defaultMessage: 'Content',
-          }),
-          isGroupTitle: true,
-        },
         {
           title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
             defaultMessage: 'Index Management',
           }),
           link: 'management:index_management',
           breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+          spaceBefore: 'm',
         },
         {
           title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
@@ -100,22 +84,28 @@ const navigationTree: NavigationTreeDefinition = {
           link: 'management:ingest_pipelines',
           breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
         },
-
         {
-          id: 'security',
-          title: i18n.translate('xpack.serverlessSearch.nav.security', {
-            defaultMessage: 'Security',
-          }),
-          isGroupTitle: true,
+          title: CONNECTORS_LABEL,
+          link: 'serverlessConnectors',
         },
         {
           link: 'management:api_keys',
           breadcrumbStatus: 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+          spaceBefore: 'm',
         },
       ],
     },
   ],
   footer: [
+    {
+      type: 'navItem',
+      id: 'search_getting_started',
+      title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+        defaultMessage: 'Get started',
+      }),
+      icon: 'launch',
+      link: 'serverlessElasticsearch',
+    },
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',

@@ -6,7 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import {
+  isoToEpochRt,
+  jsonRt,
+  toBooleanRt,
+  toNumberRt,
+} from '@kbn/io-ts-utils';
 import {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
@@ -105,7 +110,12 @@ const servicesRoute = createApmServerRoute({
       t.partial({ serviceGroup: t.string }),
       t.intersection([
         probabilityRt,
-        serviceTransactionDataSourceRt,
+        t.intersection([
+          serviceTransactionDataSourceRt,
+          t.type({
+            useDurationSummary: toBooleanRt,
+          }),
+        ]),
         environmentRt,
         kueryRt,
         rangeRt,
@@ -131,6 +141,7 @@ const servicesRoute = createApmServerRoute({
       probability,
       documentType,
       rollupInterval,
+      useDurationSummary,
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
@@ -163,6 +174,7 @@ const servicesRoute = createApmServerRoute({
       randomSampler,
       documentType,
       rollupInterval,
+      useDurationSummary,
     });
   },
 });
@@ -356,14 +368,20 @@ const serviceNodeMetadataRoute = createApmServerRoute({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt, environmentRt]),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      serviceTransactionDataSourceRt,
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceNodeMetadataResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
-    const { kuery, start, end, environment } = params.query;
+    const { kuery, start, end, environment, documentType, rollupInterval } =
+      params.query;
 
     return getServiceNodeMetadata({
       kuery,
@@ -373,6 +391,8 @@ const serviceNodeMetadataRoute = createApmServerRoute({
       start,
       end,
       environment,
+      documentType,
+      rollupInterval,
     });
   },
 });

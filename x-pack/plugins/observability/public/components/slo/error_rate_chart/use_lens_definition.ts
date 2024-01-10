@@ -7,10 +7,15 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOResponse, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 
 export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
+
+  const interval = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
+    ? slo.objective.timesliceWindow
+    : '60s';
 
   return {
     title: 'SLO Error Rate',
@@ -125,7 +130,7 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
                   scale: 'interval',
                   params: {
                     // @ts-ignore
-                    interval: 'auto',
+                    interval,
                     includeEmptyRows: true,
                     dropPartials: false,
                   },
@@ -551,7 +556,7 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
       adHocDataViews: {
         '32ca1ad4-81c0-4daf-b9d1-07118044bdc5': {
           id: '32ca1ad4-81c0-4daf-b9d1-07118044bdc5',
-          title: '.slo-observability.sli-v2.*',
+          title: SLO_DESTINATION_INDEX_PATTERN,
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},

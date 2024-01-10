@@ -40,7 +40,7 @@ export const SECRET = i18n.translate('xpack.stackConnectors.components.bedrock.s
 });
 
 export const BEDROCK = i18n.translate('xpack.stackConnectors.components.bedrock.title', {
-  defaultMessage: 'AWS Bedrock',
+  defaultMessage: 'Amazon Bedrock',
 });
 
 export const DOCUMENTATION = i18n.translate(
@@ -97,3 +97,9 @@ export const BODY_DESCRIPTION = i18n.translate(
 export const MODEL = i18n.translate('xpack.stackConnectors.components.bedrock.model', {
   defaultMessage: 'Model',
 });
+
+export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string) =>
+  i18n.translate('xpack.stackConnectors.components.genAi.dashboardLink', {
+    values: { apiProvider, connectorName },
+    defaultMessage: 'View {apiProvider} Usage Dashboard for "{ connectorName }" Connector',
+  });

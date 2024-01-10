@@ -8,14 +8,16 @@
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
+import type { CoreStart } from '@kbn/core/public';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
 import type { EditChangePointChartsPanelContext } from '../embeddable/types';
-import type { AiopsCoreSetup } from '../plugin';
+import type { AiopsPluginStartDeps } from '../types';
 
 export const EDIT_CHANGE_POINT_CHARTS_ACTION = 'editChangePointChartsPanelAction';
 
 export function createEditChangePointChartsPanelAction(
-  getStartServices: AiopsCoreSetup['getStartServices']
+  coreStart: CoreStart,
+  pluginStart: AiopsPluginStartDeps
 ): UiActionsActionDefinition<EditChangePointChartsPanelContext> {
   return {
     id: 'edit-change-point-charts',
@@ -31,8 +33,6 @@ export function createEditChangePointChartsPanelAction(
       if (!embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
-
-      const [coreStart, pluginStart] = await getStartServices();
 
       try {
         const { resolveEmbeddableChangePointUserInput } = await import(

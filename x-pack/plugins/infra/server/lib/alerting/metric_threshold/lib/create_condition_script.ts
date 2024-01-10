@@ -18,7 +18,8 @@ export const createConditionScript = (threshold: number[], comparator: Comparato
   }
   if (comparator === Comparator.OUTSIDE_RANGE && threshold.length === 2) {
     return {
-      source: `params.value < params.threshold0 && params.value > params.threshold1 ? 1 : 0`,
+      // OUTSIDE_RANGE/NOT BETWEEN is the opposite of BETWEEN. Use the BETWEEN condition and switch the 1 and 0
+      source: `params.value > params.threshold0 && params.value < params.threshold1 ? 0 : 1`,
       params: {
         threshold0: threshold[0],
         threshold1: threshold[1],

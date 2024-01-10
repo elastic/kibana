@@ -114,6 +114,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:excludeColdAndFrozenTiersInAnalyzer': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:enableCcsWarning': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -489,10 +493,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'labs:dashboard:dashboardControls': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'labs:dashboard:linksPanel': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -557,7 +557,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:profilingPerCoreWatt': {
+  'observability:profilingPerVCPUWattX86': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingPervCPUWattArm64': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -577,6 +581,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInfrastructureProfilingIntegration': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:enableGroupedNav': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -593,8 +601,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:profilingUseLegacyFlamegraphAPI': {
-    type: 'boolean',
+  'observability:profilingCostPervCPUPerHour': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingAWSCostDiscountRate': {
+    type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
 };

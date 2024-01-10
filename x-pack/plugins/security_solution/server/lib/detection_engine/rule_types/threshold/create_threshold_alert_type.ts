@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { ThresholdRuleParams } from '../../rule_schema';
-import { thresholdRuleParams } from '../../rule_schema';
+import { ThresholdRuleParams } from '../../rule_schema';
 import { thresholdExecutor } from './threshold';
 import type { ThresholdAlertState } from './types';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
@@ -21,21 +19,14 @@ import { validateIndexPatterns } from '../utils';
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
-  const { version } = createOptions;
+  const { version, licensing } = createOptions;
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
     validate: {
       params: {
         validate: (object: unknown): ThresholdRuleParams => {
-          const [validated, errors] = validateNonExact(object, thresholdRuleParams);
-          if (errors != null) {
-            throw new Error(errors);
-          }
-          if (validated == null) {
-            throw new Error('Validation of rule params failed');
-          }
-          return validated;
+          return ThresholdRuleParams.parse(object);
         },
         /**
          * validate rule params when rule is bulk edited (update and created in future as well)
@@ -85,6 +76,7 @@ export const createThresholdAlertType = (
         services,
         startedAt,
         state,
+        spaceId,
       } = execOptions;
       const result = await thresholdExecutor({
         completeRule,
@@ -105,6 +97,9 @@ export const createThresholdAlertType = (
         exceptionFilter,
         unprocessedExceptions,
         inputIndexFields,
+        spaceId,
+        runOpts: execOptions.runOpts,
+        licensing,
       });
       return result;
     },

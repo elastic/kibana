@@ -12,9 +12,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
-  EuiIcon,
   EuiButtonIcon,
+  useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
+import * as i18n from '../translations';
 
 import type { CustomFieldTypes, CustomFieldsConfiguration } from '../../../../common/types/domain';
 import { builderMap } from '../builder';
@@ -29,6 +31,7 @@ export interface Props {
 const CustomFieldsListComponent: React.FC<Props> = (props) => {
   const { customFields, onDeleteCustomField, onEditCustomField } = props;
   const [selectedItem, setSelectedItem] = useState<CustomFieldsConfiguration[number] | null>(null);
+  const { euiTheme } = useEuiTheme();
 
   const renderTypeLabel = (type?: CustomFieldTypes) => {
     const createdBuilder = type && builderMap[type];
@@ -59,13 +62,10 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
             <React.Fragment key={customField.key}>
               <EuiPanel
                 paddingSize="s"
-                data-test-subj={`custom-field-${customField.label}-${customField.type}`}
+                data-test-subj={`custom-field-${customField.key}-${customField.type}`}
                 hasShadow={false}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="grab" />
-                  </EuiFlexItem>
                   <EuiFlexItem grow={true}>
                     <EuiFlexGroup alignItems="center" gutterSize="s">
                       <EuiFlexItem grow={false}>
@@ -73,7 +73,12 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
                           <h4>{customField.label}</h4>
                         </EuiText>
                       </EuiFlexItem>
-                      <EuiText color="subdued">{renderTypeLabel(customField.type)}</EuiText>
+                      <EuiBadge color={euiTheme.colors.body}>
+                        {renderTypeLabel(customField.type)}
+                      </EuiBadge>
+                      {customField.required && (
+                        <EuiBadge color={euiTheme.colors.body}>{i18n.REQUIRED}</EuiBadge>
+                      )}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

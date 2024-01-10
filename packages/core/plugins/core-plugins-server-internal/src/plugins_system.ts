@@ -23,11 +23,13 @@ import type {
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
 } from './plugins_service';
+import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
 const Sec = 1000;
 
 /** @internal */
 export class PluginsSystem<T extends PluginType> {
+  private readonly runtimeResolver = new RuntimePluginContractResolver();
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
   // `satup`, the past-tense version of the noun `setup`.
@@ -90,6 +92,9 @@ export class PluginsSystem<T extends PluginType> {
       return contracts;
     }
 
+    const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
+    this.runtimeResolver.setDependencyMap(runtimeDependencies);
+
     const sortedPlugins = new Map(
       [...this.getTopologicallySortedPluginNames()]
         .map((pluginName) => [pluginName, this.plugins.get(pluginName)!] as [string, PluginWrapper])
@@ -114,19 +119,19 @@ export class PluginsSystem<T extends PluginType> {
 
       let pluginSetupContext;
       if (this.type === PluginType.preboot) {
-        pluginSetupContext = createPluginPrebootSetupContext(
-          this.coreContext,
-          deps as PluginsServicePrebootSetupDeps,
-          plugin
-        );
+        pluginSetupContext = createPluginPrebootSetupContext({
+          deps: deps as PluginsServicePrebootSetupDeps,
+          plugin,
+        });
       } else {
-        pluginSetupContext = createPluginSetupContext(
-          this.coreContext,
-          deps as PluginsServiceSetupDeps,
-          plugin
-        );
+        pluginSetupContext = createPluginSetupContext({
+          deps: deps as PluginsServiceSetupDeps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
+        });
       }
 
+      await plugin.init();
       let contract: unknown;
       const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
       if (isPromise(contractOrPromise)) {
@@ -154,6 +159,8 @@ export class PluginsSystem<T extends PluginType> {
       contracts.set(pluginName, contract);
       this.satupPlugins.push(pluginName);
     }
+
+    this.runtimeResolver.resolveSetupRequests(contracts);
 
     return contracts;
   }
@@ -186,7 +193,7 @@ export class PluginsSystem<T extends PluginType> {
 
       let contract: unknown;
       const contractOrPromise = plugin.start(
-        createPluginStartContext(this.coreContext, deps, plugin),
+        createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
         pluginDepContracts
       );
       if (isPromise(contractOrPromise)) {
@@ -213,6 +220,8 @@ export class PluginsSystem<T extends PluginType> {
 
       contracts.set(pluginName, contract);
     }
+
+    this.runtimeResolver.resolveStartRequests(contracts);
 
     return contracts;
   }
@@ -265,6 +274,7 @@ export class PluginsSystem<T extends PluginType> {
     const uiPluginNames = [...this.getTopologicallySortedPluginNames().keys()].filter(
       (pluginName) => this.plugins.get(pluginName)!.includesUiPlugin
     );
+    const filterUiPlugins = (pluginName: string) => uiPluginNames.includes(pluginName);
     const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
       uiPluginNames.map((pluginName) => {
         const plugin = this.plugins.get(pluginName)!;
@@ -274,12 +284,10 @@ export class PluginsSystem<T extends PluginType> {
             id: pluginName,
             type: plugin.manifest.type,
             configPath: plugin.manifest.configPath,
-            requiredPlugins: plugin.manifest.requiredPlugins.filter((p) =>
-              uiPluginNames.includes(p)
-            ),
-            optionalPlugins: plugin.manifest.optionalPlugins.filter((p) =>
-              uiPluginNames.includes(p)
-            ),
+            requiredPlugins: plugin.manifest.requiredPlugins.filter(filterUiPlugins),
+            optionalPlugins: plugin.manifest.optionalPlugins.filter(filterUiPlugins),
+            runtimePluginDependencies:
+              plugin.manifest.runtimePluginDependencies.filter(filterUiPlugins),
             requiredBundles: plugin.manifest.requiredBundles,
             enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
           },
@@ -370,4 +378,19 @@ const buildReverseDependencyMap = (
     reverseMap.set(pluginName, []);
   }
   return reverseMap;
+};
+
+const buildPluginRuntimeDependencyMap = (
+  pluginMap: Map<PluginName, PluginWrapper>
+): Map<PluginName, Set<PluginName>> => {
+  const runtimeDependencies = new Map<PluginName, Set<PluginName>>();
+  for (const [pluginName, pluginWrapper] of pluginMap.entries()) {
+    const pluginRuntimeDeps = new Set([
+      ...pluginWrapper.optionalPlugins,
+      ...pluginWrapper.requiredPlugins,
+      ...pluginWrapper.runtimePluginDependencies,
+    ]);
+    runtimeDependencies.set(pluginName, pluginRuntimeDeps);
+  }
+  return runtimeDependencies;
 };

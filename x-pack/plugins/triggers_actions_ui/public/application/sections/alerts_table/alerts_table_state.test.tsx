@@ -9,7 +9,12 @@ import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { AlertConsumers, ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -18,9 +23,9 @@ import {
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
   FetchAlertData,
+  RenderCustomActionsRowArgs,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
-import { TypeRegistry } from '../../type_registry';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { useFetchBrowserFieldCapabilities } from './hooks/use_fetch_browser_fields_capabilities';
@@ -32,6 +37,7 @@ import { getCasesMockMap } from './cases/index.mock';
 import { createCasesServiceMock } from './index.mock';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowMockMap } from './maintenance_windows/index.mock';
+import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');
@@ -130,6 +136,7 @@ const alerts = [
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
     [AlertsField.uuid]: ['1047d115-670d-469e-af7a-86fdd2b2f814'],
+    [ALERT_UUID]: ['alert-id-1'],
     [ALERT_CASE_IDS]: ['test-id'],
     [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1'],
   },
@@ -257,14 +264,31 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
         jest.fn().mockImplementation((props) => {
           return `${props.colIndex}:${props.rowIndex}`;
         }),
+      useActionsColumn: () => ({
+        renderCustomActionsRow: ({ setFlyoutAlert }: RenderCustomActionsRowArgs) => {
+          return (
+            <button
+              data-test-subj="expandColumnCellOpenFlyoutButton-0"
+              onClick={() => {
+                setFlyoutAlert('alert-id-1');
+              }}
+            />
+          );
+        },
+      }),
     };
   }
   return {};
 });
+
+const updateMock = jest.fn();
+const getActionsMock = jest.fn();
 const alertsTableConfigurationRegistryMock = {
   has: hasMock,
   get: getMock,
-} as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+  getActions: getActionsMock,
+  update: updateMock,
+} as unknown as AlertTableConfigRegistry;
 
 const storageMock = Storage as jest.Mock;
 
@@ -308,7 +332,6 @@ describe('AlertsTableState', () => {
     id: `test-alerts`,
     featureIds: [AlertConsumers.LOGS],
     query: {},
-    showExpandToDetails: true,
   };
 
   const mockCustomProps = (customProps: Partial<AlertsTableConfigurationRegistry>) => {
@@ -325,7 +348,8 @@ describe('AlertsTableState', () => {
     const alertsTableConfigurationRegistryWithPersistentControlsMock = {
       has: hasMock,
       get: getMockWithUsePersistentControls,
-    } as unknown as TypeRegistry<AlertsTableConfigurationRegistry>;
+      update: updateMock,
+    } as unknown as AlertTableConfigRegistry;
 
     return {
       ...tableProps,
@@ -554,10 +578,12 @@ describe('AlertsTableState', () => {
     it('should pass the correct maintenance window ids to useBulkGetMaintenanceWindows', async () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       await waitFor(() => {
-        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
-          ids: ['test-mw-id-1', 'test-mw-id-2'],
-          canFetchMaintenanceWindows: true,
-        });
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: ['test-mw-id-1', 'test-mw-id-2'],
+            canFetchMaintenanceWindows: true,
+          })
+        );
       });
     });
 
@@ -572,10 +598,12 @@ describe('AlertsTableState', () => {
 
       render(<AlertsTableWithLocale {...tableProps} />);
       await waitFor(() => {
-        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
-          ids: ['test-mw-id-1', 'test-mw-id-2'],
-          canFetchMaintenanceWindows: true,
-        });
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: ['test-mw-id-1', 'test-mw-id-2'],
+            canFetchMaintenanceWindows: true,
+          })
+        );
       });
     });
 
@@ -593,10 +621,12 @@ describe('AlertsTableState', () => {
 
       render(<AlertsTableWithLocale {...tableProps} />);
       await waitFor(() => {
-        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
-          ids: ['test-mw-id-2'],
-          canFetchMaintenanceWindows: true,
-        });
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: ['test-mw-id-2'],
+            canFetchMaintenanceWindows: true,
+          })
+        );
       });
     });
 
@@ -624,10 +654,12 @@ describe('AlertsTableState', () => {
 
       render(<AlertsTableWithLocale {...props} />);
       await waitFor(() => {
-        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
-          ids: ['test-mw-id-2'],
-          canFetchMaintenanceWindows: false,
-        });
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: ['test-mw-id-2'],
+            canFetchMaintenanceWindows: false,
+          })
+        );
       });
     });
   });
@@ -637,6 +669,7 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       expect(hasMock).toHaveBeenCalledWith(PLUGIN_ID);
       expect(getMock).toHaveBeenCalledWith(PLUGIN_ID);
+      expect(updateMock).toBeCalledTimes(2);
     });
 
     it('should render an empty error state when the plugin id owner is not registered', async () => {
@@ -649,7 +682,7 @@ describe('AlertsTableState', () => {
   describe('flyout', () => {
     it('should show a flyout when selecting an alert', async () => {
       const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
 
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
@@ -677,7 +710,7 @@ describe('AlertsTableState', () => {
         />
       );
 
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
@@ -715,7 +748,7 @@ describe('AlertsTableState', () => {
         />
       );
 
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 

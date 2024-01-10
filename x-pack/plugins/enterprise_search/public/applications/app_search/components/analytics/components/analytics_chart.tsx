@@ -13,6 +13,8 @@ import moment from 'moment';
 
 import { Chart, Settings, LineSeries, CurveType, Axis, Tooltip } from '@elastic/charts';
 
+import { i18n } from '@kbn/i18n';
+
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { X_AXIS_DATE_FORMAT, TOOLTIP_DATE_FORMAT } from '../constants';
@@ -37,10 +39,7 @@ export const AnalyticsChart: React.FC<Props> = ({ height = 300, lines }) => {
   return (
     <Chart size={{ height }}>
       <Tooltip headerFormatter={(tooltip) => moment(tooltip.value).format(TOOLTIP_DATE_FORMAT)} />
-      <Settings
-        theme={charts.theme.useChartsTheme()}
-        baseTheme={charts.theme.useChartsBaseTheme()}
-      />
+      <Settings baseTheme={charts.theme.useChartsBaseTheme()} locale={i18n.getLocale()} />
       {lines.map(({ id, data, isDashed }) => (
         <LineSeries
           key={id}

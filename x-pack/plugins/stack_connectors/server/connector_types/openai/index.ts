@@ -10,7 +10,10 @@ import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { GenerativeAIConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  GenerativeAIForSecurityConnectorFeatureId,
+  GenerativeAIForObservabilityConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
@@ -27,13 +30,16 @@ import { renderParameterTemplates } from './render';
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
   id: OPENAI_CONNECTOR_ID,
   name: OPENAI_TITLE,
-  Service: OpenAIConnector,
+  getService: (params) => new OpenAIConnector(params),
   schema: {
     config: ConfigSchema,
     secrets: SecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
-  supportedFeatureIds: [GenerativeAIConnectorFeatureId],
+  supportedFeatureIds: [
+    GenerativeAIForSecurityConnectorFeatureId,
+    GenerativeAIForObservabilityConnectorFeatureId,
+  ],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
 });

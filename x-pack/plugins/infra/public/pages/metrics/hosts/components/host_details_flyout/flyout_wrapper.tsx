@@ -23,7 +23,8 @@ export const FlyoutWrapper = ({ node: { name }, closeFlyout }: Props) => {
 
   return source ? (
     <AssetDetails
-      asset={{ id: name, name }}
+      assetId={name}
+      assetName={name}
       assetType="host"
       dateRange={parsedDateRange}
       overrides={{

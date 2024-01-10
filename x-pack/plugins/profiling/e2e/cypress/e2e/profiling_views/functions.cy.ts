@@ -7,7 +7,7 @@
 import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 
 describe('Functions page', () => {
@@ -38,7 +38,7 @@ describe('Functions page', () => {
     cy.get(firstRowSelector).eq(2).contains('vmlinux');
     cy.get(firstRowSelector).eq(3).contains('5.46%');
     cy.get(firstRowSelector).eq(4).contains('5.46%');
-    cy.get(firstRowSelector).eq(5).contains('1.84 lbs / 0.84 kg');
+    cy.get(firstRowSelector).eq(5).contains('4.07 lbs / 1.84 kg');
     cy.get(firstRowSelector).eq(6).contains('$17.37');
     cy.get(firstRowSelector).eq(7).contains('28');
   });
@@ -66,11 +66,11 @@ describe('Functions page', () => {
       { parentKey: 'impactEstimates', key: 'annualizedSelfCoreSeconds', value: '17.03 days' },
       { parentKey: 'impactEstimates', key: 'co2Emission', value: '~0.00 lbs / ~0.00 kg' },
       { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '~0.00 lbs / ~0.00 kg' },
-      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '1.84 lbs / 0.84 kg' },
+      { parentKey: 'impactEstimates', key: 'annualizedCo2Emission', value: '4.07 lbs / 1.84 kg' },
       {
         parentKey: 'impactEstimates',
         key: 'annualizedSelfCo2Emission',
-        value: '1.84 lbs / 0.84 kg',
+        value: '4.07 lbs / 1.84 kg',
       },
       { parentKey: 'impactEstimates', key: 'dollarCost', value: '$~0.00' },
       { parentKey: 'impactEstimates', key: 'selfDollarCost', value: '$~0.00' },
@@ -133,17 +133,17 @@ describe('Functions page', () => {
         columnKey: 'annualizedCo2',
         columnIndex: 5,
         highRank: 1,
-        lowRank: 389,
-        highValue: '1.84 lbs / 0.84 kg',
-        lowValue: undefined,
+        lowRank: 44,
+        highValue: '45.01 lbs / 20.42 kg',
+        lowValue: '0.15 lbs / 0.07 kg',
       },
       {
         columnKey: 'annualizedDollarCost',
         columnIndex: 6,
         highRank: 1,
-        lowRank: 389,
-        highValue: '$17.37',
-        lowValue: undefined,
+        lowRank: 44,
+        highValue: '$192.36',
+        lowValue: '$0.62',
       },
     ].forEach(({ columnKey, columnIndex, highRank, highValue, lowRank, lowValue }) => {
       cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
@@ -175,14 +175,13 @@ describe('Functions page', () => {
   });
 
   describe('Test changing CO2 settings', () => {
-    afterEach(() => {
+    after(() => {
       cy.updateAdvancedSettings({
         [profilingCo2PerKWH]: 0.000379069,
         [profilingDatacenterPUE]: 1.7,
-        [profilingPerCoreWatt]: 7,
+        [profilingPervCPUWattX86]: 7,
       });
     });
-
     it('changes CO2 settings and validate values in the table', () => {
       cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
@@ -190,7 +189,7 @@ describe('Functions page', () => {
       const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
       cy.get(firstRowSelector).eq(1).contains('1');
       cy.get(firstRowSelector).eq(2).contains('vmlinux');
-      cy.get(firstRowSelector).eq(5).contains('1.84 lbs / 0.84 kg');
+      cy.get(firstRowSelector).eq(5).contains('4.07 lbs / 1.84 kg');
       cy.contains('Settings').click();
       cy.contains('Advanced Settings');
       cy.get(`[data-test-subj="advancedSetting-editField-${profilingCo2PerKWH}"]`)
@@ -199,28 +198,32 @@ describe('Functions page', () => {
       cy.get(`[data-test-subj="advancedSetting-editField-${profilingDatacenterPUE}"]`)
         .clear()
         .type('2.4');
-      cy.get(`[data-test-subj="advancedSetting-editField-${profilingPerCoreWatt}"]`)
+      cy.get(`[data-test-subj="advancedSetting-editField-${profilingPervCPUWattX86}"]`)
         .clear()
         .type('20');
       cy.contains('Save changes').click();
+      cy.getByTestSubj('kbnLoadingMessage').should('exist');
+      cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
+        timeout: 50000,
+      });
       cy.go('back');
       cy.wait('@getTopNFunctions');
-      cy.get(firstRowSelector).eq(5).contains('24.22k lbs / 10.99k');
+      cy.get(firstRowSelector).eq(5).contains('1.87k lbs / 847.83 kg');
       const firstRowSelectorActionButton =
         '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"] .euiButtonIcon';
       cy.get(firstRowSelectorActionButton).click();
       [
-        { parentKey: 'impactEstimates', key: 'co2Emission', value: '0.02 lbs / 0.01 kg' },
-        { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '0.02 lbs / 0.01 kg' },
+        { parentKey: 'impactEstimates', key: 'co2Emission', value: '~0.00 lbs / ~0.00 kg' },
+        { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '~0.00 lbs / ~0.00 kg' },
         {
           parentKey: 'impactEstimates',
           key: 'annualizedCo2Emission',
-          value: '24.22k lbs / 10.99k kg',
+          value: '1.87k lbs / 847.83 kg',
         },
         {
           parentKey: 'impactEstimates',
           key: 'annualizedSelfCo2Emission',
-          value: '24.22k lbs / 10.99k kg',
+          value: '1.87k lbs / 847.83 kg',
         },
       ].forEach(({ parentKey, key, value }) => {
         cy.get(`[data-test-subj="${parentKey}_${key}"]`).contains(value);

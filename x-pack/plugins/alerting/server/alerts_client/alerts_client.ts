@@ -10,9 +10,8 @@ import {
   ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
-  ALERT_STATUS_UNTRACKED,
-  ALERT_STATUS_ACTIVE,
   ALERT_UUID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -22,6 +21,7 @@ import { DeepPartial } from '@kbn/utility-types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   SummarizedAlerts,
+  ScopedQueryAlerts,
   AlertInstanceContext,
   AlertInstanceState,
   RuleAlertData,
@@ -34,7 +34,7 @@ import {
   IIndexPatternString,
 } from '../alerts_service/resource_installer_utils';
 import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
-import type { AlertRule, SearchResult } from './types';
+import type { AlertRule, LogAlertsOpts, ProcessAlertsOpts, SearchResult } from './types';
 import {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -44,6 +44,9 @@ import {
   ReportedAlertData,
   UpdateableAlert,
   GetSummarizedAlertsParams,
+  GetMaintenanceWindowScopedQueryAlertsParams,
+  UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
+  ScopedQueryAggregationResult,
 } from './types';
 import {
   buildNewAlert,
@@ -52,7 +55,9 @@ import {
   buildRecoveredAlert,
   formatRule,
   getHitsWithCount,
+  getScopedQueryHitsWithIds,
   getLifecycleAlertsQueries,
+  getMaintenanceWindowAlertsQuery,
   getContinualAlertsQuery,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
@@ -93,6 +98,7 @@ export class AlertsClient<
     primaryTerm: Record<string, number | undefined>;
   };
 
+  private startedAtString: string | null = null;
   private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
 
@@ -121,6 +127,7 @@ export class AlertsClient<
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
+    this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
     await this.legacyAlertsClient.initializeExecution(opts);
 
     if (!this.ruleType.alerts?.shouldWrite) {
@@ -190,65 +197,23 @@ export class AlertsClient<
     }
   }
 
-  public async search(queryBody: SearchRequest['body']): Promise<SearchResult<AlertData>> {
+  public async search<Aggregation = unknown>(
+    queryBody: SearchRequest['body']
+  ): Promise<SearchResult<AlertData, Aggregation>> {
     const esClient = await this.options.elasticsearchClientPromise;
     const index = this.isUsingDataStreams()
       ? this.indexTemplateAndPattern.alias
       : this.indexTemplateAndPattern.pattern;
     const {
       hits: { hits, total },
-    } = await esClient.search<Alert & AlertData>({
+      aggregations,
+    } = await esClient.search<Alert & AlertData, Aggregation>({
       index,
       body: queryBody,
       ignore_unavailable: true,
     });
 
-    return { hits, total };
-  }
-
-  public async setAlertStatusToUntracked(indices: string[], ruleIds: string[]) {
-    const esClient = await this.options.elasticsearchClientPromise;
-    const terms: Array<{ term: Record<string, { value: string }> }> = ruleIds.map((ruleId) => ({
-      term: {
-        [ALERT_RULE_UUID]: { value: ruleId },
-      },
-    }));
-    terms.push({
-      term: {
-        [ALERT_STATUS]: { value: ALERT_STATUS_ACTIVE },
-      },
-    });
-
-    try {
-      // Retry this updateByQuery up to 3 times to make sure the number of documents
-      // updated equals the number of documents matched
-      for (let retryCount = 0; retryCount < 3; retryCount++) {
-        const response = await esClient.updateByQuery({
-          index: indices,
-          allow_no_indices: true,
-          body: {
-            conflicts: 'proceed',
-            script: {
-              source: UNTRACK_UPDATE_PAINLESS_SCRIPT,
-              lang: 'painless',
-            },
-            query: {
-              bool: {
-                must: terms,
-              },
-            },
-          },
-        });
-        if (response.total === response.updated) break;
-        this.options.logger.warn(
-          `Attempt ${retryCount + 1}: Failed to untrack ${
-            (response.total ?? 0) - (response.updated ?? 0)
-          } of ${response.total}; indices ${indices}, ruleIds ${ruleIds}`
-        );
-      }
-    } catch (err) {
-      this.options.logger.error(`Error marking ${ruleIds} as untracked - ${err.message}`);
-    }
+    return { hits, total, aggregations };
   }
 
   public report(
@@ -279,7 +244,7 @@ export class AlertsClient<
 
     return {
       uuid: legacyAlert.getUuid(),
-      start: legacyAlert.getStart(),
+      start: legacyAlert.getStart() ?? this.startedAtString,
     };
   }
 
@@ -315,6 +280,14 @@ export class AlertsClient<
     return this.legacyAlertsClient.checkLimitUsage();
   }
 
+  public processAlerts(opts: ProcessAlertsOpts) {
+    this.legacyAlertsClient.processAlerts(opts);
+  }
+
+  public logAlerts(opts: LogAlertsOpts) {
+    this.legacyAlertsClient.logAlerts(opts);
+  }
+
   public processAndLogAlerts(opts: ProcessAndLogAlertsOpts) {
     this.legacyAlertsClient.processAndLogAlerts(opts);
   }
@@ -332,7 +305,7 @@ export class AlertsClient<
       );
       return;
     }
-    const currentTime = new Date().toISOString();
+    const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
     const { alertsToReturn, recoveredAlertsToReturn } =
@@ -590,6 +563,150 @@ export class AlertsClient<
     };
   }
 
+  private async getMaintenanceWindowScopedQueryAlerts({
+    ruleId,
+    spaceId,
+    executionUuid,
+    maintenanceWindows,
+  }: GetMaintenanceWindowScopedQueryAlertsParams): Promise<ScopedQueryAlerts> {
+    if (!ruleId || !spaceId || !executionUuid) {
+      throw new Error(
+        `Must specify rule ID, space ID, and executionUuid for scoped query AAD alert query.`
+      );
+    }
+    const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
+
+    const query = getMaintenanceWindowAlertsQuery({
+      executionUuid,
+      ruleId,
+      maintenanceWindows,
+      action: isLifecycleAlert ? 'open' : undefined,
+    });
+
+    const response = await this.search<ScopedQueryAggregationResult>(query);
+
+    return getScopedQueryHitsWithIds(response.aggregations);
+  }
+
+  private async updateAlertMaintenanceWindowIds(idsToUpdate: string[]) {
+    const esClient = await this.options.elasticsearchClientPromise;
+    const newAlerts = Object.values(this.legacyAlertsClient.getProcessedAlerts('new'));
+
+    const params: Record<string, string[]> = {};
+
+    idsToUpdate.forEach((id) => {
+      const newAlert = newAlerts.find((alert) => alert.getUuid() === id);
+      if (newAlert) {
+        params[id] = newAlert.getMaintenanceWindowIds();
+      }
+    });
+
+    try {
+      const response = await esClient.updateByQuery({
+        query: {
+          terms: {
+            _id: idsToUpdate,
+          },
+        },
+        conflicts: 'proceed',
+        index: this.indexTemplateAndPattern.alias,
+        script: {
+          source: `
+            if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
+              ctx._source['${ALERT_MAINTENANCE_WINDOW_IDS}'] = params[ctx._source['${ALERT_UUID}']];
+            }
+          `,
+          lang: 'painless',
+          params,
+        },
+      });
+      return response;
+    } catch (err) {
+      this.options.logger.warn(`Error updating alert maintenance window IDs: ${err}`);
+      throw err;
+    }
+  }
+
+  public async updateAlertsMaintenanceWindowIdByScopedQuery({
+    ruleId,
+    spaceId,
+    executionUuid,
+    maintenanceWindows,
+  }: UpdateAlertsMaintenanceWindowIdByScopedQueryParams) {
+    const maintenanceWindowsWithScopedQuery = maintenanceWindows.filter(
+      ({ scopedQuery }) => scopedQuery
+    );
+    const maintenanceWindowsWithoutScopedQuery = maintenanceWindows.filter(
+      ({ scopedQuery }) => !scopedQuery
+    );
+    const maintenanceWindowsWithoutScopedQueryIds = maintenanceWindowsWithoutScopedQuery.map(
+      ({ id }) => id
+    );
+
+    if (maintenanceWindowsWithScopedQuery.length === 0) {
+      return {
+        alertIds: [],
+        maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
+      };
+    }
+
+    // Run aggs to get all scoped query alert IDs, returns a record<maintenanceWindowId, alertIds>,
+    // indicating the maintenance window has matches a number of alerts with the scoped query.
+    const aggsResult = await this.getMaintenanceWindowScopedQueryAlerts({
+      ruleId,
+      spaceId,
+      executionUuid,
+      maintenanceWindows: maintenanceWindowsWithScopedQuery,
+    });
+
+    const alertsAffectedByScopedQuery: string[] = [];
+    const appliedMaintenanceWindowIds: string[] = [];
+
+    const newAlerts = Object.values(this.getProcessedAlerts('new'));
+
+    for (const [scopedQueryMaintenanceWindowId, alertIds] of Object.entries(aggsResult)) {
+      // Go through matched alerts, find the in memory object
+      alertIds.forEach((alertId) => {
+        const newAlert = newAlerts.find((alert) => alert.getUuid() === alertId);
+        if (!newAlert) {
+          return;
+        }
+
+        const newMaintenanceWindowIds = [
+          // Keep existing Ids
+          ...newAlert.getMaintenanceWindowIds(),
+          // Add the ids that don't have scoped queries
+          ...maintenanceWindowsWithoutScopedQueryIds,
+          // Add the scoped query id
+          scopedQueryMaintenanceWindowId,
+        ];
+
+        // Update in memory alert with new maintenance window IDs
+        newAlert.setMaintenanceWindowIds([...new Set(newMaintenanceWindowIds)]);
+
+        alertsAffectedByScopedQuery.push(newAlert.getUuid());
+        appliedMaintenanceWindowIds.push(...newMaintenanceWindowIds);
+      });
+    }
+
+    const uniqueAlertsId = [...new Set(alertsAffectedByScopedQuery)];
+    const uniqueMaintenanceWindowIds = [...new Set(appliedMaintenanceWindowIds)];
+
+    if (uniqueAlertsId.length) {
+      // Update alerts with new maintenance window IDs, await not needed
+      this.updateAlertMaintenanceWindowIds(uniqueAlertsId).catch(() => {
+        this.options.logger.debug(
+          'Failed to update new alerts with scoped query maintenance window Ids by updateByQuery.'
+        );
+      });
+    }
+
+    return {
+      alertIds: uniqueAlertsId,
+      maintenanceWindowIds: uniqueMaintenanceWindowIds,
+    };
+  }
+
   public client() {
     return {
       report: (
@@ -621,11 +738,3 @@ export class AlertsClient<
     return this._isUsingDataStreams;
   }
 }
-
-const UNTRACK_UPDATE_PAINLESS_SCRIPT = `
-// Certain rule types don't flatten their AAD values, apply the ALERT_STATUS key to them directly
-if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'].empty) {
-  ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
-} else {
-  ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'
-}`;

@@ -83,33 +83,29 @@ exports[`SampleDataCard installed renders with app links 1`] = `
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             data-test-subj="launchSampleDataSetsample-data-set"
             id="sampleDataLinkssample-data-set"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              aria-label="View Sample Data Set"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+              type="button"
             >
-              <button
-                aria-label="View Sample Data Set"
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
-                type="button"
+              <span
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate"
                 >
-                  <span
-                    class="eui-textTruncate"
-                  >
-                    View data
-                  </span>
-                  <span
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
+                  View data
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
       </div>

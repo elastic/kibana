@@ -11,6 +11,10 @@ discover-app {
 .dscPage {
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();
+
+    &.dscPage--serverless {
+      @include kibanaFullBodyHeight($euiSize * 3);
+    }
   }
 
   flex-direction: column;
@@ -30,16 +34,6 @@ discover-app {
 .dscPageBody__contents {
   overflow: hidden;
   height: 100%;
-}
-
-.dscSidebarResizeButton {
-  background-color: transparent !important;
-
-  &:not(:hover):not(:focus) {
-    &:before, &:after {
-      width: 0;
-    }
-  }
 }
 
 .dscPageContent__wrapper {

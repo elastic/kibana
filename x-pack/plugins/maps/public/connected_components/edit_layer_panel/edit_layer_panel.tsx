@@ -8,7 +8,6 @@
 import React, { Component, Fragment } from 'react';
 
 import {
-  EuiCallOut,
   EuiIcon,
   EuiFlexItem,
   EuiTitle,
@@ -18,7 +17,6 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FilterEditor } from './filter_editor';
@@ -29,7 +27,7 @@ import { StyleSettings } from './style_settings';
 import { StyleDescriptor, VectorLayerDescriptor } from '../../../common/descriptor_types';
 import { getData, getCore } from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
-import { isVectorLayer, IVectorLayer } from '../../classes/layers/vector_layer';
+import { isVectorLayer } from '../../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../../classes/sources/source';
 import { IField } from '../../classes/fields/field';
 import { isLayerGroup } from '../../classes/layers/layer_group';
@@ -96,16 +94,16 @@ export class EditLayerPanel extends Component<Props, State> {
       return;
     }
 
-    const vectorLayer = this.props.selectedLayer as IVectorLayer;
-    if (!vectorLayer.getSource().supportsJoins() || vectorLayer.getLeftJoinFields === undefined) {
+    if (
+      !this.props.selectedLayer.getSource().supportsJoins() ||
+      this.props.selectedLayer.getLeftJoinFields === undefined
+    ) {
       return;
     }
 
     let leftJoinFields: JoinField[] = [];
     try {
-      const leftFieldsInstances = await (
-        this.props.selectedLayer as IVectorLayer
-      ).getLeftJoinFields();
+      const leftFieldsInstances = await this.props.selectedLayer.getLeftJoinFields();
       const leftFieldPromises = leftFieldsInstances.map(async (field: IField) => {
         return {
           name: field.getName(),
@@ -124,26 +122,6 @@ export class EditLayerPanel extends Component<Props, State> {
   _onSourceChange = (...args: OnSourceChangeArgs[]) => {
     return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
   };
-
-  _renderLayerErrors() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.hasErrors()) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <EuiCallOut
-          color="warning"
-          title={i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
-            defaultMessage: 'Unable to load layer',
-          })}
-        >
-          <p data-test-subj="layerErrorMessage">{this.props.selectedLayer.getErrors()}</p>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
-  }
 
   _renderFilterSection() {
     if (
@@ -168,8 +146,7 @@ export class EditLayerPanel extends Component<Props, State> {
     if (!this.props.selectedLayer || !isVectorLayer(this.props.selectedLayer)) {
       return;
     }
-    const vectorLayer = this.props.selectedLayer as IVectorLayer;
-    if (!vectorLayer.getSource().supportsJoins()) {
+    if (!this.props.selectedLayer.getSource().supportsJoins()) {
       return null;
     }
 
@@ -177,7 +154,7 @@ export class EditLayerPanel extends Component<Props, State> {
       <Fragment>
         <EuiPanel>
           <JoinEditor
-            layer={vectorLayer}
+            layer={this.props.selectedLayer}
             leftJoinFields={this.state.leftJoinFields}
             layerDisplayName={this.state.displayName}
           />
@@ -249,8 +226,6 @@ export class EditLayerPanel extends Component<Props, State> {
 
           <div className="mapLayerPanel__body">
             <div className="mapLayerPanel__bodyOverflow">
-              {this._renderLayerErrors()}
-
               <LayerSettings
                 layer={this.props.selectedLayer}
                 supportsFitToBounds={this.state.supportsFitToBounds}

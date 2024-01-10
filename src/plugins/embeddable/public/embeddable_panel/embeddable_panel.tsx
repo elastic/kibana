@@ -6,21 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { isNil } from 'lodash';
-import classNames from 'classnames';
-import { distinct, map } from 'rxjs';
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import classNames from 'classnames';
+import { isNil } from 'lodash';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import { distinct, map } from 'rxjs';
 
-import { isPromise } from '@kbn/std';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-
+import { PanelLoader } from '@kbn/panel-loader';
+import { core, embeddableStart, inspector } from '../kibana_services';
+import { EmbeddableErrorHandler, EmbeddableOutput, ViewMode } from '../lib';
+import { EmbeddablePanelError } from './embeddable_panel_error';
 import {
-  EditPanelAction,
-  RemovePanelAction,
-  InspectPanelAction,
   CustomizePanelAction,
+  EditPanelAction,
+  InspectPanelAction,
+  RemovePanelAction,
 } from './panel_actions';
+import { EmbeddablePanelHeader } from './panel_header/embeddable_panel_header';
 import {
   EmbeddablePhase,
   EmbeddablePhaseEvent,
@@ -31,10 +33,6 @@ import {
   useSelectFromEmbeddableInput,
   useSelectFromEmbeddableOutput,
 } from './use_select_from_embeddable';
-import { EmbeddablePanelError } from './embeddable_panel_error';
-import { core, embeddableStart, inspector } from '../kibana_services';
-import { ViewMode, EmbeddableErrorHandler, EmbeddableOutput } from '../lib';
-import { EmbeddablePanelHeader } from './panel_header/embeddable_panel_header';
 
 const getEventStatus = (output: EmbeddableOutput): EmbeddablePhase => {
   if (!isNil(output.error)) {
@@ -51,6 +49,7 @@ const getEventStatus = (output: EmbeddableOutput): EmbeddablePhase => {
 export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
   const { hideHeader, showShadow, embeddable, hideInspector, onPanelStatusChange } = panelProps;
   const [node, setNode] = useState<ReactNode | undefined>();
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -61,8 +60,6 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
    * bypass the trigger registry.
    */
   const universalActions = useMemo<PanelUniversalActions>(() => {
-    const commonlyUsedRanges = core.uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
-    const dateFormat = core.uiSettings.get(UI_SETTINGS.DATE_FORMAT);
     const stateTransfer = embeddableStart.getStateTransfer();
     const editPanel = new EditPanelAction(
       embeddableStart.getEmbeddableFactory,
@@ -71,13 +68,7 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
     );
 
     const actions: PanelUniversalActions = {
-      customizePanel: new CustomizePanelAction(
-        core.overlays,
-        core.theme,
-        editPanel,
-        commonlyUsedRanges,
-        dateFormat
-      ),
+      customizePanel: new CustomizePanelAction(editPanel),
       removePanel: new RemovePanelAction(),
       editPanel,
     };
@@ -129,6 +120,12 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
    * Select state from the embeddable
    */
   const loading = useSelectFromEmbeddableOutput('loading', embeddable);
+  const rendered = useSelectFromEmbeddableOutput('rendered', embeddable);
+
+  if ((loading === false || rendered === true || outputError) && !initialLoadComplete) {
+    setInitialLoadComplete(true);
+  }
+
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
 
   /**
@@ -136,21 +133,30 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
    */
   useEffect(() => {
     if (!embeddableRoot.current) return;
-    const nextNode = embeddable.render(embeddableRoot.current) ?? undefined;
-    if (isPromise(nextNode)) {
-      nextNode.then((resolved) => setNode(resolved));
-    } else {
+
+    let cancelled = false;
+
+    const render = async (root: HTMLDivElement) => {
+      const nextNode = (await embeddable.render(root)) ?? undefined;
+
+      if (cancelled) return;
+
       setNode(nextNode);
-    }
+    };
+
+    render(embeddableRoot.current);
+
     const errorSubscription = embeddable.getOutput$().subscribe({
       next: (output) => {
         setOutputError(output.error);
       },
       error: (error) => setOutputError(error),
     });
+
     return () => {
       embeddable?.destroy();
       errorSubscription?.unsubscribe();
+      cancelled = true;
     };
   }, [embeddable, embeddableRoot]);
 
@@ -207,7 +213,13 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <div className="embPanel__content" ref={embeddableRoot} {...contentAttrs}>
+      {!initialLoadComplete && <PanelLoader />}
+      <div
+        css={initialLoadComplete ? undefined : { display: 'none !important' }}
+        className="embPanel__content"
+        ref={embeddableRoot}
+        {...contentAttrs}
+      >
         {node}
       </div>
     </EuiPanel>

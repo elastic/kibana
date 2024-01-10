@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -31,6 +31,7 @@ import {
 } from '../../../../../../../common/constants';
 
 import type { OutputFormInputsType } from './use_output_form';
+import { SecretFormRow } from './output_form_secret_form_row';
 
 const kafkaSaslOptions = [
   {
@@ -70,8 +71,47 @@ const kafkaAuthenticationsOptions = [
 
 export const OutputFormKafkaAuthentication: React.FunctionComponent<{
   inputs: OutputFormInputsType;
+  useSecretsStorage: boolean;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
 }> = (props) => {
-  const { inputs } = props;
+  const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
+  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+
+  useEffect(() => {
+    if (!isFirstLoad) return;
+    setIsFirstLoad(false);
+    // populate the secret input with the value of the plain input in order to re-save the output with secret storage
+    if (useSecretsStorage) {
+      if (inputs.kafkaAuthPasswordInput.value && !inputs.kafkaAuthPasswordSecretInput.value) {
+        inputs.kafkaAuthPasswordSecretInput.setValue(inputs.kafkaAuthPasswordInput.value);
+        inputs.kafkaAuthPasswordInput.clear();
+      }
+
+      if (inputs.kafkaSslKeyInput.value && !inputs.kafkaSslKeySecretInput.value) {
+        inputs.kafkaSslKeySecretInput.setValue(inputs.kafkaSslKeyInput.value);
+        inputs.kafkaSslKeyInput.clear();
+      }
+    }
+  }, [
+    useSecretsStorage,
+    inputs.kafkaAuthPasswordInput,
+    inputs.kafkaAuthPasswordSecretInput,
+    inputs.kafkaSslKeyInput,
+    inputs.kafkaSslKeySecretInput,
+    isFirstLoad,
+    setIsFirstLoad,
+  ]);
+
+  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.kafkaAuthPasswordInput.clear();
+      inputs.kafkaSslKeyInput.clear();
+    } else {
+      inputs.kafkaAuthPasswordSecretInput.setValue('');
+      inputs.kafkaSslKeySecretInput.setValue('');
+    }
+    onToggleSecretStorage(secretEnabled);
+  };
 
   const kafkaVerificationModeOptions = useMemo(
     () =>
@@ -145,28 +185,59 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 )}
               />
             </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
-                  defaultMessage="Client SSL certificate key"
-                />
-              }
-              {...inputs.kafkaSslKeyInput.formRowProps}
-            >
-              <EuiTextArea
+            {!useSecretsStorage ? (
+              <SecretFormRow
                 fullWidth
-                rows={5}
-                {...inputs.kafkaSslKeyInput.props}
-                placeholder={i18n.translate(
-                  'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
+                    defaultMessage="Client SSL certificate key"
+                  />
+                }
+                {...inputs.kafkaSslKeyInput.formRowProps}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretAndClearValue}
+              >
+                <EuiTextArea
+                  fullWidth
+                  rows={5}
+                  {...inputs.kafkaSslKeyInput.props}
+                  placeholder={i18n.translate(
+                    'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                    {
+                      defaultMessage: 'Specify certificate key',
+                    }
+                  )}
+                />
+              </SecretFormRow>
+            ) : (
+              <SecretFormRow
+                fullWidth
+                title={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.kafkaPasswordSecretInputTitle',
                   {
-                    defaultMessage: 'Specify certificate key',
+                    defaultMessage: 'Client SSL certificate key',
                   }
                 )}
-              />
-            </EuiFormRow>
+                {...inputs.kafkaSslKeySecretInput.formRowProps}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretAndClearValue}
+                cancelEdit={inputs.kafkaSslKeySecretInput.cancelEdit}
+              >
+                <EuiTextArea
+                  fullWidth
+                  rows={5}
+                  data-test-subj="kafkaSslKeySecretInput"
+                  {...inputs.kafkaSslKeySecretInput.props}
+                  placeholder={i18n.translate(
+                    'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
+                    {
+                      defaultMessage: 'Specify certificate key',
+                    }
+                  )}
+                />
+              </SecretFormRow>
+            )}
           </>
         );
       default:
@@ -189,23 +260,48 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                 {...inputs.kafkaAuthUsernameInput.props}
               />
             </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.kafkaPasswordInputLabel"
-                  defaultMessage="Password"
-                />
-              }
-              {...inputs.kafkaAuthPasswordInput.formRowProps}
-            >
-              <EuiFieldPassword
-                type={'dual'}
-                data-test-subj="settingsOutputsFlyout.kafkaPasswordInput"
+            {!useSecretsStorage ? (
+              <SecretFormRow
                 fullWidth
-                {...inputs.kafkaAuthPasswordInput.props}
-              />
-            </EuiFormRow>
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.kafkaPasswordInputLabel"
+                    defaultMessage="Password"
+                  />
+                }
+                {...inputs.kafkaAuthPasswordInput.formRowProps}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretAndClearValue}
+              >
+                <EuiFieldPassword
+                  type={'dual'}
+                  data-test-subj="settingsOutputsFlyout.kafkaPasswordInput"
+                  fullWidth
+                  {...inputs.kafkaAuthPasswordInput.props}
+                />
+              </SecretFormRow>
+            ) : (
+              <SecretFormRow
+                fullWidth
+                title={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.kafkaPasswordInputtitle',
+                  {
+                    defaultMessage: 'Password',
+                  }
+                )}
+                {...inputs.kafkaAuthPasswordSecretInput.formRowProps}
+                useSecretsStorage={useSecretsStorage}
+                onToggleSecretStorage={onToggleSecretAndClearValue}
+                cancelEdit={inputs.kafkaAuthPasswordSecretInput.cancelEdit}
+              >
+                <EuiFieldPassword
+                  type={'dual'}
+                  data-test-subj="settingsOutputsFlyout.kafkaPasswordSecretInput"
+                  fullWidth
+                  {...inputs.kafkaAuthPasswordSecretInput.props}
+                />
+              </SecretFormRow>
+            )}
             <EuiFormRow
               fullWidth
               label={

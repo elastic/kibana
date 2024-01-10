@@ -23,11 +23,11 @@ import { KibanaObjectUi } from '../page';
 
 export interface KibanaObjectItemProps {
   objectType: string;
-  kibanaObjects: KibanaObjectUi[];
+  kibanaObjects: KibanaObjectUi[] | undefined;
   isSaving: boolean;
 }
 
-export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
+export const KibanaObjectList: FC<KibanaObjectItemProps> = memo(
   ({ objectType, kibanaObjects, isSaving }) => {
     const kibanaObjectLabels: Record<string, string> = {
       dashboard: i18n.translate('xpack.ml.newJob.recognize.dashboardsLabel', {
@@ -41,6 +41,10 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
       }),
     };
 
+    if (kibanaObjects === undefined) {
+      return null;
+    }
+
     return (
       <>
         <EuiTitle size="s">
@@ -53,7 +57,7 @@ export const KibanaObjects: FC<KibanaObjectItemProps> = memo(
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem>
                       <EuiText size="s" color={exists ? 'subdued' : 'success'}>
                         {title}
                       </EuiText>

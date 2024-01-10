@@ -61,6 +61,7 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   filtersForSuggestions?: Filter[];
   readOnly?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
+  filtersCount?: number;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -80,7 +81,7 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-export const FILTER_EDITOR_WIDTH = 960;
+export const FILTER_EDITOR_WIDTH = 1200;
 
 function FilterItemComponent(props: FilterItemProps) {
   const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
@@ -366,8 +367,7 @@ function FilterItemComponent(props: FilterItemProps) {
 
   const popoverProps: FilterPopoverProps = {
     id: `popoverFor_filter${id}`,
-    className: `globalFilterItem__popover`,
-    anchorClassName: `globalFilterItem__popoverAnchor`,
+    display: 'block',
     isOpen: isPopoverOpen,
     closePopover,
     button: <FilterView {...filterViewProps} />,
@@ -398,6 +398,7 @@ function FilterItemComponent(props: FilterItemProps) {
                 filtersForSuggestions={props.filtersForSuggestions}
                 suggestionsAbstraction={props.suggestionsAbstraction}
                 docLinks={docLinks}
+                filtersCount={props.filtersCount}
               />
             </div>,
           ]}

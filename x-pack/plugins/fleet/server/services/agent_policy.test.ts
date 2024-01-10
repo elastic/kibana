@@ -8,6 +8,8 @@
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { Logger } from '@kbn/core/server';
 
 import { PackagePolicyRestrictionRelatedError, FleetUnauthorizedError } from '../errors';
 import type {
@@ -32,6 +34,7 @@ import { getFullAgentPolicy } from './agent_policies';
 import * as outputsHelpers from './agent_policies/outputs_helpers';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
+import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
@@ -104,8 +107,13 @@ function getAgentPolicyCreateMock() {
   });
   return soClient;
 }
-
+let mockedLogger: jest.Mocked<Logger>;
 describe('agent policy', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -182,13 +190,13 @@ describe('agent policy', () => {
       });
     });
 
-    it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', () => {
+    it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      expect(
+      await expect(
         agentPolicyService.create(soClient, esClient, {
           name: 'test',
           namespace: 'default',
@@ -199,13 +207,13 @@ describe('agent policy', () => {
       );
     });
 
-    it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', () => {
+    it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      expect(
+      await expect(
         agentPolicyService.create(soClient, esClient, {
           name: 'test',
           namespace: 'default',
@@ -619,7 +627,7 @@ describe('agent policy', () => {
       });
     });
 
-    it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', () => {
+    it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
@@ -632,7 +640,7 @@ describe('agent policy', () => {
         references: [],
       });
 
-      expect(
+      await expect(
         agentPolicyService.update(soClient, esClient, 'test-id', {
           name: 'test',
           namespace: 'default',
@@ -643,7 +651,7 @@ describe('agent policy', () => {
       );
     });
 
-    it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', () => {
+    it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
 
       const soClient = getAgentPolicyCreateMock();
@@ -656,7 +664,7 @@ describe('agent policy', () => {
         references: [],
       });
 
-      expect(
+      await expect(
         agentPolicyService.update(soClient, esClient, 'test-id', {
           name: 'test',
           namespace: 'default',
@@ -664,6 +672,34 @@ describe('agent policy', () => {
       ).resolves.not.toThrowError(
         new FleetUnauthorizedError('Tamper protection requires Platinum license')
       );
+    });
+
+    it('should throw Error if is_protected=true with invalid uninstall token', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
+      mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
+        checkTokenValidityForPolicy: jest
+          .fn()
+          .mockResolvedValueOnce({ error: new Error('reason') }),
+      } as unknown as UninstallTokenServiceInterface);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'test-id',
+        type: 'mocked',
+        references: [],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          name: 'test',
+          namespace: 'default',
+          is_protected: true,
+        })
+      ).rejects.toThrowError(new Error('Cannot enable Agent Tamper Protection: reason'));
     });
   });
 

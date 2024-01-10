@@ -11,6 +11,7 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
+import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 
 import { DashboardContainerFactory } from '..';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
@@ -168,6 +169,9 @@ describe('dashboard renderer', () => {
   });
 
   test('renders a 404 page when initial dashboard creation returns a savedObjectNotFound error', async () => {
+    // mock embeddable dependencies so that the embeddable panel renders
+    setStubKibanaServices();
+
     // ensure that the first attempt at creating a dashboard results in a 404
     const mockErrorEmbeddable = {
       error: new SavedObjectNotFound('dashboard', 'gat em'),

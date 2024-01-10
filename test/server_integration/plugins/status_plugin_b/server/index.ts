@@ -8,4 +8,4 @@
 
 import { StatusPluginBPlugin } from './plugin';
 
-export const plugin = () => new StatusPluginBPlugin();
+export const plugin = async () => new StatusPluginBPlugin();

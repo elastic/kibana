@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 
 export const TITLE = i18n.translate('xpack.cases.customFields.title', {
-  defaultMessage: 'Custom Fields',
+  defaultMessage: 'Custom fields',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.cases.customFields.description', {
@@ -66,6 +66,10 @@ export const FIELD_OPTION_REQUIRED = i18n.translate(
   }
 );
 
+export const REQUIRED = i18n.translate('xpack.cases.customFields.required', {
+  defaultMessage: 'Required',
+});
+
 export const REQUIRED_FIELD = (fieldName: string): string =>
   i18n.translate('xpack.cases.customFields.requiredField', {
     values: { fieldName },
@@ -78,11 +82,9 @@ export const EDIT_CUSTOM_FIELDS_ARIA_LABEL = (customFieldLabel: string) =>
     defaultMessage: 'click to edit {customFieldLabel}',
   });
 
-export const NO_CUSTOM_FIELD_SET = (customFieldLabel: string) =>
-  i18n.translate('xpack.cases.caseView.noCustomFieldSet', {
-    values: { customFieldLabel },
-    defaultMessage: 'No "{customFieldLabel}" added',
-  });
+export const NO_CUSTOM_FIELD_SET = i18n.translate('xpack.cases.caseView.noCustomFieldSet', {
+  defaultMessage: 'No value is added',
+});
 
 export const DELETE_FIELD_TITLE = (fieldName: string) =>
   i18n.translate('xpack.cases.customFields.deleteField', {
@@ -100,3 +102,17 @@ export const DELETE_FIELD_DESCRIPTION = i18n.translate(
 export const DELETE = i18n.translate('xpack.cases.customFields.fieldOptions.Delete', {
   defaultMessage: 'Delete',
 });
+
+export const TOGGLE_FIELD_ON_LABEL = i18n.translate(
+  'xpack.cases.customFields.tableFilters.toggle.on',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const TOGGLE_FIELD_OFF_LABEL = i18n.translate(
+  'xpack.cases.customFields.tableFilters.toggle.off',
+  {
+    defaultMessage: 'Off',
+  }
+);

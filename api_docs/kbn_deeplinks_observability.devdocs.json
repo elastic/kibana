@@ -190,28 +190,12 @@
           },
           {
             "parentPluginId": "@kbn/deeplinks-observability",
-            "id": "def-common.LogExplorerNavigationParams.sort",
-            "type": "Array",
-            "tags": [],
-            "label": "sort",
-            "description": [
-              "\nArray of the used sorting [[field,direction],...]"
-            ],
-            "signature": [
-              "string[][] | undefined"
-            ],
-            "path": "packages/deeplinks/observability/locators/log_explorer.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/deeplinks-observability",
             "id": "def-common.LogExplorerNavigationParams.filters",
             "type": "Array",
             "tags": [],
             "label": "filters",
             "description": [
-              "\nOptionally apply filters."
+              "\nOptionally apply free-form filters."
             ],
             "signature": [
               {
@@ -224,6 +208,74 @@
               "[] | undefined"
             ],
             "path": "packages/deeplinks/observability/locators/log_explorer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.LogExplorerNavigationParams.filterControls",
+            "type": "Object",
+            "tags": [],
+            "label": "filterControls",
+            "description": [
+              "\nOptionally apply curated filter controls"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.FilterControls",
+                "text": "FilterControls"
+              },
+              " | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/log_explorer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.ObservabilityLogExplorerLocationState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObservabilityLogExplorerLocationState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.ObservabilityLogExplorerLocationState",
+            "text": "ObservabilityLogExplorerLocationState"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.ObservabilityLogExplorerLocationState.origin",
+            "type": "Object",
+            "tags": [],
+            "label": "origin",
+            "description": [],
+            "signature": [
+              "{ id: \"application-log-onboarding\"; } | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -297,8 +349,8 @@
             "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
-            "section": "def-common.LogExplorerNavigationParams",
-            "text": "LogExplorerNavigationParams"
+            "section": "def-common.DatasetLocatorParams",
+            "text": "DatasetLocatorParams"
           }
         ],
         "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
@@ -369,6 +421,14 @@
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
             "section": "def-common.LogExplorerNavigationParams",
             "text": "LogExplorerNavigationParams"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.ObservabilityLogExplorerLocationState",
+            "text": "ObservabilityLogExplorerLocationState"
           }
         ],
         "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
@@ -405,6 +465,14 @@
             "docId": "kibKbnDeeplinksObservabilityPluginApi",
             "section": "def-common.LogExplorerNavigationParams",
             "text": "LogExplorerNavigationParams"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.ObservabilityLogExplorerLocationState",
+            "text": "ObservabilityLogExplorerLocationState"
           }
         ],
         "path": "packages/deeplinks/observability/locators/observability_log_explorer.ts",
@@ -427,9 +495,47 @@
             "section": "def-common.AppId",
             "text": "AppId"
           },
-          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"observability-overview:slos\" | \"metrics:settings\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:metrics-hosts\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:services\" | \"apm:service-groups-list\" | \"apm:storage-explorer\""
+          " | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"observability-overview:slos\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:services\" | \"apm:service-groups-list\" | \"apm:storage-explorer\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.FilterControls",
+        "type": "Type",
+        "tags": [],
+        "label": "FilterControls",
+        "description": [],
+        "signature": [
+          "{ namespace?: ",
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.ListFilterControl",
+            "text": "ListFilterControl"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/deeplinks/observability/locators/log_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.ListFilterControl",
+        "type": "Type",
+        "tags": [],
+        "label": "ListFilterControl",
+        "description": [],
+        "signature": [
+          "{ mode: \"include\"; values: string[]; }"
+        ],
+        "path": "packages/deeplinks/observability/locators/log_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -445,6 +551,36 @@
           "\"LOG_EXPLORER_LOCATOR\""
         ],
         "path": "packages/deeplinks/observability/locators/log_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.LOGS_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LOGS_APP_ID",
+        "description": [],
+        "signature": [
+          "\"logs\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OBSERVABILITY_LOG_EXPLORER_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOG_EXPLORER_APP_ID",
+        "description": [],
+        "signature": [
+          "\"observability-log-explorer\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -475,6 +611,21 @@
           "\"OBSERVABILITY_ONBOARDING_LOCATOR\""
         ],
         "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OBSERVABILITY_OVERVIEW_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_OVERVIEW_APP_ID",
+        "description": [],
+        "signature": [
+          "\"observability-overview\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

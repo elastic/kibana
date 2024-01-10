@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
+import React from 'react';
 import { DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
-import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
-import { IDatasetsClient } from '../services/datasets';
-import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 import { useDatasetSelection } from '../hooks/use_dataset_selection';
 import { DataViewsProvider, useDataViewsContext } from '../hooks/use_data_views';
+import { useEsql } from '../hooks/use_esql';
+import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
+import { IDatasetsClient } from '../services/datasets';
+import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
 
 interface CustomDatasetSelectorProps {
-  logExplorerProfileStateService: LogExplorerProfileStateService;
+  logExplorerControllerStateService: LogExplorerControllerStateService;
 }
 
-export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateService }) => {
+export const CustomDatasetSelector = withProviders(({ logExplorerControllerStateService }) => {
   const { datasetSelection, handleDatasetSelectionChange } = useDatasetSelection(
-    logExplorerProfileStateService
+    logExplorerControllerStateService
   );
 
   const {
@@ -59,6 +60,8 @@ export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateSer
     sortDataViews,
   } = useDataViewsContext();
 
+  const { isEsqlEnabled, discoverEsqlUrlProps } = useEsql({ datasetSelection });
+
   return (
     <DatasetSelector
       datasets={datasets}
@@ -66,15 +69,17 @@ export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateSer
       datasetsError={datasetsError}
       dataViews={dataViews}
       dataViewsError={dataViewsError}
+      discoverEsqlUrlProps={discoverEsqlUrlProps}
       integrations={integrations}
       integrationsError={integrationsError}
+      isEsqlEnabled={isEsqlEnabled}
       isLoadingDataViews={isLoadingDataViews}
       isLoadingIntegrations={isLoadingIntegrations}
       isLoadingUncategorized={isLoadingUncategorized}
       isSearchingIntegrations={isSearchingIntegrations}
+      onDataViewSelection={selectDataView}
       onDataViewsReload={reloadDataViews}
       onDataViewsSearch={searchDataViews}
-      onDataViewSelection={selectDataView}
       onDataViewsSort={sortDataViews}
       onDataViewsTabClick={loadDataViews}
       onIntegrationsLoadMore={loadMore}
@@ -106,13 +111,13 @@ function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorP
     datasetsClient,
     dataViews,
     discover,
-    logExplorerProfileStateService,
+    logExplorerControllerStateService,
   }: CustomDatasetSelectorBuilderProps) {
     return (
       <IntegrationsProvider datasetsClient={datasetsClient}>
         <DatasetsProvider datasetsClient={datasetsClient}>
           <DataViewsProvider dataViewsService={dataViews} discoverService={discover}>
-            <Component logExplorerProfileStateService={logExplorerProfileStateService} />
+            <Component logExplorerControllerStateService={logExplorerControllerStateService} />
           </DataViewsProvider>
         </DatasetsProvider>
       </IntegrationsProvider>

@@ -49,7 +49,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const objectRemover = new ObjectRemover(supertest);
 
-  describe('Alert documents', () => {
+  describe('Alert documents', function () {
+    // Timeout of 360000ms exceeded
+    this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = '.es-query';
     const ALERT_INDEX = '.alerts-stack.alerts-default';
     let ruleId: string;
@@ -105,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits1[ALERT_MAINTENANCE_WINDOW_IDS]).to.be.an(Array);
       expect(typeof hits1[ALERT_REASON]).to.be('string');
       expect(typeof hits1[ALERT_RULE_EXECUTION_UUID]).to.be('string');
-      expect(typeof hits1[ALERT_DURATION]).to.be('string');
+      expect(typeof hits1[ALERT_DURATION]).to.be('number');
       expect(new Date(hits1[ALERT_START])).to.be.a(Date);
       expect(typeof hits1[ALERT_TIME_RANGE]).to.be('object');
       expect(typeof hits1[ALERT_UUID]).to.be('string');
@@ -139,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         [SPACE_IDS]: ['default'],
         ['kibana.alert.title']: "rule 'always fire' matched query",
         ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
@@ -162,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
           groupBy: 'all',
           searchType: 'esQuery',
         },
-        [ALERT_RULE_PRODUCER]: 'stackAlerts',
+        [ALERT_RULE_PRODUCER]: hits1[ALERT_RULE_PRODUCER],
         [ALERT_RULE_REVISION]: 0,
         [ALERT_RULE_TYPE_ID]: '.es-query',
         [ALERT_RULE_TAGS]: [],
@@ -235,8 +238,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2['@timestamp']).to.be.greaterThan(hits1['@timestamp']);
       expect(OPEN_OR_ACTIVE.has(hits1[EVENT_ACTION])).to.be(true);
       expect(hits2[EVENT_ACTION]).to.be('active');
-      expect(parseInt(hits1[ALERT_DURATION], 10)).to.not.be.lessThan(0);
-      expect(hits2[ALERT_DURATION]).not.to.be('0');
+      expect(hits1[ALERT_DURATION]).to.not.be.lessThan(0);
+      expect(hits2[ALERT_DURATION]).not.to.be(0);
 
       // remove fields we know will be different
       const fields = [

@@ -15,12 +15,12 @@ import type { ESQLWorker } from './worker/esql_worker';
 
 import { DiagnosticsAdapter } from '../common/diagnostics_adapter';
 import { WorkerProxyService } from '../common/worker_proxy';
-import { ESQLCompletionAdapter } from './lib/monaco/esql_completion_provider';
-import type { ESQLCustomAutocompleteCallbacks } from './lib/autocomplete/types';
+import type { ESQLCallbacks } from './lib/ast/shared/types';
+import { ESQLAstAdapter } from './lib/monaco/esql_ast_provider';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
 
-export const ESQLLang: CustomLangModuleType = {
+export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
     const { ESQLTokensProvider } = await import('./lib/monaco');
@@ -29,12 +29,18 @@ export const ESQLLang: CustomLangModuleType = {
 
     monaco.languages.setTokensProvider(ESQL_LANG_ID, new ESQLTokensProvider());
 
+    // handle syntax errors via the diagnostic adapter
+    // but then enrich them via the separate validate function
     new DiagnosticsAdapter(ESQL_LANG_ID, (...uris) => workerProxyService.getWorker(uris));
   },
   languageConfiguration: {
-    brackets: [['(', ')']],
+    brackets: [
+      ['(', ')'],
+      ['[', ']'],
+    ],
     autoClosingPairs: [
       { open: '(', close: ')' },
+      { open: '[', close: ']' },
       { open: `'`, close: `'` },
       { open: '"', close: '"' },
     ],
@@ -44,8 +50,65 @@ export const ESQLLang: CustomLangModuleType = {
       { open: '"', close: '"' },
     ],
   },
-
-  getSuggestionProvider(callbacks?: ESQLCustomAutocompleteCallbacks) {
-    return new ESQLCompletionAdapter((...uris) => workerProxyService.getWorker(uris), callbacks);
+  validate: async (model: monaco.editor.ITextModel, code: string, callbacks?: ESQLCallbacks) => {
+    const astAdapter = new ESQLAstAdapter(
+      (...uris) => workerProxyService.getWorker(uris),
+      callbacks
+    );
+    return await astAdapter.validate(model, code);
+  },
+  getSignatureProvider: (callbacks?: ESQLCallbacks): monaco.languages.SignatureHelpProvider => {
+    return {
+      signatureHelpTriggerCharacters: [' ', '('],
+      async provideSignatureHelp(
+        model: monaco.editor.ITextModel,
+        position: monaco.Position,
+        _token: monaco.CancellationToken,
+        context: monaco.languages.SignatureHelpContext
+      ) {
+        const astAdapter = new ESQLAstAdapter(
+          (...uris) => workerProxyService.getWorker(uris),
+          callbacks
+        );
+        return astAdapter.suggestSignature(model, position, context);
+      },
+    };
+  },
+  getHoverProvider: (callbacks?: ESQLCallbacks): monaco.languages.HoverProvider => {
+    return {
+      async provideHover(
+        model: monaco.editor.ITextModel,
+        position: monaco.Position,
+        token: monaco.CancellationToken
+      ) {
+        const astAdapter = new ESQLAstAdapter(
+          (...uris) => workerProxyService.getWorker(uris),
+          callbacks
+        );
+        return astAdapter.getHover(model, position, token);
+      },
+    };
+  },
+  getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
+    return {
+      triggerCharacters: [',', '(', '=', ' ', ''],
+      async provideCompletionItems(
+        model: monaco.editor.ITextModel,
+        position: monaco.Position,
+        context: monaco.languages.CompletionContext
+      ): Promise<monaco.languages.CompletionList> {
+        const astAdapter = new ESQLAstAdapter(
+          (...uris) => workerProxyService.getWorker(uris),
+          callbacks
+        );
+        const suggestionEntries = await astAdapter.autocomplete(model, position, context);
+        return {
+          suggestions: suggestionEntries.suggestions.map((suggestion) => ({
+            ...suggestion,
+            range: undefined as unknown as monaco.IRange,
+          })),
+        };
+      },
+    };
   },
 };

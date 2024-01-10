@@ -696,26 +696,23 @@ describe('SavedObjectsRepository Spaces Extension', () => {
             expect.objectContaining({
               body: expect.arrayContaining([
                 expect.objectContaining({
-                  update: expect.objectContaining({
+                  index: expect.objectContaining({
                     _id: `${
                       currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
                     }${obj1.type}:${obj1.id}`,
                   }),
                 }),
                 expect.objectContaining({
-                  doc: expect.objectContaining({
-                    config: obj1.attributes,
-                  }),
+                  config: obj1.attributes,
                 }),
+
                 expect.objectContaining({
-                  update: expect.objectContaining({
+                  index: expect.objectContaining({
                     _id: `${obj2.type}:${obj2.id}`,
                   }),
                 }),
                 expect.objectContaining({
-                  doc: expect.objectContaining({
-                    multiNamespaceType: obj2.attributes,
-                  }),
+                  multiNamespaceType: obj2.attributes,
                 }),
               ]),
             }),

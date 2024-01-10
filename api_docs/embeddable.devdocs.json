@@ -1746,48 +1746,6 @@
                 "id": "def-public.CustomizePanelAction.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "overlays",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayStart",
-                    "text": "OverlayStart"
-                  }
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "theme",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-theme-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
-                  }
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$3",
-                "type": "Object",
-                "tags": [],
                 "label": "editPanel",
                 "description": [],
                 "signature": [
@@ -1798,71 +1756,6 @@
                     "section": "def-public.EditPanelAction",
                     "text": "EditPanelAction"
                   }
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$4",
-                "type": "Array",
-                "tags": [],
-                "label": "commonlyUsedRanges",
-                "description": [],
-                "signature": [
-                  "CommonlyUsedRange",
-                  "[] | undefined"
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$5",
-                "type": "string",
-                "tags": [],
-                "label": "dateFormat",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.CustomizePanelAction.isTimeRangeCompatible",
-            "type": "Function",
-            "tags": [],
-            "label": "isTimeRangeCompatible",
-            "description": [],
-            "signature": [
-              "({ embeddable }: ",
-              "CustomizePanelActionContext",
-              ") => boolean"
-            ],
-            "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.isTimeRangeCompatible.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ embeddable }",
-                "description": [],
-                "signature": [
-                  "CustomizePanelActionContext"
                 ],
                 "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
                 "deprecated": false,
@@ -7675,15 +7568,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly registerTrigger: (trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
               },
-              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+              ") => void; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7699,15 +7592,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
-                "text": "Trigger"
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
               },
-              ") => void; readonly unregisterAction: (actionId: string) => void; }"
+              "<any>) => void; }"
             ],
             "path": "src/plugins/embeddable/public/plugin.tsx",
             "deprecated": false,
@@ -7735,15 +7628,17 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly registerTrigger: (trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
               },
-              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+              ") => void; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -7759,17 +7654,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
-                "text": "Trigger"
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
               },
-              ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
+              "<any>) => void; readonly getAction: (id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",

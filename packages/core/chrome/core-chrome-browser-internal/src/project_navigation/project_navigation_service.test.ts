@@ -7,15 +7,17 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { firstValueFrom, lastValueFrom, take } from 'rxjs';
+import { firstValueFrom, lastValueFrom, take, BehaviorSubject } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
+import type { ChromeNavLinks, ChromeBreadcrumb, AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
 const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) => {
   const projectNavigationService = new ProjectNavigationService();
   const history = createMemoryHistory();
+  const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+
   history.replace(locationPathName);
   const projectNavigation = projectNavigationService.start({
     application: {
@@ -24,33 +26,36 @@ const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) =
     },
     navLinks: {} as unknown as ChromeNavLinks,
     http: httpServiceMock.createStartContract(),
+    chromeBreadcrumbs$,
   });
 
-  return { projectNavigation, history };
+  return { projectNavigation, history, chromeBreadcrumbs$ };
 };
 
 describe('breadcrumbs', () => {
   const setupWithNavTree = () => {
     const currentLocationPathName = '/foo/item1';
-    const { projectNavigation, history } = setup({ locationPathName: currentLocationPathName });
+    const { projectNavigation, chromeBreadcrumbs$, history } = setup({
+      locationPathName: currentLocationPathName,
+    });
 
     const mockNavigation = {
       navigationTree: [
         {
           id: 'root',
           title: 'Root',
-          path: ['root'],
+          path: 'root',
           breadcrumbStatus: 'hidden' as 'hidden',
           children: [
             {
               id: 'subNav',
-              path: ['root', 'subNav'],
+              path: 'root.subNav',
               title: '', // intentionally empty to skip rendering
               children: [
                 {
                   id: 'navItem1',
                   title: 'Nav Item 1',
-                  path: ['root', 'subNav', 'navItem1'],
+                  path: 'root.subNav.navItem1',
                   deepLink: {
                     id: 'navItem1',
                     title: 'Nav Item 1',
@@ -66,7 +71,7 @@ describe('breadcrumbs', () => {
       ],
     };
     projectNavigation.setProjectNavigation(mockNavigation);
-    return { projectNavigation, history, mockNavigation };
+    return { projectNavigation, history, mockNavigation, chromeBreadcrumbs$ };
   };
 
   test('should set breadcrumbs home / nav / custom', async () => {
@@ -81,15 +86,41 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "breadcrumb-home",
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanelClass
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
+          },
+          "text": "Project",
         },
         Object {
-          "data-test-subj": "breadcrumb-deepLinkId-navItem1",
+          "deepLinkId": "navItem1",
           "href": "/foo/item1",
           "text": "Nav Item 1",
         },
@@ -120,12 +151,38 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "breadcrumb-home",
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanelClass
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
+          },
+          "text": "Project",
         },
         Object {
           "href": "/custom1",
@@ -134,6 +191,64 @@ describe('breadcrumbs', () => {
         Object {
           "href": "/custom1/custom2",
           "text": "custom2",
+        },
+      ]
+    `);
+  });
+
+  test('should merge nav breadcrumbs and chrome breadcrumbs', async () => {
+    const { projectNavigation, chromeBreadcrumbs$ } = setupWithNavTree();
+
+    projectNavigation.setProjectBreadcrumbs([]);
+    chromeBreadcrumbs$.next([
+      { text: 'Kibana' },
+      { deepLinkId: 'navItem1' as AppDeepLinkId, text: 'Nav Item 1 from Chrome' },
+      { text: 'Deep context from Chrome' },
+    ]);
+
+    const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "popoverContent": <EuiContextMenuPanelClass
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
+          />,
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
+          },
+          "text": "Project",
+        },
+        Object {
+          "deepLinkId": "navItem1",
+          "text": "Nav Item 1 from Chrome",
+        },
+        Object {
+          "text": "Deep context from Chrome",
         },
       ]
     `);
@@ -203,12 +318,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          path: ['root'],
+          path: 'root',
           children: [
             {
               id: 'item1',
               title: 'Item 1',
-              path: ['root', 'item1'],
+              path: 'root.item1',
               deepLink: {
                 id: 'item1',
                 title: 'Item 1',
@@ -229,14 +344,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
-          path: ['root', 'item1'],
+          path: 'root.item1',
           deepLink: {
             id: 'item1',
             title: 'Item 1',
@@ -260,12 +373,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          path: ['root'],
+          path: 'root',
           children: [
             {
               id: 'item1',
               title: 'Item 1',
-              path: ['root', 'item1'],
+              path: 'root.item1',
               getIsActive: () => true,
             },
           ],
@@ -280,14 +393,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
-          path: ['root', 'item1'],
+          path: 'root.item1',
           getIsActive: expect.any(Function),
         },
       ],

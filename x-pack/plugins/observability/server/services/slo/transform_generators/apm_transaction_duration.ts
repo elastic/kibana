@@ -11,12 +11,13 @@ import {
   apmTransactionDurationIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
-} from '../../../assets/constants';
+} from '../../../../common/slo/constants';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { APMTransactionDurationIndicator, SLO } from '../../../domain/models';
 import { InvalidTransformError } from '../../../errors';
@@ -137,7 +138,10 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: APMTransactionDurationIndicator) {
+  private buildAggregations(
+    slo: SLO,
+    indicator: APMTransactionDurationIndicator
+  ): Record<string, AggregationsAggregationContainer> {
     // threshold is in ms (milliseconds), but apm data is stored in us (microseconds)
     const truncatedThreshold = Math.trunc(indicator.params.threshold * 1000);
 
@@ -145,9 +149,11 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       _numerator: {
         range: {
           field: 'transaction.duration.histogram',
+          keyed: true,
           ranges: [
             {
               to: truncatedThreshold,
+              key: 'target',
             },
           ],
         },
@@ -155,7 +161,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
       'slo.numerator': {
         bucket_script: {
           buckets_path: {
-            numerator: `_numerator['*-${truncatedThreshold}.0']>_count`,
+            numerator: `_numerator['target']>_count`,
           },
           script: 'params.numerator',
         },

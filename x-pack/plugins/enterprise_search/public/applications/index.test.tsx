@@ -10,10 +10,14 @@ import React from 'react';
 import { act } from '@testing-library/react';
 import { getContext } from 'kea';
 
+import { Observable } from 'rxjs';
+
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
@@ -53,7 +57,13 @@ describe('renderApp', () => {
   });
 
   const mockContainer = kibanaDeps.params.element;
-  const MockApp = () => <div className="hello-world">Hello world!</div>;
+  const MockApp = () => (
+    <div className="hello-world">
+      {i18n.translate('xpack.enterpriseSearch.mockApp.div.helloWorldLabel', {
+        defaultMessage: 'Hello world',
+      })}
+    </div>
+  );
 
   it('mounts and unmounts UI', () => {
     const unmount = renderApp(MockApp, kibanaDeps, pluginData);
@@ -102,12 +112,24 @@ describe('renderApp', () => {
 
   describe('renderHeaderActions', () => {
     const mockHeaderEl = document.createElement('header');
-    const MockHeaderActions = () => <button className="hello-world">Hello World</button>;
+    const MockHeaderActions = () => (
+      <button className="hello-world">
+        <FormattedMessage
+          id="xpack.enterpriseSearch.mockHeaderActions.button.helloWorldLabel"
+          defaultMessage="Hello World"
+        />
+      </button>
+    );
 
     it('mounts and unmounts any HeaderActions component', () => {
       const store = getContext().store;
 
-      const unmountHeader = renderHeaderActions(MockHeaderActions, store, mockHeaderEl);
+      const unmountHeader = renderHeaderActions(
+        MockHeaderActions,
+        store,
+        { theme$: new Observable() } as any,
+        mockHeaderEl
+      );
       expect(mockHeaderEl.querySelector('.hello-world')).not.toBeNull();
 
       unmountHeader();

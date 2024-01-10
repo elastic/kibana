@@ -19,7 +19,7 @@ import {
 import moment from 'moment';
 import React, { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { EuiCallOut } from '@elastic/eui';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';

@@ -17,7 +17,7 @@ describe('TableSource', () => {
     });
   });
 
-  describe('getPropertiesMap', () => {
+  describe('getJoinMetrics', () => {
     it('should roll up results', async () => {
       const tableSource = new TableSource({
         term: 'iso',
@@ -53,18 +53,17 @@ describe('TableSource', () => {
         ],
       });
 
-      const propertiesMap = await tableSource.getPropertiesMap(
+      const { joinMetrics } = await tableSource.getJoinMetrics(
         {} as unknown as VectorSourceRequestMeta,
-        'a',
-        'b',
+        'layer1',
         () => {}
       );
 
-      expect(propertiesMap.size).toEqual(2);
-      expect(propertiesMap.get('US')).toEqual({
+      expect(joinMetrics.size).toEqual(2);
+      expect(joinMetrics.get('US')).toEqual({
         population: 100,
       });
-      expect(propertiesMap.get('CN')).toEqual({
+      expect(joinMetrics.get('CN')).toEqual({
         population: 400,
       });
     });

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 

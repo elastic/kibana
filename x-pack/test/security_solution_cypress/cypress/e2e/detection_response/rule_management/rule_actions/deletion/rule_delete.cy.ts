@@ -12,15 +12,16 @@ import { RULE_SWITCH } from '../../../../../screens/alerts_detection_rules';
 
 import {
   deleteFirstRule,
+  disableAutoRefresh,
   getRulesManagementTableRows,
   selectRulesByName,
 } from '../../../../../tasks/alerts_detection_rules';
 import { deleteSelectedRules } from '../../../../../tasks/rules_bulk_actions';
 import { createRule, findAllRules } from '../../../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
 
-describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+describe('Rule deletion', { tags: ['@ess', '@serverless'] }, () => {
   const testRules = [
     getNewRule({ rule_id: 'rule1', name: 'Rule 1', enabled: false }),
     getNewRule({ rule_id: 'rule2', name: 'Rule 2', enabled: false }),
@@ -33,6 +34,7 @@ describe('Rule deletion', { tags: ['@ess', '@serverless', '@skipInServerless'] }
     createRule(testRules[2]);
     login();
     visitRulesManagementTable();
+    disableAutoRefresh();
   });
 
   it('User can delete an individual rule', () => {

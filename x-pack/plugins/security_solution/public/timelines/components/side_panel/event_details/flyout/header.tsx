@@ -8,6 +8,7 @@
 import { EuiFlyoutHeader } from '@elastic/eui';
 import React from 'react';
 
+import type { GetFieldsData } from '../../../../../common/hooks/use_get_fields_data';
 import { ExpandableEventTitle } from '../expandable_event';
 import { BackToAlertDetailsLink } from './back_to_alert_details_link';
 
@@ -22,6 +23,9 @@ interface FlyoutHeaderComponentProps {
   ruleName: string;
   showAlertDetails: () => void;
   timestamp: string;
+  scopeId: string;
+  refetchFlyoutData: () => Promise<void>;
+  getFieldsData: GetFieldsData;
 }
 
 const FlyoutHeaderContentComponent = ({
@@ -35,6 +39,9 @@ const FlyoutHeaderContentComponent = ({
   ruleName,
   showAlertDetails,
   timestamp,
+  scopeId,
+  refetchFlyoutData,
+  getFieldsData,
 }: FlyoutHeaderComponentProps) => {
   return (
     <>
@@ -49,6 +56,9 @@ const FlyoutHeaderContentComponent = ({
           promptContextId={promptContextId}
           ruleName={ruleName}
           timestamp={timestamp}
+          scopeId={scopeId}
+          refetchFlyoutData={refetchFlyoutData}
+          getFieldsData={getFieldsData}
         />
       )}
     </>
@@ -67,6 +77,9 @@ const FlyoutHeaderComponent = ({
   ruleName,
   showAlertDetails,
   timestamp,
+  scopeId,
+  refetchFlyoutData,
+  getFieldsData,
 }: FlyoutHeaderComponentProps) => {
   return (
     <EuiFlyoutHeader hasBorder={isHostIsolationPanelOpen}>
@@ -81,6 +94,9 @@ const FlyoutHeaderComponent = ({
         ruleName={ruleName}
         showAlertDetails={showAlertDetails}
         timestamp={timestamp}
+        scopeId={scopeId}
+        refetchFlyoutData={refetchFlyoutData}
+        getFieldsData={getFieldsData}
       />
     </EuiFlyoutHeader>
   );

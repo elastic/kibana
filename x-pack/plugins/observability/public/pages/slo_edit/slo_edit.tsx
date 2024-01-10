@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -20,6 +21,8 @@ import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_dia
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { SloEditForm } from './components/slo_edit_form';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+
+export const InspectSLOPortalNode = createHtmlPortalNode();
 
 export function SloEditPage() {
   const {
@@ -33,7 +36,7 @@ export function SloEditPage() {
   const { sloId } = useParams<{ sloId: string | undefined }>();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
-  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
+  const { data: slo } = useFetchSloDetails({ sloId });
 
   useBreadcrumbs([
     {
@@ -41,6 +44,7 @@ export function SloEditPage() {
       text: i18n.translate('xpack.observability.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
+      deepLinkId: 'observability-overview:slos',
     },
     ...(!!slo
       ? [
@@ -65,10 +69,6 @@ export function SloEditPage() {
     navigateToUrl(basePath.prepend(paths.observability.slos));
   }
 
-  if (sloId && isInitialLoading) {
-    return null;
-  }
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -79,7 +79,7 @@ export function SloEditPage() {
           : i18n.translate('xpack.observability.sloCreatePageTitle', {
               defaultMessage: 'Create new SLO',
             }),
-        rightSideItems: [<FeedbackButton />],
+        rightSideItems: [<FeedbackButton />, <OutPortal node={InspectSLOPortalNode} />],
         bottomBorder: false,
       }}
       data-test-subj="slosEditPage"

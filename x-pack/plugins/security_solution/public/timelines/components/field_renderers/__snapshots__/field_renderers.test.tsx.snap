@@ -2,15 +2,11 @@
 
 exports[`Field Renderers #autonomousSystemRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 .euiPopover__anchor {
-  width: 100%;
-}
-
-.c1 > span.euiToolTipAnchor {
+  .c0 > span.euiToolTipAnchor {
   display: block;
 }
 
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
+.c0 > span.euiToolTipAnchor.eui-textTruncate {
   display: inline-block;
 }
 
@@ -24,29 +20,25 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
         class=""
       >
         <div
-          class="euiPopover c0 emotion-euiPopover"
+          class="euiPopover emotion-euiPopover-inline-block"
         >
           <div
-            class="euiPopover__anchor css-16vtueo-render"
+            data-test-subj="withHoverActionsButton"
           >
             <div
-              data-test-subj="withHoverActionsButton"
+              data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_organization_name"
+              tabindex="-1"
             >
-              <div
-                data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_organization_name"
-                tabindex="-1"
+              <span
+                class="c0"
+                data-test-subj="render-content-source.as.organization.name"
               >
                 <span
-                  class="c1"
-                  data-test-subj="render-content-source.as.organization.name"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                  >
-                    Test Org
-                  </span>
+                  Test Org
                 </span>
-              </div>
+              </span>
             </div>
           </div>
         </div>
@@ -64,29 +56,25 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
         class=""
       >
         <div
-          class="euiPopover c0 emotion-euiPopover"
+          class="euiPopover emotion-euiPopover-inline-block"
         >
           <div
-            class="euiPopover__anchor css-16vtueo-render"
+            data-test-subj="withHoverActionsButton"
           >
             <div
-              data-test-subj="withHoverActionsButton"
+              data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_number"
+              tabindex="-1"
             >
-              <div
-                data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_number"
-                tabindex="-1"
+              <span
+                class="c0"
+                data-test-subj="render-content-source.as.number"
               >
                 <span
-                  class="c1"
-                  data-test-subj="render-content-source.as.number"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                  >
-                    12345
-                  </span>
+                  12345
                 </span>
-              </div>
+              </span>
             </div>
           </div>
         </div>
@@ -108,15 +96,11 @@ exports[`Field Renderers #dateRenderer it renders correctly against snapshot 1`]
 
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 .euiPopover__anchor {
-  width: 100%;
-}
-
-.c1 > span.euiToolTipAnchor {
+  .c0 > span.euiToolTipAnchor {
   display: block;
 }
 
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
+.c0 > span.euiToolTipAnchor.eui-textTruncate {
   display: inline-block;
 }
 
@@ -124,36 +108,32 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
     class=""
   >
     <div
-      class="euiPopover c0 emotion-euiPopover"
+      class="euiPopover emotion-euiPopover-inline-block"
     >
       <div
-        class="euiPopover__anchor css-16vtueo-render"
+        data-test-subj="withHoverActionsButton"
       >
         <div
-          data-test-subj="withHoverActionsButton"
+          data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
+          tabindex="-1"
         >
-          <div
-            data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
-            tabindex="-1"
+          <span
+            class="c0"
+            data-test-subj="render-content-host.name"
           >
             <span
-              class="c1"
-              data-test-subj="render-content-host.name"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              <a
+                class="euiLink emotion-euiLink-primary"
+                data-test-subj="host-details-button"
+                href="securitySolutionUI/hosts/name/raspberrypi"
+                rel="noreferrer"
               >
-                <a
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/name/raspberrypi"
-                  rel="noreferrer"
-                >
-                  raspberrypi
-                </a>
-              </span>
+                raspberrypi
+              </a>
             </span>
-          </div>
+          </span>
         </div>
       </div>
     </div>
@@ -163,15 +143,11 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
 
 exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 .euiPopover__anchor {
-  width: 100%;
-}
-
-.c1 > span.euiToolTipAnchor {
+  .c0 > span.euiToolTipAnchor {
   display: block;
 }
 
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
+.c0 > span.euiToolTipAnchor.eui-textTruncate {
   display: inline-block;
 }
 
@@ -179,36 +155,32 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
     class=""
   >
     <div
-      class="euiPopover c0 emotion-euiPopover"
+      class="euiPopover emotion-euiPopover-inline-block"
     >
       <div
-        class="euiPopover__anchor css-16vtueo-render"
+        data-test-subj="withHoverActionsButton"
       >
         <div
-          data-test-subj="withHoverActionsButton"
+          data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
+          tabindex="-1"
         >
-          <div
-            data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
-            tabindex="-1"
+          <span
+            class="c0"
+            data-test-subj="render-content-host.name"
           >
             <span
-              class="c1"
-              data-test-subj="render-content-host.name"
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              <a
+                class="euiLink emotion-euiLink-primary"
+                data-test-subj="host-details-button"
+                href="securitySolutionUI/hosts/name/raspberrypi"
+                rel="noreferrer"
               >
-                <a
-                  class="euiLink emotion-euiLink-primary"
-                  data-test-subj="host-details-button"
-                  href="securitySolutionUI/hosts/name/raspberrypi"
-                  rel="noreferrer"
-                >
-                  raspberrypi
-                </a>
-              </span>
+                raspberrypi
+              </a>
             </span>
-          </div>
+          </span>
         </div>
       </div>
     </div>
@@ -218,15 +190,11 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
 
 exports[`Field Renderers #locationRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 .euiPopover__anchor {
-  width: 100%;
-}
-
-.c1 > span.euiToolTipAnchor {
+  .c0 > span.euiToolTipAnchor {
   display: block;
 }
 
-.c1 > span.euiToolTipAnchor.eui-textTruncate {
+.c0 > span.euiToolTipAnchor.eui-textTruncate {
   display: inline-block;
 }
 
@@ -240,29 +208,25 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
         class=""
       >
         <div
-          class="euiPopover c0 emotion-euiPopover"
+          class="euiPopover emotion-euiPopover-inline-block"
         >
           <div
-            class="euiPopover__anchor css-16vtueo-render"
+            data-test-subj="withHoverActionsButton"
           >
             <div
-              data-test-subj="withHoverActionsButton"
+              data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_city_name"
+              tabindex="-1"
             >
-              <div
-                data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_city_name"
-                tabindex="-1"
+              <span
+                class="c0"
+                data-test-subj="render-content-source.geo.city_name"
               >
                 <span
-                  class="c1"
-                  data-test-subj="render-content-source.geo.city_name"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                  >
-                    New York
-                  </span>
+                  New York
                 </span>
-              </div>
+              </span>
             </div>
           </div>
         </div>
@@ -276,29 +240,25 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
         class=""
       >
         <div
-          class="euiPopover c0 emotion-euiPopover"
+          class="euiPopover emotion-euiPopover-inline-block"
         >
           <div
-            class="euiPopover__anchor css-16vtueo-render"
+            data-test-subj="withHoverActionsButton"
           >
             <div
-              data-test-subj="withHoverActionsButton"
+              data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_region_name"
+              tabindex="-1"
             >
-              <div
-                data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_region_name"
-                tabindex="-1"
+              <span
+                class="c0"
+                data-test-subj="render-content-source.geo.region_name"
               >
                 <span
-                  class="c1"
-                  data-test-subj="render-content-source.geo.region_name"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                 >
-                  <span
-                    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                  >
-                    New York
-                  </span>
+                  New York
                 </span>
-              </div>
+              </span>
             </div>
           </div>
         </div>
@@ -324,13 +284,13 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
     >
       iana.org
       <span
-        class="emotion-euiLink__externalIcon"
+        class="emotion-EuiExternalLinkIcon"
         data-euiicon-type="popout"
       >
         External link
       </span>
       <span
-        class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+        class="emotion-euiScreenReaderOnly"
       >
         (opens in a new tab or window)
       </span>

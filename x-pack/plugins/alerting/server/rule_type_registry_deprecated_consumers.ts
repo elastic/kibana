@@ -9,6 +9,7 @@ import { ALERTS_FEATURE_ID } from './types';
 
 export const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
   'example.always-firing': [ALERTS_FEATURE_ID],
+  'example.people-in-space': [ALERTS_FEATURE_ID],
   transform_health: [ALERTS_FEATURE_ID],
   '.index-threshold': [ALERTS_FEATURE_ID],
   '.geo-containment': [ALERTS_FEATURE_ID],
@@ -30,7 +31,6 @@ export const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
   'siem.newTermsRule': [ALERTS_FEATURE_ID],
   'siem.notifications': [ALERTS_FEATURE_ID],
   'slo.rules.burnRate': [ALERTS_FEATURE_ID],
-  'metrics.alert.anomaly': [ALERTS_FEATURE_ID],
   'logs.alert.document.count': [ALERTS_FEATURE_ID],
   'metrics.alert.inventory.threshold': [ALERTS_FEATURE_ID],
   'metrics.alert.threshold': [ALERTS_FEATURE_ID],

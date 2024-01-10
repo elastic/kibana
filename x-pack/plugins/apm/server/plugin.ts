@@ -11,7 +11,6 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-  SavedObjectsClient,
 } from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
@@ -50,7 +49,7 @@ import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source
 import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
 import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
-import { APM_STATIC_DATA_VIEW_ID } from '../common/data_view_constants';
+import { registerAssistantFunctions } from './assistant_functions';
 
 export class APMPlugin
   implements
@@ -123,26 +122,6 @@ export class APMPlugin
       ],
     });
 
-    // ensure that the APM data view is globally available
-    getCoreStart()
-      .then(async (coreStart) => {
-        const soClient = new SavedObjectsClient(
-          coreStart.savedObjects.createInternalRepository()
-        );
-
-        await soClient.updateObjectsSpaces(
-          [{ id: APM_STATIC_DATA_VIEW_ID, type: 'index-pattern' }],
-          ['*'],
-          []
-        );
-      })
-      .catch((e) => {
-        this.logger?.error(
-          'Failed to make APM data view available globally',
-          e
-        );
-      });
-
     const resourcePlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
@@ -189,6 +168,8 @@ export class APMPlugin
         APM_SERVER_FEATURE_ID
       );
 
+    const kibanaVersion = this.initContext.env.packageInfo.version;
+
     registerRoutes({
       core: {
         setup: core,
@@ -201,7 +182,7 @@ export class APMPlugin
       ruleDataClient,
       plugins: resourcePlugins,
       telemetryUsageCounter,
-      kibanaVersion: this.initContext.env.packageInfo.version,
+      kibanaVersion,
     });
 
     const { getApmIndices } = plugins.apmDataAccess;
@@ -251,6 +232,18 @@ export class APMPlugin
       this.logger?.error('Failed to schedule APM source map migration');
       this.logger?.error(e);
     });
+
+    plugins.observabilityAIAssistant.service.register(
+      registerAssistantFunctions({
+        config: this.currentConfig!,
+        coreSetup: core,
+        featureFlags: this.currentConfig!.featureFlags,
+        kibanaVersion,
+        logger: this.logger.get('assistant'),
+        plugins: resourcePlugins,
+        ruleDataClient,
+      })
+    );
 
     return { config$ };
   }

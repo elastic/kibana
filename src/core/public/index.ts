@@ -68,6 +68,16 @@ export type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
+export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginContractResolver,
+  PluginContractMap,
+  PluginContractResolverResponse,
+  PluginContractResolverResponseItem,
+  FoundPluginContractResolverResponseItem,
+  NotFoundPluginContractResolverResponseItem,
+} from '@kbn/core-plugins-contracts-browser';
 export type { PluginOpaqueId } from '@kbn/core-base-common';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
@@ -177,6 +187,7 @@ export type {
   HttpResponse,
   HttpHandler,
   IBasePath,
+  IStaticAssets,
   IAnonymousPaths,
   IExternalUrl,
   IHttpInterceptController,

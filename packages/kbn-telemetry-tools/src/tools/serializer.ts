@@ -102,7 +102,7 @@ export function getConstraints(node: ts.Node, program: ts.Program): any {
     return node.text;
   }
 
-  if (ts.isImportSpecifier(node)) {
+  if (ts.isImportSpecifier(node) || ts.isExportSpecifier(node)) {
     const source = node.getSourceFile();
     const importedModuleName = getModuleSpecifier(node);
 
@@ -178,7 +178,10 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
       const constraints = getConstraints(constraint, program);
       const constraintsArray = Array.isArray(constraints) ? constraints : [constraints];
       if (typeof constraintsArray[0] === 'string') {
-        return constraintsArray.reduce((acc, c) => ({ ...acc, [c]: descriptor }), {});
+        return constraintsArray.reduce((acc, c) => {
+          (acc as Record<string, unknown>)[c] = descriptor;
+          return acc;
+        }, {});
       }
     }
     return { '@@INDEX@@': descriptor };

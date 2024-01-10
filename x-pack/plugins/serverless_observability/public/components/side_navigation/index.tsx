@@ -25,16 +25,27 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Observability',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
-      accordionProps: {
-        arrowProps: { css: { display: 'none' } },
-      },
+      isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
         {
-          title: i18n.translate('xpack.serverlessObservability.nav.logExplorer', {
-            defaultMessage: 'Log Explorer',
+          title: i18n.translate('xpack.serverlessObservability.nav.discover', {
+            defaultMessage: 'Discover',
           }),
           link: 'observability-log-explorer',
+          // avoid duplicate "Discover" breadcrumbs
+          breadcrumbStatus: 'hidden',
+          renderAs: 'item',
+          children: [
+            {
+              link: 'discover',
+              children: [
+                {
+                  link: 'observability-log-explorer',
+                },
+              ],
+            },
+          ],
         },
         {
           title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
@@ -46,7 +57,32 @@ const navigationTree: NavigationTreeDefinition = {
           },
         },
         {
+          title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
+            defaultMessage: 'Visualizations',
+          }),
+          link: 'visualize',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return (
+              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
+              pathNameSerialized.startsWith(prepend('/app/lens')) ||
+              pathNameSerialized.startsWith(prepend('/app/maps'))
+            );
+          },
+        },
+        {
           link: 'observability-overview:alerts',
+        },
+        {
+          link: 'observability-overview:cases',
+          renderAs: 'item',
+          children: [
+            {
+              link: 'observability-overview:cases_configure',
+            },
+            {
+              link: 'observability-overview:cases_create',
+            },
+          ],
         },
         {
           link: 'observability-overview:slos',
@@ -54,15 +90,26 @@ const navigationTree: NavigationTreeDefinition = {
         {
           id: 'aiops',
           title: 'AIOps',
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
+          renderAs: 'accordion',
+          spaceBefore: null,
           children: [
             {
               title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
                 defaultMessage: 'Anomaly detection',
               }),
               link: 'ml:anomalyDetection',
+              renderAs: 'item',
+              children: [
+                {
+                  link: 'ml:singleMetricViewer',
+                },
+                {
+                  link: 'ml:anomalyExplorer',
+                },
+                {
+                  link: 'ml:settings',
+                },
+              ],
             },
             {
               title: i18n.translate('xpack.serverlessObservability.ml.logRateAnalysis', {
@@ -91,17 +138,11 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          id: 'groups-spacer-1',
-          isGroupTitle: true,
-        },
-        {
           id: 'apm',
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
-          accordionProps: {
-            arrowProps: { css: { display: 'none' } },
-          },
+          renderAs: 'accordion',
           children: [
             {
               link: 'apm:services',
@@ -125,41 +166,40 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          id: 'groups-spacer-2',
-          isGroupTitle: true,
-        },
-        {
-          link: 'observability-overview:cases',
-        },
-        {
-          title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
-            defaultMessage: 'Visualizations',
+          id: 'metrics',
+          title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
+            defaultMessage: 'Infrastructure',
           }),
-          link: 'visualize',
-          getIsActive: ({ pathNameSerialized, prepend }) => {
-            return (
-              pathNameSerialized.startsWith(prepend('/app/visualize')) ||
-              pathNameSerialized.startsWith(prepend('/app/lens')) ||
-              pathNameSerialized.startsWith(prepend('/app/maps'))
-            );
-          },
-        },
-        {
-          id: 'groups-spacer-3',
-          isGroupTitle: true,
-        },
-        {
-          title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-            defaultMessage: 'Add data',
-          }),
-          link: 'observabilityOnboarding',
+          renderAs: 'accordion',
+          children: [
+            {
+              link: 'metrics:inventory',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+              },
+            },
+            {
+              link: 'metrics:hosts',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+              },
+            },
+          ],
         },
       ],
     },
   ],
   footer: [
     {
-      type: 'navGroup',
+      type: 'navItem',
+      title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+        defaultMessage: 'Get started',
+      }),
+      link: 'observabilityOnboarding',
+      icon: 'launch',
+    },
+    {
+      type: 'navItem',
       id: 'devTools',
       title: i18n.translate('xpack.serverlessObservability.nav.devTools', {
         defaultMessage: 'Developer tools',

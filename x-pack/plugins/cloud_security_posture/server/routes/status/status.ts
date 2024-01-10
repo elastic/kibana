@@ -29,6 +29,9 @@ import {
   POSTURE_TYPES,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
+  POSTURE_TYPE_ALL,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
+  LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../common/constants';
 import type {
   CspApiRequestHandlerContext,
@@ -41,7 +44,7 @@ import type {
   CspStatusCode,
   IndexStatus,
   PostureTypes,
-} from '../../../common/types';
+} from '../../../common/types_old';
 import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,
@@ -168,20 +171,53 @@ export const getCspStatus = async ({
     installedPackagePoliciesVulnMgmt,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
-    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger),
-    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+      postureType: POSTURE_TYPE_ALL,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, {
+      postureType: POSTURE_TYPE_ALL,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, {
+      postureType: POSTURE_TYPE_ALL,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'cspm'),
-    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'cspm'),
-    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'cspm'),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+      postureType: CSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, {
+      postureType: CSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, {
+      postureType: CSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
 
-    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, 'kspm'),
-    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, 'kspm'),
-    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, 'kspm'),
+    checkIndexStatus(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger, {
+      postureType: KSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, FINDINGS_INDEX_PATTERN, logger, {
+      postureType: KSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger, {
+      postureType: KSPM_POLICY_TEMPLATE,
+      retentionTime: LATEST_FINDINGS_RETENTION_POLICY,
+    }),
 
-    checkIndexStatus(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger),
-    checkIndexStatus(esClient, VULNERABILITIES_INDEX_PATTERN, logger, VULN_MGMT_POLICY_TEMPLATE),
+    checkIndexStatus(esClient, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger, {
+      postureType: VULN_MGMT_POLICY_TEMPLATE,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
+    checkIndexStatus(esClient, VULNERABILITIES_INDEX_PATTERN, logger, {
+      postureType: VULN_MGMT_POLICY_TEMPLATE,
+      retentionTime: LATEST_VULNERABILITIES_RETENTION_POLICY,
+    }),
 
     packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
     packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
@@ -295,6 +331,7 @@ export const getCspStatus = async ({
     {
       latest: vulnerabilitiesLatestIndexStatus,
       stream: vulnerabilitiesIndexStatus,
+      score: scoreIndexStatus,
     },
     installation,
     healthyAgentsVulMgmt,

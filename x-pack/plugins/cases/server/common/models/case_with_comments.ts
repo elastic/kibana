@@ -129,7 +129,7 @@ export class CaseCommentModel {
           },
           options,
         }),
-        this.updateCaseUserAndDateSkipRefresh(updatedAt),
+        this.partialUpdateCaseUserAndDateSkipRefresh(updatedAt),
       ]);
 
       await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
@@ -144,11 +144,11 @@ export class CaseCommentModel {
     }
   }
 
-  private async updateCaseUserAndDateSkipRefresh(date: string) {
-    return this.updateCaseUserAndDate(date, false);
+  private async partialUpdateCaseUserAndDateSkipRefresh(date: string) {
+    return this.partialUpdateCaseUserAndDate(date, false);
   }
 
-  private async updateCaseUserAndDate(
+  private async partialUpdateCaseUserAndDate(
     date: string,
     refresh: RefreshSetting
   ): Promise<CaseCommentModel> {
@@ -160,7 +160,6 @@ export class CaseCommentModel {
           updated_at: date,
           updated_by: { ...this.params.user },
         },
-        version: this.caseInfo.version,
         refresh,
       });
 
@@ -193,13 +192,15 @@ export class CaseCommentModel {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
     await this.params.services.userActionService.creator.createUserAction({
-      type: UserActionTypes.comment,
-      action: UserActionActions.update,
-      caseId: this.caseInfo.id,
-      attachmentId: comment.id,
-      payload: { attachment: queryRestAttributes },
-      user: this.params.user,
-      owner,
+      userAction: {
+        type: UserActionTypes.comment,
+        action: UserActionActions.update,
+        caseId: this.caseInfo.id,
+        attachmentId: comment.id,
+        payload: { attachment: queryRestAttributes },
+        user: this.params.user,
+        owner,
+      },
     });
   }
 
@@ -240,7 +241,7 @@ export class CaseCommentModel {
           id,
           refresh: false,
         }),
-        this.updateCaseUserAndDateSkipRefresh(createdDate),
+        this.partialUpdateCaseUserAndDateSkipRefresh(createdDate),
       ]);
 
       await Promise.all([
@@ -403,15 +404,17 @@ export class CaseCommentModel {
     req: AttachmentRequest
   ) {
     await this.params.services.userActionService.creator.createUserAction({
-      type: UserActionTypes.comment,
-      action: UserActionActions.create,
-      caseId: this.caseInfo.id,
-      attachmentId: comment.id,
-      payload: {
-        attachment: req,
+      userAction: {
+        type: UserActionTypes.comment,
+        action: UserActionActions.create,
+        caseId: this.caseInfo.id,
+        attachmentId: comment.id,
+        payload: {
+          attachment: req,
+        },
+        user: this.params.user,
+        owner: comment.attributes.owner,
       },
-      user: this.params.user,
-      owner: comment.attributes.owner,
     });
   }
 
@@ -498,7 +501,7 @@ export class CaseCommentModel {
           }),
           refresh: false,
         }),
-        this.updateCaseUserAndDateSkipRefresh(new Date().toISOString()),
+        this.partialUpdateCaseUserAndDateSkipRefresh(new Date().toISOString()),
       ]);
 
       const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(

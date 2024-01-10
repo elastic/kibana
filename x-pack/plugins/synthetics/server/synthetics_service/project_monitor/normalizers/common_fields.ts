@@ -14,7 +14,7 @@ import {
   BrowserFields,
   ConfigKey,
   CommonFields,
-  DataStream,
+  MonitorTypeEnum,
   Locations,
   ProjectMonitor,
   ScheduleUnit,
@@ -298,7 +298,7 @@ export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = ''
   }, {});
 
 export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) => {
-  const defaultFields = DEFAULT_FIELDS[monitor.type as DataStream];
+  const defaultFields = DEFAULT_FIELDS[monitor.type as MonitorTypeEnum];
   const supportedKeys = Object.keys(defaultFields);
   const flattenedConfig = flattenAndFormatObject(monitor, '', supportedKeys);
   const {
@@ -306,6 +306,7 @@ export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) 
     privateLocations: _privateLocations,
     content: _content,
     id: _id,
+    retestOnFailure: _retestOnFailure,
     ...yamlConfig
   } = flattenedConfig;
   const unsupportedKeys = Object.keys(yamlConfig).filter((key) => !supportedKeys.includes(key));

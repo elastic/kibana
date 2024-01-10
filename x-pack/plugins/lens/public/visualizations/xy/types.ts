@@ -119,6 +119,13 @@ export interface XYByValueAnnotationLayerConfig {
   annotations: EventAnnotationConfig[];
   indexPatternId: string;
   ignoreGlobalFilters: boolean;
+  // populated only when the annotation has been forked from the
+  // version saved in the library (persisted as XYPersistedLinkedByValueAnnotationLayerConfig)
+  cachedMetadata?: {
+    title: string;
+    description: string;
+    tags: string[];
+  };
 }
 
 export type XYPersistedByValueAnnotationLayerConfig = Omit<
@@ -208,6 +215,7 @@ export interface XYState {
   labelsOrientation?: LabelsOrientationConfig;
   curveType?: XYCurveType;
   fillOpacity?: number;
+  minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
   valuesInLegend?: boolean;

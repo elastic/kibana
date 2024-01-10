@@ -22,13 +22,17 @@ import {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
-import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
+import {
+  RulesSettingsClient,
+  RulesSettingsFlappingClient,
+  RulesSettingsQueryDelayClient,
+} from './rules_settings_client';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
@@ -135,6 +139,7 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
+  getTimeRange: (timeWindow?: string) => { dateStart: string; dateEnd: string };
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -174,6 +179,8 @@ export interface SummarizedAlertsChunk {
   data: AlertHit[];
 }
 
+export type ScopedQueryAlerts = Record<string, string[]>;
+
 export interface SummarizedAlerts {
   new: SummarizedAlertsChunk;
   ongoing: SummarizedAlertsChunk;
@@ -201,6 +208,12 @@ interface ComponentTemplateSpec {
 export type FormatAlert<AlertData extends RuleAlertData> = (
   alert: Partial<AlertData>
 ) => Partial<AlertData>;
+
+export const DEFAULT_AAD_CONFIG: IRuleTypeAlerts<DefaultAlert> = {
+  context: `default`,
+  mappings: { fieldMap: {} },
+  shouldWrite: true,
+};
 
 export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**
@@ -372,6 +385,7 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
+export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
 
 export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
 
@@ -436,6 +450,9 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   };
 }
 
+/**
+ * @deprecated in favor of Rule
+ */
 export interface RawRule extends SavedObjectAttributes {
   enabled: boolean;
   name: string;

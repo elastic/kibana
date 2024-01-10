@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { monaco } from '@kbn/monaco';
 
@@ -34,7 +34,6 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
   const [height, setHeight] = useState(MIN_HEIGHT);
-
   useDebounce(
     () => {
       onChange(editorValue);

@@ -13,7 +13,8 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { CodeEditorProps, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorProps } from '@kbn/code-editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -75,6 +76,18 @@ const rowsSource: EsHitRecord[] = [
   },
 ];
 
+const rowsSourceWithEmptyValues: EsHitRecord[] = [
+  {
+    _id: '1',
+    _index: 'test',
+    _score: 1,
+    _source: { bytes: 100, extension: null },
+    highlight: {
+      extension: ['@kibana-highlighted-field.gz@/kibana-highlighted-field'],
+    },
+  },
+];
+
 const rowsFields: EsHitRecord[] = [
   {
     _id: '1',
@@ -105,15 +118,15 @@ const build = (hit: EsHitRecord) => buildDataTableRecord(hit, dataViewMock);
 
 describe('Unified data table cell rendering', function () {
   it('renders bytes column correctly', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsSource.map(build),
-      false,
-      () => false,
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsSource.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: () => false,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -131,15 +144,15 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders bytes column correctly using _source when details is true', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsSource.map(build),
-      false,
-      () => false,
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsSource.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: () => false,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -158,15 +171,15 @@ describe('Unified data table cell rendering', function () {
 
   it('renders bytes column correctly using fields when details is true', () => {
     const closePopoverMockFn = jest.fn();
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFields.map(build),
-      false,
-      () => false,
-      closePopoverMockFn,
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFields.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: () => false,
+      closePopover: closePopoverMockFn,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = mountWithIntl(
       <DataTableCellValue
         rowIndex={0}
@@ -186,15 +199,15 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders _source column correctly', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsSource.map(build),
-      false,
-      (fieldName) => ['extension', 'bytes'].includes(fieldName),
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsSource.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -269,15 +282,15 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders _source column correctly when isDetails is set to true', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsSource.map(build),
-      false,
-      () => false,
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsSource.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: () => false,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -344,16 +357,87 @@ describe('Unified data table cell rendering', function () {
     `);
   });
 
-  it('renders fields-based column correctly', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFields.map(build),
-      true,
-      (fieldName) => ['extension', 'bytes'].includes(fieldName),
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
+  it('renders _source column correctly if on text based mode and have nulls', () => {
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsSourceWithEmptyValues.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      isPlainRecord: true,
+    });
+    const component = shallow(
+      <DataTableCellValue
+        rowIndex={0}
+        colIndex={0}
+        columnId="_source"
+        isDetails={false}
+        isExpanded={false}
+        isExpandable={true}
+        setCellProps={jest.fn()}
+      />
     );
+    expect(component).toMatchInlineSnapshot(`
+      <EuiDescriptionList
+        className="unifiedDataTable__descriptionList unifiedDataTable__cellValue"
+        compressed={true}
+        type="inline"
+      >
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          bytesDisplayName
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": 100,
+            }
+          }
+        />
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          _index
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "test",
+            }
+          }
+        />
+        <EuiDescriptionListTitle
+          className="unifiedDataTable__descriptionListTitle"
+        >
+          _score
+        </EuiDescriptionListTitle>
+        <EuiDescriptionListDescription
+          className="unifiedDataTable__descriptionListDescription"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": 1,
+            }
+          }
+        />
+      </EuiDescriptionList>
+    `);
+  });
+
+  it('renders fields-based column correctly', () => {
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFields.map(build),
+      useNewFieldsApi: true,
+      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -432,16 +516,16 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('limits amount of rendered items', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFields.map(build),
-      true,
-      (fieldName) => ['extension', 'bytes'].includes(fieldName),
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFields.map(build),
+      useNewFieldsApi: true,
+      shouldShowFieldHandler: (fieldName) => ['extension', 'bytes'].includes(fieldName),
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       // this is the number of rendered items
-      1
-    );
+      maxEntries: 1,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -477,41 +561,13 @@ describe('Unified data table cell rendering', function () {
         <EuiDescriptionListTitle
           className="unifiedDataTable__descriptionListTitle"
         >
-          bytesDisplayName
+          and 3 more fields
         </EuiDescriptionListTitle>
         <EuiDescriptionListDescription
           className="unifiedDataTable__descriptionListDescription"
           dangerouslySetInnerHTML={
             Object {
-              "__html": Array [
-                100,
-              ],
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _index
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "test",
-            }
-          }
-        />
-        <EuiDescriptionListTitle
-          className="unifiedDataTable__descriptionListTitle"
-        >
-          _score
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription
-          className="unifiedDataTable__descriptionListDescription"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": 1,
+              "__html": "",
             }
           }
         />
@@ -520,15 +576,15 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders fields-based column correctly when isDetails is set to true', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFields.map(build),
-      true,
-      (fieldName) => false,
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFields.map(build),
+      useNewFieldsApi: true,
+      shouldShowFieldHandler: (fieldName) => false,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -601,15 +657,16 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('collect object fields and renders them like _source', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFieldsWithTopLevelObject.map(build),
-      true,
-      (fieldName) => ['object.value', 'extension', 'bytes'].includes(fieldName),
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFieldsWithTopLevelObject.map(build),
+      useNewFieldsApi: true,
+      shouldShowFieldHandler: (fieldName) =>
+        ['object.value', 'extension', 'bytes'].includes(fieldName),
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -646,15 +703,16 @@ describe('Unified data table cell rendering', function () {
 
   it('collect object fields and renders them like _source with fallback for unmapped', () => {
     (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFieldsWithTopLevelObject.map(build),
-      true,
-      (fieldName) => ['extension', 'bytes', 'object.value'].includes(fieldName),
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFieldsWithTopLevelObject.map(build),
+      useNewFieldsApi: true,
+      shouldShowFieldHandler: (fieldName) =>
+        ['extension', 'bytes', 'object.value'].includes(fieldName),
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -691,15 +749,15 @@ describe('Unified data table cell rendering', function () {
 
   it('collect object fields and renders them as json in details', () => {
     const closePopoverMockFn = jest.fn();
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFieldsWithTopLevelObject.map(build),
-      true,
-      () => false,
-      closePopoverMockFn,
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFieldsWithTopLevelObject.map(build),
+      useNewFieldsApi: true,
+      shouldShowFieldHandler: () => false,
+      closePopover: closePopoverMockFn,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -759,15 +817,15 @@ describe('Unified data table cell rendering', function () {
 
   it('renders a functional close button when CodeEditor is rendered', () => {
     const closePopoverMockFn = jest.fn();
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFieldsWithTopLevelObject.map(build),
-      true,
-      () => false,
-      closePopoverMockFn,
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFieldsWithTopLevelObject.map(build),
+      useNewFieldsApi: true,
+      shouldShowFieldHandler: () => false,
+      closePopover: closePopoverMockFn,
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = mountWithIntl(
       <KibanaContextProvider services={mockServices}>
         <DataTableCellValue
@@ -788,15 +846,15 @@ describe('Unified data table cell rendering', function () {
 
   it('does not collect subfields when the the column is unmapped but part of fields response', () => {
     (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFieldsWithTopLevelObject.map(build),
-      true,
-      () => false,
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFieldsWithTopLevelObject.map(build),
+      useNewFieldsApi: true,
+      shouldShowFieldHandler: () => false,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -823,15 +881,15 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders correctly when invalid row is given', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsSource.map(build),
-      false,
-      () => false,
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsSource.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: () => false,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={1}
@@ -849,15 +907,15 @@ describe('Unified data table cell rendering', function () {
   });
 
   it('renders correctly when invalid column is given', () => {
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsSource.map(build),
-      false,
-      () => false,
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsSource.map(build),
+      useNewFieldsApi: false,
+      shouldShowFieldHandler: () => false,
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}
@@ -888,15 +946,15 @@ describe('Unified data table cell rendering', function () {
         },
       },
     ];
-    const DataTableCellValue = getRenderCellValueFn(
-      dataViewMock,
-      rowsFieldsUnmapped.map(build),
-      true,
-      (fieldName) => ['unmapped'].includes(fieldName),
-      jest.fn(),
-      mockServices.fieldFormats as unknown as FieldFormatsStart,
-      100
-    );
+    const DataTableCellValue = getRenderCellValueFn({
+      dataView: dataViewMock,
+      rows: rowsFieldsUnmapped.map(build),
+      useNewFieldsApi: true,
+      shouldShowFieldHandler: (fieldName) => ['unmapped'].includes(fieldName),
+      closePopover: jest.fn(),
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+    });
     const component = shallow(
       <DataTableCellValue
         rowIndex={0}

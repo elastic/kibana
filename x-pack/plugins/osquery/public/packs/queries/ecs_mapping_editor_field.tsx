@@ -47,8 +47,8 @@ import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/utils/converters';
-import ECSSchema from '../../common/schemas/ecs/v8.7.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.7.0.json';
+import ECSSchema from '../../common/schemas/ecs/v8.11.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.10.2.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';

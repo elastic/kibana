@@ -12,12 +12,18 @@ export async function searchStackTraces({
   client,
   filter,
   sampleSize,
+  durationSeconds,
 }: {
   client: ProfilingESClient;
   filter: ProjectTimeQuery;
   sampleSize: number;
+  durationSeconds: number;
 }) {
-  const response = await client.profilingStacktraces({ query: filter, sampleSize });
+  const response = await client.profilingStacktraces({
+    query: filter,
+    sampleSize,
+    durationSeconds,
+  });
 
   return decodeStackTraceResponse(response);
 }
