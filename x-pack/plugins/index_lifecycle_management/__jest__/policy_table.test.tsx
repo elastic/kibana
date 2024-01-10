@@ -203,18 +203,20 @@ describe('policy table', () => {
 
   test('shows deprecated policies with Deprecated badges', () => {
     const rendered = mountWithIntl(component);
-    const visiblePolicies = getPolicies(rendered);
 
-    visiblePolicies.forEach((p) => {
-      const policyRow = findTestSubject(rendered, `policyTableRow-${p.name}`);
-      const deprecatedBadge = findTestSubject(policyRow, 'deprecatedPolicyBadge');
+    // Initially the switch is off so we should not see any deprecated policies
+    let deprecatedPolicies = findTestSubject(rendered, 'deprecatedPolicyBadge');
+    expect(deprecatedPolicies.length).toBe(0);
 
-      if (p.isDeprecatedPolicy) {
-        expect(deprecatedBadge.exists()).toBeTruthy();
-      } else {
-        expect(deprecatedBadge.exists()).toBeFalsy();
-      }
-    });
+    // Enable filtering by deprecated policies
+    const searchInput = rendered.find('.euiFieldSearch').first();
+    (searchInput.instance() as unknown as HTMLInputElement).value = 'is:policy.deprecated';
+    searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+    rendered.update();
+
+    // Now we should see all deprecated policies
+    deprecatedPolicies = findTestSubject(rendered, 'deprecatedPolicyBadge');
+    expect(deprecatedPolicies.length).toBe(10);
   });
 
   test('filters based on content of search input', () => {

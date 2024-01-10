@@ -143,11 +143,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   );
 
   const filteredPolicies = useMemo(() => {
-    let result = policies;
-
-    if (managedPoliciesVisible) {
-      result = result.filter((item) => !item.policy?._meta?.managed);
-    }
+    let result = managedPoliciesVisible
+      ? policies
+      : policies.filter((item) => !item.policy?._meta?.managed);
 
     // When the query includes 'is:policy.deprecated', we want to show deprecated policies.
     // Otherwise hide them all since they wont be supported in the future.
