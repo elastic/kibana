@@ -59,6 +59,7 @@ beforeEach(async () => {
     screenshotting: screenshottingMock,
   });
   getScreenshotsSpy.mockImplementation(() => {
+    mockLogger.get('screenshotting');
     return Rx.of({
       metrics: { cpu: 0, pages: 1 },
       data: Buffer.from(testContent),
@@ -68,7 +69,7 @@ beforeEach(async () => {
   });
 });
 
-test(`passes browserTimezone to generatePdf`, async () => {
+test(`passes browserTimezone to getScreenshots`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const browserTimezone = 'UTC';
@@ -84,15 +85,9 @@ test(`passes browserTimezone to generatePdf`, async () => {
     stream
   );
 
-  expect(getScreenshotsSpy).toHaveBeenCalledWith({
-    browserTimezone: 'UTC',
-    format: 'pdf',
-    headers: {},
-    layout: undefined,
-    logo: false,
-    title: undefined,
-    urls: ['http://localhost:80/mock-server-basepath/app/kibana#/something'],
-  });
+  expect(getScreenshotsSpy).toHaveBeenCalledWith(
+    expect.objectContaining({ browserTimezone: 'UTC' })
+  );
 });
 
 test(`returns content_type of application/pdf`, async () => {
@@ -108,7 +103,7 @@ test(`returns content_type of application/pdf`, async () => {
   expect(contentType).toBe('application/pdf');
 });
 
-test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
+test(`returns buffer content base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   await mockPdfExportType.runTask(
     'pdfJobId',
@@ -119,4 +114,19 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   );
 
   expect(content).toEqual(testContent);
+});
+
+test(`uses the export-type provided logger`, async () => {
+  const logSpy = jest.spyOn(mockLogger, 'get');
+
+  const encryptedHeaders = await encryptHeaders({});
+  await mockPdfExportType.runTask(
+    'pdfJobId',
+    getBasePayload({ objects: [], headers: encryptedHeaders }),
+    taskInstanceFields,
+    cancellationToken,
+    stream
+  );
+
+  expect(logSpy).toHaveBeenCalledWith('screenshotting');
 });

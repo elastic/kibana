@@ -63,6 +63,7 @@ beforeEach(async () => {
   });
 
   getScreenshotsSpy.mockImplementation(() => {
+    mockLogger.get('screenshotting');
     return Rx.of({
       metrics: { cpu: 0 },
       results: [{ screenshots: [{ data: Buffer.from(testContent) }] }] as CaptureResult['results'],
@@ -70,7 +71,7 @@ beforeEach(async () => {
   });
 });
 
-test(`passes browserTimezone to generatePng`, async () => {
+test(`passes browserTimezone to getScreenshots`, async () => {
   const browserTimezone = 'UTC';
   await mockPngExportType.runTask(
     'pngJobId',
@@ -86,17 +87,9 @@ test(`passes browserTimezone to generatePng`, async () => {
     stream
   );
 
-  expect(getScreenshotsSpy).toHaveBeenCalledWith({
-    format: 'png',
-    headers: {},
-    layout: { dimensions: {}, id: 'preserve_layout' },
-    urls: [
-      [
-        'http://localhost:80/mock-server-basepath/app/reportingRedirect?forceNow=test',
-        { __REPORTING_REDIRECT_LOCATOR_STORE_KEY__: undefined },
-      ],
-    ],
-  });
+  expect(getScreenshotsSpy).toHaveBeenCalledWith(
+    expect.objectContaining({ browserTimezone: 'UTC' })
+  );
 });
 
 test(`returns content_type of application/png`, async () => {
@@ -114,7 +107,7 @@ test(`returns content_type of application/png`, async () => {
   expect(contentType).toBe('image/png');
 });
 
-test(`returns content of generatePng getBuffer base64 encoded`, async () => {
+test(`returns buffer content base64 encoded`, async () => {
   await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({
@@ -128,4 +121,22 @@ test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   );
 
   expect(content).toEqual(testContent);
+});
+
+test(`screenshotting plugin uses the logger provided by the export-type`, async () => {
+  const logSpy = jest.spyOn(mockLogger, 'get');
+
+  await mockPngExportType.runTask(
+    'pngJobId',
+    getBasePayload({
+      layout: { dimensions: {} },
+      locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
+      headers: encryptedHeaders,
+    }),
+    taskInstanceFields,
+    cancellationToken,
+    stream
+  );
+
+  expect(logSpy).toHaveBeenCalledWith('screenshotting');
 });

@@ -107,13 +107,9 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
-        const options = {
-          headers,
-          browserTimezone: payload.browserTimezone,
-          layout: { ...payload.layout, id: 'preserve_layout' as const },
-        };
 
-        if (!options.layout?.dimensions) {
+        const layout = { ...payload.layout, id: 'preserve_layout' as const };
+        if (!layout.dimensions) {
           throw new Error(`LayoutParams.Dimensions is undefined.`);
         }
 
@@ -123,8 +119,9 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         return this.startDeps
           .screenshotting!.getScreenshots({
             format: 'png',
+            browserTimezone: payload.browserTimezone,
             headers,
-            layout: { ...payload.layout, id: 'preserve_layout' },
+            layout,
             urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
             taskInstanceFields,
             logger,

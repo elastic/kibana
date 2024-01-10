@@ -106,3 +106,24 @@ test('gets the csv content from job parameters', async () => {
         }
       `);
 });
+
+test('uses the provided logger', async () => {
+  const logSpy = jest.spyOn(mockLogger, 'get');
+
+  await mockCsvSearchSourceExportType.runTask(
+    'cool-job-id',
+    {
+      headers: encryptedHeaders,
+      browserTimezone: 'US/Alaska',
+      searchSource: {},
+      objectType: 'search',
+      title: 'Test Search',
+      version: '7.13.0',
+    },
+    taskInstanceFields,
+    new CancellationToken(),
+    stream
+  );
+
+  expect(logSpy).toHaveBeenCalledWith('execute-job:cool-job-id');
+});
