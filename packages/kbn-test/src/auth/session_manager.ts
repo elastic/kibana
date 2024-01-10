@@ -96,8 +96,9 @@ export class SamlSessionManager {
     // Validate role before creating SAML session
     if (!this.supportedRoles.includes(role)) {
       throw new Error(
-        `Role '${role}' is not defined in the supported list: ${this.supportedRoles.join(', ')}.\n
-        Update roles resource file in ${SERVERLESS_ROLES_ROOT_PATH} to enable it for testing`
+        `Role '${role}' is not defined in the supported list: ${this.supportedRoles.join(
+          ', '
+        )}. Update roles resource file in ${SERVERLESS_ROLES_ROOT_PATH} to enable it for testing`
       );
     }
 
