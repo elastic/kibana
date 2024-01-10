@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
+import { Map, TileLayer } from 'react-leaflet';
 import { I18LABELS } from './translations';
 import { UXMetrics } from './ux_metrics';
 import { ImpactfulMetrics } from './impactful_metrics';
@@ -45,6 +46,22 @@ export function RumDashboard() {
         >
           <ImpactfulMetrics />
         </LoadWhenInView>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <Map center={[0, 0]} zoom={13}>
+          <HeatmapLayer
+            fitBoundsOnLoad
+            fitBoundsOnUpdate
+            points={addressPoints}
+            longitudeExtractor={(m) => m[1]}
+            latitudeExtractor={(m) => m[0]}
+            intensityExtractor={(m) => parseFloat(m[2])}
+          />
+          <TileLayer
+            url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          />
+        </Map>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

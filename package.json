@@ -1045,6 +1045,8 @@
     "react-hook-form": "^7.44.2",
     "react-intl": "^2.8.0",
     "react-is": "^17.0.2",
+    "react-leaflet": "^4.2.1",
+    "react-leaflet-heatmap-layer-v3": "^3.0.3-beta-1",
     "react-markdown": "^6.0.3",
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "^0.41.2",
