@@ -11,3 +11,5 @@ export {
   type SamlSessionManagerOptions,
   type HostOptions,
 } from './session_manager';
+
+export { readRolesFromResource } from './helper';

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ServerlessProjectType } from '@kbn/es';
-import { SamlSessionManager } from '@kbn/test';
+import { ServerlessProjectType, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
+import { readRolesFromResource, SamlSessionManager } from '@kbn/test';
+import { resolve } from 'path';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
@@ -17,6 +18,9 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   const projectType = kbnServerArgs
     .find((arg) => arg.startsWith('--serverless'))!
     .split('=')[1] as ServerlessProjectType;
+
+  const resourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
+  const supportedRoles = readRolesFromResource(resourcePath);
 
   // Sharing the instance within FTR config run means cookies are persistent for each role between tests.
   const sessionManager = new SamlSessionManager({
@@ -29,7 +33,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     },
     log,
     isCloud,
-    projectType,
+    supportedRoles,
   });
 
   return sessionManager;

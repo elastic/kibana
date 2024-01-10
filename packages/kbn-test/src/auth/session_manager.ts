@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ServerlessProjectType, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
+import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { resolve } from 'path';
 import Url from 'url';
 import { KbnClient } from '../kbn_client';
-import { readCloudUsersFromFile, readSvlRolesFromResources } from './helper';
+import { readCloudUsersFromFile } from './helper';
 import { createCloudSAMLSession, createLocalSAMLSession, Session } from './saml_auth';
 import { Role, User } from './types';
 
@@ -27,7 +27,7 @@ export interface HostOptions {
 export interface SamlSessionManagerOptions {
   hostOptions: HostOptions;
   isCloud: boolean;
-  projectType?: ServerlessProjectType;
+  supportedRoles?: string[];
   log: ToolingLog;
 }
 
@@ -62,7 +62,7 @@ export class SamlSessionManager {
     });
     this.sessionCache = new Map<Role, Session>();
     this.roleToUserMap = new Map<Role, User>();
-    this.supportedRoles = readSvlRolesFromResources(options.projectType);
+    this.supportedRoles = options.supportedRoles ?? [];
   }
 
   /**
@@ -94,7 +94,7 @@ export class SamlSessionManager {
     }
 
     // Validate role before creating SAML session
-    if (!this.supportedRoles.includes(role)) {
+    if (this.supportedRoles.length && !this.supportedRoles.includes(role)) {
       throw new Error(
         `Role '${role}' is not defined in the supported list: ${this.supportedRoles.join(
           ', '
