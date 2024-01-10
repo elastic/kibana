@@ -9,15 +9,14 @@ import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
-import { PanelHeader } from './header';
-import { PanelContent } from './content';
-import type { LeftPanelTabsType, UserDetailsLeftPanelTab } from './tabs';
 import { useTabs } from './tabs';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-
-interface RiskInputsParam {
-  alertIds: string[];
-}
+import type {
+  EntityDetailsLeftPanelTab,
+  LeftPanelTabsType,
+} from '../shared/components/left_panel/left_panel_header';
+import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
+import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 
 interface UserParam {
   name: string;
@@ -25,7 +24,7 @@ interface UserParam {
 }
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
-  riskInputs: RiskInputsParam;
+  isRiskScoreExist: boolean;
   user: UserParam;
   path?: PanelPath;
 }
@@ -35,23 +34,27 @@ export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'user_details';
 
-export const UserDetailsPanel = ({ riskInputs, user, path }: UserDetailsPanelProps) => {
+export const UserDetailsPanel = ({ isRiskScoreExist, user, path }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser(user.name, user.email);
-  const tabs = useTabs(managedUser.data, riskInputs.alertIds);
-  const { selectedTabId, setSelectedTabId } = useSelectedTab(riskInputs, user, tabs, path);
+  const tabs = useTabs(managedUser.data, user.name, isRiskScoreExist);
+  const { selectedTabId, setSelectedTabId } = useSelectedTab(isRiskScoreExist, user, tabs, path);
 
   if (managedUser.isLoading) return <FlyoutLoading />;
 
   return (
     <>
-      <PanelHeader selectedTabId={selectedTabId} setSelectedTabId={setSelectedTabId} tabs={tabs} />
-      <PanelContent selectedTabId={selectedTabId} tabs={tabs} />
+      <LeftPanelHeader
+        selectedTabId={selectedTabId}
+        setSelectedTabId={setSelectedTabId}
+        tabs={tabs}
+      />
+      <LeftPanelContent selectedTabId={selectedTabId} tabs={tabs} />
     </>
   );
 };
 
 const useSelectedTab = (
-  riskInputs: RiskInputsParam,
+  isRiskScoreExist: boolean,
   user: UserParam,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined
@@ -65,15 +68,15 @@ const useSelectedTab = (
     return tabs.find((tab) => tab.id === path.tab)?.id ?? defaultTab;
   }, [path, tabs]);
 
-  const setSelectedTabId = (tabId: UserDetailsLeftPanelTab) => {
+  const setSelectedTabId = (tabId: EntityDetailsLeftPanelTab) => {
     openLeftPanel({
       id: UserDetailsPanelKey,
       path: {
         tab: tabId,
       },
       params: {
-        riskInputs,
         user,
+        isRiskScoreExist,
       },
     });
   };
