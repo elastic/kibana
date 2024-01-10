@@ -34,7 +34,7 @@ import {
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
-import { openTimelineFieldsBrowser, populateTimeline } from '../../../tasks/timeline';
+import { openTimelineFieldsBrowser } from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
@@ -49,13 +49,12 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-  context('Fields Browser rendering', () => {
 describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
+  describe('Fields Browser rendering', () => {
     beforeEach(() => {
       login();
       visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
-      populateTimeline();
       openTimelineFieldsBrowser();
     });
 
@@ -117,12 +116,11 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  context('Editing the timeline', () => {
+  describe('Editing the timeline', () => {
     beforeEach(() => {
       login();
       visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
-      populateTimeline();
       openTimelineFieldsBrowser();
     });
 
