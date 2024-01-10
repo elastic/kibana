@@ -198,7 +198,7 @@ export const ControlGroup = () => {
                         color={'danger'}
                         iconType={'refresh'}
                         aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                        onClick={() => controlGroup.openAddDataControlFlyout()}
+                        onClick={() => controlGroup.clearSelections()}
                       />
                     </EuiFlexItem>
                   )}

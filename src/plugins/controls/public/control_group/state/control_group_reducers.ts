@@ -31,6 +31,12 @@ export const controlGroupReducers = {
   ) => {
     state.explicitInput.chainingSystem = action.payload;
   },
+  setLastSavedInput: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupComponentState['lastSavedInput']>
+  ) => {
+    state.componentState.lastSavedInput = action.payload;
+  },
   // setShowApplySelections: (
   //   state: WritableDraft<ControlGroupReduxState>,
   //   action: PayloadAction<ControlGroupInput['showApplySelections']>

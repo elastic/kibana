@@ -24,7 +24,7 @@ import {
   persistableControlGroupInputKeys,
 } from '../../../common';
 import { pluginServices } from '../../services';
-import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
+import { ControlEmbeddable, ControlInput, ControlOutput, isClearableControl } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
@@ -249,6 +249,11 @@ export class ControlGroupContainer extends Container<
     flyoutRef = undefined;
   }
 
+  // public setLastSavedInput(newInput: PersistableControlGroupInput) {
+  //   console.log('set last saved input', newInput);
+  //   this.dispatch.setLastSavedInput(newInput);
+  // }
+
   public async addDataControlFromField(controlProps: AddDataControlProps) {
     const panelState = await getDataControlPanelState(this.getInput(), controlProps);
     return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
@@ -279,6 +284,34 @@ export class ControlGroupContainer extends Container<
 
   public updateFilterContext = (filters: Filter[]) => {
     this.updateInput({ filters });
+  };
+
+  public clearSelections = () => {
+    const panels = this.getState().componentState.lastSavedInput.panels;
+    for (const childId of this.getChildIds()) {
+      const child = this.getChild(childId);
+      if (isClearableControl(child)) {
+        child.resetSelections(panels[childId].explicitInput);
+      }
+      // console.log('CHILD', child);
+      // if (isClearableControl(child)) {
+      //   child.clearSelections();
+      // }
+    }
+
+    // for(const panel of panels) {
+    //   const
+    // }
+    // this.updateInput({ panels: this.getState().componentState.lastSavedInput.panels });
+    // const parent = useDashboard();
+    // console.log(this.getState().componentState);
+    // for (const childId of this.getChildIds()) {
+    //   const child = this.getChild(childId);
+    //   console.log('CHILD', child);
+    //   if (isClearableControl(child)) {
+    //     child.clearSelections();
+    //   }
+    // }
   };
 
   private recalculateFilters = () => {

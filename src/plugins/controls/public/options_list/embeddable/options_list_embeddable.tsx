@@ -79,7 +79,7 @@ type OptionsListReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class OptionsListEmbeddable
   extends Embeddable<OptionsListEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements IClearableControl<OptionsListEmbeddableInput>
 {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
@@ -408,6 +408,10 @@ export class OptionsListEmbeddable
     if (exclude) newFilter.meta.negate = true;
     return [newFilter];
   };
+
+  public resetSelections(lastSavedInput: OptionsListEmbeddableInput) {
+    this.dispatch.setSelections(lastSavedInput.selectedOptions);
+  }
 
   public clearSelections() {
     this.dispatch.clearSelections({});

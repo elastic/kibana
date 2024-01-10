@@ -77,7 +77,7 @@ type RangeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class RangeSliderEmbeddable
   extends Embeddable<RangeSliderEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements IClearableControl<RangeSliderEmbeddableInput>
 {
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
@@ -406,6 +406,10 @@ export class RangeSliderEmbeddable
 
   public clearSelections() {
     this.dispatch.setSelectedRange(['', '']);
+  }
+
+  public resetSelections(lastSavedInput: RangeSliderEmbeddableInput) {
+    console.log('hereee');
   }
 
   public reload = async () => {

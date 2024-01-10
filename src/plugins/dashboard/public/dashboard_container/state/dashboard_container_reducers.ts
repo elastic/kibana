@@ -130,6 +130,13 @@ export const dashboardContainerReducers = {
     state.componentState.hasRunClientsideMigrations = false;
   },
 
+  // setHasRunClientSideMigrations: (
+  //   state: DashboardReduxState,
+  //   action: PayloadAction<DashboardPublicState['hasRunClientsideMigrations']>
+  // ) => {
+  //   state.componentState.hasRunClientsideMigrations = action.payload;
+  // },
+
   /**
    * Resets the dashboard to the last saved input, excluding:
    * 1) The time range, unless `timeRestore` is `true` - if we include the time range on reset even when

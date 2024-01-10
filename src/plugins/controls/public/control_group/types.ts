@@ -30,6 +30,10 @@ export interface ControlGroupCreationOptions {
   fieldFilterPredicate?: FieldFilterPredicate;
 }
 
+export type ControlGroupComponentState = ControlGroupSettings & {
+  lastSavedInput: PersistableControlGroupInput;
+};
+
 export interface ControlGroupSettings {
   showAddButton?: boolean;
   staticDataViewId?: string;

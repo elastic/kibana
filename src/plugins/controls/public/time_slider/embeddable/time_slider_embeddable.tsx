@@ -55,7 +55,7 @@ type TimeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class TimeSliderControlEmbeddable
   extends Embeddable<TimeSliderControlEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements IClearableControl<TimeSliderControlEmbeddableInput>
 {
   public readonly type = TIME_SLIDER_CONTROL;
   public deferEmbeddedLoad = true;
@@ -359,6 +359,10 @@ export class TimeSliderControlEmbeddable
 
   public clearSelections() {
     this.onTimesliceChange();
+  }
+
+  public resetSelections(lastSavedInput: TimeSliderControlEmbeddableInput) {
+    console.log('hereee');
   }
 
   public render = (node: HTMLElement) => {

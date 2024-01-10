@@ -46,12 +46,18 @@ export type ControlEmbeddable<
   renderPrepend?: () => ReactNode | undefined;
 };
 
-export interface IClearableControl extends ControlEmbeddable {
+export interface IClearableControl<
+  TClearableControlEmbeddableInput extends ControlInput = ControlInput
+> extends ControlEmbeddable {
   clearSelections: () => void;
+  resetSelections: (lastSavedInput: TClearableControlEmbeddableInput) => void;
 }
 
 export const isClearableControl = (control: ControlEmbeddable): control is IClearableControl => {
-  return Boolean((control as IClearableControl).clearSelections);
+  return (
+    Boolean((control as IClearableControl).clearSelections) &&
+    Boolean((control as IClearableControl).resetSelections)
+  );
 };
 
 /**
