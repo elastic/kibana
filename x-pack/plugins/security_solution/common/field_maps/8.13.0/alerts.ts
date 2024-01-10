@@ -6,10 +6,35 @@
  */
 
 import { alertsFieldMap840 } from '../8.4.0';
-import { ALERT_HOST_CRITICALITY, ALERT_USER_CRITICALITY } from '../field_names';
+import {
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
+  LEGACY_ALERT_HOST_CRITICALITY,
+  LEGACY_ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
+} from '../field_names';
 
 export const alertsFieldMap8130 = {
   ...alertsFieldMap840,
+  /**
+   * @deprecated Use ALERT_HOST_CRITICALITY instead.
+   */
+  [LEGACY_ALERT_HOST_CRITICALITY]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  /**
+   * @deprecated use ALERT_USER_CRITICALITY instead.
+   */
+  [LEGACY_ALERT_USER_CRITICALITY]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   /**
    * Stores the criticality level for the host, as determined by analysts, in relation to the alert.
    * The Criticality level is copied from the asset criticality index.
@@ -25,6 +50,26 @@ export const alertsFieldMap8130 = {
    */
   [ALERT_USER_CRITICALITY]: {
     type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: {
+    type: 'float',
     array: false,
     required: false,
   },

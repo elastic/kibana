@@ -1663,8 +1663,8 @@ export default ({ getService }: FtrProviderContext) => {
           return expect(fullAlert).to.be.ok();
         }
 
-        expect(fullAlert?.['kibana.alert.host.criticality_level']).to.eql('low');
-        expect(fullAlert?.['kibana.alert.user.criticality_level']).to.eql('very_important');
+        expect(fullAlert?.['host.asset.criticality']).to.eql('low');
+        expect(fullAlert?.['user.asset.criticality']).to.eql('very_important');
       });
     });
   });

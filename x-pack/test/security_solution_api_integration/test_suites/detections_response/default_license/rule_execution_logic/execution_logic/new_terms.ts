@@ -1062,8 +1062,8 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         const fullAlert = previewAlerts[0]._source;
 
-        expect(fullAlert?.['kibana.alert.host.criticality_level']).to.eql('normal');
-        expect(fullAlert?.['kibana.alert.user.criticality_level']).to.eql('very_important');
+        expect(fullAlert?.['host.asset.criticality']).to.eql('normal');
+        expect(fullAlert?.['user.asset.criticality']).to.eql('very_important');
       });
     });
   });
