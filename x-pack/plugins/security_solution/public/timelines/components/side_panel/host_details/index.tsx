@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -81,6 +82,7 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
         <StyledEuiFlyoutBody>
           <EuiSpacer size="m" />
           <ExpandableHostDetailsPageLink hostName={hostName} />
+          <EuiHorizontalRule />
           <AssetCriticalitySelector entity={{ type: 'host', name: hostName }} />
           <ExpandableHostDetails contextID={contextID} scopeId={scopeId} hostName={hostName} />
         </StyledEuiFlyoutBody>
