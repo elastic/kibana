@@ -35,13 +35,9 @@ export function compareSOSnapshots(
     buildkite.uploadArtifacts(outputPath);
 
     const versionChanges = Object.keys(soComparisonResult.changes).reduce((changes, pluginId) => {
-      const pluginChanges = soComparisonResult.changes[pluginId];
-      const latestVersionBefore = pluginChanges.from.modelVersions.pop();
-      const latestVersionAfter = pluginChanges.to.modelVersions.pop();
-
       changes[pluginId] = {
-        from: latestVersionBefore.version,
-        to: latestVersionAfter.version,
+        from: soComparisonResult.changes[pluginId].versionChange.from,
+        to: soComparisonResult.changes[pluginId].versionChange.to,
       };
 
       return changes;

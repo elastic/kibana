@@ -22,6 +22,22 @@ interface CompareSnapshotsParameters {
   to: string;
   log: ToolingLog;
   outputPath?: string;
+  shortOutput?: boolean;
+}
+
+interface SnapshotComparisonResult {
+  hasChanges: boolean;
+  from: string;
+  to: string;
+  changed: string[];
+  unchanged: string[];
+  changes: {
+    [pluginName: string]: {
+      from: MigrationInfoRecord;
+      to: MigrationInfoRecord;
+      versionChange: { from: string; to: string };
+    };
+  };
 }
 
 async function compareSnapshots({
@@ -29,7 +45,8 @@ async function compareSnapshots({
   log,
   from,
   to,
-}: CompareSnapshotsParameters): Promise<any> {
+  shortOutput = false,
+}: CompareSnapshotsParameters): Promise<SnapshotComparisonResult> {
   validateInput({
     from,
     to,
@@ -43,17 +60,22 @@ async function compareSnapshots({
 
   const result = compareSnapshotFiles(fromSnapshot, toSnapshot);
 
-  log.info(
-    `Snapshots compared: ${from} <=> ${to}. ` +
-      `${result.hasChanges ? 'Changed: ' + result.changed.join(', ') : 'No changes'}`
-  );
+  if (result.hasChanges) {
+    log.info(`Snapshots compared: ${from} <=> ${to}. Changed: ${result.changed.join(', ')}`);
+    result.changed.forEach((pluginName) => {
+      const change = result.changes[pluginName];
+      log.info(`  ${pluginName}: ${change.versionChange.from} => ${change.versionChange.to}`);
+    });
+  } else {
+    log.info(`Snapshots compared: ${from} <=> ${to}. No changes`);
+  }
 
   if (outputPath) {
     writeSnapshot(outputPath, result);
     log.info(`Output written to: ${outputPath}`);
-  } else {
+  } else if (!shortOutput) {
     log.info(
-      `Emitting result to STDOUT... (Enable '--silent' or '--quiet' to disable non-parseable output)`
+      `Emitting result to STDOUT... (Use '--quiet' to disable non-parseable output, or --short to disable JSON output)`
     );
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(result, null, 2));
@@ -132,7 +154,10 @@ function expandGitRev(gitRev: string) {
  * @param fromSnapshot
  * @param toSnapshot
  */
-function compareSnapshotFiles(fromSnapshot: MigrationSnapshot, toSnapshot: MigrationSnapshot) {
+function compareSnapshotFiles(
+  fromSnapshot: MigrationSnapshot,
+  toSnapshot: MigrationSnapshot
+): SnapshotComparisonResult {
   const pluginNames = Object.keys(fromSnapshot.typeDefinitions);
   const pluginNamesWithChangedHash = pluginNames.filter((pluginName) => {
     const fromHash = fromSnapshot.typeDefinitions[pluginName].hash;
@@ -148,9 +173,13 @@ function compareSnapshotFiles(fromSnapshot: MigrationSnapshot, toSnapshot: Migra
     changesObj[pluginName] = {
       from: fromMigrationInfo,
       to: toMigrationInfo,
+      versionChange: {
+        from: fromMigrationInfo.modelVersions.at(-1)?.version || '0',
+        to: toMigrationInfo.modelVersions.at(-1)?.version || '0',
+      },
     };
     return changesObj;
-  }, {} as Record<string, { from: MigrationInfoRecord; to: MigrationInfoRecord }>);
+  }, {} as Record<string, { from: MigrationInfoRecord; to: MigrationInfoRecord; versionChange: { from: string; to: string } }>);
 
   return {
     hasChanges: pluginNamesWithChangedHash.length > 0,
