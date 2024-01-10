@@ -527,6 +527,48 @@ describe('UninstallTokenService', () => {
           ).resolves.toBeNull();
         });
 
+        describe('avoiding `too_many_nested_clauses` error', () => {
+          it('performs one query if number of policies is smaller than batch size', async () => {
+            mockCreatePointInTimeFinderAsInternalUser();
+            await uninstallTokenService.checkTokenValidityForAllPolicies();
+
+            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(1);
+            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledWith({
+              filter:
+                'fleet-uninstall-tokens.id: "test-so-id" or fleet-uninstall-tokens.id: "test-so-id-two"',
+              perPage: 10000,
+              type: 'fleet-uninstall-tokens',
+            });
+          });
+
+          it('performs multiple queries if number of policies is larger than batch size', async () => {
+            mockCreatePointInTimeFinderAsInternalUser();
+
+            // @ts-ignore
+            uninstallTokenService.batchSize = 1;
+
+            await uninstallTokenService.checkTokenValidityForAllPolicies();
+
+            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(2);
+
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenNthCalledWith(1, {
+              filter: 'fleet-uninstall-tokens.id: "test-so-id"',
+              perPage: 10000,
+              type: 'fleet-uninstall-tokens',
+            });
+
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenNthCalledWith(2, {
+              filter: 'fleet-uninstall-tokens.id: "test-so-id-two"',
+              perPage: 10000,
+              type: 'fleet-uninstall-tokens',
+            });
+          });
+        });
+
         it('returns error if any of the tokens is missing', async () => {
           mockCreatePointInTimeFinderAsInternalUser([okaySO, missingTokenSO2]);
 

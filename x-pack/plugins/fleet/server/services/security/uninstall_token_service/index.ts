@@ -162,6 +162,12 @@ export interface UninstallTokenServiceInterface {
 export class UninstallTokenService implements UninstallTokenServiceInterface {
   private _soClient: SavedObjectsClientContract | undefined;
 
+  /** If BATCH_SIZE is too large, we get an error of `too_many_nested_clauses`.
+   *  Assuming that `max_clause_count` >= 1024, and experiencing that batch size should be less than half
+   *  than `max_clause_count` with our current query, batch size below 512 should be okay on every env.
+   */
+  private batchSize = 500;
+
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
   public async getToken(id: string): Promise<UninstallToken | null> {
@@ -202,12 +208,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private async getDecryptedTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
-    /** If BATCH_SIZE is too large, we get an error of `too_many_nested_clauses`.
-     *  Assuming that `max_clause_count` >= 1024, and experiencing that batch size should be less than half
-     *  than `max_clause_count` with our current query, batch size below 512 should be okay on every env.
-     */
-    const BATCH_SIZE = 500;
-
     const tokenObjectHits = await this.getTokenObjectsByIncludeFilter(policyIds);
 
     if (tokenObjectHits.length === 0) {
@@ -219,7 +219,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     );
 
     const uninstallTokenChunks: UninstallToken[][] = await asyncMap(
-      chunk(filterEntries, BATCH_SIZE),
+      chunk(filterEntries, this.batchSize),
       (entries) => {
         const filter = entries.join(' or ');
         return this.getDecryptedTokens({ filter });
