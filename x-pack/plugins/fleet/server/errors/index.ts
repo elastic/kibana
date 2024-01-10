@@ -43,6 +43,7 @@ export class PackageInvalidArchiveError extends FleetError {}
 export class PackageRemovalError extends FleetError {}
 export class PackageESError extends FleetError {}
 export class ConcurrentInstallOperationError extends FleetError {}
+export class PackageSavedObjectConflictError extends FleetError {}
 
 export class KibanaSOReferenceError extends FleetError {}
 export class PackageAlreadyInstalledError extends FleetError {}

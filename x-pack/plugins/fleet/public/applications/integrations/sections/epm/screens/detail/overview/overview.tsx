@@ -107,7 +107,7 @@ const UnverifiedCallout: React.FC = () => {
   );
 };
 
-const PrereleaseCallout: React.FC<{
+export const PrereleaseCallout: React.FC<{
   packageName: string;
   latestGAVersion?: string;
   packageTitle: string;

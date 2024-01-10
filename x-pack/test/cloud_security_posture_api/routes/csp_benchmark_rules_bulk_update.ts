@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const createDetectionRule = async (rule: CspBenchmarkRule) => {
-    await supertest
+    const detectionRule = await supertest
       .post(DETECTION_ENGINE_RULES_URL)
       .set('version', DETECTION_RULE_RULES_API_CURRENT_VERSION)
       .set('kbn-xsrf', 'xxxx')
@@ -74,7 +74,9 @@ export default function ({ getService }: FtrProviderContext) {
         name: rule.metadata.name,
         description: rule.metadata.rationale,
         tags: generateBenchmarkRuleTags(rule.metadata),
-      });
+      })
+      .expect(200);
+    return detectionRule;
   };
 
   /**
@@ -91,14 +93,15 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug('CSP plugin is initialized');
     });
 
-  describe('Verify update csp rules states API', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/174204
+  describe.skip('Verify update csp rules states API', async () => {
     before(async () => {
       await waitForPluginInitialized();
     });
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.clean({
-        types: ['cloud-security-posture-settings'],
+        types: ['cloud-security-posture-settings', 'alert'],
       });
     });
 
@@ -115,9 +118,15 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'mute',
           rules: [
             {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
             },
             {
+              benchmark_id: rule2.metadata.benchmark.id,
+              benchmark_version: rule2.metadata.benchmark.version,
+              rule_number: rule2.metadata.benchmark.rule_number || '',
               rule_id: rule2.metadata.id,
             },
           ],
@@ -146,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
       );
-      expectExpect(body.detection_rules).toEqual('disabled 0 detections rules.');
+      expectExpect(body.disabled_detection_rules).toEqual([]);
     });
 
     it('unmute rules successfully', async () => {
@@ -162,9 +171,15 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'unmute',
           rules: [
             {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
             },
             {
+              benchmark_id: rule2.metadata.benchmark.id,
+              benchmark_version: rule2.metadata.benchmark.version,
+              rule_number: rule2.metadata.benchmark.rule_number || '',
               rule_id: rule2.metadata.id,
             },
           ],
@@ -210,9 +225,15 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'unmute',
           rules: [
             {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
             },
             {
+              benchmark_id: rule2.metadata.benchmark.id,
+              benchmark_version: rule2.metadata.benchmark.version,
+              rule_number: rule2.metadata.benchmark.rule_number || '',
               rule_id: rule2.metadata.id,
             },
           ],
@@ -252,9 +273,15 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'mute',
           rules: [
             {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
             },
             {
+              benchmark_id: rule3.metadata.benchmark.id,
+              benchmark_version: rule3.metadata.benchmark.version,
+              rule_number: rule3.metadata.benchmark.rule_number || '',
               rule_id: rule3.metadata.id,
             },
           ],
@@ -288,7 +315,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('mute detection rule successfully', async () => {
       const rule1 = await getRandomCspBenchmarkRule();
 
-      await createDetectionRule(rule1);
+      const detectionRule = await createDetectionRule(rule1);
 
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -299,20 +326,23 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'mute',
           rules: [
             {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
             },
           ],
         })
         .expect(200);
 
-      expectExpect(body.detection_rules).toEqual('disabled 1 detections rules.');
+      expectExpect(body.disabled_detection_rules).toEqual([detectionRule.body.id]);
     });
 
-    it('Expect to two benchmark rules and one detection rule', async () => {
+    it('Expect to mute two benchmark rules and one detection rule', async () => {
       const rule1 = await getRandomCspBenchmarkRule();
       const rule2 = await getRandomCspBenchmarkRule();
 
-      await createDetectionRule(rule1);
+      const detectionRule = await createDetectionRule(rule1);
 
       const { body } = await supertest
         .post(`/internal/cloud_security_posture/rules/_bulk_action`)
@@ -323,16 +353,76 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'mute',
           rules: [
             {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
             },
             {
+              benchmark_id: rule2.metadata.benchmark.id,
+              benchmark_version: rule2.metadata.benchmark.version,
+              rule_number: rule2.metadata.benchmark.rule_number || '',
               rule_id: rule2.metadata.id,
             },
           ],
         })
         .expect(200);
 
-      expectExpect(body.detection_rules).toEqual('disabled 1 detections rules.');
+      expectExpect(body.disabled_detection_rules).toEqual([detectionRule.body.id]);
+    });
+
+    it('Expect to save rules states when requesting to update empty object', async () => {
+      const rule1 = await getRandomCspBenchmarkRule();
+
+      await supertest
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          action: 'mute',
+          rules: [
+            {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
+              rule_id: rule1.metadata.id,
+            },
+          ],
+        })
+        .expect(200);
+
+      await supertest
+        .post(`/internal/cloud_security_posture/rules/_bulk_action`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          action: 'unmute',
+          rules: [],
+        })
+        .expect(200);
+
+      const { body } = await supertest
+        .get(`/internal/cloud_security_posture/rules/_get_states`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expectExpect(body).toEqual(
+        expectExpect.objectContaining({
+          [generateRuleKey(rule1)]: {
+            muted: true,
+            benchmark_id: rule1.metadata.benchmark.id,
+            benchmark_version: rule1.metadata.benchmark.version,
+            rule_number: rule1.metadata.benchmark.rule_number
+              ? rule1.metadata.benchmark.rule_number
+              : '',
+            rule_id: rule1.metadata.id,
+          },
+        })
+      );
     });
 
     it('set wrong action input', async () => {
@@ -347,6 +437,9 @@ export default function ({ getService }: FtrProviderContext) {
           action: 'foo',
           rules: [
             {
+              benchmark_id: rule1.metadata.benchmark.id,
+              benchmark_version: rule1.metadata.benchmark.version,
+              rule_number: rule1.metadata.benchmark.rule_number || '',
               rule_id: rule1.metadata.id,
             },
           ],

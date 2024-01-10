@@ -257,6 +257,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
           className="indexPatternEditor__form"
           error={form.getErrors()}
           isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
+          data-validation-error={form.getErrors().length ? '1' : '0'}
+          data-test-subj="indexPatternEditorForm"
         >
           <UseField path="isAdHoc" />
           {indexPatternTypeSelect}

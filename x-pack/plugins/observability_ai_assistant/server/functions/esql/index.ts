@@ -30,7 +30,7 @@ const loadSystemMessage = once(async () => {
 });
 
 const loadEsqlDocs = once(async () => {
-  const dir = Path.join(__dirname, './docs');
+  const dir = Path.join(__dirname, './esql_docs');
   const files = (await readdir(dir)).filter((file) => Path.extname(file) === '.txt');
 
   if (!files.length) {
@@ -288,6 +288,8 @@ export function registerEsqlFunction({
                       delta: {
                         content: cachedContent,
                       },
+                      index: 0,
+                      finish_reason: null,
                     },
                   ],
                 });
