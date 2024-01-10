@@ -8,13 +8,13 @@
 
 import * as fs from 'fs';
 import { resolve } from 'path';
-import { Role, User } from './types';
 import { load as loadYaml } from 'js-yaml';
 import {
   ServerlessProjectType,
   SERVERLESS_ROLES_ROOT_PATH,
   VALID_SERVERLESS_PROJECT_TYPE,
 } from '@kbn/es';
+import { Role, User } from './types';
 
 export const readCloudUsersFromFile = (filePath: string): Array<[Role, User]> => {
   if (!fs.existsSync(filePath)) {
