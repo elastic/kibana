@@ -48,8 +48,8 @@ export const getCspBenchmarkRulesStatesHandler = async (
   }
 };
 
-export const buildMutedRulesFilter = async (
-  encryptedSoClient: ISavedObjectsRepository
+export const getMutedRulesFilterQuery = async (
+  encryptedSoClient: ISavedObjectsRepository | SavedObjectsClientContract
 ): Promise<QueryDslQueryContainer[]> => {
   const rulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
   const mutedRules = Object.fromEntries(

@@ -96,6 +96,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             ? ExistenceFetchStatus.succeeded
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
+        getNewFields: () => [],
       })
     );
 
@@ -156,6 +157,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             ? ExistenceFetchStatus.succeeded
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
+        getNewFields: () => [],
       })
     );
 
@@ -185,6 +187,8 @@ describe('UnifiedFieldList useGroupedFields()', () => {
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
     expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+    expect(result.current.allFieldsModified).toBe(allFields);
+    expect(result.current.hasNewFields).toBe(false);
 
     rerender({
       ...props,
@@ -198,6 +202,82 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).not.toBe(
       scrollToTopResetCounter1
     );
+    expect(result.current.allFieldsModified).toBe(allFields);
+    expect(result.current.hasNewFields).toBe(false);
+
+    (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
+  });
+
+  it('should work correctly with new fields', async () => {
+    const props: GroupedFieldsParams<DataViewField> = {
+      dataViewId: dataView.id!,
+      allFields,
+      services: mockedServices,
+      getNewFieldsBySpec: (spec) => spec.map((field) => new DataViewField(field)),
+    };
+
+    const newField = { name: 'test', type: 'keyword', searchable: true, aggregatable: true };
+
+    jest.spyOn(ExistenceApi, 'useExistingFieldsReader').mockImplementation(
+      (): ExistingFieldsReader => ({
+        hasFieldData: (dataViewId) => {
+          return dataViewId === props.dataViewId;
+        },
+        getFieldsExistenceStatus: (dataViewId) =>
+          dataViewId === props.dataViewId
+            ? ExistenceFetchStatus.succeeded
+            : ExistenceFetchStatus.unknown,
+        isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== props.dataViewId,
+        getNewFields: () => [newField],
+      })
+    );
+
+    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+      initialProps: props,
+    });
+
+    await waitForNextUpdate();
+
+    let fieldListGroupedProps = result.current.fieldListGroupedProps;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
+    const scrollToTopResetCounter1 = fieldListGroupedProps.scrollToTopResetCounter;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-0',
+      'PopularFields-0',
+      'AvailableFields-25',
+      'UnmappedFields-1',
+      'EmptyFields-0',
+      'MetaFields-3',
+    ]);
+
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+    expect(result.current.allFieldsModified).toStrictEqual([
+      ...allFields,
+      new DataViewField(newField),
+    ]);
+    expect(result.current.hasNewFields).toBe(true);
+
+    rerender({
+      ...props,
+      dataViewId: null, // for text-based queries
+      allFields,
+    });
+
+    fieldListGroupedProps = result.current.fieldListGroupedProps;
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+    expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).not.toBe(
+      scrollToTopResetCounter1
+    );
+    expect(result.current.allFieldsModified).toBe(allFields);
+    expect(result.current.hasNewFields).toBe(false);
 
     (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
   });
@@ -438,6 +518,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
             ? ExistenceFetchStatus.succeeded
             : ExistenceFetchStatus.unknown,
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== knownDataViewId,
+        getNewFields: () => [],
       })
     );
 

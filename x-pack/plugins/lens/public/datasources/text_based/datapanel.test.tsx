@@ -30,6 +30,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { createMockFramePublicAPI } from '../../mocks';
 import { DataViewsState } from '../../state_management';
+import { addColumnsToCache } from './fieldlist_cache';
 
 const fieldsFromQuery = [
   {
@@ -106,7 +107,7 @@ const initialState: TextBasedPrivateState = {
       index: '1',
       columns: [],
       allColumns: [],
-      query: { sql: 'SELECT * FROM foo' },
+      query: { esql: 'SELECT * FROM foo' },
     },
   },
   indexPatternRefs: [
@@ -114,8 +115,9 @@ const initialState: TextBasedPrivateState = {
     { id: '2', title: 'my-fake-restricted-pattern' },
     { id: '3', title: 'my-compatible-pattern' },
   ],
-  fieldList: fieldsFromQuery,
 };
+
+addColumnsToCache('SELECT * FROM my-fake-index-pattern', fieldsFromQuery);
 
 function getFrameAPIMock({
   indexPatterns,
@@ -189,7 +191,7 @@ describe('TextBased Query Languages Data Panel', () => {
         fromDate: 'now-7d',
         toDate: 'now',
       },
-      query: { sql: 'SELECT * FROM my-fake-index-pattern' } as unknown as Query,
+      query: { esql: 'SELECT * FROM my-fake-index-pattern' } as unknown as Query,
       filters: [],
       showNoDataPopover: jest.fn(),
       dropOntoWorkspace: jest.fn(),

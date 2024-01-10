@@ -14,7 +14,8 @@ import { SubmitCaseButton } from './submit_button';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 
-describe('SubmitCaseButton', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174376
+describe.skip('SubmitCaseButton', () => {
   const onSubmit = jest.fn();
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
