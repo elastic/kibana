@@ -124,7 +124,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiButtonEmpty onClick={props.onClose}>
-              <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
+              <FormattedMessage id="xpack.reporting.links.doneButton" defaultMessage="Done" />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>
