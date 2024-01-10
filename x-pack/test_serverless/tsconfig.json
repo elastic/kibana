@@ -85,5 +85,6 @@
     "@kbn/index-management-plugin",
     "@kbn/alerting-plugin",
     "@kbn/ftr-common-functional-ui-services",
+    "@kbn/es",
   ]
 }
