@@ -73,8 +73,8 @@ import type {
 } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import {
-  legacyIsNotificationAlertExecutor,
-  legacyRulesNotificationAlertType,
+  isLegacyNotificationRuleExecutor,
+  legacyRulesNotificationRuleType,
 } from './lib/detection_engine/rule_actions_legacy';
 import {
   createSecurityRuleTypeWrapper,
@@ -354,9 +354,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.alerting != null) {
-      const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
+      const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
 
-      if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
+      if (isLegacyNotificationRuleExecutor(ruleNotificationType)) {
         plugins.alerting.registerType(ruleNotificationType);
       }
     }
