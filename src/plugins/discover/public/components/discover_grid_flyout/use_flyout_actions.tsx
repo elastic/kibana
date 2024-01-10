@@ -50,6 +50,10 @@ export const useFlyoutActions = ({
       label: i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkLabel', {
         defaultMessage: 'View surrounding documents',
       }),
+      helpText: i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsHover', {
+        defaultMessage:
+          'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
+      }),
     },
     ...customActions,
   ];

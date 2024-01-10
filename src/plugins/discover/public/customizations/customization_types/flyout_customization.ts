@@ -23,6 +23,7 @@ export interface FlyoutActionItem {
   id: string;
   enabled: boolean;
   label: string;
+  helpText?: string;
   iconType: IconType;
   onClick: (() => void) | MouseEventHandler;
   href?: string;

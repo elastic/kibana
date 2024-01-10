@@ -102,7 +102,9 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
       {visibleFlyoutActions.map((action) => (
         <EuiFlexItem key={action.id} grow={false}>
           {showFlyoutIconsOnly ? (
-            <EuiToolTip content={action.label}>
+            <EuiToolTip
+              content={`${action.helpText ? `${action.label} - ${action.helpText}` : action.label}`}
+            >
               <EuiButtonIcon
                 size="s"
                 iconType={action.iconType}
@@ -113,18 +115,20 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
               />
             </EuiToolTip>
           ) : (
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiButtonEmpty
-              size="s"
-              iconSize="s"
-              flush="both"
-              iconType={action.iconType}
-              data-test-subj={action.dataTestSubj}
-              href={action.href}
-              onClick={action.onClick}
-            >
-              {action.label}
-            </EuiButtonEmpty>
+            <EuiToolTip content={action.helpText} delay="long">
+              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+              <EuiButtonEmpty
+                size="s"
+                iconSize="s"
+                flush="both"
+                iconType={action.iconType}
+                data-test-subj={action.dataTestSubj}
+                href={action.href}
+                onClick={action.onClick}
+              >
+                {action.label}
+              </EuiButtonEmpty>
+            </EuiToolTip>
           )}
         </EuiFlexItem>
       ))}
