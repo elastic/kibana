@@ -184,10 +184,14 @@ function getESServerlessOptions(
   const serverlessHost: string | undefined =
     config.has('esServerlessOptions.host') && config.get('esServerlessOptions.host');
 
-  const kbnServerArgs = config.get('kbnTestServer.serverArgs') as string[];
-  const projectType = kbnServerArgs
-    .find((arg) => arg.startsWith('--serverless'))!
-    .split('=')[1] as ServerlessProjectType;
+  const kbnServerArgs =
+    (config.has('kbnTestServer.serverArgs') &&
+      (config.get('kbnTestServer.serverArgs') as string[])) ||
+    [];
+  const serverlessArg = kbnServerArgs.find((arg) => arg.startsWith('--serverless'));
+  const projectType = serverlessArg
+    ? (serverlessArg.split('=')[1] as ServerlessProjectType)
+    : undefined;
 
   const commonOptions = {
     host: serverlessHost,
