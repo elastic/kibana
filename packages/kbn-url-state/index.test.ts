@@ -56,6 +56,24 @@ describe('useSyncToUrl', () => {
     );
   });
 
+  it('two updates happening one after another should be merged', () => {
+    window.location.hash = '#should_be_there';
+
+    const { result } = renderHook(() => useUrlState('namespace', 'test'));
+
+    act(() => {
+      result.current[1]({ a: { b: 'a' } });
+      result.current[1]({ a: { c: 'd' } });
+      jest.runAllTimers();
+    });
+
+    expect(window.history.pushState).toHaveBeenCalledWith(
+      {},
+      '',
+      '#should_be_there?namespace=(test%3A(a%3A(b%3Aa%2Cc%3Ad)))'
+    );
+  });
+
   it('should escape values correctly', () => {
     window.location.hash = '#should_be_there';
 

@@ -306,7 +306,14 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(NEW_TIMELINE_ACTION).click();
+  recurse(
+    () => {
+      cy.get(NEW_TIMELINE_ACTION).click();
+      return cy.get(CREATE_NEW_TIMELINE).first();
+    },
+    (sub) => sub.is(':visible')
+  );
+
   cy.get(CREATE_NEW_TIMELINE).first().click();
 };
 

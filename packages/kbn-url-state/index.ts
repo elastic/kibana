@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { encode, decode, RisonValue } from '@kbn/rison';
 import { stringify, parse } from 'query-string';
+import { merge } from 'lodash';
 
 interface StateCache<T> {
   namespaces: Record<string, Record<string, T | undefined>>;
@@ -82,7 +83,7 @@ export const useUrlState = <T = unknown>(urlNamespace: string, key: string) => {
         !Array.isArray(currentValue);
 
       cache.namespaces[urlNamespace][key] = canSpread
-        ? ({ ...currentValue, ...updatedValue } as unknown as T)
+        ? (merge(currentValue, updatedValue) as unknown as T)
         : (updatedValue as unknown as T);
 
       // This batches updates to the URL state to avoid excessive history entries
