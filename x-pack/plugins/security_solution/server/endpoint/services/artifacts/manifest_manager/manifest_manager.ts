@@ -16,7 +16,7 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { AppFeatureKey } from '@kbn/security-solution-features/keys';
 import { stringify } from '../../../utils/stringify';
-import { BatchProcessor } from '../../../utils/batch_processor';
+import { QueueProcessor } from '../../../utils/queue_processor';
 import type { AppFeaturesService } from '../../../../lib/app_features_service/app_features_service';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
@@ -585,7 +585,7 @@ export class ManifestManager {
     const updatedPolicies: string[] = [];
     const unChangedPolicies: string[] = [];
     const manifestVersion = manifest.getSemanticVersion();
-    const policyUpdateBatchProcessor = new BatchProcessor<PackagePolicy>({
+    const policyUpdateBatchProcessor = new QueueProcessor<PackagePolicy>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
       key: 'tryDispatch',
@@ -746,7 +746,7 @@ export class ManifestManager {
 
     const errors: string[] = [];
 
-    const artifactDeletionProcess = new BatchProcessor<string>({
+    const artifactDeletionProcess = new QueueProcessor<string>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
       key: 'cleanup',

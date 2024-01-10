@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
-export interface BatchProcessorOptions<T = unknown> {
+export interface QueueProcessorOptions<T = unknown> {
   batchHandler: (batch: { batch: number; data: T[] }) => Promise<void>;
   batchSize?: number;
   logger?: Logger;
@@ -23,7 +23,7 @@ export interface BatchProcessorOptions<T = unknown> {
  * reach the `batchSize`.
  *
  * @example
- * const processor = new BatchProcessor<{ id: string }>({
+ * const processor = new QueueProcessor<{ id: string }>({
  *   batchHandler: ({ data, batch }) => {
  *     // data === array of `{ id: string }`
  *     // batch === batch number
@@ -38,9 +38,9 @@ export interface BatchProcessorOptions<T = unknown> {
  *
  * await processor.complete();
  */
-export class BatchProcessor<T = unknown> {
+export class QueueProcessor<T = unknown> {
   private readonly batchSize: number;
-  private readonly batchHandler: BatchProcessorOptions<T>['batchHandler'];
+  private readonly batchHandler: QueueProcessorOptions<T>['batchHandler'];
   private readonly logger: Logger | undefined = undefined;
 
   private queue: T[] = [];
@@ -52,8 +52,8 @@ export class BatchProcessor<T = unknown> {
     batchHandler,
     batchSize = 10,
     logger,
-    key = 'BatchProcessor',
-  }: BatchProcessorOptions<T>) {
+    key = 'QueueProcessor',
+  }: QueueProcessorOptions<T>) {
     if (batchSize < 1 || !Number.isFinite(batchSize)) {
       throw new Error(`batchSize must be a number greater than zerro`);
     }
