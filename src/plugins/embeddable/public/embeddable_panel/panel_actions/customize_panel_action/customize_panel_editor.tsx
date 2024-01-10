@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiSwitch,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiForm,
-  EuiTextArea,
-  EuiFlyoutFooter,
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperDatePicker,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
   EuiSpacer,
+  EuiSuperDatePicker,
+  EuiSwitch,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { TimeRangeInput } from './customize_panel_action';
+import {
+  CommonlyUsedRange,
+  Embeddable,
+  IEmbeddable,
+  isFilterableEmbeddable,
+  ViewMode,
+} from '../../../lib';
 import { canInheritTimeRange } from './can_inherit_time_range';
 import { doesInheritTimeRange } from './does_inherit_time_range';
-import {
-  IEmbeddable,
-  Embeddable,
-  CommonlyUsedRange,
-  ViewMode,
-  isFilterableEmbeddable,
-} from '../../../lib';
 import { FiltersDetails } from './filters_details';
+import { TimeRangeInput } from './time_range_helpers';
 
 type PanelSettings = {
   title?: string;
@@ -55,10 +55,11 @@ interface CustomizePanelProps {
   commonlyUsedRanges?: CommonlyUsedRange[];
   onClose: () => void;
   onEdit: () => void;
+  focusOnTitle?: boolean;
 }
 
 export const CustomizePanelEditor = (props: CustomizePanelProps) => {
-  const { onClose, embeddable, dateFormat, timeRangeCompatible, onEdit } = props;
+  const { onClose, embeddable, dateFormat, timeRangeCompatible, onEdit, focusOnTitle } = props;
   const editMode = embeddable.getInput().viewMode === ViewMode.EDIT;
   const [hideTitle, setHideTitle] = useState(embeddable.getInput().hidePanelTitles);
   const [panelDescription, setPanelDescription] = useState(
@@ -75,6 +76,13 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
       ? (embeddable as Embeddable<TimeRangeInput>).getInput().timeRange
       : undefined
   );
+  const initialFocusRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (focusOnTitle && initialFocusRef.current) {
+      initialFocusRef.current.focus();
+    }
+  }, [initialFocusRef, focusOnTitle]);
 
   const commonlyUsedRangesForDatePicker = props.commonlyUsedRanges
     ? props.commonlyUsedRanges.map(
@@ -108,7 +116,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
     if (!editMode) return null;
 
     return (
-      <>
+      <div data-test-subj="customEmbeddableTitleComponent">
         <EuiFormRow>
           <EuiSwitch
             checked={!hideTitle}
@@ -154,6 +162,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
           }
         >
           <EuiFieldText
+            inputRef={initialFocusRef}
             id="panelTitleInput"
             className="panelTitleInputText"
             data-test-subj="customEmbeddablePanelTitleInput"
@@ -219,7 +228,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
             )}
           />
         </EuiFormRow>
-      </>
+      </div>
     );
   };
 
@@ -292,7 +301,7 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm>
+        <EuiForm data-test-subj="customizePanelForm">
           {renderCustomTitleComponent()}
           {renderCustomTimeRangeComponent()}
           {renderFilterDetails()}

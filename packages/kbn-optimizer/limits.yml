@@ -18,7 +18,6 @@ pageLoadAssetSize:
   cloudDefend: 18697
   cloudExperiments: 59358
   cloudFullStory: 18493
-  cloudGainsight: 18710
   cloudLinks: 55984
   cloudSecurityPosture: 19109
   console: 46091
@@ -33,7 +32,7 @@ pageLoadAssetSize:
   datasetQuality: 50624
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
-  dataViewManagement: 5100
+  dataViewManagement: 5136
   dataViews: 48300
   dataVisualizer: 27530
   devTools: 38637
@@ -86,7 +85,7 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 41000
+  lens: 43000
   licenseManagement: 41817
   licensing: 29004
   links: 44490
