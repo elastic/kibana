@@ -59,7 +59,6 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const VALID_SERVERLESS_PROJECT_TYPE = ['es', 'oblt', 'security'];
 export type ServerlessProjectType = 'es' | 'oblt' | 'security';
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {

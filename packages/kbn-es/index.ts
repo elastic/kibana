@@ -13,7 +13,6 @@ export {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
   SERVERLESS_NODES,
-  VALID_SERVERLESS_PROJECT_TYPE,
   getDockerFileMountPath,
   verifyDockerInstalled,
   maybeCreateDockerNetwork,
