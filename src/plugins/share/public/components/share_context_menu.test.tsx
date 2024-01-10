@@ -12,6 +12,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ShareContextMenu, ShareContextMenuProps } from './share_context_menu';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 
 const defaultProps: ShareContextMenuProps = {
   allowEmbed: true,
@@ -21,6 +23,9 @@ const defaultProps: ShareContextMenuProps = {
   onClose: () => {},
   objectType: 'dashboard',
   urlService: {} as any,
+  openModal: jest.fn(),
+  theme: themeServiceMock.createStartContract(),
+  i18nStart: i18nServiceMock.createStartContract(),
 };
 
 test('should render context menu panel when there are more than one panel', () => {
