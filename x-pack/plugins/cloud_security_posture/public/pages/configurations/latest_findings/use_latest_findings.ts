@@ -23,6 +23,8 @@ import {
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
+import { CspBenchmarkRulesStates } from '../../../../common/types/latest';
+import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
@@ -45,25 +47,11 @@ interface FindingsAggs {
 
 export const getFindingsQuery = (
   { query, sort }: UseFindingsOptions,
-  rulesStates: any,
+  rulesStates: CspBenchmarkRulesStates,
   pageParam: any
 ) => {
-  const mutedRules = Object.fromEntries(
-    Object.entries(rulesStates).filter(([key, value]) => value.muted === true)
-  );
+  const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
 
-  const mutedRulesFilterQuery = Object.keys(mutedRules).map((key) => {
-    const rule = mutedRules[key];
-    return {
-      bool: {
-        must: [
-          { term: { 'rule.benchmark.id': rule.benchmark_id } },
-          { term: { 'rule.benchmark.version': rule.benchmark_version } },
-          { term: { 'rule.benchmark.rule_number': rule.rule_number } },
-        ],
-      },
-    };
-  });
   return {
     index: CSP_LATEST_FINDINGS_DATA_VIEW,
     sort: getMultiFieldsSort(sort),
@@ -135,7 +123,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
     data,
     notifications: { toasts },
   } = useKibana().services;
-  const { data: rulesStates, status, isSuccess } = useGetCspBenchmarkRulesStatesApi();
+  const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
 
   return useInfiniteQuery(
     ['csp_findings', { params: options }],
@@ -144,8 +132,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: await getFindingsQuery(options, rulesStates, pageParam),
-          // params: getFindingsQuery(options, pageParam),
+          params: await getFindingsQuery(options, rulesStates!, pageParam), // ruleStates always exists since it under the `enabled` dependency.
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be an defined');
