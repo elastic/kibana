@@ -38,6 +38,7 @@ interface Arguments {
   // timezone?: string;
   timeField?: string;
   locale?: string;
+  dropNulls?: boolean;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -89,6 +90,7 @@ interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
+  dropNulls?: boolean;
 }
 
 export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
@@ -130,10 +132,17 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The locale to use.',
         }),
       },
+      dropNulls: {
+        aliases: ['dropNulls'],
+        types: ['boolean'],
+        help: i18n.translate('data.search.essql.dropNull.help', {
+          defaultMessage: 'If true adds the null columns to a separate property',
+        }),
+      },
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale },
+      { query, /* timezone, */ timeField, locale, dropNulls },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -154,6 +163,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query,
             // time_zone: timezone,
             locale,
+            dropNulls,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
@@ -248,7 +258,16 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               name,
               meta: { type: normalizeType(type) },
             })) ?? [];
-          const columnNames = columns.map(({ name }) => name);
+          const nullColumns =
+            body.null_columns?.map(({ name, type }) => ({
+              id: name,
+              name,
+              meta: { type: normalizeType(type) },
+              isNull: true,
+            })) ?? [];
+
+          const allColumns = [...columns, ...nullColumns];
+          const columnNames = allColumns.map(({ name }) => name);
           const rows = body.values.map((row) => zipObject(columnNames, row));
 
           return {
@@ -256,7 +275,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             meta: {
               type: 'es_ql',
             },
-            columns,
+            columns: allColumns,
             rows,
             warning,
           } as Datatable;

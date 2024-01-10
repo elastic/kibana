@@ -306,6 +306,14 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
+   * Returns true if field is Empty
+   */
+
+  public get empty() {
+    return Boolean(this.spec.empty);
+  }
+
+  /**
    * Returns true if field is subtype nested
    */
   public isSubtypeNested() {

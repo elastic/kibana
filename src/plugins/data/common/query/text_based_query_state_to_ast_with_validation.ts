@@ -14,6 +14,7 @@ interface Args extends QueryState {
   dataView?: DataView;
   inputQuery?: Query;
   timeFieldName?: string;
+  dropNulls?: boolean;
 }
 
 /**
@@ -28,6 +29,7 @@ export async function textBasedQueryStateToAstWithValidation({
   inputQuery,
   time,
   dataView,
+  dropNulls,
 }: Args) {
   let ast;
   if (query && isOfAggregateQueryType(query)) {
@@ -37,6 +39,7 @@ export async function textBasedQueryStateToAstWithValidation({
       inputQuery,
       time,
       timeFieldName: dataView?.timeFieldName,
+      dropNulls,
     });
   }
   return ast;

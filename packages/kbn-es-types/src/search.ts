@@ -663,5 +663,6 @@ export type ESQLRow = unknown[];
 
 export interface ESQLSearchReponse {
   columns: ESQLColumn[];
+  null_columns?: ESQLColumn[];
   values: ESQLRow[];
 }
