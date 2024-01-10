@@ -14,6 +14,7 @@ import {
   parseGroupingQuery,
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
+import { LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { LATEST_VULNERABILITIES_RETENTION_POLICY } from '../../../../common/constants';
 import {
@@ -101,6 +102,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     unit: VULNERABILITIES_UNIT,
     groupPanelRenderer,
     groupStatsRenderer,
+    groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
   });
 
   const groupingQuery = getGroupingQuery({

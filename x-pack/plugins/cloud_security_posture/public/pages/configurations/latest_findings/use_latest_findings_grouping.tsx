@@ -14,6 +14,7 @@ import {
   parseGroupingQuery,
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
+import { LOCAL_STORAGE_FINDINGS_GROUPING_KEY } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
 import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
@@ -152,6 +153,7 @@ export const useLatestFindingsGrouping = ({
     unit: FINDINGS_UNIT,
     groupPanelRenderer,
     groupStatsRenderer,
+    groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
   });
 
   const groupingQuery = getGroupingQuery({
