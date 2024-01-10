@@ -29,15 +29,11 @@ import React, { useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  CRITICALITY_LEVEL_DESCRIPTION,
-  CRITICALITY_LEVEL_TITLE,
-  PICK_ASSET_CRITICALITY,
-} from './translations';
+import { PICK_ASSET_CRITICALITY } from './translations';
+import { AssetCriticalityBadge } from './asset_criticality_badge';
 import type { Entity, ModalState, State } from './use_asset_criticality';
 import { useAssetCriticalityData, useCriticalityModal } from './use_asset_criticality';
-import type { CriticalityLevel } from './common';
-import { CRITICALITY_LEVEL_COLOR } from './common';
+import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 
 interface Props {
   entity: Entity;
@@ -75,12 +71,10 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
             <EuiFlexItem>
               <EuiText size="s">
                 {criticality.status === 'update' && criticality.query.data?.criticality_level ? (
-                  <EuiHealth
-                    data-test-subj="asset-criticality-level"
-                    color={CRITICALITY_LEVEL_COLOR[criticality.query.data.criticality_level]}
-                  >
-                    {CRITICALITY_LEVEL_TITLE[criticality.query.data.criticality_level]}
-                  </EuiHealth>
+                  <AssetCriticalityBadge
+                    criticalityLevel={criticality.query.data.criticality_level}
+                    dataTestSubj="asset-criticality-level"
+                  />
                 ) : (
                   <EuiHealth color="subdued">
                     <FormattedMessage
@@ -182,21 +176,15 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entit
 const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel> => ({
   value: level,
   dropdownDisplay: (
-    <EuiHealth
-      color={CRITICALITY_LEVEL_COLOR[level]}
+    <AssetCriticalityBadge
+      criticalityLevel={level}
       style={{ lineHeight: 'inherit' }}
-      data-test-subj="asset-criticality-modal-select-option"
-    >
-      <strong>{CRITICALITY_LEVEL_TITLE[level]}</strong>
-      <EuiText size="s" color="subdued">
-        <p>{CRITICALITY_LEVEL_DESCRIPTION[level]}</p>
-      </EuiText>
-    </EuiHealth>
+      dataTestSubj="asset-criticality-modal-select-option"
+      withDescription
+    />
   ),
   inputDisplay: (
-    <EuiHealth color={CRITICALITY_LEVEL_COLOR[level]} style={{ lineHeight: 'inherit' }}>
-      {CRITICALITY_LEVEL_TITLE[level]}
-    </EuiHealth>
+    <AssetCriticalityBadge criticalityLevel={level} style={{ lineHeight: 'inherit' }} />
   ),
 });
 const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [

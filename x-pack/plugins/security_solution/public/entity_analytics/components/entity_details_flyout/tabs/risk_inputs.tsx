@@ -6,18 +6,23 @@
  */
 
 import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
-import { EuiSpacer, EuiInMemoryTable, EuiTitle } from '@elastic/eui';
+import { EuiHealth, EuiSpacer, EuiInMemoryTable, EuiTitle } from '@elastic/eui';
+import { euiLightVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import type { CriticalityLevel } from '../../../../../common/entity_analytics/asset_criticality/types';
+import { BasicTable } from '../../../../common/components/ml/tables/basic_table';
 import { useAlertsByIds } from '../../../../common/containers/alerts/use_alerts_by_ids';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { ActionColumn } from '../components/action_column';
 import { RiskInputsUtilityBar } from '../components/utility_bar';
-
+import { AssetCriticalityBadge } from '../../asset_criticality';
 export interface RiskInputsTabProps extends Record<string, unknown> {
   alertIds: string[];
+  criticalityLevel?: CriticalityLevel;
 }
 
 export interface AlertRawData {
@@ -26,10 +31,73 @@ export interface AlertRawData {
   _id: string;
 }
 
-export const RiskInputsTab = ({ alertIds }: RiskInputsTabProps) => {
+const CriticalityField: React.FC<{ criticalityLevel: RiskInputsTabProps['criticalityLevel'] }> = ({
+  criticalityLevel,
+}) => {
+  if (criticalityLevel) {
+    return <AssetCriticalityBadge criticalityLevel={criticalityLevel} />;
+  }
+
+  return (
+    <EuiHealth color="subdued" data-test-subj="no-criticality">
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.noCriticality"
+        defaultMessage="No criticality assigned"
+      />
+    </EuiHealth>
+  );
+};
+
+const ContextsTable: React.FC<{ criticalityLevel: RiskInputsTabProps['criticalityLevel'] }> = ({
+  criticalityLevel,
+}) => {
+  const columns = [
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.fieldColumnTitle"
+          defaultMessage="Field"
+        />
+      ),
+      field: 'label',
+      render: (label: string) => (
+        <span
+          css={css`
+            font-weight: ${euiLightVars.euiFontWeightMedium};
+            color: ${euiLightVars.euiTitleColor};
+          `}
+        >
+          {label}
+        </span>
+      ),
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.valuesColumnTitle"
+          defaultMessage="Values"
+        />
+      ),
+      field: 'field',
+      render: (field: string | undefined, { render }: { render: () => JSX.Element }) => render(),
+    },
+  ];
+
+  const items = [
+    {
+      label: 'Asset Criticality Level',
+      render: () => <CriticalityField criticalityLevel={criticalityLevel} />,
+    },
+  ];
+
+  return (
+    <BasicTable data-test-subj="contexts-table" columns={columns} items={items} compressed={true} />
+  );
+};
+
+export const RiskInputsTab = ({ alertIds, criticalityLevel }: RiskInputsTabProps) => {
   const [selectedItems, setSelectedItems] = useState<AlertRawData[]>([]);
   const { loading, data: alertsData } = useAlertsByIds({ alertIds });
-
   const euiTableSelectionProps = useMemo(
     () => ({
       onSelectionChange: (selected: AlertRawData[]) => {
@@ -107,7 +175,17 @@ export const RiskInputsTab = ({ alertIds }: RiskInputsTabProps) => {
 
   return (
     <>
-      {/* Temporary label. It will be replaced by a filter */}
+      <EuiTitle size="xs" data-test-subj="risk-input-tab-title">
+        <h3>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.contextsTitle"
+            defaultMessage="Contexts"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <ContextsTable criticalityLevel={criticalityLevel} />
+      <EuiSpacer size="m" />
       <EuiTitle size="xs" data-test-subj="risk-input-tab-title">
         <h3>
           <FormattedMessage

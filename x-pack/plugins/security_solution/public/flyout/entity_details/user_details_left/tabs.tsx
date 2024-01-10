@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
 import { UserAssetTableType } from '../../../explore/users/store/model';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
@@ -21,14 +22,23 @@ import { RightPanelProvider } from '../../document_details/right/context';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
-export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftPanelTabsType =>
+interface UseTabsParams {
+  managedUser: ManagedUserHits;
+  alertIds: string[];
+  criticalityLevel?: CriticalityLevel;
+}
+export const useTabs = ({
+  managedUser,
+  alertIds,
+  criticalityLevel,
+}: UseTabsParams): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
     if (alertIds.length > 0) {
-      tabs.push(getRiskInputTab(alertIds));
+      tabs.push(getRiskInputTab({ alertIds, criticalityLevel }));
     }
 
     if (oktaManagedUser) {
@@ -40,7 +50,7 @@ export const useTabs = (managedUser: ManagedUserHits, alertIds: string[]): LeftP
     }
 
     return tabs;
-  }, [alertIds, managedUser]);
+  }, [alertIds, managedUser, criticalityLevel]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
   id: EntityDetailsLeftPanelTab.OKTA,

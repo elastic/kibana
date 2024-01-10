@@ -58,7 +58,7 @@ export interface RiskScore {
   id_value: string;
   criticality_level?: string | undefined;
   criticality_modifier?: number | undefined;
-  calculated_level: string;
+  calculated_level: RiskLevels;
   calculated_score: number;
   calculated_score_norm: number;
   category_1_score: number;

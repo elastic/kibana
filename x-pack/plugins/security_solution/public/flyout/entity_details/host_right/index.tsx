@@ -84,12 +84,13 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
             host: {
               name: hostName,
             },
+            criticalityLevel: hostRiskData?.host.risk.criticality_level,
           },
           path: tab ? { tab } : undefined,
         },
       });
     },
-    [openLeftPanel, hostRiskData?.host.risk.inputs, hostName]
+    [hostRiskData, openLeftPanel, hostName]
   );
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);

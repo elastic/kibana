@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 import {
@@ -16,6 +17,7 @@ import {
 
 interface RiskInputsParam {
   alertIds: string[];
+  criticalityLevel?: CriticalityLevel;
 }
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
@@ -31,11 +33,11 @@ export const HostDetailsPanel = ({ riskInputs }: HostDetailsPanelProps) => {
   // Temporary implementation while Host details left panel don't have Asset tabs
   const [tabs, selectedTabId, setSelectedTabId] = useMemo(() => {
     return [
-      riskInputs.alertIds.length > 0 ? [getRiskInputTab(riskInputs.alertIds)] : [],
+      riskInputs.alertIds.length > 0 ? [getRiskInputTab(riskInputs)] : [],
       EntityDetailsLeftPanelTab.RISK_INPUTS,
       () => {},
     ];
-  }, [riskInputs.alertIds]);
+  }, [riskInputs]);
 
   return (
     <>

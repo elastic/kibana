@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
 import { useTabs } from './tabs';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
@@ -20,6 +21,7 @@ import { LeftPanelContent } from '../shared/components/left_panel/left_panel_con
 
 interface RiskInputsParam {
   alertIds: string[];
+  criticalityLevel?: CriticalityLevel;
 }
 
 interface UserParam {
@@ -40,7 +42,7 @@ export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'use
 
 export const UserDetailsPanel = ({ riskInputs, user, path }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser(user.name, user.email);
-  const tabs = useTabs(managedUser.data, riskInputs.alertIds);
+  const tabs = useTabs({ managedUser: managedUser.data, ...riskInputs });
   const { selectedTabId, setSelectedTabId } = useSelectedTab(riskInputs, user, tabs, path);
 
   if (managedUser.isLoading) return <FlyoutLoading />;

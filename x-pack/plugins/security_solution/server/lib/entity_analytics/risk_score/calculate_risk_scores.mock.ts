@@ -9,7 +9,7 @@ import {
   ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
+import { RiskCategories, RiskLevels } from '../../../../common/entity_analytics/risk_engine';
 import type {
   CalculateRiskScoreAggregations,
   CalculateScoresResponse,
@@ -89,7 +89,7 @@ const buildResponseMock = (
         id_value: 'hostname',
         criticality_level: 'important',
         criticality_modifier: 1.5,
-        calculated_level: 'Unknown',
+        calculated_level: RiskLevels.unknown,
         calculated_score: 20,
         calculated_score_norm: 30,
         category_1_score: 30,
