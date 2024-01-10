@@ -9,7 +9,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import { useBatchedPublishingSubjects } from './publishing_batcher';
 import { useStateFromPublishingSubject } from './publishing_subject';
@@ -52,7 +52,7 @@ describe('useBatchedPublishingSubjects', () => {
       renderCount++;
       return (
         <>
-          <button onClick={incrementAll}/>
+          <button onClick={incrementAll} />
           <span>{`value1: ${value1}, value2: ${value2}, value3: ${value3}, value4: ${value4}, value5: ${value5}, value6: ${value6}`}</span>
           <div data-test-subj="renderCount">{renderCount}</div>
         </>
@@ -60,11 +60,15 @@ describe('useBatchedPublishingSubjects', () => {
     }
     render(<Component />);
     await waitFor(() => {
-      expect(screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')).toBeInTheDocument();
+      expect(
+        screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
+      ).toBeInTheDocument();
     });
     userEvent.click(screen.getByRole('button'));
     await waitFor(() => {
-      expect(screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')).toBeInTheDocument();
+      expect(
+        screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
+      ).toBeInTheDocument();
     });
     expect(screen.getByTestId('renderCount')).toHaveTextContent('2');
   });
@@ -84,10 +88,12 @@ describe('useBatchedPublishingSubjects', () => {
       renderCount++;
       return (
         <>
-          <button onClick={() => {
-            // using setTimeout to move next calls outside of callstack from onClick
-            setTimeout(incrementAll, 0);
-          }}/>
+          <button
+            onClick={() => {
+              // using setTimeout to move next calls outside of callstack from onClick
+              setTimeout(incrementAll, 0);
+            }}
+          />
           <span>{`value1: ${value1}, value2: ${value2}, value3: ${value3}, value4: ${value4}, value5: ${value5}, value6: ${value6}`}</span>
           <div data-test-subj="renderCount">{renderCount}</div>
         </>
@@ -95,11 +101,15 @@ describe('useBatchedPublishingSubjects', () => {
     }
     render(<Component />);
     await waitFor(() => {
-      expect(screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')).toBeInTheDocument();
+      expect(
+        screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
+      ).toBeInTheDocument();
     });
     userEvent.click(screen.getByRole('button'));
     await waitFor(() => {
-      expect(screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')).toBeInTheDocument();
+      expect(
+        screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
+      ).toBeInTheDocument();
     });
     expect(screen.getByTestId('renderCount')).toHaveTextContent('3');
   });
@@ -117,10 +127,12 @@ describe('useBatchedPublishingSubjects', () => {
       renderCount++;
       return (
         <>
-          <button onClick={() => {
-            // using setTimeout to move next calls outside of callstack from onClick
-            setTimeout(incrementAll, 0);
-          }}/>
+          <button
+            onClick={() => {
+              // using setTimeout to move next calls outside of callstack from onClick
+              setTimeout(incrementAll, 0);
+            }}
+          />
           <span>{`value1: ${value1}, value2: ${value2}, value3: ${value3}, value4: ${value4}, value5: ${value5}, value6: ${value6}`}</span>
           <div data-test-subj="renderCount">{renderCount}</div>
         </>
@@ -128,11 +140,15 @@ describe('useBatchedPublishingSubjects', () => {
     }
     render(<Component />);
     await waitFor(() => {
-      expect(screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')).toBeInTheDocument();
+      expect(
+        screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
+      ).toBeInTheDocument();
     });
     userEvent.click(screen.getByRole('button'));
     await waitFor(() => {
-      expect(screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')).toBeInTheDocument();
+      expect(
+        screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
+      ).toBeInTheDocument();
     });
     expect(screen.getByTestId('renderCount')).toHaveTextContent('7');
   });
