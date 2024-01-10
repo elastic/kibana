@@ -151,6 +151,7 @@ const CustomStyles: React.FC = ({ children }) => {
   const customCss = css`
     .${CODE_CLASS_NAME}.diff-code {
       padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.m};
+      font-family: ${euiTheme.font.family};
     }
 
     .${TABLE_CLASS_NAME} .diff-gutter-col {

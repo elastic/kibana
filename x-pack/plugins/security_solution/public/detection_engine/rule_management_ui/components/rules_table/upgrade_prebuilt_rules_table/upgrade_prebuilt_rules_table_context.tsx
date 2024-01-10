@@ -276,14 +276,14 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     if (!activeRule) {
       return [];
     }
-
+    console.log(activeRule.diff);
     return [
       {
         id: 'updates',
         name: ruleDetailsI18n.UPDATES_TAB_LABEL,
         content: (
           <TabContentPadding>
-            <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
+            <RuleDiffTab ruleDiff={activeRule.diff} />
           </TabContentPadding>
         ),
       },
