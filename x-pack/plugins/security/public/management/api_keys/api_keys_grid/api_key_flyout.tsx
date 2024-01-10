@@ -38,7 +38,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { CodeEditorField } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import type { CategorizedApiKey } from './api_keys_grid_page';
@@ -61,17 +61,24 @@ import type {
 
 export const DEFAULT_EXPIRATION_VALUE = '60';
 
-export const ENABLED_LABEL: string = i18n.translate(
-  'xpack.security.accountManagement.apiKeyFlyout.enabledLabel',
-  {
-    defaultMessage: 'Enabled',
-  }
+const TypeLabel = () => (
+  <FormattedMessage
+    id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
+    defaultMessage="Type"
+  />
 );
 
-export const DISABLED_LABEL: string = i18n.translate(
-  'xpack.security.accountManagement.apiKeyFlyout.disabledLabel',
+const NameLabel = () => (
+  <FormattedMessage
+    id="xpack.security.accountManagement.apiKeyFlyout.nameLabel"
+    defaultMessage="Name"
+  />
+);
+
+const invalidJsonError = i18n.translate(
+  'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
   {
-    defaultMessage: 'Disabled',
+    defaultMessage: 'Enter valid JSON.',
   }
 );
 
@@ -313,10 +320,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       <EuiFlexItem>
                         <EuiText size="xs">
                           <strong>
-                            <FormattedMessage
-                              id="xpack.security.accountManagement.apiKeyFlyout.nameLabel"
-                              defaultMessage="Name"
-                            />
+                            <NameLabel />
                           </strong>
                         </EuiText>
                       </EuiFlexItem>
@@ -349,10 +353,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       <EuiFlexItem>
                         <EuiText size="xs">
                           <strong>
-                            <FormattedMessage
-                              id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
-                              defaultMessage="Type"
-                            />
+                            <TypeLabel />
                           </strong>
                         </EuiText>
                       </EuiFlexItem>
@@ -437,15 +438,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       </p>
                     </EuiText>
                     <EuiSpacer size="s" />
-                    <FormRow
-                      label={
-                        <FormattedMessage
-                          id="xpack.security.accountManagement.apiKeyFlyout.nameLabel"
-                          defaultMessage="Name"
-                        />
-                      }
-                      fullWidth
-                    >
+                    <FormRow label={<NameLabel />} fullWidth>
                       <FormField
                         name="name"
                         inputRef={firstFieldRef}
@@ -680,12 +673,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         try {
                           JSON.parse(value);
                         } catch (e) {
-                          return i18n.translate(
-                            'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
-                            {
-                              defaultMessage: 'Enter valid JSON.',
-                            }
-                          );
+                          return invalidJsonError;
                         }
                       }}
                       fullWidth
@@ -772,12 +760,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                             try {
                               JSON.parse(value);
                             } catch (e) {
-                              return i18n.translate(
-                                'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
-                                {
-                                  defaultMessage: 'Enter valid JSON.',
-                                }
-                              );
+                              return invalidJsonError;
                             }
                           }}
                           fullWidth
@@ -861,12 +844,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           try {
                             JSON.parse(value);
                           } catch (e) {
-                            return i18n.translate(
-                              'xpack.security.management.apiKeys.apiKeyFlyout.invalidJsonError',
-                              {
-                                defaultMessage: 'Enter valid JSON.',
-                              }
-                            );
+                            return invalidJsonError;
                           }
                         }}
                         fullWidth
@@ -914,13 +892,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
     </FormikProvider>
   );
 };
-
-const TypeLabel = () => (
-  <FormattedMessage
-    id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
-    defaultMessage="Type"
-  />
-);
 
 export function mapCreateApiKeyValues(values: ApiKeyFormValues): CreateAPIKeyParams {
   const { type, name } = values;
