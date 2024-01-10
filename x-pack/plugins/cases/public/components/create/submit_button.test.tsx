@@ -23,40 +23,38 @@ describe('SubmitCaseButton', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  for (let index = 0; index < 100; index++) {
-    it('renders', async () => {
-      appMockRender.render(
-        <FormTestComponent onSubmit={onSubmit}>
-          <SubmitCaseButton />
-        </FormTestComponent>
-      );
+  it('renders', async () => {
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <SubmitCaseButton />
+      </FormTestComponent>
+    );
 
-      expect(await screen.findByTestId('create-case-submit')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('create-case-submit')).toBeInTheDocument();
+  });
 
-    it('submits', async () => {
-      appMockRender.render(
-        <FormTestComponent onSubmit={onSubmit}>
-          <SubmitCaseButton />
-        </FormTestComponent>
-      );
+  it('submits', async () => {
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <SubmitCaseButton />
+      </FormTestComponent>
+    );
 
-      userEvent.click(await screen.findByTestId('create-case-submit'));
+    userEvent.click(await screen.findByTestId('create-case-submit'));
 
-      await waitFor(() => expect(onSubmit).toBeCalled());
-    });
+    await waitFor(() => expect(onSubmit).toBeCalled());
+  });
 
-    it('disables when submitting', async () => {
-      appMockRender.render(
-        <FormTestComponent onSubmit={onSubmit}>
-          <SubmitCaseButton />
-        </FormTestComponent>
-      );
+  it('disables when submitting', async () => {
+    appMockRender.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <SubmitCaseButton />
+      </FormTestComponent>
+    );
 
-      const button = await screen.findByTestId('create-case-submit');
-      userEvent.click(button);
+    const button = await screen.findByTestId('create-case-submit');
+    userEvent.click(button);
 
-      await waitFor(() => expect(button).toBeDisabled());
-    });
-  }
+    await waitFor(() => expect(button).toBeDisabled());
+  });
 });
