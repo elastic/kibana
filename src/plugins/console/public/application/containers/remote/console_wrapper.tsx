@@ -145,7 +145,7 @@ export const ConsoleWrapper = (props: RemoteConsoleDependencies): React.ReactEle
         >
           <RequestContextProvider>
             <EditorContextProvider settings={settings.toJSON()}>
-              <Main />
+              <Main hideWelcome />
             </EditorContextProvider>
           </RequestContextProvider>
         </ServicesContextProvider>
