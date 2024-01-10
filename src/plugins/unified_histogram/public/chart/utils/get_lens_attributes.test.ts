@@ -565,7 +565,6 @@ describe('getLensAttributes', () => {
           "state": Object {
             "datasourceStates": Object {
               "textBased": Object {
-                "fieldList": Array [],
                 "indexPatternRefs": Array [],
                 "initialContext": Object {
                   "contextualFields": Array [
