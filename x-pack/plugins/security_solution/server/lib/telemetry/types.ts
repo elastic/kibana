@@ -43,6 +43,8 @@ export interface ESLicense {
   start_date_in_millis?: number;
 }
 
+// Telemetry
+//
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   '@timestamp'?: string;
@@ -77,6 +79,22 @@ export interface TelemetryEvent {
       pod?: SearchTypes;
     };
   };
+}
+
+/**
+ * List of supported telemetry channels.
+ *
+ * TODO(sebastian.zaffarano): should we start using this list instead of
+ * the hardcoded values or the constants defined along the code?
+ */
+export enum TelemetryChannel {
+  LISTS = 'security-lists-v2',
+  ENDPOINT_META = 'endpoint-metadata',
+  ENDPOINT_ALERTS = 'alerts-endpoint',
+  DETECTION_ALERTS = 'alerts-detections',
+  TIMELINE = 'alerts-timeline',
+  INSIGHTS = 'security-insights-v1',
+  TASK_METRICS = 'task-metrics',
 }
 
 // EP Policy Response
