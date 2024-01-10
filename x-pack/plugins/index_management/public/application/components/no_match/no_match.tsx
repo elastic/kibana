@@ -38,7 +38,7 @@ export const NoMatch = ({
           <p>
             <FormattedMessage
               id="xpack.idxMgmt.noMatch.noIndicesDescription"
-              defaultMessage="No indices match your search. Clear the searchbar input or click the button below."
+              defaultMessage="Start a new search or try using different filters."
             />
           </p>
         }
