@@ -9,8 +9,6 @@ Storage and accessor functions are made available via the `AppContextService`, a
 To register a capability on plugin start, add the following in the consuming plugin's `start()`, specifying any number of capabilities you would like to explicitly declare:
 
 ```ts
-
-```ts
 plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
   assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
   assistantStreamingEnabled: config.experimentalFeatures.assistantStreamingEnabled,
