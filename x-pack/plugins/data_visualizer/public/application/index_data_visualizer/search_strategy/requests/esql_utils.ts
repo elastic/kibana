@@ -11,6 +11,17 @@ import { MAX_PERCENT, PERCENTILE_SPACING } from './constants';
 export interface ESQLQuery {
   esql: string;
 }
+
+/**
+ * Helper function to escape special characters for field names used in ESQL queries.
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/esql-syntax.html#esql-identifiers
+ * @param str
+ * @returns "`str`"
+ **/
+export const escapeESQL = (str: string) => {
+  return `\`${str}\``;
+};
+
 export function isESQLQuery(arg: unknown): arg is ESQLQuery {
   return isPopulatedObject(arg, ['esql']);
 }
@@ -20,4 +31,6 @@ const PERCENTS = Array.from(
 );
 
 export const getPercentileESQLQuery = (fieldName: string) =>
-  PERCENTS.map((p) => `${fieldName}_p${p} = PERCENTILE(${fieldName}, ${p})`);
+  PERCENTS.map(
+    (p) => `${escapeESQL(`${fieldName}_p${p}`)} = PERCENTILE(${escapeESQL(fieldName)}, ${p})`
+  );

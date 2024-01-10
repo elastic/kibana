@@ -17,6 +17,7 @@ import { OMIT_FIELDS } from '../../../../common/constants';
 import type { TimeBucketsInterval } from '../../../../common/services/time_buckets';
 import type {
   DataStatsFetchProgress,
+  DateFieldStats,
   FieldExamples,
   FieldStats,
   StringFieldStats,
@@ -26,7 +27,11 @@ import type { DocumentCountStats } from '../../common/hooks/use_document_count_s
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { PERCENTILE_SPACING } from '../search_strategy/requests/constants';
-import { getPercentileESQLQuery, isESQLQuery } from '../search_strategy/requests/esql_utils';
+import {
+  escapeESQL,
+  getPercentileESQLQuery,
+  isESQLQuery,
+} from '../search_strategy/requests/esql_utils';
 import { getESQLDocumentCountStats } from '../search_strategy/requests/get_document_stats';
 import type { NonAggregatableField } from '../types/overall_stats';
 import { getESQLSupportedAggs } from '../utils/get_supported_aggs';
@@ -120,6 +125,7 @@ export const useESQLFieldStatsData = ({
           const esqlBaseQuery = searchQuery.esql;
           const totalFieldsCnt = columns.length;
           const processedFieldStats = new Map<string, FieldStats>();
+          setFieldStats(processedFieldStats);
 
           // GETTING STATS FOR NUMERIC FIELDS
 
@@ -139,8 +145,8 @@ export const useESQLFieldStatsData = ({
                */
               return {
                 field,
-                query: `${field.name}_min = MIN(${field.name}),
-              ${field.name}_max = MAX(${field.name}),
+                query: `${escapeESQL(`${field.name}_min`)} = MIN(${escapeESQL(field.name)}),
+                ${escapeESQL(`${field.name}_max`)} = MAX(${escapeESQL(field.name)}),
               ${percentiles.join(',')}
               `,
                 startIndex: idx * (percentiles.length + 2),
@@ -148,12 +154,13 @@ export const useESQLFieldStatsData = ({
             });
 
           if (numericFields.length > 0) {
-            const fieldStatsQuery = '| STATS ' + numericFields.map(({ query }) => query).join(',');
+            const numericStatsQuery =
+              '| STATS ' + numericFields.map(({ query }) => query).join(',');
 
             const fieldStatsResp = await runRequest(
               {
                 params: {
-                  query: esqlBaseQuery + fieldStatsQuery,
+                  query: esqlBaseQuery + numericStatsQuery,
                   locale: 'en',
                   ...(filter ? { filter } : {}),
                 },
@@ -185,7 +192,6 @@ export const useESQLFieldStatsData = ({
                 });
               });
 
-              setFieldStats(processedFieldStats);
               setFetchState({
                 loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
               });
@@ -198,9 +204,11 @@ export const useESQLFieldStatsData = ({
             .map((field) => {
               return {
                 field,
-                query: `| STATS ${field.name}_terms = count(${field.name}) BY ${field.name}
+                query: `| STATS ${escapeESQL(`${field.name}_terms`)} = count(${escapeESQL(
+                  field.name
+                )}) BY ${escapeESQL(field.name)}
                   | LIMIT 10
-                  | SORT ${field.name}_terms DESC`,
+                  | SORT ${escapeESQL(`${field.name}_terms`)} DESC`,
               };
             });
 
@@ -253,7 +261,9 @@ export const useESQLFieldStatsData = ({
             .map((field) => {
               return {
                 field,
-                query: `| STATS ${field.name}_terms = count(${field.name}) BY ${field.name}
+                query: `| STATS ${escapeESQL(`${field.name}_terms`)} = count(${escapeESQL(
+                  field.name
+                )}) BY ${escapeESQL(field.name)}
                   | LIMIT 3`,
               };
             });
@@ -321,7 +331,7 @@ export const useESQLFieldStatsData = ({
                   query:
                     esqlBaseQuery +
                     `| KEEP ${textFields.map((f) => f.name).join(',')}
-                  | LIMIT 10`,
+                     | LIMIT 10`,
                   ...(filter ? { filter } : {}),
                 },
               },
@@ -339,9 +349,55 @@ export const useESQLFieldStatsData = ({
                   examples,
                 } as FieldExamples);
               });
+              setFetchState({
+                loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
+              });
             }
           }
 
+          // GETTING STATS FOR DATE FIELDS
+          const dateFields = columns
+            .filter((f) => f.secondaryType === 'date')
+            .map((field) => {
+              return {
+                field,
+                query: `${escapeESQL(`${field.name}_earliest`)} = MIN(${escapeESQL(
+                  field.name
+                )}), ${escapeESQL(`${field.name}_latest`)} = MAX(${escapeESQL(field.name)})`,
+              };
+            });
+
+          if (dateFields.length > 0) {
+            const dateStatsQuery = ' | STATS ' + dateFields.map(({ query }) => query).join(',');
+
+            const dateFieldsResp = await runRequest(
+              {
+                params: {
+                  query: esqlBaseQuery + dateStatsQuery,
+                  ...(filter ? { filter } : {}),
+                },
+              },
+              { strategy: ESQL_SEARCH_STRATEGY }
+            );
+
+            if (dateFieldsResp && !unmounted) {
+              dateFields.forEach(({ field: dateField }, idx) => {
+                const row = dateFieldsResp.rawResponse.values[0] as Array<null | string | number>;
+
+                const earliest = row[idx * 2];
+                const latest = row[idx * 2 + 1];
+
+                processedFieldStats.set(dateField.name, {
+                  fieldName: dateField.name,
+                  earliest,
+                  latest,
+                } as DateFieldStats);
+              });
+              setFetchState({
+                loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
+              });
+            }
+          }
           setFetchState({
             loaded: 100,
             isRunning: false,
@@ -544,7 +600,11 @@ export const useESQLOverallStatsData = (
           let countQuery = aggregatableFieldsToQuery.length > 0 ? '| STATS ' : '';
           countQuery += aggregatableFieldsToQuery
             .map((field) => {
-              return `${field.name}_count = COUNT(${field.name}), ${field.name}_cardinality = COUNT_DISTINCT(${field.name})`;
+              return `${escapeESQL(`${field.name}_count`)} = COUNT(${escapeESQL(
+                field.name
+              )}), ${escapeESQL(`${field.name}_cardinality`)} = COUNT_DISTINCT(${escapeESQL(
+                field.name
+              )})`;
             })
             .join(',');
 
