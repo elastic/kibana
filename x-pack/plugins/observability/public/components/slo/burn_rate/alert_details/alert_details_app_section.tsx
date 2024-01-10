@@ -34,7 +34,9 @@ export default function AlertDetailsAppSection({
   setAlertSummaryFields,
 }: AppSectionProps) {
   const {
-    services: { http },
+    services: {
+      http: { basePath },
+    },
   } = useKibana();
 
   const sloId = alert.fields['kibana.alert.rule.parameters']!.sloId as string;
@@ -51,7 +53,7 @@ export default function AlertDetailsAppSection({
           }
         ),
         value: (
-          <EuiLink data-test-subj="sloLink" href={http.basePath.prepend(alert.link!)}>
+          <EuiLink data-test-subj="sloLink" href={basePath.prepend(alert.link!)}>
             {slo?.name ?? '-'}
           </EuiLink>
         ),
@@ -70,7 +72,7 @@ export default function AlertDetailsAppSection({
         ),
       },
     ]);
-  }, [alert, rule, ruleLink, setAlertSummaryFields, slo]);
+  }, [alert, rule, ruleLink, setAlertSummaryFields, basePath, slo]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">
