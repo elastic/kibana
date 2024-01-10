@@ -73,7 +73,8 @@
     "@kbn/ml-data-view-utils",
     "@kbn/ml-creation-wizard-utils",
     "@kbn/alerts-as-data-utils",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/rule-data-utils"
   ],
   "exclude": [
     "target/**/*",
