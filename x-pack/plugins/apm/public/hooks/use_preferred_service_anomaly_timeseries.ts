@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ApmMlDetectorType } from '../../common/anomaly_detection/apm_ml_detectors';
+import { AnomalyDetectorType } from '../../common/anomaly_detection/apm_ml_detectors';
 import { getPreferredServiceAnomalyTimeseries } from '../../common/anomaly_detection/get_preferred_service_anomaly_timeseries';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../context/environments_context/use_environments_context';
 import { useServiceAnomalyTimeseriesContext } from '../context/service_anomaly_timeseries/use_service_anomaly_timeseries_context';
 
 export function usePreferredServiceAnomalyTimeseries(
-  detectorType: ApmMlDetectorType
+  detectorType: AnomalyDetectorType
 ) {
   const { allAnomalyTimeseries } = useServiceAnomalyTimeseriesContext();
 
