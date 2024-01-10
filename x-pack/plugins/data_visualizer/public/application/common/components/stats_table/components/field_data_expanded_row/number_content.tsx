@@ -48,6 +48,8 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
   const { min, median, max, distribution } = stats;
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
+  // @TODO: remove
+  console.log(`--@@NumberContent fieldFormat`, fieldFormat);
   const summaryTableItems = [
     {
       function: 'min',

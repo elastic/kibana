@@ -62,7 +62,7 @@ import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/
 import { getDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import {
-  Column,
+  type Column,
   useESQLOverallStatsData,
   useESQLFieldStatsData,
   type AggregatableField,
@@ -132,7 +132,7 @@ export interface IndexDataVisualizerESQLProps {
 
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { data } = services;
+  const { data, fieldFormats } = services;
   const euiTheme = useCurrentEuiTheme();
 
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
@@ -378,6 +378,9 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         ...field,
         ...fieldData,
         loading: fieldData?.existsInDocs ?? true,
+        fieldFormat:
+          currentDataView?.getFormatterForFieldNoDefault(field.name) ??
+          fieldFormats.deserialize({ id: field.secondaryType }),
         aggregatable: true,
         deletable: false,
         type: getFieldType(field) as SupportedFieldType,
@@ -391,7 +394,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       visibleMetricsCount: metricFieldsToShow.length,
     });
     setMetricConfigs(configs);
-  }, [metricsLoaded, overallStats, showEmptyFields, columns]);
+  }, [metricsLoaded, overallStats, showEmptyFields, columns, currentDataView?.id]);
 
   const createNonMetricCards = useCallback(() => {
     if (!columns || !overallStats) return;
@@ -447,6 +450,9 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         secondaryType: getFieldType(field) as SupportedFieldType,
         loading: fieldData?.existsInDocs ?? true,
         deletable: false,
+        fieldFormat:
+          currentDataView?.getFormatterForFieldNoDefault(field.name) ??
+          fieldFormats.deserialize({ id: field.secondaryType }),
       };
 
       // Map the field type from the Kibana index pattern to the field type
@@ -469,7 +475,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     });
 
     setNonMetricConfigs(configs);
-  }, [columns, nonMetricsLoaded, overallStats, showEmptyFields]);
+  }, [columns, nonMetricsLoaded, overallStats, showEmptyFields, currentDataView?.id]);
 
   const fieldsCountStats: TotalFieldsStats | undefined = useMemo(() => {
     if (!overallStats) return;
