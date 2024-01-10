@@ -17,6 +17,7 @@ export function compareSOSnapshots(
 ): null | {
   hasChanges: boolean;
   changed: string[];
+  versionChanges: Record<string, { from: string; to: string }>;
   command: string;
 } {
   assertValidSha(previousSha);
@@ -33,9 +34,23 @@ export function compareSOSnapshots(
     const buildkite = new BuildkiteClient({ exec });
     buildkite.uploadArtifacts(outputPath);
 
+    const versionChanges = Object.keys(soComparisonResult.changes).reduce((changes, pluginId) => {
+      const pluginChanges = soComparisonResult.changes[pluginId];
+      const latestVersionBefore = pluginChanges.from.modelVersions.pop();
+      const latestVersionAfter = pluginChanges.to.modelVersions.pop();
+
+      changes[pluginId] = {
+        from: latestVersionBefore.version,
+        to: latestVersionAfter.version,
+      };
+
+      return changes;
+    }, {} as Record<string, { from: string; to: string }>);
+
     return {
       hasChanges: soComparisonResult.hasChanges,
       changed: soComparisonResult.changed,
+      versionChanges,
       command,
     };
   } catch (ex) {
@@ -47,14 +62,23 @@ export function compareSOSnapshots(
 export function makeSOComparisonBlockHtml(comparisonResult: {
   hasChanges: boolean;
   changed: string[];
+  versionChanges: Record<string, { from: string; to: string }>;
   command: string;
 }): string {
   if (comparisonResult.hasChanges) {
+    const { versionChanges, changed, command } = comparisonResult;
     return `<div>
-<h4>Plugin Saved Object migration changes: *yes, ${comparisonResult.changed.length} plugin(s)*</h4>
-<div>Changed plugins: <strong>${comparisonResult.changed.join(', ')}</strong></div>
+<h4>Plugin Saved Object migration changes: *yes, ${changed.length} plugin(s)*</h4>
+<div>Changed plugins:</div>
+ <div>
+    <ul>
+${Object.keys(versionChanges).map(
+  (key) => `<li>${key}: ${versionChanges[key].from} => ${versionChanges[key].to}</li>`
+)}
+    </ul>
+ </div>
 <i>Find detailed info in the archived artifacts, or run the command yourself: </i>
-<div><pre>${comparisonResult.command}</pre></div>
+<div><pre>${command}</pre></div>
 </div>`;
   } else {
     return `<div>
