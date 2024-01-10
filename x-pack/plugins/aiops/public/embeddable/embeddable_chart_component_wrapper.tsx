@@ -127,7 +127,7 @@ export const ChartGridEmbeddableWrapper: FC<
     onError: (error: Error) => void;
   }
 > = ({
-  viewType,
+  viewType = CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
   fn,
   metricField,
   maxSeriesToPlot,
