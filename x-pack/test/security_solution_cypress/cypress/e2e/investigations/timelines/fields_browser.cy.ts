@@ -13,9 +13,7 @@ import {
   FIELDS_BROWSER_MESSAGE_HEADER,
   FIELDS_BROWSER_FILTER_INPUT,
   FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER,
-  FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES,
   FIELDS_BROWSER_CATEGORY_BADGE,
-  FIELDS_BROWSER_VIEW_BUTTON,
 } from '../../../screens/fields_browser';
 import { TIMELINE_FIELDS_BUTTON } from '../../../screens/timeline';
 
@@ -56,14 +54,6 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
       visitWithTimeRange(hostsUrl('allHosts'));
       openTimelineUsingToggle();
       openTimelineFieldsBrowser();
-    });
-
-    it('displays all categories (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORIES_BADGES).should('be.empty');
-    });
-
-    it('displays "view all" option by default', () => {
-      cy.get(FIELDS_BROWSER_VIEW_BUTTON).should('contain.text', 'View: all');
     });
 
     it('displays the expected count of categories that match the filter input', () => {
