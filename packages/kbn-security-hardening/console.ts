@@ -6,36 +6,47 @@
  * Side Public License, v 1.
  */
 
+import { isDevMode } from '@kbn/xstate-utils';
+
 /* eslint-disable no-console */
 
 // From https://www.ascii-code.com/characters/control-characters,
 // but explicitly allowing the range \u0008-\u000F (line breaks, tabs, etc.)
 const CONTROL_CHAR_REGEXP = new RegExp('[\\u0000-\\u0007\\u0010-\\u001F]', 'g');
 
-export const unsafeConsole = {
-  // debug: console.debug.bind(console),
-  // error: console.error.bind(console),
+// export const isDevMode = () => process.env.NODE_ENV !== 'production';
+
+export const internalConsole = {
+  debug: console.debug.bind(console),
+  error: console.error.bind(console),
   info: console.info.bind(console),
   log: console.log.bind(console),
-  // trace: console.trace.bind(console),
-  // warn: console.warn.bind(console),
+  trace: console.trace.bind(console),
+  warn: console.warn.bind(console),
 };
 
-console.info = function (...args) {
-  const cleanedArgs = args.map(function (arg) {
-    if (typeof arg !== 'string') return arg;
-    return escapeControlChars(arg);
-  });
-  unsafeConsole.info.apply(this, cleanedArgs);
-};
+// internalConsole.info.apply(console, [`***** process.env.NODE_ENV: ${process.env.NODE_ENV}`]);
 
-console.log = function (...args) {
-  const cleanedArgs = args.map(function (arg) {
-    if (typeof arg !== 'string') return arg;
-    return escapeControlChars(arg);
-  });
-  unsafeConsole.log.apply(this, cleanedArgs);
-};
+// Only override console if running in production mode
+if (!isDevMode) {
+  // internalConsole.info.apply(console, [`***** OVERRIDING CONSOLE!`]);
+  // internalConsole.info.apply(console, [`***** process.env.NODE_ENV: ${process.env.NODE_ENV}`]);
+  console.info = function (...args) {
+    const cleanedArgs = args.map(function (arg) {
+      if (typeof arg !== 'string') return arg;
+      return escapeControlChars(arg);
+    });
+    internalConsole.info.apply(console, cleanedArgs);
+  };
+
+  console.log = function (...args) {
+    const cleanedArgs = args.map(function (arg) {
+      if (typeof arg !== 'string') return arg;
+      return escapeControlChars(arg);
+    });
+    internalConsole.log.apply(console, cleanedArgs);
+  };
+}
 
 function escapeControlChars(input: string) {
   // typings may be wrong, there's scenarios where the message is not a plain string (e.g error stacks from the ES client)

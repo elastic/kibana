@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { unsafeConsole } from './console';
+export { internalConsole as internalConsole } from './console';

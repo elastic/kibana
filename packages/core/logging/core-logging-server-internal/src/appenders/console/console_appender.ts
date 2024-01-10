@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
-import { unsafeConsole } from '@kbn/security-hardening';
+import { internalConsole } from '@kbn/security-hardening';
 import { Layouts } from '../../layouts/layouts';
 
 const { literal, object } = schema;
@@ -37,7 +37,7 @@ export class ConsoleAppender implements DisposableAppender {
   public append(record: LogRecord) {
     // // eslint-disable-next-line no-console
     // console.log(this.layout.format(record));
-    unsafeConsole.log(this.layout.format(record));
+    internalConsole.log(this.layout.format(record));
   }
 
   /**
