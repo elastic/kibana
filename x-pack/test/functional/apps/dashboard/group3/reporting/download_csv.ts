@@ -177,7 +177,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await reporting.initLogs();
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata', {
+          performance: {
+            highWaterMark: 300,
+            concurrency: 1,
+          },
+        });
 
         await navigateToDashboardApp();
         await PageObjects.dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);
