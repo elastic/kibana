@@ -159,7 +159,6 @@ export const defaultProps = {
         errors: [],
       },
     },
-    fieldList,
     indexPatternRefs: [],
   },
   source: numericDraggedColumn,
