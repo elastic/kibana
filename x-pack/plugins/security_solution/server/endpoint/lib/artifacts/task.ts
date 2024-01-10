@@ -147,7 +147,7 @@ export class ManifestTask {
     }
 
     try {
-      let oldManifest: Manifest | null;
+      let oldManifest: Manifest | null = null;
 
       try {
         // Last manifest we computed, which was saved to ES
@@ -165,8 +165,7 @@ export class ManifestTask {
         );
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      if (oldManifest! == null) {
+      if (!oldManifest) {
         this.logger.debug('Last computed manifest not available yet');
         return;
       }
@@ -208,7 +207,10 @@ export class ManifestTask {
         reportErrors(this.logger, deleteErrors);
       }
 
-      await manifestManager.cleanup(newManifest);
+      await manifestManager.cleanup([
+        ...oldManifest.getOrphanArtifacts(),
+        ...newManifest.getOrphanArtifacts(),
+      ]);
     } catch (err) {
       this.logger.error(wrapErrorIfNeeded(err));
     }

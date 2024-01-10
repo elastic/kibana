@@ -125,8 +125,8 @@ export class BatchProcessor<T = unknown> {
   /**
    * Adds an update to the queue
    */
-  public addToQueue(data: T) {
-    this.queue.push(data);
+  public addToQueue(...data: T[]) {
+    this.queue.push(...data);
     this.processQueue();
   }
 

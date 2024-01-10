@@ -495,6 +495,7 @@ export class ManifestManager {
         soVersion: manifestSo.version,
       });
 
+      // FIXME:PT remove having all artifats in memory here adn instead "process" through each page.
       const fleetArtifacts = await this.listAllArtifacts();
       const fleetArtifactsById = keyBy(fleetArtifacts, (artifact) => getArtifactId(artifact));
 
@@ -502,15 +503,19 @@ export class ManifestManager {
         const artifact = fleetArtifactsById[entry.artifactId];
 
         if (!artifact) {
-          this.logger.error(
-            new InvalidInternalManifestError(`artifact id [${entry.artifactId}] not found!`, {
-              entry,
-              action: 'removed from internal ManifestManger tracking map',
-            })
-          );
+          manifest.addOrphanArtifact(entry.artifactId);
         } else {
           manifest.addEntry(artifact, entry.policyId);
         }
+      }
+
+      if (manifest.hasOrphanArtifacts()) {
+        this.logger.warn(
+          'Orphan artifacts detected! The following artifact IDs are not currently being managed by ' +
+            `manifest v${manifestSo.version} and will be cleaned up:\n${manifest
+              .getOrphanArtifacts()
+              .join('\n')}`
+        );
       }
 
       return manifest;
@@ -721,7 +726,7 @@ export class ManifestManager {
     const fleetArtifacts: Artifact[] = [];
     let total = 0;
 
-    for await (const artifacts of this.artifactClient.fetchAll({ includeArtifactBody: false })) {
+    for await (const artifacts of this.artifactClient.fetchAll()) {
       fleetArtifacts.push(...artifacts);
       total += artifacts.length;
     }
@@ -734,13 +739,13 @@ export class ManifestManager {
   /**
    * Cleanup .fleet-artifacts index if there are some orphan artifacts
    */
-  public async cleanup(manifest: Manifest) {
-    // TODO:PT change method to instead process only artifact IDs
-    //      `getLastComputedManifest()` already loops through all artifacts from Fleet and actually
-    //      knows which ones are bad. We should leverage that instead of looping through all of them
-    //      here again.
+  public async cleanup(artifactIds: string[]): Promise<void> {
+    if (artifactIds.length === 0) {
+      return;
+    }
 
-    const badArtifactIds: string[] = [];
+    const errors: string[] = [];
+
     const artifactDeletionProcess = new BatchProcessor<string>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
@@ -748,37 +753,31 @@ export class ManifestManager {
       batchHandler: async ({ batch, data }) => {
         const deleteErrors = await this.artifactClient.bulkDeleteArtifacts(data);
 
-        badArtifactIds.push(...data);
-
-        if (deleteErrors) {
-          this.logger.error(
-            `Delete batch #[${batch}] with [${
-              data.length
-            }] items encountered the following errors:\n${stringify(deleteErrors)}`
+        if (deleteErrors.length) {
+          errors.push(
+            `Delete batch #[${batch}] with [${data.length}] items:\n${stringify(deleteErrors)}`
           );
         }
       },
     });
 
-    const validArtifactIds = manifest.getAllArtifacts().map((artifact) => getArtifactId(artifact));
+    const uniqueArtifactIds = Array.from(new Set(artifactIds.filter((id) => id.trim().length > 0)));
 
-    for await (const artifacts of this.artifactClient.fetchAll()) {
-      for (const artifact of artifacts) {
-        const artifactId = getArtifactId(artifact);
-        const isArtifactInManifest = validArtifactIds.includes(artifactId);
+    this.logger.debug(
+      `Orphan artifacts to be deleted from Fleet:\n${stringify(uniqueArtifactIds)}`
+    );
 
-        if (!isArtifactInManifest) {
-          artifactDeletionProcess.addToQueue(artifactId);
-        }
-      }
-    }
-
+    artifactDeletionProcess.addToQueue(...uniqueArtifactIds);
     await artifactDeletionProcess.complete();
 
-    this.logger.info(`Orphan artifacts (if any) have been cleaned up`);
-
-    if (badArtifactIds.length) {
-      this.logger.debug(`Deleted artifacts from Fleet:\n${stringify(badArtifactIds)}`);
+    if (errors.length > 0) {
+      this.logger.error(
+        `The following errors were encountered while attempting to delete [${
+          uniqueArtifactIds.length
+        }] orphaned artifacts:\n${stringify(errors)}`
+      );
+    } else {
+      this.logger.info(`Orphan artifacts cleaned up: ${uniqueArtifactIds.length}`);
     }
   }
 }

@@ -57,6 +57,7 @@ export class Manifest {
   private readonly allEntries: Map<string, ManifestEntryDescriptor>;
   private readonly defaultEntries: Map<string, ManifestEntry>;
   private readonly policySpecificEntries: Map<string, Map<string, ManifestEntry>>;
+  private orphanArtifacts: string[] = [];
   private version: ManifestVersion;
 
   constructor(version?: Partial<ManifestVersion>) {
@@ -227,5 +228,26 @@ export class Manifest {
       schemaVersion: this.getSchemaVersion(),
       semanticVersion: this.getSemanticVersion(),
     };
+  }
+
+  /**
+   * Adds an Artifact ID to the list of Orphan artifacts - artifacts not tracked by
+   * the most current manifest and likely needing to be cleanup
+   * @param artifactId
+   */
+  public addOrphanArtifact(artifactId: string): void {
+    this.orphanArtifacts.push(artifactId);
+  }
+
+  /**
+   * Returns array of artifact IDs that have been found to be orphans - not tracked
+   * by the most current manifest)
+   */
+  public getOrphanArtifacts(): string[] {
+    return [...this.orphanArtifacts];
+  }
+
+  public hasOrphanArtifacts(): boolean {
+    return this.orphanArtifacts.length > 0;
   }
 }
