@@ -6,52 +6,71 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import type { FullRuleDiff, RuleFieldsDiff } from '../../../../../common/api/detection_engine';
-import { PartialRuleDiff, DiffableCommonFields } from '../../../../../common/api/detection_engine';
+import { omit } from 'lodash';
+import stringify from 'json-stable-stringify';
+import {
+  EuiSpacer,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiTitle,
+  EuiIconTip,
+} from '@elastic/eui';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
 import * as i18n from './json_diff/translations';
-import { FieldDiffComponent } from './diff_components';
-import { getFormattedFieldDiff } from '../../logic/rule_details/get_formatted_field_diff';
+
+const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
+  stringify(jsObject, { space: 2 });
 
 interface RuleDiffTabProps {
-  ruleDiff: FullRuleDiff;
+  oldRule: RuleResponse;
+  newRule: RuleResponse;
 }
 
-export const RuleDiffTab = ({ ruleDiff }: RuleDiffTabProps) => {
-  // const [oldSource, newSource] = useMemo(() => {
-  //   const visibleOldRuleProperties = omit(oldRule, 'revision');
-  //   const visibleNewRuleProperties = omit(newRule, 'revision');
+export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
+  const [oldSource, newSource] = useMemo(() => {
+    const visibleOldRuleProperties = omit(oldRule, 'revision');
+    const visibleNewRuleProperties = omit(newRule, 'revision');
 
-  //   return [
-  //     sortAndStringifyJson(visibleOldRuleProperties),
-  //     sortAndStringifyJson(visibleNewRuleProperties),
-  //   ];
-  // }, [oldRule, newRule]);
-  const fieldsToRender = useMemo(() => {
-    const fields: Array<{ oldField: string; newField: string; fieldName: string }> = [];
-    for (const field in ruleDiff.fields) {
-      if (Object.hasOwn(ruleDiff.fields, field)) {
-        const typedField = field as keyof RuleFieldsDiff;
-        const [oldField, newField] = getFormattedFieldDiff(typedField, ruleDiff.fields);
-        // const oldField = sortAndStringifyJson(ruleDiff.fields[typedField].current_version);
-        // const newField = sortAndStringifyJson(ruleDiff.fields[typedField].target_version);
-        fields.push({ oldField, newField, fieldName: field });
-      }
-    }
-    return fields;
-  }, [ruleDiff.fields]);
+    return [
+      sortAndStringifyJson(visibleOldRuleProperties),
+      sortAndStringifyJson(visibleNewRuleProperties),
+    ];
+  }, [oldRule, newRule]);
+
   return (
     <>
-      {fieldsToRender.map(({ fieldName, oldField, newField }) => {
-        return (
-          <>
-            <EuiSpacer size="m" />
-            <FieldDiffComponent oldField={oldField} newField={newField} fieldName={fieldName} />
-          </>
-        );
-      })}
+      <EuiSpacer size="m" />
+      <EuiPanel color="transparent" hasBorder>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup alignItems="baseline" gutterSize="xs">
+            <EuiIconTip
+              color="subdued"
+              content={i18n.BASE_VERSION_DESCRIPTION}
+              type="iInCircle"
+              size="m"
+              display="block"
+            />
+            <EuiTitle size="xxxs">
+              <h6>{i18n.BASE_VERSION}</h6>
+            </EuiTitle>
+          </EuiFlexGroup>
+          <EuiFlexGroup alignItems="baseline" gutterSize="xs">
+            <EuiIconTip
+              color="subdued"
+              content={i18n.UPDATED_VERSION_DESCRIPTION}
+              type="iInCircle"
+              size="m"
+            />
+            <EuiTitle size="xxxs">
+              <h6>{i18n.UPDATED_VERSION}</h6>
+            </EuiTitle>
+          </EuiFlexGroup>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="s" size="full" />
+        <DiffView oldSource={oldSource} newSource={newSource} />
+      </EuiPanel>
     </>
   );
 };

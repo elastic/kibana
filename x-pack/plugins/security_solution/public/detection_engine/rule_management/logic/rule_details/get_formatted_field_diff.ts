@@ -16,8 +16,6 @@ export const getFormattedFieldDiff = (fieldName: keyof AllFieldsDiff, fields: Al
   let currentVersion;
   let targetVersion;
 
-  const test = fields.history_window_start.current_version;
-
   switch (fieldName) {
     case 'name':
     case 'description':
