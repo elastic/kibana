@@ -33,11 +33,11 @@ describe('EditTagsFlyout', () => {
     onSaveTags: jest.fn(),
   };
 
+  useGetTagsMock.mockReturnValue({ isLoading: false, data: tags });
+
   beforeEach(() => {
     jest.clearAllMocks();
     appMock = createAppMockRenderer();
-
-    useGetTagsMock.mockReturnValue({ isLoading: false, data: tags });
   });
 
   it('renders correctly', async () => {
@@ -78,12 +78,12 @@ describe('EditTagsFlyout', () => {
   it('shows the case title when selecting one case', async () => {
     appMock.render(<EditTagsFlyout {...props} />);
 
-    expect(screen.getByText(basicCase.title)).toBeInTheDocument();
+    expect(await screen.findByText(basicCase.title)).toBeInTheDocument();
   });
 
   it('shows the number of total selected cases in the title  when selecting multiple cases', async () => {
     appMock.render(<EditTagsFlyout {...props} selectedCases={[basicCase, basicCase]} />);
 
-    expect(screen.getByText('Selected cases: 2')).toBeInTheDocument();
+    expect(await screen.findByText('Selected cases: 2')).toBeInTheDocument();
   });
 });
