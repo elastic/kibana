@@ -16,8 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   describe('connectors', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/173929
-    this.tags(['failsOnMKI']);
     before(async () => {
       await pageObjects.svlCommonPage.login();
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
@@ -65,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
       });
 
-      it('searchBar and select filter connector table', async () => {
+      it('searchBar and select, filters connector table', async () => {
         pageObjects.svlSearchConnectorsPage.connectorOverviewPage.getConnectorFromConnectorTable(
           TEST_CONNECTOR_NAME
         );

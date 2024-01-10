@@ -1517,39 +1517,39 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/utils.ts"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/utils.ts"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/utils.ts"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/threatmatch_input/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/threatmatch_input/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/threatmatch_input/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/threatmatch_input/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4115,11 +4115,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/query_bar/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/query_bar/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4351,11 +4351,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
             "plugin": "securitySolution",
