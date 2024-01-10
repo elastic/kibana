@@ -170,9 +170,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.settings.clickIndexPatternLogstash();
 
-      // todo checking to see if this is needed after auto update code
-      // await PageObjects.settings.refreshDataViewFieldList();
-
       await testSubjects.existOrFail('dataViewMappingConflict');
 
       expect(await PageObjects.settings.getFieldTypes()).to.eql([

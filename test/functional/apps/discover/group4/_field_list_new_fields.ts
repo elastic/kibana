@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // todo
     it('Check that new ingested fields are added to the available fields section', async function () {
       const initialPattern = 'my-index-';
       await es.transport.request({
