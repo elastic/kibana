@@ -5,10 +5,28 @@
  * 2.0.
  */
 
+/*
+ * Mocking EuiSearchBar because its onChange is not firing during tests
+ */
+import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
+
+jest.mock('@elastic/eui/lib/components/search_bar/search_box', () => {
+  return {
+    EuiSearchBox: (props: EuiSearchBoxProps) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockSearchBox'}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          props.onSearch(event.target.value);
+        }}
+      />
+    ),
+  };
+});
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH, INTERNAL_API_BASE_PATH } from '../../../common';
-import { setupEnvironment, nextTick } from '../helpers';
+import { setupEnvironment } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
 
@@ -97,16 +115,12 @@ describe('<IndexManagementHome />', () => {
         createDataStreamPayload({ name: 'dataStream1' })
       );
 
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-      });
-
       await act(async () => {
-        const { component } = testBed;
-
-        await nextTick();
-        component.update();
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+        });
       });
+      testBed.component.update();
     });
 
     test('navigates to the data stream in the Data Streams tab', async () => {
@@ -166,6 +180,55 @@ describe('<IndexManagementHome />', () => {
 
     await actions.clickIndexNameAt(0);
     expect(testBed.actions.findIndexDetailsPageTitle()).toContain(indexName);
+  });
+
+  describe('empty list component', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([]);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+    });
+
+    test('renders the default empty list content', () => {
+      expect(testBed.exists('createIndexMessage')).toBe(true);
+    });
+
+    it('displays an empty list content if set via extensions service', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([]);
+      await act(async () => {
+        testBed = await setup(httpSetup, {
+          services: {
+            extensionsService: {
+              _emptyListContent: {
+                renderContent: () => {
+                  return <div>Empty list content</div>;
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+
+      expect(testBed.component.text()).toContain('Empty list content');
+    });
+
+    it('renders "no indices found" prompt for search', async () => {
+      const { find, component, exists } = testBed;
+      await act(async () => {
+        find('indicesSearch').simulate('change', { target: { value: 'non-existing-index' } });
+      });
+      component.update();
+
+      expect(exists('noIndicesMessage')).toBe(true);
+
+      find('clearIndicesSearch').simulate('click');
+      component.update();
+
+      expect(exists('noIndicesMessage')).toBe(false);
+    });
   });
 
   describe('index actions', () => {
@@ -416,16 +479,12 @@ describe('<IndexManagementHome />', () => {
         },
       ]);
 
-      testBed = await setup(httpSetup, {
-        history: createMemoryHistory(),
-      });
-
       await act(async () => {
-        const { component } = testBed;
-
-        await nextTick();
-        component.update();
+        testBed = await setup(httpSetup, {
+          history: createMemoryHistory(),
+        });
       });
+      testBed.component.update();
     });
 
     test('shows the create index button', async () => {
@@ -441,7 +500,7 @@ describe('<IndexManagementHome />', () => {
 
       expect(exists('createIndexNameFieldText')).toBe(true);
 
-      await await actions.clickCreateIndexCancelButton();
+      await actions.clickCreateIndexCancelButton();
 
       expect(exists('createIndexNameFieldText')).toBe(false);
     });

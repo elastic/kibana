@@ -188,7 +188,6 @@ describe('Text based languages utils', () => {
           },
         },
         indexPatternRefs: [],
-        fieldList: [],
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
@@ -247,29 +246,6 @@ describe('Text based languages utils', () => {
             name: 'Foo',
           },
         },
-        fieldList: [
-          {
-            name: 'timestamp',
-            id: 'timestamp',
-            meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
         indexPatternRefs: [
           {
             id: '3',
@@ -340,7 +316,6 @@ describe('Text based languages utils', () => {
           },
         },
         indexPatternRefs: [],
-        fieldList: [],
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
@@ -404,29 +379,6 @@ describe('Text based languages utils', () => {
             name: 'Foo',
           },
         },
-        fieldList: [
-          {
-            name: 'timestamp',
-            id: 'timestamp',
-            meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
         indexPatternRefs: [
           {
             id: '3',

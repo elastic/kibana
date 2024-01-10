@@ -76,7 +76,6 @@ export const currentSuggestionMock = {
         timeField: 'timestamp',
       },
     },
-    fieldList: [],
     indexPatternRefs: [],
     initialContext: {
       dataViewSpec: {
@@ -215,7 +214,6 @@ export const allSuggestionsMock = [
           timeField: 'timestamp',
         },
       },
-      fieldList: [],
       indexPatternRefs: [],
       initialContext: {
         dataViewSpec: {

@@ -69,7 +69,13 @@ describe('onDrop', () => {
         layers: {
           first: expect.objectContaining({
             columns: expectedColumns,
-            allColumns: [...fieldList, ...expectedColumns],
+            allColumns: [
+              ...fieldList,
+              column1,
+              column2,
+              column3,
+              { ...column1, columnId: 'newId' },
+            ],
           }),
         },
       })
