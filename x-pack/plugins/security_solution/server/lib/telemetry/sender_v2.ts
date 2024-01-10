@@ -20,7 +20,7 @@ import { type TelemetryChannel } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
-import { tlog } from './helpers';
+import { newTelemetryLogger, type TelemetryLogger } from './helpers';
 
 export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   private retryConfig: RetryConfig | undefined;
@@ -33,12 +33,12 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
 
   private status: ServiceStatus = ServiceStatus.CREATED;
 
-  private readonly logger: Logger;
+  private readonly logger: TelemetryLogger;
 
   private senderUtils: SenderUtils | undefined;
 
   constructor(logger: Logger) {
-    this.logger = logger.get('telemetry_events');
+    this.logger = newTelemetryLogger(logger.get('telemetry_events'));
   }
 
   public setup(
@@ -72,20 +72,20 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
       )
       .subscribe({
         next: (result: Result) => {
+          // TODO(sebastian.zaffarano): increment telemetry usage counter
           if (isFailure(result)) {
-            tlog(
-              this.logger,
+            this.logger.l(
               `Failure! unable to send ${result} events to channel "${result.channel}"`
             );
           } else {
-            tlog(this.logger, `Success! %d events sent to channel "${result.channel}"`);
+            this.logger.l(`Success! %d events sent to channel "${result.channel}"`);
           }
         },
         error: (err) => {
-          tlog(this.logger, `Unexpected error: "${err}"`);
+          this.logger.l(`Unexpected error: "${err}"`);
         },
         complete: () => {
-          tlog(this.logger, 'Shutting down');
+          this.logger.l('Shutting down');
           this.finished$.next();
         },
       });
@@ -143,8 +143,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
         if (inflightEventsCounter < this.getConfigFor(channel).inflightEventsThreshold) {
           return rx.of(event);
         }
-        tlog(
-          this.logger,
+        this.logger.l(
           `>> Dropping event ${event} (channel: ${channel}, inflightEventsCounter: ${inflightEventsCounter})`
         );
         return rx.EMPTY;
@@ -189,8 +188,6 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
         )
       ),
 
-      // TODO(sebastian.zaffarano): increment telemetry usage counter
-
       // update inflight events counter
       rx.tap((result: Result) => {
         inflightEvents$.next(-result.events);
@@ -208,7 +205,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     const senderMetadata = await this.getSenderMetadata(channel);
 
     try {
-      tlog(this.logger, `Sending ${events.length} telemetry events to ${channel}`);
+      this.logger.l(`Sending ${events.length} telemetry events to ${channel}`);
 
       const body = events.join('\n');
 
@@ -231,12 +228,12 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
           if (r.status < 400) {
             return { events: events.length, channel };
           } else {
-            tlog(this.logger, `Unexpected response, got ${r.status}`);
+            this.logger.l(`Unexpected response, got ${r.status}`);
             throw newFailure(`Got ${r.status}`, channel, events.length);
           }
         })
         .catch((err) => {
-          tlog(this.logger, `Runtime error: ${err.message}`);
+          this.logger.l(`Runtime error: ${err.message}`);
           throw newFailure(`Error posting events: ${err}`, channel, events.length);
         });
     } catch (err: unknown) {
@@ -278,9 +275,6 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
 function newFailure(message: string, channel: TelemetryChannel, events: number): Failure {
   const failure: Failure = { name: 'Failure', message, channel, events };
   return failure;
-}
-function isSuccess(result: Result): result is Success {
-  return isFailure(result) === false;
 }
 
 function isFailure(result: Result): result is Failure {

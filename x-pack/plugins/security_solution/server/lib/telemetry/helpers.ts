@@ -294,6 +294,17 @@ export const tlog = (logger: Logger, message: string) => {
   }
 };
 
+export interface TelemetryLogger extends Logger {
+  l: (message: string) => void;
+}
+
+export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
+  return {
+    ...logger,
+    l: (message: string) => tlog(logger, message),
+  };
+};
+
 export const createTaskMetric = (
   name: string,
   passed: boolean,
