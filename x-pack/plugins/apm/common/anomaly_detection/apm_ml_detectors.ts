@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-export enum ApmMlDetectorType {
+export enum AnomalyDetectorType {
   txLatency = 'txLatency',
   txThroughput = 'txThroughput',
   txFailureRate = 'txFailureRate',
 }
 
 const detectorIndices = {
-  [ApmMlDetectorType.txLatency]: 0,
-  [ApmMlDetectorType.txThroughput]: 1,
-  [ApmMlDetectorType.txFailureRate]: 2,
+  [AnomalyDetectorType.txLatency]: 0,
+  [AnomalyDetectorType.txThroughput]: 1,
+  [AnomalyDetectorType.txFailureRate]: 2,
 };
 
-export function getApmMlDetectorIndex(type: ApmMlDetectorType) {
+export function getAnomalyDetectorIndex(type: AnomalyDetectorType) {
   return detectorIndices[type];
 }
 
-export function getApmMlDetectorType(detectorIndex: number) {
-  let type: ApmMlDetectorType;
+export function getAnomalyDetectorType(detectorIndex: number) {
+  let type: AnomalyDetectorType;
   for (type in detectorIndices) {
     if (detectorIndices[type] === detectorIndex) {
       return type;
