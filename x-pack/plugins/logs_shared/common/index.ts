@@ -60,5 +60,13 @@ export {
 } from './http_api';
 
 // Locators
-export { LOGS_LOCATOR_ID, NODE_LOGS_LOCATOR_ID } from './locators';
-export type { LogsLocatorParams, NodeLogsLocatorParams } from './locators';
+export {
+  LOGS_LOCATOR_ID,
+  TRACE_LOGS_LOCATOR_ID,
+  NODE_LOGS_LOCATOR_ID,
+  INFRA_LOGS_LOCATOR_ID,
+  INFRA_NODE_LOGS_LOCATOR_ID,
+  getLogsLocatorsFromUrlService,
+} from './locators';
+export type { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './locators';
+export { createNodeLogsQuery } from './locators/helpers';
