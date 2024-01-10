@@ -12,13 +12,12 @@ import {
 import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 import { ALERTS_URL } from '../../urls/navigation';
-import { enableRiskEngine } from '../../tasks/entity_analytics';
-import { deleteRiskEngineConfiguration } from '../../tasks/api_calls/risk_engine';
 import { USER_PANEL_HEADER } from '../../screens/hosts/flyout_user_panel';
 import { waitForAlerts } from '../../tasks/alerts';
 import { HOST_PANEL_HEADER } from '../../screens/hosts/flyout_host_panel';
 import { RISK_INPUT_PANEL_HEADER } from '../../screens/flyout_risk_panel';
 import { expandRiskInputsFlyoutPanel } from '../../tasks/risk_scores/risk_inputs_flyout_panel';
+import { mockRiskEngineEnabled } from '../../tasks/entity_analytics';
 
 const USER_NAME = 'user1';
 const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
@@ -40,21 +39,22 @@ describe(
   },
   () => {
     before(() => {
-      login();
-      enableRiskEngine();
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
-      cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
+      cy.task('esArchiverLoad', { archiveName: 'query_alert' });
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'risk_scores_new');
+      cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
       cy.task('esArchiverUnload', 'query_alert');
-      deleteRiskEngineConfiguration();
+    });
+
+    beforeEach(() => {
+      mockRiskEngineEnabled();
+      login();
     });
 
     describe('User details', () => {
       it('should display entity flyout and open risk input panel', () => {
-        login();
         visitWithTimeRange(ALERTS_URL);
         waitForAlerts();
         expandFirstAlertUserFlyout();
@@ -70,7 +70,6 @@ describe(
 
     describe('Host details', () => {
       it('should display entity flyout and open risk input panel', () => {
-        login();
         visitWithTimeRange(ALERTS_URL);
         waitForAlerts();
         expandFirstAlertHostFlyout();

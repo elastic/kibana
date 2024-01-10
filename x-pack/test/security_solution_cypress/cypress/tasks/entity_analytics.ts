@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  RISK_ENGINE_STATUS_URL,
+  RISK_SCORE_INDEX_STATUS_API_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import { BASIC_TABLE_LOADING } from '../screens/common';
 import {
   ANOMALIES_TABLE_ROWS,
@@ -42,6 +46,27 @@ export const navigateToNextPage = () => {
 export const riskEngineStatusChange = () => {
   cy.get(RISK_SCORE_SWITCH).should('not.have.attr', 'disabled');
   cy.get(RISK_SCORE_SWITCH).click();
+};
+
+export const mockRiskEngineEnabled = () => {
+  // mock the risk engine status
+  cy.intercept('GET', RISK_ENGINE_STATUS_URL, {
+    statusCode: 200,
+    body: {
+      risk_engine_status: 'ENABLED',
+      legacy_risk_engine_status: 'INSTALLED',
+      is_max_amount_of_risk_engines_reached: false,
+    },
+  }).as('riskEngineStatus');
+
+  // mock the risk index status
+  cy.intercept('GET', `${RISK_SCORE_INDEX_STATUS_API_URL}?indexName=*&entity=*`, {
+    statusCode: 200,
+    body: {
+      isDeprecated: false,
+      isEnabled: true,
+    },
+  }).as('riskIndexStatus');
 };
 
 export const enableRiskEngine = () => {
