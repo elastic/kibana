@@ -211,14 +211,14 @@ export abstract class Importer implements IImporter {
     return result;
   }
 
-  private _getFirstReadDoc(): object {
-    const firstReadDoc = this._docArray[0];
-    return typeof firstReadDoc === 'string' ? JSON.parse(firstReadDoc) : firstReadDoc;
+  private _getFirstReadDocs(count = 1): object[] {
+    const firstReadDocs = this._docArray.slice(0, count);
+    return firstReadDocs.map((doc) => (typeof doc === 'string' ? JSON.parse(doc) : doc));
   }
 
-  private _getLastReadDoc(): object {
-    const lastReadDoc = this._docArray[this._docArray.length - 1];
-    return typeof lastReadDoc === 'string' ? JSON.parse(lastReadDoc) : lastReadDoc;
+  private _getLastReadDocs(count = 1): object[] {
+    const lastReadDocs = this._docArray.slice(-count);
+    return lastReadDocs.map((doc) => (typeof doc === 'string' ? JSON.parse(doc) : doc));
   }
 
   public async previewIndexTimeRange() {
@@ -226,16 +226,15 @@ export abstract class Importer implements IImporter {
       throw new Error('Import has not been initialized');
     }
 
-    const firstDoc = this._getFirstReadDoc();
-    const lastDoc = this._getLastReadDoc();
+    const firstDocs = this._getFirstReadDocs(5);
+    const lastDocs = this._getLastReadDocs(5);
 
     const body = JSON.stringify({
-      firstDoc,
-      lastDoc,
+      docs: firstDocs.concat(lastDocs),
       pipeline: this._pipeline,
       timeField: this._timeFieldName,
     });
-    return await getHttp().fetch<{ start: number; end: number }>({
+    return await getHttp().fetch<{ start: number | null; end: number | null }>({
       path: `/internal/file_upload/preview_index_time_range`,
       method: 'POST',
       version: '1',

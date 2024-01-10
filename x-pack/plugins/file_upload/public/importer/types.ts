@@ -55,5 +55,5 @@ export interface IImporter {
   initialized(): boolean;
   getIndex(): string | undefined;
   getTimeField(): string | undefined;
-  previewIndexTimeRange(): Promise<{ start: number; end: number }>;
+  previewIndexTimeRange(): Promise<{ start: number | null; end: number | null }>;
 }

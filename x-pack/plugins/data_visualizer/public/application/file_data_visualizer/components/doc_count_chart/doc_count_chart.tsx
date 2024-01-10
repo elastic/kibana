@@ -17,7 +17,7 @@ import { EventRateChart, LineChartPoint } from './event_rate_chart';
 const BAR_TARGET = 150;
 const PROGRESS_INCREMENT = 5;
 const FINISHED_CHECKS = 3;
-const ATTEMPTS = 3;
+const ERROR_ATTEMPTS = 3;
 const BACK_FILL_BUCKETS = 8;
 
 export const DocCountChart: FC<{
@@ -25,24 +25,29 @@ export const DocCountChart: FC<{
   dataStart: DataPublicPluginStart;
   importer: IImporter;
 }> = ({ statuses, dataStart, importer }) => {
+  const timeBuckets = useTimeBuckets();
+  const index = useMemo(() => importer.getIndex(), [importer]);
+  const timeField = useMemo(() => importer.getTimeField(), [importer]);
+
   const [loading, setLoading] = useState(false);
+  const [loadingTimeRange, setLoadingTimeRange] = useState(false);
   const [finished, setFinished] = useState(false);
   const [previousProgress, setPreviousProgress] = useState(0);
-  const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
-  const timeBuckets = useTimeBuckets();
-  const [timeRange, setTimeRange] = useState<{ start: Moment; end: Moment } | undefined>(undefined);
-  const [timeRangeAttempts, setTimeRangeAttempts] = useState(ATTEMPTS);
   const [lastNonZeroTimeMs, setLastNonZeroTimeMs] = useState<
     { index: number; time: number } | undefined
   >(undefined);
+
+  const [eventRateChartData, setEventRateChartData] = useState<LineChartPoint[]>([]);
+  const [timeRange, setTimeRange] = useState<{ start: Moment; end: Moment } | undefined>(undefined);
+
   const loadFullData = useRef(false);
+
+  const [errorAttempts, setErrorAttempts] = useState(ERROR_ATTEMPTS);
   const recordFailure = useCallback(() => {
     // eslint-disable-next-line no-console
-    console.log('incrementFailedAttempts');
-    setTimeRangeAttempts(timeRangeAttempts - 1);
-  }, [timeRangeAttempts]);
-  const index = useMemo(() => importer.getIndex(), [importer]);
-  const timeField = useMemo(() => importer.getTimeField(), [importer]);
+    console.log('incrementFailedAttempts', errorAttempts);
+    setErrorAttempts(errorAttempts - 1);
+  }, [errorAttempts]);
 
   const loadData = useCallback(async () => {
     if (timeField === undefined || index === undefined || timeRange === undefined) {
@@ -113,7 +118,6 @@ export const DocCountChart: FC<{
           },
         })
       );
-      setLoading(false);
       // @ts-expect-error
       if (resp?.rawResponse?.aggregations?.eventRate?.buckets !== undefined) {
         // @ts-expect-error
@@ -134,9 +138,9 @@ export const DocCountChart: FC<{
         setLastNonZeroTimeMs(findLastTimestamp(newData, BACK_FILL_BUCKETS));
       }
     } catch (error) {
-      setLoading(false);
       recordFailure();
     }
+    setLoading(false);
   }, [
     timeField,
     index,
@@ -164,58 +168,64 @@ export const DocCountChart: FC<{
   );
 
   const loadTimeRange = useCallback(async () => {
-    if (timeField === undefined) {
+    if (loadingTimeRange === true) {
       return;
     }
+    setLoadingTimeRange(true);
     try {
       const { start, end } = await importer.previewIndexTimeRange();
-      if (start >= end) {
+      if (start === null || end === null || start >= end) {
         throw new Error('Invalid time range');
       }
       setTimeRange({ start: moment(start), end: moment(end) });
     } catch (error) {
       recordFailure();
     }
-  }, [importer, recordFailure, timeField]);
+    setLoadingTimeRange(false);
+  }, [importer, loadingTimeRange, recordFailure]);
 
-  useEffect(() => {
-    if (timeRangeAttempts === 0) {
-      return;
-    }
-
-    if (timeRange === undefined) {
-      loadTimeRange();
-      return;
-    }
-
-    if (loading === false && statuses.uploadProgress > 1 && statuses.uploadProgress < 100) {
-      if (statuses.uploadProgress - previousProgress > PROGRESS_INCREMENT) {
-        setPreviousProgress(statuses.uploadProgress);
-
-        loadData();
+  useEffect(
+    function loadProgress() {
+      if (errorAttempts === 0) {
+        return;
       }
-    } else if (loading === false && statuses.uploadProgress === 100 && finished === false) {
-      setFinished(true);
-      finishedChecks(FINISHED_CHECKS);
-      loadFullData.current = true;
-    }
-  }, [
-    finished,
-    finishedChecks,
-    loadData,
-    loadTimeRange,
-    loading,
-    previousProgress,
-    statuses,
-    timeRange,
-    timeRangeAttempts,
-  ]);
+
+      if (timeRange === undefined) {
+        loadTimeRange();
+        return;
+      }
+
+      if (loading === false && statuses.uploadProgress > 1 && statuses.uploadProgress < 100) {
+        if (statuses.uploadProgress - previousProgress > PROGRESS_INCREMENT) {
+          setPreviousProgress(statuses.uploadProgress);
+
+          loadData();
+        }
+      } else if (loading === false && statuses.uploadProgress === 100 && finished === false) {
+        setFinished(true);
+        finishedChecks(FINISHED_CHECKS);
+        loadFullData.current = true;
+      }
+    },
+    [
+      finished,
+      finishedChecks,
+      loadData,
+      loadTimeRange,
+      loading,
+      loadingTimeRange,
+      previousProgress,
+      statuses,
+      timeRange,
+      errorAttempts,
+    ]
+  );
 
   if (
     timeField === undefined ||
     statuses.indexCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
     statuses.ingestPipelineCreatedStatus === IMPORT_STATUS.INCOMPLETE ||
-    timeRangeAttempts === 0 ||
+    errorAttempts === 0 ||
     eventRateChartData.length === 0
   ) {
     return null;

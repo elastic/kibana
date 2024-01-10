@@ -301,8 +301,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         validate: {
           request: {
             body: schema.object({
-              firstDoc: schema.any(),
-              lastDoc: schema.any(),
+              docs: schema.arrayOf(schema.any()),
               pipeline: schema.any(),
               timeField: schema.string(),
             }),
@@ -311,12 +310,9 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       },
       async (context, request, response) => {
         try {
-          const { firstDoc, lastDoc, pipeline, timeField } = request.body;
+          const { docs, pipeline, timeField } = request.body;
           const esClient = (await context.core).elasticsearch.client;
-          const resp = await previewIndexTimeRange(esClient, timeField, pipeline, [
-            firstDoc,
-            lastDoc,
-          ]);
+          const resp = await previewIndexTimeRange(esClient, timeField, pipeline, docs);
 
           return response.ok({
             body: resp,
