@@ -57,7 +57,10 @@ const CriticalityField: React.FC<{ criticalityLevel?: CriticalityLevel }> = ({
   );
 };
 
-const ContextsTable: React.FC<{ riskScore?: UserRiskScore | HostRiskScore }> = ({ riskScore }) => {
+const ContextsTable: React.FC<{ riskScore?: UserRiskScore | HostRiskScore; loading: boolean }> = ({
+  riskScore,
+  loading,
+}) => {
   const criticalityLevel = useMemo(() => {
     if (!riskScore) {
       return undefined;
@@ -110,7 +113,13 @@ const ContextsTable: React.FC<{ riskScore?: UserRiskScore | HostRiskScore }> = (
   ];
 
   return (
-    <BasicTable data-test-subj="contexts-table" columns={columns} items={items} compressed={true} />
+    <BasicTable
+      data-test-subj="contexts-table"
+      columns={columns}
+      items={items}
+      compressed={true}
+      loading={loading}
+    />
   );
 };
 
@@ -130,7 +139,11 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     }
   }, [entityName, entityType]);
 
-  const { data: riskScoreData, error: riskScoreError } = useRiskScore({
+  const {
+    data: riskScoreData,
+    error: riskScoreError,
+    loading: loadingRiskScore,
+  } = useRiskScore({
     riskEntity: entityType,
     filterQuery: nameFilterQuery,
     onlyLatest: false,
@@ -140,7 +153,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
   const {
-    loading,
+    loading: loadingAlerts,
     data: alertsData,
     error: riskAlertsError,
   } = useRiskContributingAlerts({ riskScore });
@@ -253,7 +266,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         </h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
-      <ContextsTable riskScore={riskScore} />
+      <ContextsTable riskScore={riskScore} loading={loadingRiskScore} />
       <EuiSpacer size="m" />
       <EuiTitle size="xs" data-test-subj="risk-input-tab-title">
         <h3>
@@ -268,7 +281,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       <EuiSpacer size="xs" />
       <EuiInMemoryTable
         compressed={true}
-        loading={loading}
+        loading={loadingRiskScore || loadingAlerts}
         items={alertsData ?? []}
         columns={columns}
         pagination
