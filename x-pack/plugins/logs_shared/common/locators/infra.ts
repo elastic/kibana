@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export const API_KEY_PLACEHOLDER = 'your_api_key';
-export const INDEX_NAME_PLACEHOLDER = 'index_name';
+export const INFRA_LOGS_LOCATOR_ID = 'INFRA_LOGS_LOCATOR';
+
+export const INFRA_NODE_LOGS_LOCATOR_ID = 'INFRA_NODE_LOGS_LOCATOR';
