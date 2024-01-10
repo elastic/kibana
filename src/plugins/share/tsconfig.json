@@ -20,7 +20,9 @@
     "@kbn/core-custom-branding-browser",
     "@kbn/react-kibana-context-theme",
     "@kbn/config-schema",
-    "@kbn/core-saved-objects-utils-server",  ],
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-i18n-browser-mocks",  ],
   "exclude": [
     "target/**/*",
   ]
