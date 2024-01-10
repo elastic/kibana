@@ -8,8 +8,7 @@
 
 import * as React from 'react';
 import { monaco } from '@kbn/monaco';
-import { Props as CodeEditorProps } from '../code_editor/code_editor';
-import { CodeEditor, HandlebarsLang } from '../code_editor';
+import { CodeEditor, HandlebarsLang, type CodeEditorProps } from '@kbn/code-editor';
 
 import './styles.scss';
 
