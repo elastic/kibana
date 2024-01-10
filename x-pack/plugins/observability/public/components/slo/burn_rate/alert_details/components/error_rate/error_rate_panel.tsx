@@ -20,26 +20,32 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { ActionGroup, WindowSchema } from '../../../../../../typings';
+import {
+  ALERT_ACTION_ID,
+  HIGH_PRIORITY_ACTION_ID,
+  LOW_PRIORITY_ACTION_ID,
+  MEDIUM_PRIORITY_ACTION_ID,
+} from '../../../../../../../common/constants';
+import { WindowSchema } from '../../../../../../typings';
+import { useKibana } from '../../../../../../utils/kibana_react';
 import { ErrorRateChart } from '../../../../error_rate_chart';
 import { BurnRateAlert } from '../../alert_details_app_section';
-import { useKibana } from '../../../../../../utils/kibana_react';
 
-function getActionGroupFromReason(reason: string): ActionGroup {
+function getActionGroupFromReason(reason: string): string {
   const prefix = reason.split(':')[0]?.toLowerCase() ?? undefined;
   switch (prefix) {
     case 'critical':
-      return 'slo.burnRate.alert';
+      return ALERT_ACTION_ID;
     case 'high':
-      return 'slo.burnRate.high';
+      return HIGH_PRIORITY_ACTION_ID;
     case 'medium':
-      return 'slo.burnRate.medium';
+      return MEDIUM_PRIORITY_ACTION_ID;
     case 'low':
     default:
-      return 'slo.burnRate.low';
+      return LOW_PRIORITY_ACTION_ID;
   }
 }
 

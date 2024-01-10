@@ -84,6 +84,7 @@ const withCore = makeDecorator({
           metrics: { enabled: false },
           uptime: { enabled: false },
           observability: { enabled: false },
+          slo: { enabled: false },
         },
       },
     };
