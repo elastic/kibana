@@ -61,8 +61,8 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       await es.bulk({
         refresh: true,
         operations: [
-          ...insertOperation(VULNERABILITIES_INDEX_DEFAULT_NS, findingsMock),
-          ...insertOperation(LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, findingsMock),
+          ...insertOperation(FINDINGS_INDEX, findingsMock),
+          ...insertOperation(FINDINGS_LATEST_INDEX, findingsMock),
         ],
       });
     },
@@ -236,7 +236,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const navigateToLatestFindingsPage = async () => {
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
-      'cloud_security_posture/findings',
+      'cloud_security_posture/findings/configurations',
       { shouldUseHashForSubUrl: false }
     );
   };
