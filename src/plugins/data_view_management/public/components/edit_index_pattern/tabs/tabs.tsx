@@ -462,7 +462,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     size="m"
                     color="success"
                   >
-                    Refresh
+                    {refreshAriaLabel}
                   </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>
@@ -477,7 +477,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     color="primary"
                     fill
                   >
-                    Add field
+                    {addFieldButtonLabel}
                   </EuiButton>
                 </EuiFlexItem>
               )}
