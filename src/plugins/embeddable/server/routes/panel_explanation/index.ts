@@ -9,6 +9,8 @@ import { IRouter } from '@kbn/core-http-server';
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { schema } from '@kbn/config-schema';
 
+const ELASTIC_MANAGED = 'https://takingcare.in';
+const CUSTOMER_MANAGED = 'http://takingcare.in:8001';
 export const initGetPanelExplanation = <T extends RequestHandlerContext>({
   router,
 }: {
@@ -26,11 +28,17 @@ export const initGetPanelExplanation = <T extends RequestHandlerContext>({
     async (_context, req, res) => {
       try {
         const { title } = req.params;
-        const response = await fetch(`https://takingcare.in/panel/${title}`, {
-          method: 'GET',
-        });
 
-        const explanation = await response.text();
+        const requests = [
+          fetch(`${ELASTIC_MANAGED}/panel/${title}`).then(handleResponse),
+          fetch(`${CUSTOMER_MANAGED}/panel/${title}`).then(handleResponse),
+        ];
+
+        const explanation = await Promise.all(requests).then(
+          ([elasticManagedResponse, customManagedResponse]) => {
+            return elasticManagedResponse || customManagedResponse;
+          }
+        );
 
         return res.ok({
           body: { data: { explanation } },
@@ -45,4 +53,14 @@ export const initGetPanelExplanation = <T extends RequestHandlerContext>({
       }
     }
   );
+};
+
+const handleResponse = (response: Response) => {
+  if (response.status !== 200) {
+    // eslint-disable-next-line no-console
+    console.log('Failed to get explanation', response.statusText);
+    return '';
+  }
+
+  return response.text();
 };

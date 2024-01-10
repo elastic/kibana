@@ -28,7 +28,7 @@ export const EmbeddablePanelPopover = React.memo(({ title }: { title?: string })
       const response = await core.http.get<{ data: { explanation: string } }>(
         `${ENDPOINT}/${encodeURIComponent(title.replaceAll(/\//g, '__'))}`
       );
-      setPopoverContent(response.data.explanation);
+      setPopoverContent(response.data.explanation || DEFAULT_UNAVAILABLE_MESSAGE);
     } catch (e) {
       setPopoverContent(DEFAULT_UNAVAILABLE_MESSAGE);
     }

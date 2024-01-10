@@ -16,13 +16,6 @@ import { EmbeddablePanelPopover } from './embeddable_panel_popover';
 import { EditPanelAction } from '../panel_actions';
 import { openCustomizePanelFlyout } from '../panel_actions/customize_panel_action/open_customize_panel';
 
-const AI_SUPPORTED_INTEGRATIONS = ['[Metrics Oracle]', '[Metrics Kubernetes]'];
-
-const supportsAIPopover = (title?: string) => {
-  if (!title) return false;
-  return AI_SUPPORTED_INTEGRATIONS.some((integration) => title.includes(integration));
-};
-
 export const EmbeddablePanelTitle = ({
   viewMode,
   hideTitle,
@@ -37,7 +30,6 @@ export const EmbeddablePanelTitle = ({
   editPanelAction?: EditPanelAction;
 }) => {
   const title = embeddable.getTitle();
-  const aiExplanationSupported = supportsAIPopover(title);
 
   const titleComponent = useMemo(() => {
     if (hideTitle) return null;
@@ -78,7 +70,7 @@ export const EmbeddablePanelTitle = ({
           <span className="embPanel__titleInner" data-test-subj="embeddablePanelTitleInner">
             {titleComponent}
           </span>
-          {aiExplanationSupported ? <EmbeddablePanelPopover title={title} /> : null}
+          <EmbeddablePanelPopover title={title} />
         </>
       );
     return (
@@ -99,7 +91,7 @@ export const EmbeddablePanelTitle = ({
         </span>
       </EuiToolTip>
     );
-  }, [aiExplanationSupported, description, title, titleComponent]);
+  }, [description, title, titleComponent]);
 
   return titleComponentWithDescription;
 };
