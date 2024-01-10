@@ -49,10 +49,8 @@ const defaultHeaders = [
   { id: 'user.name' },
 ];
 
-// Flaky in serverless tests
-// FLAKY: https://github.com/elastic/kibana/issues/169363
-describe.skip('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
   context('Fields Browser rendering', () => {
+describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       login();
       visitWithTimeRange(hostsUrl('allHosts'));
