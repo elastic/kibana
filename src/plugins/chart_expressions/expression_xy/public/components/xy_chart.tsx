@@ -310,8 +310,17 @@ export function XYChart({
             x: 16,
             y: 9,
           },
+          minDimensions: {
+            y: { value: 300, unit: 'pixels' },
+            x: { value: 100, unit: 'percentage' },
+          },
         }
-      : { maxDimensions: { x: 100, y: 100, unit: 'percentage' } };
+      : {
+          maxDimensions: {
+            x: { value: 100, unit: 'percentage' },
+            y: { value: 100, unit: 'percentage' },
+          },
+        };
 
   const { veil, onResize } = useSizeTransitionVeil(chartSizeSpec, setChartSize);
 

@@ -168,9 +168,8 @@ export const MetricVis = ({
       name: 'chartSize',
       data: {
         maxDimensions: {
-          y: grid.current.length * maxTileSideLength,
-          x: grid.current[0]?.length * maxTileSideLength,
-          unit: 'pixels',
+          y: { value: grid.current.length * maxTileSideLength, unit: 'pixels' },
+          x: { value: grid.current[0]?.length * maxTileSideLength, unit: 'pixels' },
         },
       },
     };

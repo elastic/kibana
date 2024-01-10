@@ -260,15 +260,14 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     const chartSizeSpec: ChartSizeSpec = {
       maxDimensions: {
-        unit: 'pixels',
         ...(gaugeType === GaugeShapes.HORIZONTAL_BULLET
           ? {
-              x: 600,
-              y: 300,
+              x: { value: 600, unit: 'pixels' },
+              y: { value: 300, unit: 'pixels' },
             }
           : {
-              y: 600,
-              x: 300,
+              y: { value: 600, unit: 'pixels' },
+              x: { value: 300, unit: 'pixels' },
             }),
       },
     };

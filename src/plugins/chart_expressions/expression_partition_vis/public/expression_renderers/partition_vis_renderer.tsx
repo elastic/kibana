@@ -121,9 +121,8 @@ export const getPartitionVisRenderer: (
       name: 'chartSize',
       data: {
         maxDimensions: {
-          x: 100,
-          y: 100,
-          unit: 'percentage',
+          x: { value: 100, unit: 'percentage' },
+          y: { value: 100, unit: 'percentage' },
         },
       },
     };

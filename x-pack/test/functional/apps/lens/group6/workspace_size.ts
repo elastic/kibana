@@ -79,6 +79,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     };
 
+    const assertWorkspaceStyles = async (expectedStyles: {
+      aspectRatio: string;
+      minHeight: string;
+      minWidth: string;
+      maxHeight: string;
+      maxWidth: string;
+    }) => {
+      const actualStyles = await PageObjects.lens.getWorkspaceVisContainerStyles();
+
+      expect(actualStyles).to.eql(expectedStyles);
+    };
+
     const VERTICAL_16_9 = 16 / 9;
     const outerWorkspaceDimensions = { width: 690, height: 400 };
     const UNCONSTRAINED = outerWorkspaceDimensions.width / outerWorkspaceDimensions.height;
@@ -201,46 +213,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceDimensions('300px', '400px');
     });
 
-    it('preserves aspect ratio when either dimension is constrained', async () => {
-      const changeWindowAndAssertAspectRatio = async (
-        width: number,
-        height: number,
-        expectedRatio: number
-      ) => {
-        const { width: currentWidth } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
-
-        await browser.setWindowSize(width, height);
-
-        // this is important so that we don't assert against the old dimensions
-        await retry.waitFor('workspace width to change', async () => {
-          const { width: newWidth } = await PageObjects.lens.getWorkspaceVisContainerDimensions();
-          return newWidth !== currentWidth;
-        });
-
-        await assertWorkspaceAspectRatio(expectedRatio);
-      };
-
-      // this test is designed to make sure the correct aspect ratio is preserved
-      // when the window size is constrained in EITHER width or height
-      await retry.try(async () => {
-        await PageObjects.lens.switchToVisualization('bar');
-      });
-
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
-
-      // plenty of height, constrained width
-      await changeWindowAndAssertAspectRatio(1200, 1000, VERTICAL_16_9);
-
-      // plenty of width, constrained height
-      await changeWindowAndAssertAspectRatio(2000, 600, VERTICAL_16_9);
-
-      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
-    });
-
     it('XY chart size', async () => {
       // XY charts should have 100% width and 100% height unless they are a vertical chart with a time dimension
       await retry.try(async () => {
@@ -248,12 +220,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.lens.switchToVisualization('line');
       });
 
-      await assertWorkspaceAspectRatio(UNCONSTRAINED);
+      await assertWorkspaceStyles({
+        aspectRatio: 'auto',
+        minHeight: 'auto',
+        minWidth: 'auto',
+        maxHeight: '100%',
+        maxWidth: '100%',
+      });
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
+      });
+
+      await assertWorkspaceStyles({
+        aspectRatio: '16 / 9',
+        minHeight: '300px',
+        minWidth: '100%',
+        maxHeight: 'none',
+        maxWidth: 'none',
       });
 
       await assertWorkspaceAspectRatio(VERTICAL_16_9);

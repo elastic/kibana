@@ -35,20 +35,17 @@ export interface ChartSizeEvent extends ExpressionRendererEvent {
 
 export type ChartSizeUnit = 'pixels' | 'percentage';
 
-export type ChartSizeSpec =
-  | {
-      // if maxDimensions are provided, the aspect ratio will be computed from them
-      maxDimensions?: {
-        x: number;
-        y: number;
-        unit: ChartSizeUnit;
-      };
-      aspectRatio?: never;
-    }
-  | {
-      aspectRatio?: { x: number; y: number };
-      maxDimensions?: never;
-    };
+interface ChartSizeDimensions {
+  x?: { value: number; unit: ChartSizeUnit };
+  y?: { value: number; unit: ChartSizeUnit };
+}
+
+export interface ChartSizeSpec {
+  // if maxDimensions are provided, the aspect ratio will be computed from them
+  maxDimensions?: ChartSizeDimensions;
+  minDimensions?: ChartSizeDimensions;
+  aspectRatio?: { x: number; y: number };
+}
 
 export function isChartSizeEvent(event: ExpressionRendererEvent): event is ChartSizeEvent {
   const expectedName: ChartSizeEvent['name'] = 'chartSize';

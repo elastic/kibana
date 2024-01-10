@@ -147,6 +147,7 @@ export function WorkspacePanelWrapper({
 
   const aspectRatio = displayOptions?.aspectRatio;
   const maxDimensions = displayOptions?.maxDimensions;
+  const minDimensions = displayOptions?.minDimensions;
 
   let visDimensionsCSS: Interpolation<Theme> = {};
 
@@ -155,8 +156,21 @@ export function WorkspacePanelWrapper({
   }
 
   if (maxDimensions) {
-    visDimensionsCSS.maxWidth = `${maxDimensions.x}${unitToCSSUnit[maxDimensions.unit]}`;
-    visDimensionsCSS.maxHeight = `${maxDimensions.y}${unitToCSSUnit[maxDimensions.unit]}`;
+    visDimensionsCSS.maxWidth = maxDimensions.x
+      ? `${maxDimensions.x.value}${unitToCSSUnit[maxDimensions.x.unit]}`
+      : '';
+    visDimensionsCSS.maxHeight = maxDimensions.y
+      ? `${maxDimensions.y.value}${unitToCSSUnit[maxDimensions.y.unit]}`
+      : '';
+  }
+
+  if (minDimensions) {
+    visDimensionsCSS.minWidth = minDimensions.x
+      ? `${minDimensions.x.value}${unitToCSSUnit[minDimensions.x.unit]}`
+      : '';
+    visDimensionsCSS.minHeight = minDimensions.y
+      ? `${minDimensions.y.value}${unitToCSSUnit[minDimensions.y.unit]}`
+      : '';
   }
 
   return (
