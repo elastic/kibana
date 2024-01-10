@@ -59,8 +59,6 @@ import type {
   UpdateAPIKeyResult,
 } from '../api_keys_api_client';
 
-export const DEFAULT_EXPIRATION_VALUE = '60';
-
 const TypeLabel = () => (
   <FormattedMessage
     id="xpack.security.accountManagement.apiKeyFlyout.typeLabel"
