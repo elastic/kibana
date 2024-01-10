@@ -291,7 +291,7 @@ export function Chart({
         dataSourceStates: {
           ...attributes.state.datasourceStates,
           textBased: {
-            ...attributes.state.datasourceStates.textBased,
+            ...(attributes.state.datasourceStates.textBased || {}),
             layers: {},
           },
         },
