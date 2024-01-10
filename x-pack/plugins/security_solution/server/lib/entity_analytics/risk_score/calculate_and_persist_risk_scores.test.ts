@@ -35,6 +35,7 @@ const calculateAndPersistRecentHostRiskScores = (
     riskScoreDataClient,
     assetCriticalityService: assetCriticalityServiceMock.create(),
     runtimeMappings: {},
+    forceUpgrade: false,
   });
 };
 
