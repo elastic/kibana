@@ -209,7 +209,6 @@ export class CspPlugin
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
     await initializeCspIndices(esClient, this.config, this.logger);
-    // await initializeCspDataView(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await scheduleFindingsStatsTask(taskManager, this.logger);
     this.#isInitialized = true;
