@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -48,6 +49,7 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPanelProps) => {
+  const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutContext();
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
@@ -77,6 +79,10 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
 
   const openTabPanel = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
+      telemetry.reportRiskInputsExpandedFlyoutOpened({
+        entity: 'host',
+      });
+
       openLeftPanel({
         id: HostDetailsPanelKey,
         params: {
@@ -86,7 +92,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
         },
       });
     },
-    [openLeftPanel, hostName, isRiskScoreExist]
+    [telemetry, openLeftPanel, hostName, isRiskScoreExist]
   );
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
