@@ -6,6 +6,7 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
+import { createKbnClient } from '../common/stack_services';
 import { load } from './src/load';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 
@@ -15,21 +16,18 @@ export const cli = () => {
       createToolingLogger.setDefaultLogLevelFromCliFlags(cliContext.flags);
 
       const log = cliContext.log;
-      const options = {
+      const kbnClient = createKbnClient({
+        log,
+        url: cliContext.flags.kibana as string,
         username: cliContext.flags.username as string,
         password: cliContext.flags.password as string,
-        kibanaUrl: cliContext.flags.kibana as string,
-        elasticsearchUrl: cliContext.flags.elasticsearch as string,
-        asSuperuser: cliContext.flags.asSuperuser as boolean,
-        log,
+      });
+
+      const options = {
+        policyCount: Number(cliContext.flags.policyCount) || 10,
       };
 
-      log.info(`Loading data into: ${options.kibanaUrl}`);
-
-      await load(options);
-    },
-
-    /*
+      /*
         load_env_data
             --policyCount=5000
             --trustedAppsCount=1000
@@ -40,18 +38,25 @@ export const cli = () => {
             --globalArtifactRatio=50
      */
 
+      log.info(`Loading data to: ${kbnClient.resolveUrl('')}`);
+
+      await load({
+        kbnClient,
+        log,
+        policyCount: options.policyCount,
+      });
+    },
+
     // Options
     {
       description: `Loads data into a environment for testing/development`,
       flags: {
-        string: ['kibana', 'elastic', 'username', 'password'],
-        boolean: ['asSuperuser'],
+        string: ['kibana', 'username', 'password'],
         default: {
           kibana: 'http://127.0.0.1:5601',
-          elasticsearch: 'http://127.0.0.1:9200',
           username: 'elastic',
           password: 'changeme',
-          asSuperuser: false,
+          policyCount: 10,
         },
         help: `
         --username          User name to be used for auth against elasticsearch and
@@ -59,11 +64,8 @@ export const cli = () => {
                             **IMPORTANT:** if 'asSuperuser' option is not used, then the
                             user defined here MUST have 'superuser' AND 'kibana_system' roles
         --password          User name Password (Default: changeme)
-        --asSuperuser       If defined, then a Security super user will be created using the
-                            the credentials defined via 'username' and 'password' options. This
-                            new user will then be used to run this utility.
         --kibana            The url to Kibana (Default: http://127.0.0.1:5601)
-        --elasticsearch     The url to Elasticsearch (Default: http://127.0.0.1:9200)
+        --policyCount       How many policies to create (Default: 10)
       `,
       },
     }
