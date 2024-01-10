@@ -18,7 +18,8 @@
       "observabilityAIAssistant",
       "embeddable",
       "inspector",
-      "apm"
+      "apm",
+      "synthetics"
     ],
     "optionalPlugins": [
       "cloud",

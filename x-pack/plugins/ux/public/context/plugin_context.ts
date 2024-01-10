@@ -7,10 +7,12 @@
 
 import { createContext } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 export interface PluginContextValue {
+  coreStart: CoreStart;
   appMountParameters: AppMountParameters;
   exploratoryView: ExploratoryViewPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;

@@ -47,12 +47,13 @@ import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { PluginContext } from '../context/plugin_context';
 
-export type BreadcrumbTitle<T = {}> =
-  | string
-  | ((props: RouteComponentProps<T>) => string)
-  | null;
+export type BreadcrumbTitle<
+  T extends { [K in keyof T]?: string | undefined } = {}
+> = string | ((props: RouteComponentProps<T>) => string) | null;
 
-export interface RouteDefinition<T = any> extends RouteProps {
+export interface RouteDefinition<
+  T extends { [K in keyof T]?: string | undefined } = any
+> extends RouteProps {
   breadcrumb: BreadcrumbTitle<T>;
 }
 
@@ -164,6 +165,7 @@ export function UXAppRoot({
           >
             <PluginContext.Provider
               value={{
+                coreStart: core,
                 appMountParameters,
                 exploratoryView,
                 observabilityShared,

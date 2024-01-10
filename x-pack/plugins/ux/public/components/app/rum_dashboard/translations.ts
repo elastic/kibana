@@ -50,6 +50,9 @@ export const I18LABELS = {
   jsErrors: i18n.translate('xpack.ux.dashboard.impactfulMetrics.jsErrors', {
     defaultMessage: 'JavaScript errors',
   }),
+  clickMap: i18n.translate('xpack.ux.dashboard.clickMap.panelTitle', {
+    defaultMessage: 'Click Map',
+  }),
   highTrafficPages: i18n.translate(
     'xpack.ux.dashboard.impactfulMetrics.highTrafficPages',
     {

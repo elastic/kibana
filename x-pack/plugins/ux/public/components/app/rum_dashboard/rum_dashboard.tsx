@@ -13,6 +13,7 @@ import { UXMetrics } from './ux_metrics';
 import { ImpactfulMetrics } from './impactful_metrics';
 import { PageLoadAndViews } from './panels/page_load_and_views';
 import { VisitorBreakdownsPanel } from './panels/visitor_breakdowns';
+import { ClickMapPanel } from './panels/click_map_panel';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { ClientMetrics } from './client_metrics';
 
@@ -37,6 +38,9 @@ export function RumDashboard() {
         >
           <VisitorBreakdownsPanel />
         </LoadWhenInView>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <ClickMapPanel />
       </EuiFlexItem>
       <EuiFlexItem>
         <LoadWhenInView
