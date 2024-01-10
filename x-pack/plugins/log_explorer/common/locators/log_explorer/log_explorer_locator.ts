@@ -29,7 +29,7 @@ export class LogExplorerLocatorDefinition implements LocatorDefinition<LogExplor
         }
       : undefined;
 
-    return this.deps.discover.locator?.getLocation({
+    return this.deps.discoverAppLocator?.getLocation({
       ...params,
       dataViewId: dataset,
       dataViewSpec,

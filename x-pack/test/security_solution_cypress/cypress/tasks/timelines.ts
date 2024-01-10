@@ -20,7 +20,10 @@ import {
   TIMELINE_ITEM_ACTION_BTN,
 } from '../screens/timelines';
 import { SELECT_ALL_CHECKBOX } from '../screens/shared';
-import { CREATE_NEW_TIMELINE_WITH_BORDER } from '../screens/timeline';
+import {
+  TIMELINE_COLLAPSED_ITEMS_BTN,
+  TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
+} from '../screens/timeline';
 
 export const expandNotes = () => {
   cy.get(EXPAND_NOTES_BTN).click();
@@ -55,7 +58,6 @@ export const selectTimeline = (timelineId: string) => {
 };
 
 export const selectAllTimelines = () => {
-  cy.get(SELECT_ALL_CHECKBOX).should('exist');
   cy.get(SELECT_ALL_CHECKBOX).click();
 };
 
@@ -65,4 +67,7 @@ export const exportSelectedTimelines = () => {
   cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 
-export const createTimeline = () => cy.get(CREATE_NEW_TIMELINE_WITH_BORDER).click();
+export const createTimelineFromFirstTemplateInList = () => {
+  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();
+  cy.get(TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN).click();
+};

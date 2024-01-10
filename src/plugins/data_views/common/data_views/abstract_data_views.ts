@@ -126,6 +126,8 @@ export abstract class AbstractDataView {
 
   protected scriptedFields: DataViewFieldBase[];
 
+  private allowHidden: boolean = false;
+
   constructor(config: AbstractDataViewDeps) {
     const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
 
@@ -178,7 +180,12 @@ export abstract class AbstractDataView {
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
+    this.allowHidden = spec.allowHidden || false;
   }
+
+  getAllowHidden = () => this.allowHidden;
+
+  setAllowHidden = (allowHidden: boolean) => (this.allowHidden = allowHidden);
 
   /**
    * Get name of Data View
@@ -325,6 +332,7 @@ export abstract class AbstractDataView {
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: stringifyOrUndefined(this.runtimeFieldMap),
       name: this.name,
+      allowHidden: this.allowHidden,
     };
   }
 

@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import type { AllTimelinesVariables } from '../../containers/all';
-import type { TimelineModel } from '../../store/timeline/model';
+import type { TimelineModel } from '../../store/model';
 import type {
   RowRendererId,
   SingleTimelineResolveResponse,
@@ -225,19 +225,10 @@ export interface UpdateTimeline {
   to: string;
   ruleNote?: string;
   ruleAuthor?: string;
+  preventSettingQuery?: boolean;
 }
 
-export type DispatchUpdateTimeline = ({
-  duplicate,
-  id,
-  from,
-  notes,
-  resolveTimelineConfig,
-  timeline,
-  to,
-  ruleNote,
-  ruleAuthor,
-}: UpdateTimeline) => () => void;
+export type DispatchUpdateTimeline = (args: UpdateTimeline) => () => void;
 
 export enum TimelineTabsStyle {
   tab = 'tab',

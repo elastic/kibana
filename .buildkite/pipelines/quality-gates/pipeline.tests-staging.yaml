@@ -13,18 +13,20 @@ steps:
 
   - label: ":kibana: Kibana Serverless Tests for ${ENVIRONMENT}"
     trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
-    soft_fail: true # Remove this before release or when tests stabilize
+    soft_fail: true # Remove when tests stabilize
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
         EC_ENV: staging
         EC_REGION: aws-us-east-1
+        RETRY_TESTS_ON_FAIL: "true"
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
 
   - wait: ~
 
-  - label: ":judge::seedling: Trigger Manual Tests Phase"
-    command: "make -C /agent trigger-manual-verification-phase"
-    if: build.branch == "main"
-    agents:
-      image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.2"
+  - group: "Kibana Release Manager"
+    steps:
+      - label: ":judge::seedling: Trigger Manual Tests Phase"
+        command: "make -C /agent trigger-manual-verification-phase"
+        agents:
+          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"

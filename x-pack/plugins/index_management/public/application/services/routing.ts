@@ -6,7 +6,7 @@
  */
 
 import { Section } from '../../../common/constants';
-import type { IndexDetailsTabIds } from '../../../common/constants';
+import type { IndexDetailsTabId } from '../../../common/constants';
 
 export const getTemplateListLink = () => `/templates`;
 
@@ -34,10 +34,6 @@ export const getTemplateCloneLink = (name: string, isLegacy?: boolean) => {
   return encodeURI(url);
 };
 
-export const getILMPolicyPath = (policyName: string) => {
-  return `/data/index_lifecycle_management/policies/edit/${encodeURIComponent(policyName)}`;
-};
-
 export const getIndexListUri = (filter?: string, includeHiddenIndices?: boolean) => {
   const hiddenIndicesParam =
     typeof includeHiddenIndices !== 'undefined' ? includeHiddenIndices : false;
@@ -58,7 +54,7 @@ export const getDataStreamDetailsLink = (name: string) => {
   return encodeURI(`/data_streams/${encodeURIComponent(name)}`);
 };
 
-export const getIndexDetailsLink = (indexName: string, tab?: IndexDetailsTabIds) => {
+export const getIndexDetailsLink = (indexName: string, tab?: IndexDetailsTabId) => {
   let link = `/${Section.Indices}/index_details?indexName=${encodeURIComponent(indexName)}`;
   if (tab) {
     link = `${link}&tab=${tab}`;

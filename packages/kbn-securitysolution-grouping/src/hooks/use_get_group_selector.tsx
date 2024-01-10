@@ -30,6 +30,7 @@ export interface UseGetGroupSelectorArgs {
     event: string | string[],
     count?: number | undefined
   ) => void;
+  title?: string;
 }
 
 interface UseGetGroupSelectorStateless
@@ -84,6 +85,7 @@ export const useGetGroupSelector = ({
   onGroupChange,
   onOptionsChange,
   tracker,
+  title,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroups: selectedGroups, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
@@ -110,20 +112,25 @@ export const useGetGroupSelector = ({
 
   const onChange = useCallback(
     (groupSelection: string) => {
-      if (selectedGroups.find((selected) => selected === groupSelection)) {
-        const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
-        if (groups.length === 0) {
-          setSelectedGroups(['none']);
-        } else {
-          setSelectedGroups(groups);
+      // Simulate a toggle behavior when maxGroupingLevels is 1
+      if (maxGroupingLevels === 1) {
+        setSelectedGroups([groupSelection]);
+      } else {
+        if (selectedGroups.find((selected) => selected === groupSelection)) {
+          const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
+          if (groups.length === 0) {
+            setSelectedGroups(['none']);
+          } else {
+            setSelectedGroups(groups);
+          }
+          return;
         }
-        return;
-      }
 
-      const newSelectedGroups = isNoneGroup([groupSelection])
-        ? [groupSelection]
-        : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
-      setSelectedGroups(newSelectedGroups);
+        const newSelectedGroups = isNoneGroup([groupSelection])
+          ? [groupSelection]
+          : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
+        setSelectedGroups(newSelectedGroups);
+      }
 
       // built-in telemetry: UI-counter
       tracker?.(
@@ -133,7 +140,7 @@ export const useGetGroupSelector = ({
 
       onGroupChange?.({ tableId: groupingId, groupByField: groupSelection });
     },
-    [groupingId, onGroupChange, selectedGroups, setSelectedGroups, tracker]
+    [groupingId, maxGroupingLevels, onGroupChange, selectedGroups, setSelectedGroups, tracker]
   );
 
   useEffect(() => {
@@ -184,6 +191,7 @@ export const useGetGroupSelector = ({
         fields,
         maxGroupingLevels,
         options,
+        title,
       }}
     />
   );

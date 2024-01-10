@@ -80,7 +80,7 @@
           "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldRowProvider}."
         ],
         "signature": [
-          "({ children, docLinks, notifications, }: React.PropsWithChildren<",
+          "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
             "scope": "common",
@@ -99,7 +99,7 @@
             "id": "def-common.FieldRowKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  docLinks,\n  notifications,\n}",
+            "label": "{\n  children,\n  docLinks,\n  notifications,\n  settings,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",

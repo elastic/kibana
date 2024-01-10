@@ -9,10 +9,11 @@ import { EuiCommentProps } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit, uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -50,7 +51,9 @@ type ShowAssistantOverlay = ({
 }: ShowAssistantOverlayProps) => void;
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
+  alertsIndexPattern?: string;
   assistantAvailability: AssistantAvailability;
+  assistantStreamingEnabled?: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   baseAllow: string[];
@@ -64,12 +67,22 @@ export interface AssistantProviderProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getComments: ({
+    amendMessage,
     currentConversation,
-    lastCommentRef,
+    isFetchingResponse,
+    regenerateMessage,
     showAnonymizedValues,
   }: {
+    amendMessage: ({
+      conversationId,
+      content,
+    }: {
+      conversationId: string;
+      content: string;
+    }) => void;
     currentConversation: Conversation;
-    lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+    isFetchingResponse: boolean;
+    regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
@@ -80,11 +93,14 @@ export interface AssistantProviderProps {
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
+  toasts?: IToasts;
 }
 
 export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
+  alertsIndexPattern: string | undefined;
   assistantAvailability: AssistantAvailability;
+  assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
@@ -102,17 +118,25 @@ export interface UseAssistantContext {
   conversations: Record<string, Conversation>;
   getComments: ({
     currentConversation,
-    lastCommentRef,
     showAnonymizedValues,
+    amendMessage,
+    isFetchingResponse,
   }: {
     currentConversation: Conversation;
-    lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
-
+    isFetchingResponse: boolean;
+    amendMessage: ({
+      conversationId,
+      content,
+    }: {
+      conversationId: string;
+      content: string;
+    }) => void;
+    regenerateMessage: () => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
-  localStorageLastConversationId: string | undefined;
+  getConversationId: (id?: string) => string;
   promptContexts: Record<string, PromptContext>;
   modelEvaluatorEnabled: boolean;
   nameSpace: string;
@@ -129,6 +153,7 @@ export interface UseAssistantContext {
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   title: string;
+  toasts: IToasts | undefined;
   unRegisterPromptContext: UnRegisterPromptContext;
 }
 
@@ -136,7 +161,9 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
+  alertsIndexPattern,
   assistantAvailability,
+  assistantStreamingEnabled = false,
   assistantTelemetry,
   augmentMessageCodeBlocks,
   baseAllow,
@@ -158,6 +185,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   setDefaultAllow,
   setDefaultAllowReplacement,
   title = DEFAULT_ASSISTANT_TITLE,
+  toasts,
 }) => {
   /**
    * Local storage for all quick prompts, prefixed by assistant nameSpace
@@ -262,10 +290,20 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     [setConversations]
   );
 
+  const getConversationId = useCallback(
+    // if a conversationId has been provided, use that
+    // if not, check local storage
+    // last resort, go to welcome conversation
+    (id?: string) => id ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
+    [localStorageLastConversationId]
+  );
+
   const value = useMemo(
     () => ({
       actionTypeRegistry,
+      alertsIndexPattern,
       assistantAvailability,
+      assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
@@ -283,7 +321,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       docLinks,
       getComments,
       http,
-      knowledgeBase: localStorageKnowledgeBase ?? DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+      knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
       modelEvaluatorEnabled,
       promptContexts,
       nameSpace,
@@ -299,13 +337,16 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setShowAssistantOverlay,
       showAssistantOverlay,
       title,
+      toasts,
       unRegisterPromptContext,
-      localStorageLastConversationId,
+      getConversationId,
       setLastConversationId: setLocalStorageLastConversationId,
     }),
     [
       actionTypeRegistry,
+      alertsIndexPattern,
       assistantAvailability,
+      assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       baseAllow,
@@ -322,7 +363,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getComments,
       http,
       localStorageKnowledgeBase,
-      localStorageLastConversationId,
+      getConversationId,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
       modelEvaluatorEnabled,
@@ -337,9 +378,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setLocalStorageLastConversationId,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
-      setSelectedSettingsTab,
       showAssistantOverlay,
       title,
+      toasts,
       unRegisterPromptContext,
     ]
   );

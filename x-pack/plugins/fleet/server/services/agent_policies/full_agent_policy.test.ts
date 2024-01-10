@@ -485,6 +485,7 @@ describe('transformOutputToFullPolicyOutput', () => {
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "type": "elasticsearch",
       }
     `);
@@ -509,6 +510,7 @@ ssl.test: 123
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "ssl.ca_trusted_fingerprint": "fingerprint123",
         "ssl.test": 123,
         "test": 1234,
@@ -541,6 +543,7 @@ ssl.test: 123
         "hosts": Array [
           "http://host.fr",
         ],
+        "preset": "balanced",
         "proxy_url": "https://proxy1.fr",
         "type": "elasticsearch",
       }
@@ -567,6 +570,7 @@ ssl.test: 123
           "http://host.fr",
         ],
         "password": "\${ES_PASSWORD}",
+        "preset": "balanced",
         "type": "elasticsearch",
         "username": "\${ES_USERNAME}",
       }

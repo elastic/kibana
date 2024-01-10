@@ -373,7 +373,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"references.0: Expected string, received number, references.0: Expected string, received number, references.0: Expected string, received number, references.0: Expected string, received number, references.0: Expected string, received number, and 3 more"`
+    );
   });
 
   test('indexes cannot be numbers', () => {
@@ -385,7 +387,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", index.0: Expected string, received number, index.0: Expected string, received number, type: Invalid literal value, expected \\"saved_query\\", index.0: Expected string, received number, and 8 more"`
+    );
   });
 
   test('saved_id is not required when type is saved_query and will validate without it', () => {
@@ -456,7 +460,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up', type: Invalid literal value, expected \\"saved_query\\", language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up', and 9 more"`
+    );
   });
 
   test('max_signals cannot be negative', () => {
@@ -518,7 +524,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"meta: Expected object, received string, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", meta: Expected object, received string, meta: Expected object, received string, and 12 more"`
+    );
   });
 
   test('filters cannot be a string', () => {
@@ -529,7 +537,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", filters: Expected array, received string, filters: Expected array, received string, type: Invalid literal value, expected \\"saved_query\\", and 10 more"`
+    );
   });
 
   test('name cannot be an empty string', () => {
@@ -631,7 +641,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"threat.0.framework: Required, threat.0.framework: Required, threat.0.framework: Required, threat.0.framework: Required, threat.0.framework: Required, and 3 more"`
+    );
   });
 
   test('threat is invalid when updated with missing tactic sub-object', () => {
@@ -655,7 +667,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"threat.0.tactic: Required, threat.0.tactic: Required, threat.0.tactic: Required, threat.0.tactic: Required, threat.0.tactic: Required, and 3 more"`
+    );
   });
 
   test('threat is valid when updated with missing technique', () => {
@@ -700,7 +714,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk', and 3 more"`
+    );
   });
 
   describe('note', () => {
@@ -744,7 +760,9 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"note: Expected string, received object, note: Expected string, received object, note: Expected string, received object, note: Expected string, received object, note: Expected string, received object, and 3 more"`
+      );
     });
   });
 
@@ -756,7 +774,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.group: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.group: Required, actions.0.group: Required, and 12 more"`
+    );
   });
 
   test('You cannot send in an array of actions that are missing "id"', () => {
@@ -767,7 +787,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.id: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.id: Required, actions.0.id: Required, and 12 more"`
+    );
   });
 
   test('You cannot send in an array of actions that are missing "params"', () => {
@@ -778,7 +800,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.params: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.params: Required, actions.0.params: Required, and 12 more"`
+    );
   });
 
   test('You cannot send in an array of actions that are including "actionTypeId"', () => {
@@ -796,7 +820,9 @@ describe('Patch rule request schema', () => {
 
     const result = PatchRuleRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"actions.0.action_type_id: Required, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", actions.0.action_type_id: Required, actions.0.action_type_id: Required, and 12 more"`
+    );
   });
 
   describe('exception_list', () => {
@@ -862,7 +888,9 @@ describe('Patch rule request schema', () => {
 
       const result = PatchRuleRequestBody.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"Invalid input"`);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'not a namespace type', type: Invalid literal value, expected \\"eql\\", exceptions_list.0.list_id: Required, and 26 more"`
+      );
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {

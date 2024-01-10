@@ -13,9 +13,11 @@ import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../common';
 const rewriteBodyRes: RewriteRequestCase<MaintenanceWindow> = ({
   r_rule: rRule,
   category_ids: categoryIds,
+  scoped_query: scopedQuery,
   ...rest
 }) => ({
   ...rest,
+  scopedQuery,
   categoryIds,
   rRule,
 });

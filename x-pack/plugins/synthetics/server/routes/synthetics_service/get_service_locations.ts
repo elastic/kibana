@@ -23,8 +23,11 @@ export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
   }): Promise<any> => {
     const elasticManagedLocationsEnabled =
       Boolean(
-        (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime
-          .elasticManagedLocationsEnabled
+        (
+          await server.coreStart?.capabilities.resolveCapabilities(request, {
+            capabilityPath: 'uptime.*',
+          })
+        ).uptime.elasticManagedLocationsEnabled
       ) ?? true;
 
     if (elasticManagedLocationsEnabled) {
@@ -42,7 +45,7 @@ export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
       const { locations: privateLocations, agentPolicies } =
         await getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient);
 
-      const result = toClientContract({ locations: privateLocations }, agentPolicies).locations;
+      const result = toClientContract({ locations: privateLocations }, agentPolicies);
       return {
         locations: result,
       };

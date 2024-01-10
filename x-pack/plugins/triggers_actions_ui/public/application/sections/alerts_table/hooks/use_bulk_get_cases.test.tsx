@@ -7,10 +7,11 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import * as api from './apis/bulk_get_cases';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetCases } from './use_bulk_get_cases';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
+import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
@@ -27,7 +28,7 @@ describe('useBulkGetCases', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+    appMockRender = createAppMockRenderer(AlertsTableQueryContext);
   });
 
   it('calls the api when invoked with the correct parameters', async () => {

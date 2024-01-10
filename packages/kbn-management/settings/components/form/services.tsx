@@ -56,7 +56,7 @@ export const FormKibanaProvider: FC<FormKibanaDependencies> = ({ children, ...de
 
   return (
     <FormContext.Provider value={services}>
-      <FieldCategoryKibanaProvider {...{ docLinks, notifications }}>
+      <FieldCategoryKibanaProvider {...{ docLinks, notifications, settings }}>
         {children}
       </FieldCategoryKibanaProvider>
     </FormContext.Provider>

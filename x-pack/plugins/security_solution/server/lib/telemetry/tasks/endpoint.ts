@@ -179,7 +179,6 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             const packagePolicies = agentPolicy?.package_policies;
 
             if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {
-              tlog(logger, `package policy exists as ${JSON.stringify(packagePolicies)}`);
               packagePolicies
                 .map((pPolicy) => pPolicy as PolicyData)
                 .forEach((pPolicy) => {
@@ -228,11 +227,6 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             )
           : new Map<string, EndpointPolicyResponseDocument>();
 
-        tlog(
-          logger,
-          `policy responses exists as ${JSON.stringify(Object.fromEntries(policyResponses))}`
-        );
-
         /** STAGE 4 - Fetch Endpoint Agent Metadata
          *
          * Reads Endpoint Agent metadata out of the `.ds-metrics-endpoint.metadata` data stream
@@ -261,10 +255,6 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             },
             new Map<string, EndpointMetadataDocument>()
           );
-        tlog(
-          logger,
-          `endpoint metadata exists as ${JSON.stringify(Object.fromEntries(endpointMetadata))}`
-        );
         /** STAGE 5 - Create the telemetry log records
          *
          * Iterates through the endpoint metrics documents at STAGE 1 and joins them together

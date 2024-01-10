@@ -281,7 +281,6 @@ describe('SearchSource', () => {
         searchSource.setField('index', {
           ...indexPattern,
           getComputedFields: () => ({
-            storedFields: ['hello'],
             scriptFields: { world: {} },
             docvalueFields: ['@timestamp'],
             runtimeFields,
@@ -289,7 +288,7 @@ describe('SearchSource', () => {
         } as unknown as DataView);
 
         const request = searchSource.getSearchRequestBody();
-        expect(request.stored_fields).toEqual(['hello']);
+        expect(request.stored_fields).toEqual(['*']);
         expect(request.script_fields).toEqual({ world: {} });
         expect(request.fields).toEqual(['@timestamp']);
         expect(request.runtime_mappings).toEqual(runtimeFields);

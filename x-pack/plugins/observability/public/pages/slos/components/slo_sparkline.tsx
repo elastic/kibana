@@ -35,12 +35,12 @@ export interface Props {
   data: Data[];
   chart: ChartType;
   state: State;
+  size?: 'compact' | 'default';
   isLoading: boolean;
 }
 
-export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
+export function SloSparkline({ chart, data, id, isLoading, size, state }: Props) {
   const charts = useKibana().services.charts;
-  const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
 
   const { euiTheme } = useEuiTheme();
@@ -52,12 +52,15 @@ export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
     return <EuiLoadingChart style={{ minWidth: 60, justifyContent: 'center' }} size="m" mono />;
   }
 
+  const height = size === 'compact' ? 14 : 28;
+  const width = size === 'compact' ? 40 : 60;
+
   return (
-    <Chart size={{ height: 28, width: 60 }}>
+    <Chart size={{ height, width }}>
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
-        theme={[theme, EUI_SPARKLINE_THEME_PARTIAL]}
+        theme={[EUI_SPARKLINE_THEME_PARTIAL]}
         locale={i18n.getLocale()}
       />
       <Tooltip type={TooltipType.None} />

@@ -83,11 +83,7 @@ interface NodeDefinitionBase {
    */
   breadcrumbStatus?: 'hidden' | 'visible';
   /**
-   * Optional status to for the side navigation. "hidden" and "visible" are self explanatory.
-   * The `renderAsItem` status is _only_ for group nodes (nodes with children declared or with
-   * the "nodeType" set to `group`) and allow to render the node as an "item" instead of the head of
-   * a group. This is usefull to have sub-pages declared in the tree that will correctly be mapped
-   * in the Breadcrumbs, but are not rendered in the side navigation.
+   * Optional status to indicate if the node should be hidden in the side nav (but still present in the navigation tree).
    * @default 'visible'
    */
   sideNavStatus?: SideNavNodeStatus;
@@ -173,7 +169,7 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
   title: string;
   /** Path in the tree of the node */
-  path: string[];
+  path: string;
   /** App id or deeplink id */
   deepLink?: ChromeNavLink;
   /**
@@ -182,9 +178,14 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    */
   children?: ChromeProjectNavigationNode[];
   /**
-   * Flag to indicate if the node is currently active.
+   * Handler to render the node item with custom JSX. This handler is added to render the `children` of
+   * the Navigation.Item component when React components are used to declare the navigation tree.
    */
-  isActive?: boolean;
+  renderItem?: () => React.ReactNode;
+  /**
+   * Flag to indicate if the node is an "external" cloud link
+   */
+  isElasticInternalLink?: boolean;
 }
 
 /** @public */

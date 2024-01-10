@@ -6,6 +6,7 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
 import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
@@ -84,6 +85,7 @@ describe('GetSLO', () => {
         revision: slo.revision,
         groupBy: slo.groupBy,
         instanceId: ALL_VALUE,
+        version: SLO_MODEL_VERSION,
       });
     });
   });

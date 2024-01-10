@@ -38,9 +38,9 @@ import {
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
-} from '../../store/timeline/actions';
-import type { TimelineModel } from '../../store/timeline/model';
-import { timelineDefaults } from '../../store/timeline/defaults';
+} from '../../store/actions';
+import type { TimelineModel } from '../../store/model';
+import { timelineDefaults } from '../../store/defaults';
 
 import {
   defaultColumnHeaderType,
@@ -401,6 +401,10 @@ export const queryTimelineById = <TCache>({
               savedSearchId: timeline.savedSearchId,
             },
             to,
+            // The query has already been resolved before
+            // when the response was mapped to a model.
+            // No need to do that again.
+            preventSettingQuery: true,
           })();
         }
       })
@@ -428,6 +432,7 @@ export const dispatchUpdateTimeline =
     to,
     ruleNote,
     ruleAuthor,
+    preventSettingQuery,
   }: UpdateTimeline): (() => void) =>
   () => {
     if (!isEmpty(timeline.indexNames)) {
@@ -459,6 +464,7 @@ export const dispatchUpdateTimeline =
       dispatchAddTimeline({ id, timeline, resolveTimelineConfig, savedTimeline: duplicate })
     );
     if (
+      !preventSettingQuery &&
       timeline.kqlQuery != null &&
       timeline.kqlQuery.filterQuery != null &&
       timeline.kqlQuery.filterQuery.kuery != null &&

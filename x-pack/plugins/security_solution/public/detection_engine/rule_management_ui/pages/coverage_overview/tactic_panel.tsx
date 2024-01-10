@@ -11,9 +11,9 @@ import React, { memo, useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { CoverageOverviewMitreTactic } from '../../../rule_management/model/coverage_overview/mitre_tactic';
 import { coverageOverviewPanelWidth } from './constants';
-import { getNumOfCoveredTechniques } from './helpers';
 import * as i18n from './translations';
 import { CoverageOverviewPanelRuleStats } from './shared_components/panel_rule_stats';
+import { getNumOfCoveredTechniques } from '../../../rule_management/model/coverage_overview/mitre_technique';
 
 export interface CoverageOverviewTacticPanelProps {
   tactic: CoverageOverviewMitreTactic;

@@ -64,7 +64,9 @@
     "@kbn/serverless",
     "@kbn/no-data-page-plugin",
     "@kbn/search-response-warnings",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/shared-ux-utility"
   ],
   "exclude": [
     "target/**/*",

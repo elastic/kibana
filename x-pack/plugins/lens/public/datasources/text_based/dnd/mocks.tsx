@@ -83,6 +83,37 @@ export const numericDraggedField = {
   },
 };
 
+export const fieldListNonNumericOnly = [
+  {
+    columnId: 'category',
+    fieldName: 'category',
+    meta: {
+      type: 'string',
+    },
+  },
+  {
+    columnId: 'currency',
+    fieldName: 'currency',
+    meta: {
+      type: 'string',
+    },
+  },
+  {
+    columnId: 'products.sold_date',
+    fieldName: 'products.sold_date',
+    meta: {
+      type: 'date',
+    },
+  },
+  {
+    columnId: 'products.buyer',
+    fieldName: 'products.buyer',
+    meta: {
+      type: 'string',
+    },
+  },
+];
+
 export const fieldList = [
   {
     columnId: 'category',
@@ -128,7 +159,6 @@ export const defaultProps = {
         errors: [],
       },
     },
-    fieldList,
     indexPatternRefs: [],
   },
   source: numericDraggedColumn,

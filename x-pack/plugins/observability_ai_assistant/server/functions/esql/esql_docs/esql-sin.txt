@@ -1,0 +1,7 @@
+SIN
+
+
+Sine trigonometric function. Input expected in radians.
+ROW a=1.8
+| EVAL sin=SIN(a)
+Supported types:

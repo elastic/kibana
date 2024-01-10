@@ -14,7 +14,7 @@ else
 fi
 
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
-KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
@@ -26,7 +26,7 @@ if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   exit 1
 fi
 
-echo "--- Build images"
+echo "--- Build Kibana"
 node scripts/build \
   --debug \
   --release \
@@ -87,12 +87,22 @@ fi
 echo "--- Build dependencies report"
 node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.csv"
 
-echo "--- Upload artifacts"
+echo "--- Upload CDN assets"
 cd target
+gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_QA_KEY")
+
+CDN_ASSETS_FOLDER=$(mktemp -d)
+tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip=1
+
+gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_QA_BUCKET/$GIT_ABBREV_COMMIT"
+gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
+
+echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 cd -
 

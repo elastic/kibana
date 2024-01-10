@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { ResponseActionBodySchema } from '../../../../../common/api/endpoint';
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
 } from '../../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 
 export type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
   command: ResponseActionsApiCommandNames;
-  user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
+  user?: { username: string } | null | undefined;
   rule_id?: string;
   rule_name?: string;
   error?: string;
@@ -31,7 +31,7 @@ export interface CreateActionMetadata {
 export interface ActionCreateService {
   createActionFromAlert: (payload: CreateActionPayload, agents: string[]) => Promise<ActionDetails>;
   createAction: <
-    TOutputContent extends object = object,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     payload: CreateActionPayload,

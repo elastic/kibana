@@ -13,7 +13,7 @@
 import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
-  profilingPerCoreWatt,
+  profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 
 describe('Settings page', () => {
@@ -25,7 +25,7 @@ describe('Settings page', () => {
     cy.updateAdvancedSettings({
       [profilingCo2PerKWH]: 0.000379069,
       [profilingDatacenterPUE]: 1.7,
-      [profilingPerCoreWatt]: 7,
+      [profilingPervCPUWattX86]: 7,
     });
   });
 
@@ -35,7 +35,10 @@ describe('Settings page', () => {
     cy.contains('CO2');
     cy.contains('Regional Carbon Intensity (ton/kWh)');
     cy.contains('Data Center PUE');
-    cy.contains('Per Core Watts');
+    cy.contains('Per vCPU Watts - x86');
+    cy.contains('Per vCPU Watts - arm64');
+    cy.contains('AWS EDP discount rate (%)');
+    cy.contains('Cost per vCPU per hour ($)');
   });
 
   it('updates values', () => {
@@ -48,7 +51,7 @@ describe('Settings page', () => {
     cy.get(`[data-test-subj="advancedSetting-editField-${profilingDatacenterPUE}"]`)
       .clear()
       .type('2.4');
-    cy.get(`[data-test-subj="advancedSetting-editField-${profilingPerCoreWatt}"]`)
+    cy.get(`[data-test-subj="advancedSetting-editField-${profilingPervCPUWattX86}"]`)
       .clear()
       .type('20');
     cy.get('[data-test-subj="profilingBottomBarActions"]').should('exist');

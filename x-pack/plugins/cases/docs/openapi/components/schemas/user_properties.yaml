@@ -1,15 +1,22 @@
 email:
-  type: string
-  example: null
-  nullable: true
+  type:
+    - "string"
+    - "null"
+  examples:
+    - null
 full_name:
-  type: string
-  example: null
-  nullable: true
-username:
-  type: string
-  example: elastic
-  nullable: true
+  type:
+    - "string"
+    - "null"
+  examples:
+    - null
 profile_uid:
   type: string
-  example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+  examples:
+    - u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+username:
+  type:
+    - "string"
+    - "null"
+  examples:
+    - elastic

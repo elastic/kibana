@@ -70,8 +70,10 @@ const testVisTypes: BaseVisType[] = [
 const testVisTypeAliases: VisTypeAlias[] = [
   {
     title: 'Lens',
-    aliasApp: 'lens',
-    aliasPath: 'path/to/lens',
+    alias: {
+      app: 'lens',
+      path: 'path/to/lens',
+    },
     icon: 'lensApp',
     name: 'lens',
     description: 'Description of Lens app',
@@ -79,8 +81,10 @@ const testVisTypeAliases: VisTypeAlias[] = [
   },
   {
     title: 'Maps',
-    aliasApp: 'maps',
-    aliasPath: 'path/to/maps',
+    alias: {
+      app: 'maps',
+      path: 'path/to/maps',
+    },
     icon: 'gisApp',
     name: 'maps',
     description: 'Description of Maps app',

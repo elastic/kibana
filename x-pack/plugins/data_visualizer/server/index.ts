@@ -6,6 +6,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { DataVisualizerPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) => new DataVisualizerPlugin();
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { DataVisualizerPlugin } = await import('./plugin');
+  return new DataVisualizerPlugin();
+};

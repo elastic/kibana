@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
@@ -48,6 +49,7 @@ import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
+import { AlertActionsProps } from './types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -95,6 +97,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getAlertsTable: (props: AlertsTableProps) => {
       return getAlertsTableLazy(props);
+    },
+    getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {
+      return getAlertsTableDefaultAlertActionsLazy(props);
     },
     getFieldBrowser: (props: FieldBrowserProps) => {
       return getFieldBrowserLazy(props);

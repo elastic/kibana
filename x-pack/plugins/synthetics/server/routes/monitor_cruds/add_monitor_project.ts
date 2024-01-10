@@ -13,7 +13,7 @@ import { ProjectMonitor } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
-const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
+const MAX_PAYLOAD_SIZE = 1048576 * 50; // 20MiB
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
@@ -102,8 +102,11 @@ export const validatePermissions = async (
 
   const elasticManagedLocationsEnabled =
     Boolean(
-      (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime
-        .elasticManagedLocationsEnabled
+      (
+        await server.coreStart?.capabilities.resolveCapabilities(request, {
+          capabilityPath: 'uptime.*',
+        })
+      ).uptime.elasticManagedLocationsEnabled
     ) ?? true;
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;

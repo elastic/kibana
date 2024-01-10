@@ -7,6 +7,7 @@
 
 import type { FrameworkRequest } from '../../../framework';
 import { mockGetTimelineValue, mockSavedObject } from '../../__mocks__/import_timelines';
+import { mockTimeline } from '../../__mocks__/create_timelines';
 
 import {
   convertStringToBase64,
@@ -15,10 +16,11 @@ import {
   getDraftTimeline,
   resolveTimelineOrNull,
   updatePartialSavedTimeline,
+  copyTimeline,
 } from '.';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
-import { getNotesByTimelineId } from '../notes/saved_object';
-import { getAllPinnedEventsByTimelineId } from '../pinned_events';
+import { getNotesByTimelineId, persistNote } from '../notes/saved_object';
+import { getAllPinnedEventsByTimelineId, persistPinnedEventOnTimeline } from '../pinned_events';
 import { TimelineType } from '../../../../../common/api/timeline';
 import type {
   AllTimelinesResponse,
@@ -40,10 +42,12 @@ jest.mock('./convert_saved_object_to_savedtimeline', () => ({
 
 jest.mock('../notes/saved_object', () => ({
   getNotesByTimelineId: jest.fn().mockResolvedValue([]),
+  persistNote: jest.fn(),
 }));
 
 jest.mock('../pinned_events', () => ({
   getAllPinnedEventsByTimelineId: jest.fn().mockResolvedValue([]),
+  persistPinnedEventOnTimeline: jest.fn(),
 }));
 
 describe('saved_object', () => {
@@ -460,6 +464,97 @@ describe('saved_object', () => {
         perPage: 1,
         type: 'siem-ui-timeline',
       });
+    });
+  });
+
+  describe('Copy timeline', () => {
+    let mockFindSavedObject: jest.Mock;
+    let mockRequest: FrameworkRequest;
+    let createSavedObject: jest.Mock;
+
+    beforeEach(() => {
+      mockFindSavedObject = jest.fn().mockResolvedValue({ saved_objects: [], total: 0 });
+      createSavedObject = jest.fn().mockResolvedValue({
+        id: '1',
+        version: '2323r23',
+        attributes: {
+          ...mockGetTimelineValue,
+          kqlQuery: null,
+        },
+      });
+      mockRequest = {
+        user: {
+          username: 'username',
+        },
+        context: {
+          core: {
+            savedObjects: {
+              client: {
+                find: mockFindSavedObject,
+                create: createSavedObject,
+                get: jest.fn(async () => ({
+                  ...mockResolvedSavedObject.saved_object,
+                })),
+              },
+            },
+          },
+        },
+      } as unknown as FrameworkRequest;
+    });
+
+    afterEach(() => {
+      mockFindSavedObject.mockClear();
+      (getNotesByTimelineId as jest.Mock).mockClear();
+      (persistNote as jest.Mock).mockClear();
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockClear();
+    });
+
+    it('should resolve all associated saved objects and copy those', async () => {
+      const note = {
+        notedId: 'theNoteId',
+        timelineId: 'original_id',
+        version: '23d23f',
+        note: 'test note',
+      };
+      (getNotesByTimelineId as jest.Mock).mockResolvedValue([note]);
+      const pinnedEvent = {
+        timelineId: 'original_id',
+        eventId: 'randomEventId',
+      };
+      (getAllPinnedEventsByTimelineId as jest.Mock).mockResolvedValue([pinnedEvent]);
+
+      const originalId = 'original_id';
+      const res = await copyTimeline(
+        mockRequest,
+        mockTimeline as unknown as SavedTimeline,
+        originalId
+      );
+
+      // Resolves objects by the correct timeline id
+      expect(getNotesByTimelineId).toHaveBeenCalledWith(mockRequest, originalId);
+      expect(getAllPinnedEventsByTimelineId).toHaveBeenCalledWith(mockRequest, originalId);
+
+      // Notes are created with the new timeline id and a copy of the original node
+      expect(persistNote).toHaveBeenCalledWith(
+        expect.objectContaining({
+          noteId: null,
+          note: expect.objectContaining({
+            ...note,
+            timelineId: mockResolvedTimeline.savedObjectId,
+          }),
+          overrideOwner: false,
+        })
+      );
+
+      // Pinned events are created with the new timeline id and the correct event id
+      expect(persistPinnedEventOnTimeline).toHaveBeenCalledWith(
+        mockRequest,
+        null,
+        pinnedEvent.eventId,
+        mockResolvedTimeline.savedObjectId
+      );
+
+      expect(res.timeline.savedObjectId).toBe(mockResolvedTimeline.savedObjectId);
     });
   });
 });

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PresentationUtilPlugin } from './plugin';
-
 export { SETTING_CATEGORY } from './ui_settings';
-export const plugin = () => new PresentationUtilPlugin();
+export const plugin = async () => {
+  const { PresentationUtilPlugin } = await import('./plugin');
+  return new PresentationUtilPlugin();
+};

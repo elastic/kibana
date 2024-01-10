@@ -23,15 +23,12 @@ import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
 import { createMetricThresholdRuleType } from './alerting/metric_threshold';
-import { createLazyContainerMetricsTable } from './components/infrastructure_node_metrics_tables/container/create_lazy_container_metrics_table';
-import { createLazyHostMetricsTable } from './components/infrastructure_node_metrics_tables/host/create_lazy_host_metrics_table';
-import { createLazyPodMetricsTable } from './components/infrastructure_node_metrics_tables/pod/create_lazy_pod_metrics_table';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import {
   type InfraLocators,
-  LogsLocatorDefinition,
-  NodeLogsLocatorDefinition,
+  InfraLogsLocatorDefinition,
+  InfraNodeLogsLocatorDefinition,
 } from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
@@ -45,7 +42,6 @@ import type {
   InfraClientSetupDeps,
   InfraClientStartDeps,
   InfraClientStartExports,
-  InfraClientStartServices,
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 
@@ -183,13 +179,15 @@ export class Plugin implements InfraClientPluginClass {
     );
 
     // Register Locators
-    const logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition({ core }));
-    const nodeLogsLocator = pluginsSetup.share.url.locators.create(
-      new NodeLogsLocatorDefinition({ core })
-    );
+    const logsLocator = this.config.featureFlags.logsUIEnabled
+      ? pluginsSetup.share.url.locators.create(new InfraLogsLocatorDefinition({ core }))
+      : undefined;
+    const nodeLogsLocator = this.config.featureFlags.logsUIEnabled
+      ? pluginsSetup.share.url.locators.create(new InfraNodeLogsLocatorDefinition({ core }))
+      : undefined;
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdRuleType(core, logsLocator)
+      createLogThresholdRuleType(core, pluginsSetup.share.url)
     );
 
     if (this.config.featureFlags.logsUIEnabled) {
@@ -250,46 +248,52 @@ export class Plugin implements InfraClientPluginClass {
     }: {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
-    }): AppDeepLink[] => [
-      {
-        id: 'inventory',
-        title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-          defaultMessage: 'Inventory',
-        }),
-        path: '/inventory',
-        navLinkStatus: AppNavLinkStatus.visible,
-      },
-      ...(hostsEnabled
-        ? [
-            {
-              id: 'hosts',
-              title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-                defaultMessage: 'Hosts',
-              }),
-              path: '/hosts',
-              navLinkStatus: AppNavLinkStatus.visible,
-            },
-          ]
-        : []),
-      ...(metricsExplorerEnabled
-        ? [
-            {
-              id: 'metrics-explorer',
-              title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                defaultMessage: 'Metrics Explorer',
-              }),
-              path: '/explorer',
-            },
-          ]
-        : []),
-      {
-        id: 'settings',
-        title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-          defaultMessage: 'Settings',
-        }),
-        path: '/settings',
-      },
-    ];
+    }): AppDeepLink[] => {
+      const serverlessNavLinkStatus = this.isServerlessEnv
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden;
+
+      return [
+        {
+          id: 'inventory',
+          title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+            defaultMessage: 'Inventory',
+          }),
+          path: '/inventory',
+          navLinkStatus: serverlessNavLinkStatus,
+        },
+        ...(hostsEnabled
+          ? [
+              {
+                id: 'hosts',
+                title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+                  defaultMessage: 'Hosts',
+                }),
+                path: '/hosts',
+                navLinkStatus: serverlessNavLinkStatus,
+              },
+            ]
+          : []),
+        ...(metricsExplorerEnabled
+          ? [
+              {
+                id: 'metrics-explorer',
+                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                  defaultMessage: 'Metrics Explorer',
+                }),
+                path: '/explorer',
+              },
+            ]
+          : []),
+        {
+          id: 'settings',
+          title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+            defaultMessage: 'Settings',
+          }),
+          path: '/settings',
+        },
+      ];
+    };
 
     core.application.register({
       id: 'metrics',
@@ -312,13 +316,11 @@ export class Plugin implements InfraClientPluginClass {
 
         const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
         const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
-        return renderApp(
-          coreStart,
-          { ...plugins, kibanaVersion: this.kibanaVersion, isCloudEnv, isServerlessEnv },
-          pluginStart,
-          this.config,
-          params
-        );
+        return renderApp(coreStart, { ...plugins }, pluginStart, this.config, params, {
+          kibanaVersion: this.kibanaVersion,
+          isCloudEnv,
+          isServerlessEnv,
+        });
       },
     });
 
@@ -364,8 +366,6 @@ export class Plugin implements InfraClientPluginClass {
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
-    const getStartServices = (): InfraClientStartServices => [core, plugins, startContract];
-
     const inventoryViews = this.inventoryViews.start({
       http: core.http,
     });
@@ -381,9 +381,6 @@ export class Plugin implements InfraClientPluginClass {
       metricsExplorerViews,
       telemetry,
       locators: this.locators!,
-      ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
-      HostMetricsTable: createLazyHostMetricsTable(getStartServices),
-      PodMetricsTable: createLazyPodMetricsTable(getStartServices),
     };
 
     return startContract;

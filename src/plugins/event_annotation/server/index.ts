@@ -7,7 +7,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { EventAnnotationServerPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new EventAnnotationServerPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { EventAnnotationServerPlugin } = await import('./plugin');
+  return new EventAnnotationServerPlugin(initializerContext);
+};

@@ -13,18 +13,25 @@ import { navLinksMock } from './navlinks';
 
 const activeNodes: ChromeProjectNavigationNode[][] = [];
 
+const defaultDeepLinks = {
+  ...navLinksMock.reduce<Record<string, ChromeNavLink>>((acc, navLink) => {
+    acc[navLink.id] = navLink;
+    return acc;
+  }, {}),
+};
+
 export const getServicesMock = ({
-  navLinks = navLinksMock,
-}: { navLinks?: ChromeNavLink[] } = {}): NavigationServices => {
+  deepLinks = defaultDeepLinks,
+}: { deepLinks?: Readonly<Record<string, ChromeNavLink>> } = {}): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
   const recentlyAccessed$ = new BehaviorSubject([]);
-  const navLinks$ = new BehaviorSubject(navLinks);
+  const deepLinks$ = new BehaviorSubject(deepLinks);
 
   return {
     basePath,
     recentlyAccessed$,
-    navLinks$,
+    deepLinks$,
     navIsOpen: true,
     navigateToUrl,
     onProjectNavigationChange: jest.fn(),
@@ -33,15 +40,19 @@ export const getServicesMock = ({
     cloudLinks: {
       billingAndSub: {
         title: 'Mock Billing & Subscriptions',
-        href: 'https://cloud.elastic.co/account/billing',
+        href: 'https://cloud.elastic.co/account/billing/',
       },
       performance: {
         title: 'Mock Performance',
-        href: 'https://cloud.elastic.co/deployments/123456789/performance',
+        href: 'https://cloud.elastic.co/deployments/123456789/performance/',
       },
       userAndRoles: {
         title: 'Mock Users & Roles',
-        href: 'https://cloud.elastic.co/deployments/123456789/security/users',
+        href: 'https://cloud.elastic.co/deployments/123456789/security/users/',
+      },
+      deployment: {
+        title: 'Mock Deployment',
+        href: 'https://cloud.elastic.co/deployments/123456789/',
       },
     },
   };

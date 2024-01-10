@@ -15,4 +15,4 @@ properties:
   results:
     type: array
     items:
-      $ref: 'slo_response.yaml'
+      $ref: 'slo_with_summary_response.yaml'

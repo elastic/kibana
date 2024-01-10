@@ -39,7 +39,11 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../../../../tasks/common';
+import {
+  deleteAlertsAndRules,
+  deleteDataView,
+  postDataView,
+} from '../../../../../tasks/api_calls/common';
 
 import {
   getEqlRule,
@@ -101,15 +105,11 @@ describe(
       enabled: false,
     });
 
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       deleteAlertsAndRules();
-      cy.task('esArchiverResetKibana');
-      login();
+      deleteDataView(DATA_VIEW_ID);
 
+      login();
       postDataView(DATA_VIEW_ID);
 
       createRule(TESTED_CUSTOM_QUERY_RULE_DATA);
@@ -257,14 +257,9 @@ describe(
       rule_id: '2',
     });
 
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      cy.task('esArchiverResetKibana');
 
       postDataView(DATA_VIEW_ID);
 
@@ -275,6 +270,10 @@ describe(
       disableAutoRefresh();
 
       expectManagementTableRules(['with dataview', 'no data view']);
+    });
+
+    afterEach(() => {
+      deleteDataView(DATA_VIEW_ID);
     });
 
     it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {

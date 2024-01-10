@@ -22,7 +22,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/slo_response.yaml'
+            $ref: '../components/schemas/slo_with_summary_response.yaml'
     '400':
       description: Bad request
       content:
@@ -72,7 +72,7 @@ put:
       content:
         application/json:
           schema:
-            $ref: '../components/schemas/slo_response.yaml'
+            $ref: '../components/schemas/slo_definition_response.yaml'
     '400':
       description: Bad request
       content:

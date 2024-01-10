@@ -11,7 +11,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -23,12 +22,13 @@ import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/publi
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { ruleDetailsRoute } from '@kbn/rule-data-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
@@ -43,12 +43,12 @@ import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
 import { CONNECTORS_PLUGIN_ID } from '../common/constants';
+import { queryClient } from './query_client';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
   () => import('./sections/rule_details/components/rule_details_route')
 );
-const queryClient = new QueryClient();
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
@@ -72,6 +72,8 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
+  isServerless: boolean;
+  fieldFormats: FieldFormatsStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -83,17 +85,17 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { dataViews, uiSettings, theme$ } = deps;
+  const { dataViews, theme } = deps;
   const sections: Section[] = ['rules', 'logs', 'alerts'];
-  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+  const isDarkMode = theme.getTheme().darkMode;
 
   const sectionsRegex = sections.join('|');
   setDataViewsService(dataViews);
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={isDarkMode}>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ ...deps, theme: { theme$ } }}>
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
               <QueryClientProvider client={queryClient}>
                 <AppWithoutRouter sectionsRegex={sectionsRegex} />

@@ -17,10 +17,14 @@ post:
         schema:
           $ref: '../components/schemas/run_connector_request.yaml'
         examples:
+          runEmailConnectorRequest:
+            $ref: '../components/examples/run_email_connector_request.yaml'
           runIndexConnectorRequest:
             $ref: '../components/examples/run_index_connector_request.yaml'
           runJiraConnectorRequest:
             $ref: '../components/examples/run_jira_connector_request.yaml'
+          runPagerDutyConnectorRequest:
+            $ref: '../components/examples/run_pagerduty_connector_request.yaml'
           runServerLogConnectorRequest:
             $ref: '../components/examples/run_server_log_connector_request.yaml'
           runServiceNowITOMConnectorRequest:
@@ -57,10 +61,14 @@ post:
                   - error
                   - ok
           examples:
+            runEmailConnectorResponse:
+              $ref: '../components/examples/run_email_connector_response.yaml'
             runIndexConnectorResponse:
               $ref: '../components/examples/run_index_connector_response.yaml'
             runJiraConnectorResponse:
               $ref: '../components/examples/run_jira_connector_response.yaml'
+            runPagerDutyConnectorResponse:
+              $ref: '../components/examples/run_pagerduty_connector_response.yaml'
             runServerLogConnectorResponse:
               $ref: '../components/examples/run_server_log_connector_response.yaml'
             runServiceNowITOMConnectorResponse:
@@ -69,7 +77,3 @@ post:
               $ref: '../components/examples/run_swimlane_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

@@ -55,7 +55,7 @@ describe('NewTemplateTimeline', () => {
 
       wrapper = mount(
         <TestProviders store={store}>
-          <NewTemplateTimeline outline={true} closeGearMenu={mockClosePopover} title={mockTitle} />
+          <NewTemplateTimeline outline={true} onClick={mockClosePopover} title={mockTitle} />
         </TestProviders>
       );
     });
@@ -92,7 +92,7 @@ describe('NewTemplateTimeline', () => {
 
       wrapper = mount(
         <TestProviders store={store}>
-          <NewTemplateTimeline outline={true} closeGearMenu={mockClosePopover} title={mockTitle} />
+          <NewTemplateTimeline outline={true} onClick={mockClosePopover} title={mockTitle} />
         </TestProviders>
       );
     });

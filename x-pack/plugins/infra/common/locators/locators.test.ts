@@ -6,21 +6,24 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { LogsLocatorDefinition, LogsLocatorDependencies } from './logs_locator';
-import { NodeLogsLocatorDefinition } from './node_logs_locator';
-import type { LogsLocatorParams } from './logs_locator';
-import type { NodeLogsLocatorParams } from './node_logs_locator';
+import { InfraLogsLocatorDefinition, InfraLogsLocatorDependencies } from './logs_locator';
+import { InfraNodeLogsLocatorDefinition } from './node_logs_locator';
 import { coreMock } from '@kbn/core/public/mocks';
-import { findInventoryFields } from '../inventory_models';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import moment from 'moment';
-import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import {
+  DEFAULT_LOG_VIEW,
+  LogViewReference,
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 
 const setupLogsLocator = async () => {
-  const deps: LogsLocatorDependencies = {
+  const deps: InfraLogsLocatorDependencies = {
     core: coreMock.createSetup(),
   };
-  const logsLocator = new LogsLocatorDefinition(deps);
-  const nodeLogsLocator = new NodeLogsLocatorDefinition(deps);
+  const logsLocator = new InfraLogsLocatorDefinition(deps);
+  const nodeLogsLocator = new InfraNodeLogsLocatorDefinition(deps);
 
   return {
     logsLocator,
@@ -30,8 +33,9 @@ const setupLogsLocator = async () => {
 
 describe('Infra Locators', () => {
   const APP_ID = 'logs';
-  const nodeType = 'host';
   const FILTER_QUERY = 'trace.id:1234';
+  const nodeType = 'host';
+  const nodeField = findInventoryFields(nodeType).id;
   const nodeId = uuidv4();
   const time = 1550671089404;
   const from = 1676815089000;
@@ -121,7 +125,7 @@ describe('Infra Locators', () => {
     it('should create a link to Node Logs with no state', async () => {
       const params: NodeLogsLocatorParams = {
         nodeId,
-        nodeType,
+        nodeField,
         time,
       };
       const { nodeLogsLocator } = await setupLogsLocator();
@@ -136,7 +140,7 @@ describe('Infra Locators', () => {
     it('should allow specifying specific logPosition', async () => {
       const params: NodeLogsLocatorParams = {
         nodeId,
-        nodeType,
+        nodeField,
         time,
       };
       const { nodeLogsLocator } = await setupLogsLocator();
@@ -149,7 +153,7 @@ describe('Infra Locators', () => {
     it('should allow specifying specific filter', async () => {
       const params: NodeLogsLocatorParams = {
         nodeId,
-        nodeType,
+        nodeField,
         time,
         filter: FILTER_QUERY,
       };
@@ -163,7 +167,7 @@ describe('Infra Locators', () => {
     it('should allow specifying specific view id', async () => {
       const params: NodeLogsLocatorParams = {
         nodeId,
-        nodeType,
+        nodeField,
         time,
         logView: { ...DEFAULT_LOG_VIEW, logViewId: 'test' },
       };
@@ -177,7 +181,7 @@ describe('Infra Locators', () => {
     it('should allow specifying specific time range', async () => {
       const params: NodeLogsLocatorParams = {
         nodeId,
-        nodeType,
+        nodeField,
         time,
         from,
         to,
@@ -193,7 +197,7 @@ describe('Infra Locators', () => {
     it('should return correct structured url', async () => {
       const params: NodeLogsLocatorParams = {
         nodeId,
-        nodeType,
+        nodeField,
         time,
         logView: DEFAULT_LOG_VIEW,
         filter: FILTER_QUERY,
@@ -230,11 +234,11 @@ const constructLogView = (logView?: LogViewReference) => {
 };
 
 const constructLogPosition = (time: number = 1550671089404) => {
-  return `(position:(tiebreaker:0,time:${time}))`;
+  return `(position:(tiebreaker:0,time:'${moment(time).toISOString()}'))`;
 };
 
 const constructLogFilter = ({
-  nodeType,
+  nodeField,
   nodeId,
   filter,
   timeRange,
@@ -243,7 +247,7 @@ const constructLogFilter = ({
   let finalFilter = filter || '';
 
   if (nodeId) {
-    const nodeFilter = `${findInventoryFields(nodeType!).id}: ${nodeId}`;
+    const nodeFilter = `${nodeField}: ${nodeId}`;
     finalFilter = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
   }
 

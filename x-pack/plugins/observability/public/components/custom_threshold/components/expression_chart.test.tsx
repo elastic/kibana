@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
-import { act } from 'react-dom/test-utils';
 import { LineAnnotation, RectAnnotation } from '@elastic/charts';
-import { DataViewBase } from '@kbn/es-query';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
+import { DataViewBase } from '@kbn/es-query';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import React, { ReactElement } from 'react';
+import { act } from 'react-dom/test-utils';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
-import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
 const mockStartServices = mockCoreMock.createStart();
 
@@ -37,8 +37,8 @@ const mockResponse = {
   series: [{ id: 'Everything', rows: [], columns: [] }],
 };
 
-jest.mock('../hooks/use_metrics_explorer_chart_data', () => ({
-  useMetricsExplorerChartData: () => ({ loading: false, data: { pages: [mockResponse] } }),
+jest.mock('../hooks/use_expression_chart_data', () => ({
+  useExpressionChartData: () => ({ loading: false, data: { pages: [mockResponse] } }),
 }));
 
 describe('ExpressionChart', () => {
@@ -76,7 +76,12 @@ describe('ExpressionChart', () => {
 
   it('should display no data message', async () => {
     const expression: MetricExpression = {
-      aggType: Aggregators.AVERAGE,
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+        },
+      ],
       timeSize: 1,
       timeUnit: 'm',
       sourceId: 'default',

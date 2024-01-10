@@ -22,6 +22,7 @@ import type {
   CopyAgentPolicyResponse,
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
+  BulkGetAgentPoliciesResponse,
 } from '../../types';
 
 import { useRequest, sendRequest, useConditionalRequest, sendRequestForRq } from './use_request';
@@ -42,6 +43,17 @@ export const useGetAgentPoliciesQuery = (query?: GetAgentPoliciesRequest['query'
       path: agentPolicyRouteService.getListPath(),
       method: 'get',
       query,
+      version: API_VERSIONS.public.v1,
+    })
+  );
+};
+
+export const useBulkGetAgentPoliciesQuery = (ids: string[], options?: { full?: boolean }) => {
+  return useQuery<BulkGetAgentPoliciesResponse, RequestError>(['agentPolicies', ids], () =>
+    sendRequestForRq<BulkGetAgentPoliciesResponse>({
+      path: agentPolicyRouteService.getBulkGetPath(),
+      method: 'post',
+      body: JSON.stringify({ ids, full: options?.full }),
       version: API_VERSIONS.public.v1,
     })
   );

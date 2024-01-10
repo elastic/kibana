@@ -12,6 +12,7 @@ import {
   type AggregateQuery,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
+  getAggregateQueryMode,
 } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
@@ -19,6 +20,9 @@ import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
 import type { DataViewsState } from '../../state_management';
+import { addColumnsToCache } from './fieldlist_cache';
+
+export const MAX_NUM_OF_COLUMNS = 5;
 
 export async function loadIndexPatternRefs(
   indexPatternsService: DataViewsPublicPluginStart
@@ -107,6 +111,8 @@ export async function getStateFromAggregateQuery(
     timeFieldName = dataView.timeFieldName;
     const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
     columnsFromQuery = table?.columns ?? [];
+    const language = getAggregateQueryMode(query);
+    addColumnsToCache(query[language], columnsFromQuery);
     allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
   } catch (e) {
     errors.push(e);
@@ -127,7 +133,6 @@ export async function getStateFromAggregateQuery(
 
   return {
     ...tempState,
-    fieldList: columnsFromQuery ?? [],
     indexPatternRefs,
     initialContext: context,
   };
@@ -145,4 +150,26 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
   // other textbased queries....
 
   return indexPattern;
+}
+
+export function canColumnBeDroppedInMetricDimension(
+  columns: TextBasedLayerColumn[] | DatatableColumn[],
+  selectedColumnType?: string
+): boolean {
+  // check if at least one numeric field exists
+  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  return !hasNumberTypeColumns || (hasNumberTypeColumns && selectedColumnType === 'number');
+}
+
+export function canColumnBeUsedBeInMetricDimension(
+  columns: TextBasedLayerColumn[] | DatatableColumn[],
+  selectedColumnType?: string
+): boolean {
+  // check if at least one numeric field exists
+  const hasNumberTypeColumns = columns?.some((c) => c?.meta?.type === 'number');
+  return (
+    !hasNumberTypeColumns ||
+    columns.length >= MAX_NUM_OF_COLUMNS ||
+    (hasNumberTypeColumns && selectedColumnType === 'number')
+  );
 }

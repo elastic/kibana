@@ -128,6 +128,7 @@ COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverle
 COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
 # Supportability enhancement: enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
 RUN echo '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
+RUN echo '--diagnostic-dir=./data' >> config/node.options
 {{/serverless}}
 {{^opensslLegacyProvider}}
 RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
@@ -189,7 +190,7 @@ ENTRYPOINT ["/bin/tini", "--"]
 CMD ["/app/kibana.sh"]
 # Generate a stub command that will be overwritten at runtime
 RUN mkdir /app && \
-    /usr/bin/echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
+    echo -e '#!/bin/bash\nexec /usr/local/bin/kibana-docker' > /app/kibana.sh && \
     chmod 0555 /app/kibana.sh
 {{/cloud}}
 

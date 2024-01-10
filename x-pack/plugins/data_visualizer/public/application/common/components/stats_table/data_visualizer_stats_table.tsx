@@ -51,7 +51,7 @@ const FIELD_NAME = 'fieldName';
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
 type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
-interface DataVisualizerTableProps<T> {
+interface DataVisualizerTableProps<T extends object> {
   items: T[];
   pageState: DataVisualizerTableState;
   updatePageState: (update: DataVisualizerTableState) => void;
@@ -275,9 +275,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             );
           }
 
-          return (
-            <DistinctValues cardinality={item?.stats?.cardinality} showIcon={dimensions.showIcon} />
-          );
+          return <DistinctValues config={item} showIcon={dimensions.showIcon} />;
         },
         sortable: (item: DataVisualizerTableItem) => item?.stats?.cardinality,
         align: LEFT_ALIGNMENT as HorizontalAlignment,

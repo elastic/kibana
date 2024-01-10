@@ -33,7 +33,7 @@ export class PluginContract {
   public getStartServices(): ContractStartServices {
     return {
       extraRoutes$: this.extraRoutes$.asObservable(),
-      getComponent$: this.componentsService.getComponent$.bind(this.componentsService),
+      getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
       upselling: this.upsellingService,
     };
   }

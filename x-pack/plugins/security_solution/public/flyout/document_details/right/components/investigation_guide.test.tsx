@@ -19,11 +19,12 @@ import { mockContextValue } from '../mocks/mock_context';
 import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
-import { LeftPanelInvestigationTab, LeftPanelKey } from '../../left';
+import { LeftPanelInvestigationTab, DocumentDetailsLeftPanelKey } from '../../left';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
 
 const NO_DATA_MESSAGE = 'Investigation guideThere’s no investigation guide for this rule.';
+const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
 
 const renderInvestigationGuide = () =>
   render(
@@ -97,6 +98,21 @@ describe('<InvestigationGuide />', () => {
     expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);
   });
 
+  it('should render preview message when flyout is in preview', () => {
+    const { queryByTestId, getByTestId } = render(
+      <IntlProvider locale="en">
+        <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
+          <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+            <InvestigationGuide />
+          </RightPanelContext.Provider>
+        </ExpandableFlyoutContext.Provider>
+      </IntlProvider>
+    );
+
+    expect(queryByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
+  });
+
   it('should navigate to investigation guide when clicking on button', () => {
     (useInvestigationGuide as jest.Mock).mockReturnValue({
       loading: false,
@@ -109,7 +125,7 @@ describe('<InvestigationGuide />', () => {
     getByTestId(INVESTIGATION_GUIDE_BUTTON_TEST_ID).click();
 
     expect(mockFlyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: {
         tab: LeftPanelInvestigationTab,
       },

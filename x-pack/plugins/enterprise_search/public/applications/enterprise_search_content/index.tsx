@@ -10,7 +10,7 @@ import { Redirect } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -20,15 +20,18 @@ import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
+import { Connectors } from './components/connectors/connectors';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
 import { Settings } from './components/settings';
 import {
-  SETUP_GUIDE_PATH,
+  CONNECTORS_PATH,
+  CRAWLERS_PATH,
+  ERROR_STATE_PATH,
   ROOT_PATH,
   SEARCH_INDICES_PATH,
   SETTINGS_PATH,
-  ERROR_STATE_PATH,
+  SETUP_GUIDE_PATH,
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
@@ -73,6 +76,12 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />
       <Route path={SEARCH_INDICES_PATH}>
         <SearchIndicesRouter />
+      </Route>
+      <Route path={CONNECTORS_PATH}>
+        <Connectors isCrawler={false} />
+      </Route>
+      <Route path={CRAWLERS_PATH}>
+        <Connectors isCrawler />
       </Route>
       <Route path={SETTINGS_PATH}>
         <Settings />

@@ -276,6 +276,13 @@ export interface SavedObjectsClientContract {
   /**
    * Bulk Updates multiple SavedObject at once
    *
+   * The savedObjects `bulkUpdate` API will update documents client-side and then reindex the updated documents.
+   * These update operations are done in-memory, and cause memory constraint issues when
+   * updating many objects with large `json` blobs stored in some fields. As such, we recommend against using
+   * `bulkUpdate` for savedObjects that:
+   * - use arrays (as these tend to be large objects)
+   * - store large `json` blobs in some fields
+   *
    * @param objects - array of objects to update (contains ID, type, attributes, and optional namespace)
    * @param options {@link SavedObjectsBulkUpdateOptions} - options for the bulkUpdate operation
    * @returns the {@link SavedObjectsBulkUpdateResponse}

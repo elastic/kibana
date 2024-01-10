@@ -38,6 +38,8 @@ export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetri
           size_limit: heapStats.heap_size_limit,
         },
         resident_set_size_in_bytes: memoryUsage.rss,
+        array_buffers_in_bytes: memoryUsage.arrayBuffers,
+        external_in_bytes: memoryUsage.external,
       },
       pid: process.pid,
       event_loop_delay: eventLoopDelayHistogram.mean,

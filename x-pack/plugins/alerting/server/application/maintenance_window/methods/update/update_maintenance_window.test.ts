@@ -207,6 +207,223 @@ describe('MaintenanceWindowClient - update', () => {
     );
   });
 
+  it('should update maintenance window with scoped query', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+
+    const modifiedEvents = [
+      { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' },
+      { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-01T23:43:21.000Z' },
+    ];
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      rRule: {
+        tzid: 'CET',
+        dtstart: '2023-03-26T00:00:00.000Z',
+        freq: Frequency.WEEKLY,
+        count: 5,
+      } as MaintenanceWindow['rRule'],
+      events: modifiedEvents,
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+      categoryIds: ['observability'],
+    });
+
+    savedObjectsClient.get.mockResolvedValue({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    savedObjectsClient.create.mockResolvedValue({
+      attributes: {
+        ...mockMaintenanceWindow,
+        ...updatedAttributes,
+        ...updatedMetadata,
+      },
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    await updateMaintenanceWindow(mockContext, {
+      id: 'test-id',
+      data: {
+        scopedQuery: {
+          kql: "_id: '1234'",
+          filters: [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: 'kibana.alert.action_group',
+                field: 'kibana.alert.action_group',
+                params: {
+                  query: 'test',
+                },
+                type: 'phrase',
+              },
+              $state: {
+                store: 'appState',
+              },
+              query: {
+                match_phrase: {
+                  'kibana.alert.action_group': 'test',
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.kql
+    ).toEqual(`_id: '1234'`);
+
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.filters[0]
+    ).toEqual({
+      $state: { store: 'appState' },
+      meta: {
+        alias: null,
+        disabled: false,
+        field: 'kibana.alert.action_group',
+        key: 'kibana.alert.action_group',
+        negate: false,
+        params: { query: 'test' },
+        type: 'phrase',
+      },
+      query: { match_phrase: { 'kibana.alert.action_group': 'test' } },
+    });
+
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery!.dsl
+    ).toMatchInlineSnapshot(
+      `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"_id\\":\\"'1234'\\"}}],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"kibana.alert.action_group\\":\\"test\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
+    );
+  });
+
+  it('should remove maintenance window with scoped query', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+
+    const modifiedEvents = [
+      { gte: '2023-03-26T00:00:00.000Z', lte: '2023-03-26T00:12:34.000Z' },
+      { gte: '2023-04-01T23:00:00.000Z', lte: '2023-04-01T23:43:21.000Z' },
+    ];
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      rRule: {
+        tzid: 'CET',
+        dtstart: '2023-03-26T00:00:00.000Z',
+        freq: Frequency.WEEKLY,
+        count: 5,
+      } as MaintenanceWindow['rRule'],
+      events: modifiedEvents,
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').add(2, 'week').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValue({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    savedObjectsClient.create.mockResolvedValue({
+      attributes: {
+        ...mockMaintenanceWindow,
+        ...updatedAttributes,
+        ...updatedMetadata,
+      },
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    await updateMaintenanceWindow(mockContext, {
+      id: 'test-id',
+      data: {
+        scopedQuery: null,
+      },
+    });
+
+    expect(
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scopedQuery
+    ).toBeNull();
+  });
+
+  it('should throw if updating a maintenance window with invalid scoped query', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    await expect(async () => {
+      await updateMaintenanceWindow(mockContext, {
+        id: 'test-id',
+        data: {
+          scopedQuery: {
+            kql: 'invalid: ',
+            filters: [],
+          },
+        },
+      });
+    }).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Error validating update maintenance window data - invalid scoped query - Expected \\"(\\", \\"{\\", value, whitespace but end of input found.
+      invalid: 
+      ---------^"
+    `);
+  });
+
+  it('should throw if trying to update a MW with a scoped query with other than 1 category ID', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.get.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+      categoryIds: ['observability', 'securitySolution'],
+    } as unknown as SavedObject);
+
+    await expect(async () => {
+      await updateMaintenanceWindow(mockContext, {
+        id: 'test-id',
+        data: {
+          scopedQuery: {
+            kql: "_id: '1234'",
+            filters: [
+              {
+                meta: {
+                  disabled: false,
+                  negate: false,
+                  alias: null,
+                  key: 'kibana.alert.action_group',
+                  field: 'kibana.alert.action_group',
+                  params: {
+                    query: 'test',
+                  },
+                  type: 'phrase',
+                },
+                $state: {
+                  store: 'appState',
+                },
+                query: {
+                  match_phrase: {
+                    'kibana.alert.action_group': 'test',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+    }).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to update maintenance window by id: test-id, Error: Error: Cannot edit archived maintenance windows: Cannot edit archived maintenance windows"`
+    );
+  });
+
   it('should throw if updating a maintenance window that has expired', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({

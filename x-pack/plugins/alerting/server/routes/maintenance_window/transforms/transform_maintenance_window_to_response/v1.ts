@@ -29,5 +29,8 @@ export const transformMaintenanceWindowToResponse = (
     ...(maintenanceWindow.categoryIds !== undefined
       ? { category_ids: maintenanceWindow.categoryIds }
       : {}),
+    ...(maintenanceWindow.scopedQuery !== undefined
+      ? { scoped_query: maintenanceWindow.scopedQuery }
+      : {}),
   };
 };

@@ -8,7 +8,8 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { RRule, Weekday } from '@kbn/rrule';
-import { RRuleParams, MaintenanceWindowSOAttributes, DateRange } from '../../../../common';
+import { RRuleParams, DateRange } from '../../../../common';
+import { MaintenanceWindow } from '../types';
 
 export interface GenerateMaintenanceWindowEventsParams {
   rRule: RRuleParams;
@@ -58,7 +59,7 @@ export const shouldRegenerateEvents = ({
   rRule,
   duration,
 }: {
-  maintenanceWindow: MaintenanceWindowSOAttributes;
+  maintenanceWindow: MaintenanceWindow;
   rRule?: RRuleParams;
   duration?: number;
 }): boolean => {

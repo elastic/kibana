@@ -8,9 +8,10 @@
 import { get } from 'lodash/fp';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { KibanaRequest } from '@kbn/core-http-server';
+import { PassThrough, Readable } from 'stream';
 import { RequestBody } from './langchain/types';
 
-interface Props {
+export interface Props {
   actions: ActionsPluginStart;
   connectorId: string;
   request: KibanaRequest<unknown, unknown, RequestBody>;
@@ -25,12 +26,19 @@ export const executeAction = async ({
   actions,
   request,
   connectorId,
-}: Props): Promise<StaticResponse> => {
+}: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
+
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
     params: request.body.params,
   });
+
+  if (actionResult.status === 'error') {
+    throw new Error(
+      `Action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+    );
+  }
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
     return {
@@ -39,5 +47,11 @@ export const executeAction = async ({
       status: 'ok',
     };
   }
-  throw new Error('Unexpected action result');
+  const readable = get('data', actionResult) as Readable;
+
+  if (typeof readable?.read !== 'function') {
+    throw new Error('Action result status is error: result is not streamable');
+  }
+
+  return readable.pipe(new PassThrough());
 };

@@ -12,18 +12,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButtonEmpty,
-  EuiLink,
-  EuiTextColor,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
@@ -65,7 +56,6 @@ import {
   editVisualizationAction,
   setSaveable,
   useLensSelector,
-  selectExecutionContext,
   selectIsFullscreenDatasource,
   selectVisualization,
   selectDatasourceStates,
@@ -79,10 +69,16 @@ import {
   VisualizationState,
   DatasourceStates,
   DataViewsState,
+  selectExecutionContextSearch,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
-import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
+import {
+  inferTimeField,
+  DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS,
+  EXPRESSION_BUILD_ERROR_ID,
+} from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
+import { WorkspaceErrors } from './workspace_errors';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -98,7 +94,6 @@ export interface WorkspacePanelProps {
 }
 
 interface WorkspaceState {
-  expandError: boolean;
   expressionToRender: string | null | undefined;
   errors: UserMessage[];
 }
@@ -121,8 +116,6 @@ const executionContext: KibanaExecutionContext = {
     type: 'lens',
   },
 };
-
-const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';
 
 export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
   const { getSuggestionForField, ...restProps } = props;
@@ -166,7 +159,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
-    expandError: false,
     expressionToRender: undefined,
     errors: [],
   });
@@ -305,11 +297,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = useCallback(() => {
-    return getUserMessages(['visualization', 'visualizationInEditor'], {
-      severity: 'error',
-    });
-  }, [getUserMessages]);
+  const workspaceErrors = useCallback(
+    () =>
+      getUserMessages(['visualization', 'visualizationInEditor'], {
+        severity: 'error',
+      }),
+    [getUserMessages]
+  );
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
@@ -711,7 +705,7 @@ export const VisualizationWrapper = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const context = useLensSelector(selectExecutionContext);
+  const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting
   const { isRenderComplete, hasDynamicError, setIsRenderComplete, setDynamicError, nodeRef } =
     useReportingState(errors);
@@ -721,76 +715,30 @@ export const VisualizationWrapper = ({
     onRender$();
   }, [setIsRenderComplete, onRender$]);
 
-  const searchContext: ExecutionContextSearch = useMemo(
-    () => ({
-      query: context.query,
-      timeRange: {
-        from: context.dateRange.fromDate,
-        to: context.dateRange.toDate,
-      },
-      filters: context.filters,
-      disableWarningToasts: true,
-    }),
-    [context]
-  );
   const searchSessionId = useLensSelector(selectSearchSessionId);
 
   if (errors.length) {
-    const showExtraErrorsAction =
-      !localState.expandError && errors.length > 1 ? (
-        <EuiButtonEmpty
-          onClick={() => {
-            setLocalState((prevState: WorkspaceState) => ({
-              ...prevState,
-              expandError: !prevState.expandError,
-            }));
-          }}
-          data-test-subj="workspace-more-errors-button"
-        >
-          {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
-            defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
-            values: { errors: errors.length - 1 },
-          })}
-        </EuiButtonEmpty>
-      ) : null;
-
-    const [firstMessage, ...rest] = errors;
-
+    const configurationErrorTitle = i18n.translate(
+      'xpack.lens.editorFrame.configurationFailureErrors',
+      {
+        defaultMessage: `A configuration error occurred`,
+      }
+    );
     return (
-      <EuiFlexGroup
+      <div
         data-shared-items-container
         data-render-complete={true}
         data-shared-item=""
-        data-render-error={i18n.translate('xpack.lens.editorFrame.configurationFailureErrors', {
-          defaultMessage: `A configuration error occurred`,
-        })}
+        data-render-error={configurationErrorTitle}
       >
-        <EuiFlexItem>
-          <EuiEmptyPrompt
-            actions={showExtraErrorsAction}
-            body={
-              <>
-                <div data-test-subj="workspace-error-message">{firstMessage.longMessage}</div>
-                {localState.expandError && (
-                  <>
-                    <EuiSpacer />
-                    {rest.map((message) => (
-                      <div data-test-subj="workspace-error-message">
-                        {message.longMessage}
-                        <EuiSpacer />
-                      </div>
-                    ))}
-                  </>
-                )}
-              </>
-            }
-            iconColor="danger"
-            iconType="warning"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <WorkspaceErrors errors={errors} title={configurationErrorTitle} />
+      </div>
     );
   }
+
+  const dataLoadingErrorTitle = i18n.translate('xpack.lens.editorFrame.dataFailure', {
+    defaultMessage: `An error occurred when loading data`,
+  });
 
   return (
     <div
@@ -798,13 +746,7 @@ export const VisualizationWrapper = ({
       data-shared-items-container
       data-render-complete={isRenderComplete}
       data-shared-item=""
-      data-render-error={
-        hasDynamicError
-          ? i18n.translate('xpack.lens.editorFrame.dataFailure', {
-              defaultMessage: `An error occurred when loading data.`,
-            })
-          : undefined
-      }
+      data-render-error={hasDynamicError ? dataLoadingErrorTitle : undefined}
       ref={nodeRef}
     >
       <ExpressionRendererComponent
@@ -821,9 +763,9 @@ export const VisualizationWrapper = ({
         executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
-          const errorsFromRequest = getOriginalRequestErrorMessages(error || null, core.docLinks);
+          const errorsFromRequest = getOriginalRequestErrorMessages(error || null);
           const visibleErrorMessages = errorsFromRequest.length
-            ? errorsFromRequest.map((e) => e.longMessage || e.shortMessage)
+            ? errorsFromRequest
             : errorMessage
             ? [errorMessage]
             : [];
@@ -832,54 +774,7 @@ export const VisualizationWrapper = ({
             setDynamicError(true);
           }
 
-          return (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiEmptyPrompt
-                  actions={
-                    visibleErrorMessages.length && !localState.expandError ? (
-                      <EuiButtonEmpty
-                        onClick={() => {
-                          setLocalState((prevState: WorkspaceState) => ({
-                            ...prevState,
-                            expandError: !prevState.expandError,
-                          }));
-                        }}
-                      >
-                        {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
-                          defaultMessage: 'Show details of error',
-                        })}
-                      </EuiButtonEmpty>
-                    ) : null
-                  }
-                  body={
-                    <>
-                      <p data-test-subj="expression-failure">
-                        <FormattedMessage
-                          id="xpack.lens.editorFrame.dataFailure"
-                          defaultMessage="An error occurred when loading data."
-                        />
-                      </p>
-
-                      {localState.expandError
-                        ? visibleErrorMessages.map((visibleErrorMessage) =>
-                            typeof visibleErrorMessage === 'string' ? (
-                              <p className="eui-textBreakWord" key={visibleErrorMessage}>
-                                {visibleErrorMessage}
-                              </p>
-                            ) : (
-                              visibleErrorMessage
-                            )
-                          )
-                        : null}
-                    </>
-                  }
-                  iconColor="danger"
-                  iconType="warning"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
+          return <WorkspaceErrors errors={visibleErrorMessages} title={dataLoadingErrorTitle} />;
         }}
       />
     </div>

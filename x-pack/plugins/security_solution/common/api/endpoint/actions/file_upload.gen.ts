@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { BaseActionSchema } from '../model/schema/common.gen';
 
 export type FileUploadActionRequestBody = z.infer<typeof FileUploadActionRequestBody>;
-export const FileUploadActionRequestBody = BaseActionSchema.and(
+export const FileUploadActionRequestBody = BaseActionSchema.merge(
   z.object({
     parameters: z.object({
       overwrite: z.boolean().optional().default(false),

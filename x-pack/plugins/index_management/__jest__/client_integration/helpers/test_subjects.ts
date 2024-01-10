@@ -102,5 +102,15 @@ export type TestSubjects =
   | 'filter-option-h'
   | 'infiniteRetentionPeriod.input'
   | 'saveButton'
+  | 'dsIsFullyManagedByILM'
+  | 'someIndicesAreManagedByILMCallout'
+  | 'viewIlmPolicyLink'
+  | 'viewAllIndicesLink'
+  | 'dataRetentionEnabledField.input'
+  | 'enrichPoliciesInsuficientPrivileges'
   | 'dataRetentionDetail'
-  | 'createIndexSaveButton';
+  | 'createIndexSaveButton'
+  | 'createIndexMessage'
+  | 'indicesSearch'
+  | 'noIndicesMessage'
+  | 'clearIndicesSearch';

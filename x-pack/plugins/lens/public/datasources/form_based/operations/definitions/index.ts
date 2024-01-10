@@ -51,7 +51,7 @@ import {
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
 import type {
-  FrameDatasourceAPI,
+  FramePublicAPI,
   IndexPattern,
   IndexPatternField,
   OperationMetadata,
@@ -350,11 +350,6 @@ interface BaseOperationDefinitionProps<
    * Operations can be used as middleware for other operations, hence not shown in the panel UI
    */
   hidden?: boolean;
-  documentation?: {
-    signature: string;
-    description: string;
-    section: 'elasticsearch' | 'calculation' | 'constants';
-  };
   quickFunctionDocumentation?: string;
   /**
    * React component for operation field specific behaviour
@@ -477,7 +472,7 @@ export type FieldBasedOperationErrorMessage =
         newState: (
           data: DataPublicPluginStart,
           core: CoreStart,
-          frame: FrameDatasourceAPI,
+          frame: FramePublicAPI,
           layerId: string
         ) => Promise<FormBasedLayer>;
       };

@@ -12,6 +12,8 @@ import {
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
+  getLimitFromESQLQuery,
+  cleanupESQLQueryForLensSuggestions,
 } from './es_aggregate_query';
 
 describe('sql query helpers', () => {
@@ -113,6 +115,47 @@ describe('sql query helpers', () => {
 
       const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 [metadata _id]');
       expect(idxPattern9).toBe('foo-1, foo-2');
+    });
+  });
+
+  describe('getLimitFromESQLQuery', () => {
+    it('should return default limit when ES|QL query is empty', () => {
+      const limit = getLimitFromESQLQuery('');
+      expect(limit).toBe(500);
+    });
+
+    it('should return default limit when ES|QL query does not contain LIMIT command', () => {
+      const limit = getLimitFromESQLQuery('FROM foo');
+      expect(limit).toBe(500);
+    });
+
+    it('should return default limit when ES|QL query contains invalid LIMIT command', () => {
+      const limit = getLimitFromESQLQuery('FROM foo | LIMIT iAmNotANumber');
+      expect(limit).toBe(500);
+    });
+
+    it('should return limit when ES|QL query contains LIMIT command', () => {
+      const limit = getLimitFromESQLQuery('FROM foo | LIMIT 10000 | KEEP myField');
+      expect(limit).toBe(10000);
+    });
+
+    it('should return last limit when ES|QL query contains multiple LIMIT command', () => {
+      const limit = getLimitFromESQLQuery('FROM foo | LIMIT 200 | LIMIT 0');
+      expect(limit).toBe(0);
+    });
+  });
+
+  describe('cleanupESQLQueryForLensSuggestions', () => {
+    it('should not remove anything if a drop command is not present', () => {
+      expect(cleanupESQLQueryForLensSuggestions('from a | eval b = 1')).toBe('from a | eval b = 1');
+    });
+
+    it('should remove multiple drop statement if present', () => {
+      expect(
+        cleanupESQLQueryForLensSuggestions(
+          'from a | drop @timestamp | drop a | drop b | keep c | drop d'
+        )
+      ).toBe('from a | keep c ');
     });
   });
 });

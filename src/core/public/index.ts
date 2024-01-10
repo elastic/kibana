@@ -187,6 +187,7 @@ export type {
   HttpResponse,
   HttpHandler,
   IBasePath,
+  IStaticAssets,
   IAnonymousPaths,
   IExternalUrl,
   IHttpInterceptController,

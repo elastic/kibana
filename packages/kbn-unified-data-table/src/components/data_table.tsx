@@ -56,7 +56,12 @@ import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
-import { getEuiGridColumns, getLeadControlColumns, getVisibleColumns } from './data_table_columns';
+import {
+  getEuiGridColumns,
+  getLeadControlColumns,
+  getVisibleColumns,
+  hasSourceTimeFieldValue,
+} from './data_table_columns';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
 import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
@@ -533,25 +538,6 @@ export const UnifiedDataTable = ({
     );
   }, [currentPageSize, setPagination]);
 
-  /**
-   * Sorting
-   */
-  const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
-
-  const [inmemorySortingColumns, setInmemorySortingColumns] = useState([]);
-  const onTableSort = useCallback(
-    (sortingColumnsData) => {
-      if (isSortEnabled) {
-        if (isPlainRecord) {
-          setInmemorySortingColumns(sortingColumnsData);
-        } else if (onSort) {
-          onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
-        }
-      }
-    },
-    [onSort, isSortEnabled, isPlainRecord, setInmemorySortingColumns]
-  );
-
   const shouldShowFieldHandler = useMemo(() => {
     const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
     return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
@@ -617,9 +603,15 @@ export const UnifiedDataTable = ({
     [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
+  const shouldShowTimeField = useMemo(
+    () =>
+      hasSourceTimeFieldValue(displayedColumns, dataView, columnTypes, showTimeCol, isPlainRecord),
+    [dataView, displayedColumns, isPlainRecord, showTimeCol, columnTypes]
+  );
+
   const visibleColumns = useMemo(
-    () => getVisibleColumns(displayedColumns, dataView, showTimeCol),
-    [dataView, displayedColumns, showTimeCol]
+    () => getVisibleColumns(displayedColumns, dataView, shouldShowTimeField),
+    [dataView, displayedColumns, shouldShowTimeField]
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
@@ -709,6 +701,32 @@ export const UnifiedDataTable = ({
     }),
     [visibleColumns, hideTimeColumn, onSetColumns]
   );
+
+  /**
+   * Sorting
+   */
+  const sortingColumns = useMemo(
+    () =>
+      sort
+        .map(([id, direction]) => ({ id, direction }))
+        .filter(({ id }) => visibleColumns.includes(id)),
+    [sort, visibleColumns]
+  );
+
+  const [inmemorySortingColumns, setInmemorySortingColumns] = useState([]);
+  const onTableSort = useCallback(
+    (sortingColumnsData) => {
+      if (isSortEnabled) {
+        if (isPlainRecord) {
+          setInmemorySortingColumns(sortingColumnsData);
+        } else if (onSort) {
+          onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
+        }
+      }
+    },
+    [onSort, isSortEnabled, isPlainRecord, setInmemorySortingColumns]
+  );
+
   const sorting = useMemo(() => {
     if (isSortEnabled) {
       return {

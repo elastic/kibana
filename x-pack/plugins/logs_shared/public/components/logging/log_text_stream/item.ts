@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { TimeKey } from '@kbn/io-ts-utils';
 import { bisector } from 'd3-array';
-import { compareToTimeKey, TimeKey } from '../../../../common/time';
 import { LogEntry } from '../../../../common/log_entry';
+import { compareToTimeKey } from '../../../../common/time';
 
 export type StreamItem = LogEntryStreamItem;
 
@@ -27,17 +28,17 @@ export function getStreamItemTimeKey(item: StreamItem) {
 export function getStreamItemId(item: StreamItem) {
   switch (item.kind) {
     case 'logEntry':
-      return `${item.logEntry.cursor.time}:${item.logEntry.cursor.tiebreaker}:${item.logEntry.id}`;
+      return `${item.logEntry.cursor.time}/${item.logEntry.cursor.tiebreaker}/${item.logEntry.id}`;
   }
 }
 
 export function parseStreamItemId(id: string) {
-  const idFragments = id.split(':');
+  const idFragments = id.split('/');
 
   return {
     gid: idFragments.slice(2).join(':'),
     tiebreaker: parseInt(idFragments[1], 10),
-    time: parseInt(idFragments[0], 10),
+    time: idFragments[0],
   };
 }
 

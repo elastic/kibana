@@ -3,12 +3,14 @@
 exports[`overviewPageActions all buttons 1`] = `
 Array [
   <mockConstructor
-    application={
+    coreStart={
       Object {
-        "capabilities": Object {
-          "navLinks": Object {
-            "dev_tools": true,
-            "management": true,
+        "application": Object {
+          "capabilities": Object {
+            "navLinks": Object {
+              "dev_tools": true,
+              "management": true,
+            },
           },
         },
       }
@@ -32,12 +34,14 @@ exports[`overviewPageActions no buttons 1`] = `Array []`;
 exports[`overviewPageActions only add data button 1`] = `
 Array [
   <mockConstructor
-    application={
+    coreStart={
       Object {
-        "capabilities": Object {
-          "navLinks": Object {
-            "dev_tools": true,
-            "management": true,
+        "application": Object {
+          "capabilities": Object {
+            "navLinks": Object {
+              "dev_tools": true,
+              "management": true,
+            },
           },
         },
       }

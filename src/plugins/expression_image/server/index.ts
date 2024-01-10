@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionImagePlugin } from './plugin';
-
 export type { ExpressionImagePluginSetup, ExpressionImagePluginStart } from './plugin';
 
-export function plugin() {
+export async function plugin() {
+  const { ExpressionImagePlugin } = await import('./plugin');
   return new ExpressionImagePlugin();
 }

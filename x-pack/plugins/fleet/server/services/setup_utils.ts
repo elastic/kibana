@@ -12,7 +12,7 @@ let isPending = false;
 let onResolve = (value?: unknown) => {};
 let onReject = (reason: any) => {};
 
-export async function awaitIfPending<T>(asyncFunction: Function): Promise<T> {
+export async function awaitIfPending<T>(asyncFunction: () => Promise<T>): Promise<T> {
   // pending successful or failed attempt
   if (isPending) {
     // don't run concurrent installs

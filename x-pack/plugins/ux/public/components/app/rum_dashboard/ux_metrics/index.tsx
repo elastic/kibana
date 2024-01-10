@@ -15,6 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { getCoreVitalsComponent } from '@kbn/observability-plugin/public';
+import { useINPQuery } from '../../../../hooks/use_inp_query';
 import { I18LABELS } from '../translations';
 import { KeyUXMetrics } from './key_ux_metrics';
 import { useUxQuery } from '../hooks/use_ux_query';
@@ -31,8 +32,9 @@ export function UXMetrics() {
   const uxQuery = useUxQuery();
 
   const { data, loading: loadingResponse } = useCoreWebVitalsQuery(uxQuery);
+  const { data: inpData, loading: inpLoading } = useINPQuery(uxQuery);
 
-  const loading = loadingResponse ?? true;
+  const loading = (loadingResponse ?? true) || inpLoading;
 
   const {
     sharedData: { totalPageViews },
@@ -41,13 +43,18 @@ export function UXMetrics() {
   const CoreVitals = useMemo(
     () =>
       getCoreVitalsComponent({
-        data,
+        data: {
+          ...data,
+          inp: inpData?.inp,
+          inpRanks: inpData?.inpRanks,
+          hasINP: inpData?.hasINP,
+        },
         totalPageViews,
         loading,
         displayTrafficMetric: true,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [loading]
+    [loading, inpLoading]
   );
 
   return (

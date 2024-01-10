@@ -9,6 +9,7 @@
 import { EuiComboBox, EuiComboBoxOptionOption, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { UnifiedHistogramBreakdownContext } from '../types';
@@ -19,6 +20,9 @@ export interface BreakdownFieldSelectorProps {
   breakdown: UnifiedHistogramBreakdownContext;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
+
+const TRUNCATION_PROPS = { truncation: 'middle' as const };
+const SINGLE_SELECTION = { asPlainText: true };
 
 export const BreakdownFieldSelector = ({
   dataView,
@@ -58,6 +62,8 @@ export const BreakdownFieldSelector = ({
     max-width: ${euiTheme.base * 22}px;
   `;
 
+  const panelMinWidth = calculateWidthFromEntries(fieldOptions, ['label']);
+
   return (
     <EuiToolTip
       position="top"
@@ -75,10 +81,12 @@ export const BreakdownFieldSelector = ({
         aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
           defaultMessage: 'Break down by',
         })}
-        singleSelection={{ asPlainText: true }}
+        inputPopoverProps={{ panelMinWidth, anchorPosition: 'downRight' }}
+        singleSelection={SINGLE_SELECTION}
         options={fieldOptions}
         selectedOptions={selectedFields}
         onChange={onFieldChange}
+        truncationProps={TRUNCATION_PROPS}
         compressed
         fullWidth={true}
         onFocus={disableFieldPopover}

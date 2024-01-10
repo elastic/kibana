@@ -17,7 +17,7 @@ import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
-import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { isLocalhost } from './is_localhost';
 import { getLocalhostRealIp } from './network_services';
 import { createSecuritySuperuser } from './security_user_services';
@@ -337,7 +337,7 @@ export const isServerlessKibanaFlavor = async (client: KbnClient | Client): Prom
     // If we don't have status for plugins, then error
     // the Status API will always return something (its an open API), but if auth was successful,
     // it will also return more data.
-    if (!kbnStatus.status.plugins) {
+    if (!kbnStatus?.status?.plugins) {
       throw new Error(
         `Unable to retrieve Kibana plugins status (likely an auth issue with the username being used for kibana)`
       );

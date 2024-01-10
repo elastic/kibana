@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { AuditLogger, AuditService } from './audit_service';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
+
+import type { AuditService } from './audit_service';
 
 export const auditLoggerMock = {
   create() {

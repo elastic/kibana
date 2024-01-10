@@ -40,7 +40,7 @@ interface CommonColumnDefinition {
 interface TimestampColumnDefinition extends CommonColumnDefinition {
   type: 'timestamp';
   /** Timestamp renderer. Takes a epoch_millis and returns a valid `ReactNode` */
-  render?: (timestamp: number) => React.ReactNode;
+  render?: (timestamp: string) => React.ReactNode;
 }
 
 interface MessageColumnDefinition extends CommonColumnDefinition {

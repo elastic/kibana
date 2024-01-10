@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { PluginInitializer } from '@kbn/core/server';
-import { FeatureControlsPluginExample } from './plugin';
 
-export const plugin: PluginInitializer<void, void> = () => new FeatureControlsPluginExample();
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { FeatureControlsPluginExample } = await import('./plugin');
+  return new FeatureControlsPluginExample();
+};

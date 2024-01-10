@@ -8,7 +8,10 @@
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
 import type { Inspect, Maybe, SortField } from '../../../common';
-import type { RiskInputs } from '../../../../risk_engine';
+import {
+  type RiskInputs,
+  RiskLevels as RiskSeverity,
+} from '../../../../entity_analytics/risk_engine';
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
@@ -29,6 +32,8 @@ export interface RiskStats {
   calculated_level: RiskSeverity;
   inputs?: RiskInputs;
 }
+
+export { RiskSeverity };
 
 export interface HostRiskScore {
   '@timestamp': string;
@@ -85,14 +90,6 @@ export interface RiskScoreItem {
   [RiskScoreFields.alertsCount]: Maybe<number>;
 }
 
-export enum RiskSeverity {
-  unknown = 'Unknown',
-  low = 'Low',
-  moderate = 'Moderate',
-  high = 'High',
-  critical = 'Critical',
-}
-
 export const isUserRiskScore = (risk: HostRiskScore | UserRiskScore): risk is UserRiskScore =>
   'user' in risk;
 
@@ -103,11 +100,3 @@ export const EMPTY_SEVERITY_COUNT = {
   [RiskSeverity.moderate]: 0,
   [RiskSeverity.unknown]: 0,
 };
-
-export const SEVERITY_UI_SORT_ORDER = [
-  RiskSeverity.unknown,
-  RiskSeverity.low,
-  RiskSeverity.moderate,
-  RiskSeverity.high,
-  RiskSeverity.critical,
-];

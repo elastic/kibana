@@ -22,6 +22,7 @@ import {
 import { getDetectionsEngineer } from './detections_engineer';
 import { getWithResponseActionsRole } from './with_response_actions_role';
 import { getNoResponseActionsRole } from './without_response_actions_role';
+import { getWithArtifactReadPrivilegesRole } from './with_artifact_read_privileges_role';
 
 export * from './with_response_actions_role';
 export * from './without_response_actions_role';
@@ -74,6 +75,7 @@ export const ENDPOINT_SECURITY_ROLE_NAMES = Object.freeze({
   endpoint_response_actions_access: 'endpoint_response_actions_access',
   endpoint_response_actions_no_access: 'endpoint_response_actions_no_access',
   endpoint_security_policy_management_read: 'endpoint_security_policy_management_read',
+  artifact_read_privileges: 'artifact_read_privileges',
 });
 
 export const getAllEndpointSecurityRoles = (): EndpointSecurityRoleDefinitions => {
@@ -134,6 +136,10 @@ export const getAllEndpointSecurityRoles = (): EndpointSecurityRoleDefinitions =
     endpoint_security_policy_management_read: {
       ...getEndpointSecurityPolicyManagementReadRole(),
       name: 'endpoint_security_policy_management_read',
+    },
+    artifact_read_privileges: {
+      ...getWithArtifactReadPrivilegesRole(),
+      name: 'artifact_read_privileges',
     },
   };
 };

@@ -459,3 +459,20 @@ export interface ValueListResponse {
 }
 
 export type Nullable<T> = T | null | undefined;
+
+export interface ExtraInfo {
+  clusterInfo: ESClusterInfo;
+  licenseInfo: ESLicense | undefined;
+}
+
+export interface TimeFrame {
+  startOfDay: string;
+  endOfDay: string;
+}
+
+export interface TimelineResult {
+  nodes: number;
+  events: number;
+  timeline: TimelineTelemetryTemplate | undefined;
+}
+

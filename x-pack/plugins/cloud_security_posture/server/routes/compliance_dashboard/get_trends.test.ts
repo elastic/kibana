@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTrendsFromQueryResult, ScoreTrendDoc } from './get_trends';
+import { formatTrends, ScoreTrendDoc } from './get_trends';
 
 const trendDocs: ScoreTrendDoc[] = [
   {
@@ -18,6 +18,15 @@ const trendDocs: ScoreTrendDoc[] = [
         total_findings: 20,
         passed_findings: 5,
         failed_findings: 15,
+      },
+    },
+    score_by_benchmark_id: {
+      cis_gcp: {
+        v2_0_0: {
+          total_findings: 6,
+          passed_findings: 3,
+          failed_findings: 3,
+        },
       },
     },
   },
@@ -38,22 +47,27 @@ const trendDocs: ScoreTrendDoc[] = [
         failed_findings: 5,
       },
     },
-  },
-  {
-    '@timestamp': '2022-04-05T15:30:00Z',
-    total_findings: 30,
-    passed_findings: 25,
-    failed_findings: 5,
-    score_by_cluster_id: {
-      forth_cluster_id: {
-        total_findings: 25,
-        passed_findings: 25,
-        failed_findings: 0,
+    score_by_benchmark_id: {
+      cis_gcp: {
+        v2_0_0: {
+          total_findings: 6,
+          passed_findings: 3,
+          failed_findings: 3,
+        },
       },
-      fifth_cluster_id: {
-        total_findings: 5,
-        passed_findings: 0,
-        failed_findings: 5,
+      cis_azure: {
+        v2_0_0: {
+          total_findings: 6,
+          passed_findings: 3,
+          failed_findings: 3,
+        },
+      },
+      cis_aws: {
+        v1_5_0: {
+          total_findings: 6,
+          passed_findings: 3,
+          failed_findings: 3,
+        },
       },
     },
   },
@@ -61,7 +75,7 @@ const trendDocs: ScoreTrendDoc[] = [
 
 describe('getTrendsFromQueryResult', () => {
   it('should return value matching Trends type definition, in descending order, and with postureScore', async () => {
-    const trends = getTrendsFromQueryResult(trendDocs);
+    const trends = formatTrends(trendDocs);
     expect(trends).toEqual([
       {
         timestamp: '2022-04-06T15:30:00Z',
@@ -77,6 +91,14 @@ describe('getTrendsFromQueryResult', () => {
             totalPassed: 5,
             totalFailed: 15,
             postureScore: 25.0,
+          },
+        },
+        benchmarks: {
+          'cis_gcp;v2.0.0': {
+            totalFailed: 3,
+            totalFindings: 6,
+            totalPassed: 3,
+            postureScore: 50,
           },
         },
       },
@@ -102,27 +124,24 @@ describe('getTrendsFromQueryResult', () => {
             postureScore: 75.0,
           },
         },
-      },
-      {
-        timestamp: '2022-04-05T15:30:00Z',
-        summary: {
-          totalFindings: 30,
-          totalPassed: 25,
-          totalFailed: 5,
-          postureScore: 83.3,
-        },
-        clusters: {
-          forth_cluster_id: {
-            totalFindings: 25,
-            totalPassed: 25,
-            totalFailed: 0,
-            postureScore: 100.0,
+        benchmarks: {
+          'cis_gcp;v2.0.0': {
+            totalFailed: 3,
+            totalFindings: 6,
+            totalPassed: 3,
+            postureScore: 50.0,
           },
-          fifth_cluster_id: {
-            totalFindings: 5,
-            totalPassed: 0,
-            totalFailed: 5,
-            postureScore: 0,
+          'cis_azure;v2.0.0': {
+            totalFailed: 3,
+            totalFindings: 6,
+            totalPassed: 3,
+            postureScore: 50.0,
+          },
+          'cis_aws;v1.5.0': {
+            totalFailed: 3,
+            totalFindings: 6,
+            totalPassed: 3,
+            postureScore: 50.0,
           },
         },
       },

@@ -176,6 +176,7 @@ describe('getLensAttributes', () => {
                 "position": "right",
                 "shouldTruncate": false,
               },
+              "minBarHeight": 2,
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
               "tickLabelsVisibilitySettings": Object {
@@ -352,6 +353,7 @@ describe('getLensAttributes', () => {
                 "position": "right",
                 "shouldTruncate": false,
               },
+              "minBarHeight": 2,
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
               "tickLabelsVisibilitySettings": Object {
@@ -510,6 +512,7 @@ describe('getLensAttributes', () => {
                 "position": "right",
                 "shouldTruncate": false,
               },
+              "minBarHeight": 2,
               "preferredSeriesType": "bar_stacked",
               "showCurrentTimeMarker": true,
               "tickLabelsVisibilitySettings": Object {
@@ -562,7 +565,6 @@ describe('getLensAttributes', () => {
           "state": Object {
             "datasourceStates": Object {
               "textBased": Object {
-                "fieldList": Array [],
                 "indexPatternRefs": Array [],
                 "initialContext": Object {
                   "contextualFields": Array [
