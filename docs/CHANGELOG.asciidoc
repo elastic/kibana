@@ -11,6 +11,7 @@
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.12.0>>
+* <<release-notes-8.11.4>>
 * <<release-notes-8.11.3>>
 * <<release-notes-8.11.2>>
 * <<release-notes-8.11.1>>
@@ -315,6 +316,15 @@ Presentation::
 * Prevents overflowing dashboard title on saved toast notifications ({kibana-pull}172620[#172620]).
 * Ignore indices without geometry field in vector tile requests ({kibana-pull}171472[#171472]).
 * Fixes layer displaying no data instead of error ({kibana-pull}170084[#170084]).
+
+[[release-notes-8.11.4]]
+== {kib} 8.11.4
+
+[float]
+[[fixes-v8.11.4]]
+=== Bug fixes and enhancements
+There are no user-facing changes in the 8.11.4 release.
+
 
 [[release-notes-8.11.3]]
 == {kib} 8.11.3
