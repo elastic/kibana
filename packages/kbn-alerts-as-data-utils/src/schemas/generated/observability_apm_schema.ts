@@ -69,6 +69,7 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const ObservabilityApmAlertRequired = rt.type({
 });
+// prettier-ignore
 const ObservabilityApmAlertOptional = rt.partial({
   'agent.name': schemaString,
   'error.grouping_key': schemaString,

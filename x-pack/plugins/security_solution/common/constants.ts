@@ -263,6 +263,7 @@ export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
 export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
 export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
 export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
+export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings`;
 
 export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
 export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
