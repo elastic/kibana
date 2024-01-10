@@ -39,7 +39,6 @@ export const useIsInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
     const hasProcessEntityId =
       processEntityIds != null && processEntityIds.length === 1 && firstProcessEntityId !== '';
 
-    console.log({ isAcceptedAgentType, hasProcessEntityId });
     return isAcceptedAgentType && hasProcessEntityId;
   }, [crowdstrikeDataInAnalyzerEnabled, ecsData, sentinelOneDataInAnalyzerEnabled]);
 };
