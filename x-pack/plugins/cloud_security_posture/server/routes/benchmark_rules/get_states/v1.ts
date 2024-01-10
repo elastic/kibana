@@ -48,10 +48,9 @@ export const getCspBenchmarkRulesStatesHandler = async (
   }
 };
 
-export const getMutedRulesFilterQuery = async (
-  encryptedSoClient: ISavedObjectsRepository | SavedObjectsClientContract
+export const buildMutedRulesFilterQuery = async (
+  rulesStates: CspBenchmarkRulesStates
 ): Promise<QueryDslQueryContainer[]> => {
-  const rulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
   const mutedRules = Object.fromEntries(
     Object.entries(rulesStates).filter(([key, value]) => value.muted === true)
   );
@@ -69,5 +68,13 @@ export const getMutedRulesFilterQuery = async (
     };
   });
 
+  return mutedRulesFilterQuery;
+};
+
+export const getMutedRulesFilterQuery = async (
+  encryptedSoClient: ISavedObjectsRepository | SavedObjectsClientContract
+): Promise<QueryDslQueryContainer[]> => {
+  const rulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
+  const mutedRulesFilterQuery = buildMutedRulesFilterQuery(rulesStates);
   return mutedRulesFilterQuery;
 };
