@@ -877,9 +877,14 @@ describe('MetricVisComponent', function () {
     expect(getDimensionsRequest(false)).toMatchInlineSnapshot(`
       Object {
         "maxDimensions": Object {
-          "unit": "pixels",
-          "x": 300,
-          "y": 300,
+          "x": Object {
+            "unit": "pixels",
+            "value": 300,
+          },
+          "y": Object {
+            "unit": "pixels",
+            "value": 300,
+          },
         },
       }
     `);
@@ -887,9 +892,14 @@ describe('MetricVisComponent', function () {
     expect(getDimensionsRequest(true)).toMatchInlineSnapshot(`
       Object {
         "maxDimensions": Object {
-          "unit": "pixels",
-          "x": 1000,
-          "y": 400,
+          "x": Object {
+            "unit": "pixels",
+            "value": 1000,
+          },
+          "y": Object {
+            "unit": "pixels",
+            "value": 400,
+          },
         },
       }
     `);
