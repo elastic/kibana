@@ -209,8 +209,6 @@ const initNavNode = <
   return navNode;
 };
 
-const navTreePresets = getPresets('all');
-
 const isPresetDefinition = (
   item: RootNavigationItemDefinition | NodeDefinition
 ): item is PresetDefinition => {
@@ -240,6 +238,8 @@ export const parseNavigationTree = (
   navigationTreeDef: NavigationTreeDefinition,
   { deepLinks, cloudLinks }: { deepLinks: Record<string, ChromeNavLink>; cloudLinks: CloudLinks }
 ): { navigationTree: ChromeProjectNavigationNode[]; navigationTreeUI: NavigationTreeUI } => {
+  const navTreePresets = getPresets('all');
+
   // The navigation tree that represents the global navigation and will be used by the Chrome service
   const navigationTree: ChromeProjectNavigationNode[] = [];
 

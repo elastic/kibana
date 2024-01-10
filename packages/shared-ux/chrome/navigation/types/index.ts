@@ -54,7 +54,7 @@ export interface NavigationKibanaDependencies {
     };
   };
   serverless: {
-    setNavigationDeprecated: (projectNavigation: ChromeProjectNavigation) => void;
+    setNavigation: (projectNavigation: ChromeProjectNavigation) => void;
     getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
   };
   cloud: CloudStart;

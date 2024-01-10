@@ -200,22 +200,6 @@ describe('start', () => {
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
     });
 
-    it('renders the default project side navigation', async () => {
-      const { chrome } = await start({
-        startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
-      });
-
-      chrome.setChromeStyle('project');
-
-      const component = mount(chrome.getHeaderComponent());
-
-      const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
-      expect(projectHeader.length).toBe(1);
-
-      const defaultProjectSideNav = findTestSubject(component, 'defaultProjectSideNav');
-      expect(defaultProjectSideNav.length).toBe(1);
-    });
-
     it('renders the custom project side navigation', async () => {
       const { chrome } = await start({
         startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
