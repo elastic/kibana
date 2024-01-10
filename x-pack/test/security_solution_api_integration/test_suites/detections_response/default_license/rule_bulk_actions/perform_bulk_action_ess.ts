@@ -495,7 +495,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // BROKEN
-      it.only('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
+      it('should export rules with legacy investigation_fields and transform legacy field in response', async () => {
         const { body } = await postBulkAction()
           .send({ query: '', action: BulkActionTypeEnum.export })
           .expect(200)
