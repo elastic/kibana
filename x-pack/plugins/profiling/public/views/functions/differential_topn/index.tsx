@@ -54,9 +54,7 @@ export function DifferentialTopNFunctionsView() {
 
   const totalSeconds = timeRange.inSeconds.end - timeRange.inSeconds.start;
   const totalComparisonSeconds =
-    (new Date(comparisonTimeRange.end!).getTime() -
-      new Date(comparisonTimeRange.start!).getTime()) /
-    1000;
+    comparisonTimeRange.inSeconds.end! - comparisonTimeRange.inSeconds.start!;
 
   const comparisonTime = totalSeconds / totalComparisonSeconds;
 
@@ -175,10 +173,7 @@ export function DifferentialTopNFunctionsView() {
               baseValue={
                 state.data
                   ? {
-                      duration: totalSeconds,
-                      selfCPU: state.data.selfCPU,
                       totalCount: state.data.TotalCount,
-                      totalCPU: state.data.totalCPU,
                       scaleFactor: isNormalizedByTime ? baselineTime : baseline,
                       totalAnnualCO2Kgs: state.data.totalAnnualCO2Kgs,
                       totalAnnualCostUSD: state.data.totalAnnualCostUSD,
@@ -188,10 +183,7 @@ export function DifferentialTopNFunctionsView() {
               comparisonValue={
                 comparisonState.data
                   ? {
-                      duration: totalComparisonSeconds,
-                      selfCPU: comparisonState.data.selfCPU,
                       totalCount: comparisonState.data.TotalCount,
-                      totalCPU: comparisonState.data.totalCPU,
                       scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
                       totalAnnualCO2Kgs: comparisonState.data.totalAnnualCO2Kgs,
                       totalAnnualCostUSD: comparisonState.data.totalAnnualCostUSD,
@@ -209,18 +201,19 @@ export function DifferentialTopNFunctionsView() {
           >
             <DifferentialTopNFunctionsGrid
               base={state.data}
-              comparison={comparisonState.data}
               baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+              comparison={comparisonState.data}
               comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
-              totalSeconds={totalSeconds}
-              pageIndex={pageIndex}
-              onChangePage={handlePageChange}
-              onChangeSort={handleOnSort}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              onFrameClick={handleOnFrameClick}
               comparisonSortDirection={comparisonSortDirection}
               comparisonSortField={comparisonSortField}
+              comparisonTotalSeconds={totalComparisonSeconds}
+              onChangePage={handlePageChange}
+              onChangeSort={handleOnSort}
+              onFrameClick={handleOnFrameClick}
+              pageIndex={pageIndex}
+              sortDirection={sortDirection}
+              sortField={sortField}
+              totalSeconds={totalSeconds}
             />
           </AsyncComponent>
         </EuiFlexItem>

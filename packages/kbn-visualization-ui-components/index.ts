@@ -11,7 +11,6 @@ export {
   NameInput,
   DebouncedInput,
   useDebouncedValue,
-  TooltipWrapper,
   ColorPicker,
   IconSelect,
   IconSelectSetting,

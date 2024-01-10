@@ -9020,6 +9020,67 @@
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunctionDefinitions.math_column",
+            "type": "Object",
+            "tags": [],
+            "label": "math_column",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"mathColumn\", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.MathColumnArguments",
+                "text": "MathColumnArguments"
+              },
+              ", Promise<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ">, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -20285,6 +20346,67 @@
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.MovingAverageArgs",
                 "text": "MovingAverageArgs"
+              },
+              ", Promise<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ">, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunctionDefinitions.math_column",
+            "type": "Object",
+            "tags": [],
+            "label": "math_column",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"mathColumn\", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.MathColumnArguments",
+                "text": "MathColumnArguments"
               },
               ", Promise<",
               {
@@ -33084,6 +33206,67 @@
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-common.MovingAverageArgs",
                 "text": "MovingAverageArgs"
+              },
+              ", Promise<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ">, ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunctionDefinitions.math_column",
+            "type": "Object",
+            "tags": [],
+            "label": "math_column",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"mathColumn\", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Datatable",
+                "text": "Datatable"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.MathColumnArguments",
+                "text": "MathColumnArguments"
               },
               ", Promise<",
               {

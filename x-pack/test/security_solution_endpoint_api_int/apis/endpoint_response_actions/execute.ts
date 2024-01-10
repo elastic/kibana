@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/171666
   // FLAKY: https://github.com/elastic/kibana/issues/171667
-  describe.skip('Endpoint `execute` response action', function () {
+  describe('Endpoint `execute` response action', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
