@@ -15,7 +15,7 @@ import { NavigationProvider } from '../src/services';
 import { DefaultNavigation } from '../src/ui/default_navigation';
 import type { PanelContentProvider } from '../src/ui';
 import type { NavigationTreeDefinition } from '../src/ui/types';
-import { NavigationServices } from '../types';
+import { NavigationServices } from '../src/types';
 
 const services = getServicesMock();
 

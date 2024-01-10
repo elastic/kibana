@@ -13,7 +13,7 @@ import { navLinksMock } from '../mocks/src/navlinks';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
 import { getMockFn, renderNavigation, type ProjectNavigationChangeListener } from './utils';
 import { getServicesMock } from '../mocks/src/jest';
-import { NavigationServices } from '../types';
+import { NavigationServices } from '../src/types';
 
 const { cloudLinks: mockCloudLinks } = getServicesMock();
 

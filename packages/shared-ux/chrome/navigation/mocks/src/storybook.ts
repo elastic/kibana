@@ -9,7 +9,7 @@
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
 import { BehaviorSubject } from 'rxjs';
-import { NavigationServices } from '../../types';
+import { NavigationServices } from '../../src/types';
 
 type Arguments = NavigationServices;
 export type Params = Pick<

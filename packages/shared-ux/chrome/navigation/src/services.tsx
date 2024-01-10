@@ -11,7 +11,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
-import { NavigationKibanaDependencies, NavigationServices } from '../types';
+import { NavigationKibanaDependencies, NavigationServices } from './types';
 import { CloudLink, CloudLinks, getCloudLinks } from './cloud_links';
 
 const Context = React.createContext<NavigationServices | null>(null);

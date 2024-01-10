@@ -8,7 +8,7 @@
 
 import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { BehaviorSubject, of } from 'rxjs';
-import { NavigationServices } from '../../types';
+import { NavigationServices } from '../../src/types';
 import { navLinksMock } from './navlinks';
 
 const activeNodes: ChromeProjectNavigationNode[][] = [];

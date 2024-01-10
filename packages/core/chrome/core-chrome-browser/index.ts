@@ -44,13 +44,4 @@ export type {
   NodeDefinitionWithChildren,
   NodeRenderAs,
   EuiThemeSize,
-  NavigationTreeDefinition,
-  GroupDefinition,
-  ItemDefinition,
-  PresetDefinition,
-  RecentlyAccessedDefinition,
-  RecentItem,
-  NavigationGroupPreset,
-  ProjectNavigationTreeDefinition,
-  RootNavigationItemDefinition,
 } from './src';

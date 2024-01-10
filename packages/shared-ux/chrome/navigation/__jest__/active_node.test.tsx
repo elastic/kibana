@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 
 import type { RootNavigationItemDefinition } from '../src/ui/types';
-import { NavigationServices } from '../types';
+import { NavigationServices } from '../src/types';
 import { renderNavigation } from './utils';
 
 describe('Active node', () => {

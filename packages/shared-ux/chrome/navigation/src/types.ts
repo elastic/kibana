@@ -7,6 +7,8 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 import type {
@@ -14,8 +16,16 @@ import type {
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
-import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
-import type { CloudLinks } from '../src/cloud_links';
+import type { RecentItem } from './ui';
+import type { CloudLinks } from './cloud_links';
+
+type BasePathService = Pick<IBasePath, 'prepend'>;
+
+/**
+ * @internal
+ */
+
+export type NavigateToUrlFn = ApplicationStart['navigateToUrl'];
 
 /**
  * A list of services that are consumed by this component.

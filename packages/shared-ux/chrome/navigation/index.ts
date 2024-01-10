@@ -23,4 +23,4 @@ export type {
   PanelContentProvider,
 } from './src/ui';
 
-export type { NavigationServices } from './types';
+export type { NavigationServices } from './src/types';

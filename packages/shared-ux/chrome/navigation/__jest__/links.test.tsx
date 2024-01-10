@@ -9,7 +9,7 @@ import './setup_jest_mocks';
 import { of } from 'rxjs';
 
 import type { RootNavigationItemDefinition } from '../src/ui/types';
-import { NavigationServices } from '../types';
+import { NavigationServices } from '../src/types';
 import { getMockFn, renderNavigation, type ProjectNavigationChangeListener } from './utils';
 
 describe('Links', () => {

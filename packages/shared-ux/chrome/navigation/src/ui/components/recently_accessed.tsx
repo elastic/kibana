@@ -11,10 +11,10 @@ import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 
-import { RecentItem } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
 
 import { getI18nStrings } from '../i18n_strings';
+import { RecentItem } from '../types';
 
 export interface Props {
   /**

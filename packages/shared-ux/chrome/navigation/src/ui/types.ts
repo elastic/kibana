@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { ReactNode } from 'react';
 
 import type {
@@ -43,6 +42,12 @@ export interface NodeProps<
 
 /** The preset that can be pass to the NavigationBucket component */
 export type NavigationGroupPreset = 'analytics' | 'devtools' | 'ml' | 'management';
+
+export interface RecentItem {
+  link: string;
+  label: string;
+  id: string;
+}
 
 /**
  * @public

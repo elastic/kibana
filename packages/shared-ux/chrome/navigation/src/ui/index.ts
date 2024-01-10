@@ -22,4 +22,5 @@ export type {
   NavigationTreeDefinition,
   RecentlyAccessedDefinition,
   RootNavigationItemDefinition,
+  RecentItem,
 } from './types';

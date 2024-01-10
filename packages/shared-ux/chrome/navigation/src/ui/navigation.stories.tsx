@@ -24,7 +24,7 @@ import {
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
-import type { NavigationServices } from '../../types';
+import type { NavigationServices } from '../types';
 import { NavigationProvider } from '../services';
 import { DefaultNavigation } from './default_navigation';
 import { getPresets } from './nav_tree_presets';
