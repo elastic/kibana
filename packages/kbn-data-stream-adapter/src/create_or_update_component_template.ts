@@ -33,17 +33,10 @@ const putIndexTemplateTotalFieldsLimitUsingComponentTemplate = async (
     { logger }
   );
   const indexTemplatesUsingComponentTemplate = (indexTemplates ?? []).filter(
-    (indexTemplate: IndicesGetIndexTemplateIndexTemplateItem) => {
-      if (
-        indexTemplate &&
-        indexTemplate.index_template &&
-        indexTemplate.index_template.composed_of
-      ) {
-        return indexTemplate.index_template.composed_of.includes(componentTemplateName);
-      }
-      return false;
-    }
+    (indexTemplate: IndicesGetIndexTemplateIndexTemplateItem) =>
+      (indexTemplate.index_template?.composed_of ?? []).includes(componentTemplateName)
   );
+
   await asyncForEach(
     indexTemplatesUsingComponentTemplate,
     async (template: IndicesGetIndexTemplateIndexTemplateItem) => {

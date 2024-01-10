@@ -40,11 +40,6 @@ export const createResultsDataStream: CreateResultsDataStream = ({ kibanaVersion
   resultsDataStream.setIndexTemplate({
     name: RESULTS_INDEX_TEMPLATE_NAME,
     componentTemplateRefs: [RESULTS_COMPONENT_TEMPLATE_NAME, ECS_COMPONENT_TEMPLATE_NAME],
-    template: {
-      lifecycle: {
-        data_retention: '90d',
-      },
-    },
   });
 
   return resultsDataStream;
