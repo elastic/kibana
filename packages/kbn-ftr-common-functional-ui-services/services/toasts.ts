@@ -12,7 +12,9 @@ import { FtrService } from './ftr_provider_context';
 export class ToastsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
-
+  private readonly find = this.ctx.getService('find');
+  private readonly config = this.ctx.getService('config');
+  private readonly defaultFindTimeout = this.config.get('timeouts.find');
   /**
    * Returns the title and message of a specific error toast.
    * This method is specific to toasts created via `.addError` since they contain
@@ -40,11 +42,20 @@ export class ToastsService extends FtrService {
    *
    * @param index The 1-based index of the toast to dismiss. Use first by default.
    */
-  public async dismissToast(index: number = 1) {
+  public async dismissToastByIndex(index: number = 1) {
     const toast = await this.getToastElement(index);
     await toast.moveMouseTo();
     const dismissButton = await this.testSubjects.findDescendant('toastCloseButton', toast);
     await dismissButton.click();
+  }
+
+  public async closeToast(): Promise<string> {
+    const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
+    await toast.moveMouseTo();
+    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
+
+    await this.testSubjects.click('toastCloseButton');
+    return title;
   }
 
   public async dismissAllToasts() {

@@ -478,15 +478,6 @@ export class CommonPageObject extends FtrService {
     });
   }
 
-  async closeToast() {
-    const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
-    await toast.moveMouseTo();
-    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
-
-    await this.testSubjects.click('toastCloseButton');
-    return title;
-  }
-
   async closeToastIfExists() {
     const toastShown = await this.find.existsByCssSelector('.euiToast');
     if (toastShown) {
