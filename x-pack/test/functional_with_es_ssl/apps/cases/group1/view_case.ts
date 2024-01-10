@@ -1051,8 +1051,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('case-view-tab-title-activity');
         });
 
-        // there are no alerts in stack management yet
-        it.skip('renders the activity tab when the query parameter tabId=alerts', async () => {
+        it('renders the activity tab when the query parameter tabId=alerts', async () => {
           const theCase = await createAndNavigateToCase(getPageObject, getService);
 
           await cases.navigation.navigateToSingleCase('cases', theCase.id, 'alerts');

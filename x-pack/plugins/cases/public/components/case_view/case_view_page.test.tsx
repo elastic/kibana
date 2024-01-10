@@ -37,7 +37,6 @@ import {
 } from './mocks';
 import type { CaseViewPageProps } from './types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { actionTypesMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_actions_stats';
@@ -99,6 +98,11 @@ const useGetCategoriesMock = useGetCategories as jest.Mock;
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const usePushToServiceMock = usePushToService as jest.Mock;
+
+useCaseViewNavigationMock.mockReturnValue({
+  getCaseViewUrl: jest.fn(),
+  navigateToCaseView: jest.fn(),
+});
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -305,33 +309,6 @@ describe('CaseViewPage', () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
         expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
-      });
-
-      it('renders the alerts tab when the query parameter tabId has alerts', async () => {
-        useUrlParamsMock.mockReturnValue({
-          urlParams: {
-            tabId: CASE_VIEW_PAGE_TABS.ALERTS,
-          },
-        });
-
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('case-view-tab-content-alerts')).toBeInTheDocument();
-        expect(await screen.findByTestId('alerts-table')).toBeInTheDocument();
-      });
-
-      it('navigates to the alerts tab when the alerts tab is clicked', async () => {
-        const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
-
-        await waitFor(async () => {
-          expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-            detailName: caseData.id,
-            tabId: CASE_VIEW_PAGE_TABS.ALERTS,
-          });
-        });
       });
     });
 
