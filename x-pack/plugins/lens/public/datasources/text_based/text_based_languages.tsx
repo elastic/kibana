@@ -46,6 +46,7 @@ import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import { canColumnBeUsedBeInMetricDimension, MAX_NUM_OF_COLUMNS } from './utils';
+import { getColumnsFromCache, addColumnsToCache } from './fieldlist_cache';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -141,12 +142,14 @@ export function getTextBasedDatasource({
         };
       });
 
+      const language = getAggregateQueryMode(context.query);
+      addColumnsToCache(context.query[language], textBasedQueryColumns);
+
       const index = context.dataViewSpec.id ?? context.dataViewSpec.title;
       const query = context.query;
       const updatedState = {
         ...state,
         initialContext: undefined,
-        fieldList: textBasedQueryColumns,
         ...(context.dataViewSpec.id
           ? {
               indexPatternRefs: [
@@ -292,7 +295,6 @@ export function getTextBasedDatasource({
       return {
         indexPatternRefs: [],
         layers: {},
-        fieldList: [],
       };
     },
 
@@ -316,7 +318,6 @@ export function getTextBasedDatasource({
         newState: {
           ...state,
           layers: newLayers,
-          fieldList: state.fieldList,
         },
       };
     },
@@ -341,8 +342,9 @@ export function getTextBasedDatasource({
     // at this case we don't suggest all columns in a table but the first
     // MAX_NUM_OF_COLUMNS
     suggestsLimitedColumns(state: TextBasedPrivateState) {
-      const fieldsList = state?.fieldList ?? [];
-      return fieldsList.length >= MAX_NUM_OF_COLUMNS;
+      const layers = Object.values(state.layers);
+      const allColumns = layers[0].allColumns;
+      return allColumns.length >= MAX_NUM_OF_COLUMNS;
     },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
@@ -421,8 +423,14 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      const fields = props.state.fieldList;
       const allColumns = props.state.layers[props.layerId]?.allColumns;
+      const fields = allColumns.map((col) => {
+        return {
+          id: col.columnId,
+          name: col.fieldName,
+          meta: col?.meta ?? { type: 'number' },
+        };
+      });
       const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
       const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
 
@@ -539,12 +547,8 @@ export function getTextBasedDatasource({
         datasourceId: 'textBased',
 
         getTableSpec: () => {
-          const columns = state.layers[layerId]?.columns.filter((c) => {
-            const columnExists = state?.fieldList?.some((f) => f.name === c?.fieldName);
-            if (columnExists) return c;
-          });
           return (
-            columns.map((column) => ({
+            state.layers[layerId]?.columns.map((column) => ({
               columnId: column.columnId,
               fields: [column.fieldName],
             })) || []
@@ -592,7 +596,10 @@ export function getTextBasedDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
-      const field = state.fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
+      const layers = Object.values(state.layers);
+      const query = layers?.[0]?.query;
+      const fieldList = query ? getColumnsFromCache(query[getAggregateQueryMode(query)]) : [];
+      const field = fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
       if (!field) return [];
       return Object.entries(state.layers)?.map(([id, layer]) => {
         const newId = generateId();

@@ -48,6 +48,7 @@ export const getSLOTransformTemplate = (
     group_by: groupBy,
     aggregations,
   },
+  defer_validation: true,
   _meta: {
     version: SLO_RESOURCES_VERSION,
     managed: true,
