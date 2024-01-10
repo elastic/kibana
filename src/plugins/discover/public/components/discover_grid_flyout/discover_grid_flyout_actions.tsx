@@ -103,7 +103,7 @@ export function DiscoverGridFlyoutActions({ flyoutActions }: DiscoverGridFlyoutA
         <EuiFlexItem key={action.id} grow={false}>
           {showFlyoutIconsOnly ? (
             <EuiToolTip
-              content={`${action.helpText ? `${action.label} - ${action.helpText}` : action.label}`}
+              content={action.helpText ? `${action.label} - ${action.helpText}` : action.label}
             >
               <EuiButtonIcon
                 size="s"
