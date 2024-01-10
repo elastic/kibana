@@ -48,6 +48,7 @@ import {
   GetDataStreamsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
+  GetCategoriesResponseSchema,
 } from '../../types';
 
 import {
@@ -90,7 +91,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
-        validate: { request: GetCategoriesRequestSchema },
+        validate: { request: GetCategoriesRequestSchema, response: GetCategoriesResponseSchema },
       },
       getCategoriesHandler
     );
@@ -237,7 +238,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN,
       options: {
         body: {
-          accepts: ['application/gzip', 'application/zip'],
+          accepts: ['application/gzip', 'application/zip'], // TODO: openapi missing
           parse: false,
           maxBytes: MAX_FILE_SIZE_BYTES,
         },

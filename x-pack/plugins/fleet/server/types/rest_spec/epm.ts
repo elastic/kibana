@@ -15,6 +15,30 @@ export const GetCategoriesRequestSchema = {
   }),
 };
 
+export const GetCategoriesResponseSchema = {
+  '200': {
+    body: schema.object({
+      items: schema.arrayOf(
+        schema.object({
+          id: schema.string(),
+          title: schema.string(),
+          count: schema.number(),
+          parent_id: schema.maybe(schema.string()),
+          parent_title: schema.maybe(schema.string()),
+        })
+      ),
+    }),
+  },
+  // TODO generic error
+  '400': {
+    body: schema.object({
+      message: schema.string(),
+      error: schema.string(),
+      statusCode: schema.number(),
+    }),
+  },
+};
+
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
