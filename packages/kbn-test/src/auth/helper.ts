@@ -7,8 +7,8 @@
  */
 
 import * as fs from 'fs';
-import { Role, User } from './types';
 import { load as loadYaml } from 'js-yaml';
+import { Role, User } from './types';
 
 export const readCloudUsersFromFile = (filePath: string): Array<[Role, User]> => {
   if (!fs.existsSync(filePath)) {
