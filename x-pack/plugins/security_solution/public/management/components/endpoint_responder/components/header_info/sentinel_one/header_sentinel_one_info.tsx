@@ -31,9 +31,9 @@ export const HeaderSentinelOneInfo = memo<HeaderSentinelOneInfoProps>(({ agentIn
 
   return (
     <HeaderAgentInfo
-      platform={agentInfo.os.name.toLowerCase() as Platform}
+      platform={agentInfo.host.os.family.toLowerCase() as Platform}
       hostName={agentInfo.host.name}
-      lastCheckin={agentInfo.last_checkin}
+      lastCheckin={agentInfo.lastCheckin}
     >
       {/* TODO: Update with a SentinelOne agent isolation status component */}
       {/* <SentinelOneAgentStatus

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EndpointResponderExtensionComponentProps } from '../types';
@@ -19,22 +19,6 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
       return !prevState;
     });
   }, []);
-
-  const endpointInfo = useMemo(
-    () => ({
-      hostname: props.meta.endpoint
-        ? props.meta.endpoint.host.hostname
-        : props.meta.sentinel_one
-        ? props.meta.sentinel_one.host.name
-        : '',
-      agentId: props.meta.endpoint
-        ? props.meta.endpoint.agent.id
-        : props.meta.sentinel_one
-        ? props.meta.sentinel_one.agent.id
-        : '',
-    }),
-    [props.meta]
-  );
 
   return (
     <>
@@ -58,11 +42,11 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h1>{UX_MESSAGES.flyoutTitle(endpointInfo.hostname)}</h1>
+              <h1>{UX_MESSAGES.flyoutTitle(props.meta.hostName)}</h1>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <ResponseActionsLog agentIds={endpointInfo.agentId} />
+            <ResponseActionsLog agentIds={props.meta.agentId} />
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

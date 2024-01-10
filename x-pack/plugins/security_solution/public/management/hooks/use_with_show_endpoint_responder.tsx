@@ -45,7 +45,8 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
           .register({
             id: endpointAgentId,
             meta: {
-              endpoint: endpointMetadata,
+              agentId: endpointAgentId,
+              hostName: endpointMetadata.host.hostname,
             },
             consoleProps: {
               commands: getEndpointConsoleCommands({

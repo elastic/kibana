@@ -27,10 +27,8 @@ import { getFieldValue } from '../host_isolation/helpers';
 export interface ResponderContextMenuItemProps {
   endpointId: string;
   onClick?: () => void;
-  thirdPartyAgentInfo?: {
-    agentType: ResponseActionAgentType;
-    eventData: TimelineEventsDetailsItem[] | null;
-  };
+  agentType?: ResponseActionAgentType;
+  eventData?: TimelineEventsDetailsItem[] | null;
 }
 
 const getSentinelOneAgentInfo = (
@@ -46,29 +44,39 @@ const getSentinelOneAgentInfo = (
     },
     host: {
       name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
+      os: {
+        name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
+        family: getFieldValue({ category: 'host', field: 'host.os.family' }, eventData),
+        version: getFieldValue({ category: 'host', field: 'host.os.version' }, eventData),
+      },
     },
-    os: {
-      name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
-      family: getFieldValue({ category: 'host', field: 'host.os.family' }, eventData),
-      version: getFieldValue({ category: 'host', field: 'host.os.version' }, eventData),
-    },
-    last_checkin: getFieldValue(
+    lastCheckin: getFieldValue(
       { category: 'kibana', field: 'kibana.alert.last_detected' },
       eventData
     ),
   };
 };
 
+/**
+ * This hook is used to get the data needed to show the context menu items for the responder
+ * actions.
+ * @param endpointId the id of the endpoint
+ * @param onClick the callback to handle the click event
+ * @param agentType the type of agent, defaults to 'endpoint'
+ * @param eventData the event data, exists only when agentType !== 'endpoint'
+ * @returns an object with the data needed to show the context menu item
+ */
+
 export const useResponderActionData = ({
   endpointId,
   onClick,
-  thirdPartyAgentInfo,
+  agentType = 'endpoint',
+  eventData,
 }: ResponderContextMenuItemProps): {
   handleResponseActionsClick: () => void;
   isDisabled: boolean;
   tooltip: ReactNode;
 } => {
-  const { agentType, eventData } = thirdPartyAgentInfo ?? {};
   const isEndpointHost = agentType === 'endpoint';
   const showEndpointActionsConsole = useWithShowEndpointResponder();
   const showResponseActionsConsole = useWithShowResponder();
@@ -114,15 +122,22 @@ export const useResponderActionData = ({
   }, [isEndpointHost, isFetching, error, hostInfo?.host_status]);
 
   const handleResponseActionsClick = useCallback(() => {
-    if (eventData) {
-      const agentInfoFromAlert = getSentinelOneAgentInfo(eventData);
+    if (!isEndpointHost) {
+      const agentInfoFromAlert = getSentinelOneAgentInfo(eventData || null);
       showResponseActionsConsole(agentInfoFromAlert);
     }
     if (hostInfo) {
       showEndpointActionsConsole(hostInfo.metadata);
     }
     if (onClick) onClick();
-  }, [eventData, hostInfo, onClick, showResponseActionsConsole, showEndpointActionsConsole]);
+  }, [
+    isEndpointHost,
+    hostInfo,
+    onClick,
+    eventData,
+    showResponseActionsConsole,
+    showEndpointActionsConsole,
+  ]);
 
   return {
     handleResponseActionsClick,

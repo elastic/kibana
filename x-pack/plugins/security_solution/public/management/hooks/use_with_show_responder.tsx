@@ -47,7 +47,8 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .register({
             id: endpointAgentId,
             meta: {
-              sentinel_one: agentInfo,
+              agentId: endpointAgentId,
+              hostName: agentInfo.host.name,
             },
             consoleProps: {
               commands: getEndpointConsoleCommands({

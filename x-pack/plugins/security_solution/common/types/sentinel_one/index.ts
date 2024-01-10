@@ -14,11 +14,11 @@ export interface SentinelOneAgentInfo {
   };
   host: {
     name: string;
+    os: {
+      name: string;
+      family: string;
+      version: string;
+    };
   };
-  os: {
-    name: string;
-    family: string;
-    version: string;
-  };
-  last_checkin: string;
+  lastCheckin: string;
 }

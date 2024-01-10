@@ -45,10 +45,8 @@ export const useResponderActionItem = (
   const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
     endpointId,
     onClick,
-    thirdPartyAgentInfo: {
-      agentType,
-      eventData: agentType !== 'endpoint' ? eventDetailsData : null,
-    },
+    agentType,
+    eventData: agentType !== 'endpoint' ? eventDetailsData : null,
   });
 
   return useMemo(() => {
