@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-
 import { CspBenchmarkRulesStates } from '../types/latest';
 
 export const buildMutedRulesFilter = (

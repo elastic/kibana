@@ -6,7 +6,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-
 import { CspBenchmarkRulesStates } from '../../../../common/types/latest';
 import {
   CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION,
