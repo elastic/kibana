@@ -45,8 +45,7 @@
       "lens",
       "maps",
       "visualizations",
-      "fieldFormats",
-      "savedObjects",
+      "fieldFormats"
     ],
   }
 }
