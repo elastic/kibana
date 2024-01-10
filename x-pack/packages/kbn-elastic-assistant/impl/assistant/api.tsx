@@ -9,6 +9,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 
+import { Stream } from 'openai/src/streaming';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
@@ -134,7 +135,18 @@ export const fetchConnectorExecuteAction = async ({
           isStream: false,
         };
       }
-      console.log('before runner');
+      const controller = new AbortController();
+      // Create a Stream instance from the response using the static method
+      const stream = Stream.fromSSEResponse(response?.response, controller);
+      // const stream = ChatCompletionStream.fromReadableStream(streamResponse);
+      // Use the iterator directly
+      // const iterator = readableStreamAsyncIterable(stream);
+      console.log('streamResponse', { stream, streamResponse });
+      for await (const item of stream) {
+        // Process each item from the stream
+        console.log('chunk?', item);
+      }
+      console.log('finished?');
       // const runner = ChatCompletionStreamingRunner.fromReadableStream(streamResponse);
       //
       // console.log('after runner', runner);

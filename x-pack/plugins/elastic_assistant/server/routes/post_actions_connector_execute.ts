@@ -73,8 +73,6 @@ export const postActionsConnectorExecuteRoute = (
           // response.end();
           return response.ok({
             body: result,
-
-            headers: { 'Content-Type': 'text/plain' },
           });
         }
 

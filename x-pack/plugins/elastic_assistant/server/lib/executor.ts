@@ -54,34 +54,21 @@ export const executeAction = async ({
   const readable = get('data', actionResult) as StreamResponse;
   console.log('readable', {
     readable,
-    readableT: readable.iterator,
-    readableTy: typeof readable.iterator,
+    // readableT: readable.iterator,
+    // readableTy: typeof readable.iterator,
   });
-
-  if (typeof readable?.iterator !== 'function') {
-    throw new Error('Action result status is error: result is not streamable');
-  }
+  //
+  // if (typeof readable?.iterator !== 'function') {
+  //   throw new Error('Action result status is error: result is not streamable');
+  // }
   // for await (const chunk of readable) {
   //   console.log('chunk', chunk);
   // }
 
-  console.log('before toReadableStream');
+  // console.log('before toReadableStream');
   const rs = readable.toReadableStream();
-  console.log('after toReadableStream', rs);
-  return Readable.from(rs).pipe(new PassThrough());
-  // const transformStream = readable.toReadableStream();
-  //   new ReadableStream({
-  //   async start(controller) {
-  //     for await (const chunk of readable) {
-  //       console.log('chunk', chunk);
-  //       controller.enqueue(chunk);
-  //     }
-  //     controller.close();
-  //   },
-  // });
-  console.timeEnd('transformStream');
-  console.log('transformStream', transformStream);
+  // console.log('after toReadableStream', rs);
+  return rs;
 
-  return Readable.from(transformStream).pipe(new PassThrough());
-  return transformStream; // .pipe(new PassThrough());
+  return Readable.from(readable).pipe(new PassThrough());
 };
