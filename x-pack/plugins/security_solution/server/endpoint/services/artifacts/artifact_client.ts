@@ -69,8 +69,13 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     return this.fleetArtifacts.listArtifacts(options);
   }
 
-  fetchAll(options?: FetchAllArtifactsOptions): AsyncIterable<Artifact[]> {
-    return this.fleetArtifacts.fetchAll(options);
+  fetchAll({
+    // Our default, unlike the Fleet service, is to NOT include the body of
+    // the artifact, since we really don't need it when processing all artifacts
+    includeArtifactBody = false,
+    ...options
+  }: FetchAllArtifactsOptions = {}): AsyncIterable<Artifact[]> {
+    return this.fleetArtifacts.fetchAll({ ...options, includeArtifactBody });
   }
 
   async createArtifact(
