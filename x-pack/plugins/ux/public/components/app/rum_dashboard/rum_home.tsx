@@ -57,15 +57,15 @@ export function RumHome() {
 
   return (
     <PageTemplateComponent
-      noDataConfig={isLoading ? undefined : noDataConfig}
+      // noDataConfig={isLoading ? undefined : noDataConfig}
       pageHeader={{ children: <PageHeader /> }}
       isPageDataLoaded={isLoading === false}
-      isEmptyState={isLoading}
+      // isEmptyState={isLoading}
     >
       {isLoading && <EmptyStateLoading />}
-      <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
+      {/* <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}> */}
         <RumOverview />
-      </div>
+      {/* </div> */}
     </PageTemplateComponent>
   );
 }
