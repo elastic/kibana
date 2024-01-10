@@ -753,6 +753,41 @@ export const enrollHostVmWithFleet = async ({
   return waitForHostToEnroll(kbnClient, log, hostVm.name, timeoutMs);
 };
 
+interface CreateAgentPolicyOptions {
+  kbnClient: KbnClient;
+  policy?: CreateAgentPolicyRequest['body'];
+}
+
+/**
+ * Create a new Agent Policy in fleet
+ * @param kbnClient
+ * @param log
+ * @param policy
+ */
+export const createAgentPolicy = async ({
+  kbnClient,
+  policy,
+}: CreateAgentPolicyOptions): Promise<AgentPolicy> => {
+  const body: CreateAgentPolicyRequest['body'] = policy ?? {
+    name: `agent policy - ${fleetGenerator.randomString(10)}`,
+    description: `Policy created by security solution tooling: ${__filename}`,
+    namespace: 'default',
+    monitoring_enabled: ['logs', 'metrics'],
+  };
+
+  return kbnClient
+    .request<CreateAgentPolicyResponse>({
+      path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+      method: 'POST',
+      body,
+    })
+    .then((response) => response.data.item)
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
 interface GetOrCreateDefaultAgentPolicyOptions {
   kbnClient: KbnClient;
   log: ToolingLog;
@@ -784,24 +819,15 @@ export const getOrCreateDefaultAgentPolicy = async ({
 
   log.info(`Creating default test/dev Fleet agent policy with name: [${policyName}]`);
 
-  const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-    name: policyName,
-    description: `Policy created by security solution tooling: ${__filename}`,
-    namespace: 'default',
-    monitoring_enabled: ['logs', 'metrics'],
-  };
-
-  const newAgentPolicy = await kbnClient
-    .request<CreateAgentPolicyResponse>({
-      path: AGENT_POLICY_API_ROUTES.CREATE_PATTERN,
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
-      method: 'POST',
-      body: newAgentPolicyData,
-    })
-    .then((response) => response.data.item)
-    .catch(catchAxiosErrorFormatAndThrow);
+  const newAgentPolicy = await createAgentPolicy({
+    kbnClient,
+    policy: {
+      name: policyName,
+      description: `Policy created by security solution tooling: ${__filename}`,
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+    },
+  });
 
   log.verbose(newAgentPolicy);
 
