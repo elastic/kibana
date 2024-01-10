@@ -7,15 +7,13 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of } from 'rxjs';
+import { firstValueFrom, lastValueFrom, take, BehaviorSubject } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import type { ChromeNavLinks, ChromeBreadcrumb, AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
-const setup = ({
-  locationPathName = '/',
-}: { locationPathName?: string; navLinkIds?: Readonly<string[]> } = {}) => {
+const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) => {
   const projectNavigationService = new ProjectNavigationService();
   const history = createMemoryHistory();
   const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
