@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
@@ -46,6 +47,7 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPanelProps) => {
+  const { telemetry } = useKibana().services;
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
@@ -80,6 +82,10 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
   const { openLeftPanel } = useExpandableFlyoutContext();
   const openPanelTab = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
+      telemetry.reportRiskInputsExpandedFlyoutOpened({
+        entity: 'user',
+      });
+
       openLeftPanel({
         id: UserDetailsPanelKey,
         params: {
@@ -92,7 +98,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         path: tab ? { tab } : undefined,
       });
     },
-    [email, openLeftPanel, userName, userRiskData]
+    [telemetry, email, openLeftPanel, userName, userRiskData]
   );
 
   const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);

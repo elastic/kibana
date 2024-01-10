@@ -27,7 +27,6 @@ const defaultProps = {
         allColumns: [...fieldList, column1, column2, column3],
       },
     },
-    fieldList,
   },
   source: numericDraggedColumn,
   target: {
@@ -86,7 +85,6 @@ describe('Text-based: getDropProps', () => {
             allColumns: [...fieldListNonNumericOnly, column1, column2, column3],
           },
         },
-        fieldList: fieldListNonNumericOnly,
       },
       source: notNumericDraggedField,
     } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
