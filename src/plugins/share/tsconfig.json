@@ -20,10 +20,7 @@
     "@kbn/core-custom-branding-browser",
     "@kbn/react-kibana-context-theme",
     "@kbn/config-schema",
-    "@kbn/core-saved-objects-utils-server",
-    "@kbn/saved-objects-management-plugin",
-    "@kbn/saved-objects-tagging-oss-plugin",
-  ],
+    "@kbn/core-saved-objects-utils-server",  ],
   "exclude": [
     "target/**/*",
   ]

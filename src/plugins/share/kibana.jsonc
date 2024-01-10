@@ -10,7 +10,6 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils", 
-      "savedObjectsManagement"
     ]
   }
 }
