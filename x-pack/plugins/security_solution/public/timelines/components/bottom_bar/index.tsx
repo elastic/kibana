@@ -6,10 +6,11 @@
  */
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { State } from '../../../common/store';
+import { selectTitleByTimelineById } from '../../store/selectors';
 import { AddTimelineButton } from '../flyout/add_timeline_button';
-import { useTimelineTitle } from '../../hooks/use_timeline_title';
 import { timelineActions } from '../../store';
 import { TimelineSaveStatus } from '../save_status';
 import { AddToFavoritesButton } from '../timeline/properties/helpers';
@@ -43,7 +44,7 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(({ show, tim
     [dispatch, timelineId]
   );
 
-  const title = useTimelineTitle({ timelineId });
+  const title = useSelector((state: State) => selectTitleByTimelineById(state, timelineId));
 
   return (
     <EuiPanel borderRadius="none" data-test-subj="timeline-bottom-bar">

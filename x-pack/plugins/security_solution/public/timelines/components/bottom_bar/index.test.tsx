@@ -10,10 +10,8 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { timelineActions } from '../../store';
 import { TimelineBottomBar } from '.';
-import { useTimelineTitle } from '../../hooks/use_timeline_title';
 import { TimelineId } from '../../../../common/types';
 
-jest.mock('../../hooks/use_timeline_title');
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
   return {
@@ -24,8 +22,6 @@ jest.mock('react-redux', () => {
 
 describe('TimelineBottomBar', () => {
   test('should render all components for bottom bar', () => {
-    (useTimelineTitle as jest.Mock).mockReturnValue('title');
-
     const { getByTestId } = render(
       <TestProviders>
         <TimelineBottomBar show={false} timelineId={TimelineId.test} />
@@ -39,8 +35,6 @@ describe('TimelineBottomBar', () => {
   });
 
   test('should not render the event count badge if timeline is open', () => {
-    (useTimelineTitle as jest.Mock).mockReturnValue('title');
-
     const { queryByTestId } = render(
       <TestProviders>
         <TimelineBottomBar show={true} timelineId={TimelineId.test} />
