@@ -23,14 +23,17 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
   console.log(ruleDiff);
 
   const fieldsToRender = useMemo(() => {
-    const fields: Array<{ oldField: string; newField: string; fieldName: string }> = [];
+    const fields: Array<{
+      formattedDiffs: Array<{ currentVersion: string; targetVersion: string; fieldName: string }>;
+      fieldName: string;
+    }> = [];
     for (const field in ruleDiff.fields) {
       if (Object.hasOwn(ruleDiff.fields, field)) {
         const typedField = field as keyof RuleFieldsDiff;
-        const [oldField, newField] = getFormattedFieldDiff(typedField, ruleDiff.fields);
+        const formattedDiffs = getFormattedFieldDiff(typedField, ruleDiff.fields);
         // const oldField = sortAndStringifyJson(ruleDiff.fields[typedField].current_version);
         // const newField = sortAndStringifyJson(ruleDiff.fields[typedField].target_version);
-        fields.push({ oldField, newField, fieldName: field });
+        fields.push({ formattedDiffs, fieldName: field });
       }
     }
     return fields;
@@ -38,11 +41,11 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
 
   return (
     <>
-      {fieldsToRender.map(({ fieldName, oldField, newField }) => {
+      {fieldsToRender.map(({ fieldName, formattedDiffs }) => {
         return (
           <>
             <EuiSpacer size="m" />
-            <FieldDiffComponent oldField={oldField} newField={newField} fieldName={fieldName} />
+            <FieldDiffComponent ruleDiffs={formattedDiffs} fieldName={fieldName} />
           </>
         );
       })}
