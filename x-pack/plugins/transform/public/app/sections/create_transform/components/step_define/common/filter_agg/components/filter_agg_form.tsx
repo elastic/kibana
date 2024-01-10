@@ -76,14 +76,12 @@ export const FilterAggForm: AggFormComponent<FilterAggConfigBase> = ({
     [selectedField]
   );
 
-  console.log('aggConfig', aggConfig);
   const utils = getFilterAggTypeUtils(aggConfig.aggTypeConfig);
   const FilterAggFormComponent = getFilterAggTypeComponent(aggConfig.aggTypeConfig);
-  console.log('utils', utils);
-
   const filterAggTypeConfig = aggConfig?.aggTypeConfig;
   const filterAgg = aggConfig?.filterAgg ?? '';
   const isValid = utils?.isValid ? utils?.isValid() : undefined;
+
   return (
     <>
       {filterAggsOptions !== undefined ? (

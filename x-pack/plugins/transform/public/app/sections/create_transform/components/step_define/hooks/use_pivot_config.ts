@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { useMemo } from 'react';
 import type { Action } from 'redux';
 import type { ThunkAction } from 'redux-thunk';
@@ -45,15 +46,15 @@ import { getAggConfigUtils } from '../common/agg_utils';
  * Clones aggregation configuration and updates parent references
  * for the sub-aggregations.
  */
-function cloneAggItem(item: PivotAggsConfig, parentRef?: PivotAggsConfig) {
+function cloneAggItem(item: PivotAggsConfig, nestingLevel: number = 0) {
   const newItem = { ...item };
-  if (parentRef !== undefined) {
-    newItem.parentAgg = parentRef;
+  if (nestingLevel !== undefined) {
+    newItem.nestingLevel = nestingLevel;
   }
   if (newItem.subAggs !== undefined) {
     const newSubAggs: PivotAggsConfigDict = {};
     for (const [key, subItem] of Object.entries(newItem.subAggs)) {
-      newSubAggs[key] = cloneAggItem(subItem, newItem);
+      newSubAggs[key] = cloneAggItem(subItem, nestingLevel + 1);
     }
     newItem.subAggs = newSubAggs;
   }
@@ -97,10 +98,10 @@ export function validatePivotConfig(config: TransformPivotConfig['pivot']) {
  * Returns a root aggregation configuration
  * for provided aggregation item.
  */
-function getRootAggregation(item: PivotAggsConfig) {
+function getRootAggregation(item: PivotAggsConfig, items: PivotAggsConfigDict) {
   let rootItem = item;
-  while (rootItem.parentAgg !== undefined) {
-    rootItem = rootItem.parentAgg;
+  while (rootItem.parentAggId !== undefined) {
+    rootItem = items[rootItem.parentAggId];
   }
   return rootItem;
 }
@@ -118,12 +119,16 @@ export const usePivotConfigOptions = () => {
 };
 export type PivotConfigOptions = ReturnType<typeof usePivotConfigOptions>;
 
+const items: PivotAggsConfigDict = {};
+
 export const getPivotConfigActions = (
   pivotConfigOptions: PivotConfigOptions,
   toastNotifications: NotificationsStart['toasts']
 ) => {
   const { rAddAggregation, rAddGroupBy, rDeleteAggregation, rDeleteGroupBy, rUpdateAggregation } =
     stepDefineSlice.actions;
+
+  console.log('RESET getPivotConfigActions');
 
   // The list of selected aggregations
   // const aggList = useWizardSelector((s) => s.stepDefine.aggList);
@@ -244,6 +249,8 @@ export const getPivotConfigActions = (
         return;
       }
 
+      items[config.aggId] = config;
+
       dispatch(rAddAggregation({ aggName, config }));
     };
   /**
@@ -269,6 +276,7 @@ export const getPivotConfigActions = (
         return;
       }
 
+      items[item.aggId] = item;
       dispatch(rUpdateAggregation({ previousAggName, config: item }));
     };
   /**
@@ -276,10 +284,11 @@ export const getPivotConfigActions = (
    */
   const addSubAggregation =
     (
-      item: PivotAggsConfig,
+      frozenItem: PivotAggsConfig,
       d: DropDownLabel[]
     ): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
     (dispatch) => {
+      const item = cloneDeep(frozenItem);
       if (!item.isSubAggsSupported) {
         throw new Error(`Aggregation "${item.agg}" does not support sub-aggregations`);
       }
@@ -299,8 +308,11 @@ export const getPivotConfigActions = (
       }
 
       item.subAggs[config.aggName] = config;
+      items[config.aggId] = config;
 
-      const newRootItem = cloneAggItem(getRootAggregation(item));
+      const newRootItem = cloneAggItem(getRootAggregation(item, items));
+      console.log('update', newRootItem.aggName, newRootItem);
+      items[newRootItem.aggId] = newRootItem;
       dispatch(updateAggregation(newRootItem.aggName, newRootItem));
     };
 
@@ -313,7 +325,7 @@ export const getPivotConfigActions = (
       subItem: PivotAggsConfig
     ): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
     (dispatch) => {
-      const parent = subItem.parentAgg;
+      const parent = subItem.parentAggId && items[subItem.parentAggId];
       if (!parent || !parent.subAggs) {
         throw new Error('No parent aggregation reference found');
       }
@@ -334,7 +346,10 @@ export const getPivotConfigActions = (
         ...newSubAgg,
         [subItem.aggName]: subItem,
       };
-      const newRootItem = cloneAggItem(getRootAggregation(subItem));
+      items[parent.aggId] = parent;
+
+      const newRootItem = cloneAggItem(getRootAggregation(subItem, items));
+      items[newRootItem.aggId] = newRootItem;
       dispatch(updateAggregation(newRootItem.aggName, newRootItem));
     };
 
@@ -351,7 +366,9 @@ export const getPivotConfigActions = (
         throw new Error('Unable to delete a sub-agg');
       }
       delete item.subAggs[subAggName];
-      const newRootItem = cloneAggItem(getRootAggregation(item));
+      delete items[item.subAggs[subAggName].aggId];
+      const newRootItem = cloneAggItem(getRootAggregation(item, items));
+      items[newRootItem.aggId] = newRootItem;
       dispatch(updateAggregation(newRootItem.aggName, newRootItem));
     };
 

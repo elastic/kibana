@@ -64,10 +64,11 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   useEffect(() => {
     if (agg === aggConfigDef.agg) return;
     const config = getAggFormConfig(agg, {
-      parentAgg: aggConfigDef.parentAgg,
+      nestingLevel: aggConfigDef.nestingLevel,
       subAggs: aggConfigDef.subAggs,
       agg,
       aggName,
+      aggId: aggConfigDef.aggId,
       dropDownName: aggName,
       field,
     });

@@ -26,7 +26,7 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
   const { aggOptions, aggOptionsData } = usePivotConfigOptions();
   const addSubAggHandler = useCallback(
     (d: EuiComboBoxOptionOption[]) => {
-      actions.addSubAggregation(clone(item), d);
+      actions.addSubAggregation(item, d);
     },
     [actions, item]
   );
@@ -46,12 +46,7 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
   );
 
   const isNewSubAggAllowed: boolean = useMemo(() => {
-    let nestingLevel = 1;
-    let parentItem = item.parentAgg;
-    while (parentItem !== undefined) {
-      nestingLevel++;
-      parentItem = parentItem.parentAgg;
-    }
+    const nestingLevel = item.nestingLevel ?? 0;
     return nestingLevel <= MAX_NESTING_SUB_AGGS;
   }, [item]);
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { nanoid } from '@reduxjs/toolkit';
+
 import { getTermsAggConfig } from './terms_agg';
 import { EsFieldName } from '../../../../../../../common/types/fields';
 import {
@@ -28,6 +30,7 @@ export function getDefaultAggregationConfig(
   const commonConfig = {
     agg,
     aggName,
+    aggId: nanoid(),
     dropDownName,
     field: fieldName,
   };

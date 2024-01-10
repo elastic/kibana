@@ -153,6 +153,7 @@ export const MAX_NESTING_SUB_AGGS = 10;
 export interface PivotAggsConfigBase {
   agg: PivotSupportedAggs;
   aggName: AggName;
+  aggId: string;
   dropDownName: string;
   /**
    * Indicates if aggregation supports multiple fields
@@ -163,7 +164,9 @@ export interface PivotAggsConfigBase {
   /** Dictionary of the sub-aggregations */
   subAggs?: PivotAggsConfigDict;
   /** Reference to the parent aggregation */
-  parentAgg?: PivotAggsConfig;
+  parentAggId?: string;
+  /** Nesting level to allow checks if another sub aggregation can be added */
+  nestingLevel?: number;
 }
 
 /**
@@ -172,7 +175,7 @@ export interface PivotAggsConfigBase {
 export function getAggConfigFromEsAgg(
   esAggDefinition: Record<string, any>,
   aggName: string,
-  parentRef?: PivotAggsConfig
+  nestingLevel?: number
 ) {
   const aggKeys = Object.keys(esAggDefinition);
 
@@ -194,8 +197,8 @@ export function getAggConfigFromEsAgg(
 
   const config = getAggFormConfig(agg, commonConfig);
 
-  if (parentRef) {
-    config.parentAgg = parentRef;
+  if (nestingLevel) {
+    config.nestingLevel = nestingLevel + 1;
   }
 
   if (isPivotAggsWithExtendedForm(config)) {
@@ -208,7 +211,11 @@ export function getAggConfigFromEsAgg(
     for (const [subAggName, subAggConfigs] of Object.entries(
       esAggDefinition.aggs as Record<string, object>
     )) {
-      config.subAggs[subAggName] = getAggConfigFromEsAgg(subAggConfigs, subAggName, config);
+      config.subAggs[subAggName] = getAggConfigFromEsAgg(
+        subAggConfigs,
+        subAggName,
+        config.nestingLevel
+      );
     }
   }
 
@@ -317,8 +324,10 @@ export function getEsAggFromAggConfig(
 
   delete esAgg.agg;
   delete esAgg.aggName;
+  delete esAgg.aggId;
   delete esAgg.dropDownName;
-  delete esAgg.parentAgg;
+  delete esAgg.nestingLevel;
+  delete esAgg.parentAggId;
 
   if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
     const utils = getAggConfigUtils(pivotAggsConfig);
