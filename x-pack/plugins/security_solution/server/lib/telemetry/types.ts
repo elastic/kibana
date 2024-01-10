@@ -44,7 +44,6 @@ export interface ESLicense {
 }
 
 // Telemetry
-//
 export interface TelemetryEvent {
   [key: string]: SearchTypes;
   '@timestamp'?: string;

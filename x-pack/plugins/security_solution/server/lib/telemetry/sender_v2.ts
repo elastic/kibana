@@ -6,6 +6,7 @@
  */
 import axios from 'axios';
 import * as rx from 'rxjs';
+import { cloneDeep } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
@@ -75,7 +76,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
           // TODO(sebastian.zaffarano): increment telemetry usage counter
           if (isFailure(result)) {
             this.logger.l(
-              `Failure! unable to send ${result} events to channel "${result.channel}"`
+              `Failure! unable to send ${result.events} events to channel "${result.channel}": ${result.message}`
             );
           } else {
             this.logger.l(`Success! %d events sent to channel "${result.channel}"`);
@@ -122,7 +123,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
       throw new Error(`Channel "${channel}" was not configured`);
     }
 
-    this.getQueues().set(channel, config);
+    this.getQueues().set(channel, cloneDeep(config));
   }
 
   // internal methods
@@ -166,25 +167,20 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
 
       // chunk by size
       rx.map((values) =>
-        collections
-          .chunkedBy(
-            values,
-            this.getConfigFor(channel).maxPayloadSizeBytes,
-            (payload) => payload.length
-          )
-          .map((chunk) => {
-            const c: Chunk = { channel, payloads: chunk };
-            return c;
-          })
+        collections.chunkedBy(
+          values,
+          this.getConfigFor(channel).maxPayloadSizeBytes,
+          (payload) => payload.length
+        )
       ),
       rx.concatAll(),
 
       // send events to the telemetry server
-      rx.concatMap((chunk: Chunk) =>
+      rx.concatMap((payloads: string[]) =>
         retryOnError$(
           this.getRetryConfig().retryCount,
           this.getRetryConfig().retryDelayMillis,
-          async () => this.sendEvents(channel, chunk.payloads)
+          async () => this.sendEvents(channel, payloads)
         )
       ),
 
@@ -193,11 +189,6 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
         inflightEvents$.next(-result.events);
       })
     ) as rx.Observable<Result>;
-  }
-
-  private async getSenderMetadata(channel: TelemetryChannel) {
-    if (this.senderUtils === undefined) throw new Error('Service not initialized');
-    return this.senderUtils?.fetchSenderMetadata(channel);
   }
 
   // TODO(sebastian.zaffarano): not fully implemented yet
@@ -252,6 +243,11 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     return config;
   }
 
+  private async getSenderMetadata(channel: TelemetryChannel) {
+    if (this.senderUtils === undefined) throw new Error('Service not initialized');
+    return this.senderUtils?.fetchSenderMetadata(channel);
+  }
+
   private getRetryConfig(): RetryConfig {
     if (this.retryConfig === undefined) throw new Error('Service not initialized');
     return this.retryConfig;
@@ -279,11 +275,6 @@ function newFailure(message: string, channel: TelemetryChannel, events: number):
 
 function isFailure(result: Result): result is Failure {
   return 'name' in result && 'message' in result && 'events' in result && 'channel' in result;
-}
-
-interface Chunk {
-  channel: TelemetryChannel;
-  payloads: string[];
 }
 
 interface Event {

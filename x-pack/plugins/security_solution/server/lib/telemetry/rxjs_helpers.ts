@@ -54,6 +54,16 @@ export class CachedSubject<T> {
   }
 }
 
+/**
+ * Executes the given `body()` function wrappig it in a retry logic by using
+ * the rxjs `retry` operator.
+ *
+ * @param retryCount the number of times to retry the `body()` function
+ * @param retryDelayMillis the delay between each retry
+ * @param body the function to execute
+ * @returns an observable that emits either the result returned by the `body()`
+ * function or the latest caught error after exhausting the retryCount.
+ */
 export function retryOnError$<R>(
   retryCount: number,
   retryDelayMillis: number,
