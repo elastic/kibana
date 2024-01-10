@@ -11,6 +11,7 @@ exports[`NoDataCardComponent props button 1`] = `
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   footer={
     <EuiButton
+      data-test-subj="noDataDefaultFooterAction"
       fill={true}
     >
       Button
@@ -40,7 +41,9 @@ exports[`NoDataCardComponent props href 1`] = `
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   footer={
     <EuiButton
+      data-test-subj="noDataDefaultFooterAction"
       fill={true}
+      href="some path"
     >
       Add Elastic Agent
     </EuiButton>
@@ -70,6 +73,7 @@ exports[`NoDataCardComponent renders 1`] = `
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   footer={
     <EuiButton
+      data-test-subj="noDataDefaultFooterAction"
       fill={true}
     >
       Add Elastic Agent
