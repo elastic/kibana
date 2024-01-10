@@ -495,26 +495,28 @@ export class ManifestManager {
         soVersion: manifestSo.version,
       });
 
-      // FIXME:PT remove having all artifats in memory here adn instead "process" through each page.
       const fleetArtifacts = await this.listAllArtifacts();
       const fleetArtifactsById = keyBy(fleetArtifacts, (artifact) => getArtifactId(artifact));
+      const invalidArtifactIds: string[] = [];
 
+      // Ensure that all artifacts currently defined in the Manifest have a valid artifact in fleet,
+      // and remove any that does not have an actual artifact from the manifest
       for (const entry of manifestSo.attributes.artifacts) {
         const artifact = fleetArtifactsById[entry.artifactId];
 
         if (!artifact) {
-          manifest.addOrphanArtifact(entry.artifactId);
+          invalidArtifactIds.push(entry.artifactId);
         } else {
           manifest.addEntry(artifact, entry.policyId);
         }
       }
 
-      if (manifest.hasOrphanArtifacts()) {
+      if (invalidArtifactIds.length) {
         this.logger.warn(
-          'Orphan artifacts detected! The following artifact IDs are not currently being managed by ' +
-            `manifest v${manifestSo.version} and will be cleaned up:\n${manifest
-              .getOrphanArtifacts()
-              .join('\n')}`
+          'Missing artifacts detected! The following artifact IDs, in ' +
+            `manifest v${
+              manifestSo.version
+            }, are not valid (point to a non-existent Artifact):\n${stringify(invalidArtifactIds)}`
         );
       }
 
@@ -737,21 +739,21 @@ export class ManifestManager {
   }
 
   /**
-   * Cleanup .fleet-artifacts index if there are some orphan artifacts
+   * Pulls in all artifacts from Fleet and checks to ensure they are all being referenced
+   * by the Manifest. If any are found to not be in the current Manifest (orphan), they
+   * are cleaned up (deleted)
    */
-  public async cleanup(artifactIds: string[]): Promise<void> {
-    if (artifactIds.length === 0) {
-      return;
-    }
-
+  public async cleanup(manifest: Manifest) {
+    const badArtifactIds: string[] = [];
     const errors: string[] = [];
-
     const artifactDeletionProcess = new QueueProcessor<string>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
       key: 'cleanup',
       batchHandler: async ({ batch, data }) => {
         const deleteErrors = await this.artifactClient.bulkDeleteArtifacts(data);
+
+        badArtifactIds.push(...data);
 
         if (deleteErrors.length) {
           errors.push(
@@ -761,23 +763,31 @@ export class ManifestManager {
       },
     });
 
-    const uniqueArtifactIds = Array.from(new Set(artifactIds.filter((id) => id.trim().length > 0)));
+    const validArtifactIds = manifest.getAllArtifacts().map((artifact) => getArtifactId(artifact));
 
-    this.logger.debug(
-      `Orphan artifacts to be deleted from Fleet:\n${stringify(uniqueArtifactIds)}`
-    );
+    for await (const artifacts of this.artifactClient.fetchAll()) {
+      for (const artifact of artifacts) {
+        const artifactId = getArtifactId(artifact);
+        const isArtifactInManifest = validArtifactIds.includes(artifactId);
 
-    artifactDeletionProcess.addToQueue(...uniqueArtifactIds);
+        if (!isArtifactInManifest) {
+          artifactDeletionProcess.addToQueue(artifactId);
+        }
+      }
+    }
+
     await artifactDeletionProcess.complete();
+
+    this.logger.debug(`Orphan artifacts deleted from Fleet:\n${stringify(badArtifactIds)}`);
 
     if (errors.length > 0) {
       this.logger.error(
         `The following errors were encountered while attempting to delete [${
-          uniqueArtifactIds.length
+          badArtifactIds.length
         }] orphaned artifacts:\n${stringify(errors)}`
       );
-    } else {
-      this.logger.info(`Orphan artifacts cleaned up: ${uniqueArtifactIds.length}`);
+    } else if (badArtifactIds.length > 0) {
+      this.logger.info(`Orphan artifacts cleaned up: ${badArtifactIds.length}`);
     }
   }
 }

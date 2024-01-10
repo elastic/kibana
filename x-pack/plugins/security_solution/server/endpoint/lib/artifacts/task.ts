@@ -207,10 +207,7 @@ export class ManifestTask {
         reportErrors(this.logger, deleteErrors);
       }
 
-      await manifestManager.cleanup([
-        ...oldManifest.getOrphanArtifacts(),
-        ...newManifest.getOrphanArtifacts(),
-      ]);
+      await manifestManager.cleanup(newManifest);
     } catch (err) {
       this.logger.error(wrapErrorIfNeeded(err));
     }
