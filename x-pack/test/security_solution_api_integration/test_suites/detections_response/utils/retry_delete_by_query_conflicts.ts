@@ -9,10 +9,10 @@ import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
 
 // Number of times to retry when conflicts occur
-export const RetryForConflictsAttempts = 2;
+const RETRY_ATTEMPTS = 2;
 
 // Delay between retries when conflicts occur
-export const RetryForConflictsDelay = 200;
+const RETRY_DELAY = 200;
 
 /*
  * Retry an Elasticsearch deleteByQuery operation if it runs into 409 Conflicts,
@@ -22,8 +22,8 @@ export async function retryIfDeleteByQueryConflicts<T>(
   logger: ToolingLog,
   name: string,
   operation: () => Promise<DeleteByQueryResponse>,
-  retries: number = RetryForConflictsAttempts,
-  retryDelay: number = RetryForConflictsDelay
+  retries: number = RETRY_ATTEMPTS,
+  retryDelay: number = RETRY_DELAY
 ): Promise<DeleteByQueryResponse> {
   const operationResult = await operation();
   if (!operationResult.failures || operationResult.failures?.length === 0) {
