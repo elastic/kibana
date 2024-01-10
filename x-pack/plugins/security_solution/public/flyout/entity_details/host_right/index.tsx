@@ -121,6 +121,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
             <HostPanelContent
+              hostName={hostName}
               observedHost={observedHostWithAnomalies}
               riskScoreState={riskScoreState}
               contextID={contextID}

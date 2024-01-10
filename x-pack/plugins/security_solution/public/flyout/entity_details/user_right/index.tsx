@@ -134,6 +134,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
               managedUser={managedUser}
             />
             <UserPanelContent
+              userName={userName}
               managedUser={managedUser}
               observedUser={observedUserWithAnomalies}
               riskScoreState={riskScoreState}
