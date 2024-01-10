@@ -38,7 +38,7 @@ import {
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
-import { useCapabilities } from '../assistant/api/use_capabilities';
+import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;

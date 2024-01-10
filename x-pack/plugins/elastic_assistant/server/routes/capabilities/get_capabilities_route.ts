@@ -15,6 +15,11 @@ import { GetCapabilitiesResponse } from '../../schemas/capabilities/get_capabili
 import { buildResponse } from '../../lib/build_response';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
+/**
+ * Get the assistant capabilities for the requesting plugin
+ *
+ * @param router IRouter for registering routes
+ */
 export const getCapabilitiesRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
     .get({

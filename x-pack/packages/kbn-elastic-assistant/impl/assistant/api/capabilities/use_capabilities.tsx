@@ -31,27 +31,22 @@ export const useCapabilities = ({
   http,
   toasts,
 }: UseCapabilitiesParams): UseQueryResult<GetCapabilitiesResponse, IHttpFetchError> => {
-  return useQuery(
-    CAPABILITIES_QUERY_KEY,
-    async ({ signal }) => {
+  return useQuery({
+    queryKey: CAPABILITIES_QUERY_KEY,
+    queryFn: async ({ signal }) => {
       return getCapabilities({ http, signal });
     },
-    {
-      retry: false,
-      keepPreviousData: true,
-      // Deprecated, hoist to `queryCache` w/in `QueryClient. See: https://stackoverflow.com/a/76961109
-      onError: (error: IHttpFetchError<ResponseErrorBody>) => {
-        if (error.name !== 'AbortError') {
-          toasts?.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            {
-              title: i18n.translate('xpack.elasticAssistant.capabilities.statusError', {
-                defaultMessage: 'Error fetching capabilities',
-              }),
-            }
-          );
-        }
-      },
-    }
-  );
+    retry: false,
+    keepPreviousData: true,
+    // Deprecated, hoist to `queryCache` w/in `QueryClient. See: https://stackoverflow.com/a/76961109
+    onError: (error: IHttpFetchError<ResponseErrorBody>) => {
+      if (error.name !== 'AbortError') {
+        toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+          title: i18n.translate('xpack.elasticAssistant.capabilities.statusError', {
+            defaultMessage: 'Error fetching capabilities',
+          }),
+        });
+      }
+    },
+  });
 };
