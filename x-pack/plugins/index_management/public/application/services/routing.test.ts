@@ -11,24 +11,19 @@ describe('routing', () => {
   describe('index details link', () => {
     it('adds the index name to the url', () => {
       const indexName = 'testIndex';
-      const url = getIndexDetailsLink(indexName, { filter: '', includeHiddenIndices: false });
+      const url = getIndexDetailsLink(indexName, '');
       expect(url).toContain(`indexName=${indexName}`);
     });
 
     it('adds the indices table parameters to the url', () => {
       const filter = 'isFollower:true';
-      const url = getIndexDetailsLink('testIndex', { filter, includeHiddenIndices: true });
-      expect(url).toContain(`filter=${encodeURIComponent(filter)}`);
-      expect(url).toContain('includeHiddenIndices=true');
+      const url = getIndexDetailsLink('testIndex', `?filter=${encodeURIComponent(filter)}`);
+      expect(url).toContain(`&filter=${encodeURIComponent(filter)}`);
     });
 
     it('adds an optional index details tab to the url', () => {
       const tab = 'dynamic-tab';
-      const url = getIndexDetailsLink(
-        'testIndex',
-        { filter: '', includeHiddenIndices: false },
-        tab
-      );
+      const url = getIndexDetailsLink('testIndex', '', tab);
       expect(url).toContain(`tab=${tab}`);
     });
   });

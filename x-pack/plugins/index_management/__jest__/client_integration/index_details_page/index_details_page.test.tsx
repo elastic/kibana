@@ -672,7 +672,7 @@ describe('<IndexDetailsPage />', () => {
       await testBed.actions.clickBackToIndicesButton();
       expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
       expect(testBed.routerMock.history.push).toHaveBeenCalledWith(
-        `/indices?includeHiddenIndices=true&filter=${encodeURIComponent(filter)}`
+        `/indices?filter=${encodeURIComponent(filter)}&includeHiddenIndices=true`
       );
     });
   });

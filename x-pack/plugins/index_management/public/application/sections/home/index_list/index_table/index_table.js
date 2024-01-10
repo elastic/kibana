@@ -50,6 +50,8 @@ import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { CreateIndexButton } from '../create_index/create_index_button';
 
+const PAGE_SIZE_OPTIONS = [10, 50, 100];
+
 const getHeaders = ({ showIndexStats }) => {
   const headers = {};
 
@@ -127,16 +129,28 @@ export class IndexTable extends Component {
         ),
       REFRESH_RATE_INDEX_LIST
     );
-    const { location, filterChanged } = this.props;
-    const { filter } = qs.parse((location && location.search) || '');
+    const { filterChanged, pageSizeChanged, pageChanged, toggleNameToVisibleMap, toggleChanged } =
+      this.props;
+    const { filter, pageSize, pageIndex, ...rest } = this.readURLParams();
     if (filter) {
-      const decodedFilter = attemptToURIDecode(filter);
-
       try {
-        const filter = EuiSearchBar.Query.parse(decodedFilter);
-        filterChanged(filter);
+        const parsedFilter = EuiSearchBar.Query.parse(filter);
+        filterChanged(parsedFilter);
       } catch (e) {
         this.setState({ filterError: e });
+      }
+    }
+    if (pageSize && PAGE_SIZE_OPTIONS.includes(pageSize)) {
+      pageSizeChanged(pageSize);
+    }
+    if (pageIndex && pageIndex > -1) {
+      pageChanged(pageIndex);
+    }
+    const toggleParams = Object.keys(rest);
+    const toggles = Object.keys(toggleNameToVisibleMap);
+    for (const toggleParam of toggleParams) {
+      if (toggles.includes(toggleParam)) {
+        toggleChanged(toggleParam, rest[toggleParam] === 'true');
       }
     }
   }
@@ -152,21 +166,25 @@ export class IndexTable extends Component {
 
   readURLParams() {
     const { location } = this.props;
-    const { includeHiddenIndices } = qs.parse((location && location.search) || '');
+    const { filter, pageSize, pageIndex, ...rest } = qs.parse((location && location.search) || '');
     return {
-      includeHiddenIndices: includeHiddenIndices === 'true',
+      filter: filter ? attemptToURIDecode(String(filter)) : undefined,
+      pageSize: pageSize ? Number(String(pageSize)) : undefined,
+      pageIndex: pageIndex ? Number(String(pageIndex)) : undefined,
+      ...rest,
     };
   }
 
-  setIncludeHiddenParam(hidden) {
-    const { pathname, search } = this.props.location;
+  setURLParam(paramName, value) {
+    const { location, history } = this.props;
+    const { pathname, search } = location;
     const params = qs.parse(search);
-    if (hidden) {
-      params.includeHiddenIndices = 'true';
+    if (value) {
+      params[paramName] = value;
     } else {
-      delete params.includeHiddenIndices;
+      delete params[paramName];
     }
-    this.props.history.push(pathname + '?' + qs.stringify(params));
+    history.push(pathname + '?' + qs.stringify(params));
   }
 
   onSort = (column) => {
@@ -206,10 +224,7 @@ export class IndexTable extends Component {
     if (error) {
       this.setState({ filterError: error });
     } else {
-      const { pathname, search } = this.props.location;
-      const params = qs.parse(search);
-      params.filter = query.text;
-      this.props.history.push(pathname + '?' + qs.stringify(params));
+      this.setURLParam('filter', encodeURIComponent(query.text));
       this.props.filterChanged(query);
       this.setState({ filterError: null });
     }
@@ -286,8 +301,7 @@ export class IndexTable extends Component {
   }
 
   buildRowCell(fieldName, value, index, appServices) {
-    const { filterChanged, history, filter } = this.props;
-    const { includeHiddenIndices } = this.readURLParams();
+    const { filterChanged, history, location } = this.props;
 
     if (fieldName === 'health') {
       return <DataHealth health={value} />;
@@ -296,11 +310,7 @@ export class IndexTable extends Component {
         <Fragment>
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
-            onClick={() =>
-              history.push(
-                getIndexDetailsLink(value, { filter: filter.text, includeHiddenIndices })
-              )
-            }
+            onClick={() => history.push(getIndexDetailsLink(value, location.search || ''))}
           >
             {value}
           </EuiLink>
@@ -425,10 +435,16 @@ export class IndexTable extends Component {
       <EuiTablePagination
         activePage={pager.getCurrentPageIndex()}
         itemsPerPage={pager.itemsPerPage}
-        itemsPerPageOptions={[10, 50, 100]}
+        itemsPerPageOptions={PAGE_SIZE_OPTIONS}
         pageCount={pager.getTotalPages()}
-        onChangeItemsPerPage={pageSizeChanged}
-        onChangePage={pageChanged}
+        onChangeItemsPerPage={(pageSize) => {
+          this.setURLParam('pageSize', pageSize);
+          pageSizeChanged(pageSize);
+        }}
+        onChangePage={(pageIndex) => {
+          this.setURLParam('pageIndex', pageIndex);
+          pageChanged(pageIndex);
+        }}
       />
     );
   }
@@ -445,7 +461,10 @@ export class IndexTable extends Component {
           id={`checkboxToggles-${name}`}
           data-test-subj={`checkboxToggles-${name}`}
           checked={toggleNameToVisibleMap[name]}
-          onChange={(event) => toggleChanged(name, event.target.checked)}
+          onChange={(event) => {
+            this.setURLParam(name, event.target.checked);
+            toggleChanged(name, event.target.checked);
+          }}
           label={label}
         />
       </EuiFlexItem>
@@ -453,10 +472,17 @@ export class IndexTable extends Component {
   }
 
   render() {
-    const { filter, indices, loadIndices, indicesLoading, indicesError, allIndices, pager } =
-      this.props;
+    const {
+      filter,
+      indices,
+      loadIndices,
+      indicesLoading,
+      indicesError,
+      allIndices,
+      pager,
+      location,
+    } = this.props;
 
-    const { includeHiddenIndices } = this.readURLParams();
     const hasContent = !indicesLoading && !indicesError;
 
     if (!hasContent) {
@@ -541,21 +567,6 @@ export class IndexTable extends Component {
                       {extensionsService.toggles.map((toggle) => {
                         return this.renderToggleControl(toggle);
                       })}
-
-                      <EuiFlexItem grow={false}>
-                        <EuiSwitch
-                          id="checkboxShowHiddenIndices"
-                          data-test-subj="indexTableIncludeHiddenIndicesToggle"
-                          checked={includeHiddenIndices}
-                          onChange={(event) => this.setIncludeHiddenParam(event.target.checked)}
-                          label={
-                            <FormattedMessage
-                              id="xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel"
-                              defaultMessage="Include hidden indices"
-                            />
-                          }
-                        />
-                      </EuiFlexItem>
                     </EuiFlexGroup>
                   )}
                 </EuiFlexItem>
@@ -574,10 +585,7 @@ export class IndexTable extends Component {
                         <IndexActionsContextMenu
                           indexNames={Object.keys(selectedIndicesMap)}
                           isOnListView={true}
-                          indicesListParams={{
-                            filter: filter.text,
-                            includeHiddenIndices,
-                          }}
+                          indicesListURLParams={location.search || ''}
                           resetSelection={() => {
                             this.setState({ selectedIndicesMap: {} });
                           }}

@@ -68,7 +68,7 @@ export class IndexActionsContextMenu extends Component {
       indices,
       reloadIndices,
       unfreezeIndices,
-      indicesListParams,
+      indicesListURLParams,
     } = this.props;
     const allOpen = every(indexNames, (indexName) => {
       return indexStatusByName[indexName] === INDEX_OPEN;
@@ -84,7 +84,7 @@ export class IndexActionsContextMenu extends Component {
         }),
         onClick: () => {
           history.push(
-            getIndexDetailsLink(indexNames[0], indicesListParams, IndexDetailsSection.Overview)
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Overview)
           );
         },
       });
@@ -95,7 +95,7 @@ export class IndexActionsContextMenu extends Component {
         }),
         onClick: () => {
           history.push(
-            getIndexDetailsLink(indexNames[0], indicesListParams, IndexDetailsSection.Settings)
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Settings)
           );
         },
       });
@@ -106,7 +106,7 @@ export class IndexActionsContextMenu extends Component {
         }),
         onClick: () => {
           history.push(
-            getIndexDetailsLink(indexNames[0], indicesListParams, IndexDetailsSection.Mappings)
+            getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Mappings)
           );
         },
       });
@@ -118,7 +118,7 @@ export class IndexActionsContextMenu extends Component {
           }),
           onClick: () => {
             history.push(
-              getIndexDetailsLink(indexNames[0], indicesListParams, IndexDetailsSection.Stats)
+              getIndexDetailsLink(indexNames[0], indicesListURLParams, IndexDetailsSection.Stats)
             );
           },
         });

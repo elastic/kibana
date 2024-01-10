@@ -25,8 +25,9 @@ import {
   IndexDetailsSection,
   IndexDetailsTab,
   IndexDetailsTabId,
+  Section,
 } from '../../../../../../common/constants';
-import { getIndexDetailsLink, getIndexListUri } from '../../../../services/routing';
+import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { ManageIndexButton } from './manage_index_button';
@@ -110,22 +111,20 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     return sortedTabs;
   }, [enableIndexStats, extensionsService.indexDetailsTabs, index]);
 
-  const { filter: filterParam, includeHiddenIndices: includeHiddenParam } = qs.parse(search);
-  const filter = String(filterParam);
-  const includeHiddenIndices = Boolean(includeHiddenParam);
-
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
-      return history.push(
-        getIndexDetailsLink(index.name, { filter, includeHiddenIndices }, newSection)
-      );
+      return history.push(getIndexDetailsLink(index.name, search, newSection));
     },
-    [history, index.name, filter, includeHiddenIndices]
+    [history, index.name, search]
   );
 
   const navigateToAllIndices = useCallback(() => {
-    history.push(getIndexListUri(filter, includeHiddenIndices));
-  }, [history, filter, includeHiddenIndices]);
+    const indicesListParams = qs.parse(search);
+    delete indicesListParams.indexName;
+    delete indicesListParams.tab;
+    const paramsString = qs.stringify(indicesListParams);
+    history.push(`/${Section.Indices}${paramsString ? '?' : ''}${paramsString}`);
+  }, [history, search]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     return tabs.map((tabConfig) => ({

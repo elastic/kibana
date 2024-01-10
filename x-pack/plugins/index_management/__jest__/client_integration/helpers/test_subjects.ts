@@ -30,7 +30,7 @@ export type TestSubjects =
   | 'indexContextMenu'
   | 'indexManagementHeaderContent'
   | 'indexTable'
-  | 'indexTableIncludeHiddenIndicesToggle'
+  | 'checkboxToggles-includeHiddenIndices'
   | 'indexTableIndexNameLink'
   | 'indicesList'
   | 'indicesTab'

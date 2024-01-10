@@ -57,16 +57,12 @@ export const getDataStreamDetailsLink = (name: string) => {
 
 export const getIndexDetailsLink = (
   indexName: string,
-  indicesListParams: { filter: string; includeHiddenIndices: boolean },
+  indicesListURLParams: string,
   tab?: IndexDetailsTabId
 ) => {
   let link = `/${Section.Indices}/index_details?indexName=${encodeURIComponent(indexName)}`;
-  const { filter, includeHiddenIndices } = indicesListParams;
-  if (filter) {
-    link = `${link}&filter=${encodeURIComponent(filter)}`;
-  }
-  if (includeHiddenIndices) {
-    link = `${link}&includeHiddenIndices=${includeHiddenIndices}`;
+  if (indicesListURLParams) {
+    link = `${link}&${indicesListURLParams.replace('?', '')}`;
   }
   if (tab) {
     link = `${link}&tab=${tab}`;
