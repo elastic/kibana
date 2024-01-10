@@ -9,6 +9,9 @@ import type { ReactNode } from 'react-markdown';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
+/**
+ * RemoteConsoleProps are optional props used when rendering the remote developer console.
+ */
 export interface RemoteConsoleProps {
   /**
    * Set element displayed at the right of the remote console header.

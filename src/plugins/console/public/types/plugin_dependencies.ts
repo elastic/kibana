@@ -28,10 +28,23 @@ export interface AppStartUIPluginDependencies {
   usageCollection?: UsageCollectionStart;
 }
 
+/**
+ * Console plugin's setup service object
+ */
 export interface ConsolePluginSetup {
+  /**
+   * Public locator for the console UI
+   */
   locator?: LocatorPublic<ConsoleUILocatorParams>;
 }
 
+/**
+ * Console plugin's start service object
+ */
 export interface ConsolePluginStart {
+  /**
+   * renderRemoteConsole is available if the console UI is enabled. This function can be called to
+   * render a remote version of the developer console on the page.
+   */
   renderRemoteConsole?: (props?: RemoteConsoleProps) => ReactElement | null;
 }
