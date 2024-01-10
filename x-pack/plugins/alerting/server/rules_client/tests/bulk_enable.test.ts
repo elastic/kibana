@@ -537,26 +537,28 @@ describe('bulkEnableRules', () => {
 
       const result = await rulesClient.bulkEnableRules({ ids: ['id1', 'id2'] });
 
-      expect(taskManager.schedule).toHaveBeenCalledTimes(1);
-      expect(taskManager.schedule).toHaveBeenCalledWith({
-        id: 'id1',
-        taskType: `alerting:fakeType`,
-        params: {
-          alertId: 'id1',
-          spaceId: 'default',
-          consumer: 'fakeConsumer',
+      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'id1',
+          taskType: `alerting:fakeType`,
+          params: {
+            alertId: 'id1',
+            spaceId: 'default',
+            consumer: 'fakeConsumer',
+          },
+          schedule: {
+            interval: '5m',
+          },
+          enabled: false,
+          state: {
+            alertInstances: {},
+            alertTypeState: {},
+            previousStartedAt: null,
+          },
+          scope: ['alerting'],
         },
-        schedule: {
-          interval: '5m',
-        },
-        enabled: true,
-        state: {
-          alertInstances: {},
-          alertTypeState: {},
-          previousStartedAt: null,
-        },
-        scope: ['alerting'],
-      });
+      ]);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -620,26 +622,28 @@ describe('bulkEnableRules', () => {
       });
       const result = await rulesClient.bulkEnableRules({ ids: ['id1', 'id2'] });
 
-      expect(taskManager.schedule).toHaveBeenCalledTimes(1);
-      expect(taskManager.schedule).toHaveBeenCalledWith({
-        id: 'id1',
-        taskType: `alerting:fakeType`,
-        params: {
-          alertId: 'id1',
-          spaceId: 'default',
-          consumer: 'fakeConsumer',
+      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'id1',
+          taskType: `alerting:fakeType`,
+          params: {
+            alertId: 'id1',
+            spaceId: 'default',
+            consumer: 'fakeConsumer',
+          },
+          schedule: {
+            interval: '5m',
+          },
+          enabled: false,
+          state: {
+            alertInstances: {},
+            alertTypeState: {},
+            previousStartedAt: null,
+          },
+          scope: ['alerting'],
         },
-        schedule: {
-          interval: '5m',
-        },
-        enabled: true,
-        state: {
-          alertInstances: {},
-          alertTypeState: {},
-          previousStartedAt: null,
-        },
-        scope: ['alerting'],
-      });
+      ]);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -706,26 +710,28 @@ describe('bulkEnableRules', () => {
 
       expect(taskManager.removeIfExists).toHaveBeenCalledTimes(1);
       expect(taskManager.removeIfExists).toHaveBeenCalledWith('id1');
-      expect(taskManager.schedule).toHaveBeenCalledTimes(1);
-      expect(taskManager.schedule).toHaveBeenCalledWith({
-        id: 'id1',
-        taskType: `alerting:fakeType`,
-        params: {
-          alertId: 'id1',
-          spaceId: 'default',
-          consumer: 'fakeConsumer',
+      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'id1',
+          taskType: `alerting:fakeType`,
+          params: {
+            alertId: 'id1',
+            spaceId: 'default',
+            consumer: 'fakeConsumer',
+          },
+          schedule: {
+            interval: '5m',
+          },
+          enabled: false,
+          state: {
+            alertInstances: {},
+            alertTypeState: {},
+            previousStartedAt: null,
+          },
+          scope: ['alerting'],
         },
-        schedule: {
-          interval: '5m',
-        },
-        enabled: true,
-        state: {
-          alertInstances: {},
-          alertTypeState: {},
-          previousStartedAt: null,
-        },
-        scope: ['alerting'],
-      });
+      ]);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
