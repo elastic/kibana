@@ -64,7 +64,11 @@ export const executeAction = async ({
   // for await (const chunk of readable) {
   //   console.log('chunk', chunk);
   // }
-  return readable;
+
+  console.log('before toReadableStream');
+  const rs = readable.toReadableStream();
+  console.log('after toReadableStream', rs);
+  return Readable.from(rs).pipe(new PassThrough());
   // const transformStream = readable.toReadableStream();
   //   new ReadableStream({
   //   async start(controller) {

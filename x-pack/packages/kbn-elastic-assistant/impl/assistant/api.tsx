@@ -9,7 +9,6 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 
-import { ChatCompletionStream } from 'openai/lib/ChatCompletionStream';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
@@ -136,17 +135,18 @@ export const fetchConnectorExecuteAction = async ({
         };
       }
       console.log('before runner');
-      const runner = ChatCompletionStream.fromReadableStream(streamResponse);
-
-      console.log('after runner', runner);
-      runner.on('content', (delta, snapshot) => {
-        console.log('inside runner');
-        process.stdout.write(delta);
-        console.log('delta', delta);
-        // or, in a browser, you might display like this:
-        // document.body.innerText += delta; // or:
-        // document.body.innerText = snapshot;
-      });
+      // const runner = ChatCompletionStreamingRunner.fromReadableStream(streamResponse);
+      //
+      // console.log('after runner', runner);
+      // runner.on('content', (delta, snapshot) => {
+      //   console.log('deltarunner', delta);
+      //   // process.stdout.write(delta);
+      //   // or, in a browser, you might display like this:
+      //   // document.body.innerText += delta; // or:
+      //   // document.body.innerText = snapshot;
+      // });
+      // const here = await runner.finalChatCompletion();
+      // console.log('after finalChatCompletion', here);
 
       const reader = response?.response?.body?.getReader();
       console.log('reader??', reader);
@@ -223,6 +223,7 @@ export const fetchConnectorExecuteAction = async ({
       traceData,
     };
   } catch (error) {
+    console.log('ERROR', error);
     const getReader = error?.response?.body?.getReader;
     const reader =
       isStream && typeof getReader === 'function' ? getReader.call(error.response.body) : null;
