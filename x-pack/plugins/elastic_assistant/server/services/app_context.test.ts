@@ -160,5 +160,19 @@ describe('AppContextService', () => {
         expect.objectContaining(assistantFeatures)
       );
     });
+
+    it('allows registering a subset of all available features', () => {
+      const pluginName = 'pluginName';
+      const featuresSubset: Partial<AssistantFeatures> = {
+        assistantModelEvaluation: true,
+      };
+
+      appContextService.start(mockAppContext);
+      appContextService.registerFeatures(pluginName, featuresSubset);
+
+      expect(appContextService.getRegisteredFeatures(pluginName)).toEqual(
+        expect.objectContaining({ ...assistantFeatures, ...featuresSubset })
+      );
+    });
   });
 });

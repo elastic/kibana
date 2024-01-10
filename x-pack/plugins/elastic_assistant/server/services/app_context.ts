@@ -76,7 +76,7 @@ class AppContextService {
    * @param pluginName
    * @param features
    */
-  public registerFeatures(pluginName: string, features: AssistantFeatures) {
+  public registerFeatures(pluginName: string, features: Partial<AssistantFeatures>) {
     this.logger?.debug('AppContextService:registerFeatures');
     this.logger?.debug(`pluginName: ${pluginName}`);
     this.logger?.debug(

@@ -33,6 +33,9 @@ export interface ElasticAssistantPluginSetup {
 
 /** The plugin start interface */
 export interface ElasticAssistantPluginStart {
+  /**
+   * Actions plugin start contract.
+   */
   actions: ActionsPluginStart;
   /**
    * Register features to be used by the elastic assistant.
@@ -41,11 +44,11 @@ export interface ElasticAssistantPluginStart {
    * and the correct features are available. See {@link getPluginNameFromRequest} for more details.
    *
    * @param pluginName Name of the plugin the features should be registered to
-   * @param features AssistantFeatures to be registered with for the given plugin
+   * @param features Partial<AssistantFeatures> to be registered with for the given plugin
    */
-  registerFeatures: (pluginName: string, features: AssistantFeatures) => void;
+  registerFeatures: (pluginName: string, features: Partial<AssistantFeatures>) => void;
   /**
-   * Get the registered features
+   * Get the registered features for a given plugin name.
    * @param pluginName Name of the plugin to get the features for
    */
   getRegisteredFeatures: GetRegisteredFeatures;
@@ -60,7 +63,7 @@ export interface ElasticAssistantPluginStart {
    */
   registerTools: (pluginName: string, tools: AssistantTool[]) => void;
   /**
-   * Get the registered tools
+   * Get the registered tools for a given plugin name.
    * @param pluginName Name of the plugin to get the tools for
    */
   getRegisteredTools: GetRegisteredTools;

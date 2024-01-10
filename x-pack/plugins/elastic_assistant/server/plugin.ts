@@ -137,52 +137,24 @@ export class ElasticAssistantPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: ElasticAssistantPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    plugins: ElasticAssistantPluginStartDependencies
+  ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
 
     return {
-      /**
-       * Actions plugin start contract
-       */
       actions: plugins.actions,
-
-      /**
-       * Get the registered features for a given plugin name.
-       * @param pluginName
-       */
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
-
-      /**
-       * Register features to be used by the Elastic Assistant for a given plugin. Use the plugin name that
-       * corresponds to your application as defined in the `x-kbn-context` header of requests made from your
-       * application.
-       *
-       * @param pluginName
-       * @param features
-       */
-      registerFeatures: (pluginName: string, features: AssistantFeatures) => {
-        return appContextService.registerFeatures(pluginName, features);
-      },
-
-      /**
-       * Get the registered tools for a given plugin name.
-       * @param pluginName
-       */
       getRegisteredTools: (pluginName: string) => {
         return appContextService.getRegisteredTools(pluginName);
       },
-
-      /**
-       * Register tools to be used by the Elastic Assistant for a given plugin. Use the plugin name that
-       * corresponds to your application as defined in the `x-kbn-context` header of requests made from your
-       * application.
-       *
-       * @param pluginName
-       * @param tools
-       */
+      registerFeatures: (pluginName: string, features: Partial<AssistantFeatures>) => {
+        return appContextService.registerFeatures(pluginName, features);
+      },
       registerTools: (pluginName: string, tools: AssistantTool[]) => {
         return appContextService.registerTools(pluginName, tools);
       },
