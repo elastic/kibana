@@ -20,7 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { i18n } from '@kbn/i18n';
+
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -33,7 +33,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
-import { useRiskContributingAlerts } from '../../hooks/use_risk_contributing_alerts';
+
 import {
   buildColumns,
   getEntityData,
@@ -48,7 +48,6 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   queryId: string;
   openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
 }
-const ALERTS_FIELDS: string[] = [];
 
 const RiskSummaryComponent = <T extends RiskScoreEntity>({
   riskScoreData,
@@ -60,10 +59,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData(riskData);
   const { euiTheme } = useEuiTheme();
-  const { data: alertsData } = useRiskContributingAlerts({
-    riskScore: riskData,
-    fields: ALERTS_FIELDS,
-  });
+
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = isUserRiskData(riskData) ? 'user.name' : 'host.name';
@@ -78,17 +74,6 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const items: TableItem[] = useMemo(
-    () => [
-      {
-        category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
-          defaultMessage: 'Alerts',
-        }),
-        count: alertsData?.length ?? 0,
-      },
-    ],
-    [alertsData?.length]
-  );
   const columns = useMemo(buildColumns, []);
   const rows = useMemo(() => getItems(entityData), [entityData]);
 
