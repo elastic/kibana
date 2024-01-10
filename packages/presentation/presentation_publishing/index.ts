@@ -93,8 +93,8 @@ export {
   type PublishesWritableViewMode,
   type ViewMode,
 } from './interfaces/publishes_view_mode';
-export { useBatchedPublishingSubjects } from './publishing_batcher';
 export {
+  useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
   usePublishingSubject,
   type PublishingSubject,
