@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.11.4>>
 * <<release-notes-8.11.3>>
 * <<release-notes-8.11.2>>
 * <<release-notes-8.11.1>>
@@ -56,6 +57,15 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.11.4]]
+== {kib} 8.11.4
+
+[float]
+[[fixes-v8.11.4]]
+=== Bug fixes and enhancements
+There are no user-facing changes in the 8.11.4 release.
+
 [[release-notes-8.11.3]]
 == {kib} 8.11.3
 
