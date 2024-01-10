@@ -77,7 +77,7 @@ export const SECURITY_INCIDENT = i18n.translate(
 export const SHORT_DESCRIPTION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.titleFieldLabel',
   {
-    defaultMessage: 'Short description',
+    defaultMessage: 'Short description (required)',
   }
 );
 
@@ -209,14 +209,14 @@ export const UNKNOWN = i18n.translate('xpack.stackConnectors.components.serviceN
 export const CORRELATION_ID = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.correlationID',
   {
-    defaultMessage: 'Correlation ID',
+    defaultMessage: 'Correlation ID (optional)',
   }
 );
 
 export const CORRELATION_DISPLAY = i18n.translate(
   'xpack.stackConnectors.components.serviceNow.correlationDisplay',
   {
-    defaultMessage: 'Correlation display',
+    defaultMessage: 'Correlation display (optional)',
   }
 );
 
