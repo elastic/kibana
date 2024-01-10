@@ -44,7 +44,7 @@ export const DataDriftPromptHint = ({
             size="m"
             onClick={refresh}
             iconType="visTagCloud"
-            data-test-subj="analyzeDataDriftWithoutSavingButton"
+            data-test-subj="runDataDriftAnalysis"
             aria-label={ANALYZE_DATA_DRIFT_LABEL}
           >
             {ANALYZE_DATA_DRIFT_LABEL}

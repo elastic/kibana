@@ -43,6 +43,7 @@ interface DataDriftViewProps {
   lastRefresh: number;
   onRefresh: () => void;
   initialSettings: InitialSettings;
+  hasValidTimeField: boolean;
 }
 // Data drift view
 export const DataDriftView = ({
@@ -55,6 +56,7 @@ export const DataDriftView = ({
   lastRefresh,
   onRefresh,
   initialSettings,
+  hasValidTimeField,
 }: DataDriftViewProps) => {
   const [showDataComparisonOnly, setShowDataComparisonOnly] = useState(false);
 
@@ -63,13 +65,16 @@ export const DataDriftView = ({
   >(windowParameters);
 
   const canAnalyzeDataDrift = useMemo(() => {
-    return isPopulatedObject(windowParameters, [
-      'baselineMin',
-      'baselineMax',
-      'deviationMin',
-      'deviationMax',
-    ]);
-  }, [windowParameters]);
+    return (
+      !hasValidTimeField ||
+      isPopulatedObject(windowParameters, [
+        'baselineMin',
+        'baselineMax',
+        'deviationMin',
+        'deviationMax',
+      ])
+    );
+  }, [windowParameters, hasValidTimeField]);
 
   const [fetchInfo, setFetchIno] = useState<
     | {

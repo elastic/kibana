@@ -209,7 +209,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
           const xMax = x(maxRef.current) ?? 0;
           const minExtentPx = Math.round((xMax - xMin) / 100);
 
-          const baselineBrush = d3.select(`#data-drift-${brushId}-baseline`);
+          const baselineBrush = d3.select(`#data-drift-${brushId}`);
           const baselineSelection = d3.brushSelection(baselineBrush.node() as SVGGElement);
 
           if (!isBrushXSelection(baselineSelection)) {
@@ -221,7 +221,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
             max: px2ts(baselineSelection[1]),
           };
 
-          if (id === `${brushId}-baseline` && baselineSelection) {
+          if (id === `${brushId}` && baselineSelection) {
             const newBaselineMax = baselineSelection[1];
             const newBaselineMin = Math.min(baselineSelection[0], newBaselineMax - minExtentPx);
             newWindowParameters.min = px2ts(newBaselineMin);
@@ -238,7 +238,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
           };
 
           if (
-            id === `${brushId}-baseline` &&
+            id === `${brushId}` &&
             (baselineSelection[0] !== newBrushPx.min || baselineSelection[1] !== newBrushPx.max)
           ) {
             d3.select(this)
@@ -278,7 +278,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
             return 'data-drift-' + b.id;
           })
           .attr('data-test-subj', (b: SingleBrush) => {
-            return 'dataDriftBrush' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
+            return 'dataDriftBrush-' + b.id.charAt(0).toUpperCase() + b.id.slice(1);
           })
           .each((brushObject: SingleBrush, i, n) => {
             const x = d3.scaleLinear().domain([min, max]).rangeRound([0, widthRef.current]);
@@ -312,7 +312,7 @@ export const SingleBrush: FC<SingleBrushProps> = (props) => {
 
       if (brushes.current.length !== 1) {
         widthRef.current = width;
-        newBrush(`${brushId}-baseline`, baselineMin, baselineMax);
+        newBrush(`${brushId}`, baselineMin, baselineMax);
       }
 
       drawBrushes();

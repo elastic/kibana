@@ -385,7 +385,7 @@ export const DocumentCountChartWithBrush: FC<DocumentCountChartProps> = (props) 
   return (
     <>
       {isBrushVisible ? (
-        <div className="dataDriftSingleBrush" data-test-subj={'dataDriftSingleBrush'}>
+        <div className="dataDriftSingleBrush" data-test-subj={`dataDriftSingleBrush-${id}`}>
           <div
             css={{
               'margin-bottom': '-4px',

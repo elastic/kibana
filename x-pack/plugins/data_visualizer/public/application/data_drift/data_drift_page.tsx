@@ -91,8 +91,8 @@ export const PageHeader: FC = () => {
   );
 
   const hasValidTimeField = useMemo(
-    () => dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
-    [dataView.timeFieldName]
+    () => dataView && dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
+    [dataView]
   );
 
   return (
@@ -341,6 +341,10 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify({ brushRanges, colors })]
   );
+  const hasValidTimeField = useMemo(
+    () => dataView && dataView.timeFieldName !== undefined && dataView.timeFieldName !== '',
+    [dataView]
+  );
 
   const referenceIndexPatternLabel = initialSettings?.reference
     ? getDataDriftDataLabel(REFERENCE_LABEL, initialSettings.reference)
@@ -434,6 +438,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
                 searchQueryLanguage={searchQueryLanguage}
                 lastRefresh={lastRefresh}
                 onRefresh={forceRefresh}
+                hasValidTimeField={hasValidTimeField}
               />
             </EuiPanel>
           </EuiFlexItem>
