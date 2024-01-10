@@ -30,6 +30,8 @@ import type {
   AggregationsTermsExclude,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { isResponseError } from '@kbn/es-errors';
+
 import { UninstallTokenError } from '../../../../common/errors';
 
 import type { GetUninstallTokensMetadataResponse } from '../../../../common/types/rest_spec/uninstall_token';
@@ -202,13 +204,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private async getDecryptedTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
-    /** If `uninstallTokenVerificationBatchSize` is too large, we get an error of `too_many_nested_clauses`.
-     *  Assuming that `max_clause_count` >= 1024, and experiencing that batch size should be less than half
-     *  than `max_clause_count` with our current query, batch size below 512 should be okay on every env.
-     */
-    const config = appContextService.getConfig();
-    const batchSize = config?.setup?.uninstallTokenVerificationBatchSize ?? 500;
-
     const tokenObjectHits = await this.getTokenObjectsByIncludeFilter(policyIds);
 
     if (tokenObjectHits.length === 0) {
@@ -220,7 +215,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     );
 
     const uninstallTokenChunks: UninstallToken[][] = await asyncMap(
-      chunk(filterEntries, batchSize),
+      chunk(filterEntries, this.getUninstallTokenVerificationBatchSize()),
       (entries) => {
         const filter = entries.join(' or ');
         return this.getDecryptedTokens({ filter });
@@ -229,6 +224,16 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     return uninstallTokenChunks.flat();
   }
+
+  private getUninstallTokenVerificationBatchSize = () => {
+    /** If `uninstallTokenVerificationBatchSize` is too large, we get an error of `too_many_nested_clauses`.
+     *  Assuming that `max_clause_count` >= 1024, and experiencing that batch size should be less than half
+     *  than `max_clause_count` with our current query, batch size below 512 should be okay on every env.
+     */
+    const config = appContextService.getConfig();
+
+    return config?.setup?.uninstallTokenVerificationBatchSize ?? 500;
+  };
 
   private getDecryptedTokens = async (
     options: Partial<SavedObjectsCreatePointInTimeFinderOptions>
@@ -536,6 +541,16 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       if (error instanceof UninstallTokenError) {
         // known errors are considered non-fatal
         return { error };
+      } else if (isResponseError(error) && error.message.includes('too_many_nested_clauses')) {
+        // `too_many_nested_clauses` is considered non-fatal
+        const errorMessage =
+          'Failed to validate uninstall tokens: `too_many_nested_clauses` error received. ' +
+          'Setting/decreasing the value of `xpack.fleet.setup.uninstallTokenVerificationBatchSize` in your kibana.yml should help. ' +
+          `Current value is ${this.getUninstallTokenVerificationBatchSize()}.`;
+
+        appContextService.getLogger().warn(`${errorMessage}: '${error}'`);
+
+        return { error: new UninstallTokenError(errorMessage) };
       } else {
         const errorMessage = 'Unknown error happened while checking Uninstall Tokens validity';
         appContextService.getLogger().error(`${errorMessage}: '${error}'`);
