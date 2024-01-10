@@ -40,6 +40,7 @@ storiesOf('Components/HostPanelContent', module)
       scopeId={'test-scopeId'}
       isDraggable={false}
       openDetailsPanel={() => {}}
+      hostName={'test-host-name'}
     />
   ))
   .add('no observed data', () => (
@@ -62,6 +63,7 @@ storiesOf('Components/HostPanelContent', module)
       scopeId={'test-scopeId'}
       isDraggable={false}
       openDetailsPanel={() => {}}
+      hostName={'test-host-name'}
     />
   ))
   .add('loading', () => (
@@ -84,5 +86,6 @@ storiesOf('Components/HostPanelContent', module)
       scopeId={'test-scopeId'}
       isDraggable={false}
       openDetailsPanel={() => {}}
+      hostName={'test-host-name'}
     />
   ));

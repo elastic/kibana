@@ -6,7 +6,7 @@
  */
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
-
+import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiButton,
@@ -22,7 +22,9 @@ import {
   EuiModalHeaderTitle,
   EuiSuperSelect,
   EuiText,
+  EuiTitle,
   EuiHorizontalRule,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import React, { useState } from 'react';
@@ -41,6 +43,7 @@ interface Props {
 export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
   const modal = useCriticalityModal();
   const criticality = useAssetCriticalityData(entity, modal);
+  const { euiTheme } = useEuiTheme();
 
   if (criticality.privileges.isLoading || !criticality.privileges.data?.has_all_required) {
     return null;
@@ -48,15 +51,23 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
 
   return (
     <>
-      <EuiHorizontalRule />
       <EuiAccordion
         id="asset-criticality-selector"
         buttonContent={
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
-            defaultMessage="Asset Criticality"
-          />
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTitle"
+                defaultMessage="Asset Criticality"
+              />
+            </h3>
+          </EuiTitle>
         }
+        buttonProps={{
+          css: css`
+            color: ${euiTheme.colors.primary};
+          `,
+        }}
         data-test-subj="asset-criticality-selector"
       >
         {criticality.query.isLoading || criticality.mutation.isLoading ? (

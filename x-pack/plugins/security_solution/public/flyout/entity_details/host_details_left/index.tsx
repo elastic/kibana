@@ -7,21 +7,17 @@
 
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 import {
   EntityDetailsLeftPanelTab,
   LeftPanelHeader,
 } from '../shared/components/left_panel/left_panel_header';
-
-interface RiskInputsParam {
-  alertIds: string[];
-  criticalityLevel?: CriticalityLevel;
-}
+import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
-  riskInputs: RiskInputsParam;
+  isRiskScoreExist: boolean;
+  name: string;
 }
 export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'host_details';
@@ -29,15 +25,18 @@ export interface HostDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const HostDetailsPanelKey: HostDetailsExpandableFlyoutProps['key'] = 'host_details';
 
-export const HostDetailsPanel = ({ riskInputs }: HostDetailsPanelProps) => {
+export const HostDetailsPanel = ({ name, isRiskScoreExist }: HostDetailsPanelProps) => {
   // Temporary implementation while Host details left panel don't have Asset tabs
   const [tabs, selectedTabId, setSelectedTabId] = useMemo(() => {
+    const isRiskScoreTabAvailable = isRiskScoreExist && name;
     return [
-      riskInputs.alertIds.length > 0 ? [getRiskInputTab(riskInputs)] : [],
+      isRiskScoreTabAvailable
+        ? [getRiskInputTab({ entityName: name, entityType: RiskScoreEntity.host })]
+        : [],
       EntityDetailsLeftPanelTab.RISK_INPUTS,
       () => {},
     ];
-  }, [riskInputs]);
+  }, [name, isRiskScoreExist]);
 
   return (
     <>

@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_criteria';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -16,7 +17,6 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelContent } from './content';
 import { HostPanelHeader } from './header';
@@ -48,6 +48,7 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPanelProps) => {
+  const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutContext();
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
@@ -64,6 +65,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
 
   const { data: hostRisk, inspect: inspectRiskScore, refetch, loading } = riskScoreState;
   const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+  const isRiskScoreExist = !!hostRiskData?.host.risk;
 
   useQueryInspector({
     deleteQuery,
@@ -76,29 +78,24 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
 
   const openTabPanel = useCallback(
     (tab?: EntityDetailsLeftPanelTab) => {
+      telemetry.reportRiskInputsExpandedFlyoutOpened({
+        entity: 'host',
+      });
+
       openLeftPanel({
         id: HostDetailsPanelKey,
         params: {
-          riskInputs: {
-            alertIds: hostRiskData?.host.risk.inputs?.map(({ id }) => id) ?? [],
-            host: {
-              name: hostName,
-            },
-            criticalityLevel: hostRiskData?.host.risk.criticality_level,
-          },
+          name: hostName,
+          isRiskScoreExist,
           path: tab ? { tab } : undefined,
         },
       });
     },
-    [hostRiskData, openLeftPanel, hostName]
+    [telemetry, openLeftPanel, hostName, isRiskScoreExist]
   );
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
   const observedHost = useObservedHost(hostName);
-
-  if (riskScoreState.loading || observedHost.isLoading) {
-    return <FlyoutLoading />;
-  }
 
   return (
     <AnomalyTableProvider
@@ -120,11 +117,12 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={!!hostRiskData?.host.risk}
+              flyoutIsExpandable={isRiskScoreExist}
               expandDetails={openDefaultPanel}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
             <HostPanelContent
+              hostName={hostName}
               observedHost={observedHostWithAnomalies}
               riskScoreState={riskScoreState}
               contextID={contextID}

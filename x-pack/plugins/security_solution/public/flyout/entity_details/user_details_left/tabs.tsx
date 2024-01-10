@@ -7,8 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 import { getRiskInputTab } from '../../../entity_analytics/components/entity_details_flyout';
 import { UserAssetTableType } from '../../../explore/users/store/model';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
@@ -19,26 +17,27 @@ import type {
 import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
 import { RightPanelProvider } from '../../document_details/right/context';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
-interface UseTabsParams {
-  managedUser: ManagedUserHits;
-  alertIds: string[];
-  criticalityLevel?: CriticalityLevel;
-}
-export const useTabs = ({
-  managedUser,
-  alertIds,
-  criticalityLevel,
-}: UseTabsParams): LeftPanelTabsType =>
+export const useTabs = (
+  managedUser: ManagedUserHits,
+  name: string,
+  isRiskScoreExist: boolean
+): LeftPanelTabsType =>
   useMemo(() => {
     const tabs: LeftPanelTabsType = [];
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
-    if (alertIds.length > 0) {
-      tabs.push(getRiskInputTab({ alertIds, criticalityLevel }));
+    if (isRiskScoreExist) {
+      tabs.push(
+        getRiskInputTab({
+          entityName: name,
+          entityType: RiskScoreEntity.user,
+        })
+      );
     }
 
     if (oktaManagedUser) {
@@ -50,7 +49,7 @@ export const useTabs = ({
     }
 
     return tabs;
-  }, [alertIds, managedUser, criticalityLevel]);
+  }, [isRiskScoreExist, managedUser, name]);
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
   id: EntityDetailsLeftPanelTab.OKTA,
