@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
+import moment from 'moment';
 import React from 'react';
 import {
   ALERT_ACTION_ID,
@@ -114,6 +115,25 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <span>
+                {i18n.translate(
+                  'xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.subtitle',
+                  {
+                    defaultMessage: 'Last {duration} hours',
+                    values: {
+                      duration: Math.round(
+                        moment
+                          .duration(moment(alertTimeRange.to).diff(alertTimeRange.from))
+                          .asHours()
+                      ),
+                    },
+                  }
+                )}
+              </span>
+            </EuiText>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup direction="row" gutterSize="m">
           <EuiFlexItem grow={1}>
