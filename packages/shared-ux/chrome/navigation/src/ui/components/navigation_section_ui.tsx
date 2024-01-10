@@ -24,7 +24,7 @@ import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/projec
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
-import { useNavigation } from '../default_navigation';
+import { useNavigation } from '../navigation';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 

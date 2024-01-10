@@ -8,7 +8,7 @@
 
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 
-export { DefaultNavigation, getPresets } from './src/ui';
+export { Navigation, getPresets } from './src/ui';
 
 export type {
   GroupDefinition,

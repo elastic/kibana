@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import {
-  DefaultNavigation,
+  Navigation,
   NavigationKibanaProvider,
   type NavigationTreeDefinition,
 } from '@kbn/shared-ux-chrome-navigation';
@@ -149,7 +149,7 @@ export const createServerlessSearchSideNavComponent =
   () => {
     return (
       <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
-        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlSearchSideNav" />
+        <Navigation navigationTree={navigationTree} dataTestSubj="svlSearchSideNav" />
       </NavigationKibanaProvider>
     );
   };

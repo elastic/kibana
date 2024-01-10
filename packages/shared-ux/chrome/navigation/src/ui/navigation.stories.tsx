@@ -26,7 +26,7 @@ import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import type { NavigationServices } from '../types';
 import { NavigationProvider } from '../services';
-import { DefaultNavigation } from './default_navigation';
+import { Navigation } from './navigation';
 import { getPresets } from './nav_tree_presets';
 import { ContentProvider } from './components/panel';
 import type { NavigationTreeDefinition } from './types';
@@ -269,7 +269,7 @@ export const GroupsExamples = (args: NavigationServices) => {
     <NavigationWrapper>
       {({ isCollapsed }) => (
         <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <DefaultNavigation navigationTree={groupExamplesNavigationTree} />
+          <Navigation navigationTree={groupExamplesNavigationTree} />
         </NavigationProvider>
       )}
     </NavigationWrapper>
@@ -531,7 +531,7 @@ export const ComplexObjectDefinition = (args: NavigationServices) => {
     <NavigationWrapper>
       {({ isCollapsed }) => (
         <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <DefaultNavigation navigationTree={navigationTree} />
+          <Navigation navigationTree={navigationTree} />
         </NavigationProvider>
       )}
     </NavigationWrapper>
@@ -1034,7 +1034,7 @@ export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
     <NavigationWrapper>
       {({ isCollapsed }) => (
         <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <DefaultNavigation
+          <Navigation
             navigationTree={navigationTreeWithPanels}
             panelContentProvider={panelContentProvider}
           />

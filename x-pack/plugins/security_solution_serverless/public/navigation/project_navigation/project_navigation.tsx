@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import { DefaultNavigation, NavigationKibanaProvider } from '@kbn/shared-ux-chrome-navigation';
+import { Navigation, NavigationKibanaProvider } from '@kbn/shared-ux-chrome-navigation';
 import type {
   ContentProvider,
   PanelComponentProps,
@@ -66,7 +66,7 @@ export const SecuritySideNavComponent = React.memo(function SecuritySideNavCompo
       serverless={services.serverless}
       cloud={services.cloud}
     >
-      <DefaultNavigation
+      <Navigation
         dataTestSubj="securitySolutionSideNav"
         navigationTree={navigationTree}
         panelContentProvider={panelContentProvider}

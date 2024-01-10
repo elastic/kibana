@@ -12,7 +12,7 @@ import type { ChromeProjectNavigation } from '@kbn/core-chrome-browser';
 import { EuiThemeProvider } from '@elastic/eui';
 import { getServicesMock } from '../mocks/src/jest';
 import { NavigationProvider } from '../src/services';
-import { DefaultNavigation } from '../src/ui/default_navigation';
+import { Navigation } from '../src/ui/navigation';
 import type { PanelContentProvider } from '../src/ui';
 import type { NavigationTreeDefinition } from '../src/ui/types';
 import { NavigationServices } from '../src/types';
@@ -39,10 +39,7 @@ export const renderNavigation = ({
         {...overrideServices}
         onProjectNavigationChange={onProjectNavigationChange}
       >
-        <DefaultNavigation
-          navigationTree={navTreeDef}
-          panelContentProvider={panelContentProvider}
-        />
+        <Navigation navigationTree={navTreeDef} panelContentProvider={panelContentProvider} />
       </NavigationProvider>
     </EuiThemeProvider>
   );

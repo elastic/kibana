@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
-  DefaultNavigation,
+  Navigation,
   NavigationKibanaProvider,
   NavigationTreeDefinition,
 } from '@kbn/shared-ux-chrome-navigation';
@@ -249,7 +249,7 @@ export const getObservabilitySideNavComponent =
   () => {
     return (
       <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
-        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlObservabilitySideNav" />
+        <Navigation navigationTree={navigationTree} dataTestSubj="svlObservabilitySideNav" />
       </NavigationKibanaProvider>
     );
   };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { DefaultNavigation } from './default_navigation';
+export { Navigation } from './navigation';
 
 export { RecentlyAccessed } from './components';
 

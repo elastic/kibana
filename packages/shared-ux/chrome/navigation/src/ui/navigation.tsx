@@ -46,7 +46,7 @@ interface Props {
   panelContentProvider?: PanelContentProvider;
 }
 
-const DefaultNavigationComp: FC<Props> = ({
+const NavigationComp: FC<Props> = ({
   navigationTree: _navigationTree,
   dataTestSubj,
   panelContentProvider,
@@ -113,7 +113,7 @@ const DefaultNavigationComp: FC<Props> = ({
   );
 };
 
-export const DefaultNavigation = React.memo(DefaultNavigationComp) as typeof DefaultNavigationComp;
+export const Navigation = React.memo(NavigationComp) as typeof NavigationComp;
 
 export function useNavigation() {
   const context = useContext(NavigationContext);
