@@ -264,10 +264,12 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
       return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
     }
 
-    const isSame = isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
+    const prevValue = getSavedSearchValueForComparison(prevSavedSearch, key);
+    const nextValue = getSavedSearchValueForComparison(nextSavedSearchWithoutSearchSource, key);
+    const isSame = isEqual(prevValue, nextValue);
 
     if (!isSame) {
-      console.log({
+      console.log('changes to saved search detected', {
         key,
         before: prevSavedSearch[key],
         after: nextSavedSearchWithoutSearchSource[key],
@@ -300,6 +302,12 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
         : isEqual(prevValue, nextValue);
 
     if (!isSame) {
+      console.log('[savedSearch] difference between initial and changed version', {
+        key,
+        before: prevValue,
+        after: nextValue,
+      });
+
       addLog('[savedSearch] difference between initial and changed version', {
         key,
         before: prevValue,
@@ -333,4 +341,16 @@ function getSearchSourceFieldValueForComparison(
   }
 
   return searchSource.getField(searchSourceFieldName);
+}
+
+function getSavedSearchValueForComparison(
+  savedSearch: Omit<SavedSearch, 'searchSource'>,
+  key: keyof Omit<SavedSearch, 'searchSource'>
+) {
+  if (key === 'customVisualizationJSON' && savedSearch.customVisualizationJSON) {
+    // the stringified JSON might have keys in a different order, so we parse it back into an object to compare
+    return JSON.parse(savedSearch.customVisualizationJSON);
+  }
+
+  return savedSearch[key];
 }

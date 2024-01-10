@@ -44,6 +44,7 @@ export function ChartConfigPanel({
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
   const updateSuggestion = useCallback(
     (datasourceState, visualizationState) => {
+      console.log('new vis', datasourceState, visualizationState);
       const updatedSuggestion = {
         ...currentSuggestion,
         ...(datasourceState && { datasourceState }),
@@ -53,6 +54,8 @@ export function ChartConfigPanel({
     },
     [currentSuggestion, onSuggestionChange]
   );
+
+  console.log('lens attributes', lensAttributesContext);
 
   useEffect(() => {
     const tablesAdapters = lensAdapters?.tables?.tables;
