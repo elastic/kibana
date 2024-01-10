@@ -123,7 +123,7 @@ test(`returns buffer content base64 encoded`, async () => {
   expect(content).toEqual(testContent);
 });
 
-test(`screenshotting plugin uses the logger provided by the export-type`, async () => {
+test(`screenshotting plugin uses the logger provided by the PNG export-type`, async () => {
   const logSpy = jest.spyOn(mockLogger, 'get');
 
   await mockPngExportType.runTask(

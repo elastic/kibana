@@ -358,9 +358,10 @@ export class CsvGenerator {
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
 
+    const { startedAt, retryAt } = this.taskInstanceFields;
     this.logger.debug(
-      `Task started at: ${moment(this.taskInstanceFields.startedAt).format()}.` +
-        ` Able to run until: ${moment(this.taskInstanceFields.retryAt).format()}`
+      `Task started at: ${moment(startedAt).format()}.` +
+        ` Can run until: ${moment(retryAt).format()}`
     );
 
     const index = searchSource.getField('index');
