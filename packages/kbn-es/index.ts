@@ -13,8 +13,11 @@ export {
   ELASTIC_SERVERLESS_SUPERUSER,
   ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
   SERVERLESS_NODES,
+  VALID_SERVERLESS_PROJECT_TYPE,
   getDockerFileMountPath,
   verifyDockerInstalled,
   maybeCreateDockerNetwork,
+  type ServerlessProjectType,
 } from './src/utils';
 export type { ArtifactLicense } from './src/artifact';
+export { SERVERLESS_ROLES_ROOT_PATH } from './src/paths';

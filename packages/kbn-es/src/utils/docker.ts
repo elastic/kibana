@@ -59,6 +59,9 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
+export const VALID_SERVERLESS_PROJECT_TYPE = ['es', 'oblt', 'security'];
+export type ServerlessProjectType = 'es' | 'secucity' | 'oblt';
+
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
 }
@@ -66,8 +69,8 @@ export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   /** Publish ES docker container on additional host IP */
   host?: string;
-  /**  Project type */
-  projectType?: 'es' | 'secucity' | 'oblt';
+  /**  Serverless project type */
+  projectType?: ServerlessProjectType;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
   /** Path to the directory where the ES cluster will store data */
@@ -595,7 +598,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   const rolesResourcePaths = projectType
     ? [resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml')]
     : // read roles for all projects if project is not defined
-      ['es', 'obtl', 'security'].map((type) =>
+      VALID_SERVERLESS_PROJECT_TYPE.map((type) =>
         resolve(SERVERLESS_ROLES_ROOT_PATH, type, 'roles.yml')
       );
 
