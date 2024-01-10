@@ -13,14 +13,16 @@ export interface QueueProcessorOptions<T = unknown> {
   logger?: Logger;
   /**
    * Used when `logger` is passed. It will be used to define the logging messages context path.
-   * Defautls to the name of the callback provided in `batchHandler`
+   * Defaults to the name of the callback provided in `batchHandler`
    */
   key?: string;
 }
 
 /**
- * Process an un-bound amount of items in batches. Each batch is process once the queued updates
- * reach the `batchSize`.
+ * Process an un-bound amount of items in batches. Each batch is process once the queued reach the
+ * `batchSize`, thus processing is gradually executed ensuring that data is not held in memory
+ * for too long. Once all items are added to the Queue, calling
+ * `.complete()` will ensure they are all processed.
  *
  * @example
  * const processor = new QueueProcessor<{ id: string }>({
@@ -30,7 +32,7 @@ export interface QueueProcessorOptions<T = unknown> {
  *   }
  * });
  *
- * const myIdList = [ .... ]; // Array with 50 string;
+ * const myIdList = [ .... ]; // Array with 50 string
  *
  * for (const id of myIdList) {
  *   batchHandler.addToQueue({ id: id});
