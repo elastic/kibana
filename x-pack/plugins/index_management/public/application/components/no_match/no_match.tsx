@@ -81,7 +81,7 @@ export const NoMatch = ({
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.noMatch.createIndexDescription"
-            defaultMessage="You don't have any indices yet. Create an index by clicking the button below."
+            defaultMessage="You don't have any indices yet."
           />
         </p>
       }
