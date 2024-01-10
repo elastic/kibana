@@ -237,7 +237,7 @@ describe('group editor preview', () => {
     const assertTimeField = (fieldName: string, attributes: TypedLensByValueInput['attributes']) =>
       expect(
         (
-          attributes.state.datasourceStates.formBased.layers[DATA_LAYER_ID].columns[
+          attributes.state.datasourceStates.formBased?.layers[DATA_LAYER_ID].columns[
             DATE_HISTOGRAM_COLUMN_ID
           ] as FieldBasedIndexPatternColumn
         ).sourceField

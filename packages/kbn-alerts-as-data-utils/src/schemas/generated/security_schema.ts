@@ -117,6 +117,7 @@ const SecurityAlertRequired = rt.type({
   'kibana.alert.uuid': schemaString,
   'kibana.space_ids': schemaStringArray,
 });
+// prettier-ignore
 const SecurityAlertOptional = rt.partial({
   'ecs.version': schemaString,
   'event.action': schemaString,

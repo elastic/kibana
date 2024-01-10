@@ -110,6 +110,9 @@ const mockKibana = () => {
         },
       },
       unifiedSearch: {
+        ui: {
+          QueryStringInput: () => <div>Query String Input</div>,
+        },
         autocomplete: {
           hasQuerySuggestions: () => {},
         },

@@ -233,10 +233,35 @@ const uploadPipeline = (pipelineContent: string | object) => {
       );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
-      );
-      pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/rule_management.yml')
+      );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^package.json/,
+        /^packages\/kbn-securitysolution-.*/,
+        /^x-pack\/plugins\/alerting/,
+        /^x-pack\/plugins\/data_views\/common/,
+        /^x-pack\/plugins\/lists/,
+        /^x-pack\/plugins\/rule_registry\/common/,
+        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/plugins\/security_solution_ess/,
+        /^x-pack\/plugins\/security_solution_serverless/,
+        /^x-pack\/plugins\/task_manager/,
+        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/alerts_table/,
+        /^x-pack\/plugins\/usage_collection\/public/,
+        /^x-pack\/plugins\/elastic_assistant/,
+        /^x-pack\/packages\/security-solution/,
+        /^x-pack\/packages\/kbn-elastic-assistant/,
+        /^x-pack\/packages\/kbn-elastic-assistant-common/,
+        /^x-pack\/test\/security_solution_cypress/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
       );
     }
 
