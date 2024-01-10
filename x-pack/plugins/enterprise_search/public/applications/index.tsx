@@ -199,5 +199,5 @@ export const renderHeaderActions = (
     </I18nProvider>,
     kibanaHeaderEl
   );
-  return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
+  return () => ReactDOM.render(<></>, kibanaHeaderEl);
 };
