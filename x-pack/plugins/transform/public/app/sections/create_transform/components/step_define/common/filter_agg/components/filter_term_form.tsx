@@ -22,12 +22,12 @@ import { useWizardSelector } from '../../../../../state_management/create_transf
 import { useToastNotifications } from '../../../../../../../app_dependencies';
 import { useWizardContext } from '../../../../wizard/wizard';
 
-import { FilterAggConfigTerm } from '../types';
+import type { FilterAggForm, FilterAggTypeConfigTerm } from '../types';
 
 /**
  * Form component for the term filter aggregation.
  */
-export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggFormComponent'] = ({
+export const FilterTermForm: FilterAggForm<FilterAggTypeConfigTerm> = ({
   config,
   onChange,
   selectedField,

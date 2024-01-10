@@ -39,6 +39,7 @@ import {
 import { TransformPivotConfig } from '../../../../../../../common/types/transform';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
 import { isPivotAggConfigWithUiSupport } from '../../../../../common/pivot_group_by';
+import { getAggConfigUtils } from '../common/agg_utils';
 
 /**
  * Clones aggregation configuration and updates parent references
@@ -64,8 +65,10 @@ function cloneAggItem(item: PivotAggsConfig, parentRef?: PivotAggsConfig) {
  */
 function isConfigInvalid(aggsArray: PivotAggsConfig[]): boolean {
   return aggsArray.some((agg) => {
+    if (!isPivotAggsWithExtendedForm(agg)) return false;
+    const utils = getAggConfigUtils(agg);
     return (
-      (isPivotAggsWithExtendedForm(agg) && !agg.isValid()) ||
+      (isPivotAggsWithExtendedForm(agg) && !utils?.isValid()) ||
       (agg.subAggs && isConfigInvalid(Object.values(agg.subAggs)))
     );
   });
@@ -186,6 +189,7 @@ export const getPivotConfigActions = (
       const { aggList, groupByList } = getState().stepDefine;
       const label: AggName = d[0].label;
       const config: PivotAggsConfig = aggOptionsData[label];
+      console.log('config', config);
 
       let aggName: AggName = config.aggName;
 

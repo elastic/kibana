@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { FC } from 'react';
-import { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
+import type { FC } from 'react';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../../common/types/pivot_aggs';
+import type {
+  PivotAggsConfigWithExtra,
+  PivotAggsUtilsWithExtra,
+} from '../../../../../../common/pivot_aggs';
 import { FILTERS } from './constants';
 
 export type FilterAggType = typeof FILTERS[keyof typeof FILTERS];
 
-type FilterAggForm<T> = FC<{
+export type FilterAggForm<T> = FC<{
   /** Filter aggregation related configuration */
   config: Partial<T> | undefined;
   /** Callback for configuration updates */
@@ -22,67 +27,144 @@ type FilterAggForm<T> = FC<{
   isValid?: boolean;
 }>;
 
-interface FilterAggTypeConfig<U, R> {
-  /** Form component */
-  FilterAggFormComponent?: U extends undefined ? undefined : FilterAggForm<U>;
-  /** Filter agg type configuration*/
-  filterAggConfig?: U extends undefined ? undefined : U;
+interface FilterAggTypeUtils<ESConfig extends { [key: string]: any }> {
   /** Converts UI agg config form to ES agg request object */
-  getEsAggConfig: (field?: string) => R;
+  getEsAggConfig: (field?: string) => ESConfig;
   /** Validation result of the filter agg config */
   isValid?: () => boolean;
   /** Provides aggregation name generated based on the configuration */
   getAggName?: () => string | undefined;
   /** Helper text for the aggregation reflecting some configuration info */
   helperText?: () => string | undefined;
+}
+
+type FilterAttFormComponentName =
+  | 'filterTermForm'
+  | 'filterRangeForm'
+  | 'filterExistsForm'
+  | 'filterBoolForm'
+  | 'filterEditorForm';
+
+interface FilterAggTypeConfig<T extends FilterAttFormComponentName, U> {
+  /** Form component */
+  filterAggFormComponent: T;
+  /** Filter agg type configuration*/
+  filterAggConfig?: U extends undefined ? undefined : U;
   /** Field name. In some cases, e.g. `exists` filter, it's resolved from the filter agg definition */
   fieldName?: string;
 }
 
 /** Filter agg type definition */
-interface FilterAggProps<K extends FilterAggType, U, ESConfig extends { [key: string]: any }> {
+interface FilterAggProps<T extends FilterAttFormComponentName, K extends FilterAggType, U> {
   /** Filter aggregation type */
   filterAgg: K;
   /** Definition of the filter agg config */
-  aggTypeConfig: FilterAggTypeConfig<U, ESConfig>;
+  aggTypeConfig: FilterAggTypeConfig<T, U>;
 }
 
 /** Filter term agg */
-export type FilterAggConfigTerm = FilterAggProps<
-  'term',
-  { value: string },
-  { [field: string]: string }
->;
+export interface FilterAggTypeConfigTerm {
+  value: string;
+}
+export type FilterAggConfigTerm = FilterAggProps<'filterTermForm', 'term', FilterAggTypeConfigTerm>;
+
+export const isFilterAggConfigTerm = (
+  arg: unknown
+): arg is FilterAggTypeConfig<'filterTermForm', FilterAggTypeConfigTerm> =>
+  isPopulatedObject(arg, ['filterAggFormComponent']) &&
+  arg.filterAggFormComponent === 'filterTermForm';
+
+export type FilterAggUtilsTerm = FilterAggTypeUtils<{ [field: string]: string }>;
+
 /** Filter range agg */
+export interface FilterAggTypeConfigRange {
+  from?: number;
+  to?: number;
+  includeFrom?: boolean;
+  includeTo?: boolean;
+}
+
 export type FilterAggConfigRange = FilterAggProps<
+  'filterRangeForm',
   'range',
-  { from?: number; to?: number; includeFrom?: boolean; includeTo?: boolean },
-  { [field: string]: { [key in 'gt' | 'gte' | 'lt' | 'lte']: number } }
->;
-/** Filter exists agg */
-export type FilterAggConfigExists = FilterAggProps<'exists', undefined, { field: string }>;
-/** Filter bool agg */
-export type FilterAggConfigBool = FilterAggProps<
-  'bool',
-  string,
-  { must?: object[]; must_not?: object[]; should?: object[] }
+  FilterAggTypeConfigRange
 >;
 
+export const isFilterAggConfigRange = (
+  arg: unknown
+): arg is FilterAggConfigRange['aggTypeConfig'] =>
+  isPopulatedObject(arg, ['filterAggFormComponent']) &&
+  arg.filterAggFormComponent === 'filterRangeForm';
+
+export type FilterAggUtilsRange = FilterAggTypeUtils<{
+  [field: string]: { [key in 'gt' | 'gte' | 'lt' | 'lte']: number };
+}>;
+
+/** Filter exists agg */
+export type FilterAggConfigExists = FilterAggProps<'filterExistsForm', 'exists', undefined>;
+
+export const isFilterAggConfigExists = (
+  arg: unknown
+): arg is FilterAggConfigExists['aggTypeConfig'] =>
+  isPopulatedObject(arg, ['filterAggFormComponent']) &&
+  arg.filterAggFormComponent === 'filterExistsForm';
+
+export type FilterAggUtilsExists = FilterAggTypeUtils<{ field: string }>;
+
+/** Filter bool agg */
+export type FilterAggConfigBool = FilterAggProps<'filterBoolForm', 'bool', string>;
+
+export const isFilterAggConfigBool = (arg: unknown): arg is FilterAggConfigBool['aggTypeConfig'] =>
+  isPopulatedObject(arg, ['filterAggFormComponent']) &&
+  arg.filterAggFormComponent === 'filterBoolForm';
+
+export type FilterAggUtilsBool = FilterAggTypeUtils<{
+  must?: object[];
+  must_not?: object[];
+  should?: object[];
+}>;
+
 /** General type for filter agg */
-export type FilterAggConfigEditor = FilterAggProps<FilterAggType, string, Record<string, unknown>>;
+export type FilterAggTypeConfigEditor = string;
+export type FilterAggConfigEditor = FilterAggProps<
+  'filterEditorForm',
+  FilterAggType,
+  FilterAggTypeConfigEditor
+>;
+
+export const isFilterAggConfigEditor = (
+  arg: unknown
+): arg is FilterAggTypeConfig<'filterEditorForm', FilterAggTypeConfigEditor> =>
+  isPopulatedObject(arg, ['filterAggFormComponent']) &&
+  arg.filterAggFormComponent === 'filterEditorForm';
+
+export type FilterAggUtilsEditor = FilterAggTypeUtils<Record<string, unknown>>;
 
 export type FilterAggConfigUnion =
   | FilterAggConfigTerm
   | FilterAggConfigRange
   | FilterAggConfigBool
-  | FilterAggConfigExists;
+  | FilterAggConfigExists
+  | FilterAggConfigEditor;
+export type FilterAggUtilsUnion =
+  | FilterAggUtilsTerm
+  | FilterAggUtilsRange
+  | FilterAggUtilsBool
+  | FilterAggUtilsExists
+  | FilterAggUtilsEditor;
 
 /**
  * Union type for filter aggregations
  * TODO find out if it's possible to use {@link FilterAggConfigUnion} instead of {@link FilterAggConfigBase}.
  * ATM TS is not able to infer a type.
  */
-export type PivotAggsConfigFilter = PivotAggsConfigWithExtra<FilterAggConfigBase, {}>;
+export type PivotAggsConfigFilter = PivotAggsConfigWithExtra<FilterAggConfigBase>;
+
+export const isPivotAggsConfigFilter = (arg: unknown): arg is PivotAggsConfigFilter =>
+  isPopulatedObject(arg, ['aggFormComponent']) &&
+  arg.aggFormComponent === PIVOT_SUPPORTED_AGGS.FILTER;
+
+export type PivotAggsUtilsFilter = PivotAggsUtilsWithExtra<FilterAggConfigBase, {}>;
 
 export interface FilterAggConfigBase {
   filterAgg?: FilterAggType;

@@ -20,6 +20,7 @@ import { PIVOT_SUPPORTED_AGGS, PivotAgg } from '../../../common/types/pivot_aggs
 import { getAggFormConfig } from '../sections/create_transform/components/step_define/common/get_agg_form_config';
 import type { PivotAggsConfigFilter } from '../sections/create_transform/components/step_define/common/filter_agg/types';
 import type { PivotAggsConfigTopMetrics } from '../sections/create_transform/components/step_define/common/top_metrics_agg/types';
+import { getAggConfigUtils } from '../sections/create_transform/components/step_define/common/agg_utils';
 
 export function isPivotSupportedAggs(arg: unknown): arg is PivotSupportedAggs {
   return (
@@ -198,7 +199,8 @@ export function getAggConfigFromEsAgg(
   }
 
   if (isPivotAggsWithExtendedForm(config)) {
-    config.setUiConfigFromEs(esAggDefinition[agg]);
+    const utils = getAggConfigUtils(config);
+    if (utils) utils.setUiConfigFromEs(esAggDefinition[agg]);
   }
 
   if (aggKeys.includes('aggs')) {
@@ -217,19 +219,24 @@ export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
   field: EsFieldName | EsFieldName[] | null;
 }
 
-export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: any }>
-  extends PivotAggsConfigWithUiBase {
-  /** Form component */
-  AggFormComponent: FC<{
-    aggConfig: Partial<T>;
-    onChange: (arg: Partial<T>) => void;
-    selectedField: string;
-    isValid?: boolean;
-  }>;
-  /** Aggregation specific configuration */
+export type AggFormComponentNames =
+  | typeof PIVOT_SUPPORTED_AGGS.FILTER
+  | typeof PIVOT_SUPPORTED_AGGS.PERCENTILES
+  | typeof PIVOT_SUPPORTED_AGGS.TERMS
+  | typeof PIVOT_SUPPORTED_AGGS.TOP_METRICS;
+
+/** Form component */
+interface AggFormComponentProps<T> {
   aggConfig: Partial<T>;
+  onChange: (arg: Partial<T>) => void;
+  selectedField: string;
+  isValid?: boolean;
+}
+export type AggFormComponent<T> = FC<AggFormComponentProps<T>>;
+
+export interface PivotAggsUtilsWithExtra<T, ESConfig extends { [key: string]: any }> {
   /** Set UI configuration from ES aggregation definition */
-  setUiConfigFromEs: (arg: ESConfig) => void;
+  setUiConfigFromEs: (esConfig: ESConfig) => void;
   /** Converts UI agg config form to ES agg request object */
   getEsAggConfig: () => ESConfig | null;
   /** Indicates if the configuration is valid */
@@ -238,6 +245,13 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
   getAggName?: () => string | undefined;
   /** Helper text for the aggregation reflecting some configuration info */
   helperText?: () => string | undefined;
+}
+
+export interface PivotAggsConfigWithExtra<T> extends PivotAggsConfigWithUiBase {
+  /** Form component */
+  aggFormComponent: AggFormComponentNames;
+  /** Aggregation specific configuration */
+  aggConfig: Partial<T>;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {
@@ -269,9 +283,7 @@ export function isPivotAggsConfigWithUiBase(arg: unknown): arg is PivotAggsConfi
 type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter | PivotAggsConfigTopMetrics;
 
 export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfigWithExtendedForm {
-  return (
-    isPopulatedObject(arg, ['setUiConfigFromEs']) || isPopulatedObject(arg, ['AggFormComponent'])
-  );
+  return isPopulatedObject(arg, ['aggFormComponent']);
 }
 
 export function isPivotAggConfigTopMetric(arg: unknown): arg is PivotAggsConfigTopMetrics {
@@ -309,7 +321,10 @@ export function getEsAggFromAggConfig(
   delete esAgg.parentAgg;
 
   if (isPivotAggsWithExtendedForm(pivotAggsConfig)) {
-    esAgg = pivotAggsConfig.getEsAggConfig() as PivotAgg;
+    const utils = getAggConfigUtils(pivotAggsConfig);
+    if (utils) {
+      esAgg = utils.getEsAggConfig() as PivotAgg;
+    }
 
     if (esAgg === null) {
       return null;

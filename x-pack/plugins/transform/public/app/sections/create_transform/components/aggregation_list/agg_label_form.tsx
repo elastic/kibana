@@ -22,6 +22,7 @@ import {
 import { PopoverForm } from './popover_form';
 import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { SubAggsSection } from './sub_aggs_section';
+import { getAggConfigUtils } from '../step_define/common/agg_utils';
 
 interface Props {
   item: PivotAggsConfig;
@@ -38,8 +39,9 @@ export const AggLabelForm: React.FC<Props> = ({
   onChange,
   options,
 }) => {
+  const utils = isPivotAggsWithExtendedForm(item) ? getAggConfigUtils(item) : undefined;
   const [isPopoverVisible, setPopoverVisibility] = useState(
-    isPivotAggsWithExtendedForm(item) && !item.isValid()
+    isPivotAggsWithExtendedForm(item) && !utils?.isValid()
   );
 
   function update(updateItem: PivotAggsConfig) {
@@ -47,12 +49,12 @@ export const AggLabelForm: React.FC<Props> = ({
     setPopoverVisibility(false);
   }
 
-  const helperText = isPivotAggsWithExtendedForm(item) && item.helperText && item.helperText();
+  const helperText = isPivotAggsWithExtendedForm(item) && utils?.helperText && utils.helperText();
 
   const isSubAggSupported =
     isPivotAggsConfigWithUiBase(item) &&
     item.isSubAggsSupported &&
-    (isPivotAggsWithExtendedForm(item) ? item.isValid() : true);
+    (isPivotAggsWithExtendedForm(item) ? utils?.isValid() : true);
 
   return (
     <>

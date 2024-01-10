@@ -12,12 +12,14 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { AggFormComponent } from '../../../../../../../common/pivot_aggs';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
 import { getFilterAggTypeConfig } from '../config';
-import type { FilterAggType, PivotAggsConfigFilter } from '../types';
+import type { FilterAggType, FilterAggConfigBase } from '../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
 import { useWizardContext } from '../../../../wizard/wizard';
 import { useWizardSelector } from '../../../../../state_management/create_transform_store';
+import { getFilterAggTypeUtils, getFilterAggTypeComponent } from '../config';
 
 /**
  * Resolves supported filters for provided field.
@@ -52,7 +54,7 @@ export function getSupportedFilterAggs(
  * Responsible for the filter agg type selection and rendering of
  * the corresponded field set.
  */
-export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
+export const FilterAggForm: AggFormComponent<FilterAggConfigBase> = ({
   aggConfig,
   onChange,
   selectedField,
@@ -74,9 +76,14 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
     [selectedField]
   );
 
+  console.log('aggConfig', aggConfig);
+  const utils = getFilterAggTypeUtils(aggConfig.aggTypeConfig);
+  const FilterAggFormComponent = getFilterAggTypeComponent(aggConfig.aggTypeConfig);
+  console.log('utils', utils);
+
   const filterAggTypeConfig = aggConfig?.aggTypeConfig;
   const filterAgg = aggConfig?.filterAgg ?? '';
-  const isValid = filterAggTypeConfig?.isValid ? filterAggTypeConfig?.isValid() : undefined;
+  const isValid = utils?.isValid ? utils?.isValid() : undefined;
   return (
     <>
       {filterAggsOptions !== undefined ? (
@@ -122,8 +129,8 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
           />
         </EuiFormRow>
       ) : null}
-      {filterAgg !== '' && filterAggTypeConfig?.FilterAggFormComponent && (
-        <filterAggTypeConfig.FilterAggFormComponent
+      {filterAgg !== '' && FilterAggFormComponent && (
+        <FilterAggFormComponent
           config={filterAggTypeConfig?.filterAggConfig}
           onChange={(update: any) => {
             onChange({

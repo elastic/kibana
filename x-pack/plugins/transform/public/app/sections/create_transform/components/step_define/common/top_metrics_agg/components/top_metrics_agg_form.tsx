@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
-import { PivotAggsConfigTopMetrics, TopMetricsAggConfig } from '../types';
+import type { TopMetricsAggConfig } from '../types';
 import {
   isSpecialSortField,
   SORT_DIRECTION,
@@ -20,8 +20,9 @@ import {
 import { useWizardContext } from '../../../../wizard/wizard';
 import { getPivotDropdownOptions } from '../../get_pivot_dropdown_options';
 import { useWizardSelector } from '../../../../../state_management/create_transform_store';
+import { AggFormComponent } from '../../../../../../../common/pivot_aggs';
 
-export const TopMetricsAggForm: PivotAggsConfigTopMetrics['AggFormComponent'] = ({
+export const TopMetricsAggForm: AggFormComponent<TopMetricsAggConfig> = ({
   onChange,
   aggConfig,
 }) => {

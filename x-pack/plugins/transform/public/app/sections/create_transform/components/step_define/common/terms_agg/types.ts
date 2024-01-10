@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../../common/types/pivot_aggs';
+import type {
+  PivotAggsConfigWithExtra,
+  PivotAggsUtilsWithExtra,
+} from '../../../../../../common/pivot_aggs';
 
 export interface TermsAggConfig {
   size: number;
 }
-export type IPivotAggsConfigTerms = PivotAggsConfigWithExtra<
+export type IPivotAggsConfigTerms = PivotAggsConfigWithExtra<TermsAggConfig>;
+
+export const isPivotAggsConfigTerms = (arg: unknown): arg is IPivotAggsConfigTerms =>
+  isPopulatedObject(arg, ['aggFormComponent']) &&
+  arg.aggFormComponent === PIVOT_SUPPORTED_AGGS.TERMS;
+
+export type IPivotAggsUtilsTerms = PivotAggsUtilsWithExtra<
   TermsAggConfig,
   { field: string; size: number }
 >;

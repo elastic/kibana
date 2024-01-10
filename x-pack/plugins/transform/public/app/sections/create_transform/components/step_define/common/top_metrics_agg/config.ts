@@ -17,29 +17,17 @@ import {
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
-import { PivotAggsConfigTopMetrics } from './types';
-import { TopMetricsAggForm } from './components/top_metrics_agg_form';
+import type { PivotAggsConfigTopMetrics, PivotAggsUtilsTopMetrics } from './types';
 
-/**
- * Gets initial basic configuration of the top_metrics aggregation.
- */
-export function getTopMetricsAggConfig(
-  commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase
-): PivotAggsConfigTopMetrics {
+export function getTopMetricsAggUtils(config: PivotAggsConfigTopMetrics): PivotAggsUtilsTopMetrics {
   return {
-    ...commonConfig,
-    isSubAggsSupported: false,
-    isMultiField: true,
-    field: isPivotAggsConfigWithUiBase(commonConfig) ? commonConfig.field : '',
-    AggFormComponent: TopMetricsAggForm,
-    aggConfig: {},
     getEsAggConfig() {
       // ensure the configuration has been completed
       if (!this.isValid()) {
         return null;
       }
 
-      const { sortField, sortSettings = {}, ...unsupportedConfig } = this.aggConfig;
+      const { sortField, sortSettings = {}, ...unsupportedConfig } = config.aggConfig;
 
       let sort = null;
 
@@ -63,7 +51,7 @@ export function getTopMetricsAggConfig(
       }
 
       return {
-        metrics: (Array.isArray(this.field) ? this.field : [this.field]).map((f) => ({
+        metrics: (Array.isArray(config.field) ? config.field : [config.field]).map((f) => ({
           field: f as string,
         })),
         sort: sort!,
@@ -73,16 +61,16 @@ export function getTopMetricsAggConfig(
     setUiConfigFromEs(esAggDefinition) {
       const { metrics, sort, ...unsupportedConfig } = esAggDefinition;
 
-      this.field = (Array.isArray(metrics) ? metrics : [metrics]).map((v) => v!.field);
+      config.field = (Array.isArray(metrics) ? metrics : [metrics]).map((v) => v!.field);
 
       if (isSpecialSortField(sort)) {
-        this.aggConfig.sortField = sort;
+        config.aggConfig.sortField = sort;
         return;
       }
 
       if (!sort) {
-        this.aggConfig = {
-          ...this.aggConfig,
+        config.aggConfig = {
+          ...config.aggConfig,
           ...(unsupportedConfig ?? {}),
         };
 
@@ -91,41 +79,59 @@ export function getTopMetricsAggConfig(
 
       const sortField = Object.keys(sort)[0];
 
-      this.aggConfig.sortField = sortField;
+      config.aggConfig.sortField = sortField;
 
       const sortDefinition = sort[sortField];
 
-      this.aggConfig.sortSettings = this.aggConfig.sortSettings ?? {};
+      config.aggConfig.sortSettings = config.aggConfig.sortSettings ?? {};
 
       if (isValidSortDirection(sortDefinition)) {
-        this.aggConfig.sortSettings.order = sortDefinition;
+        config.aggConfig.sortSettings.order = sortDefinition;
       }
 
       if (isPopulatedObject(sortDefinition)) {
         const { order, mode, numeric_type: numType, ...rest } = sortDefinition;
-        this.aggConfig.sortSettings = rest;
+        config.aggConfig.sortSettings = rest;
 
         if (isValidSortDirection(order)) {
-          this.aggConfig.sortSettings.order = order;
+          config.aggConfig.sortSettings.order = order;
         }
         if (isValidSortMode(mode)) {
-          this.aggConfig.sortSettings.mode = mode;
+          config.aggConfig.sortSettings.mode = mode;
         }
         if (isValidSortNumericType(numType)) {
-          this.aggConfig.sortSettings.numericType = numType;
+          config.aggConfig.sortSettings.numericType = numType;
         }
       }
 
-      this.aggConfig = {
-        ...this.aggConfig,
+      config.aggConfig = {
+        ...config.aggConfig,
         ...(unsupportedConfig ?? {}),
       };
     },
     isValid() {
       return (
-        !!this.aggConfig.sortField &&
-        (isSpecialSortField(this.aggConfig.sortField) ? true : !!this.aggConfig.sortSettings?.order)
+        !!config.aggConfig.sortField &&
+        (isSpecialSortField(config.aggConfig.sortField)
+          ? true
+          : !!config.aggConfig.sortSettings?.order)
       );
     },
+  };
+}
+
+/**
+ * Gets initial basic configuration of the top_metrics aggregation.
+ */
+export function getTopMetricsAggConfig(
+  commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase
+): PivotAggsConfigTopMetrics {
+  return {
+    ...commonConfig,
+    isSubAggsSupported: false,
+    isMultiField: true,
+    field: isPivotAggsConfigWithUiBase(commonConfig) ? commonConfig.field : '',
+    aggFormComponent: 'top_metrics',
+    aggConfig: {},
   };
 }

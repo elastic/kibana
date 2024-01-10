@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
+import { clone } from 'lodash';
 import { EuiComboBoxOptionOption, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,7 +26,7 @@ export const SubAggsSection: FC<{ item: PivotAggsConfig }> = ({ item }) => {
   const { aggOptions, aggOptionsData } = usePivotConfigOptions();
   const addSubAggHandler = useCallback(
     (d: EuiComboBoxOptionOption[]) => {
-      actions.addSubAggregation(item, d);
+      actions.addSubAggregation(clone(item), d);
     },
     [actions, item]
   );

@@ -12,16 +12,80 @@ import {
   PivotAggsConfigWithUiBase,
 } from '../../../../../../common/pivot_aggs';
 import { FILTERS } from './constants';
-import { FilterAggForm, FilterEditorForm, FilterRangeForm, FilterTermForm } from './components';
 import {
-  FilterAggConfigBool,
-  FilterAggConfigExists,
-  FilterAggConfigRange,
-  FilterAggConfigTerm,
-  FilterAggConfigUnion,
-  FilterAggType,
-  PivotAggsConfigFilter,
+  isFilterAggConfigTerm,
+  isFilterAggConfigRange,
+  isFilterAggConfigExists,
+  isFilterAggConfigBool,
+  isFilterAggConfigEditor,
+  type FilterAggConfigBool,
+  type FilterAggConfigExists,
+  type FilterAggConfigRange,
+  type FilterAggConfigTerm,
+  type FilterAggConfigEditor,
+  type FilterAggConfigUnion,
+  type FilterAggType,
+  type FilterAggUtilsUnion,
+  type FilterAggUtilsTerm,
+  type FilterAggUtilsRange,
+  type FilterAggUtilsExists,
+  type FilterAggUtilsBool,
+  type FilterAggUtilsEditor,
+  type PivotAggsConfigFilter,
+  type PivotAggsUtilsFilter,
 } from './types';
+
+import { FilterTermForm, FilterEditorForm, FilterRangeForm } from './components';
+
+export const getFilterAggUtils = (config: PivotAggsConfigFilter): PivotAggsUtilsFilter => {
+  return {
+    getEsAggConfig() {
+      // ensure the configuration has been completed
+      if (!this.isValid()) {
+        return null;
+      }
+      const utils = getFilterAggUtils(config.aggConfig.aggTypeConfig);
+      const esAgg = utils.getEsAggConfig();
+      return {
+        [config.aggConfig.filterAgg as string]: esAgg,
+      };
+    },
+    setUiConfigFromEs(esAggDefinition) {
+      const filterAgg = Object.keys(esAggDefinition)[0] as FilterAggType;
+      // @ts-ignore conflicts with a union type
+      const filterAggConfig = esAggDefinition[filterAgg];
+
+      const aggTypeConfig = getFilterAggTypeConfig(
+        filterAgg,
+        config.field as string,
+        filterAggConfig
+      );
+
+      config.field = config.field ?? aggTypeConfig.fieldName ?? null;
+
+      config.aggConfig = {
+        filterAgg,
+        aggTypeConfig,
+      };
+    },
+    isValid() {
+      return (
+        config.aggConfig?.filterAgg !== undefined &&
+        (config.aggConfig.aggTypeConfig?.isValid ? config.aggConfig.aggTypeConfig.isValid() : true)
+      );
+    },
+    getAggName() {
+      return config.aggConfig?.aggTypeConfig?.getAggName
+        ? config.aggConfig.aggTypeConfig.getAggName()
+        : undefined;
+    },
+    helperText() {
+      return config.aggConfig?.aggTypeConfig?.helperText
+        ? config.aggConfig.aggTypeConfig.helperText()
+        : undefined;
+    },
+  };
+};
 
 /**
  * Gets initial basic configuration of the filter aggregation.
@@ -36,49 +100,135 @@ export function getFilterAggConfig(
     isSubAggsSupported: true,
     // Field name might be missing, for instance for the bool filter.
     field,
-    AggFormComponent: FilterAggForm,
+    aggFormComponent: 'filter',
     aggConfig: {},
-    getEsAggConfig() {
-      // ensure the configuration has been completed
-      if (!this.isValid()) {
-        return null;
-      }
-      const esAgg = this.aggConfig.aggTypeConfig?.getEsAggConfig(this.field);
-      return {
-        [this.aggConfig.filterAgg as string]: esAgg,
-      };
-    },
-    setUiConfigFromEs(esAggDefinition) {
-      const filterAgg = Object.keys(esAggDefinition)[0] as FilterAggType;
-      // @ts-ignore conflicts with a union type
-      const filterAggConfig = esAggDefinition[filterAgg];
-
-      const aggTypeConfig = getFilterAggTypeConfig(filterAgg, field as string, filterAggConfig);
-
-      this.field = field ?? aggTypeConfig.fieldName ?? null;
-
-      this.aggConfig = {
-        filterAgg,
-        aggTypeConfig,
-      };
-    },
-    isValid() {
-      return (
-        this.aggConfig?.filterAgg !== undefined &&
-        (this.aggConfig.aggTypeConfig?.isValid ? this.aggConfig.aggTypeConfig.isValid() : true)
-      );
-    },
-    getAggName() {
-      return this.aggConfig?.aggTypeConfig?.getAggName
-        ? this.aggConfig.aggTypeConfig.getAggName()
-        : undefined;
-    },
-    helperText() {
-      return this.aggConfig?.aggTypeConfig?.helperText
-        ? this.aggConfig.aggTypeConfig.helperText()
-        : undefined;
-    },
   };
+}
+
+export function getFilterAggTypeUtils(
+  aggTypeConfig: FilterAggConfigUnion['aggTypeConfig']
+): FilterAggUtilsUnion | undefined {
+  if (isFilterAggConfigTerm(aggTypeConfig)) {
+    const termUtils: FilterAggUtilsTerm = {
+      getEsAggConfig() {
+        if (aggTypeConfig.fieldName === undefined || !aggTypeConfig.filterAggConfig) {
+          throw new Error(`Config ${FILTERS.TERM} is not completed`);
+        }
+        return {
+          [aggTypeConfig.fieldName]: aggTypeConfig.filterAggConfig.value,
+        };
+      },
+      isValid() {
+        return aggTypeConfig.filterAggConfig?.value !== undefined;
+      },
+      getAggName() {
+        return aggTypeConfig.filterAggConfig?.value
+          ? aggTypeConfig.filterAggConfig.value
+          : undefined;
+      },
+    };
+    return termUtils;
+  } else if (isFilterAggConfigRange(aggTypeConfig)) {
+    const rangeUtils: FilterAggUtilsRange = {
+      getEsAggConfig() {
+        if (aggTypeConfig.fieldName === undefined || !aggTypeConfig.filterAggConfig) {
+          throw new Error(`Config ${FILTERS.RANGE} is not completed`);
+        }
+
+        const { from, includeFrom, to, includeTo } = aggTypeConfig.filterAggConfig;
+        const result = {} as ReturnType<FilterAggUtilsRange['getEsAggConfig']>[0];
+
+        if (from) {
+          result[includeFrom ? 'gte' : 'gt'] = from;
+        }
+        if (to) {
+          result[includeTo ? 'lte' : 'lt'] = to;
+        }
+
+        return {
+          [aggTypeConfig.fieldName]: result,
+        };
+      },
+      isValid() {
+        if (
+          typeof aggTypeConfig.filterAggConfig !== 'object' ||
+          (aggTypeConfig.filterAggConfig.from === undefined &&
+            aggTypeConfig.filterAggConfig.to === undefined)
+        ) {
+          return false;
+        }
+
+        if (
+          aggTypeConfig.filterAggConfig.from !== undefined &&
+          aggTypeConfig.filterAggConfig.to !== undefined
+        ) {
+          return aggTypeConfig.filterAggConfig.from <= aggTypeConfig.filterAggConfig.to;
+        }
+
+        return true;
+      },
+      helperText() {
+        if (!this.isValid!()) return;
+        const { from, to, includeFrom, includeTo } = aggTypeConfig.filterAggConfig!;
+
+        return `range: ${`${from !== undefined ? `${includeFrom ? '≥' : '>'} ${from}` : ''} ${
+          from !== undefined && to !== undefined ? '&' : ''
+        } ${to !== undefined ? `${includeTo ? '≤' : '<'} ${to}` : ''}`.trim()}`;
+      },
+    };
+    return rangeUtils;
+  } else if (isFilterAggConfigExists(aggTypeConfig)) {
+    const existsUtils: FilterAggUtilsExists = {
+      getEsAggConfig() {
+        if (aggTypeConfig.fieldName === undefined) {
+          throw new Error(`Config ${FILTERS.EXISTS} is not completed`);
+        }
+        return {
+          field: aggTypeConfig.fieldName,
+        };
+      },
+      isValid() {
+        return typeof aggTypeConfig.fieldName === 'string';
+      },
+    };
+    return existsUtils;
+  } else if (isFilterAggConfigBool(aggTypeConfig)) {
+    const boolUtils: FilterAggUtilsBool = {
+      getEsAggConfig() {
+        return JSON.parse(aggTypeConfig.filterAggConfig!);
+      },
+      isValid() {
+        return isJsonString(aggTypeConfig.filterAggConfig);
+      },
+    };
+    return boolUtils;
+  } else if (isFilterAggConfigEditor(aggTypeConfig)) {
+    const editorUtils: FilterAggUtilsEditor = {
+      getEsAggConfig() {
+        return aggTypeConfig.filterAggConfig !== undefined
+          ? JSON.parse(aggTypeConfig.filterAggConfig!)
+          : {};
+      },
+      isValid() {
+        return isJsonString(aggTypeConfig.filterAggConfig);
+      },
+    };
+    return editorUtils;
+  }
+}
+
+export function getFilterAggTypeComponent(aggTypeConfig: FilterAggConfigUnion['aggTypeConfig']) {
+  if (isFilterAggConfigTerm(aggTypeConfig)) {
+    return FilterTermForm;
+  } else if (isFilterAggConfigRange(aggTypeConfig)) {
+    return FilterRangeForm;
+  } else if (isFilterAggConfigExists(aggTypeConfig)) {
+    return FilterEditorForm;
+  } else if (isFilterAggConfigBool(aggTypeConfig)) {
+    return FilterEditorForm;
+  } else if (isFilterAggConfigEditor(aggTypeConfig)) {
+    return FilterEditorForm;
+  }
 }
 
 /**
@@ -98,23 +248,9 @@ export function getFilterAggTypeConfig(
       resultField = esConfig ? Object.keys(esConfig)[0] : resultField;
 
       return {
-        FilterAggFormComponent: FilterTermForm,
+        filterAggFormComponent: 'filterTermForm',
         filterAggConfig: {
           value,
-        },
-        getEsAggConfig() {
-          if (this.fieldName === undefined || !this.filterAggConfig) {
-            throw new Error(`Config ${FILTERS.TERM} is not completed`);
-          }
-          return {
-            [this.fieldName]: this.filterAggConfig.value,
-          };
-        },
-        isValid() {
-          return this.filterAggConfig?.value !== undefined;
-        },
-        getAggName() {
-          return this.filterAggConfig?.value ? this.filterAggConfig.value : undefined;
         },
         fieldName: resultField,
       } as FilterAggConfigTerm['aggTypeConfig'];
@@ -125,7 +261,7 @@ export function getFilterAggTypeConfig(
 
       return {
         fieldName: resultField,
-        FilterAggFormComponent: FilterRangeForm,
+        filterAggFormComponent: 'filterRangeForm',
         filterAggConfig:
           typeof esFilterRange === 'object'
             ? {
@@ -135,70 +271,17 @@ export function getFilterAggTypeConfig(
                 includeTo: esFilterRange.lte !== undefined,
               }
             : undefined,
-        getEsAggConfig() {
-          if (this.fieldName === undefined || !this.filterAggConfig) {
-            throw new Error(`Config ${FILTERS.RANGE} is not completed`);
-          }
-
-          const { from, includeFrom, to, includeTo } = this.filterAggConfig;
-          const result = {} as ReturnType<
-            FilterAggConfigRange['aggTypeConfig']['getEsAggConfig']
-          >[0];
-
-          if (from) {
-            result[includeFrom ? 'gte' : 'gt'] = from;
-          }
-          if (to) {
-            result[includeTo ? 'lte' : 'lt'] = to;
-          }
-
-          return {
-            [this.fieldName]: result,
-          };
-        },
-        isValid() {
-          if (
-            typeof this.filterAggConfig !== 'object' ||
-            (this.filterAggConfig.from === undefined && this.filterAggConfig.to === undefined)
-          ) {
-            return false;
-          }
-
-          if (this.filterAggConfig.from !== undefined && this.filterAggConfig.to !== undefined) {
-            return this.filterAggConfig.from <= this.filterAggConfig.to;
-          }
-
-          return true;
-        },
-        helperText() {
-          if (!this.isValid!()) return;
-          const { from, to, includeFrom, includeTo } = this.filterAggConfig!;
-
-          return `range: ${`${from !== undefined ? `${includeFrom ? '≥' : '>'} ${from}` : ''} ${
-            from !== undefined && to !== undefined ? '&' : ''
-          } ${to !== undefined ? `${includeTo ? '≤' : '<'} ${to}` : ''}`.trim()}`;
-        },
       } as FilterAggConfigRange['aggTypeConfig'];
     case FILTERS.EXISTS:
       resultField = esConfig ? esConfig.field : resultField;
 
       return {
+        filterAggFormComponent: 'filterExistsForm',
         fieldName: resultField,
-        getEsAggConfig() {
-          if (this.fieldName === undefined) {
-            throw new Error(`Config ${FILTERS.EXISTS} is not completed`);
-          }
-          return {
-            field: this.fieldName,
-          };
-        },
-        isValid() {
-          return typeof this.fieldName === 'string';
-        },
       } as FilterAggConfigExists['aggTypeConfig'];
     case FILTERS.BOOL:
       return {
-        FilterAggFormComponent: FilterEditorForm,
+        filterAggFormComponent: 'filterBoolForm',
         filterAggConfig: JSON.stringify(
           {
             must: [],
@@ -208,24 +291,12 @@ export function getFilterAggTypeConfig(
           null,
           2
         ),
-        isValid() {
-          return isJsonString(this.filterAggConfig);
-        },
-        getEsAggConfig() {
-          return JSON.parse(this.filterAggConfig!);
-        },
       } as FilterAggConfigBool['aggTypeConfig'];
     default:
       return {
         fieldName,
-        FilterAggFormComponent: FilterEditorForm,
+        filterAggFormComponent: 'filterEditorForm',
         filterAggConfig: '',
-        getEsAggConfig() {
-          return this.filterAggConfig !== undefined ? JSON.parse(this.filterAggConfig!) : {};
-        },
-        isValid() {
-          return isJsonString(this.filterAggConfig);
-        },
-      };
+      } as FilterAggConfigEditor['aggTypeConfig'];
   }
 }

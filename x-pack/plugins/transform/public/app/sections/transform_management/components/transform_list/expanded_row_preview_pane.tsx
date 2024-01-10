@@ -5,44 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, FC } from 'react';
+import React, { type FC } from 'react';
 
 import { DataGrid } from '@kbn/ml-data-grid';
 
-import { TransformConfigUnion } from '../../../../../../common/types/transform';
-
 import { useToastNotifications } from '../../../../app_dependencies';
-import { getTransformConfigQuery } from '../../../../common';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { SearchItems } from '../../../../hooks/use_search_items';
 
-import {
-  applyTransformConfigToDefineState,
-  getDefaultStepDefineState,
-} from '../../../create_transform/components/step_define';
-
-interface ExpandedRowPreviewPaneProps {
-  transformConfig: TransformConfigUnion;
-}
-
-export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
+export const ExpandedRowPreviewPane: FC = () => {
   const toastNotifications = useToastNotifications();
-
-  const { searchQuery, validationStatus, previewRequest, runtimeMappings } = useMemo(
-    () =>
-      applyTransformConfigToDefineState(
-        getDefaultStepDefineState({} as SearchItems),
-        transformConfig
-      ),
-    [transformConfig]
-  );
-
-  const transformConfigQuery = useMemo(() => getTransformConfigQuery(searchQuery), [searchQuery]);
-
-  const dataViewTitle = Array.isArray(transformConfig.source.index)
-    ? transformConfig.source.index.join(',')
-    : transformConfig.source.index;
-
   const pivotPreviewProps = useTransformConfigData();
 
   return (

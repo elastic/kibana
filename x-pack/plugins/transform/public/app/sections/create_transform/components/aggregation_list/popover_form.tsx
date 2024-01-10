@@ -36,6 +36,12 @@ import {
 import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { getAggFormConfig } from '../step_define/common/get_agg_form_config';
 
+import {
+  getAggFormComponent,
+  getAggConfigUtils,
+  type AggFormComponent,
+} from '../step_define/common/agg_utils';
+
 interface Props {
   defaultData: PivotAggsConfig;
   otherAggNames: AggName[];
@@ -71,9 +77,12 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
 
   useUpdateEffect(() => {
     if (isPivotAggsWithExtendedForm(aggConfigDef)) {
-      const name = aggConfigDef.getAggName ? aggConfigDef.getAggName() : undefined;
-      if (name !== undefined) {
-        setAggName(name);
+      const utils = getAggConfigUtils(aggConfigDef);
+      if (utils) {
+        const name = utils.getAggName ? utils.getAggName() : undefined;
+        if (name !== undefined) {
+          setAggName(name);
+        }
       }
     }
   }, [aggConfigDef]);
@@ -147,9 +156,15 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
   }
 
   let formValid = validAggName;
+  const AggFormComponent: AggFormComponent | undefined = isPivotAggsWithExtendedForm(aggConfigDef)
+    ? getAggFormComponent(aggConfigDef)
+    : undefined;
 
   if (isPivotAggsWithExtendedForm(aggConfigDef)) {
-    formValid = validAggName && aggConfigDef.isValid();
+    const utils = getAggConfigUtils(aggConfigDef);
+    if (utils) {
+      formValid = validAggName && utils.isValid();
+    }
   }
 
   return (
@@ -236,8 +251,8 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           />
         </EuiFormRow>
       )}
-      {isPivotAggsWithExtendedForm(aggConfigDef) ? (
-        <aggConfigDef.AggFormComponent
+      {isPivotAggsWithExtendedForm(aggConfigDef) && AggFormComponent ? (
+        <AggFormComponent
           aggConfig={aggConfigDef.aggConfig}
           selectedField={field as string}
           onChange={(update: typeof aggConfigDef.aggConfig) => {
@@ -246,7 +261,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
               aggConfig: update,
             });
           }}
-          isValid={aggConfigDef.isValid()}
+          isValid={formValid}
         />
       ) : null}
       {isUnsupportedAgg && (

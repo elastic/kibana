@@ -5,14 +5,37 @@
  * 2.0.
  */
 
-import { TermsAggForm } from './terms_form_component';
 import {
   isPivotAggsConfigWithUiBase,
   PivotAggsConfigBase,
   PivotAggsConfigWithUiBase,
   TERMS_AGG_DEFAULT_SIZE,
 } from '../../../../../../common/pivot_aggs';
-import { IPivotAggsConfigTerms } from './types';
+import type { IPivotAggsConfigTerms, IPivotAggsUtilsTerms } from './types';
+
+export function getTermsAggUtils(config: IPivotAggsConfigTerms): IPivotAggsUtilsTerms {
+  return {
+    setUiConfigFromEs(esAggDefinition) {
+      const { field: esField, size } = esAggDefinition;
+
+      config.field = esField;
+      config.aggConfig.size = size;
+    },
+    getEsAggConfig() {
+      if (!this.isValid()) {
+        return null;
+      }
+
+      return {
+        field: config.field as string,
+        size: config.aggConfig.size as number,
+      };
+    },
+    isValid() {
+      return typeof config.aggConfig.size === 'number' && config.aggConfig.size > 0;
+    },
+  };
+}
 
 export function getTermsAggConfig(
   commonConfig: PivotAggsConfigWithUiBase | PivotAggsConfigBase
@@ -23,29 +46,10 @@ export function getTermsAggConfig(
     ...commonConfig,
     isSubAggsSupported: false,
     isMultiField: false,
-    AggFormComponent: TermsAggForm,
+    aggFormComponent: 'terms',
     field,
     aggConfig: {
       size: TERMS_AGG_DEFAULT_SIZE,
-    },
-    setUiConfigFromEs(esAggDefinition) {
-      const { field: esField, size } = esAggDefinition;
-
-      this.field = esField;
-      this.aggConfig.size = size;
-    },
-    getEsAggConfig() {
-      if (!this.isValid()) {
-        return null;
-      }
-
-      return {
-        field: this.field as string,
-        size: this.aggConfig.size as number,
-      };
-    },
-    isValid() {
-      return typeof this.aggConfig.size === 'number' && this.aggConfig.size > 0;
     },
   };
 }
