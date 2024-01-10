@@ -289,13 +289,16 @@ export function Chart({
       state: {
         ...attributes.state,
         dataSourceStates: {
-          formBased: attributes.state.datasourceStates.formBased,
+          ...attributes.state.datasourceStates,
+          textBased: {
+            ...attributes.state.datasourceStates.textBased,
+            layers: {},
+          },
         },
       },
     };
 
     if (layers) {
-      newState.state.datasourceStates.textBased = { layers: {} };
       for (const key of Object.keys(layers)) {
         // Modify the value as needed, e.g., appending ' modified' to each value
         const newLayer = { ...layers[key] };
