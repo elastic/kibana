@@ -169,14 +169,12 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('restores focus to the Customize Columns button when `Reset Fields` is clicked', () => {
-      openTimelineFieldsBrowser();
       resetFields();
 
       cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
     });
 
     it('restores focus to the Customize Columns button when Esc is pressed', () => {
-      openTimelineFieldsBrowser();
       cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{esc}');
 
       cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
