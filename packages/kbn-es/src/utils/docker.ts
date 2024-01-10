@@ -595,14 +595,10 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       }, {} as Record<string, string>)
     : {};
 
-  const rolesResourcePaths = projectType
-    ? [resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml')]
-    : // read roles for all projects if project is not defined
-      VALID_SERVERLESS_PROJECT_TYPE.map((type) =>
-        resolve(SERVERLESS_ROLES_ROOT_PATH, type, 'roles.yml')
-      );
+  // read roles for the specified project only, 'es' if not defined
+  const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType ?? 'es', 'roles.yml');
 
-  const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, ...rolesResourcePaths];
+  const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];
 
   const serverlessResources = resourcesPaths.reduce<string[]>((acc, path) => {
     const fileName = basename(path);
