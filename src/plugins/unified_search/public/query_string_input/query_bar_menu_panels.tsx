@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiContextMenuPanelDescriptor,
@@ -24,6 +24,7 @@ import {
   toggleFilterNegated,
   pinFilter,
   unpinFilter,
+  compareFilters,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -34,6 +35,8 @@ import {
   UI_SETTINGS,
 } from '@kbn/data-plugin/common';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
+import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
+import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
@@ -134,10 +137,21 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.options.filterLanguageLabel', {
       defaultMessage: 'Filter language',
     }),
+  getQuickFiltersLabel: () =>
+    i18n.translate('unifiedSearch.filter.options.quickFiltersLabel', {
+      defaultMessage: 'Quick filters',
+    }),
 };
+
+type ContextMenuItem =
+  | EuiContextMenuPanelDescriptor
+  | (EuiContextMenuPanelItemDescriptor & {
+      width?: number;
+    });
 
 export interface QueryBarMenuPanelsProps {
   filters?: Filter[];
+  quickFilters: QuickFiltersMenuItem[];
   savedQuery?: SavedQuery;
   language: string;
   dateRangeFrom?: string;
@@ -162,6 +176,7 @@ export interface QueryBarMenuPanelsProps {
 
 export function QueryBarMenuPanels({
   filters,
+  quickFilters,
   savedQuery,
   language,
   dateRangeFrom,
@@ -191,6 +206,52 @@ export function QueryBarMenuPanels({
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [hasFiltersOrQuery, setHasFiltersOrQuery] = useState(false);
   const [savedQueryHasChanged, setSavedQueryHasChanged] = useState(false);
+
+  const applyQuickFilter = useCallback(
+    (filter: Filter) => {
+      if (!filters?.some((f) => compareFilters(f, filter))) {
+        onFiltersUpdated?.([...(filters ?? []), filter]);
+      }
+      closePopover();
+    },
+    [closePopover, filters, onFiltersUpdated]
+  );
+
+  const quickFiltersContextMenuData = useMemo(() => {
+    let items = [] as EuiContextMenuPanelItemDescriptor[];
+    const panels = [] as EuiContextMenuPanelDescriptor[];
+    if (showFilterBar && quickFilters.length > 0) {
+      let panelsCount = 0;
+      const quickFiltersItemToContextMenuItem = (qf: QuickFiltersMenuItem) => {
+        if (isQuickFiltersGroup(qf)) {
+          const panelId = `quick_filter_group_${panelsCount++}`;
+          panels.push({
+            id: panelId,
+            title: qf.groupName,
+            items: qf.items.map(quickFiltersItemToContextMenuItem),
+          });
+          return {
+            name: qf.groupName,
+            icon: qf.icon ?? 'filterInCircle',
+            panel: panelId,
+          };
+        } else {
+          return {
+            ...qf,
+            icon: qf.icon ?? 'filterInCircle',
+            onClick: () => {
+              applyQuickFilter(qf.filter);
+            },
+          };
+        }
+      };
+      items = quickFilters.map(quickFiltersItemToContextMenuItem);
+    }
+    return {
+      items,
+      panels,
+    };
+  }, [applyQuickFilter, quickFilters, showFilterBar]);
 
   useEffect(() => {
     const fetchSavedQueries = async () => {
@@ -320,7 +381,7 @@ export function QueryBarMenuPanels({
   const luceneLabel = strings.getLuceneLanguageName();
   const kqlLabel = strings.getKqlLanguageName();
 
-  const filtersRelatedPanels = [
+  const filtersRelatedPanels: ContextMenuItem[] = [
     {
       name: strings.getOptionsAddFilterButtonLabel(),
       icon: 'plus',
@@ -337,7 +398,7 @@ export function QueryBarMenuPanels({
     },
   ];
 
-  const queryAndFiltersRelatedPanels = [
+  const queryAndFiltersRelatedPanels: ContextMenuItem[] = [
     {
       name: savedQuery
         ? strings.getLoadOtherFilterSetLabel()
@@ -359,7 +420,7 @@ export function QueryBarMenuPanels({
     { isSeparator: true },
   ];
 
-  const items = [];
+  const items: ContextMenuItem[] = [];
   // apply to all actions are only shown when there are filters
   if (showFilterBar) {
     items.push(...filtersRelatedPanels);
@@ -385,6 +446,11 @@ export function QueryBarMenuPanels({
       { isSeparator: true }
     );
   }
+
+  if (showFilterBar && quickFilters.length > 0) {
+    items.push(...[...quickFiltersContextMenuData.items, { isSeparator: true } as const]);
+  }
+
   // saved queries actions are only shown when the showQueryInput and showFilterBar is true
   if (showQueryInput && showFilterBar) {
     items.push(...queryAndFiltersRelatedPanels);
@@ -513,6 +579,7 @@ export function QueryBarMenuPanels({
       width: 400,
       content: <div>{manageFilterSetComponent}</div>,
     },
+    ...quickFiltersContextMenuData.panels,
   ] as EuiContextMenuPanelDescriptor[];
 
   if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {

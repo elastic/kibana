@@ -255,6 +255,8 @@ const AlertsTableStateWithQueryProvider = ({
     skip: false,
   });
 
+  console.log('Alerts', alerts);
+
   const { data: mutedAlerts } = useGetMutedAlerts([
     ...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0])),
   ]);

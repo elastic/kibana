@@ -33,6 +33,7 @@ import type {
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
+import { QuickFiltersMenuItem } from '../query_string_input/quick_filters';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
@@ -58,6 +59,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
+  quickFilters?: QuickFiltersMenuItem[];
   filtersForSuggestions?: Filter[];
   hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
   prependFilterBar?: React.ReactNode;
@@ -146,6 +148,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     showSubmitButton: true,
     showAutoRefreshOnly: false,
     filtersForSuggestions: [],
+    quickFilters: [],
   };
 
   private services = this.props.kibana.services;
@@ -502,6 +505,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         openQueryBarMenu={this.state.openQueryBarMenu}
         onFiltersUpdated={this.props.onFiltersUpdated}
         filters={this.props.filters}
+        quickFilters={this.props.quickFilters ?? []}
         hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
         query={this.state.query as Query}
         savedQuery={this.props.savedQuery}

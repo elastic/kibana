@@ -7,6 +7,7 @@
 
 import { Filter } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { QuickFilter } from '@kbn/unified-search-plugin/public/search_bar/search_bar';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
 
@@ -18,6 +19,7 @@ export interface AlertsSearchBarProps {
   rangeTo?: string;
   query?: string;
   filters?: Filter[];
+  quickFilters?: QuickFilter[];
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showSubmitButton?: boolean;
@@ -33,4 +35,5 @@ export interface AlertsSearchBarProps {
     query?: string;
   }) => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
+  filtersForSuggestions?: Filter[];
 }

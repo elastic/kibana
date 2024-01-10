@@ -36,7 +36,7 @@ import {
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
-const Alerts = lazy(() => import('./sections/global_alerts'));
+const GlobalAlerts = lazy(() => import('./sections/global_alerts'));
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
@@ -60,7 +60,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
-export const renderApp = (deps: TriggersAndActionsUiServices) => {
+export const renderApp = (deps: Partial<TriggersAndActionsUiServices>) => {
   const { element } = deps;
   render(<App deps={deps} />, element);
   return () => {
@@ -80,7 +80,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
               <Routes>
-                <Route path={`/`} component={suspendedComponentWithProps(Alerts, 'xl')} />
+                <Route path={`/`} component={suspendedComponentWithProps(GlobalAlerts, 'xl')} />
               </Routes>
             </Router>
           </KibanaContextProvider>

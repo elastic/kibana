@@ -35,7 +35,6 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { getSectionsServiceStartPrivate } from '@kbn/management-plugin/public/management_sections_service';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { AlertActionsProps } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
@@ -290,23 +289,38 @@ export class Plugin
       // updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application/alerts_app');
-        const [coreStart, deps] = await core.getStartServices();
+        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+          CoreStart,
+          PluginsStart,
+          unknown
+        ];
+        let kibanaFeatures: KibanaFeature[];
+        try {
+          kibanaFeatures = await pluginsStart.features.getFeatures();
+        } catch (err) {
+          kibanaFeatures = [];
+        }
 
-        return renderApp(params, {
-          sections: getSectionsServiceStartPrivate(),
-          kibanaVersion,
-          coreStart,
-          setBreadcrumbs: (newBreadcrumbs) => {
-            if (deps.serverless) {
-              // drop the root management breadcrumb in serverless because it comes from the navigation tree
-              const [, ...trailingBreadcrumbs] = newBreadcrumbs;
-              deps.serverless.setBreadcrumbs(trailingBreadcrumbs);
-            } else {
-              coreStart.chrome.setBreadcrumbs(newBreadcrumbs);
-            }
-          },
-          isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
-          cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
+        return renderApp({
+          ...coreStart,
+          actions: plugins.actions,
+          dashboard: pluginsStart.dashboard,
+          data: pluginsStart.data,
+          dataViews: pluginsStart.dataViews,
+          dataViewEditor: pluginsStart.dataViewEditor,
+          charts: pluginsStart.charts,
+          alerting: pluginsStart.alerting,
+          spaces: pluginsStart.spaces,
+          unifiedSearch: pluginsStart.unifiedSearch,
+          isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+          element: params.element,
+          theme$: params.theme$,
+          storage: new Storage(window.localStorage),
+          history: params.history,
+          actionTypeRegistry,
+          ruleTypeRegistry,
+          alertsTableConfigurationRegistry,
+          kibanaFeatures,
         });
       },
     });

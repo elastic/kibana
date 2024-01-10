@@ -29,7 +29,7 @@ const columns = [
       defaultMessage: 'Alert Status',
     }),
     id: ALERT_STATUS,
-    initialWidth: 110,
+    initialWidth: 140,
   },
   {
     columnHeaderType: 'not-filtered',

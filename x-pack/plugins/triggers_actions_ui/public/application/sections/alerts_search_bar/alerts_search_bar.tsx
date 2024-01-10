@@ -13,7 +13,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useAlertDataView } from '../../hooks/use_alert_data_view';
+import { useAlertDataViews } from '../../hooks/use_alert_data_view';
 import { TriggersAndActionsUiServices } from '../../..';
 import { useRuleAADFields } from '../../hooks/use_rule_aad_fields';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
@@ -29,6 +29,7 @@ export function AlertsSearchBar({
   ruleTypeId,
   query,
   filters,
+  quickFilters = [],
   onQueryChange,
   onQuerySubmit,
   onFiltersUpdated,
@@ -39,6 +40,7 @@ export function AlertsSearchBar({
   showSubmitButton = true,
   placeholder = SEARCH_BAR_PLACEHOLDER,
   submitOnBlur = false,
+  filtersForSuggestions,
 }: AlertsSearchBarProps) {
   const {
     unifiedSearch: {
@@ -47,11 +49,11 @@ export function AlertsSearchBar({
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
-  const { dataviews, loading } = useAlertDataView(featureIds ?? []);
+  const { dataViews, loading } = useAlertDataViews(featureIds ?? []);
   const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns =
-    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataviews;
+    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataViews;
 
   const ruleType = useLoadRuleTypesQuery({
     filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
@@ -100,6 +102,7 @@ export function AlertsSearchBar({
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       filters={filters}
+      quickFilters={quickFilters}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
       displayStyle="inPage"
@@ -114,6 +117,7 @@ export function AlertsSearchBar({
       submitOnBlur={submitOnBlur}
       onQueryChange={onSearchQueryChange}
       suggestionsAbstraction={isSecurity ? undefined : SA_ALERTS}
+      filtersForSuggestions={filtersForSuggestions}
     />
   );
 }

@@ -301,7 +301,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             }
 
             return (
-              <EuiFlexGroup gutterSize="none" responsive={false}>
+              <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
                 {renderCustomActionsRow({
                   alert: alerts[visibleRowIndex],
                   ecsAlert: ecsAlertsData[visibleRowIndex],

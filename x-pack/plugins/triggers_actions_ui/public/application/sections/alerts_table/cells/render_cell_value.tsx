@@ -7,12 +7,19 @@
 
 import { isEmpty } from 'lodash';
 import React, { type ReactNode } from 'react';
-import { ALERT_DURATION, TIMESTAMP } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_RULE_PRODUCER,
+  AlertConsumers,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import {
   FIELD_FORMAT_IDS,
   FieldFormatParams,
   FieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
+import { EuiBadge } from '@elastic/eui';
+import { alertProducersData } from '../constants';
 import { GetRenderCellValue } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -107,6 +114,9 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
             })(value) || '--'}
           </>
         );
+      case ALERT_RULE_PRODUCER:
+        const consumerData = alertProducersData[value as AlertConsumers];
+        return <EuiBadge iconType={consumerData.icon}>{consumerData.displayName}</EuiBadge>;
       default:
         return <>{value}</>;
     }
