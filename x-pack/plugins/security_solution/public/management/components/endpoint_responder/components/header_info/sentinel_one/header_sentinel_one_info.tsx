@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
+import { SentinelOneAgentStatus } from '../../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
 import { HeaderAgentInfo } from '../header_agent_info';
 import { useGetEndpointPendingActionsSummary } from '../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
@@ -39,11 +40,10 @@ export const HeaderSentinelOneInfo = memo<HeaderSentinelOneInfoProps>(
         hostName={hostName}
         lastCheckin={lastCheckin}
       >
-        {/* TODO: Update with a SentinelOne agent isolation status component */}
-        {/* <SentinelOneAgentStatus*/}
-        {/*  agentId={agentId}*/}
-        {/*  data-test-subj="responderHeaderSentinelOneAgentIsolationStatus"*/}
-        {/* />*/}
+        <SentinelOneAgentStatus
+          agentId={agentId}
+          data-test-subj="responderHeaderSentinelOneAgentIsolationStatus"
+        />
       </HeaderAgentInfo>
     );
   }
