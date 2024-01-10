@@ -22,7 +22,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ResultsLinks } from '../../../common/components/results_links';
 import { FilebeatConfigFlyout } from '../../../common/components/filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
@@ -37,7 +36,6 @@ import {
 } from '../../../common/components/combined_fields';
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 
-const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = {};
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
 
@@ -75,8 +73,7 @@ const DEFAULT_STATE = {
   isFilebeatFlyoutVisible: false,
   checkingValidIndex: false,
   combinedFields: [],
-  firstReadDoc: undefined,
-  lastReadDoc: undefined,
+  importer: undefined,
 };
 
 export class ImportView extends Component {
@@ -208,15 +205,6 @@ export class ImportView extends Component {
                   parseJSONStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                 });
 
-                // if an @timestamp field has been added to the
-                // mappings, use this field as the time field.
-                // This relies on the field being populated by
-                // the ingest pipeline on ingest
-                if (isPopulatedObject(mappings.properties, [DEFAULT_TIME_FIELD])) {
-                  timeFieldName = DEFAULT_TIME_FIELD;
-                  this.setState({ timeFieldName });
-                }
-
                 if (success) {
                   const importer = await fileUpload.importerFactory(format, {
                     excludeLinesPattern: results.exclude_lines_pattern,
@@ -225,13 +213,10 @@ export class ImportView extends Component {
                   if (importer !== undefined) {
                     const readResp = importer.read(data, this.setReadProgress);
                     success = readResp.success;
-                    const firstReadDoc = importer.getFirstReadDoc();
-                    const lastReadDoc = importer.getLastReadDoc();
                     this.setState({
                       readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                       reading: false,
-                      firstReadDoc,
-                      lastReadDoc,
+                      importer,
                     });
 
                     if (readResp.success === false) {
@@ -246,6 +231,9 @@ export class ImportView extends Component {
                         mappings,
                         pipeline
                       );
+
+                      timeFieldName = importer.getTimeField();
+                      this.setState({ timeFieldName });
 
                       const indexCreated = initializeImportResp.index !== undefined;
                       this.setState({
@@ -461,6 +449,7 @@ export class ImportView extends Component {
       isFilebeatFlyoutVisible,
       checkingValidIndex,
       combinedFields,
+      importer,
     } = this.state;
 
     const createPipeline = pipelineString !== '';
@@ -578,16 +567,13 @@ export class ImportView extends Component {
             <EuiPanel hasShadow={false} hasBorder>
               <ImportProgress statuses={statuses} />
 
-              <DocCountChart
-                statuses={statuses}
-                dataStart={this.props.dataStart}
-                index={index}
-                pipelineString={pipelineString}
-                fileUpload={this.props.fileUpload}
-                firstReadDoc={this.state.firstReadDoc}
-                lastReadDoc={this.state.lastReadDoc}
-                timeField={timeFieldName}
-              />
+              {importer !== undefined && importer.initialized() && (
+                <DocCountChart
+                  statuses={statuses}
+                  dataStart={this.props.dataStart}
+                  importer={importer}
+                />
+              )}
 
               {imported === true && (
                 <React.Fragment>

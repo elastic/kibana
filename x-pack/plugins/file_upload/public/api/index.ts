@@ -21,7 +21,6 @@ export interface FileUploadStartApi {
   hasImportPermission: typeof hasImportPermission;
   checkIndexExists: typeof checkIndexExists;
   getTimeFieldRange: typeof getTimeFieldRange;
-  getTimeFromDoc: typeof getTimeFromDoc;
   analyzeFile: typeof analyzeFile;
 }
 
@@ -108,18 +107,6 @@ export async function getTimeFieldRange(index: string, query: unknown, timeField
   const fileUploadModules = await lazyLoadModules();
   return await fileUploadModules.getHttp().fetch<GetTimeFieldRangeResponse>({
     path: `/internal/file_upload/time_field_range`,
-    method: 'POST',
-    version: '1',
-    body,
-  });
-}
-
-export async function getTimeFromDoc(timeField: string, doc: any, pipeline: any) {
-  const body = JSON.stringify({ doc, pipeline, timeField });
-
-  const fileUploadModules = await lazyLoadModules();
-  return await fileUploadModules.getHttp().fetch<GetTimeFromDocResponse>({
-    path: `/internal/file_upload/get_time_from_doc`,
     method: 'POST',
     version: '1',
     body,

@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { CoreSetup, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
@@ -26,9 +26,9 @@ import {
   analyzeFileQuerySchema,
   runtimeMappingsSchema,
 } from './schemas';
-import { StartDeps } from './types';
+import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
-import { getTimeFromDoc } from './get_time_from_doc';
+import { previewIndexTimeRange } from './preview_index_time_range';
 
 function importData(
   client: IScopedClusterClient,
@@ -283,18 +283,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /internal/file_upload/time_field_range Get time field range
-   * @apiName GetTimeFieldRange
-   * @apiDescription Returns the time range for the given index and query using the specified time range.
-   *
-   * @apiSchema (body) getTimeFieldRangeSchema
-   *
-   * @apiSuccess {Object} start start of time range with epoch and string properties.
-   * @apiSuccess {Object} end end of time range with epoch and string properties.
+   * @api {post} /internal/file_upload/preview_index_time_range Predict the time range for an index using example documents
+   * @apiName PreviewIndexTimeRange
+   * @apiDescription Predict the time range for an index using example documents
    */
   router.versioned
     .post({
-      path: '/internal/file_upload/get_time_from_doc',
+      path: '/internal/file_upload/preview_index_time_range',
       access: 'internal',
       options: {
         tags: ['access:fileUpload:analyzeFile'],
@@ -306,7 +301,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         validate: {
           request: {
             body: schema.object({
-              doc: schema.any(),
+              firstDoc: schema.any(),
+              lastDoc: schema.any(),
               pipeline: schema.any(),
               timeField: schema.string(),
             }),
@@ -315,9 +311,12 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       },
       async (context, request, response) => {
         try {
-          const { doc, pipeline, timeField } = request.body;
+          const { firstDoc, lastDoc, pipeline, timeField } = request.body;
           const esClient = (await context.core).elasticsearch.client;
-          const resp = await getTimeFromDoc(esClient, timeField, doc, pipeline);
+          const resp = await previewIndexTimeRange(esClient, timeField, pipeline, [
+            firstDoc,
+            lastDoc,
+          ]);
 
           return response.ok({
             body: resp,
