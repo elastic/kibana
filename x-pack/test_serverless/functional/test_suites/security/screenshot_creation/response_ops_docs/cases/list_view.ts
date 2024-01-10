@@ -71,6 +71,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
     it('case settings screenshot', async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
       await testSubjects.click('configure-case-button');
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await svlCommonScreenshots.takeScreenshot('case-settings', screenshotDirectories);
     });
 
