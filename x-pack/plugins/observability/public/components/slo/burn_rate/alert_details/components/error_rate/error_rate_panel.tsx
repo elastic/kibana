@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,13 +20,13 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ActionGroup, WindowSchema } from '../../../../../../typings';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
+import { ActionGroup, WindowSchema } from '../../../../../../typings';
 import { ErrorRateChart } from '../../../../error_rate_chart';
 import { BurnRateAlert } from '../../alert_details_app_section';
 import { useKibana } from '../../../../../../utils/kibana_react';
-import { ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 
 function getActionGroupFromReason(reason: string): ActionGroup {
   const prefix = reason.split(':')[0]?.toLowerCase() ?? undefined;
@@ -88,7 +95,10 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink href={http.basePath.prepend(alert.link!)}>
+              <EuiLink
+                data-test-subj="o11yErrorRatePanelSloDetailsLink"
+                href={http.basePath.prepend(alert.link!)}
+              >
                 <EuiIcon type="sortRight" />
                 <FormattedMessage
                   id="xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.sloDetailsLink"
