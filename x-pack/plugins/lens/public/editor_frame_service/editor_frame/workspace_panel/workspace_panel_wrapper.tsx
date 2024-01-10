@@ -7,8 +7,7 @@
 
 import './workspace_panel_wrapper.scss';
 
-import { useResizeObserver } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,16 +57,10 @@ const unitToCSSUnit: Record<ChartSizeUnit, string> = {
   percentage: '%',
 };
 
-const getAspectRatioStyles = (
-  { x, y }: { x: number; y: number },
-  parentDimensions: { width: number; height: number }
-) => {
-  const parentAspectRatio = parentDimensions.width / parentDimensions.height;
-  const aspectRatio = x / y;
-
+const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
   return {
     aspectRatio: `${x}/${y}`,
-    ...(parentAspectRatio > aspectRatio
+    ...(y > x
       ? {
           height: '100%',
           width: 'auto',
@@ -142,9 +135,6 @@ export function WorkspacePanelWrapper({
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const userMessages = getUserMessages('toolbar');
 
-  const outerWorkspaceRef = useRef<HTMLDivElement>(null);
-  const workspaceDimensions = useResizeObserver(outerWorkspaceRef.current);
-
   const aspectRatio = displayOptions?.aspectRatio;
   const maxDimensions = displayOptions?.maxDimensions;
   const minDimensions = displayOptions?.minDimensions;
@@ -152,7 +142,7 @@ export function WorkspacePanelWrapper({
   let visDimensionsCSS: Interpolation<Theme> = {};
 
   if (aspectRatio) {
-    visDimensionsCSS = getAspectRatioStyles(aspectRatio ?? maxDimensions, workspaceDimensions);
+    visDimensionsCSS = getAspectRatioStyles(aspectRatio ?? maxDimensions);
   }
 
   if (maxDimensions) {
@@ -264,7 +254,6 @@ export function WorkspacePanelWrapper({
         color="transparent"
       >
         <EuiFlexGroup
-          ref={outerWorkspaceRef}
           gutterSize="none"
           alignItems="center"
           justifyContent="center"
