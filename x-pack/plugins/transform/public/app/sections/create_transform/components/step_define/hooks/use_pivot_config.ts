@@ -128,13 +128,6 @@ export const getPivotConfigActions = (
   const { rAddAggregation, rAddGroupBy, rDeleteAggregation, rDeleteGroupBy, rUpdateAggregation } =
     stepDefineSlice.actions;
 
-  console.log('RESET getPivotConfigActions');
-
-  // The list of selected aggregations
-  // const aggList = useWizardSelector((s) => s.stepDefine.aggList);
-  // The list of selected group by fields
-  // const groupByList = useWizardSelector((s) => s.stepDefine.groupByList);
-
   const { aggOptionsData, groupByOptionsData, fields } = pivotConfigOptions;
 
   const addGroupBy =
@@ -194,7 +187,6 @@ export const getPivotConfigActions = (
       const { aggList, groupByList } = getState().stepDefine;
       const label: AggName = d[0].label;
       const config: PivotAggsConfig = aggOptionsData[label];
-      console.log('config', config);
 
       let aggName: AggName = config.aggName;
 
@@ -311,7 +303,6 @@ export const getPivotConfigActions = (
       items[config.aggId] = config;
 
       const newRootItem = cloneAggItem(getRootAggregation(item, items));
-      console.log('update', newRootItem.aggName, newRootItem);
       items[newRootItem.aggId] = newRootItem;
       dispatch(updateAggregation(newRootItem.aggName, newRootItem));
     };

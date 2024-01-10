@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
@@ -26,7 +27,6 @@ import {
   type UseIndexDataReturnType,
   INDEX_STATUS,
 } from '@kbn/ml-data-grid';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
 import {
   hasKeywordDuplicate,
@@ -35,22 +35,35 @@ import {
 } from '../../../common/utils/field_utils';
 import { getErrorMessage } from '../../../common/utils/errors';
 
-import { isDefaultQuery, matchAllQuery, TransformConfigQuery } from '../common';
+import { isDefaultQuery, matchAllQuery } from '../common';
 import { useToastNotifications, useAppDependencies } from '../app_dependencies';
-import type { AdvancedRuntimeMappingsEditorState } from '../sections/create_transform/state_management/advanced_runtime_mappings_editor_slice';
+import { useWizardSelector } from '../sections/create_transform/state_management/create_transform_store';
+import { selectTransformConfigQuery } from '../sections/create_transform/state_management/step_define_selectors';
+import { useWizardContext } from '../sections/create_transform/components/wizard/wizard';
 
-import { SearchItems } from './use_search_items';
 import { useGetHistogramsForFields } from './use_get_histograms_for_fields';
 import { useDataSearch } from './use_data_search';
 
-export const useIndexData = (
-  dataView: SearchItems['dataView'],
-  query: TransformConfigQuery,
-  combinedRuntimeMappings?: AdvancedRuntimeMappingsEditorState['runtimeMappings'],
-  timeRangeMs?: TimeRangeMs,
-  populatedFields?: string[]
-): UseIndexDataReturnType => {
-  const { analytics } = useAppDependencies();
+type PopulatedFields = Set<string>;
+const isPopulatedFields = (arg: unknown): arg is PopulatedFields => arg instanceof Set;
+
+export const useIndexData = (): UseIndexDataReturnType => {
+  const { analytics, ml } = useAppDependencies();
+  const { useFieldStatsFlyoutContext } = ml;
+  const fieldStatsContext = useFieldStatsFlyoutContext();
+
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
+
+  const timeRangeMs = useWizardSelector((s) => s.stepDefine.timeRangeMs);
+  const combinedRuntimeMappings = useWizardSelector(
+    (s) => s.advancedRuntimeMappingsEditor.runtimeMappings
+  );
+  const transformConfigQuery = useSelector(selectTransformConfigQuery);
+
+  const populatedFields = isPopulatedFields(fieldStatsContext?.populatedFields)
+    ? [...fieldStatsContext.populatedFields]
+    : [];
 
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
@@ -63,7 +76,7 @@ export const useIndexData = (
     dataView.timeFieldName,
     timeRangeMs?.from,
     timeRangeMs?.to,
-    query
+    transformConfigQuery
   );
 
   const defaultQuery = useMemo(
@@ -195,7 +208,7 @@ export const useIndexData = (
     resetPagination();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify([query, timeRangeMs])]);
+  }, [JSON.stringify([transformConfigQuery, timeRangeMs])]);
 
   const sort: EsSorting = sortingColumns.reduce((s, column) => {
     s[column.id] = { order: column.direction };
@@ -213,7 +226,7 @@ export const useIndexData = (
       body: {
         fields: ['*'],
         _source: false,
-        query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+        query: isDefaultQuery(transformConfigQuery) ? defaultQuery : queryWithBaseFilterCriteria,
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
@@ -254,7 +267,7 @@ export const useIndexData = (
       setStatus(INDEX_STATUS.LOADED);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataGridDataError, dataGridDataIsError, dataGridDataIsLoading]);
+  }, [dataGridData, dataGridDataError, dataGridDataIsError, dataGridDataIsLoading]);
 
   const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
   const { error: histogramsForFieldsError, data: histogramsForFieldsData } =
@@ -276,7 +289,7 @@ export const useIndexData = (
                 type: getFieldType(cT.schema),
               };
         }),
-      isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+      isDefaultQuery(transformConfigQuery) ? defaultQuery : queryWithBaseFilterCriteria,
       combinedRuntimeMappings,
       chartsVisible
     );
@@ -325,8 +338,12 @@ export const useIndexData = (
     });
   }
 
-  return {
-    ...dataGrid,
-    renderCellValue,
-  };
+  return useMemo(
+    () => ({
+      ...dataGrid,
+      rowCount: loadIndexDataStartTime.current === undefined ? dataGrid.rowCount : 0,
+      renderCellValue,
+    }),
+    [dataGrid, renderCellValue]
+  );
 };

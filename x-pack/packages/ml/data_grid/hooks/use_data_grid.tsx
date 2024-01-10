@@ -47,7 +47,10 @@ export const useDataGrid = (
   defaultVisibleColumnsCount = INIT_MAX_COLUMNS,
   defaultVisibleColumnsFilter?: (id: string) => boolean
 ): UseDataGridReturnType => {
-  const defaultPagination: IndexPagination = { pageIndex: 0, pageSize: defaultPageSize };
+  const defaultPagination: IndexPagination = useMemo(
+    () => ({ pageIndex: 0, pageSize: defaultPageSize }),
+    [defaultPageSize]
+  );
 
   const [ccsWarning, setCcsWarning] = useState(false);
   const [noDataMessage, setNoDataMessage] = useState('');
@@ -62,11 +65,11 @@ export const useDataGrid = (
 
   const { rowCount, rowCountRelation } = rowCountInfo;
 
-  const toggleChartVisibility = () => {
+  const toggleChartVisibility = useCallback(() => {
     if (chartsVisible !== undefined) {
       setChartsVisible(!chartsVisible);
     }
-  };
+  }, [chartsVisible, setChartsVisible]);
 
   const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback((pageSize) => {
     setPagination((p) => {
@@ -80,7 +83,7 @@ export const useDataGrid = (
     []
   );
 
-  const resetPagination = () => setPagination(defaultPagination);
+  const resetPagination = useCallback(() => setPagination(defaultPagination), [defaultPagination]);
 
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<ColumnId[]>([]);
@@ -168,35 +171,57 @@ export const useDataGrid = (
     }
   }, [chartsVisible, rowCount, rowCountRelation]);
 
-  return {
-    ccsWarning,
-    chartsVisible,
-    chartsButtonVisible: true,
-    columnsWithCharts,
-    errorMessage,
-    invalidSortingColumnns,
-    noDataMessage,
-    onChangeItemsPerPage,
-    onChangePage,
-    onSort,
-    pagination,
-    resetPagination,
-    rowCount,
-    rowCountRelation,
-    setColumnCharts,
-    setCcsWarning,
-    setErrorMessage,
-    setNoDataMessage,
-    setPagination,
-    setRowCountInfo,
-    setSortingColumns,
-    setStatus,
-    setTableItems,
-    setVisibleColumns,
-    sortingColumns,
-    status,
-    tableItems,
-    toggleChartVisibility,
-    visibleColumns,
-  };
+  return useMemo(
+    () => ({
+      ccsWarning,
+      chartsVisible,
+      chartsButtonVisible: true,
+      columnsWithCharts,
+      errorMessage,
+      invalidSortingColumnns,
+      noDataMessage,
+      onChangeItemsPerPage,
+      onChangePage,
+      onSort,
+      pagination,
+      resetPagination,
+      rowCount,
+      rowCountRelation,
+      setColumnCharts,
+      setCcsWarning,
+      setErrorMessage,
+      setNoDataMessage,
+      setPagination,
+      setRowCountInfo,
+      setSortingColumns,
+      setStatus,
+      setTableItems,
+      setVisibleColumns,
+      sortingColumns,
+      status,
+      tableItems,
+      toggleChartVisibility,
+      visibleColumns,
+    }),
+    [
+      ccsWarning,
+      chartsVisible,
+      columnsWithCharts,
+      errorMessage,
+      invalidSortingColumnns,
+      noDataMessage,
+      onChangeItemsPerPage,
+      onChangePage,
+      onSort,
+      pagination,
+      resetPagination,
+      rowCount,
+      rowCountRelation,
+      sortingColumns,
+      status,
+      tableItems,
+      toggleChartVisibility,
+      visibleColumns,
+    ]
+  );
 };
