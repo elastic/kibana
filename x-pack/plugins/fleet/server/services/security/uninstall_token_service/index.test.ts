@@ -542,10 +542,10 @@ describe('UninstallTokenService', () => {
           });
 
           it('performs multiple queries if number of policies is larger than batch size', async () => {
-            mockCreatePointInTimeFinderAsInternalUser();
-
             // @ts-ignore
-            uninstallTokenService.batchSize = 1;
+            appContextService.getConfig().setup = { uninstallTokenVerificationBatchSize: 1 };
+
+            mockCreatePointInTimeFinderAsInternalUser();
 
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
