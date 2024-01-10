@@ -79,7 +79,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
               `Failure! unable to send ${result.events} events to channel "${result.channel}": ${result.message}`
             );
           } else {
-            this.logger.l(`Success! %d events sent to channel "${result.channel}"`);
+            this.logger.l(`Success! ${result.events} events sent to channel "${result.channel}"`);
           }
         },
         error: (err) => {
@@ -193,9 +193,9 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
 
   // TODO(sebastian.zaffarano): not fully implemented yet
   private async sendEvents(channel: TelemetryChannel, events: string[]): Promise<Result> {
-    const senderMetadata = await this.getSenderMetadata(channel);
-
     try {
+      const senderMetadata = await this.getSenderMetadata(channel);
+
       this.logger.l(`Sending ${events.length} telemetry events to ${channel}`);
 
       const body = events.join('\n');
