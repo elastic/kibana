@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import type { ImmutableArray } from '../../../common/endpoint/types';
 import type {
   ConsoleResponseActionCommands,
   ResponseActionAgentType,
@@ -33,9 +34,13 @@ export interface BasicConsoleProps {
 }
 
 type ResponderInfoProps =
-  | (BasicConsoleProps & { agentType: Extract<ResponseActionAgentType, 'endpoint'> })
+  | (BasicConsoleProps & {
+      agentType: Extract<ResponseActionAgentType, 'endpoint'>;
+      capabilities: ImmutableArray<string>;
+    })
   | (BasicConsoleProps & {
       agentType: Exclude<ResponseActionAgentType, 'endpoint'>;
+      capabilities: ImmutableArray<string>;
       platform: string;
       lastCheckin: string;
     });
@@ -46,7 +51,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
 
   return useCallback(
     (props: ResponderInfoProps) => {
-      const { agentId, agentType, hostName } = props;
+      const { agentId, agentType, capabilities, hostName } = props;
       // If no authz, just exit and log something to the console
       if (!endpointPrivileges.canAccessResponseConsole) {
         window.console.error(new Error(`Access denied to ${agentType} response actions console`));
@@ -69,7 +74,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               commands: getEndpointConsoleCommands({
                 agentType,
                 endpointAgentId: agentId,
-                endpointCapabilities: ['isolation'],
+                endpointCapabilities: capabilities,
                 endpointPrivileges,
               }).filter((command) =>
                 command.name !== 'status'

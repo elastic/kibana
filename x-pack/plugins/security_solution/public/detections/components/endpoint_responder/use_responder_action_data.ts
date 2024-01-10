@@ -122,6 +122,7 @@ export const useResponderActionData = ({
       showResponseActionsConsole({
         agentId: agentInfoFromAlert.agent.id,
         agentType,
+        capabilities: ['isolation'],
         hostName: agentInfoFromAlert.host.name,
         platform: agentInfoFromAlert.host.os.family,
         lastCheckin: agentInfoFromAlert.lastCheckin,
@@ -131,6 +132,7 @@ export const useResponderActionData = ({
       showResponseActionsConsole({
         agentId: hostInfo.metadata.agent.id,
         agentType: 'endpoint',
+        capabilities: hostInfo.metadata.Endpoint.capabilities ?? [],
         hostName: hostInfo.metadata.host.name,
       });
     }

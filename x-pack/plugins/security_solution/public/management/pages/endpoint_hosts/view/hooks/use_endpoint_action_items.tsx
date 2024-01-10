@@ -130,6 +130,7 @@ export const useEndpointActionItems = (
                 showEndpointResponseActionsConsole({
                   agentId: endpointMetadata.agent.id,
                   agentType: 'endpoint',
+                  capabilities: endpointMetadata.Endpoint.capabilities ?? [],
                   hostName: endpointMetadata.host.name,
                 });
               },
