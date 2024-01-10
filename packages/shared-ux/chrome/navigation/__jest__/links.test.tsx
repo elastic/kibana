@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 import './setup_jest_mocks';
-import { type RenderResult } from '@testing-library/react';
 import { of } from 'rxjs';
 
 import type { RootNavigationItemDefinition } from '../src/ui/types';
 import { NavigationServices } from '../types';
-import {
-  getMockFn,
-  renderNavigation,
-  errorHandler,
-  TestType,
-  type ProjectNavigationChangeListener,
-} from './utils';
+import { getMockFn, renderNavigation, type ProjectNavigationChangeListener } from './utils';
 
 describe('Links', () => {
   test('should filter out unknown deeplinks', async () => {
@@ -33,26 +26,6 @@ describe('Links', () => {
         href: '',
       },
     });
-
-    const runTests = async (type: TestType, { findByTestId, queryByTestId }: RenderResult) => {
-      try {
-        expect(await queryByTestId(new RegExp(`nav-item-root.group1.${unknownLinkId}`))).toBeNull();
-        expect(await findByTestId(/nav-item-root.group1.item1/)).toBeVisible();
-        expect(await findByTestId(/nav-item-root.group1.item1/)).toBeVisible();
-
-        expect(onProjectNavigationChange).toHaveBeenCalled();
-        const lastCall =
-          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-        const [{ navigationTree }] = lastCall;
-        const [root] = navigationTree;
-        expect(root.id).toBe('root');
-        expect(root.children?.length).toBe(1);
-        expect(root.children?.[0].children?.length).toBe(1);
-        expect(root.children?.[0].children?.[0].id).toBe('item1');
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
 
     const navigationBody: Array<RootNavigationItemDefinition<any>> = [
       {
@@ -76,31 +49,29 @@ describe('Links', () => {
       },
     ];
 
-    const renderResult = renderNavigation({
+    const { findByTestId, queryByTestId } = renderNavigation({
       navTreeDef: { body: navigationBody },
       onProjectNavigationChange,
       services: { deepLinks$ },
     });
 
-    await runTests('treeDef', renderResult);
+    expect(await queryByTestId(new RegExp(`nav-item-root.group1.${unknownLinkId}`))).toBeNull();
+    expect(await findByTestId(/nav-item-root.group1.item1/)).toBeVisible();
+    expect(await findByTestId(/nav-item-root.group1.item1/)).toBeVisible();
+
+    expect(onProjectNavigationChange).toHaveBeenCalled();
+    const lastCall =
+      onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+    const [{ navigationTree }] = lastCall;
+    const [root] = navigationTree;
+    expect(root.id).toBe('root');
+    expect(root.children?.length).toBe(1);
+    expect(root.children?.[0].children?.length).toBe(1);
+    expect(root.children?.[0].children?.[0].id).toBe('item1');
   });
 
   test('should allow href for absolute links', async () => {
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const runTests = async (type: TestType, { debug }: RenderResult) => {
-      try {
-        expect(onProjectNavigationChange).toHaveBeenCalled();
-        const lastCall =
-          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-        const [{ navigationTree }] = lastCall;
-
-        const [root] = navigationTree;
-        expect(root.children?.[0].href).toBe('https://example.com');
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
 
     const navigationBody: Array<RootNavigationItemDefinition<any>> = [
       {
@@ -117,12 +88,18 @@ describe('Links', () => {
       },
     ];
 
-    const renderResult = renderNavigation({
+    renderNavigation({
       navTreeDef: { body: navigationBody },
       onProjectNavigationChange,
     });
 
-    await runTests('treeDef', renderResult);
+    expect(onProjectNavigationChange).toHaveBeenCalled();
+    const lastCall =
+      onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+    const [{ navigationTree }] = lastCall;
+
+    const [root] = navigationTree;
+    expect(root.children?.[0].href).toBe('https://example.com');
   });
 
   test('should throw if href is not an absolute links', async () => {

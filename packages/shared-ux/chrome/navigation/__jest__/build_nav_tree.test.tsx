@@ -6,19 +6,12 @@
  * Side Public License, v 1.
  */
 import './setup_jest_mocks';
-import { type RenderResult } from '@testing-library/react';
 import { of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { navLinksMock } from '../mocks/src/navlinks';
 import type { RootNavigationItemDefinition } from '../src/ui/types';
-import {
-  getMockFn,
-  renderNavigation,
-  errorHandler,
-  type TestType,
-  type ProjectNavigationChangeListener,
-} from './utils';
+import { getMockFn, renderNavigation, type ProjectNavigationChangeListener } from './utils';
 import { getServicesMock } from '../mocks/src/jest';
 import { NavigationServices } from '../types';
 
@@ -28,30 +21,7 @@ describe('builds navigation tree', () => {
   test('render reference UI and build the navigation tree', async () => {
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
 
-    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
-      try {
-        expect(await findByTestId(/nav-item-group1.item1\s/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.item2\s/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.group1A.item1\s/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).toBeVisible();
-
-        // Click the last group to expand and show the last depth
-        (await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).click();
-
-        expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
-
-        expect(onProjectNavigationChange).toHaveBeenCalled();
-        const lastCall =
-          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-        const [{ navigationTree }] = lastCall;
-        return navigationTree;
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
-
-    const renderResult = renderNavigation({
+    const { findByTestId } = renderNavigation({
       navTreeDef: {
         body: [
           {
@@ -99,7 +69,21 @@ describe('builds navigation tree', () => {
       onProjectNavigationChange,
     });
 
-    const navigationTree = await runTests('treeDef', renderResult);
+    expect(await findByTestId(/nav-item-group1.item1\s/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.item2\s/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.group1A\s/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.group1A.item1\s/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).toBeVisible();
+
+    // Click the last group to expand and show the last depth
+    (await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).click();
+
+    expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
+
+    expect(onProjectNavigationChange).toHaveBeenCalled();
+    const lastCall =
+      onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+    const [{ navigationTree }] = lastCall;
 
     expect(navigationTree).toMatchInlineSnapshot(`
       Array [
@@ -177,9 +161,6 @@ describe('builds navigation tree', () => {
         },
       ]
     `);
-
-    onProjectNavigationChange.mockReset();
-    renderResult.unmount();
   });
 
   test('should read the title from deeplink, prop or React children', async () => {
@@ -198,29 +179,6 @@ describe('builds navigation tree', () => {
     });
 
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const runTests = (type: TestType) => {
-      expect(onProjectNavigationChange).toHaveBeenCalled();
-      const lastCall =
-        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-      const [{ navigationTree }] = lastCall;
-
-      const groupChildren = navigationTree[0].children?.[0].children;
-
-      if (!groupChildren) {
-        throw new Error('Expected group children to be defined');
-      }
-
-      try {
-        expect(groupChildren[0].title).toBe('Title from deeplink');
-        expect(groupChildren[1].title).toBe('Overwrite deeplink title');
-        expect(groupChildren[2].title).toBe('Title in props'); // Unknown deeplink, has not been rendered
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-
-      return groupChildren;
-    };
 
     const navigationBody: Array<RootNavigationItemDefinition<any>> = [
       {
@@ -254,18 +212,29 @@ describe('builds navigation tree', () => {
       },
     ];
 
-    const renderResult = renderNavigation({
+    renderNavigation({
       navTreeDef: { body: navigationBody },
       services: { deepLinks$ },
       onProjectNavigationChange,
     });
 
-    const groupChildren = runTests('treeDef');
+    expect(onProjectNavigationChange).toHaveBeenCalled();
+    const lastCall =
+      onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+    const [{ navigationTree }] = lastCall;
+
+    const groupChildren = navigationTree[0].children?.[0].children;
+
+    if (!groupChildren) {
+      throw new Error('Expected group children to be defined');
+    }
+
+    expect(groupChildren[0].title).toBe('Title from deeplink');
+    expect(groupChildren[1].title).toBe('Overwrite deeplink title');
+    expect(groupChildren[2].title).toBe('Title in props'); // Unknown deeplink, has not been rendered
+
     expect(groupChildren.length).toBe(3);
     expect(groupChildren[3]).toBeUndefined(); // Unknown deeplink, has not been rendered
-
-    onProjectNavigationChange.mockReset();
-    renderResult.unmount();
   });
 
   test('should not render the group if it does not have children AND no href or deeplink', async () => {
@@ -279,30 +248,6 @@ describe('builds navigation tree', () => {
       },
     });
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const runTests = (type: TestType, { queryByTestId }: RenderResult) => {
-      expect(onProjectNavigationChange).toHaveBeenCalled();
-
-      try {
-        // Check the DOM
-        expect(queryByTestId(/nav-group-root.group1/)).toBeNull();
-        expect(queryByTestId(/nav-item-root.group2.item1/)).toBeVisible();
-
-        // Check the navigation tree
-        const lastCall =
-          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-        const [navTree] = lastCall;
-        const [rootNode] = navTree.navigationTree;
-        expect(rootNode.id).toBe('root');
-        expect(rootNode.children?.length).toBe(2);
-        expect(rootNode.children?.[0]?.id).toBe('group1');
-        expect(rootNode.children?.[0]?.children).toEqual([]); // No children mounted
-        expect(rootNode.children?.[1]?.id).toBe('group2');
-        return navTree;
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
 
     const navigationBody: Array<RootNavigationItemDefinition<any>> = [
       {
@@ -322,35 +267,32 @@ describe('builds navigation tree', () => {
       },
     ];
 
-    const renderResult = renderNavigation({
+    const { queryByTestId } = renderNavigation({
       navTreeDef: { body: navigationBody },
       services: { deepLinks$ },
       onProjectNavigationChange,
     });
 
-    await runTests('treeDef', renderResult);
+    expect(onProjectNavigationChange).toHaveBeenCalled();
 
-    onProjectNavigationChange.mockReset();
-    renderResult.unmount();
+    // Check the DOM
+    expect(queryByTestId(/nav-group-root.group1/)).toBeNull();
+    expect(queryByTestId(/nav-item-root.group2.item1/)).toBeVisible();
+
+    // Check the navigation tree
+    const lastCall =
+      onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+    const [navTree] = lastCall;
+    const [rootNode] = navTree.navigationTree;
+    expect(rootNode.id).toBe('root');
+    expect(rootNode.children?.length).toBe(2);
+    expect(rootNode.children?.[0]?.id).toBe('group1');
+    expect(rootNode.children?.[0]?.children).toEqual([]); // No children mounted
+    expect(rootNode.children?.[1]?.id).toBe('group2');
   });
 
   test('should render group preset (analytics, ml...)', async () => {
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const runTests = async (type: TestType) => {
-      try {
-        expect(onProjectNavigationChange).toHaveBeenCalled();
-        const lastCall =
-          onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-        const [navTreeGenerated] = lastCall;
-
-        expect(navTreeGenerated).toEqual({
-          navigationTree: expect.any(Array),
-        });
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
 
     const navigationBody: Array<RootNavigationItemDefinition<any>> = [
       {
@@ -371,15 +313,19 @@ describe('builds navigation tree', () => {
       },
     ];
 
-    const renderResult = renderNavigation({
+    renderNavigation({
       navTreeDef: { body: navigationBody },
       onProjectNavigationChange,
     });
 
-    await runTests('treeDef');
+    expect(onProjectNavigationChange).toHaveBeenCalled();
+    const lastCall =
+      onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+    const [navTreeGenerated] = lastCall;
 
-    renderResult.unmount();
-    onProjectNavigationChange.mockReset();
+    expect(navTreeGenerated).toEqual({
+      navigationTree: expect.any(Array),
+    });
   });
 
   test('should render recently accessed items', async () => {
@@ -388,71 +334,25 @@ describe('builds navigation tree', () => {
       { label: 'Another example', link: '/app/example/5235', id: '5235' },
     ]);
 
-    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
-      try {
-        expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
-        expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
-          'RecentThis is an exampleAnother example'
-        );
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
-
     const navigationBody: Array<RootNavigationItemDefinition<any>> = [
       {
         type: 'recentlyAccessed',
       },
     ];
 
-    const renderResult = renderNavigation({
+    const { findByTestId } = renderNavigation({
       navTreeDef: { body: navigationBody },
       services: { recentlyAccessed$ },
     });
 
-    await runTests('treeDef', renderResult);
+    expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
+    expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
+      'RecentThis is an exampleAnother example'
+    );
   });
 
   test('should render the cloud links', async () => {
     const stripLastChar = (str: string = '') => str.substring(0, str.length - 1);
-
-    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
-      try {
-        expect(await findByTestId(/nav-item-group1.cloudLink1/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.cloudLink2/)).toBeVisible();
-        expect(await findByTestId(/nav-item-group1.cloudLink3/)).toBeVisible();
-
-        {
-          const userAndRolesLink = await findByTestId(/nav-item-group1.cloudLink1/);
-          expect(userAndRolesLink.textContent).toBe('Mock Users & Roles');
-          const href = userAndRolesLink.getAttribute('href');
-          expect(href).toBe(stripLastChar(mockCloudLinks.userAndRoles?.href));
-        }
-
-        {
-          const performanceLink = await findByTestId(/nav-item-group1.cloudLink2/);
-          expect(performanceLink.textContent).toBe('Mock Performance');
-          const href = performanceLink.getAttribute('href');
-          expect(href).toBe(stripLastChar(mockCloudLinks.performance?.href));
-        }
-
-        {
-          const billingLink = await findByTestId(/nav-item-group1.cloudLink3/);
-          expect(billingLink.textContent).toBe('Mock Billing & Subscriptions');
-          const href = billingLink.getAttribute('href');
-          expect(href).toBe(stripLastChar(mockCloudLinks.billingAndSub?.href));
-        }
-
-        {
-          const deploymentLink = await findByTestId(/nav-item-group1.cloudLink4/);
-          expect(deploymentLink.textContent).toBe('Mock Deployment');
-          const href = deploymentLink.getAttribute('href');
-          expect(href).toBe(stripLastChar(mockCloudLinks.deployment?.href));
-        }
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
 
     const navigationBody: Array<RootNavigationItemDefinition<any>> = [
       {
@@ -468,10 +368,40 @@ describe('builds navigation tree', () => {
       },
     ];
 
-    const renderResult = renderNavigation({
+    const { findByTestId } = renderNavigation({
       navTreeDef: { body: navigationBody },
     });
 
-    await runTests('treeDef', renderResult);
+    expect(await findByTestId(/nav-item-group1.cloudLink1/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.cloudLink2/)).toBeVisible();
+    expect(await findByTestId(/nav-item-group1.cloudLink3/)).toBeVisible();
+
+    {
+      const userAndRolesLink = await findByTestId(/nav-item-group1.cloudLink1/);
+      expect(userAndRolesLink.textContent).toBe('Mock Users & Roles');
+      const href = userAndRolesLink.getAttribute('href');
+      expect(href).toBe(stripLastChar(mockCloudLinks.userAndRoles?.href));
+    }
+
+    {
+      const performanceLink = await findByTestId(/nav-item-group1.cloudLink2/);
+      expect(performanceLink.textContent).toBe('Mock Performance');
+      const href = performanceLink.getAttribute('href');
+      expect(href).toBe(stripLastChar(mockCloudLinks.performance?.href));
+    }
+
+    {
+      const billingLink = await findByTestId(/nav-item-group1.cloudLink3/);
+      expect(billingLink.textContent).toBe('Mock Billing & Subscriptions');
+      const href = billingLink.getAttribute('href');
+      expect(href).toBe(stripLastChar(mockCloudLinks.billingAndSub?.href));
+    }
+
+    {
+      const deploymentLink = await findByTestId(/nav-item-group1.cloudLink4/);
+      expect(deploymentLink.textContent).toBe('Mock Deployment');
+      const href = deploymentLink.getAttribute('href');
+      expect(href).toBe(stripLastChar(mockCloudLinks.deployment?.href));
+    }
   });
 });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './setup_jest_mocks';
-import { type RenderResult, act } from '@testing-library/react';
+import { act } from '@testing-library/react';
 import { of, BehaviorSubject } from 'rxjs';
 import type {
   ChromeProjectNavigation,
@@ -15,7 +15,7 @@ import type {
 
 import type { RootNavigationItemDefinition } from '../src/ui/types';
 import { NavigationServices } from '../types';
-import { renderNavigation, errorHandler, TestType } from './utils';
+import { renderNavigation } from './utils';
 
 describe('Active node', () => {
   test('should set the active node', async () => {
@@ -57,44 +57,6 @@ describe('Active node', () => {
       return activeNodes$;
     };
 
-    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
-      try {
-        expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
-          /nav-item-isActive/
-        );
-        expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).not.toMatch(
-          /nav-item-isActive/
-        );
-
-        await act(async () => {
-          activeNodes$.next([
-            [
-              {
-                id: 'group1',
-                title: 'Group 1',
-                path: 'group1',
-              },
-              {
-                id: 'item2',
-                title: 'Item 2',
-                path: 'group1.item2',
-              },
-            ],
-          ]);
-        });
-
-        expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).not.toMatch(
-          /nav-item-isActive/
-        );
-        expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).toMatch(
-          /nav-item-isActive/
-        );
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
-
-    // -- Default navigation
     const navigationBody: Array<RootNavigationItemDefinition<any>> = [
       {
         type: 'navGroup',
@@ -106,14 +68,41 @@ describe('Active node', () => {
       },
     ];
 
-    const renderResult = renderNavigation({
+    const { findByTestId } = renderNavigation({
       navTreeDef: { body: navigationBody },
       services: { deepLinks$, activeNodes$: getActiveNodes$() },
     });
 
-    await runTests('treeDef', renderResult);
+    expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+      /nav-item-isActive/
+    );
+    expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).not.toMatch(
+      /nav-item-isActive/
+    );
 
-    renderResult.unmount();
+    await act(async () => {
+      activeNodes$.next([
+        [
+          {
+            id: 'group1',
+            title: 'Group 1',
+            path: 'group1',
+          },
+          {
+            id: 'item2',
+            title: 'Item 2',
+            path: 'group1.item2',
+          },
+        ],
+      ]);
+    });
+
+    expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).not.toMatch(
+      /nav-item-isActive/
+    );
+    expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).toMatch(
+      /nav-item-isActive/
+    );
   });
 
   test('should override the URL location to set the active node', async () => {
@@ -145,16 +134,6 @@ describe('Active node', () => {
       });
     };
 
-    const runTests = async (type: TestType, { findByTestId }: RenderResult) => {
-      try {
-        expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
-          /nav-item-isActive/
-        );
-      } catch (e) {
-        errorHandler(type)(e);
-      }
-    };
-
     const navigationBody: Array<RootNavigationItemDefinition<any>> = [
       {
         type: 'navGroup',
@@ -171,14 +150,14 @@ describe('Active node', () => {
       },
     ];
 
-    const renderResult = renderNavigation({
+    const { findByTestId } = renderNavigation({
       navTreeDef: { body: navigationBody },
       services: { deepLinks$, activeNodes$: getActiveNodes$() },
       onProjectNavigationChange,
     });
 
-    await runTests('treeDef', renderResult);
-
-    renderResult.unmount();
+    expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
+      /nav-item-isActive/
+    );
   });
 });

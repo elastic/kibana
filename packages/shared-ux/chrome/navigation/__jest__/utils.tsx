@@ -20,7 +20,6 @@ import { NavigationServices } from '../types';
 const services = getServicesMock();
 
 export type ProjectNavigationChangeListener = (projectNavigation: ChromeProjectNavigation) => void;
-export type TestType = 'treeDef' | 'uiComponents';
 
 export const renderNavigation = ({
   navTreeDef,
@@ -49,14 +48,6 @@ export const renderNavigation = ({
   );
 
   return renderResult;
-};
-
-export const errorHandler = (type: TestType) => (e: Error) => {
-  const err = new Error(`Failed to run tests for ${type}.`);
-  err.stack = e.stack;
-  // eslint-disable-next-line no-console
-  console.error(err.message);
-  throw err;
 };
 
 type ArgsType<T> = T extends (...args: infer A) => any ? A : never;
