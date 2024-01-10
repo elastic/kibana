@@ -40,5 +40,5 @@ export const CHANGE_POINT_DETECTION_VIEW_TYPE = {
   TABLE: 'table',
 } as const;
 
-export type ChanegPointDetectionViewType =
+export type ChangePointDetectionViewType =
   typeof CHANGE_POINT_DETECTION_VIEW_TYPE[keyof typeof CHANGE_POINT_DETECTION_VIEW_TYPE];
