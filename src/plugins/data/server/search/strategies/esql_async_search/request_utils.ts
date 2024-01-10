@@ -10,7 +10,6 @@ import { IUiSettingsClient } from '@kbn/core/server';
 import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions, UI_SETTINGS } from '../../../../common';
-import { getDefaultSearchParams } from '../es_search';
 import { SearchConfigSchema } from '../../../../config';
 import {
   getCommonDefaultAsyncGetParams,
@@ -49,13 +48,8 @@ export async function getDefaultAsyncSubmitParams(
   >
 > {
   return {
-    // TODO: adjust for partial results
-    batched_reduce_size: searchConfig.asyncSearch.batchedReduceSize,
     // Decreases delays due to network when using CCS
-    ccs_minimize_roundtrips: true,
     ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
-    ...(await getIgnoreThrottled(uiSettingsClient)),
-    ...(await getDefaultSearchParams(uiSettingsClient)),
   };
 }
 

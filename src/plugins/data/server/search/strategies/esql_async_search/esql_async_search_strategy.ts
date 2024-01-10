@@ -10,15 +10,15 @@ import type { Observable } from 'rxjs';
 import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { EsqlAsyncSearchResponse } from './types';
 import { IAsyncSearchRequestParams } from '../..';
-import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
+import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions, IEsSearchRequest } from '../../../../common';
 import { pollSearch } from '../../../../common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchUsage, searchUsageObserver } from '../../collectors/search';
-import { shimHitsTotal } from '../es_search';
 import { SearchConfigSchema } from '../../../../config';
 
 export const esqlAsyncSearchStrategyProvider = (
@@ -49,7 +49,6 @@ export const esqlAsyncSearchStrategyProvider = (
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-    const { terminateAfter, ...requestParams } = request.params ?? {};
 
     const search = async () => {
       const params = id
@@ -70,18 +69,17 @@ export const esqlAsyncSearchStrategyProvider = (
             { ...options.transport, signal: options.abortSignal, meta: true }
           )
         : await client.transport.request(
-            { method: 'GET', path: `/_query/async}`, body: params },
+            { method: 'POST', path: `/_query/async`, body: params },
             { ...options.transport, signal: options.abortSignal, meta: true }
           );
 
-      const response = shimHitsTotal(body.response, options);
-
-      return toAsyncKibanaSearchResponse(
-        { ...body, response },
+      const finalResponse = toAsyncKibanaSearchResponse(
+        body as EsqlAsyncSearchResponse,
         headers?.warning,
         // do not return requestParams on polling calls
         id ? undefined : meta?.request?.params
       );
+      return finalResponse;
     };
 
     const cancel = async () => {
@@ -119,9 +117,6 @@ export const esqlAsyncSearchStrategyProvider = (
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
-      if (request.indexType && request.indexType !== 'rollup') {
-        throw new KbnSearchError('Unknown indexType', 400);
-      }
 
       return asyncSearch(request, options, deps);
     },
@@ -136,6 +131,27 @@ export const esqlAsyncSearchStrategyProvider = (
       logger.debug(`cancel ${id}`);
       try {
         await cancelAsyncSearch(id, esClient);
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
+    },
+    /**
+     *
+     * @param id async search ID to extend, as returned from _async_search API
+     * @param keepAlive
+     * @param options
+     * @param deps `SearchStrategyDependencies`
+     * @returns `Promise<void>`
+     * @throws `KbnServerError`
+     */
+    extend: async (id, keepAlive, options, { esClient }) => {
+      logger.debug(`extend ${id} by ${keepAlive}`);
+      try {
+        const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+        await client.transport.request(
+          { method: 'GET', path: `/_query/async/${id}`, body: { id, keep_alive: keepAlive } },
+          { ...options.transport, signal: options.abortSignal, meta: true }
+        );
       } catch (e) {
         throw getKbnServerError(e);
       }

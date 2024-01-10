@@ -80,7 +80,7 @@ import {
   eqlRawResponse,
   SQL_SEARCH_STRATEGY,
   ESQL_SEARCH_STRATEGY,
-  SQL_ASYNC_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
 } from '../../common/search';
 import { getEsaggs, getEsdsl, getEssql, getEql, getEsql } from './expressions';
 import {
@@ -182,8 +182,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
     this.registerSearchStrategy(ESQL_SEARCH_STRATEGY, esqlSearchStrategyProvider(this.logger));
     this.registerSearchStrategy(
-      SQL_ASYNC_SEARCH_STRATEGY,
-      esqlAsyncSearchStrategyProvider(this.logger)
+      ESQL_ASYNC_SEARCH_STRATEGY,
+      esqlAsyncSearchStrategyProvider(
+        this.initializerContext.config.get().search,
+        this.logger,
+        usage
+      )
     );
 
     // We don't want to register this because we don't want the client to be able to access this

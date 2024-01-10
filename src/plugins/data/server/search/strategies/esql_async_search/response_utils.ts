@@ -8,7 +8,6 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { AsyncSearchResponse } from './types';
-import { getTotalLoaded } from '../es_search';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**
@@ -21,11 +20,10 @@ export function toAsyncKibanaSearchResponse(
 ) {
   return {
     id: response.id,
-    rawResponse: response.response,
+    rawResponse: response,
     isPartial: response.is_partial,
     isRunning: response.is_running,
     ...(warning ? { warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
-    ...getTotalLoaded(response.response),
   };
 }
