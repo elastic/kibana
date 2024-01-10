@@ -31,6 +31,7 @@ RUNTIME_DEPS = [
   "@npm//@babel/plugin-proposal-optional-chaining",
   "@npm//@babel/plugin-proposal-private-methods",
   "@npm//@babel/plugin-transform-runtime",
+  "@npm//@babel/plugin-transform-logical-assignment-operators",
   "@npm//@babel/preset-env",
   "@npm//@babel/preset-react",
   "@npm//@babel/preset-typescript",
