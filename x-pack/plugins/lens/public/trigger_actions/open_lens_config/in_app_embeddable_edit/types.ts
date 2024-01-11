@@ -28,7 +28,7 @@ export interface InlineEditLensEmbeddableContext {
   // callback which runs every time something changes in the dimension panel
   onUpdate: (newAttributes: TypedLensByValueInput['attributes']) => void;
   // optional onApply callback
-  onApply?: () => void;
+  onApply?: (newAttributes: TypedLensByValueInput['attributes']) => void;
   // optional onCancel callback
   onCancel?: () => void;
   // custom container element, use in case you need to render outside a flyout

@@ -7,6 +7,7 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -37,6 +38,7 @@ import type {
   FunctionResponse,
   Message,
 } from '../common/types';
+import type { ChatActionClickHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
 import type { StreamingChatResponseEvent } from '../common/conversation_complete';
@@ -68,7 +70,8 @@ export interface ObservabilityAIAssistantChatService {
   renderFunction: (
     name: string,
     args: string | undefined,
-    response: { data?: string; content?: string }
+    response: { data?: string; content?: string },
+    onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
 }
 
@@ -85,6 +88,7 @@ export interface ObservabilityAIAssistantService {
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
   arguments: TArguments;
   response: TResponse;
+  onActionClick: ChatActionClickHandler;
 }) => React.ReactNode;
 
 export type RegisterRenderFunctionDefinition<
@@ -119,6 +123,7 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
   ml: MlPluginStart;
 }
 

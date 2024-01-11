@@ -84,6 +84,7 @@ export function ChatTimeline({
       currentUser,
       startedFrom,
       chatState,
+      onActionClick,
     });
 
     const consolidatedChatItems: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
@@ -106,7 +107,7 @@ export function ChatTimeline({
     }
 
     return consolidatedChatItems;
-  }, [chatService, hasConnector, messages, currentUser, startedFrom, chatState]);
+  }, [chatService, hasConnector, messages, currentUser, startedFrom, chatState, onActionClick]);
 
   return (
     <EuiCommentList

@@ -15,6 +15,7 @@ import { registerEsqlFunction } from './esql';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerLensFunction } from './lens';
 import { registerKibanaFunction } from './kibana';
+import { registerVisualizeESQLFunction } from './visualize_esql';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<ChatRegistrationFunction>[0],
@@ -76,6 +77,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
       registerSummarizationFunction(registrationParameters);
       registerRecallFunction(registrationParameters);
       registerLensFunction(registrationParameters);
+      registerVisualizeESQLFunction(registrationParameters);
     } else {
       description += `You do not have a working memory. Don't try to recall information via the "recall" function.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
     }

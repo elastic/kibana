@@ -193,50 +193,53 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const onApply = useCallback(() => {
+    const dsStates = Object.fromEntries(
+      Object.entries(datasourceStates).map(([id, ds]) => {
+        const dsState = ds.state;
+        return [id, dsState];
+      })
+    );
+    const references = extractReferencesFromState({
+      activeDatasources: Object.keys(datasourceStates).reduce(
+        (acc, id) => ({
+          ...acc,
+          [id]: datasourceMap[id],
+        }),
+        {}
+      ),
+      datasourceStates,
+      visualizationState: visualization.state,
+      activeVisualization,
+    });
+    const attrs = {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        visualization: visualization.state,
+        datasourceStates: dsStates,
+      },
+      references,
+      visualizationType: visualization.activeId,
+      title: visualization.activeId ?? '',
+    };
     if (savedObjectId) {
-      const dsStates = Object.fromEntries(
-        Object.entries(datasourceStates).map(([id, ds]) => {
-          const dsState = ds.state;
-          return [id, dsState];
-        })
-      );
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, id) => ({
-            ...acc,
-            [id]: datasourceMap[id],
-          }),
-          {}
-        ),
-        datasourceStates,
-        visualizationState: visualization.state,
-        activeVisualization,
-      });
-      const attrs = {
-        ...attributes,
-        state: {
-          ...attributes.state,
-          visualization: visualization.state,
-          datasourceStates: dsStates,
-        },
-        references,
-      };
       saveByRef?.(attrs);
       updateByRefInput?.(savedObjectId);
     }
-    onApplyCb?.();
+    onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
     closeFlyout?.();
   }, [
-    savedObjectId,
-    closeFlyout,
-    onApplyCb,
     datasourceStates,
     visualization.state,
+    visualization.activeId,
     activeVisualization,
     attributes,
+    savedObjectId,
+    onApplyCb,
+    closeFlyout,
+    datasourceMap,
     saveByRef,
     updateByRefInput,
-    datasourceMap,
   ]);
 
   const { getUserMessages } = useApplicationUserMessages({

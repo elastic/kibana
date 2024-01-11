@@ -27,7 +27,7 @@ export interface FlyoutWrapperProps {
   isNewPanel?: boolean;
   isSaveable?: boolean;
   onCancel?: () => void;
-  onApply?: () => void;
+  onApply?: (input: TypedLensByValueInput['attributes']) => void;
   navigateToLensEditor?: () => void;
 }
 
@@ -83,7 +83,7 @@ export interface EditConfigPanelProps {
   /** If set to true the layout changes to accordion and the text based query (i.e. ES|QL) can be edited */
   hidesSuggestions?: boolean;
   /** Optional callback for apply flyout button */
-  onApplyCb?: () => void;
+  onApplyCb?: (input: TypedLensByValueInput['attributes']) => void;
   /** Optional callback for cancel flyout button */
   onCancelCb?: () => void;
 }

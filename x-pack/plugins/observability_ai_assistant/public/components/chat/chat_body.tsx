@@ -293,6 +293,46 @@ export function ChatBody({
                           })
                         );
                         break;
+                      case ChatActionClickType.updateVisualization:
+                        const visualizeQueryMessagesIndex = messages.findIndex(
+                          ({ message }) => message.name === 'visualize_query'
+                        );
+                        next(
+                          messages.slice(0, visualizeQueryMessagesIndex).concat({
+                            '@timestamp': new Date().toISOString(),
+                            message: {
+                              role: MessageRole.Assistant,
+                              content: '',
+                              function_call: {
+                                name: 'visualize_query',
+                                arguments: JSON.stringify({
+                                  query: payload.query,
+                                  newInput: payload.newInput,
+                                }),
+                                trigger: MessageRole.User,
+                              },
+                            },
+                          })
+                        );
+                        break;
+                      case ChatActionClickType.visualizeEsqlQuery:
+                        next(
+                          messages.concat({
+                            '@timestamp': new Date().toISOString(),
+                            message: {
+                              role: MessageRole.Assistant,
+                              content: '',
+                              function_call: {
+                                name: 'visualize_query',
+                                arguments: JSON.stringify({
+                                  query: payload.query,
+                                }),
+                                trigger: MessageRole.User,
+                              },
+                            },
+                          })
+                        );
+                        break;
                     }
                   }}
                 />
