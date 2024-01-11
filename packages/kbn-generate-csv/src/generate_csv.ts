@@ -360,8 +360,8 @@ export class CsvGenerator {
 
     const { startedAt, retryAt } = this.taskInstanceFields;
     this.logger.debug(
-      `Task started at: ${moment(startedAt).format()}.` +
-        ` Can run until: ${moment(retryAt).format()}`
+      `Task started at: ${startedAt && moment(startedAt).format()}.` +
+        ` Can run until: ${retryAt && moment(retryAt).format()}`
     );
 
     const index = searchSource.getField('index');

@@ -183,8 +183,8 @@ export class Screenshots {
 
     const { startedAt, retryAt } = taskInstanceFields;
     logger.debug(
-      `Task started at: ${moment(startedAt).format()}.` +
-        ` Can run until: ${moment(retryAt).format()}`
+      `Task started at: ${startedAt && moment(startedAt).format()}.` +
+        ` Can run until: ${retryAt && moment(retryAt).format()}`
     );
 
     if (this.systemHasInsufficientMemory()) {
