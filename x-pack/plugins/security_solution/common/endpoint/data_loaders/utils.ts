@@ -76,18 +76,18 @@ export const retryOnError = async <T>(
     const thisAttempt = attempt;
     attempt++;
 
-    log.info(msg(`attempt ${thisAttempt} started at: ${new Date().toISOString()}`));
+    log.debug(msg(`attempt ${thisAttempt} started at: ${new Date().toISOString()}`));
 
     try {
       responsePromise = callback(); // store promise so that if it fails and no more attempts, we return the last failure
       const result = await responsePromise;
 
-      log.info(msg(`attempt ${thisAttempt} was successful. Exiting retry`));
+      log.debug(msg(`attempt ${thisAttempt} was successful. Exiting retry`));
       log.indent(-4);
 
       return result;
     } catch (err) {
-      log.info(msg(`attempt ${thisAttempt} failed with: ${err.message}`), err);
+      log.warning(msg(`attempt ${thisAttempt} failed with: ${err.message}`), err);
 
       // If not an error that is retryable, then end loop here and return that error;
       if (!isRetryableError(err)) {
