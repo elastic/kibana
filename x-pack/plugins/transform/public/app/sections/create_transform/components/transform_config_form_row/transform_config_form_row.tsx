@@ -23,6 +23,13 @@ import { useWizardContext } from '../wizard/wizard';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
 
+const copyToClipboardDescription = i18n.translate(
+  'xpack.transform.pivotPreview.copyClipboardTooltip',
+  {
+    defaultMessage: 'Copy Dev Console statement of the transform preview to the clipboard.',
+  }
+);
+
 export const TransformConfigFormRow: FC = () => {
   const { searchItems } = useWizardContext();
   const { dataView } = searchItems;
@@ -33,21 +40,13 @@ export const TransformConfigFormRow: FC = () => {
     selectPreviewRequest(state, dataView)
   );
   const copyToClipboard = getTransformPreviewDevConsoleStatement(copyToClipboardPreviewRequest);
-  const copyToClipboardDescription = i18n.translate(
-    'xpack.transform.pivotPreview.copyClipboardTooltip',
-    {
-      defaultMessage: 'Copy Dev Console statement of the transform preview to the clipboard.',
-    }
-  );
 
   return (
     <EuiForm>
       {transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
         <PivotFunctionForm
-          {...{
-            copyToClipboard,
-            copyToClipboardDescription,
-          }}
+          copyToClipboard={copyToClipboard}
+          copyToClipboardDescription={copyToClipboardDescription}
         />
       ) : null}
       {transformFunction === TRANSFORM_FUNCTION.LATEST ? (
