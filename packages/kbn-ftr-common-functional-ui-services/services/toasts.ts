@@ -42,11 +42,22 @@ export class ToastsService extends FtrService {
    *
    * @param index The 1-based index of the toast to dismiss. Use first by default.
    */
-  public async dismissToastByIndex(index: number = 1) {
+  public async dismissToastByIndex(index: number = 1): Promise<void> {
     const toast = await this.getToastElement(index);
     await toast.moveMouseTo();
     const dismissButton = await this.testSubjects.findDescendant('toastCloseButton', toast);
     await dismissButton.click();
+  }
+
+  public async closeToastIfExists(): Promise<void> {
+    const toastShown = await this.find.existsByCssSelector('.euiToast');
+    if (toastShown) {
+      try {
+        await this.testSubjects.click('toastCloseButton');
+      } catch (err) {
+        // ignore errors, toast clear themselves after timeout
+      }
+    }
   }
 
   public async closeToast(): Promise<string> {
