@@ -294,6 +294,10 @@ export default function Expressions(props: Props) {
   const preFillCriteria = useCallback(() => {
     const md = metadata;
     if (md?.currentOptions?.criteria?.length) {
+      const { timeSize: prefillTimeSize, timeUnit: prefillTimeUnit } =
+        md.currentOptions.criteria[0];
+      if (prefillTimeSize) setTimeSize(prefillTimeSize);
+      if (prefillTimeUnit) setTimeUnit(prefillTimeUnit);
       setRuleParams(
         'criteria',
         md.currentOptions.criteria.map((criterion) => ({

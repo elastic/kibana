@@ -170,6 +170,10 @@ describe('Expression', () => {
             { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
             { name: 'B', aggType: Aggregators.CARDINALITY, field: 'system.cpu.user.pct' },
           ],
+          comparator: Comparator.LT_OR_EQ,
+          threshold: [500],
+          timeSize: 7,
+          timeUnit: 'h',
         },
       ],
     };
@@ -185,10 +189,10 @@ describe('Expression', () => {
           { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.load.1' },
           { name: 'B', aggType: Aggregators.CARDINALITY, field: 'system.cpu.user.pct' },
         ],
-        comparator: Comparator.GT,
-        threshold: [100],
-        timeSize: 1,
-        timeUnit: 'm',
+        comparator: Comparator.LT_OR_EQ,
+        threshold: [500],
+        timeSize: 7,
+        timeUnit: 'h',
       },
     ]);
   });
