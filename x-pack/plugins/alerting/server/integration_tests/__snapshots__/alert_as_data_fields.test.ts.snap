@@ -8973,7 +8973,11 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: transform_health 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: transform_health 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.ml.anomaly_detection_alert 1`] = `
 Object {
@@ -9087,7 +9091,11 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.ml.anomaly_detection_jobs_health 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: xpack.ml.anomaly_detection_jobs_health 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.synthetics.alerts.monitorStatus 1`] = `
 Object {
