@@ -6,8 +6,10 @@
  */
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { RawAxiosRequestHeaders } from 'axios';
+import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
-import type { ESClusterInfo, ESLicense } from './types';
+import type { ESClusterInfo, ESLicense, TelemetryChannel, TelemetryCounter } from './types';
+import { createUsageCounterLabel } from './helpers';
 
 export interface SenderMetadata {
   telemetryUrl: string;
@@ -17,12 +19,15 @@ export interface SenderMetadata {
 }
 
 export class SenderUtils {
+  private readonly usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
+
   constructor(
     private readonly telemetrySetup?: TelemetryPluginSetup,
-    private readonly receiver?: ITelemetryReceiver
+    private readonly receiver?: ITelemetryReceiver,
+    private readonly telemetryUsageCounter?: IUsageCounter
   ) {}
 
-  public async fetchSenderMetadata(channel: string): Promise<SenderMetadata> {
+  public async fetchSenderMetadata(channel: TelemetryChannel): Promise<SenderMetadata> {
     const [telemetryUrl, licenseInfo] = await Promise.all([
       this.fetchTelemetryUrl(channel),
       this.receiver?.fetchLicenseInfo(),
@@ -48,7 +53,13 @@ export class SenderUtils {
     };
   }
 
-  private async fetchTelemetryUrl(channel: string): Promise<string> {
+  public incrementCounter(tags: string[], counter: TelemetryCounter, incrementBy: number): void {
+    const counterName = createUsageCounterLabel([...this.usageLabelPrefix, ...tags]);
+    const counterType = counter;
+    this.telemetryUsageCounter?.incrementCounter({ counterName, counterType, incrementBy });
+  }
+
+  private async fetchTelemetryUrl(channel: TelemetryChannel): Promise<string> {
     const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
     if (!telemetryUrl) {
       throw Error("Couldn't get telemetry URL");
@@ -61,7 +72,7 @@ export class SenderUtils {
    *   - https://telemetry.elastic.co/v3/send/my-channel-name
    *   - https://telemetry-staging.elastic.co/v3-dev/send/my-channel-name
    */
-  private getV3UrlFromV2(v2url: string, channel: string): string {
+  private getV3UrlFromV2(v2url: string, channel: TelemetryChannel): string {
     const url = new URL(v2url);
     if (!url.hostname.includes('staging')) {
       url.pathname = `/v3/send/${channel}`;

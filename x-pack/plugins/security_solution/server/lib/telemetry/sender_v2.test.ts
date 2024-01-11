@@ -13,9 +13,13 @@ import type {
   ITelemetryEventsSenderV2,
 } from './sender_v2.types';
 import { TelemetryEventsSenderV2 } from './sender_v2';
-import { TelemetryChannel } from './types';
+import { TelemetryChannel, TelemetryCounter } from './types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createMockTelemetryReceiver, createMockTelemetryPluginSetup } from './__mocks__';
+import {
+  createMockTelemetryReceiver,
+  createMockTelemetryPluginSetup,
+  createMockUsageCounter,
+} from './__mocks__';
 
 jest.mock('axios');
 jest.mock('./receiver');
@@ -24,6 +28,7 @@ describe('TelemetryEventsSenderV2', () => {
   const mockedAxiosPost = jest.spyOn(axios, 'post');
   const telemetryPluginSetup = createMockTelemetryPluginSetup();
   const receiver = createMockTelemetryReceiver();
+  const telemetryUsageCounter = createMockUsageCounter();
   const ch1 = TelemetryChannel.INSIGHTS;
   const ch2 = TelemetryChannel.LISTS;
   const ch3 = TelemetryChannel.DETECTION_ALERTS;
@@ -60,6 +65,7 @@ describe('TelemetryEventsSenderV2', () => {
     service = new TelemetryEventsSenderV2(loggingSystemMock.createLogger());
     jest.useFakeTimers({ advanceTimers: true });
     mockedAxiosPost.mockClear();
+    telemetryUsageCounter.incrementCounter.mockClear();
     mockedAxiosPost.mockResolvedValue({ status: 201 });
   });
 
@@ -688,6 +694,62 @@ describe('TelemetryEventsSenderV2', () => {
       });
 
       await service.stop();
+    });
+  });
+
+  describe('usage counter', () => {
+    it('should increment the counter when sending events ok', async () => {
+      service.setup(defaultConfig, receiver, telemetryPluginSetup, telemetryUsageCounter);
+      service.start();
+
+      service.send(ch1, ['a', 'b', 'c']);
+      await service.stop();
+
+      expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      const [param] = telemetryUsageCounter.incrementCounter.mock.calls[0];
+      expect(param.counterType).toBe(TelemetryCounter.DOCS_SENT);
+      expect(param.incrementBy).toBe(3);
+    });
+
+    it('should increment the counter when sending events with errors', async () => {
+      mockedAxiosPost.mockReturnValue(Promise.resolve({ status: 500 }));
+
+      service.setup(defaultConfig, receiver, telemetryPluginSetup, telemetryUsageCounter);
+      service.start();
+
+      service.send(ch1, ['a', 'b', 'c']);
+      await service.stop();
+
+      expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      const [param] = telemetryUsageCounter.incrementCounter.mock.calls[0];
+      expect(param.counterType).toBe(TelemetryCounter.DOCS_LOST);
+      expect(param.incrementBy).toBe(3);
+    });
+
+    it('should increment the counter when sending events with errors and without errors', async () => {
+      // retries count is set to 3
+      mockedAxiosPost
+        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
+        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
+        .mockReturnValueOnce(Promise.resolve({ status: 500 }))
+        .mockReturnValueOnce(Promise.resolve({ status: 500 }));
+
+      service.setup(defaultConfig, receiver, telemetryPluginSetup, telemetryUsageCounter);
+      service.start();
+
+      service.send(ch1, ['a', 'b', 'c']);
+      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
+      service.send(ch1, ['a', 'b']);
+      await service.stop();
+
+      expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+      let [param] = telemetryUsageCounter.incrementCounter.mock.calls[0];
+      expect(param.counterType).toBe(TelemetryCounter.DOCS_LOST);
+      expect(param.incrementBy).toBe(3);
+
+      [param] = telemetryUsageCounter.incrementCounter.mock.calls[1];
+      expect(param.counterType).toBe(TelemetryCounter.DOCS_SENT);
+      expect(param.incrementBy).toBe(2);
     });
   });
 

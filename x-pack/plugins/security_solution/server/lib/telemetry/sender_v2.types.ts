@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { type TelemetryChannel } from './types';
 import type { ITelemetryReceiver } from './receiver';
 
@@ -17,7 +18,8 @@ export interface ITelemetryEventsSenderV2 {
   setup: (
     config: TelemetryEventSenderConfig,
     telemetryReceiver: ITelemetryReceiver,
-    telemetrySetup?: TelemetryPluginSetup
+    telemetrySetup?: TelemetryPluginSetup,
+    telemetryUsageCounter?: IUsageCounter
   ) => void;
   start: () => void;
   stop: () => Promise<void>;

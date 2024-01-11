@@ -96,6 +96,11 @@ export enum TelemetryChannel {
   TASK_METRICS = 'task-metrics',
 }
 
+export enum TelemetryCounter {
+  DOCS_SENT = 'docs_sent',
+  DOCS_LOST = 'docs_lost',
+}
+
 // EP Policy Response
 
 export interface EndpointPolicyResponseAggregation {

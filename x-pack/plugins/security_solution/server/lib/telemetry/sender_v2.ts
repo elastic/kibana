@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
 import {
   type ITelemetryEventsSenderV2,
@@ -17,7 +18,7 @@ import {
   type RetryConfig,
   type TelemetryEventSenderConfig,
 } from './sender_v2.types';
-import { type TelemetryChannel } from './types';
+import { type TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
@@ -45,7 +46,8 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   public setup(
     config: TelemetryEventSenderConfig,
     telemetryReceiver: ITelemetryReceiver,
-    telemetrySetup?: TelemetryPluginSetup
+    telemetrySetup?: TelemetryPluginSetup,
+    telemetryUsageCounter?: IUsageCounter
   ): void {
     this.ensureStatus(ServiceStatus.CREATED);
 
@@ -53,7 +55,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     this.queues = config.queues;
     this.cache = new CachedSubject<Event>(this.events$);
 
-    this.senderUtils = new SenderUtils(telemetrySetup, telemetryReceiver);
+    this.senderUtils = new SenderUtils(telemetrySetup, telemetryReceiver, telemetryUsageCounter);
 
     this.updateStatus(ServiceStatus.CONFIGURED);
   }
@@ -73,13 +75,22 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
       )
       .subscribe({
         next: (result: Result) => {
-          // TODO(sebastian.zaffarano): increment telemetry usage counter
           if (isFailure(result)) {
             this.logger.l(
               `Failure! unable to send ${result.events} events to channel "${result.channel}": ${result.message}`
             );
+            this.senderUtils?.incrementCounter(
+              [result.channel],
+              TelemetryCounter.DOCS_LOST,
+              result.events
+            );
           } else {
             this.logger.l(`Success! ${result.events} events sent to channel "${result.channel}"`);
+            this.senderUtils?.incrementCounter(
+              [result.channel],
+              TelemetryCounter.DOCS_SENT,
+              result.events
+            );
           }
         },
         error: (err) => {

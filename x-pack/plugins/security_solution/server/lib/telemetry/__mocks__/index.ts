@@ -14,6 +14,8 @@ import type { TelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver, TelemetryReceiver } from '../receiver';
 import type { SecurityTelemetryTaskConfig } from '../task';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import { type UsageCounters } from '@kbn/usage-collection-plugin/common/types';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
 import { stubEndpointMetricsResponse } from './metrics';
 import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
@@ -70,13 +72,16 @@ export const stubLicenseInfo: ESLicense = {
   start_date_in_millis: -1,
 };
 
-export const createMockTelemetryPluginSetup = (
-  diagnosticsAlert?: unknown,
-  emptyTimelineTree?: boolean
-): jest.Mocked<TelemetryPluginSetup> => {
+export const createMockTelemetryPluginSetup = (): jest.Mocked<TelemetryPluginSetup> => {
   return {
     getTelemetryUrl: jest.fn(() => Promise.resolve(new URL('http://localhost/v3/send'))),
   } as unknown as jest.Mocked<TelemetryPluginSetup>;
+};
+
+export const createMockUsageCounter = (): jest.Mocked<IUsageCounter> => {
+  return {
+    incrementCounter: jest.fn((_: UsageCounters.v1.IncrementCounterParams) => {}),
+  } as unknown as jest.Mocked<IUsageCounter>;
 };
 
 export const createMockTelemetryReceiver = (
