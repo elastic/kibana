@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import {
+  EuiButton,
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
@@ -20,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 
 import { RemoteConsoleProps, RemoteConsoleDependencies } from '../../../types/remote_console';
 
-import { ConsoleHeader } from './console_header';
 import { ConsoleWrapper } from './console_wrapper';
 
 import './_index.scss';
@@ -30,7 +30,6 @@ const landmarkHeading = i18n.translate('console.remoteConsole.landmarkHeading', 
 });
 
 export const RemoteConsole = ({
-  headerRightSideItem,
   size = 'm',
   core,
   usageCollection,
@@ -64,11 +63,19 @@ export const RemoteConsole = ({
           </EuiScreenReaderOnly>
           <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
             <div className="remoteConsole__controls">
-              <ConsoleHeader
-                isConsoleOpen={isConsoleOpen}
-                rightSideItem={headerRightSideItem}
+              <EuiButton
+                color="text"
+                iconType={isConsoleOpen ? 'arrowDown' : 'arrowRight'}
                 onClick={toggleConsole}
-              />
+                fullWidth
+                contentProps={{
+                  className: 'remoteConsole__controls--button',
+                }}
+              >
+                {i18n.translate('console.remoteConsole.title', {
+                  defaultMessage: 'Console',
+                })}
+              </EuiButton>
             </div>
           </EuiThemeProvider>
           {isConsoleOpen ? (
