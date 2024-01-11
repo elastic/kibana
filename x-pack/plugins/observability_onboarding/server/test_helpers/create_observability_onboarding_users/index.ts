@@ -45,18 +45,14 @@ export async function createObservabilityOnboardingUsers({
     throw new AbortError('Security must be enabled!');
   }
 
-  const observabilityOnboardingUsers = Object.values(
-    ObservabilityOnboardingUsername
-  );
+  const observabilityOnboardingUsers = Object.values(ObservabilityOnboardingUsername);
   await asyncForEach(observabilityOnboardingUsers, async (username) => {
     const user = users[username];
     const { builtInRoleNames = [], customRoleNames = [] } = user;
 
     // create custom roles
     await Promise.all(
-      customRoleNames.map(async (roleName) =>
-        createCustomRole({ elasticsearch, kibana, roleName })
-      )
+      customRoleNames.map(async (roleName) => createCustomRole({ elasticsearch, kibana, roleName }))
     );
 
     // create user
@@ -110,6 +106,7 @@ async function getIsCredentialsValid({
     });
     return true;
   } catch (err) {
+    const { username, password } = elasticsearch;
     // eslint-disable-next-line no-console
     console.error(
       `***** Error in callKibana with username: ${username}, password: ${password}, message: ${err.message}`
