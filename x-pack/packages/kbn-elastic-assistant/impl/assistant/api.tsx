@@ -8,6 +8,7 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
@@ -125,9 +126,16 @@ export const fetchConnectorExecuteAction = async ({
         }
       );
 
-      console.log('dawg?', response);
+      const streamResponse = response?.response?.body;
+      if (!streamResponse) {
+        return {
+          response: `${API_ERROR}\n\nCould not get reader from response`,
+          isError: true,
+          isStream: false,
+        };
+      }
+
       const reader = response?.response?.body?.getReader();
-      console.log('reader?', reader);
 
       if (!reader) {
         return {
@@ -201,6 +209,7 @@ export const fetchConnectorExecuteAction = async ({
       traceData,
     };
   } catch (error) {
+    console.log('ERROR', error);
     const getReader = error?.response?.body?.getReader;
     const reader =
       isStream && typeof getReader === 'function' ? getReader.call(error.response.body) : null;

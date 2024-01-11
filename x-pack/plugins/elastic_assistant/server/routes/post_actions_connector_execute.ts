@@ -65,8 +65,17 @@ export const postActionsConnectorExecuteRoute = (
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           });
+          console.log('result', result);
+          // response.header('Content-Type', 'text/plain');
+          // for await (const chunk of result.toReadableStream()) {
+          //   response.write(chunk);
+          // }
+          //
+          // response.end();
           return response.ok({
             body: result,
+
+            headers: { 'Content-Type': 'text/plain' },
           });
         }
 
@@ -138,6 +147,7 @@ export const postActionsConnectorExecuteRoute = (
       } catch (err) {
         logger.error(err);
         const error = transformError(err);
+        console.log('error??????', error);
         telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,

@@ -83,7 +83,11 @@ export const getGenAiTokenTracking = async ({
     };
     if (data.usage == null) {
       logger.error('Response did not contain usage object');
-      return null;
+      return {
+        total_tokens: 0,
+        prompt_tokens: 0,
+        completion_tokens: 0,
+      };
     }
     return {
       total_tokens: data.usage?.total_tokens ?? 0,

@@ -7,7 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { IncomingMessage } from 'http';
+import OpenAI from 'openai';
 import { PassThrough } from 'stream';
 import {
   RunActionParamsSchema,
@@ -24,7 +24,7 @@ import type {
   RunActionResponse,
   StreamActionParams,
 } from '../../../common/openai/types';
-import { SUB_ACTION } from '../../../common/openai/constants';
+import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
@@ -34,6 +34,7 @@ import {
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   getAxiosOptions,
+  getAzureApiVersionParameter,
   getRequestWithStreamOption,
   pipeStreamingResponse,
   sanitizeRequest,
@@ -43,6 +44,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private url;
   private provider;
   private key;
+  private openAI;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -50,6 +52,18 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
     this.key = this.secrets.apiKey;
+
+    this.openAI =
+      this.config.apiProvider === OpenAiProviderType.AzureAi
+        ? new OpenAI({
+            apiKey: this.secrets.apiKey,
+            baseURL: this.config.apiUrl,
+            defaultQuery: { 'api-version': getAzureApiVersionParameter(this.config.apiUrl) },
+            defaultHeaders: { 'api-key': this.secrets.apiKey },
+          })
+        : new OpenAI({
+            apiKey: this.secrets.apiKey,
+          });
 
     this.registerSubActions();
   }
@@ -201,12 +215,20 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body - the OpenAI Invoke request body
    */
   public async invokeStream(body: InvokeAIActionParams): Promise<PassThrough> {
-    const res = (await this.streamApi({
-      body: JSON.stringify(body),
+    const stream = await this.openAI.chat.completions.create({
+      ...body,
       stream: true,
-    })) as unknown as IncomingMessage;
-
-    return res.pipe(new PassThrough());
+    });
+    // const chatCompletion = await stream.finalChatCompletion();
+    console.log('stream', stream);
+    // console.log('chatCompletion', chatCompletion);
+    return stream;
+    // const res = (await this.streamApi({
+    //   body: JSON.stringify(body),
+    //   stream: true,
+    // })) as unknown as IncomingMessage;
+    //
+    // return res.pipe(new PassThrough());
   }
 
   /**

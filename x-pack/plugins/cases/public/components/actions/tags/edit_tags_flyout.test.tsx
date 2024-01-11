@@ -16,7 +16,9 @@ import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../containers/api');
 
-describe('EditTagsFlyout', () => {
+// Failing: See https://github.com/elastic/kibana/issues/174176
+// Failing: See https://github.com/elastic/kibana/issues/174177
+describe.skip('EditTagsFlyout', () => {
   let appMock: AppMockRenderer;
 
   /**

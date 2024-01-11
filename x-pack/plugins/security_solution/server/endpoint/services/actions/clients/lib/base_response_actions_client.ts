@@ -13,7 +13,10 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
-import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
@@ -42,6 +45,7 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
   LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -52,7 +56,7 @@ import type {
   ResponseActionsRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type { CreateActionPayload } from '../../create/types';
-import { dump } from '../../../../utils/dump';
+import { stringify } from '../../../../utils/stringify';
 
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
@@ -82,7 +86,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
     Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends object = object
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
@@ -92,8 +96,10 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
 /**
  * Base class for a Response Actions client
  */
-export class ResponseActionsClientImpl implements ResponseActionsClient {
+export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
+
+  protected abstract readonly agentType: ResponseActionAgentType;
 
   constructor(protected readonly options: ResponseActionsClientOptions) {
     this.log = options.endpointService.createLogger(
@@ -158,7 +164,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       return;
     }
 
-    this.log.debug(`Updating cases:\n${dump(allCases)}`);
+    this.log.debug(`Updating cases:\n${stringify(allCases)}`);
 
     // Create an attachment for each case that includes info. about the response actions taken against the hosts
     const attachments = allCases.map(() => ({
@@ -181,14 +187,14 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
           .catch((err) => {
             // Log any error, BUT: do not fail execution
             this.log.warn(
-              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${dump(err)}`
+              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
             );
             return null;
           })
       )
     );
 
-    this.log.debug(`Update to cases done:\n${dump(casesUpdateResponse)}`);
+    this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
   }
 
   /**
@@ -213,6 +219,8 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
   protected async writeActionRequestToEndpointIndex(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<LogsEndpointAction> {
+    this.notifyUsage(actionRequest.command);
+
     const doc: LogsEndpointAction = {
       '@timestamp': new Date().toISOString(),
       agent: {
@@ -222,7 +230,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
         action_id: uuidv4(),
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
-        input_type: actionRequest.agent_type ?? 'endpoint',
+        input_type: this.agentType,
         data: {
           command: actionRequest.command,
           comment: actionRequest.comment ?? undefined,
@@ -274,7 +282,10 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
    * @param options
    * @protected
    */
-  protected async writeActionResponseToEndpointIndex<TOutputContent extends object = object>({
+  protected async writeActionResponseToEndpointIndex<
+    // Default type purposely set to empty object in order to ensure proper types are used when calling the method
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+  >({
     actionId,
     error,
     agentId,
@@ -290,6 +301,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       },
       EndpointActions: {
         action_id: actionId,
+        input_type: this.agentType,
         started_at: timestamp,
         completed_at: timestamp,
         data,
@@ -297,10 +309,10 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       error,
     };
 
-    this.log.debug(`Writing response action response:\n${dump(doc)}`);
+    this.log.debug(`Writing response action response:\n${stringify(doc)}`);
 
     await this.options.esClient
-      .index<LogsEndpointActionResponse>({
+      .index<LogsEndpointActionResponse<TOutputContent>>({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         document: doc,
         refresh: 'wait_for',
@@ -314,6 +326,20 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       });
 
     return doc;
+  }
+
+  protected notifyUsage(responseAction: ResponseActionsApiCommandNames): void {
+    const usageService = this.options.endpointService.getFeatureUsageService();
+    const featureKey = usageService.getResponseActionFeatureKey(responseAction);
+
+    if (!featureKey) {
+      this.log.warn(
+        `Response action [${responseAction}] does not have a usage feature key defined!`
+      );
+      return;
+    }
+
+    usageService.notifyUsage(featureKey);
   }
 
   public async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
