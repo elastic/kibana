@@ -71,7 +71,8 @@ export const DraggableZeekElement = React.memo<{
   isDraggable?: boolean;
   value: string | null | undefined;
   stringRenderer?: StringRenderer;
-}>(({ id, field, isDraggable, value, stringRenderer = defaultStringRenderer }) => {
+  scopeId: string;
+}>(({ id, field, isDraggable, value, stringRenderer = defaultStringRenderer, scopeId }) => {
   const dataProviderProp = useMemo(
     () => ({
       and: [],
@@ -113,6 +114,7 @@ export const DraggableZeekElement = React.memo<{
         render={render}
         isAggregatable={true}
         fieldType={'keyword'}
+        scopeId={scopeId}
       />
     </TokensFlexItem>
   ) : null;
@@ -212,11 +214,11 @@ export const constructDroppedValue = (dropped: boolean | null | undefined): stri
 interface ZeekSignatureProps {
   data: Ecs;
   isDraggable?: boolean;
-  timelineId: string;
+  scopeId: string;
 }
 
-export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, isDraggable, timelineId }) => {
-  const id = `zeek-signature-draggable-zeek-element-${timelineId}-${data._id}`;
+export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, isDraggable, scopeId }) => {
+  const id = `zeek-signature-draggable-zeek-element-${scopeId}-${data._id}`;
   const sessionId: string | null | undefined = get('zeek.session_id[0]', data);
   const dataSet: string | null | undefined = get('event.dataset[0]', data);
   const sslVersion: string | null | undefined = get('zeek.ssl.version[0]', data);
@@ -248,6 +250,7 @@ export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, isDraggable
           field="zeek.session_id"
           isDraggable={isDraggable}
           value={sessionId}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
@@ -255,6 +258,7 @@ export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, isDraggable
           isDraggable={isDraggable}
           value={dataSet}
           stringRenderer={moduleStringRenderer}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
@@ -262,6 +266,7 @@ export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, isDraggable
           isDraggable={isDraggable}
           value={fileSha1}
           stringRenderer={sha1StringRenderer}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
@@ -269,6 +274,7 @@ export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, isDraggable
           isDraggable={isDraggable}
           value={filemd5}
           stringRenderer={md5StringRenderer}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
@@ -276,60 +282,70 @@ export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, isDraggable
           isDraggable={isDraggable}
           value={dropped}
           stringRenderer={droppedStringRenderer}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
           field="zeek.ssl.version"
           isDraggable={isDraggable}
           value={sslVersion}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
           field="zeek.ssl.cipher"
           isDraggable={isDraggable}
           value={cipher}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
           field="zeek.connection.state"
           isDraggable={isDraggable}
           value={state}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
           field="http.request.method"
           isDraggable={isDraggable}
           value={httpMethod}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
           field="zeek.connection.history"
           isDraggable={isDraggable}
           value={history}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
           field="zeek.notice.note"
           isDraggable={isDraggable}
           value={note}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
           field="zeek.dns.query"
           isDraggable={isDraggable}
           value={dnsQuery}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
           field="zeek.dns.qclass_name"
           isDraggable={isDraggable}
           value={qClassName}
+          scopeId={scopeId}
         />
         <DraggableZeekElement
           id={id}
           field="http.response.status_code"
           isDraggable={isDraggable}
           value={httpResponseStatusCode}
+          scopeId={scopeId}
         />
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="center" gutterSize="none">

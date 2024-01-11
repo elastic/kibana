@@ -34,6 +34,7 @@ describe('Args', () => {
           eventId="event-123"
           args={['arg1', 'arg2', 'arg3']}
           processTitle="process-title-1"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -47,6 +48,7 @@ describe('Args', () => {
             eventId="event-123"
             args={undefined}
             processTitle={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -61,6 +63,7 @@ describe('Args', () => {
             eventId="event-123"
             args={null}
             processTitle={null}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -70,7 +73,13 @@ describe('Args', () => {
     test('it returns an empty string when args is an empty array, and title is an empty string', () => {
       const wrapper = mount(
         <TestProviders>
-          <ArgsComponent contextId="context-123" eventId="event-123" args={[]} processTitle="" />
+          <ArgsComponent
+            contextId="context-123"
+            eventId="event-123"
+            args={[]}
+            processTitle=""
+            scopeId="test"
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('');
@@ -84,6 +93,7 @@ describe('Args', () => {
             eventId="event-123"
             args={['arg1', 'arg2', 'arg3']}
             processTitle={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -98,6 +108,7 @@ describe('Args', () => {
             eventId="event-123"
             args={null}
             processTitle="process-title-1"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -112,6 +123,7 @@ describe('Args', () => {
             eventId="event-123"
             args={['arg1', 'arg2', 'arg3']}
             processTitle="process-title-1"
+            scopeId="test"
           />
         </TestProviders>
       );

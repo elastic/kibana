@@ -42,7 +42,7 @@ export const createGenericAuditRowRenderer = ({
         isDraggable={isDraggable}
         contextId={`${actionName}-${scopeId}`}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -76,7 +76,7 @@ export const createGenericFileRowRenderer = ({
         fileIcon={fileIcon}
         isDraggable={isDraggable}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),

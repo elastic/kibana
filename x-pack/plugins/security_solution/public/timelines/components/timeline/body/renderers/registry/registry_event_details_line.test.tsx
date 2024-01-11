@@ -37,6 +37,7 @@ describe('DnsRequestEventDetailsLine', () => {
     text: MODIFIED_REGISTRY_KEY,
     userDomain: '[userDomain]',
     userName: '[userName]',
+    scopeId: 'test',
   };
 
   test('it renders the expected text when all properties are provided', () => {

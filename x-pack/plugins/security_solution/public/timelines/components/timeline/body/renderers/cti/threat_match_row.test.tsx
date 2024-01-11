@@ -28,6 +28,7 @@ describe('ThreatMatchRowView', () => {
         indicatorType="domain"
         sourceField="host.name"
         sourceValue="http://elastic.co"
+        scopeId="test"
       />
     );
 
@@ -44,6 +45,7 @@ describe('ThreatMatchRowView', () => {
         indicatorType="domain"
         sourceField="host.name"
         sourceValue="http://elastic.co"
+        scopeId="test"
       />
     );
 
@@ -68,6 +70,7 @@ describe('ThreatMatchRowView', () => {
         indicatorType: 'domain',
         sourceField: 'host.name',
         sourceValue: 'http://elastic.co',
+        scopeId: 'test',
       };
     });
 

@@ -27,6 +27,7 @@ interface Props {
   text: string;
   userDomain: string | null | undefined;
   userName: string | null | undefined;
+  scopeId: string;
 }
 
 const RegistryEventDetailsLineComponent: React.FC<Props> = ({
@@ -41,6 +42,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
   text,
   userDomain,
   userName,
+  scopeId,
 }) => {
   const registryKeyTooltipContent = useMemo(
     () => (
@@ -77,6 +79,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
           userDomain={userDomain}
           userName={userName}
           workingDirectory={undefined}
+          scopeId={scopeId}
         />
 
         {!isNillEmptyOrNotFinite(registryKey) && (
@@ -94,6 +97,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
                 value={registryKey}
                 isAggregatable={true}
                 fieldType="keyword"
+                scopeId={scopeId}
               />
             </TokensFlexItem>
           </>
@@ -114,6 +118,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
                 value={registryPath}
                 isAggregatable={true}
                 fieldType="keyword"
+                scopeId={scopeId}
               />
             </TokensFlexItem>
           </>
@@ -133,6 +138,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
             processPid={processPid}
             processName={processName}
             processExecutable={undefined}
+            scopeId={scopeId}
           />
         </TokensFlexItem>
       </EuiFlexGroup>

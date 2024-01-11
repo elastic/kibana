@@ -81,6 +81,7 @@ describe('HostName', () => {
     fieldType: 'keyword',
     isAggregatable: true,
     value: 'Mock Host',
+    scopeId: 'test',
   };
 
   let toggleExpandedDetail: jest.SpyInstance;

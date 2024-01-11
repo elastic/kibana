@@ -36,6 +36,7 @@ describe('UserHostWorkingDir', () => {
           userName="[userName-123]"
           hostName="[hostName-123]"
           workingDirectory="[working-directory-123]"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -50,6 +51,7 @@ describe('UserHostWorkingDir', () => {
           userName={null}
           hostName={null}
           workingDirectory={null}
+          scopeId="test"
         />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
@@ -64,6 +66,7 @@ describe('UserHostWorkingDir', () => {
           userName={undefined}
           hostName={undefined}
           workingDirectory={undefined}
+          scopeId="test"
         />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
@@ -80,6 +83,7 @@ describe('UserHostWorkingDir', () => {
               userName={undefined}
               hostName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -98,6 +102,7 @@ describe('UserHostWorkingDir', () => {
               userName="[user-name-123]"
               hostName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -116,6 +121,7 @@ describe('UserHostWorkingDir', () => {
               userName={null}
               hostName="[host-name-123]"
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -134,6 +140,7 @@ describe('UserHostWorkingDir', () => {
               userName={null}
               hostName={null}
               workingDirectory="[working-directory-123]"
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -152,6 +159,7 @@ describe('UserHostWorkingDir', () => {
               userName="[user-name-123]"
               hostName={null}
               workingDirectory="[working-directory-123]"
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -170,6 +178,7 @@ describe('UserHostWorkingDir', () => {
               userName={null}
               hostName="[host-name-123]"
               workingDirectory="[working-directory-123]"
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -188,6 +197,7 @@ describe('UserHostWorkingDir', () => {
               userName="[user-name-123]"
               hostName="[host-name-123]"
               workingDirectory={null}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -206,6 +216,7 @@ describe('UserHostWorkingDir', () => {
               userName="[user-name-123]"
               hostName="[host-name-123]"
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -226,6 +237,7 @@ describe('UserHostWorkingDir', () => {
               userName="[user-name-123]"
               hostName="[host-name-123]"
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -246,6 +258,7 @@ describe('UserHostWorkingDir', () => {
               userName={undefined}
               hostName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -267,6 +280,7 @@ describe('UserHostWorkingDir', () => {
               userName={undefined}
               hostName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -289,6 +303,7 @@ describe('UserHostWorkingDir', () => {
               userName="[user-name-123]"
               hostName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -310,6 +325,7 @@ describe('UserHostWorkingDir', () => {
               userNameField="overridden.field.name"
               hostName={undefined}
               workingDirectory={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>

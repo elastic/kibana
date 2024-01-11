@@ -182,6 +182,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
     sourceIp,
     sourcePort,
     type,
+    scopeId,
   }) => {
     const label = type === 'source' ? i18n.SOURCE : i18n.DESTINATION;
 
@@ -242,6 +243,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
               sourceGeoRegionName={sourceGeoRegionName}
               sourceGeoCityName={sourceGeoCityName}
               type={type}
+              scopeId={scopeId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

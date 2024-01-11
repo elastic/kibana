@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { DraggableId } from '@hello-pangea/dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
@@ -219,10 +220,10 @@ export const HoverActions: React.FC<Props> = React.memo(
     const isTimelineView = scopeId === TimelineId.active;
     // TODO Provide a list of disabled/enabled actions as props
     const isEntityAnalyticsPage = scopeId === SecurityPageName.entityAnalytics;
-
+    const isAlertPreview = scopeId === TableId.rulePreview;
     const hideFilters = useMemo(
-      () => isEntityAnalyticsPage && !isTimelineView,
-      [isTimelineView, isEntityAnalyticsPage]
+      () => (isEntityAnalyticsPage || isAlertPreview) && !isTimelineView,
+      [isTimelineView, isEntityAnalyticsPage, isAlertPreview]
     );
 
     const hiddenActionsCount = useMemo(() => {

@@ -39,6 +39,7 @@ describe('SuricataSignature', () => {
           id="doc-id-123"
           signatureId={123}
           signature="ET SCAN ATTACK Hello"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -74,7 +75,7 @@ describe('SuricataSignature', () => {
     test('it renders the default SuricataSignature', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableSignatureId id="id-123" signatureId={123} />
+          <DraggableSignatureId id="id-123" signatureId={123} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('123');
@@ -83,7 +84,7 @@ describe('SuricataSignature', () => {
     test('it renders a tooltip for the signature field', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableSignatureId id="id-123" signatureId={123} />
+          <DraggableSignatureId id="id-123" signatureId={123} scopeId="test" />
         </TestProviders>
       );
 

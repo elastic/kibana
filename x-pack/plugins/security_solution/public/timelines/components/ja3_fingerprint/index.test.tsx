@@ -24,6 +24,7 @@ describe('Ja3Fingerprint', () => {
           contextId="test"
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -39,6 +40,7 @@ describe('Ja3Fingerprint', () => {
           contextId="test"
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -54,6 +56,7 @@ describe('Ja3Fingerprint', () => {
           contextId="test"
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
+          scopeId="test"
         />
       </TestProviders>
     );

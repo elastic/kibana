@@ -19,6 +19,7 @@ interface MatchDetailsProps {
   isDraggable?: boolean;
   sourceField: string;
   sourceValue: string;
+  scopeId: string;
 }
 
 export const MatchDetails: React.FC<MatchDetailsProps> = ({
@@ -27,6 +28,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
   isDraggable,
   sourceField,
   sourceValue,
+  scopeId,
 }) => (
   <EuiFlexGroup
     alignItems="center"
@@ -46,6 +48,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
         value={sourceField}
         isAggregatable={true}
         fieldType={'keyword'}
+        scopeId={scopeId}
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -66,6 +69,7 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
         value={sourceValue}
         isAggregatable={true}
         fieldType={'keyword'}
+        scopeId={scopeId}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

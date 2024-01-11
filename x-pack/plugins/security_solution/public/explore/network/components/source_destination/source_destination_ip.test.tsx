@@ -370,6 +370,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={undefined}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -419,6 +420,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -468,6 +470,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={undefined}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -517,6 +520,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -567,6 +571,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -616,6 +621,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -665,6 +671,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={[]}
           sourcePort={[]}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -714,6 +721,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -763,6 +771,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -812,6 +821,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={[]}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -861,6 +871,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -910,6 +921,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -960,6 +972,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -1010,6 +1023,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -1060,6 +1074,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={undefined}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -1111,6 +1126,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -1161,6 +1177,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={undefined}
           sourcePort={undefined}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -1211,6 +1228,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -1261,6 +1279,7 @@ describe('SourceDestinationIp', () => {
           sourceIp={asArrayIfExists(get(SOURCE_IP_FIELD_NAME, getMockNetflowData()))}
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
+          scopeId="test"
         />
       </TestProviders>
     );

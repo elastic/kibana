@@ -20,6 +20,7 @@ describe('AuthSsh', () => {
           eventId="[event-123]"
           sshSignature="[ssh-signature]"
           sshMethod="[ssh-method]"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -32,6 +33,7 @@ describe('AuthSsh', () => {
           eventId="[event-123]"
           sshSignature={null}
           sshMethod={null}
+          scopeId="test"
         />
       );
       expect(wrapper.children().length).toEqual(0);
@@ -44,6 +46,7 @@ describe('AuthSsh', () => {
           eventId="[event-123]"
           sshSignature={undefined}
           sshMethod={undefined}
+          scopeId="test"
         />
       );
       expect(wrapper.children().length).toEqual(0);
@@ -56,6 +59,7 @@ describe('AuthSsh', () => {
           eventId="[event-123]"
           sshSignature={null}
           sshMethod={undefined}
+          scopeId="test"
         />
       );
       expect(wrapper.children().length).toEqual(0);
@@ -68,6 +72,7 @@ describe('AuthSsh', () => {
           eventId="[event-123]"
           sshSignature={undefined}
           sshMethod={null}
+          scopeId="test"
         />
       );
       expect(wrapper.children().length).toEqual(0);
@@ -79,6 +84,7 @@ describe('AuthSsh', () => {
           contextId="[context-123]"
           eventId="[event-123]"
           sshSignature="[sshSignature-1]"
+          scopeId="test"
           sshMethod={null}
         />
       );
@@ -92,6 +98,7 @@ describe('AuthSsh', () => {
           eventId="[event-123]"
           sshSignature={null}
           sshMethod="[sshMethod-1]"
+          scopeId="test"
         />
       );
       expect(wrapper.find('DraggableBadge').prop('value')).toEqual('[sshMethod-1]');

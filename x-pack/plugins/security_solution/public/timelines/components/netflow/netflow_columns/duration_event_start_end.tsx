@@ -39,7 +39,8 @@ export const DurationEventStartEnd = React.memo<{
   eventEnd?: string[] | null;
   eventStart?: string[] | null;
   isDraggable?: boolean;
-}>(({ contextId, eventDuration, eventId, eventEnd, eventStart, isDraggable }) => (
+  scopeId: string;
+}>(({ contextId, eventDuration, eventId, eventEnd, eventStart, isDraggable, scopeId }) => (
   <EuiFlexGroup
     alignItems="flexStart"
     data-test-subj="duration-and-start-group"
@@ -58,6 +59,7 @@ export const DurationEventStartEnd = React.memo<{
               name={name}
               tooltipContent={null}
               value={duration}
+              scopeId={scopeId}
             >
               <EuiText size="xs">
                 <TimeIcon size="m" type="clock" />
@@ -79,6 +81,7 @@ export const DurationEventStartEnd = React.memo<{
               isDraggable={isDraggable}
               tooltipContent={null}
               value={start}
+              scopeId={scopeId}
             >
               <EuiText size="xs">
                 <TimeIcon size="m" type="clock" />
@@ -97,6 +100,7 @@ export const DurationEventStartEnd = React.memo<{
               isDraggable={isDraggable}
               tooltipContent={null}
               value={end}
+              scopeId={scopeId}
             >
               <EuiText size="xs">
                 <TimeIcon size="m" type="clock" />

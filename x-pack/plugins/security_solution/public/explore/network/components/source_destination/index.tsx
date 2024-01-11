@@ -52,6 +52,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
     sourcePackets,
     sourcePort,
     transport,
+    scopeId,
   }) => (
     <EuiFlexGroup alignItems="center" direction="column" justifyContent="center" gutterSize="none">
       <EuiFlexItem grow={false}>
@@ -65,6 +66,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
           isDraggable={isDraggable}
           protocol={networkProtocol}
           transport={transport}
+          scopeId={scopeId}
         />
       </EuiFlexItem>
 
@@ -91,6 +93,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
           sourceIp={sourceIp}
           sourcePackets={sourcePackets}
           sourcePort={sourcePort}
+          scopeId={scopeId}
         />
       </EuiFlexItemMarginTop>
     </EuiFlexGroup>

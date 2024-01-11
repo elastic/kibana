@@ -63,6 +63,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
     sourcePort,
     transport,
     userName,
+    scopeId,
   }) => (
     <EuiFlexGroup
       data-test-subj="netflow-columns"
@@ -77,6 +78,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           isDraggable={isDraggable}
           processName={processName}
           userName={userName}
+          scopeId={scopeId}
         />
       </EuiFlexItemMarginRight>
 
@@ -88,6 +90,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           eventEnd={eventEnd}
           eventStart={eventStart}
           isDraggable={isDraggable}
+          scopeId={scopeId}
         />
       </EuiFlexItemMarginRight>
 
@@ -120,6 +123,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           sourcePackets={sourcePackets}
           sourcePort={sourcePort}
           transport={transport}
+          scopeId={scopeId}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

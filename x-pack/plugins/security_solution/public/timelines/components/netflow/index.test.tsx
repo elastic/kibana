@@ -131,6 +131,7 @@ const getNetflowInstance = () => (
     )}
     transport={asArrayIfExists(get(NETWORK_TRANSPORT_FIELD_NAME, getMockNetflowData()))}
     userName={asArrayIfExists(get(USER_NAME_FIELD_NAME, getMockNetflowData()))}
+    scopeId="test"
   />
 );
 

@@ -34,7 +34,7 @@ describe('GenericFileDetails', () => {
           text="generic-text-123"
           data={mockTimelineData[27].ecs}
           fileIcon="document"
-          timelineId="test"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -48,7 +48,7 @@ describe('GenericFileDetails', () => {
             text="generic-text-123"
             data={mockTimelineData[19].ecs}
             fileIcon="document"
-            timelineId="test"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -64,7 +64,7 @@ describe('GenericFileDetails', () => {
           text="generic-text-123"
           data={mockTimelineData[0].ecs}
           fileIcon="document"
-          timelineId="test"
+          scopeId="test"
         />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
@@ -93,6 +93,7 @@ describe('GenericFileDetails', () => {
             filePath="/somepath"
             fileIcon="document"
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -122,6 +123,7 @@ describe('GenericFileDetails', () => {
             filePath="/somepath"
             fileIcon="document"
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -151,6 +153,7 @@ describe('GenericFileDetails', () => {
             filePath="/somepath"
             fileIcon="document"
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -180,6 +183,7 @@ describe('GenericFileDetails', () => {
             filePath="/somepath"
             fileIcon="document"
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -209,6 +213,7 @@ describe('GenericFileDetails', () => {
             filePath="/somepath"
             fileIcon="document"
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -238,6 +243,7 @@ describe('GenericFileDetails', () => {
             filePath="/somepath"
             fileIcon="document"
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -267,6 +273,7 @@ describe('GenericFileDetails', () => {
             filePath="/somepath"
             fileIcon="document"
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -296,6 +303,7 @@ describe('GenericFileDetails', () => {
             filePath="/somepath"
             fileIcon="document"
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -325,6 +333,7 @@ describe('GenericFileDetails', () => {
             filePath="/somepath"
             fileIcon="document"
             result="success"
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -354,6 +363,7 @@ describe('GenericFileDetails', () => {
             args={undefined}
             result={undefined}
             filePath={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -381,6 +391,7 @@ describe('GenericFileDetails', () => {
             args={undefined}
             result={undefined}
             filePath={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -408,6 +419,7 @@ describe('GenericFileDetails', () => {
             args={undefined}
             result={undefined}
             filePath={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -435,6 +447,7 @@ describe('GenericFileDetails', () => {
             args={undefined}
             result={undefined}
             filePath={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -462,6 +475,7 @@ describe('GenericFileDetails', () => {
             args={undefined}
             result={undefined}
             filePath={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -489,6 +503,7 @@ describe('GenericFileDetails', () => {
             args={undefined}
             result={undefined}
             filePath={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -516,6 +531,7 @@ describe('GenericFileDetails', () => {
             workingDirectory={undefined}
             result={undefined}
             filePath={undefined}
+            scopeId="test"
           />
         </TestProviders>
       );

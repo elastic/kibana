@@ -24,6 +24,7 @@ interface Props {
   workingDirectory: string | null | undefined;
   session: string | null | undefined;
   isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const SessionUserHostWorkingDir = React.memo<Props>(
@@ -37,6 +38,7 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
     workingDirectory,
     session,
     isDraggable,
+    scopeId,
   }) => (
     <>
       <TokensFlexItem grow={false} component="span">
@@ -52,6 +54,7 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
           isDraggable={isDraggable}
           isAggregatable={true}
           fieldType="keyword"
+          scopeId={scopeId}
         />
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
@@ -62,6 +65,7 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
           primary={primary}
           secondary={secondary}
           isDraggable={isDraggable}
+          scopeId={scopeId}
         />
       </TokensFlexItem>
       {hostName != null && (
@@ -75,6 +79,7 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
         workingDirectory={workingDirectory}
         hostName={hostName}
         isDraggable={isDraggable}
+        scopeId={scopeId}
       />
     </>
   )

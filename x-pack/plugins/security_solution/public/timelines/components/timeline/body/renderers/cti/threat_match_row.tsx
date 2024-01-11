@@ -29,6 +29,7 @@ export interface ThreatMatchRowProps {
   isDraggable?: boolean;
   sourceField: string;
   sourceValue: string;
+  scopeId: string;
 }
 
 export const ThreatMatchRow = ({
@@ -36,11 +37,13 @@ export const ThreatMatchRow = ({
   data,
   eventId,
   isDraggable,
+  scopeId,
 }: {
   contextId: string;
   data: Fields;
   eventId: string;
   isDraggable?: boolean;
+  scopeId: string;
 }) => {
   const props = {
     contextId,
@@ -51,6 +54,7 @@ export const ThreatMatchRow = ({
     isDraggable,
     sourceField: get(MATCHED_FIELD, data)[0] as string,
     sourceValue: get(MATCHED_ATOMIC, data)[0] as string,
+    scopeId,
   };
 
   return <ThreatMatchRowView {...props} />;
@@ -65,6 +69,7 @@ export const ThreatMatchRowView = ({
   isDraggable,
   sourceField,
   sourceValue,
+  scopeId,
 }: ThreatMatchRowProps) => {
   return (
     <EuiFlexGroup
@@ -80,6 +85,7 @@ export const ThreatMatchRowView = ({
           isDraggable={isDraggable}
           sourceField={sourceField}
           sourceValue={sourceValue}
+          scopeId={scopeId}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -90,6 +96,7 @@ export const ThreatMatchRowView = ({
           indicatorReference={indicatorReference}
           indicatorType={indicatorType}
           isDraggable={isDraggable}
+          scopeId={scopeId}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -33,7 +33,7 @@ describe('DnsRequestEventDetails', () => {
         <DnsRequestEventDetails
           contextId="test-context"
           data={mockEndgameDnsRequest}
-          timelineId="timeline-id-test"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );

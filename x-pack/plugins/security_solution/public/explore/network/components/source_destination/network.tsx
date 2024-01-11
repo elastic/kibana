@@ -49,6 +49,7 @@ export const Network = React.memo<{
   packets?: string[] | null;
   protocol?: string[] | null;
   transport?: string[] | null;
+  scopeId: string;
 }>(
   ({
     bytes,
@@ -60,6 +61,7 @@ export const Network = React.memo<{
     packets,
     protocol,
     transport,
+    scopeId,
   }) => (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
       {direction != null
@@ -70,6 +72,7 @@ export const Network = React.memo<{
                 direction={dir}
                 eventId={eventId}
                 isDraggable={isDraggable}
+                scopeId={scopeId}
               />
             </EuiFlexItemMarginRight>
           ))
@@ -86,6 +89,7 @@ export const Network = React.memo<{
                 value={proto}
                 isAggregatable={true}
                 fieldType="keyword"
+                scopeId={scopeId}
               />
             </EuiFlexItemMarginRight>
           ))
@@ -100,6 +104,7 @@ export const Network = React.memo<{
                   id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
                   isDraggable={isDraggable}
                   value={b}
+                  scopeId={scopeId}
                 >
                   <Stats size="xs">
                     <span>
@@ -120,6 +125,7 @@ export const Network = React.memo<{
                 id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
                 isDraggable={isDraggable}
                 value={p}
+                scopeId={scopeId}
               >
                 <Stats size="xs">
                   <span>{`${p} ${i18n.PACKETS}`}</span>
@@ -141,6 +147,7 @@ export const Network = React.memo<{
                 value={trans}
                 isAggregatable={true}
                 fieldType="keyword"
+                scopeId={scopeId}
               />
             </EuiFlexItemMarginRight>
           ))
@@ -157,6 +164,7 @@ export const Network = React.memo<{
                 value={trans}
                 isAggregatable={true}
                 fieldType="keyword"
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           ))

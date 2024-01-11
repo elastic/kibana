@@ -49,6 +49,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -80,6 +81,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -111,6 +113,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -142,6 +145,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -173,6 +177,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -204,6 +209,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -235,6 +241,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -266,6 +273,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -297,6 +305,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -328,6 +337,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -359,6 +369,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -390,6 +401,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -421,6 +433,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -452,6 +465,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -483,6 +497,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -514,6 +529,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain={undefined}
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -545,6 +561,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName={undefined}
           winlogEventId="[winlogEventId]"
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -576,6 +593,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId={undefined}
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );
@@ -607,6 +625,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId={undefined}
+          scopeId="scope-id-test"
         />
       </TestProviders>
     );

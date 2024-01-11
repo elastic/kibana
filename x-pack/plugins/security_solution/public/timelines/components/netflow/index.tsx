@@ -58,6 +58,7 @@ export const Netflow = React.memo<NetflowProps>(
     tlsServerCertificateFingerprintSha1,
     transport,
     userName,
+    scopeId,
   }) => (
     <EuiFlexGroup
       alignItems="center"
@@ -101,6 +102,7 @@ export const Netflow = React.memo<NetflowProps>(
           sourcePort={sourcePort}
           transport={transport}
           userName={userName}
+          scopeId={scopeId}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -111,6 +113,7 @@ export const Netflow = React.memo<NetflowProps>(
           tlsClientCertificateFingerprintSha1={tlsClientCertificateFingerprintSha1}
           tlsFingerprintsJa3Hash={tlsFingerprintsJa3Hash}
           tlsServerCertificateFingerprintSha1={tlsServerCertificateFingerprintSha1}
+          scopeId={scopeId}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

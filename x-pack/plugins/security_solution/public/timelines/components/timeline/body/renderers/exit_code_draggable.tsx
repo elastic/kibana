@@ -18,10 +18,11 @@ interface Props {
   isDraggable?: boolean;
   processExitCode: number | null | undefined;
   text: string | null | undefined;
+  scopeId: string;
 }
 
 export const ExitCodeDraggable = React.memo<Props>(
-  ({ contextId, endgameExitCode, eventId, isDraggable, processExitCode, text }) => {
+  ({ contextId, endgameExitCode, eventId, isDraggable, processExitCode, text, scopeId }) => {
     if (isNillEmptyOrNotFinite(processExitCode) && isNillEmptyOrNotFinite(endgameExitCode)) {
       return null;
     }
@@ -44,6 +45,7 @@ export const ExitCodeDraggable = React.memo<Props>(
               value={`${processExitCode}`}
               fieldType="number"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         )}
@@ -58,6 +60,7 @@ export const ExitCodeDraggable = React.memo<Props>(
               value={endgameExitCode}
               fieldType="number"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         )}

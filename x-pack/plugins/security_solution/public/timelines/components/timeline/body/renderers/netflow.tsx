@@ -59,14 +59,14 @@ import {
 
 interface NetflowRendererProps {
   data: Ecs;
-  timelineId: string;
+  scopeId: string;
   isDraggable?: boolean;
 }
 
 export const NetflowRenderer = React.memo<NetflowRendererProps>(
-  ({ data, timelineId, isDraggable }) => (
+  ({ data, scopeId, isDraggable }) => (
     <Netflow
-      contextId={`netflow-renderer-${timelineId}-${data._id}`}
+      contextId={`netflow-renderer-${scopeId}-${data._id}`}
       destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
       destinationGeoContinentName={asArrayIfExists(
         get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)
@@ -110,6 +110,7 @@ export const NetflowRenderer = React.memo<NetflowRendererProps>(
       )}
       transport={asArrayIfExists(get(NETWORK_TRANSPORT_FIELD_NAME, data))}
       userName={undefined}
+      scopeId={scopeId}
     />
   )
 );

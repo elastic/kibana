@@ -22,6 +22,7 @@ interface Props {
   processPid: number | undefined | null;
   processName: string | undefined | null;
   isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const ProcessDraggable = React.memo<Props>(
@@ -34,6 +35,7 @@ export const ProcessDraggable = React.memo<Props>(
     processName,
     processPid,
     isDraggable,
+    scopeId,
   }) => {
     if (
       isNillEmptyOrNotFinite(processName) &&
@@ -58,6 +60,7 @@ export const ProcessDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </EuiFlexItem>
         ) : !isNillEmptyOrNotFinite(processExecutable) ? (
@@ -71,6 +74,7 @@ export const ProcessDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </EuiFlexItem>
         ) : !isNillEmptyOrNotFinite(endgameProcessName) ? (
@@ -84,6 +88,7 @@ export const ProcessDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </EuiFlexItem>
         ) : null}
@@ -99,6 +104,7 @@ export const ProcessDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </EuiFlexItem>
         ) : !isNillEmptyOrNotFinite(endgamePid) ? (
@@ -112,6 +118,7 @@ export const ProcessDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </EuiFlexItem>
         ) : null}
@@ -132,6 +139,7 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
     processName,
     processPid,
     isDraggable,
+    scopeId,
   }) => {
     if (
       endgamePid == null &&
@@ -152,6 +160,7 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
           processName={processName}
           processPid={processPid}
           isDraggable={isDraggable}
+          scopeId={scopeId}
         />
       );
     }

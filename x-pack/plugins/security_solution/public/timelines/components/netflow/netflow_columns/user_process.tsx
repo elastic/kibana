@@ -25,7 +25,8 @@ export const UserProcess = React.memo<{
   isDraggable?: boolean;
   processName?: string[] | null;
   userName?: string[] | null;
-}>(({ contextId, eventId, isDraggable, processName, userName }) => (
+  scopeId: string;
+}>(({ contextId, eventId, isDraggable, processName, userName, scopeId }) => (
   <EuiFlexGroup
     alignItems="flexStart"
     data-test-subj="user-process"
@@ -46,6 +47,7 @@ export const UserProcess = React.memo<{
               iconType="user"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </EuiFlexItem>
         ))
@@ -63,6 +65,7 @@ export const UserProcess = React.memo<{
               iconType="console"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </EuiFlexItem>
         ))

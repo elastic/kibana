@@ -142,6 +142,7 @@ export const netflowRowRenderer: RowRenderer = {
           )}
           transport={asArrayIfExists(get(NETWORK_TRANSPORT_FIELD_NAME, data))}
           userName={asArrayIfExists(get(USER_NAME_FIELD_NAME, data))}
+          scopeId={scopeId}
         />
       </Details>
     </RowRendererContainer>

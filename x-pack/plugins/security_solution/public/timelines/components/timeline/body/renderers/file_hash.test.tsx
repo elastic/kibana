@@ -35,7 +35,7 @@ describe('FileHash', () => {
   test('displays the fileHashSha256 when provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <FileHash {...allProps} fileHashSha256="[fileHashSha256]" />
+        <FileHash {...allProps} fileHashSha256="[fileHashSha256]" scopeId="test" />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('[fileHashSha256]');
@@ -44,7 +44,7 @@ describe('FileHash', () => {
   test('displays nothing when fileHashSha256 is null', () => {
     const wrapper = mount(
       <TestProviders>
-        <FileHash {...allProps} fileHashSha256={null} />
+        <FileHash {...allProps} fileHashSha256={null} scopeId="test" />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
@@ -53,7 +53,7 @@ describe('FileHash', () => {
   test('displays nothing when fileHashSha256 is undefined', () => {
     const wrapper = mount(
       <TestProviders>
-        <FileHash {...allProps} />
+        <FileHash {...allProps} scopeId="test" />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('');

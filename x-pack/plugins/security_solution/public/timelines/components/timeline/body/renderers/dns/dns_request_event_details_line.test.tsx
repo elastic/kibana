@@ -43,6 +43,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -69,6 +70,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -95,6 +97,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -121,6 +124,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -147,6 +151,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -173,6 +178,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -199,6 +205,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -225,6 +232,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -251,6 +259,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -277,6 +286,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -303,6 +313,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain={undefined}
           userName="[userName]"
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -329,6 +340,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName={undefined}
           winlogEventId="[winlogEventId]"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -355,6 +367,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId={undefined}
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -381,6 +394,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userDomain="[userDomain]"
           userName="[userName]"
           winlogEventId={undefined}
+          scopeId="test"
         />
       </TestProviders>
     );

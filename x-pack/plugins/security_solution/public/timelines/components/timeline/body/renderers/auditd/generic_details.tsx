@@ -36,6 +36,7 @@ interface Props {
   args: string[] | null | undefined;
   session: string | null | undefined;
   isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const AuditdGenericLine = React.memo<Props>(
@@ -56,6 +57,7 @@ export const AuditdGenericLine = React.memo<Props>(
     session,
     text,
     isDraggable,
+    scopeId,
   }) => (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
       <SessionUserHostWorkingDir
@@ -68,6 +70,7 @@ export const AuditdGenericLine = React.memo<Props>(
         workingDirectory={workingDirectory}
         session={session}
         isDraggable={isDraggable}
+        scopeId={scopeId}
       />
       {processExecutable != null && (
         <TokensFlexItem grow={false} component="span">
@@ -84,6 +87,7 @@ export const AuditdGenericLine = React.memo<Props>(
           processName={processName}
           processExecutable={processExecutable}
           isDraggable={isDraggable}
+          scopeId={scopeId}
         />
       </TokensFlexItem>
       <Args
@@ -92,6 +96,7 @@ export const AuditdGenericLine = React.memo<Props>(
         contextId={contextId}
         isDraggable={isDraggable}
         processTitle={processTitle}
+        scopeId={scopeId}
       />
       {result != null && (
         <TokensFlexItem grow={false} component="span">
@@ -108,6 +113,7 @@ export const AuditdGenericLine = React.memo<Props>(
           value={result}
           isAggregatable={true}
           fieldType="keyword"
+          scopeId={scopeId}
         />
       </TokensFlexItem>
     </EuiFlexGroup>
@@ -121,11 +127,11 @@ interface GenericDetailsProps {
   isDraggable?: boolean;
   contextId: string;
   text: string;
-  timelineId: string;
+  scopeId: string;
 }
 
 export const AuditdGenericDetails = React.memo<GenericDetailsProps>(
-  ({ data, contextId, isDraggable, text, timelineId }) => {
+  ({ data, contextId, isDraggable, text, scopeId }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -159,9 +165,10 @@ export const AuditdGenericDetails = React.memo<GenericDetailsProps>(
             result={result}
             secondary={secondary}
             isDraggable={isDraggable}
+            scopeId={scopeId}
           />
           <EuiSpacer size="s" />
-          <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
+          <NetflowRenderer data={data} isDraggable={isDraggable} scopeId={scopeId} />
         </Details>
       );
     } else {

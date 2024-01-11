@@ -22,7 +22,7 @@ export const zeekRowRenderer: RowRenderer = {
   },
   renderRow: ({ data, isDraggable, scopeId }) => (
     <RowRendererContainer>
-      <ZeekDetails data={data} isDraggable={isDraggable} timelineId={scopeId} />
+      <ZeekDetails data={data} isDraggable={isDraggable} scopeId={scopeId} />
     </RowRendererContainer>
   ),
 };

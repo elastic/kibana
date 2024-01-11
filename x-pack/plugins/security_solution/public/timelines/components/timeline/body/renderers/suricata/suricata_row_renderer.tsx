@@ -22,7 +22,7 @@ export const suricataRowRenderer: RowRenderer = {
   },
   renderRow: ({ data, isDraggable, scopeId }) => (
     <RowRendererContainer>
-      <SuricataDetails data={data} isDraggable={isDraggable} timelineId={scopeId} />
+      <SuricataDetails data={data} isDraggable={isDraggable} scopeId={scopeId} />
     </RowRendererContainer>
   ),
 };

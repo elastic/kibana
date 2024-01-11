@@ -22,10 +22,11 @@ interface Props {
   primary: string | null | undefined;
   secondary: string | null | undefined;
   isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const PrimarySecondary = React.memo<Props>(
-  ({ contextId, eventId, primary, secondary, isDraggable }) => {
+  ({ contextId, eventId, primary, secondary, isDraggable, scopeId }) => {
     if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return null;
     } else if (!nilOrUnSet(primary) && nilOrUnSet(secondary)) {
@@ -39,6 +40,7 @@ export const PrimarySecondary = React.memo<Props>(
           iconType="user"
           isAggregatable={true}
           fieldType="keyword"
+          scopeId={scopeId}
         />
       );
     } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
@@ -52,6 +54,7 @@ export const PrimarySecondary = React.memo<Props>(
           iconType="user"
           isAggregatable={true}
           fieldType="keyword"
+          scopeId={scopeId}
         />
       );
     } else if (primary === secondary) {
@@ -65,6 +68,7 @@ export const PrimarySecondary = React.memo<Props>(
           iconType="user"
           isAggregatable={true}
           fieldType="keyword"
+          scopeId={scopeId}
         />
       );
     } else {
@@ -80,6 +84,7 @@ export const PrimarySecondary = React.memo<Props>(
               iconType="user"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
@@ -95,6 +100,7 @@ export const PrimarySecondary = React.memo<Props>(
               iconType="user"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         </EuiFlexGroup>
@@ -112,10 +118,11 @@ interface PrimarySecondaryUserInfoProps {
   primary: string | null | undefined;
   secondary: string | null | undefined;
   isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps>(
-  ({ contextId, eventId, userName, primary, secondary, isDraggable }) => {
+  ({ contextId, eventId, userName, primary, secondary, isDraggable, scopeId }) => {
     if (nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return null;
     } else if (
@@ -135,6 +142,7 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
           iconType="user"
           isAggregatable={true}
           fieldType="keyword"
+          scopeId={scopeId}
         />
       );
     } else if (!nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
@@ -148,6 +156,7 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
           iconType="user"
           isAggregatable={true}
           fieldType="keyword"
+          scopeId={scopeId}
         />
       );
     } else {
@@ -158,6 +167,7 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
           isDraggable={isDraggable}
           primary={primary}
           secondary={secondary}
+          scopeId={scopeId}
         />
       );
     }

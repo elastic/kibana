@@ -21,6 +21,7 @@ interface Props {
   filePath: string | null | undefined;
   fileExtOriginalPath: string | null | undefined;
   isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const FileDraggable = React.memo<Props>(
@@ -33,6 +34,7 @@ export const FileDraggable = React.memo<Props>(
     fileName,
     filePath,
     isDraggable,
+    scopeId,
   }) => {
     if (
       isNillEmptyOrNotFinite(fileName) &&
@@ -59,6 +61,7 @@ export const FileDraggable = React.memo<Props>(
               iconType="document"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         ) : !isNillEmptyOrNotFinite(endgameFileName) ? (
@@ -72,6 +75,7 @@ export const FileDraggable = React.memo<Props>(
               iconType="document"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         ) : null}
@@ -93,6 +97,7 @@ export const FileDraggable = React.memo<Props>(
               iconType="document"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         ) : !isNillEmptyOrNotFinite(endgameFilePath) ? (
@@ -106,6 +111,7 @@ export const FileDraggable = React.memo<Props>(
               iconType="document"
               isAggregatable={true}
               fieldType="keyword"
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         ) : null}
@@ -125,6 +131,7 @@ export const FileDraggable = React.memo<Props>(
                 iconType="document"
                 isAggregatable={true}
                 fieldType="keyword"
+                scopeId={scopeId}
               />
             </TokensFlexItem>
           </>

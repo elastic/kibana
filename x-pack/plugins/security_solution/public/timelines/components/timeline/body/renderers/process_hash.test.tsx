@@ -27,6 +27,7 @@ const allProps = {
   contextId: 'test',
   eventId: '1',
   processHashSha256: undefined,
+  scopeId: 'test',
 };
 
 describe('ProcessHash', () => {

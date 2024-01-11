@@ -25,6 +25,7 @@ describe('CertificateFingerprint', () => {
           contextId="test"
           fieldName="tls.client_certificate.fingerprint.sha1"
           value="3f4c57934e089f02ae7511200aee2d7e7aabd272"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -40,6 +41,7 @@ describe('CertificateFingerprint', () => {
           contextId="test"
           fieldName="tls.client_certificate.fingerprint.sha1"
           value="3f4c57934e089f02ae7511200aee2d7e7aabd272"
+          scopeId="test"
         />
       </TestProviders>
     );
@@ -55,6 +57,7 @@ describe('CertificateFingerprint', () => {
           contextId="test"
           fieldName="tls.client_certificate.fingerprint.sha1"
           value="3f4c57934e089f02ae7511200aee2d7e7aabd272"
+          scopeId="test"
         />
       </TestProviders>
     );

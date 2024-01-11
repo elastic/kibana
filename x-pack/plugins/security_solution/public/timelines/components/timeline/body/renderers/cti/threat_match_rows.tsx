@@ -72,6 +72,7 @@ const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, isDraggable, sco
                     data={indicator}
                     eventId={eventId}
                     isDraggable={isDraggable}
+                    scopeId={scopeId}
                   />
                   {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
                 </Fragment>

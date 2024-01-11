@@ -37,6 +37,7 @@ describe('RegistryEventDetails', () => {
           contextId="test-context"
           data={mockEndpointRegistryModificationEvent}
           text={MODIFIED_REGISTRY_KEY}
+          scopeId="test"
         />
       </TestProviders>
     );

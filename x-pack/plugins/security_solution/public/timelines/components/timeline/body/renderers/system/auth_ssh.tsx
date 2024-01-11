@@ -14,12 +14,13 @@ interface Props {
   contextId: string;
   eventId: string;
   isDraggable?: boolean;
+  scopeId: string;
   sshSignature: string | null | undefined;
   sshMethod: string | null | undefined;
 }
 
 export const AuthSsh = React.memo<Props>(
-  ({ contextId, eventId, isDraggable, sshSignature, sshMethod }) => (
+  ({ contextId, eventId, isDraggable, sshSignature, sshMethod, scopeId }) => (
     <>
       {sshSignature != null && (
         <TokensFlexItem grow={false} component="span">
@@ -32,6 +33,7 @@ export const AuthSsh = React.memo<Props>(
             iconType="document"
             isAggregatable={true}
             fieldType="keyword"
+            scopeId={scopeId}
           />
         </TokensFlexItem>
       )}
@@ -46,6 +48,7 @@ export const AuthSsh = React.memo<Props>(
             iconType="document"
             isAggregatable={true}
             fieldType="keyword"
+            scopeId={scopeId}
           />
         </TokensFlexItem>
       )}

@@ -35,6 +35,7 @@ describe('Package', () => {
           packageName="package-name-123"
           packageSummary="package-summary-123"
           packageVersion="package-version-123"
+          scopeId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -48,6 +49,7 @@ describe('Package', () => {
           packageName={null}
           packageSummary={null}
           packageVersion={null}
+          scopeId="test"
         />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
@@ -61,6 +63,7 @@ describe('Package', () => {
           packageName={undefined}
           packageSummary={undefined}
           packageVersion={undefined}
+          scopeId="test"
         />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
@@ -76,6 +79,7 @@ describe('Package', () => {
               packageName="[package-name-123]"
               packageSummary={undefined}
               packageVersion={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -93,6 +97,7 @@ describe('Package', () => {
               packageName="[package-name-123]"
               packageSummary="[package-summary-123]"
               packageVersion={undefined}
+              scopeId="test"
             />
           </div>
         </TestProviders>
@@ -110,6 +115,7 @@ describe('Package', () => {
               packageName="[package-name-123]"
               packageSummary="[package-summary-123]"
               packageVersion="[package-version-123]"
+              scopeId="test"
             />
           </div>
         </TestProviders>

@@ -48,7 +48,7 @@ describe('ZeekSignature', () => {
 
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
-      const wrapper = shallow(<ZeekSignature data={zeek} timelineId="test" />);
+      const wrapper = shallow(<ZeekSignature data={zeek} scopeId="test" />);
       expect(wrapper).toMatchSnapshot();
     });
   });
@@ -120,7 +120,7 @@ describe('ZeekSignature', () => {
     test('it returns null if value is null', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
+          <DraggableZeekElement id="id-123" field="zeek.notice" value={null} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.find('DraggableZeekElement').children().exists()).toBeFalsy();
@@ -129,7 +129,7 @@ describe('ZeekSignature', () => {
     test('it renders the default ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} />
+          <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('mynote');
@@ -143,6 +143,7 @@ describe('ZeekSignature', () => {
             field="zeek.notice"
             value={'mynote'}
             stringRenderer={(value) => `->${value}<-`}
+            scopeId="test"
           />
         </TestProviders>
       );
@@ -154,7 +155,12 @@ describe('ZeekSignature', () => {
         const field = 'zeek.notice';
         const wrapper = mount(
           <TestProviders>
-            <DraggableZeekElement id="id-123" field={field} value={'the people you love'} />
+            <DraggableZeekElement
+              id="id-123"
+              field={field}
+              value={'the people you love'}
+              scopeId="test"
+            />
           </TestProviders>
         );
 

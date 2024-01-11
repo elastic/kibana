@@ -20,6 +20,7 @@ interface Props {
   processParentName: string | null | undefined;
   processPpid: number | undefined | null;
   text: string | null | undefined;
+  scopeId: string;
 }
 
 export const ParentProcessDraggable = React.memo<Props>(
@@ -32,6 +33,7 @@ export const ParentProcessDraggable = React.memo<Props>(
     processParentPid,
     processPpid,
     text,
+    scopeId,
   }) => {
     if (
       isNillEmptyOrNotFinite(processParentName) &&
@@ -62,6 +64,7 @@ export const ParentProcessDraggable = React.memo<Props>(
               value={processParentName}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         )}
@@ -76,6 +79,7 @@ export const ParentProcessDraggable = React.memo<Props>(
               value={endgameParentProcessName}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         )}
@@ -91,6 +95,7 @@ export const ParentProcessDraggable = React.memo<Props>(
               value={`(${String(processParentPid)})`}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         )}
@@ -106,6 +111,7 @@ export const ParentProcessDraggable = React.memo<Props>(
               value={`(${String(processPpid)})`}
               fieldType="keyword"
               isAggregatable={true}
+              scopeId={scopeId}
             />
           </TokensFlexItem>
         )}
