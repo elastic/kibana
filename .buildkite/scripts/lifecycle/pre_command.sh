@@ -151,6 +151,8 @@ export GCS_SA_CDN_QA_BUCKET
 GOOGLE_APPLICATION_CREDENTIALS="$(mktemp -d)/kibana-gcloud-service-account.json"
 export GOOGLE_APPLICATION_CREDENTIALS
 vault_get kibana-gcloud-service-account key | base64 -d > "$GOOGLE_APPLICATION_CREDENTIALS"
+gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+
 
 # Setup Failed Test Reporter Elasticsearch credentials
 {
