@@ -202,6 +202,11 @@ const FieldPanel: FC<FieldPanelProps> = ({
     maxSeriesToPlot: 6,
     viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
   });
+
+  const [caseAttachment, setCaseAttachment] = useState<{
+    viewType: ChangePointDetectionViewType;
+  }>({ viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS });
+
   const [dashboardAttachmentReady, setDashboardAttachmentReady] = useState<boolean>(false);
 
   const {
@@ -301,20 +306,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                       }
                     : {}),
                   'data-test-subj': 'aiopsChangePointDetectionAttachToCaseButton',
-                  onClick: () => {
-                    openCasesModalCallback({
-                      timeRange,
-                      fn: fieldConfig.fn,
-                      metricField: fieldConfig.metricField,
-                      dataViewId: dataView.id,
-                      ...(fieldConfig.splitField
-                        ? {
-                            splitField: fieldConfig.splitField,
-                            partitions: selectedPartitions,
-                          }
-                        : {}),
-                    });
-                  },
+                  panel: 'attachToCasePanel',
                 },
               ]
             : []),
@@ -396,11 +388,64 @@ const FieldPanel: FC<FieldPanelProps> = ({
           </EuiPanel>
         ),
       },
+      {
+        id: 'attachToCasePanel',
+        title: i18n.translate('xpack.aiops.changePointDetection.attachToCaseTitle', {
+          defaultMessage: 'Attach to case',
+        }),
+        size: 's',
+        content: (
+          <EuiPanel paddingSize={'s'}>
+            <EuiSpacer size={'s'} />
+            <EuiForm data-test-subj="aiopsChangePointDetectionCasedAttachmentForm">
+              <ViewTypeSelector
+                value={caseAttachment.viewType}
+                onChange={(v) => {
+                  setCaseAttachment((prevState) => {
+                    return {
+                      ...prevState,
+                      viewType: v,
+                    };
+                  });
+                }}
+              />
+              <EuiButton
+                data-test-subj="aiopsChangePointDetectionSubmitCaseAttachButton"
+                fill
+                type={'submit'}
+                fullWidth
+                onClick={() => {
+                  openCasesModalCallback({
+                    timeRange,
+                    viewType: caseAttachment.viewType,
+                    fn: fieldConfig.fn,
+                    metricField: fieldConfig.metricField,
+                    dataViewId: dataView.id,
+                    ...(fieldConfig.splitField
+                      ? {
+                          splitField: fieldConfig.splitField,
+                          partitions: selectedPartitions,
+                        }
+                      : {}),
+                  });
+                }}
+                disabled={!isDashboardFormValid}
+              >
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.submitDashboardAttachButtonLabel"
+                  defaultMessage="Attach"
+                />
+              </EuiButton>
+            </EuiForm>
+          </EuiPanel>
+        ),
+      },
     ];
   }, [
     canCreateCase,
     canEditDashboards,
     canUpdateCase,
+    caseAttachment.viewType,
     caseAttachmentButtonDisabled,
     dashboardAttachment.applyTimeRange,
     dashboardAttachment.maxSeriesToPlot,
