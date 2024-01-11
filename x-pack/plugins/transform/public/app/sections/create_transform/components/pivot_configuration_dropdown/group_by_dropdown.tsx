@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, type FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiComboBox } from '@elastic/eui';
 
@@ -13,10 +13,9 @@ import { i18n } from '@kbn/i18n';
 
 import { useAppDependencies } from '../../../../app_dependencies';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardActions } from '../../state_management/create_transform_store';
 
-import { getPivotDropdownOptions } from '../step_define/common/get_pivot_dropdown_options';
-import { useWizardContext } from '../wizard/wizard';
+import { usePivotConfigOptions } from '../step_define/hooks/use_pivot_config';
 
 const placeholder = i18n.translate('xpack.transform.stepDefineForm.groupByPlaceholder', {
   defaultMessage: 'Add a group by field ...',
@@ -27,19 +26,11 @@ export const GroupByDropDown: FC = () => {
     ml: { useFieldStatsTrigger },
   } = useAppDependencies();
   const { closeFlyout, renderOption } = useFieldStatsTrigger();
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
 
-  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
-
-  const { groupByOptions } = useMemo(
-    () => getPivotDropdownOptions(dataView, runtimeMappings),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [runtimeMappings]
-  );
-
-  const { pivotConfig: actions } = useWizardActions();
-  const { addGroupBy } = actions;
+  const { groupByOptions } = usePivotConfigOptions();
+  const {
+    pivotConfig: { addGroupBy },
+  } = useWizardActions();
 
   return (
     <EuiComboBox

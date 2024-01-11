@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
@@ -17,25 +17,15 @@ import {
   TOP_METRICS_SORT_FIELD_TYPES,
   TOP_METRICS_SPECIAL_SORT_FIELDS,
 } from '../../../../../../../common/pivot_aggs';
-import { useWizardContext } from '../../../../wizard/wizard';
-import { getPivotDropdownOptions } from '../../get_pivot_dropdown_options';
-import { useWizardSelector } from '../../../../../state_management/create_transform_store';
 import { AggFormComponent } from '../../../../../../../common/pivot_aggs';
+
+import { usePivotConfigOptions } from '../../../hooks/use_pivot_config';
 
 export const TopMetricsAggForm: AggFormComponent<TopMetricsAggConfig> = ({
   onChange,
   aggConfig,
 }) => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
-
-  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
-
-  const { fields } = useMemo(
-    () => getPivotDropdownOptions(dataView, runtimeMappings),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [runtimeMappings]
-  );
+  const { fields } = usePivotConfigOptions();
 
   const sortFieldOptions = fields
     .filter((v) => TOP_METRICS_SORT_FIELD_TYPES.includes(v.type))

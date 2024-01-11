@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, type FC } from 'react';
+import React, { useState, type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,14 +17,14 @@ import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { isPivotAggsConfigWithUiBase, PivotAggsConfig } from '../../../../common';
 import { useAppDependencies } from '../../../../app_dependencies';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardActions } from '../../state_management/create_transform_store';
 
 import { getAggConfigUtils } from '../step_define/common/agg_utils';
-import { getPivotDropdownOptions } from '../step_define/common/get_pivot_dropdown_options';
-import { useWizardContext } from '../wizard/wizard';
 
 import { PopoverForm } from './popover_form';
 import { SubAggsSection } from './sub_aggs_section';
+
+import { usePivotConfigOptions } from '../step_define/hooks/use_pivot_config';
 
 interface Props {
   item: PivotAggsConfig;
@@ -37,8 +37,6 @@ export const AggLabelForm: FC<Props> = ({ item, otherAggNames, parentAggId }) =>
     ml: { useFieldStatsTrigger },
   } = useAppDependencies();
   const { closeFlyout } = useFieldStatsTrigger();
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
 
   const { pivotConfig: actions } = useWizardActions();
   const { deleteAggregation, deleteSubAggregation, updateAggregation, updateSubAggregation } =
@@ -49,13 +47,7 @@ export const AggLabelForm: FC<Props> = ({ item, otherAggNames, parentAggId }) =>
     isPivotAggsWithExtendedForm(item) && !utils?.isValid()
   );
 
-  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
-
-  const { aggOptionsData: options } = useMemo(
-    () => getPivotDropdownOptions(dataView, runtimeMappings),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [runtimeMappings]
-  );
+  const { aggOptionsData: options } = usePivotConfigOptions();
 
   function updateHandler(updateItem: PivotAggsConfig) {
     if (parentAggId) {
