@@ -50,15 +50,11 @@ export const journey = new Journey({
         `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
       )
     );
-    const session = await page.context().newCDPSession(page);
-    await session.send('Performance.enable');
 
     // wait for table to be loaded
     await page.waitForSelector(subj('hostsView-table-loaded'));
     // wait for metric charts to be loaded
     await kibanaPage.waitForCharts({ count: 5, timeout: 60000 });
-    const performanceMetrics = await session.send('Performance.getMetrics');
-    // console.log('performanceMetrics ------------------------------', performanceMetrics.metrics);
   })
   .step('Go to single host', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(
