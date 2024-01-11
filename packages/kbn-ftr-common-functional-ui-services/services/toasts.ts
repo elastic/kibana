@@ -13,6 +13,7 @@ export class ToastsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  private readonly log = this.ctx.getService('log');
   private readonly config = this.ctx.getService('config');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
   /**
@@ -120,6 +121,19 @@ export class ToastsService extends FtrService {
     });
   }
 
+  public async checkForReportingToasts(): Promise<boolean> {
+    this.log.debug('Reporting:checkForReportingToasts');
+    const isToastPresent = await this.testSubjects.exists('completeReportSuccess', {
+      allowHidden: true,
+      timeout: 90000,
+    });
+    // Close toast so it doesn't obscure the UI.
+    if (isToastPresent) {
+      await this.testSubjects.click('completeReportSuccess > toastCloseButton');
+    }
+
+    return isToastPresent;
+  }
   public async getToastElement(index: number) {
     const list = await this.getGlobalToastList();
     return await list.findByCssSelector(`.euiToast:nth-child(${index})`);
