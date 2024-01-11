@@ -128,8 +128,8 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     const input$ = this.getInput$();
 
     const aiopsAppContextValue = {
+      embeddingOrigin: this.parent?.type ?? input.embeddingOrigin ?? EMBEDDABLE_ORIGIN,
       ...this.deps,
-      embeddingOrigin: this.parent?.type ?? EMBEDDABLE_ORIGIN,
     } as unknown as AiopsAppDependencies;
 
     ReactDOM.render(

@@ -44,6 +44,8 @@ export interface EmbeddableChangePointChartProps {
    * Last reload request time, can be used for manual reload
    */
   lastReloadRequestTime?: number;
+  /** Origin of the embeddable instance */
+  embeddingOrigin?: string;
 }
 export function getEmbeddableChangePointChart(
   visType: EmbeddableChangePointType,

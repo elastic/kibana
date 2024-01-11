@@ -6,31 +6,31 @@
  */
 
 import {
-  type DefaultItemAction,
   EuiBadge,
-  type EuiBasicTableColumn,
   EuiEmptyPrompt,
   EuiIcon,
   EuiInMemoryTable,
   EuiToolTip,
+  type DefaultItemAction,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
-import React, { type FC, useCallback, useEffect, useMemo, useRef } from 'react';
+import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
+import { FilterStateStore, type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { type Filter, FilterStateStore } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
-import { NoChangePointsWarning } from './no_change_points_warning';
+import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
-import { useCommonChartProps } from './use_common_chart_props';
 import {
-  type ChangePointAnnotation,
   FieldConfig,
   SelectedChangePoint,
   useChangePointDetectionContext,
+  type ChangePointAnnotation,
 } from './change_point_detection_context';
 import { type ChartComponentProps } from './chart_component';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { NoChangePointsWarning } from './no_change_points_warning';
+import { useCommonChartProps } from './use_common_chart_props';
 
 export interface ChangePointsTableProps {
   annotations: ChangePointAnnotation[];
@@ -82,6 +82,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     data: {
       query: { filterManager },
     },
+    embeddingOrigin,
   } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
@@ -122,7 +123,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     [onRenderComplete, pagination.pageSize]
   );
 
-  const hasActions = fieldConfig.splitField !== undefined;
+  const hasActions = fieldConfig.splitField !== undefined && embeddingOrigin !== 'cases';
 
   const { bucketInterval } = useChangePointDetectionContext();
 
@@ -221,61 +222,73 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             truncateText: false,
             sortable: true,
           },
-          {
-            name: i18n.translate('xpack.aiops.changePointDetection.actionsColumn', {
-              defaultMessage: 'Actions',
-            }),
-            actions: [
-              {
-                name: i18n.translate(
-                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
-                  {
-                    defaultMessage: 'Filter for value',
-                  }
-                ),
-                description: i18n.translate(
-                  'xpack.aiops.changePointDetection.actions.filterForValueAction',
-                  {
-                    defaultMessage: 'Filter for value',
-                  }
-                ),
-                icon: 'plusInCircle',
-                color: 'primary',
-                type: 'icon',
-                onClick: (item) => {
-                  filterManager.addFilters(
-                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, false)!
-                  );
+          ...(hasActions
+            ? [
+                {
+                  name: i18n.translate('xpack.aiops.changePointDetection.actionsColumn', {
+                    defaultMessage: 'Actions',
+                  }),
+                  actions: [
+                    {
+                      name: i18n.translate(
+                        'xpack.aiops.changePointDetection.actions.filterForValueAction',
+                        {
+                          defaultMessage: 'Filter for value',
+                        }
+                      ),
+                      description: i18n.translate(
+                        'xpack.aiops.changePointDetection.actions.filterForValueAction',
+                        {
+                          defaultMessage: 'Filter for value',
+                        }
+                      ),
+                      icon: 'plusInCircle',
+                      color: 'primary',
+                      type: 'icon',
+                      onClick: (item) => {
+                        filterManager.addFilters(
+                          getFilterConfig(
+                            dataView.id!,
+                            item as Required<ChangePointAnnotation>,
+                            false
+                          )!
+                        );
+                      },
+                      isPrimary: true,
+                      'data-test-subj': 'aiopsChangePointFilterForValue',
+                    },
+                    {
+                      name: i18n.translate(
+                        'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                        {
+                          defaultMessage: 'Filter out value',
+                        }
+                      ),
+                      description: i18n.translate(
+                        'xpack.aiops.changePointDetection.actions.filterOutValueAction',
+                        {
+                          defaultMessage: 'Filter out value',
+                        }
+                      ),
+                      icon: 'minusInCircle',
+                      color: 'primary',
+                      type: 'icon',
+                      onClick: (item) => {
+                        filterManager.addFilters(
+                          getFilterConfig(
+                            dataView.id!,
+                            item as Required<ChangePointAnnotation>,
+                            true
+                          )!
+                        );
+                      },
+                      isPrimary: true,
+                      'data-test-subj': 'aiopsChangePointFilterOutValue',
+                    },
+                  ] as Array<DefaultItemAction<ChangePointAnnotation>>,
                 },
-                isPrimary: true,
-                'data-test-subj': 'aiopsChangePointFilterForValue',
-              },
-              {
-                name: i18n.translate(
-                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
-                  {
-                    defaultMessage: 'Filter out value',
-                  }
-                ),
-                description: i18n.translate(
-                  'xpack.aiops.changePointDetection.actions.filterOutValueAction',
-                  {
-                    defaultMessage: 'Filter out value',
-                  }
-                ),
-                icon: 'minusInCircle',
-                color: 'primary',
-                type: 'icon',
-                onClick: (item) => {
-                  filterManager.addFilters(
-                    getFilterConfig(dataView.id!, item as Required<ChangePointAnnotation>, true)!
-                  );
-                },
-                isPrimary: true,
-                'data-test-subj': 'aiopsChangePointFilterOutValue',
-              },
-            ] as Array<DefaultItemAction<ChangePointAnnotation>>,
-          },
+              ]
+            : []),
         ]
       : []),
   ];
