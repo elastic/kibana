@@ -24,6 +24,7 @@ import type {
   GetPackagePoliciesResponse,
   PackagePolicy,
   PostFleetSetupResponse,
+  CopyAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_API_ROUTES,
@@ -54,6 +55,7 @@ import type {
   GetEnrollmentAPIKeysResponse,
   GetOutputsResponse,
   PostAgentUnenrollResponse,
+  CopyAgentPolicyRequest,
 } from '@kbn/fleet-plugin/common/types';
 import nodeFetch from 'node-fetch';
 import semver from 'semver';
@@ -78,6 +80,10 @@ const CURRENT_USERNAME = userInfo().username.toLowerCase();
 const DEFAULT_AGENT_POLICY_NAME = `${CURRENT_USERNAME} test policy`;
 /** A Fleet agent policy that includes integrations that don't actually require an agent to run on a host. Example: SenttinelOne */
 export const DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME = `${CURRENT_USERNAME} - agentless integrations`;
+
+const randomAgentPolicyName = (): string => {
+  return `agent policy - ${fleetGenerator.randomString(10)}`;
+};
 
 export const checkInFleetAgent = async (
   esClient: Client,
@@ -769,7 +775,7 @@ export const createAgentPolicy = async ({
   policy,
 }: CreateAgentPolicyOptions): Promise<AgentPolicy> => {
   const body: CreateAgentPolicyRequest['body'] = policy ?? {
-    name: `agent policy - ${fleetGenerator.randomString(10)}`,
+    name: randomAgentPolicyName(),
     description: `Policy created by security solution tooling: ${__filename}`,
     namespace: 'default',
     monitoring_enabled: ['logs', 'metrics'],
@@ -1206,6 +1212,40 @@ export const addEndpointIntegrationToAgentPolicy = async ({
   log.debug(newIntegrationPolicy);
 
   return newIntegrationPolicy;
+};
+
+type CopyAgentPolicyOptions = Partial<CopyAgentPolicyRequest['body']> & {
+  kbnClient: KbnClient;
+  agentPolicyId: string;
+};
+
+/**
+ * Copy (clone) a Fleet Agent Policy
+ * @param kbnClient
+ * @param agentPolicyId
+ * @param name
+ * @param description
+ */
+export const copyAgentPolicy = async ({
+  kbnClient,
+  agentPolicyId,
+  name = randomAgentPolicyName(),
+  description,
+}: CopyAgentPolicyOptions) => {
+  return kbnClient
+    .request<CopyAgentPolicyResponse>({
+      path: agentPolicyRouteService.getCopyPath(agentPolicyId),
+      headers: {
+        'elastic-api-version': API_VERSIONS.public.v1,
+      },
+      method: 'POST',
+      body: {
+        name,
+        description,
+      },
+    })
+    .then((response) => response.data.item)
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 /**
