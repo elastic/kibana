@@ -89,7 +89,7 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElement(1);
+      const resultToast = await toasts.getToastElementByIndex(1);
       const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
       const title: string = await titleElement.getVisibleText();
       expect(title).to.match(/^\d+ item[s]? synchronized$/);
@@ -281,7 +281,7 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElement(1);
+      const resultToast = await toasts.getToastElementByIndex(1);
       const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
       const title: string = await titleElement.getVisibleText();
       expect(title).to.match(/^\d+ job[s]? successfully imported$/);
@@ -349,7 +349,7 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElement(1);
+      const resultToast = await toasts.getToastElementByIndex(1);
       const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
       const title: string = await titleElement.getVisibleText();
       expect(title).to.match(/^Your file is downloading in the background$/);

@@ -393,7 +393,7 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     async assertRestoreFailureToastExist() {
-      const successToast = await toasts.getToastElement(1);
+      const successToast = await toasts.getToastElementByIndex(1);
       expect(await successToast.getVisibleText()).to.contain('Error restoring state from URL');
     },
 

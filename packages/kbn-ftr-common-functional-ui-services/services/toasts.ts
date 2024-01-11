@@ -26,7 +26,7 @@ export class ToastsService extends FtrService {
    * @returns The title and message of the specified error toast.https://github.com/elastic/kibana/issues/17087
    */
   public async getErrorToast(index: number = 1, titleOnly: boolean = false) {
-    const toast = await this.getToastElement(index);
+    const toast = await this.getToastElementByIndex(index);
     const titleElement = await this.testSubjects.findDescendant('euiToastHeader', toast);
     const title: string = await titleElement.getVisibleText();
     if (titleOnly) {
@@ -44,7 +44,7 @@ export class ToastsService extends FtrService {
    * @param index The 1-based index of the toast to dismiss. Use first by default.
    */
   public async dismissToastByIndex(index: number = 1): Promise<void> {
-    const toast = await this.getToastElement(index);
+    const toast = await this.getToastElementByIndex(index);
     await toast.moveMouseTo();
     const dismissButton = await this.testSubjects.findDescendant('toastCloseButton', toast);
     await dismissButton.click();
@@ -134,13 +134,13 @@ export class ToastsService extends FtrService {
 
     return isToastPresent;
   }
-  public async getToastElement(index: number) {
+  public async getToastElementByIndex(index: number) {
     const list = await this.getGlobalToastList();
     return await list.findByCssSelector(`.euiToast:nth-child(${index})`);
   }
 
   public async getToastContent(index: number) {
-    const elem = await this.getToastElement(index);
+    const elem = await this.getToastElementByIndex(index);
     return await elem.getVisibleText();
   }
 

@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
 
   async function getExecutedAt() {
-    const toast = await toasts.getToastElement(1);
+    const toast = await toasts.getToastElementByIndex(1);
     const timeElem = await testSubjects.findDescendant('requestExecutedAt', toast);
     const text = await timeElem.getVisibleText();
     await toasts.dismissAllToasts();

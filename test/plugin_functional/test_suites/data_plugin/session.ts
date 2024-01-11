@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const getSessionIds = async () => {
     const sessionsBtn = await testSubjects.find('showSessionsButton');
     await sessionsBtn.click();
-    const toast = await toasts.getToastElement(1);
+    const toast = await toasts.getToastElementByIndex(1);
     const sessionIds = await toast.getVisibleText();
     return sessionIds.split(',');
   };

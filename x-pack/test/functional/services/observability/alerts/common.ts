@@ -241,7 +241,7 @@ export function ObservabilityAlertsCommonProvider({
     }
 
     // wait for a confirmation toast (the css index is 1-based)
-    await toasts.getToastElement(1);
+    await toasts.getToastElementByIndex(1);
     await toasts.dismissAllToasts();
   };
 
