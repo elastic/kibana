@@ -80,16 +80,16 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
               `Failure! unable to send ${result.events} events to channel "${result.channel}": ${result.message}`
             );
             this.senderUtils?.incrementCounter(
-              [result.channel],
               TelemetryCounter.DOCS_LOST,
-              result.events
+              result.events,
+              result.channel
             );
           } else {
             this.logger.l(`Success! ${result.events} events sent to channel "${result.channel}"`);
             this.senderUtils?.incrementCounter(
-              [result.channel],
               TelemetryCounter.DOCS_SENT,
-              result.events
+              result.events,
+              result.channel
             );
           }
         },

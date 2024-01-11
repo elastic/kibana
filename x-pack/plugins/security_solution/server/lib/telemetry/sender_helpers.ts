@@ -53,7 +53,7 @@ export class SenderUtils {
     };
   }
 
-  public incrementCounter(tags: string[], counter: TelemetryCounter, incrementBy: number): void {
+  public incrementCounter(counter: TelemetryCounter, incrementBy: number, ...tags: string[]): void {
     const counterName = createUsageCounterLabel([...this.usageLabelPrefix, ...tags]);
     const counterType = counter;
     this.telemetryUsageCounter?.incrementCounter({ counterName, counterType, incrementBy });
