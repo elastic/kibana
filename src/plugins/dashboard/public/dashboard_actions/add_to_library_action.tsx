@@ -56,9 +56,9 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
+    const panelTitle = embeddable.panelTitle?.value ?? embeddable.defaultPanelTitle?.value;
     try {
       await embeddable.linkToLibrary();
-      const panelTitle = embeddable.panelTitle?.value ?? embeddable.defaultPanelTitle?.value;
       this.toastsService.addSuccess({
         title: dashboardAddToLibraryActionStrings.getSuccessMessage(
           panelTitle ? `'${panelTitle}'` : ''
@@ -67,7 +67,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
       });
     } catch (e) {
       this.toastsService.addDanger({
-        title: dashboardAddToLibraryActionStrings.getErrorMessage(),
+        title: dashboardAddToLibraryActionStrings.getErrorMessage(panelTitle),
         'data-test-subj': 'addPanelToLibraryError',
       });
     }

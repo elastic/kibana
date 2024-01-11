@@ -41,9 +41,10 @@ export const dashboardAddToLibraryActionStrings = {
       defaultMessage: `Panel {panelTitle} was added to the library`,
       values: { panelTitle },
     }),
-  getErrorMessage: () =>
+  getErrorMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.addToLibrary.errorMessage', {
-      defaultMessage: `An error was encountered adding this panel to the library`,
+      defaultMessage: `An error was encountered adding panel {panelTitle} to the library`,
+      values: { panelTitle },
     }),
 };
 
