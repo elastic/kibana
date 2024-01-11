@@ -110,6 +110,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/code-editor",
     "@kbn/shared-svg",
+    "@kbn/shared-ux-utility",
+    "@kbn/management-settings-components-field-row",
   ],
   "exclude": ["target/**/*"]
 }
