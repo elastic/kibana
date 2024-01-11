@@ -153,7 +153,6 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
   });
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
-  console.log('riskScore', riskScore);
   const {
     loading: loadingAlerts,
     data: alertsData,
