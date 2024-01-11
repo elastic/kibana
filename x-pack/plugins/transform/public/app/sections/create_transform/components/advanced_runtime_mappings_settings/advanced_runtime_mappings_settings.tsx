@@ -28,8 +28,8 @@ import {
 } from '../../../../common';
 import { isPivotAggConfigWithUiSupport } from '../../../../common/pivot_group_by';
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { advancedEditorsSidebarWidth } from '../../constants';
 
-const advancedEditorsSidebarWidth = '220px';
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
   'xpack.transform.indexPreview.copyRuntimeFieldsClipboardTooltip',
   {

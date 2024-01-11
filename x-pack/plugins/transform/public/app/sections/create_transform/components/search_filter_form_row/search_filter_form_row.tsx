@@ -30,13 +30,12 @@ import {
   selectPreviewRequest,
   selectTransformConfigQuery,
 } from '../../state_management/step_define_selectors';
+import { advancedEditorsSidebarWidth } from '../../constants';
 
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
 import { SourceSearchBar } from '../source_search_bar';
 import { useWizardContext } from '../wizard/wizard';
-
-const advancedEditorsSidebarWidth = '220px';
 
 export const SearchFilterFormRow: FC = () => {
   const { searchItems } = useWizardContext();

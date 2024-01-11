@@ -27,13 +27,13 @@ import {
   type TransformStorageMapped,
 } from '../../../../../../common/types/storage';
 
+import { advancedEditorsSidebarWidth } from '../../constants';
+
 import { DatePickerApplySwitch } from '../date_picker_apply_switch';
 import { useDatePicker } from '../step_define/hooks/use_date_picker';
 import { useWizardContext } from '../wizard/wizard';
 
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
-
-const advancedEditorsSidebarWidth = '220px';
 
 export const TimeRangeFormRow: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');

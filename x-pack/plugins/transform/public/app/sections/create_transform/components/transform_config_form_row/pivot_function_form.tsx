@@ -33,6 +33,7 @@ import { useDocumentationLinks } from '../../../../hooks/use_documentation_links
 import { getAggConfigFromEsAgg } from '../../../../common/pivot_aggs';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { advancedEditorsSidebarWidth } from '../../constants';
 
 import { AdvancedPivotEditor } from '../advanced_pivot_editor';
 import { AdvancedPivotEditorSwitch } from '../advanced_pivot_editor_switch';
@@ -41,8 +42,6 @@ import { PivotConfiguration } from '../pivot_configuration';
 import { CopyConfigToClipboard } from './copy_config_to_clipboard';
 
 const { collapseLiteralStrings } = XJson;
-
-const advancedEditorsSidebarWidth = '220px';
 
 export const PivotFunctionForm: FC = () => {
   const { esTransformPivot } = useDocumentationLinks();
@@ -100,8 +99,7 @@ export const PivotFunctionForm: FC = () => {
     <EuiFlexGroup justifyContent="spaceBetween">
       {/* Flex Column #1: Pivot Config Form / Advanced Pivot Config Editor */}
       <EuiFlexItem>
-        {!isAdvancedPivotEditorEnabled && <PivotConfiguration />}
-        {isAdvancedPivotEditorEnabled && <AdvancedPivotEditor />}
+        {isAdvancedPivotEditorEnabled ? <AdvancedPivotEditor /> : <PivotConfiguration />}
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ width: advancedEditorsSidebarWidth }}>
         <EuiFlexGroup gutterSize="xs" direction="column" justifyContent="spaceBetween">
