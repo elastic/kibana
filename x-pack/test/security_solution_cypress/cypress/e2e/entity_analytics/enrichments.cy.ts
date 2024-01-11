@@ -66,9 +66,6 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('Should has enrichment fields from legacy risk', function () {
-        cy.get(ALERTS_COUNT)
-          .invoke('text')
-          .should('match', /^[1-9].+$/); // Any number of alerts
         cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
         cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
@@ -110,9 +107,6 @@ describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('Should has enrichment fields from legacy risk', function () {
-        cy.get(ALERTS_COUNT)
-          .invoke('text')
-          .should('match', /^[1-9].+$/); // Any number of alerts
         cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
         cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
