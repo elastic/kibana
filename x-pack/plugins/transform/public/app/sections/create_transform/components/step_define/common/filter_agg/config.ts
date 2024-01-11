@@ -44,8 +44,8 @@ export const getFilterAggUtils = (config: PivotAggsConfigFilter): PivotAggsUtils
       if (!this.isValid()) {
         return null;
       }
-      const utils = getFilterAggUtils(config.aggConfig.aggTypeConfig);
-      const esAgg = utils.getEsAggConfig();
+      const utils = getFilterAggTypeUtils(config.aggConfig.aggTypeConfig);
+      const esAgg = utils?.getEsAggConfig() ?? null;
       return {
         [config.aggConfig.filterAgg as string]: esAgg,
       };
