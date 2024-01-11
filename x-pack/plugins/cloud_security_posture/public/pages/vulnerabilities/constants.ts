@@ -43,7 +43,7 @@ export const getDefaultQuery = ({
   query,
   filters,
   sort: [
-    [VULNERABILITY_FIELDS.SEVERITY, 'desc'],
+    [VULNERABILITY_FIELDS.SEVERITY, 'asc'],
     [VULNERABILITY_FIELDS.SCORE_BASE, 'desc'],
   ],
 });
