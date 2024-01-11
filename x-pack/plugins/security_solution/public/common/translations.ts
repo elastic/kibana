@@ -32,16 +32,16 @@ export const UPDATE_ALERT_STATUS_FAILED_DETAILED = (updated: number, conflicts: 
 
 export const UPGRADE_AGENT_FOR_RESPONDER = (_agentType: ResponseActionAgentType) => {
   const agentType = snakeCaseToCamelCase(_agentType);
-  let defaultMessage =
-    'The current version of the {agentType} Agent does not support this feature.';
 
   if (_agentType === 'endpoint') {
-    defaultMessage +=
-      ' Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.';
+    return i18n.translate('xpack.securitySolution.endpoint.actions.disabledResponder.tooltip', {
+      defaultMessage: `The current version of the {agentType} Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.`,
+      values: { agentType },
+    });
   }
 
-  return i18n.translate('xpack.securitySolution.endpoint.actions.disabledResponder.tooltip', {
-    defaultMessage,
+  return i18n.translate('xpack.securitySolution.agent.actions.disabledResponder.tooltip', {
+    defaultMessage: `The current version of the {agentType} Agent does not support this feature.`,
     values: { agentType },
   });
 };
