@@ -125,7 +125,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    describe('SearchBar', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/174472
+    describe.skip('SearchBar', () => {
       it('add filter', async () => {
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
