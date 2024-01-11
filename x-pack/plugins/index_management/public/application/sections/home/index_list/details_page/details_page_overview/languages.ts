@@ -22,7 +22,7 @@ export const curlDefinition: LanguageDefinition = {
   -H "Content-Type: application/json" \\
   -d'
 { "index" : { "_index" : "${indexName ?? INDEX_NAME_PLACEHOLDER}" } }
-{"name": "foo", "title": "bar" }
+{"name": "foo", "title": "bar" }'
 `,
 };
 
