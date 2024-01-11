@@ -8,7 +8,7 @@
 
 import { WebDriver, logging } from 'selenium-webdriver';
 import * as Rx from 'rxjs';
-import { mergeMap, delay } from 'rxjs/operators';
+import { mergeMap, catchError, delay, repeat } from 'rxjs/operators';
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 
 export const FINAL_LOG_ENTRY_PREFIX = 'WEBDRIVER SESSION IS STOPPED';
@@ -19,59 +19,48 @@ export const FINAL_LOG_ENTRY_PREFIX = 'WEBDRIVER SESSION IS STOPPED';
  */
 export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
   const logCtrl = driver.manage().logs();
-  const poll$ = new Rx.BehaviorSubject(undefined);
 
-  const FINAL_MSG = '@@final@@';
+  // setup log polling
+  return Rx.defer(async () => await logCtrl.get(type)).pipe(
+    // filter and flatten list of entries
+    mergeMap((entries) =>
+      entries.filter((entry) => {
+        // ignore react devtools
+        if (entry.message.includes('Download the React DevTools')) {
+          return false;
+        }
 
-  return new Rx.Observable<logging.Entry>((subscriber) => {
-    subscriber.add(
-      poll$
-        .pipe(
-          delay(ms),
+        // down-level inline script errors
+        if (entry.message.includes('Refused to execute inline script')) {
+          entry.level = logging.getLevel('INFO');
+        }
 
-          mergeMap(async () => {
-            let entries: logging.Entry[] = [];
-            try {
-              entries = await logCtrl.get(type);
-            } catch (error) {
-              if (error instanceof NoSuchSessionError) {
-                // WebDriver session is invalid, sending the last log message
-                return [new logging.Entry('SEVERE', `${FINAL_LOG_ENTRY_PREFIX}: ${error.message}`)];
-              }
-            }
-            return entries;
-          }),
+        return true;
+      })
+    ),
 
-          // filter and flatten list of entries
-          mergeMap((entries) => {
-            const filtered = entries.filter((entry) => {
-              if (entry.message.includes(FINAL_MSG)) {
-                poll$.complete();
-                return false;
-              }
+    // resubscribe when parent completes with delay by `ms` milliseconds
+    repeat(),
+    delay(ms),
 
-              // ignore react devtools
-              if (entry.message.includes('Download the React DevTools')) {
-                return false;
-              }
+    catchError((error, resubscribe) => {
+      if (error instanceof NoSuchSessionError) {
+        // WebDriver session is invalid, sending the last log message
+        return Rx.concat([
+          new logging.Entry('SEVERE', `${FINAL_LOG_ENTRY_PREFIX}: ${error.message}`),
+        ]);
+      } else {
+        return Rx.concat(
+          // log error as a log entry
+          [new logging.Entry('SEVERE', `ERROR FETCHING BROWSR LOGS: ${error.message}`)],
 
-              // down-level inline script errors
-              if (entry.message.includes('Refused to execute inline script')) {
-                entry.level = logging.getLevel('INFO');
-              }
-
-              return true;
-            });
-
-            if (!poll$.closed) {
-              // schedule next poll
-              poll$.next(undefined);
-            }
-
-            return filtered;
-          })
-        )
-        .subscribe(subscriber)
-    );
-  });
+          // pause 10 seconds then resubscribe
+          Rx.of(1).pipe(
+            delay(10 * 1000),
+            mergeMap(() => resubscribe)
+          )
+        );
+      }
+    })
+  );
 }
