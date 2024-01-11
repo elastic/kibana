@@ -6,28 +6,22 @@
  * Side Public License, v 1.
  */
 
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core/server';
 import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../common/constants';
 
-export const uiSettingsConfig: Record<string, UiSettingsParams> = {
+export const dataTiersUiSettingsConfig: Record<string, UiSettingsParams> = {
   [DATA_VIEWS_FIELDS_EXCLUDED_TIERS]: {
-    /*
-    name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
-      defaultMessage: 'Default columns',
+    name: i18n.translate('dataViews.advancedSettings.dataTiersName', {
+      defaultMessage: 'Data tiers excluded from field requests',
     }),
-    */
-    name: 'Data tiers excluded from field requests',
     value: '',
     type: 'string',
-    description: 'Exclude fields from specified tiers (such as frozen) for faster performance',
-    /*
-    description: i18n.translate('discover.advancedSettings.defaultColumnsText', {
+    description: i18n.translate('dataViews.advancedSettings.dataTiersText', {
       defaultMessage:
-        'Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.',
+        'Exclude fields from specified tiers (such as frozen) for faster performance.',
     }),
-    */
     schema: schema.string(),
   },
 };

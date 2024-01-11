@@ -16,7 +16,7 @@ import { registerIndexPatternsUsageCollector } from './register_index_pattern_us
 import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
 import type { ClientConfigType } from '../common/types';
-import { uiSettingsConfig } from './ui_settings';
+import { dataTiersUiSettingsConfig } from './ui_settings';
 import {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
@@ -47,6 +47,13 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
+    if (config.dataTiersExcludedForFields) {
+      core.uiSettings.register(dataTiersUiSettingsConfig);
+    }
+
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
     registerRoutes(
@@ -70,8 +77,6 @@ export class DataViewsServerPlugin
         latest: LATEST_VERSION,
       },
     });
-
-    core.uiSettings.register(uiSettingsConfig);
 
     return {
       enableRollups: () => (this.rollupsEnabled = true),

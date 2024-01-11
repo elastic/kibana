@@ -25,7 +25,7 @@ const excludeTiersDsl = (excludedTiers: string) => {
 
 interface GetIndexFilterDslOptions {
   indexFilter?: QueryDslQueryContainer;
-  excludedTiers: string;
+  excludedTiers?: string;
 }
 
 export const getIndexFilterDsl = ({
