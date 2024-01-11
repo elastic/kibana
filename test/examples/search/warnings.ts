@@ -105,8 +105,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('searchSourceWithOther');
 
       await retry.try(async () => {
-        const toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
+        const allToasts = await find.allByCssSelector(toastsSelector);
+        expect(allToasts.length).to.be(2);
         await testSubjects.click('viewWarningBtn');
       });
 
