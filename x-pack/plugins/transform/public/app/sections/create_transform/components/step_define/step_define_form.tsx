@@ -31,27 +31,21 @@ export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
 
 export const StepDefineForm: FC = () => {
   return (
-    <div data-test-subj="transformStepDefineForm">
-      <EuiForm>
-        <TransformFunctionSelector />
-        <ConfigSectionTitle title="Source data" />
-        <DataViewFormRow />
-        <TimeRangeFormRow />
-        <SearchFilterFormRow />
+    <EuiForm data-test-subj="transformStepDefineForm">
+      <TransformFunctionSelector />
 
-        <EuiSpacer size="s" />
-        <AdvancedRuntimeMappingsSettings />
-        <EuiSpacer size="s" />
-
-        <DataGridFormRow />
-      </EuiForm>
+      <ConfigSectionTitle title="Source data" />
+      <DataViewFormRow />
+      <TimeRangeFormRow />
+      <SearchFilterFormRow />
+      <EuiSpacer size="s" />
+      <AdvancedRuntimeMappingsSettings />
+      <DataGridFormRow />
 
       <ConfigSectionTitle title="Transform configuration" />
       <TransformConfigFormRow />
-
-      <EuiSpacer size="m" />
-
+      <EuiSpacer size="s" />
       <TransformConfigPreviewFormRow />
-    </div>
+    </EuiForm>
   );
 };
