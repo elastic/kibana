@@ -14,6 +14,7 @@ import { AlertSummaryField } from '../../../../pages/alert_details/components/al
 import { TopAlert } from '../../../../typings/alerts';
 import { BurnRateRuleParams } from '../../../../typings/slo';
 import { useKibana } from '../../../../utils/kibana_react';
+import { AlertsHistoryPanel } from './components/alerts_history/alerts_history_panel';
 import { ErrorRatePanel } from './components/error_rate/error_rate_panel';
 
 export type BurnRateRule = Rule<BurnRateRuleParams>;
@@ -77,6 +78,7 @@ export default function AlertDetailsAppSection({
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">
       <ErrorRatePanel alert={alert} slo={slo} isLoading={isLoading} />
+      <AlertsHistoryPanel alert={alert} rule={rule} slo={slo} isLoading={isLoading} />
     </EuiFlexGroup>
   );
 }

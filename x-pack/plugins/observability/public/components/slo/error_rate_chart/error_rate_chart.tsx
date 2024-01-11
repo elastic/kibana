@@ -16,8 +16,9 @@ import { useLensDefinition } from './use_lens_definition';
 interface Props {
   slo: SLOResponse;
   dataTimeRange: TimeRange;
-  alertTimeRange?: TimeRange;
   threshold: number;
+  alertTimeRange?: TimeRange;
+  annotations?: Array<{ date: Date; total: number }>;
 }
 
 interface TimeRange {
@@ -25,11 +26,17 @@ interface TimeRange {
   to: Date;
 }
 
-export function ErrorRateChart({ slo, dataTimeRange, alertTimeRange, threshold }: Props) {
+export function ErrorRateChart({
+  slo,
+  dataTimeRange,
+  threshold,
+  alertTimeRange,
+  annotations,
+}: Props) {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
-  const lensDef = useLensDefinition(slo, threshold, alertTimeRange);
+  const lensDef = useLensDefinition(slo, threshold, alertTimeRange, annotations);
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
 
   const from = moment(dataTimeRange.from).subtract(delayInSeconds, 'seconds').toISOString();

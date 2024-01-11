@@ -24,31 +24,11 @@ import { ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
-import {
-  ALERT_ACTION_ID,
-  HIGH_PRIORITY_ACTION_ID,
-  LOW_PRIORITY_ACTION_ID,
-  MEDIUM_PRIORITY_ACTION_ID,
-} from '../../../../../../../common/constants';
 import { WindowSchema } from '../../../../../../typings';
 import { useKibana } from '../../../../../../utils/kibana_react';
 import { ErrorRateChart } from '../../../../error_rate_chart';
 import { BurnRateAlert } from '../../alert_details_app_section';
-
-function getActionGroupFromReason(reason: string): string {
-  const prefix = reason.split(':')[0]?.toLowerCase() ?? undefined;
-  switch (prefix) {
-    case 'critical':
-      return ALERT_ACTION_ID;
-    case 'high':
-      return HIGH_PRIORITY_ACTION_ID;
-    case 'medium':
-      return MEDIUM_PRIORITY_ACTION_ID;
-    case 'low':
-    default:
-      return LOW_PRIORITY_ACTION_ID;
-  }
-}
+import { getActionGroupFromReason } from '../../utils/alert';
 
 interface TimeRange {
   from: Date;
@@ -113,7 +93,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                 <h2>
                   {i18n.translate(
                     'xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.title',
-                    { defaultMessage: 'Burn rate' }
+                    { defaultMessage: '{sloName} burn rate', values: { sloName: slo.name } }
                   )}
                 </h2>
               </EuiTitle>
@@ -133,7 +113,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs">
+            <EuiText size="s" color="subdued">
               <span>
                 {i18n.translate(
                   'xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.subtitle',
