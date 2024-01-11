@@ -212,9 +212,7 @@ export const useBrowserRunOnceMonitors = ({
   };
 
   const replaceCheckGroupResults = (curCheckGroups: CheckGroupResult[]) => {
-    const emptyCheckGroups = checkGroupResults.filter((group) =>
-      group.checkGroupId.startsWith('placeholder-check-group')
-    );
+    const emptyCheckGroups = checkGroupResults.filter(isPlaceholderCheckGroup);
 
     // Padding the collection with placeholders so that rows could be shown on UI with loading state
     const paddedCheckGroups =
@@ -280,3 +278,6 @@ function getCheckGroupChecksum(checkGroupResults: CheckGroupResult[]) {
     );
   }, '');
 }
+
+export const isPlaceholderCheckGroup = (checkGroup: CheckGroupResult) =>
+  checkGroup.checkGroupId.startsWith('placeholder-check-group');

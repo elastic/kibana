@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -13,31 +13,60 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { useFetchClickData } from './use_fetch_click_data';
 import { MonitorSelector } from './monitor_selector';
 
+interface ImageState {
+  minWidth: number; // Used for querying coordinates
+  width: number;
+  height: number;
+  url: string; // base64 image url
+}
+
 export function ClickMap() {
   const {
     urlParams: { serviceName, environment, rangeFrom, rangeTo },
   } = useLegacyUrlParams();
+
+  const [imageState, setImageState] = useState<ImageState>({
+    minWidth: 769,
+    width: 1200,
+    height: 900,
+    url: '',
+  });
 
   const clickData = useFetchClickData({
     serviceName,
     environment,
     rangeFrom,
     rangeTo,
-    minWidth: 769,
-    maxWidth: 1200,
-    referenceWidth: 800,
-    referenceHeight: 900,
+    minWidth: imageState.minWidth,
+    maxWidth: imageState.width,
+    referenceWidth: imageState.width,
+    referenceHeight: imageState.height,
   });
 
   // console.log('clickData');
   // console.log(clickData);
 
+  const handleScreenshotCapture = useCallback(
+    (args) => {
+      setImageState(args);
+    },
+    [setImageState]
+  );
+
   return (
     <EuiFlexGroup justifyContent="spaceBetween" direction={'column'}>
       <EuiFlexItem>
-        <MonitorSelector />
+        <MonitorSelector onScreenshotCapture={handleScreenshotCapture} />
       </EuiFlexItem>
-      <EuiFlexItem />
+      <EuiFlexItem
+        css={{ alignItems: 'center', justifyContent: 'center', minHeight: 600 }}
+      >
+        <img
+          style={{ width: '600px', objectFit: 'contain' }}
+          src={imageState.url}
+          alt={'screenshot'}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

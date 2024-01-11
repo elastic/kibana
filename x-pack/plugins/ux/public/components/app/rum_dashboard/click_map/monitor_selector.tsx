@@ -6,22 +6,25 @@
  */
 
 import React, { useContext } from 'react';
-import { MonitorScreenshotEmbeddable } from '@kbn/synthetics-plugin/public';
+import {
+  MonitorScreenshotEmbeddable,
+  MonitorScreenshotEmbeddableProps,
+} from '@kbn/synthetics-plugin/public';
 import { PluginContext } from '../../../../context/plugin_context';
-// import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-// import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 
-export function MonitorSelector() {
+export function MonitorSelector({
+  onScreenshotCapture,
+}: {
+  onScreenshotCapture: MonitorScreenshotEmbeddableProps['onScreenshotCapture'];
+}) {
   const { coreStart } = useContext(PluginContext);
-  // const { http } = useKibanaServices();
-  // const basePath = http.basePath.get();
-  // const {
-  //   urlParams: { serviceName },
-  // } = useLegacyUrlParams();
 
   return (
     <>
-      <MonitorScreenshotEmbeddable coreStart={coreStart} />
+      <MonitorScreenshotEmbeddable
+        coreStart={coreStart}
+        onScreenshotCapture={onScreenshotCapture}
+      />
     </>
   );
 }

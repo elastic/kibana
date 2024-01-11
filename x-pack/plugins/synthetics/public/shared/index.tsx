@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { EmbeddableProps } from '../apps/synthetics/components/monitors_page/monitors_embeddable/monitor_screenshot_selector';
 
 const MonitorScreenshotSelectorEmbeddableLazy = lazy(
   () =>
@@ -16,7 +16,8 @@ const MonitorScreenshotSelectorEmbeddableLazy = lazy(
     )
 );
 
-export function MonitorScreenshotEmbeddable(props: { coreStart: CoreStart }) {
+export type MonitorScreenshotEmbeddableProps = EmbeddableProps;
+export function MonitorScreenshotEmbeddable(props: MonitorScreenshotEmbeddableProps) {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <MonitorScreenshotSelectorEmbeddableLazy {...props} />

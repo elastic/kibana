@@ -32,6 +32,7 @@ export const MonitorSelect = ({
   return (
     <EuiSelect
       data-test-subj="syntheticsMonitorSelectorEmbeddableMonitor"
+      compressed={true}
       fullWidth
       prepend={i18n.translate('xpack.synthetics.monitorSelectorEmbeddable.monitorLabel', {
         defaultMessage: 'Monitor',

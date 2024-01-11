@@ -19,10 +19,10 @@ import { ClickMap } from '../click_map';
 export function ClickMapPanel() {
   return (
     <EuiPanel hasBorder={true}>
-      <EuiSpacer size="xs" />
       <EuiTitle size="xs">
         <h3>{I18LABELS.clickMap}</h3>
       </EuiTitle>
+      <EuiSpacer size="xs" />
       <EuiFlexGroup wrap>
         <EuiFlexItem style={{ flexBasis: 650 }}>
           <ClickMap />
