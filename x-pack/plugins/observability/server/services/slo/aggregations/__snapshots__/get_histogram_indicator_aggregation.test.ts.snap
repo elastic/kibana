@@ -11,6 +11,7 @@ Object {
           "ranges": Array [
             Object {
               "from": 0,
+              "key": "target",
               "to": 100,
             },
           ],
@@ -24,7 +25,7 @@ Object {
   "goodEvents": Object {
     "bucket_script": Object {
       "buckets_path": Object {
-        "value": "_good>total['0.0-100.0']>_count",
+        "value": "_good>total['target']>_count",
       },
       "script": "params.value",
     },

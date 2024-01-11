@@ -52,12 +52,16 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
 
   const start = Date.now();
   const retryDelay = 502;
+  const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];
   let lastError;
 
   while (true) {
     if (Date.now() - start > timeout) {
       await onFailure(lastError);
       throw new Error('expected onFailure() option to throw an error');
+    } else if (lastError && criticalWebDriverErrors.includes(lastError.name)) {
+      // Aborting retry since WebDriver session is invalid or browser window is closed
+      throw new Error('WebDriver session is invalid, retry was aborted');
     } else if (lastError && onFailureBlock) {
       const before = await runAttempt(onFailureBlock);
       if ('error' in before) {

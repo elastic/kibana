@@ -167,6 +167,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'ARIA label and tooltip content describing a button that expands an actions menu',
       }
     ),
+    'euiCollapsedItemActions.allActionsDisabled': i18n.translate(
+      'core.euiCollapsedItemActions.allActionsDisabled',
+      {
+        defaultMessage: 'Individual item actions are disabled when rows are being selected.',
+        description: 'Title content when the actions popover toggle is disabled',
+      }
+    ),
     'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
       defaultMessage: 'Site menu',
     }),
@@ -252,16 +259,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSelector.searchcolumns': i18n.translate('core.euiColumnSelector.searchcolumns', {
       defaultMessage: 'Search columns',
     }),
-    'euiColumnSelector.buttonActiveSingular': ({ numberOfHiddenFields }: EuiValues) =>
-      i18n.translate('core.euiColumnSelector.buttonActiveSingular', {
-        defaultMessage: '{numberOfHiddenFields} column hidden',
-        values: { numberOfHiddenFields },
-      }),
-    'euiColumnSelector.buttonActivePlural': ({ numberOfHiddenFields }: EuiValues) =>
-      i18n.translate('core.euiColumnSelector.buttonActivePlural', {
-        defaultMessage: '{numberOfHiddenFields} columns hidden',
-        values: { numberOfHiddenFields },
-      }),
     'euiColumnSorting.clearAll': i18n.translate('core.euiColumnSorting.clearAll', {
       defaultMessage: 'Clear sorting',
     }),
@@ -280,11 +277,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSorting.button': i18n.translate('core.euiColumnSorting.button', {
       defaultMessage: 'Sort fields',
     }),
-    'euiColumnSorting.buttonActive': ({ numberOfSortedFields }: EuiValues) =>
-      i18n.translate('core.euiColumnSorting.buttonActive', {
-        defaultMessage: '{numberOfSortedFields, plural, one {# field} other {# fields}} sorted',
-        values: { numberOfSortedFields },
-      }),
     'euiColumnSortingDraggable.activeSortLabel': ({ display }: EuiValues) =>
       i18n.translate('core.euiColumnSortingDraggable.activeSortLabel', {
         defaultMessage: '{display} is sorting this data grid',
@@ -379,22 +371,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCommonlyUsedTimeRanges.legend': i18n.translate('core.euiCommonlyUsedTimeRanges.legend', {
       defaultMessage: 'Commonly used',
     }),
-    'euiControlBar.screenReaderHeading': i18n.translate('core.euiControlBar.screenReaderHeading', {
-      defaultMessage: 'Page level controls',
-    }),
-    'euiControlBar.screenReaderAnnouncement': i18n.translate(
-      'core.euiControlBar.screenReaderAnnouncement',
-      {
-        defaultMessage:
-          'There is a new region landmark with page level controls at the end of the document.',
-      }
-    ),
-    'euiControlBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
-      i18n.translate('core.euiControlBar.customScreenReaderAnnouncement', {
-        defaultMessage:
-          'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
-        values: { landmarkHeading },
-      }),
     'euiGlobalToastList.clearAllToastsButtonAriaLabel': i18n.translate(
       'core.euiGlobalToastList.clearAllToastsButtonAriaLabel',
       {
@@ -673,6 +649,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'Descending size label',
       }
     ),
+    'euiDataGridToolbarControl.badgeAriaLabel': ({ count }: EuiValues) =>
+      i18n.translate('core.euiDataGridToolbarControl.badgeAriaLabel', {
+        defaultMessage: 'Active: {count}',
+        values: { count },
+      }),
     'euiDatePopoverButton.invalidTitle': ({ title }: EuiValues) =>
       i18n.translate('core.euiDatePopoverButton.invalidTitle', {
         defaultMessage: 'Invalid date: {title}',
@@ -830,11 +811,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiInlineEditForm.saveButtonAriaLabel',
       { defaultMessage: 'Save edit' }
     ),
-    'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
+    'euiExternalLinkIcon.ariaLabel': i18n.translate('core.euiExternalLinkIcon.ariaLabel', {
       defaultMessage: 'External link',
     }),
-    'euiLink.newTarget.screenReaderOnlyText': i18n.translate(
-      'core.euiLink.newTarget.screenReaderOnlyText',
+    'euiExternalLinkIcon.newTarget.screenReaderOnlyText': i18n.translate(
+      'core.euiExternalLinkIcon.newTarget.screenReaderOnlyText',
       {
         defaultMessage: '(opens in a new tab or window)',
       }
@@ -941,56 +922,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
       defaultMessage: 'Closes this modal window',
     }),
-    'euiNotificationEventMessages.accordionButtonText': ({ messagesLength }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMessages.accordionButtonText', {
-        defaultMessage: '+ {messagesLength} more',
-        values: { messagesLength },
-      }),
     'euiErrorBoundary.error': i18n.translate('core.euiErrorBoundary.error', {
       defaultMessage: 'Error',
       description: 'Error boundary for uncaught exceptions when rendering part of the application',
     }),
-    'euiNotificationEventMessages.accordionAriaLabelButtonText': ({
-      messagesLength,
-      eventName,
-    }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMessages.accordionAriaLabelButtonText', {
-        defaultMessage: '+ {messagesLength} messages for {eventName}',
-        values: { messagesLength, eventName },
-      }),
-    'euiNotificationEventMeta.contextMenuButton': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMeta.contextMenuButton', {
-        defaultMessage: 'Menu for {eventName}',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadButton.markAsReadAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadButton.markAsReadAria', {
-        defaultMessage: 'Mark {eventName} as read',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadButton.markAsUnreadAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadButton.markAsUnreadAria', {
-        defaultMessage: 'Mark {eventName} as unread',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadButton.markAsRead': i18n.translate(
-      'core.euiNotificationEventReadButton.markAsRead',
-      {
-        defaultMessage: 'Mark as read',
-      }
-    ),
-    'euiNotificationEventReadButton.markAsUnread': i18n.translate(
-      'core.euiNotificationEventReadButton.markAsUnread',
-      {
-        defaultMessage: 'Mark as unread',
-      }
-    ),
-    'euiNotificationEventMessages.accordionHideText': i18n.translate(
-      'core.euiNotificationEventMessages.accordionHideText',
-      {
-        defaultMessage: 'hide',
-      }
-    ),
     'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) => (
       <FormattedMessage
         id="core.euiPagination.pageOfTotalCompressed"
@@ -1805,25 +1740,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'You can quickly navigate this list using arrow keys.',
       }
     ),
-    'euiNotificationEventReadIcon.read': i18n.translate('core.euiNotificationEventReadIcon.read', {
-      defaultMessage: 'Read',
-    }),
-    'euiNotificationEventReadIcon.readAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadIcon.readAria', {
-        defaultMessage: '{eventName} is read',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadIcon.unread': i18n.translate(
-      'core.euiNotificationEventReadIcon.unread',
-      {
-        defaultMessage: 'Unread',
-      }
-    ),
-    'euiNotificationEventReadIcon.unreadAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadIcon.unreadAria', {
-        defaultMessage: '{eventName} is unread',
-        values: { eventName },
-      }),
     'euiSkeletonLoading.loadingAriaText': ({ contentAriaLabel }: EuiValues) =>
       i18n.translate('core.euiSkeletonLoading.loadingAriaText', {
         defaultMessage: 'Loading {contentAriaLabel}',

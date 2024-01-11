@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import type { DeepPartial } from 'utility-types';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -138,29 +136,6 @@ const createIsolateOptionsMock = (
   return merge(isolateOptions, overrides);
 };
 
-const createConnectorActionsClientMock = (): ActionsClientMock => {
-  const client = actionsClientMock.create();
-
-  // Mock result of retrieving list of connectors
-  (client.getAll as jest.Mock).mockImplementation(async () => {
-    const result: ConnectorWithExtraFindData[] = [
-      // SentinelOne connector
-      createConnectorMock({
-        actionTypeId: SENTINELONE_CONNECTOR_ID,
-        id: 's1-connector-instance-id',
-      }),
-    ];
-
-    return result;
-  });
-
-  (client.execute as jest.Mock).mockImplementation(async () => {
-    return createConnectorAcitonExecuteResponseMock();
-  });
-
-  return client;
-};
-
 const createConnectorMock = (
   overrides: DeepPartial<ConnectorWithExtraFindData> = {}
 ): ConnectorWithExtraFindData => {
@@ -180,10 +155,10 @@ const createConnectorMock = (
   );
 };
 
-const createConnectorAcitonExecuteResponseMock = (
-  overrides: DeepPartial<ActionTypeExecutorResult<{}>> = {}
+const createConnectorActionExecuteResponseMock = <TData>(
+  overrides: DeepPartial<ActionTypeExecutorResult<TData>> = {}
 ): ActionTypeExecutorResult<{}> => {
-  const result: ActionTypeExecutorResult<{}> = {
+  const result: ActionTypeExecutorResult<TData> = {
     actionId: 'execute-response-mock-1',
     data: undefined,
     message: 'some mock message',
@@ -199,11 +174,13 @@ export const responseActionsClientMock = Object.freeze({
   createConstructorOptions: createConstructorOptionsMock,
   createIsolateOptions: createIsolateOptionsMock,
   createReleaseOptions: createIsolateOptionsMock,
+
   // TODO:PT add more methods to get option mocks for other class methods
 
   createIndexedResponse: createEsIndexTransportResponseMock,
 
-  createConnectorActionsClient: createConnectorActionsClientMock,
+  // Some common mocks when working with connector actions
+  createConnectorActionsClient: actionsClientMock.create,
   createConnector: createConnectorMock,
-  createConnectorActionExecuteResponse: createConnectorAcitonExecuteResponseMock,
+  createConnectorActionExecuteResponse: createConnectorActionExecuteResponseMock,
 });
