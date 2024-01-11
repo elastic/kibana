@@ -104,7 +104,7 @@ const walkSchema = (schema: OpenAPIV3.SchemaObject): void => {
 };
 
 const postProcess = (oasSchema: OpenAPIV3.SchemaObject) => {
-  if (!oasSchema) return oasSchema;
+  if (!oasSchema) return;
   walkSchema(oasSchema);
 };
 
