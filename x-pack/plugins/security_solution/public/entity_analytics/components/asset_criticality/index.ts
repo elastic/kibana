@@ -6,4 +6,3 @@
  */
 
 export * from './asset_criticality_badge';
-export * from './common';

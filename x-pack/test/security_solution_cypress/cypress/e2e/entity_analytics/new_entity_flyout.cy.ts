@@ -15,7 +15,7 @@ import { ALERTS_URL } from '../../urls/navigation';
 import { USER_PANEL_HEADER } from '../../screens/hosts/flyout_user_panel';
 import { waitForAlerts } from '../../tasks/alerts';
 import { HOST_PANEL_HEADER } from '../../screens/hosts/flyout_host_panel';
-import { RISK_INPUT_PANEL_HEADER } from '../../screens/flyout_risk_panel';
+import { RISK_INPUT_PANEL_HEADER, ASSET_CRITICALITY_BADGE } from '../../screens/flyout_risk_panel';
 import { expandRiskInputsFlyoutPanel } from '../../tasks/risk_scores/risk_inputs_flyout_panel';
 import { mockRiskEngineEnabled } from '../../tasks/entity_analytics';
 import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
@@ -67,6 +67,14 @@ describe(
         expandRiskInputsFlyoutPanel();
         cy.get(RISK_INPUT_PANEL_HEADER).should('exist');
       });
+
+      it('should show asset criticality in the risk input panel', () => {
+        waitForAlerts();
+        expandFirstAlertUserFlyout();
+        expandRiskInputsFlyoutPanel();
+        cy.get(ASSET_CRITICALITY_BADGE).should('exist');
+        cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Very important');
+      });
     });
 
     describe('Host details', () => {
@@ -80,6 +88,14 @@ describe(
         cy.log('risk input');
         expandRiskInputsFlyoutPanel();
         cy.get(RISK_INPUT_PANEL_HEADER).should('exist');
+      });
+
+      it('should show asset criticality in the risk input panel', () => {
+        waitForAlerts();
+        expandFirstAlertHostFlyout();
+        expandRiskInputsFlyoutPanel();
+        cy.get(ASSET_CRITICALITY_BADGE).should('exist');
+        cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Very important');
       });
     });
   }

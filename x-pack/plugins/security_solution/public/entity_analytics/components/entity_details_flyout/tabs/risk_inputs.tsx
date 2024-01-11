@@ -49,7 +49,12 @@ const CriticalityField: React.FC<{ criticalityLevel?: CriticalityLevel }> = ({
   criticalityLevel,
 }) => {
   if (criticalityLevel) {
-    return <AssetCriticalityBadge criticalityLevel={criticalityLevel} />;
+    return (
+      <AssetCriticalityBadge
+        criticalityLevel={criticalityLevel}
+        dataTestSubj="risk-inputs-asset-criticality-badge"
+      />
+    );
   }
 
   return (
@@ -148,6 +153,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
   });
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
+  console.log('riskScore', riskScore);
   const {
     loading: loadingAlerts,
     data: alertsData,
