@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { useCallback, useRef, useState } from 'react';
 import fastIsEqual from 'fast-deep-equal';
 import { useResizeObserver } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { ChartSizeSpec } from './types';
 
 /**
@@ -78,7 +79,7 @@ export function useSizeTransitionVeil(
         css={{
           height: '100%',
           width: '100%',
-          backgroundColor: 'white',
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
           position: 'absolute',
           zIndex: 1,
           display: showVeil ? 'block' : 'none',
