@@ -180,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata', {
           performance: {
             highWaterMark: 300,
-            concurrency: 1,
+            concurrency: 5,
           },
         });
 
