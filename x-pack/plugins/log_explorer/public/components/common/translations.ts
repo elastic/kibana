@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const flyoutMessageLabel = i18n.translate('xpack.logExplorer.flyoutDetail.label.message', {
-  defaultMessage: 'Message',
+export const flyoutContentLabel = i18n.translate('xpack.logExplorer.flyoutDetail.label.message', {
+  defaultMessage: 'Content breakdown',
 });
 
 export const flyoutServiceLabel = i18n.translate('xpack.logExplorer.flyoutDetail.label.service', {
@@ -122,21 +122,29 @@ export const flyoutShipperLabel = i18n.translate('xpack.logExplorer.flyoutDetail
   defaultMessage: 'Shipper',
 });
 
-export const flyoutHoverActionFilterForText = (text: unknown) =>
+export const actionFilterForText = (text: string) =>
   i18n.translate('xpack.logExplorer.flyoutDetail.value.hover.filterFor', {
     defaultMessage: 'Filter for this {value}',
     values: {
-      value: text as string,
+      value: text,
     },
   });
 
-export const flyoutHoverActionFilterOutText = (text: unknown) =>
+export const actionFilterOutText = (text: string) =>
   i18n.translate('xpack.logExplorer.flyoutDetail.value.hover.filterOut', {
     defaultMessage: 'Filter out this {value}',
     values: {
-      value: text as string,
+      value: text,
     },
   });
+
+export const filterOutText = i18n.translate('xpack.logExplorer.popoverAction.filterOut', {
+  defaultMessage: 'Filter out',
+});
+
+export const filterForText = i18n.translate('xpack.logExplorer.popoverAction.filterFor', {
+  defaultMessage: 'Filter for',
+});
 
 export const flyoutHoverActionFilterForFieldPresentText = i18n.translate(
   'xpack.logExplorer.flyoutDetail.value.hover.filterForFieldPresent',
@@ -159,6 +167,18 @@ export const flyoutHoverActionCopyToClipboardText = i18n.translate(
   }
 );
 
+export const copyValueText = i18n.translate('xpack.logExplorer.popoverAction.copyValue', {
+  defaultMessage: 'Copy value',
+});
+
+export const copyValueAriaText = (fieldName: string) =>
+  i18n.translate('xpack.logExplorer.popoverAction.copyValueAriaText', {
+    defaultMessage: 'Copy value of {fieldName}',
+    values: {
+      fieldName,
+    },
+  });
+
 export const flyoutAccordionShowMoreText = (count: number) =>
   i18n.translate('xpack.logExplorer.flyoutDetail.section.showMore', {
     defaultMessage: '+ {hiddenCount} more',
@@ -166,3 +186,17 @@ export const flyoutAccordionShowMoreText = (count: number) =>
       hiddenCount: count,
     },
   });
+
+export const openCellActionPopoverAriaText = i18n.translate(
+  'xpack.logExplorer.popoverAction.openPopover',
+  {
+    defaultMessage: 'Open popover',
+  }
+);
+
+export const closeCellActionPopoverText = i18n.translate(
+  'xpack.logExplorer.popoverAction.closePopover',
+  {
+    defaultMessage: 'Close popover',
+  }
+);

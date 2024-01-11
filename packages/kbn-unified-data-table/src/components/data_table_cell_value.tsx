@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './flyout_customization';
-export * from './search_bar_customization';
-export * from './top_nav_customization';
-export * from './histogram_customization';
-export * from './data_table_customisation';
+import React from 'react';
+
+export const DataTablePopoverCellValue = ({ children }: { children: React.ReactNode }) => {
+  return <span className="unifiedDataTable__cellPopoverValue eui-textBreakWord">{children}</span>;
+};
+
+// eslint-disable-next-line import/no-default-export
+export default DataTablePopoverCellValue;
