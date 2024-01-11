@@ -45,18 +45,17 @@ import {
   addNameToTimelineAndSave,
   addNameToTimelineAndSaveAsNew,
 } from '../../../tasks/timeline';
-import { createTimeline } from '../../../tasks/timelines';
+import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/173339
-describe.skip('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
+describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   beforeEach(() => {
-    login();
     deleteTimelines();
   });
 
-  it('creates a timeline from a template and should have the same query and open the timeline modal', () => {
+  it('should create a timeline from a template and should have the same query and open the timeline modal', () => {
+    login();
     createTimelineTemplate(getTimeline());
     visit(TIMELINE_TEMPLATES_URL);
     selectCustomTemplates();
@@ -64,46 +63,35 @@ describe.skip('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     clickingOnCreateTimelineFormTemplateBtn();
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
     cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
-    closeTimeline();
   });
 
-  describe('Toggle create timeline from "New" btn', () => {
-    context('Privileges: CRUD', () => {
-      beforeEach(() => {
-        login();
-        visitWithTimeRange(OVERVIEW_URL);
-      });
-
-      it('toggle create timeline ', () => {
-        openTimelineUsingToggle();
-        createNewTimeline();
-        addNameAndDescriptionToTimeline(getTimeline());
-        cy.get(TIMELINE_PANEL).should('be.visible');
-      });
-    });
-
-    context('Privileges: READ', () => {
-      beforeEach(() => {
-        login(ROLES.t1_analyst);
-        visitWithTimeRange(OVERVIEW_URL);
-      });
-
-      it('should not be able to create/update timeline ', () => {
-        openTimelineUsingToggle();
-        createNewTimeline();
-        cy.get(TIMELINE_PANEL).should('be.visible');
-        cy.get(SAVE_TIMELINE_ACTION_BTN).should('be.disabled');
-        cy.get(SAVE_TIMELINE_ACTION_BTN).first().realHover();
-        cy.get(SAVE_TIMELINE_TOOLTIP).should('be.visible');
-        cy.get(SAVE_TIMELINE_TOOLTIP).should(
-          'have.text',
-          'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.'
-        );
-      });
-    });
+  it('should be able to create timeline with crud privileges', () => {
+    login();
+    visitWithTimeRange(OVERVIEW_URL);
+    openTimelineUsingToggle();
+    createNewTimeline();
+    addNameAndDescriptionToTimeline(getTimeline());
+    cy.get(TIMELINE_PANEL).should('be.visible');
   });
 
-  it('creates a timeline by clicking untitled timeline from bottom bar', () => {
+  it('should not be able to create/update timeline with only read privileges', () => {
+    login(ROLES.t1_analyst);
+    visitWithTimeRange(TIMELINES_URL);
+    waitForTimelinesPanelToBeLoaded();
+    openTimelineUsingToggle();
+    createNewTimeline();
+    cy.get(TIMELINE_PANEL).should('be.visible');
+    cy.get(SAVE_TIMELINE_ACTION_BTN).should('be.disabled');
+    cy.get(SAVE_TIMELINE_ACTION_BTN).first().realHover();
+    cy.get(SAVE_TIMELINE_TOOLTIP).should('be.visible');
+    cy.get(SAVE_TIMELINE_TOOLTIP).should(
+      'have.text',
+      'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.'
+    );
+  });
+
+  it('should create a timeline by clicking untitled timeline from bottom bar', () => {
+    login();
     visitWithTimeRange(OVERVIEW_URL);
     openTimelineUsingToggle();
     addNameAndDescriptionToTimeline(getTimeline());
@@ -126,14 +114,17 @@ describe.skip('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
       .should('have.text', getTimeline().notes);
   });
 
-  it('shows the different timeline states', () => {
+  it('should show the different timeline states', () => {
+    login();
     visitWithTimeRange(TIMELINES_URL);
-    createTimeline();
+    openTimelineUsingToggle();
 
     // Unsaved
     cy.get(TIMELINE_PANEL).should('be.visible');
     cy.get(TIMELINE_STATUS).should('be.visible');
-    cy.get(TIMELINE_STATUS).should('have.text', 'Unsaved');
+    cy.get(TIMELINE_STATUS)
+      .invoke('text')
+      .should('match', /^Unsaved/);
 
     addNameToTimelineAndSave('Test');
 
@@ -155,10 +146,11 @@ describe.skip('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
   });
 
   it('should save timelines as new', () => {
+    login();
     visitWithTimeRange(TIMELINES_URL);
     cy.get(ROWS).should('have.length', '0');
 
-    createTimeline();
+    openTimelineUsingToggle();
     addNameToTimelineAndSave('First');
 
     // Offsetting the extra save that is happening in the background
