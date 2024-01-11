@@ -14,16 +14,21 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 
-interface TimeRange {
+export type TimeRange = {
   from: Date;
   to: Date;
-}
+};
+
+export type AlertAnnotation = {
+  date: Date;
+  total: number;
+};
 
 export function useLensDefinition(
   slo: SLOResponse,
   threshold: number,
   alertTimeRange?: TimeRange,
-  annotations?: Array<{ date: Date; total: number }>
+  annotations?: AlertAnnotation[]
 ): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
@@ -111,7 +116,7 @@ export function useLensDefinition(
                         type: 'point_in_time',
                         timestamp: moment(alertTimeRange.from).toISOString(),
                       },
-                      lineWidth: 3,
+                      lineWidth: 2,
                       color: euiTheme.colors.danger,
                       icon: 'alert',
                     },
@@ -150,7 +155,7 @@ export function useLensDefinition(
                       type: 'point_in_time',
                       timestamp: moment(annotation.date).toISOString(),
                     },
-                    lineWidth: 3,
+                    lineWidth: 2,
                     color: euiTheme.colors.danger,
                     icon: 'alert',
                   },

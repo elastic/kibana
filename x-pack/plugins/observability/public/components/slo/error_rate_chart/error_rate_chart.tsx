@@ -11,19 +11,14 @@ import moment from 'moment';
 import React from 'react';
 import { useKibana } from '../../../utils/kibana_react';
 import { getDelayInSecondsFromSLO } from '../../../utils/slo/get_delay_in_seconds_from_slo';
-import { useLensDefinition } from './use_lens_definition';
+import { AlertAnnotation, TimeRange, useLensDefinition } from './use_lens_definition';
 
 interface Props {
   slo: SLOResponse;
   dataTimeRange: TimeRange;
   threshold: number;
   alertTimeRange?: TimeRange;
-  annotations?: Array<{ date: Date; total: number }>;
-}
-
-interface TimeRange {
-  from: Date;
-  to: Date;
+  annotations?: AlertAnnotation[];
 }
 
 export function ErrorRateChart({

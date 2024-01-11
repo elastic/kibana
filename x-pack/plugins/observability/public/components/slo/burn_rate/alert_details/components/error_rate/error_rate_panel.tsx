@@ -27,13 +27,9 @@ import React from 'react';
 import { WindowSchema } from '../../../../../../typings';
 import { useKibana } from '../../../../../../utils/kibana_react';
 import { ErrorRateChart } from '../../../../error_rate_chart';
+import { TimeRange } from '../../../../error_rate_chart/use_lens_definition';
 import { BurnRateAlert } from '../../alert_details_app_section';
 import { getActionGroupFromReason } from '../../utils/alert';
-
-interface TimeRange {
-  from: Date;
-  to: Date;
-}
 
 function getDataTimeRange(
   timeRange: { gte: string; lte?: string },
