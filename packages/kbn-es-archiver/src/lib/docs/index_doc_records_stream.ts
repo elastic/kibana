@@ -33,7 +33,7 @@ export function createIndexDocRecordsStream(
     await client.helpers.bulk(
       {
         retries: 5,
-        concurrency: performance?.concurrency || 4,
+        concurrency: performance?.concurrency || DEFAULT_PERFORMANCE_OPTIONS.concurrency,
         datasource: docs.map((doc) => {
           const body = doc.source;
           const op = doc.data_stream ? BulkOperation.Create : operation;
@@ -70,7 +70,7 @@ export function createIndexDocRecordsStream(
   }
 
   return new Writable({
-    highWaterMark: performance?.highWaterMark || 5000,
+    highWaterMark: performance?.highWaterMark || DEFAULT_PERFORMANCE_OPTIONS.highWaterMark,
     objectMode: true,
 
     async write(record, enc, callback) {
@@ -99,3 +99,8 @@ export interface LoadActionPerfOptions {
   highWaterMark: number;
   concurrency: number;
 }
+
+const DEFAULT_PERFORMANCE_OPTIONS: LoadActionPerfOptions = {
+  highWaterMark: 5000,
+  concurrency: 4,
+} as const;
