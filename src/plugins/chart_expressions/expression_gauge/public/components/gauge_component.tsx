@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, memo, useCallback } from 'react';
+import React, { FC, memo, useCallback, useRef } from 'react';
+import { useResizeObserver } from '@elastic/eui';
 import { Chart, Goal, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PaletteOutput } from '@kbn/coloring';
@@ -258,6 +259,9 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       [renderComplete]
     );
 
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const containerSize = useResizeObserver(wrapperRef.current);
+
     const chartSizeSpec: ChartSizeSpec = {
       maxDimensions: {
         ...(gaugeType === GaugeShapes.HORIZONTAL_BULLET
@@ -272,7 +276,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       },
     };
 
-    const { veil, onResize } = useSizeTransitionVeil(chartSizeSpec, setChartSize);
+    const { veil, onResize } = useSizeTransitionVeil(chartSizeSpec, setChartSize, containerSize);
 
     const table = data;
     const accessors = getAccessorsFromArgs(args, table.columns);
@@ -380,7 +384,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       : {};
 
     return (
-      <div className="gauge__wrapper">
+      <div className="gauge__wrapper" ref={wrapperRef}>
         {veil}
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings

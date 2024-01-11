@@ -33,7 +33,7 @@ import {
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import { IconType } from '@elastic/eui';
+import { IconType, useResizeObserver } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
@@ -303,6 +303,9 @@ export function XYChart({
 
   const isTimeViz = isTimeChart(dataLayers);
 
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const containerSize = useResizeObserver(wrapperRef.current);
+
   const chartSizeSpec: ChartSizeSpec =
     isTimeViz && !isHorizontalChart(dataLayers)
       ? {
@@ -322,7 +325,7 @@ export function XYChart({
           },
         };
 
-  const { veil, onResize } = useSizeTransitionVeil(chartSizeSpec, setChartSize);
+  const { veil, onResize } = useSizeTransitionVeil(chartSizeSpec, setChartSize, containerSize);
 
   const formattedDatatables = useMemo(
     () =>
@@ -740,7 +743,7 @@ export function XYChart({
   );
 
   return (
-    <div css={chartContainerStyle}>
+    <div ref={wrapperRef} css={chartContainerStyle}>
       {veil}
       {showLegend !== undefined && uiState && (
         <LegendToggle
