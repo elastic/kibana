@@ -375,7 +375,12 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         <EuiModalHeaderTitle>Export</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut size="s" title={renderDescription(objectType)} iconType="iInCircle" />
+        <EuiCallOut
+          size="s"
+          id="xpack.reporting.modalContent.generationTimeDescription"
+          title={renderDescription(objectType)}
+          iconType="iInCircle"
+        />
         <EuiSpacer size="m" />
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
           <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>

@@ -144,9 +144,6 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
         name: i18n.translate('share.contextMenu.embedCodeLabel', {
           defaultMessage: 'Embed',
         }),
-        title: i18n.translate('share.contextMenu.embedCodeModalTitle', {
-          defaultMessage: 'Embed Code',
-        }),
         icon: 'console',
         sortOrder: 0,
         onClick: openEmbedModal,
