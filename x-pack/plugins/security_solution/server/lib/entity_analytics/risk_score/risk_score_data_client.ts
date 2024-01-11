@@ -6,8 +6,8 @@
  */
 
 import type {
-  Metadata,
   MappingDynamicMapping,
+  Metadata,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -15,24 +15,24 @@ import {
   createOrUpdateIndexTemplate,
 } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import {
-  riskScoreFieldMap,
   getIndexPatternDataStream,
-  totalFieldsLimit,
-  mappingComponentName,
   getTransformOptions,
+  mappingComponentName,
+  riskScoreFieldMap,
+  totalFieldsLimit,
 } from './configurations';
 import { createDataStream } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import { getRiskScoreLatestIndex } from '../../../../common/entity_analytics/risk_engine';
-import { getLatestTransformId, createTransform } from '../utils/transforms';
+import { createTransform, getLatestTransformId } from '../utils/transforms';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { RiskScoreSynchronousUpgrader } from './risk_score_synchronous_upgrader';
+import { retryTransientEsErrors } from '../utils/retry_transient_es_errors';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -167,34 +167,41 @@ export class RiskScoreDataClient {
   }
   /**
    * Ensures that configuration migrations for risk score indices are seamlessly handled across Kibana upgrades.
-   * This function is meant to be idempotent, with an exception: to reduce unnecessary processing, it will only execute once
-   * across the lifecycle of a {@link RiskScoreDataClient} instance, utilizing the {@link RiskScoreSynchronousUpgrader}.
    *
    * Upgrades:
    * - Migrating to 8.12+ requires a change to the risk score latest transform index's 'dynamic' setting to ensure that
    * unmapped fields are allowed within stored documents.
    *
    */
-  public async upgrade(forceUpgrade: boolean) {
-    await RiskScoreSynchronousUpgrader.upgrade(
-      this.options.namespace,
-      this.options.logger,
-      forceUpgrade,
-      async () => {
-        this.options.logger.info('Upgrading risk score indices.');
-        await this.setRiskScoreLatestIndexDynamicConfiguration(false);
-      }
-    );
+  public async upgrade() {
+    const desiredDynamicValue = 'false';
+    const currentDynamicValue = await this.getRiskScoreLatestIndexDynamicConfiguration();
+    if (currentDynamicValue !== desiredDynamicValue) {
+      await this.setRiskScoreLatestIndexDynamicConfiguration(desiredDynamicValue);
+    }
   }
 
+  private async getRiskScoreLatestIndexDynamicConfiguration(): Promise<string | undefined> {
+    const riskScoreLatestIndexName = getRiskScoreLatestIndex(this.options.namespace);
+    const riskScoreLatestIndexResponse = await retryTransientEsErrors(
+      () => this.options.esClient.indices.get({ index: riskScoreLatestIndexName }),
+      { logger: this.options.logger }
+    );
+    return riskScoreLatestIndexResponse[riskScoreLatestIndexName]?.mappings?.dynamic?.toString();
+  }
+
+  /**
+   * Sets the risk score latest index's 'dynamic' mapping property to the desired value.
+   * @throws Error if the index does not exist.
+   */
   private async setRiskScoreLatestIndexDynamicConfiguration(dynamic: MappingDynamicMapping) {
-    return createOrUpdateIndex({
-      esClient: this.options.esClient,
-      logger: this.options.logger,
-      options: {
-        index: getRiskScoreLatestIndex(this.options.namespace),
-        mappings: { dynamic },
-      },
-    });
+    return retryTransientEsErrors(
+      () =>
+        this.options.esClient.indices.putMapping({
+          index: getRiskScoreLatestIndex(this.options.namespace),
+          dynamic,
+        }),
+      { logger: this.options.logger }
+    );
   }
 }

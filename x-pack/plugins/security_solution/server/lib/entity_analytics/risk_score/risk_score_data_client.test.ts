@@ -21,7 +21,6 @@ import { createDataStream } from '../utils/create_datastream';
 
 import * as transforms from '../utils/transforms';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
-import { RiskScoreSynchronousUpgrader } from './risk_score_synchronous_upgrader';
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
@@ -454,20 +453,12 @@ describe('RiskScoreDataClient', () => {
     });
   });
   describe('upgrade process', () => {
-    beforeEach(() => {
-      // @ts-ignore accessing the private member in order to reset the upgrades without increasing its visibility
-      RiskScoreSynchronousUpgrader.upgradesConducted = {};
-    });
     it('upserts the configuration for the latest risk score index when upgrading', async () => {
-      await riskScoreDataClient.upgrade(false);
+      await riskScoreDataClient.upgrade();
 
-      expect(createOrUpdateIndex).toHaveBeenCalledWith(
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith(
         expect.objectContaining({
-          options: expect.objectContaining({
-            mappings: expect.objectContaining({
-              dynamic: false,
-            }),
-          }),
+          dynamic: 'false',
         })
       );
     });
