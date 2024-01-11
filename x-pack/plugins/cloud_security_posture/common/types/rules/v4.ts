@@ -6,7 +6,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import { BenchmarksCisId } from '../latest';
 export type {
   cspBenchmarkRuleMetadataSchema,
@@ -159,6 +158,6 @@ export const cspSettingsSchema = schema.object({
 export type CspSettings = TypeOf<typeof cspSettingsSchema>;
 
 export interface BulkActionBenchmarkRulesResponse {
-  newCspSettings: SavedObjectsUpdateResponse<CspSettings>;
-  disabledRules: string[];
+  updatedBenchmarkRulesStates: CspBenchmarkRulesStates;
+  disabledDetectionRules: string[];
 }
