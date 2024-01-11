@@ -422,6 +422,7 @@ function DiscoverDocumentsComponent({
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
                   componentsTourSteps={TOUR_STEPS}
+                  headerRowHeight={3}
                   externalCustomRenderers={externalCustomRenderers}
                 />
               </CellActionsProvider>

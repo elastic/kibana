@@ -322,7 +322,7 @@ describe('Textbased Data Source', () => {
         layers: {},
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'FROM "foo"' },
           dataViewSpec: {
             title: 'foo',
             id: '1',
@@ -367,7 +367,7 @@ describe('Textbased Data Source', () => {
             ],
             index: '1',
             query: {
-              sql: 'SELECT * FROM "foo"',
+              esql: 'FROM "foo"',
             },
           },
         },
