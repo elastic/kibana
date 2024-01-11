@@ -359,21 +359,6 @@
       },
       {
         "parentPluginId": "osquery",
-        "id": "def-common.DEFAULT_DARK_MODE",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_DARK_MODE",
-        "description": [],
-        "signature": [
-          "\"theme:darkMode\""
-        ],
-        "path": "x-pack/plugins/osquery/common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "osquery",
         "id": "def-common.OSQUERY_INTEGRATION_NAME",
         "type": "string",
         "tags": [],
