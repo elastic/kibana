@@ -625,6 +625,15 @@ export class ExecutionHandler<
           continue;
         }
 
+        if (
+          this.rule.notificationDelay &&
+          alert.getActiveCount() < this.rule.notificationDelay.activeCount
+        ) {
+          continue;
+        } else {
+          alert.resetActiveCount();
+        }
+
         const actionGroup = this.getActionGroup(alert);
 
         if (!this.ruleTypeActionGroups!.has(actionGroup)) {

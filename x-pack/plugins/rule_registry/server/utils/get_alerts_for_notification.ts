@@ -20,12 +20,14 @@ export function getAlertsForNotification(
 ) {
   return trackedEventsToIndex.map((trackedEvent) => {
     if (!flappingSettings.enabled || trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE) {
+      const count = trackedEvent.activeCount || 0;
+      trackedEvent.activeCount = count + 1;
+
       trackedEvent.pendingRecoveredCount = 0;
-    } else if (
-      flappingSettings.enabled &&
-      trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED
-    ) {
-      if (trackedEvent.flapping) {
+    } else if (trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED) {
+      trackedEvent.activeCount = 0;
+
+      if (flappingSettings.enabled && trackedEvent.flapping) {
         const count = trackedEvent.pendingRecoveredCount || 0;
         trackedEvent.pendingRecoveredCount = count + 1;
         if (trackedEvent.pendingRecoveredCount < flappingSettings.statusChangeThreshold) {

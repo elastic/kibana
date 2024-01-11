@@ -49,6 +49,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     revision: ruleDomain.revision,
     running: ruleDomain.running,
     viewInAppRelativeUrl: ruleDomain.viewInAppRelativeUrl,
+    notificationDelay: ruleDomain.notificationDelay,
   };
 
   if (isPublic) {

@@ -17,7 +17,12 @@ const trackedAlertStateRt = t.type({
   flappingHistory: t.array(t.boolean),
   // flapping flag that indicates whether the alert is flapping
   flapping: t.boolean,
+  // count of consecutive recovered alerts for flapping
+  // will reset if the alert is active or if equal to the alert status change threshold
   pendingRecoveredCount: t.number,
+  // count of consecutive active alerts
+  // will reset if the alert is recovered
+  activeCount: t.number,
 });
 
 export type TrackedLifecycleAlertState = t.TypeOf<typeof trackedAlertStateRt>;
