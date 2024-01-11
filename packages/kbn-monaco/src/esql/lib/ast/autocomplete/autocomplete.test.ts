@@ -36,12 +36,16 @@ const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
 const indexes = (
   [] as Array<{ name: string; hidden: boolean; suggestedAs: string | undefined }>
 ).concat(
-  ['a', 'index', 'otherIndex', '.secretIndex'].map((name) => ({
+  ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
     name,
     hidden: name.startsWith('.'),
     suggestedAs: undefined,
   })),
-  [{ name: 'my-index', hidden: false, suggestedAs: '`my-index`' }]
+  ['my-index[quoted]', 'my-index$', 'my_index{}'].map((name) => ({
+    name,
+    hidden: false,
+    suggestedAs: `\`${name}\``,
+  }))
 );
 const policies = [
   {
@@ -50,13 +54,13 @@ const policies = [
     matchField: 'otherStringField',
     enrichFields: ['otherField', 'yetAnotherField', 'yet-special-field'],
   },
-  {
-    name: 'my-policy',
+  ...['my-policy[quoted]', 'my-policy$', 'my_policy{}'].map((name) => ({
+    name,
     sourceIndices: ['enrichIndex1'],
     matchField: 'otherStringField',
     enrichFields: ['otherField', 'yetAnotherField', 'yet-special-field'],
-    suggestedAs: '`my-policy`',
-  },
+    suggestedAs: `\`${name}\``,
+  })),
 ];
 
 /**

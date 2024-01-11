@@ -27,7 +27,10 @@ export const TRIGGER_SUGGESTION_COMMAND = {
   id: 'editor.action.triggerSuggest',
 };
 
-function getSafeInsertText(text: string) {
+function getSafeInsertText(text: string, { dashSupported }: { dashSupported?: boolean } = {}) {
+  if (dashSupported) {
+    return /[^a-zA-Z\d_\.@-]/.test(text) ? `\`${text}\`` : text;
+  }
   return /[^a-zA-Z\d_\.@]/.test(text) ? `\`${text}\`` : text;
 }
 
@@ -130,7 +133,7 @@ export const buildVariablesDefinitions = (variables: string[]): AutocompleteComm
 export const buildSourcesDefinitions = (sources: string[]): AutocompleteCommandDefinition[] =>
   sources.map((label) => ({
     label,
-    insertText: getSafeInsertText(label),
+    insertText: getSafeInsertText(label, { dashSupported: true }),
     kind: 21,
     detail: i18n.translate('monaco.esql.autocomplete.sourceDefinition', {
       defaultMessage: `Input table`,
@@ -171,7 +174,7 @@ export const buildPoliciesDefinitions = (
 ): AutocompleteCommandDefinition[] =>
   policies.map(({ name: label, sourceIndices }) => ({
     label,
-    insertText: getSafeInsertText(label),
+    insertText: getSafeInsertText(label, { dashSupported: true }),
     kind: 5,
     detail: i18n.translate('monaco.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
