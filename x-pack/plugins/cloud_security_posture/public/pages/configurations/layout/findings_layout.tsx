@@ -46,7 +46,7 @@ export const PageTitleText = ({ title }: { title: React.ReactNode }) => (
   </EuiText>
 );
 
-export const getExpandColumn = <T extends unknown>({
+export const getExpandColumn = <T extends object>({
   onClick,
 }: {
   onClick(item: T): void;
