@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
-import { TaskInstanceFields } from '@kbn/screenshotting-plugin/common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { lastValueFrom } from 'rxjs';
 import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../common';
@@ -34,7 +33,7 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
         const { metrics, results } = await lastValueFrom(
           screenshotting.getScreenshots({
             request,
-            taskInstanceFields: {} as TaskInstanceFields,
+            taskInstanceFields: { startedAt: null, retryAt: null },
             expression: request.query.expression,
           })
         );

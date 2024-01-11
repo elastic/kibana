@@ -25,7 +25,6 @@ import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
-import { TaskInstanceFields } from '@kbn/reporting-common/types';
 import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import {
@@ -38,7 +37,7 @@ import { CsvGenerator } from './generate_csv';
 const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
   ...baseObj,
 });
-const mockTaskInstanceFields = {} as TaskInstanceFields;
+const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;

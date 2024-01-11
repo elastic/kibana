@@ -182,10 +182,12 @@ export class Screenshots {
     const { taskInstanceFields, format, layout } = options;
 
     const { startedAt, retryAt } = taskInstanceFields;
-    logger.debug(
-      `Task started at: ${startedAt && moment(startedAt).format()}.` +
-        ` Can run until: ${retryAt && moment(retryAt).format()}`
-    );
+    if (startedAt) {
+      logger.debug(
+        `Task started at: ${startedAt && moment(startedAt).format()}.` +
+          ` Can run until: ${retryAt && moment(retryAt).format()}`
+      );
+    }
 
     if (this.systemHasInsufficientMemory()) {
       return throwError(() => new errors.InsufficientMemoryAvailableOnCloudError());

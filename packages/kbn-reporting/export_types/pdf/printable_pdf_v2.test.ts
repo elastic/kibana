@@ -11,7 +11,7 @@ import { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
-import type { LocatorParams, TaskInstanceFields } from '@kbn/reporting-common/types';
+import type { LocatorParams } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
@@ -23,7 +23,7 @@ let mockPdfExportType: PdfExportType;
 let stream: jest.Mocked<Writable>;
 
 const cancellationToken = new CancellationToken();
-const taskInstanceFields = {} as TaskInstanceFields;
+const taskInstanceFields = { startedAt: null, retryAt: null };
 const mockLogger = loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'testencryptionkey';
