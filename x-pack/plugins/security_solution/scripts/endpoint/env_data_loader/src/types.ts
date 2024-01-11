@@ -5,4 +5,26 @@
  * 2.0.
  */
 
-export type ProgressReporter = (options: { doneCount: number }) => void;
+export type ReportProgressCallback = (options: { doneCount: number }) => void;
+
+interface ProgressReporterStateProperties {
+  prctDone: number;
+  totalCount: number;
+  doneCount: number;
+}
+
+export interface ProgressReporterState extends ProgressReporterStateProperties {
+  categories: Record<string, ProgressReporterStateProperties>;
+}
+
+export interface ProgressReporterInterface {
+  addCategory(name: string, totalCount: number): void;
+
+  getReporter(categoryName: string): ReportProgressCallback;
+
+  getState(): ProgressReporterState;
+
+  startReporting(): void;
+
+  stopReporting(): void;
+}

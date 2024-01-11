@@ -1,0 +1,134 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { once } from 'lodash';
+import type {
+  ProgressReporterInterface,
+  ProgressReporterState,
+  ReportProgressCallback,
+} from './types';
+
+const NOOP = () => {};
+
+interface ProgressReporterOptions {
+  /**
+   * If defined, this callback to be used in reporting status on an interval until
+   * the `doneCount` reaches the `totalCount` of all categories
+   * @param status
+   */
+  reportStatus?: (status: string) => void;
+}
+
+export class ProgressReporter implements ProgressReporterInterface {
+  private readonly reportIntervalMs = 20000;
+  private categories: Record<string, { totalCount: number; doneCount: number }> = {};
+  private stopReportingLoop: () => void = NOOP;
+
+  constructor(private readonly options: ProgressReporterOptions = {}) {
+    if (options.reportStatus) {
+      this.startReporting();
+    }
+  }
+
+  public startReporting() {
+    this.stopReportingLoop();
+
+    if (!this.options.reportStatus) {
+      return;
+    }
+
+    const setIntId = setInterval(() => {
+      if (this.options.reportStatus) {
+        const state = this.getState();
+        const categoryNamesMaxChr = Object.keys(state.categories).reduce((acc, categoryName) => {
+          return Math.max(acc, categoryName.length);
+        }, 10);
+
+        this.options.reportStatus(`Overall progress: ${state.prctDone}%
+  ${Object.entries(state.categories).reduce((acc, [categoryName, categoryState]) => {
+    let updatedOutput = acc;
+
+    if (updatedOutput.length) {
+      updatedOutput += `\n  `;
+    }
+
+    updatedOutput += `${`${categoryName}:`
+      .concat(' '.repeat(categoryNamesMaxChr))
+      .substring(0, categoryNamesMaxChr + 1)}  ${categoryState.prctDone}%`;
+
+    return updatedOutput;
+  }, '')}`);
+      }
+    }, this.reportIntervalMs);
+
+    const exitEvCallback = () => this.stopReportingLoop();
+
+    this.stopReportingLoop = once(() => {
+      clearInterval(setIntId);
+      process.off('exit', exitEvCallback);
+    });
+
+    process.on('exit', exitEvCallback);
+  }
+
+  stopReporting() {
+    this.stopReportingLoop();
+  }
+
+  addCategory(name: string, totalCount: number): void {
+    this.categories[name] = {
+      totalCount,
+      doneCount: 0,
+    };
+  }
+
+  getReporter(categoryName: string): ReportProgressCallback {
+    if (!this.categories[categoryName]) {
+      throw new Error(`category name [${categoryName}] has not known`);
+    }
+
+    return (options) => {
+      this.categories[categoryName].doneCount = options.doneCount;
+    };
+  }
+
+  getState(): ProgressReporterState {
+    const state: ProgressReporterState = {
+      prctDone: 0,
+      totalCount: 0,
+      doneCount: 0,
+      categories: {},
+    };
+
+    Object.entries(this.categories).forEach(
+      ([
+        categoryName,
+        { totalCount: thisCategoryTotalCount, doneCount: thisCategoryDoneCount },
+      ]) => {
+        state.totalCount += thisCategoryTotalCount;
+        state.doneCount += thisCategoryDoneCount;
+        state.categories[categoryName] = {
+          totalCount: thisCategoryTotalCount,
+          doneCount: thisCategoryDoneCount,
+          prctDone: calculatePercentage(thisCategoryTotalCount, thisCategoryDoneCount),
+        };
+      }
+    );
+
+    state.prctDone = calculatePercentage(state.totalCount, state.doneCount);
+
+    return state;
+  }
+}
+
+const calculatePercentage = (totalCount: number, doneCount: number): number => {
+  if (totalCount <= 0 || doneCount <= 0) {
+    return 0;
+  }
+
+  return Math.min(100, Number(((doneCount / totalCount) * 100).toPrecision(3)));
+};

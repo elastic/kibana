@@ -12,13 +12,13 @@ import {
   copyAgentPolicy,
   createAgentPolicy,
 } from '../../common/fleet_services';
-import type { ProgressReporter } from './types';
+import type { ReportProgressCallback } from './types';
 
 interface CreatePoliciesOptions {
   kbnClient: KbnClient;
   log: ToolingLog;
   count: number;
-  reportProgress: ProgressReporter;
+  reportProgress: ReportProgressCallback;
 }
 
 export const createPolicies = async ({

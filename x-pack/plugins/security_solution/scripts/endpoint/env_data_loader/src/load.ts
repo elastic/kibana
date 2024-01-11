@@ -7,7 +7,9 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
-import type { ProgressReporter } from './types';
+import { installOrUpgradeEndpointFleetPackage } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
+import { ProgressReporter } from './progress_reporter';
+import type { ProgressReporterInterface } from './types';
 import { createPolicies } from './create_policies';
 import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 
@@ -22,20 +24,25 @@ export const load = async ({
   log = createToolingLogger(),
   policyCount,
 }: LoadOptions) => {
-  const reportProgress: ProgressReporter = () => {};
+  const reportProgress: ProgressReporterInterface = new ProgressReporter({
+    reportStatus: (status) => {
+      log.info(status);
+    },
+  });
+
+  reportProgress.addCategory('policies', policyCount);
 
   // ==> Log state to a file in case of failure?
 
   // ==> Turn off task `endpoint:user-artifact-packager`
 
-  // ==> Ensure fleet is setup (call setup api)
+  await installOrUpgradeEndpointFleetPackage(kbnClient, log);
 
-  // create policies - store IDs (WHICH IDS? agent or integration policy?
   const endpointPolicyIds = await createPolicies({
     kbnClient,
     log,
     count: policyCount,
-    reportProgress,
+    reportProgress: reportProgress.getReporter('policies'),
   });
 
   // => create all artifacts
@@ -43,4 +50,6 @@ export const load = async ({
 
   // => re-enable the task
   //
+
+  reportProgress.stopReporting();
 };
