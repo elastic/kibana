@@ -16,6 +16,7 @@ export class DashboardAddPanelService extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly browser = this.ctx.getService('browser');
+  private readonly toasts = this.ctx.getService('toasts');
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
@@ -95,7 +96,7 @@ export class DashboardAddPanelService extends FtrService {
           continue;
         }
         await button.click();
-        await this.common.closeToastIfExists();
+        await this.toasts.closeToastIfExists();
         embeddableList.push(name);
       }
     });
