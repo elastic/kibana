@@ -277,58 +277,68 @@ export function Chart({
       responsive={false}
     >
       <EuiFlexItem grow={false} css={chartToolbarCss}>
-        <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            {renderCustomChartToggleActions ? (
-              renderCustomChartToggleActions()
-            ) : (
-              <IconButtonGroup
-                legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
-                  defaultMessage: 'Chart visibility',
-                })}
-                buttonSize="s"
-                buttons={[
-                  {
-                    label: chartVisible
-                      ? i18n.translate('unifiedHistogram.hideChartButton', {
-                          defaultMessage: 'Hide chart',
-                        })
-                      : i18n.translate('unifiedHistogram.showChartButton', {
-                          defaultMessage: 'Show chart',
-                        }),
-                    iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
-                    'data-test-subj': 'unifiedHistogramToggleChartButton',
-                    onClick: toggleHideChart,
-                  },
-                ]}
-              />
-            )}
-          </EuiFlexItem>
-          {chartVisible && !isPlainRecord && !!onTimeIntervalChange && (
-            <EuiFlexItem grow={false}>
-              <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <div>
-              {chartVisible && breakdown && (
-                <BreakdownFieldSelector
-                  dataView={dataView}
-                  breakdown={breakdown}
-                  onBreakdownFieldChange={onBreakdownFieldChange}
-                />
-              )}
-              {chartVisible &&
-                currentSuggestion &&
-                allSuggestions &&
-                allSuggestions?.length > 1 && (
-                  <SuggestionSelector
-                    suggestions={allSuggestions}
-                    activeSuggestion={currentSuggestion}
-                    onSuggestionChange={onSuggestionSelectorChange}
+        <EuiFlexGroup
+          direction="row"
+          gutterSize="s"
+          responsive={false}
+          alignItems="center"
+          justifyContent="spaceBetween"
+        >
+          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+            <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                {renderCustomChartToggleActions ? (
+                  renderCustomChartToggleActions()
+                ) : (
+                  <IconButtonGroup
+                    legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
+                      defaultMessage: 'Chart visibility',
+                    })}
+                    buttonSize="s"
+                    buttons={[
+                      {
+                        label: chartVisible
+                          ? i18n.translate('unifiedHistogram.hideChartButton', {
+                              defaultMessage: 'Hide chart',
+                            })
+                          : i18n.translate('unifiedHistogram.showChartButton', {
+                              defaultMessage: 'Show chart',
+                            }),
+                        iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
+                        'data-test-subj': 'unifiedHistogramToggleChartButton',
+                        onClick: toggleHideChart,
+                      },
+                    ]}
                   />
                 )}
-            </div>
+              </EuiFlexItem>
+              {chartVisible && !isPlainRecord && !!onTimeIntervalChange && (
+                <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                  <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                <div>
+                  {chartVisible && breakdown && (
+                    <BreakdownFieldSelector
+                      dataView={dataView}
+                      breakdown={breakdown}
+                      onBreakdownFieldChange={onBreakdownFieldChange}
+                    />
+                  )}
+                  {chartVisible &&
+                    currentSuggestion &&
+                    allSuggestions &&
+                    allSuggestions?.length > 1 && (
+                      <SuggestionSelector
+                        suggestions={allSuggestions}
+                        activeSuggestion={currentSuggestion}
+                        onSuggestionChange={onSuggestionSelectorChange}
+                      />
+                    )}
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           {chartVisible && actions.length > 0 && (
             <EuiFlexItem grow={false}>
