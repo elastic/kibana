@@ -12,6 +12,7 @@ import type {
   QueryRuleCreateProps,
   QueryRuleUpdateProps,
   EsqlRuleCreateProps,
+  EqlRuleCreateProps,
   SavedQueryRuleCreateProps,
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
@@ -131,6 +132,17 @@ export const getCreateThresholdRulesSchemaMock = (ruleId = 'rule-1'): ThresholdR
     field: 'some.field',
     value: 4,
   },
+});
+
+export const getCreateEqlRuleSchemaMock = (ruleId = 'rule-1'): EqlRuleCreateProps => ({
+  description: 'Event correlation index pattern rule',
+  name: 'Event correlation index pattern rule',
+  severity: 'high',
+  risk_score: 55,
+  rule_id: ruleId,
+  type: 'eql',
+  language: 'eql',
+  query: 'process where process.name == "regsvr32.exe"',
 });
 
 export const getCreateNewTermsRulesSchemaMock = (
