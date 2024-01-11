@@ -56,18 +56,12 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
       openTimelineFieldsBrowser();
     });
 
-    it('displays the expected count of categories that match the filter input', () => {
+    it('displays the expected count of categories and fields that match the filter input', () => {
       const filterInput = 'host.mac';
 
       filterFieldsBrowser(filterInput);
 
       cy.get(FIELDS_BROWSER_CATEGORIES_COUNT).should('have.text', '2');
-    });
-
-    it('displays a search results label with the expected count of fields matching the filter input', () => {
-      const filterInput = 'host.mac';
-      filterFieldsBrowser(filterInput);
-
       cy.get(FIELDS_BROWSER_FIELDS_COUNT).should('contain.text', '2');
     });
 
@@ -80,28 +74,21 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
       activateViewAll();
     });
 
-    it('creates the category badge when it is selected', () => {
+    it('should create the category badge when it is selected', () => {
       const category = 'host';
+      const categoryCheck = 'event';
 
       cy.get(FIELDS_BROWSER_CATEGORY_BADGE(category)).should('not.exist');
       toggleCategory(category);
       cy.get(FIELDS_BROWSER_CATEGORY_BADGE(category)).should('exist');
       toggleCategory(category);
-    });
 
-    it('search a category should match the category in the category filter', () => {
-      const category = 'host';
-
+      cy.log('the category filter should contain the filtered category');
       filterFieldsBrowser(category);
       toggleCategoryFilter();
       cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER).should('contain.text', category);
-    });
 
-    it('search a category should filter out non matching categories in the category filter', () => {
-      const category = 'host';
-      const categoryCheck = 'event';
-      filterFieldsBrowser(category);
-      toggleCategoryFilter();
+      cy.log('non-matching categories should not be listed in the category filter');
       cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_CONTAINER).should('not.contain.text', categoryCheck);
     });
   });
@@ -114,7 +101,7 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
       openTimelineFieldsBrowser();
     });
 
-    it('removes the message field from the timeline when the user un-checks the field', () => {
+    it('should remove the message field from the timeline when the user un-checks the field', () => {
       cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('exist');
 
       removesMessageField();
@@ -123,7 +110,7 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('not.exist');
     });
 
-    it('adds a field to the timeline when the user clicks the checkbox', () => {
+    it('should add a field to the timeline when the user clicks the checkbox', () => {
       const filterInput = 'host.geo.c';
 
       closeFieldsBrowser();
@@ -138,7 +125,7 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('exist');
     });
 
-    it('resets all fields in the timeline when `Reset Fields` is clicked', () => {
+    it('should reset all fields in the timeline when `Reset Fields` is clicked', () => {
       const filterInput = 'host.geo.c';
 
       filterFieldsBrowser(filterInput);
@@ -154,17 +141,13 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
       resetFields();
 
       cy.get(FIELDS_BROWSER_HEADER_HOST_GEO_CONTINENT_NAME_HEADER).should('not.exist');
-    });
 
-    it('restores focus to the Customize Columns button when `Reset Fields` is clicked', () => {
-      resetFields();
-
+      cy.log('restores focus to the Customize Columns button when `Reset Fields` is clicked');
       cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
-    });
 
-    it('restores focus to the Customize Columns button when Esc is pressed', () => {
+      cy.log('restores focus to the Customize Columns button when Esc is pressed');
+      openTimelineFieldsBrowser();
       cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{esc}');
-
       cy.get(TIMELINE_FIELDS_BUTTON).should('have.focus');
     });
   });
