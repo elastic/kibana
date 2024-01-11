@@ -95,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
 
-  describe('Findings Page', function () {
+  describe('Findings Page - DataTable', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
@@ -125,7 +125,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    describe('SearchBar', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/174472
+    describe.skip('SearchBar', () => {
       it('add filter', async () => {
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
@@ -208,6 +209,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await filterBar.removeFilter('result.evaluation');
         });
+      });
+    });
+
+    describe('DataTable features', () => {
+      it('Edit data view field option is Enabled', async () => {
+        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
+        expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();
+        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
       });
     });
 
