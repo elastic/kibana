@@ -475,4 +475,3 @@ export interface TimelineResult {
   events: number;
   timeline: TimelineTelemetryTemplate | undefined;
 }
-

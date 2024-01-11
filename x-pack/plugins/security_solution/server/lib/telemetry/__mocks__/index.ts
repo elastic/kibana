@@ -16,7 +16,6 @@ import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } f
 import { stubEndpointMetricsResponse } from './metrics';
 import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
 import type { ESClusterInfo, ESLicense } from '../types';
-import type {Agent} from "@kbn/fleet-plugin/common";
 import { stubFleetAgentResponse } from './fleet_agent_response';
 
 export const createMockTelemetryEventsSender = (
@@ -146,4 +145,3 @@ export const createMockTaskInstance = (testId: string, testType: string): Concre
     taskType: testType,
   } as ConcreteTaskInstance;
 };
-

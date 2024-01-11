@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import {loggingSystemMock} from '@kbn/core/server/mocks';
-import {createTelemetryEndpointTaskConfig} from './endpoint';
-import {createMockTelemetryEventsSender, createMockTelemetryReceiver} from '../__mocks__';
-import {usageCountersServiceMock} from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createTelemetryEndpointTaskConfig } from './endpoint';
+import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
 const telemetryUsageCounter = usageCountersServiceSetup.createUsageCounter(
@@ -80,6 +80,5 @@ describe('endpoint telemetry task test', () => {
 
     expect(mockTelemetryReceiver.fetchPolicyConfigs).toHaveBeenCalled();
     expect(mockTelemetryEventsSender.sendOnDemand).toHaveBeenCalled();
-
   });
 });
