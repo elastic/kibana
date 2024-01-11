@@ -10,6 +10,9 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export function ExperimentalBadge() {
+  let foo: string;
+
+  foo = 1;
   return (
     <EuiBetaBadge
       label={i18n.translate('xpack.observability.experimentalBadgeLabel', {
