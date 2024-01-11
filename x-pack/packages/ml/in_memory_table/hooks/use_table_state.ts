@@ -11,7 +11,7 @@ import { EuiInMemoryTable, Direction, Pagination } from '@elastic/eui';
 /**
  * Returned type for useTableState hook
  */
-export interface UseTableState<T> {
+export interface UseTableState<T extends object> {
   /**
    * Callback function which gets called whenever the pagination or sorting state of the table changed
    */
@@ -36,7 +36,7 @@ export interface UseTableState<T> {
  * @param {string} initialSortField - field name to sort by default
  * @param {string} initialSortDirection - default to 'asc'
  */
-export function useTableState<T>(
+export function useTableState<T extends object>(
   items: T[],
   initialSortField: string,
   initialSortDirection: 'asc' | 'desc' = 'asc'
