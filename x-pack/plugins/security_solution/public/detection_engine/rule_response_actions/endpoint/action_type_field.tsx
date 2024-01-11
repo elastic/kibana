@@ -49,9 +49,10 @@ const ActionTypeFieldComponent = ({
           commandName: getUiCommand(name),
           privileges: endpointPrivileges,
         });
-        const commandAlreadyExists = map(data.responseActions, 'params.command').includes(name);
-        // we enable one isolate command per rule
-        const isDisabled = (name === 'isolate' && commandAlreadyExists) || missingRbac;
+        const currentActions = map(data.responseActions, 'params.command');
+        // we enable just one instance of each action
+        const commandAlreadyExists = currentActions.includes(name);
+        const isDisabled = commandAlreadyExists || missingRbac;
 
         return {
           value: name,
