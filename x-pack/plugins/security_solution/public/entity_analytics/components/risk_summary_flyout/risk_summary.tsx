@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   useEuiTheme,
@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type {
   HostRiskScore,
@@ -34,6 +35,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
+import { useRiskContributingAlerts } from '../../hooks/use_risk_contributing_alerts';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
@@ -47,6 +49,7 @@ interface TableItem {
 }
 const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
+const ALERTS_FIELDS: string[] = [];
 
 function isUserRiskData(
   riskData: UserRiskScore | HostRiskScore | undefined
@@ -71,11 +74,15 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   queryId,
   openDetailsPanel,
 }: RiskSummaryProps<T>) => {
+  const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData(riskData);
   const { euiTheme } = useEuiTheme();
-
+  const { data: alertsData } = useRiskContributingAlerts({
+    riskScore: riskData,
+    fields: ALERTS_FIELDS,
+  });
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = isUserRiskData(riskData) ? 'user.name' : 'host.name';
@@ -127,14 +134,27 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
         category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
           defaultMessage: 'Alerts',
         }),
-        count: entityData?.risk.inputs?.length ?? 0,
+        count: alertsData?.length ?? 0,
       },
     ],
-    [entityData?.risk.inputs?.length]
+    [alertsData?.length]
+  );
+
+  const onToggle = useCallback(
+    (isOpen) => {
+      const entity = isUserRiskData(riskData) ? 'user' : 'host';
+
+      telemetry.reportToggleRiskSummaryClicked({
+        entity,
+        action: isOpen ? 'show' : 'hide',
+      });
+    },
+    [riskData, telemetry]
   );
 
   return (
     <EuiAccordion
+      onToggle={onToggle}
       initialIsOpen
       id={'risk_summary'}
       buttonProps={{
@@ -180,6 +200,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
       <EuiSpacer size="m" />
 
       <ExpandablePanel
+        data-test-subj="riskInputs"
         header={{
           title: (
             <FormattedMessage
