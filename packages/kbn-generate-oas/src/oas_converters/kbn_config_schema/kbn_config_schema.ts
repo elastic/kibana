@@ -11,8 +11,9 @@ import joi from 'joi';
 import { isConfigSchema, Type } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { OpenAPIConverter } from '../type';
-import { isReferenceObject } from './common';
+import type { OpenAPIConverter } from '../../type';
+import { isReferenceObject } from '../common';
+import * as mutations from './post_process_mutations';
 
 const parse = (schema: joi.Schema) => {
   const result = joiToJsonParse(schema, 'open-api');
@@ -78,32 +79,18 @@ const isSchemaRequired = (schema: joi.Schema | joi.Description): boolean => {
   return 'required' === get(schema, 'flags.presence');
 };
 
-const MUTATEstripDefaultDeep = (schema: OpenAPIV3.SchemaObject): void => {
-  if (schema.default?.special === 'deep') {
-    if (Object.keys(schema.default).length === 1) {
-      delete schema.default;
-    } else {
-      delete schema.default.special;
-    }
-  }
-};
-
-const MUTATEreplaceRecordType = (schema: OpenAPIV3.SchemaObject): void => {
-  schema.type = 'object';
-};
-
 const arrayContainers: Array<keyof OpenAPIV3.SchemaObject> = ['allOf', 'oneOf', 'anyOf'];
 
 const walkSchema = (schema: OpenAPIV3.SchemaObject): void => {
   if (schema.type === 'array') {
     walkSchema(schema.items as OpenAPIV3.SchemaObject);
   } else if (schema.type === 'object') {
-    MUTATEstripDefaultDeep(schema);
+    mutations.processObject(schema);
     if (schema.properties) {
       Object.values(schema.properties!).forEach((obj) => walkSchema(obj as OpenAPIV3.SchemaObject));
     }
   } else if ((schema.type as string) === 'record') {
-    MUTATEreplaceRecordType(schema);
+    mutations.replaceRecordType(schema);
   } else if (schema.type) {
     // Do nothing
   } else {

@@ -10,7 +10,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 import { OpenAPIConverter } from '../type';
 
 import { zodConverter } from './zod';
-import { kbnConfigSchemaConverter } from './kbn_config_schema';
+import { kbnConfigSchemaConverter } from './kbn_config_schema/kbn_config_schema';
 import { catchAllConverter } from './catch_all';
 
 const CONVERTERS: OpenAPIConverter[] = [kbnConfigSchemaConverter, zodConverter, catchAllConverter];

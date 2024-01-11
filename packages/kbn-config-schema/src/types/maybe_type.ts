@@ -8,6 +8,13 @@
 
 import { Type, ExtendsDeepOptions } from './type';
 
+/**
+ * Used to explicitly mark a field as optional in @kbn/config-schema.
+ *
+ * Especially for introspection on schemas when generating OAS.
+ */
+const META_FIELD_X_OAS_OPTIONAL = 'x-oas-optional';
+
 export class MaybeType<V> extends Type<V | undefined> {
   private readonly maybeType: Type<V>;
 
@@ -16,6 +23,7 @@ export class MaybeType<V> extends Type<V | undefined> {
       type
         .getSchema()
         .optional()
+        .meta({ [META_FIELD_X_OAS_OPTIONAL]: true })
         .default(() => undefined)
     );
     this.maybeType = type;
