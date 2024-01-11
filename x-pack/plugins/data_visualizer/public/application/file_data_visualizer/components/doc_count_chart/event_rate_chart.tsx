@@ -11,7 +11,6 @@ import {
   Chart,
   ScaleType,
   Settings,
-  BrushEndListener,
   PartialTheme,
   Tooltip,
   TooltipType,
@@ -19,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import { Axes } from './axes';
-import { LoadingWrapper } from './loading_wrapper';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 
 export interface LineChartPoint {
@@ -31,20 +29,9 @@ interface Props {
   eventRateChartData: LineChartPoint[];
   height: string;
   width: string;
-  showAxis?: boolean;
-  loading?: boolean;
-  fadeChart?: boolean;
-  onBrushEnd?: BrushEndListener;
 }
 
-export const EventRateChart: FC<Props> = ({
-  eventRateChartData,
-  height,
-  width,
-  showAxis,
-  loading = false,
-  onBrushEnd,
-}) => {
+export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width }) => {
   const { euiColorLightShade } = useCurrentEuiTheme();
   const theme: PartialTheme = {
     scales: { histogramPadding: 0.2 },
@@ -68,23 +55,21 @@ export const EventRateChart: FC<Props> = ({
       style={{ width, height }}
       data-test-subj={`mlEventRateChart ${eventRateChartData.length ? 'withData' : 'empty'}`}
     >
-      <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
-        <Chart>
-          {showAxis === true && <Axes />}
-          <Tooltip type={TooltipType.None} />
-          <Settings onBrushEnd={onBrushEnd} theme={theme} locale={i18n.getLocale()} />
+      <Chart>
+        <Axes />
+        <Tooltip type={TooltipType.None} />
+        <Settings theme={theme} locale={i18n.getLocale()} />
 
-          <HistogramBarSeries
-            id="event_rate"
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor={'time'}
-            yAccessors={['value']}
-            data={eventRateChartData}
-            color={euiLightVars.euiColorVis0}
-          />
-        </Chart>
-      </LoadingWrapper>
+        <HistogramBarSeries
+          id="event_rate"
+          xScaleType={ScaleType.Time}
+          yScaleType={ScaleType.Linear}
+          xAccessor={'time'}
+          yAccessors={['value']}
+          data={eventRateChartData}
+          color={euiLightVars.euiColorVis0}
+        />
+      </Chart>
     </div>
   );
 };

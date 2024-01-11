@@ -233,12 +233,7 @@ export const DocCountChart: FC<{
 
   return (
     <>
-      <EventRateChart
-        eventRateChartData={eventRateChartData}
-        height={'150px'}
-        width={'100%'}
-        showAxis={true}
-      />
+      <EventRateChart eventRateChartData={eventRateChartData} height={'150px'} width={'100%'} />
     </>
   );
 };
