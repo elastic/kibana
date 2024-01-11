@@ -6,7 +6,6 @@
  */
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
-import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiButton,
@@ -26,11 +25,9 @@ import {
   EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
-
 import React, { useState } from 'react';
-
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { css } from '@emotion/react';
 import { PICK_ASSET_CRITICALITY } from './translations';
 import { AssetCriticalityBadge } from './asset_criticality_badge';
 import type { Entity, ModalState, State } from './use_asset_criticality';
