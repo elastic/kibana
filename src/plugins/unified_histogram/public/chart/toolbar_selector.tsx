@@ -8,19 +8,20 @@
 
 import React, { useCallback, ReactElement, useState, useMemo } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableProps,
   EuiSelectableOption,
   useEuiTheme,
+  EuiPanel,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
+import { i18n } from '@kbn/i18n';
 
 export const EMPTY_OPTION = '__EMPTY_SELECTOR_OPTION__';
 
@@ -48,6 +49,14 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>();
+  const [labelPopoverDisabled, setLabelPopoverDisabled] = useState(false);
+
+  const disableLabelPopover = useCallback(() => setLabelPopoverDisabled(true), []);
+
+  const enableLabelPopover = useCallback(
+    () => setTimeout(() => setLabelPopoverDisabled(false)),
+    []
+  );
 
   const onSelectionChange = useCallback(
     (newOptions) => {
@@ -57,15 +66,24 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
         chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
       );
       setIsOpen(false);
+      disableLabelPopover();
     },
-    [onChange, setIsOpen]
+    [disableLabelPopover, onChange]
   );
 
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
     () =>
       searchable
         ? {
+            id: `${dataTestSubj}SelectableInput`,
             'data-test-subj': `${dataTestSubj}SelectorSearch`,
+            compressed: true,
+            placeholder: i18n.translate(
+              'unifiedHistogram.toolbarSelectorPopover.searchPlaceholder',
+              {
+                defaultMessage: 'Search',
+              }
+            ),
             onChange: (value) => setSearchTerm(value),
           }
         : undefined,
@@ -78,62 +96,79 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
     <EuiPopover
       id={dataTestSubj}
       ownFocus
-      initialFocus={`.${dataTestSubj}__popoverPanel`}
-      panelClassName={`${dataTestSubj}__popoverPanel`}
+      initialFocus={
+        searchable ? `#${dataTestSubj}SelectableInput` : `#${dataTestSubj}Selectable_listbox`
+      }
       panelProps={{
-        css: css`
-          min-width: ${panelMinWidth}px;
-        `,
+        css: searchable
+          ? css`
+              min-width: ${panelMinWidth}px;
+            `
+          : css`
+              width: ${panelMinWidth}px;
+            `,
       }}
-      panelPaddingSize="s"
+      panelPaddingSize="none"
       button={
-        <ToolbarButton
-          size="s"
-          css={css`
-            font-weight: ${euiTheme.font.weight.medium};
-            max-width: ${euiTheme.base * 20}px;
-          `}
-          data-test-subj={`${dataTestSubj}Button`}
-          data-selected-value={dataSelectedValue}
-          aria-label={popoverTitle}
-          label={buttonLabel}
-          onClick={() => setIsOpen(!isOpen)}
-        />
+        <EuiToolTip content={labelPopoverDisabled ? undefined : buttonLabel} delay="long">
+          <ToolbarButton
+            size="s"
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+              width: 100%;
+              min-width: 0;
+              max-width: ${euiTheme.base * 20}px;
+            `}
+            data-test-subj={`${dataTestSubj}Button`}
+            data-selected-value={dataSelectedValue}
+            aria-label={popoverTitle}
+            label={buttonLabel}
+            onClick={() => setIsOpen(!isOpen)}
+            onBlur={enableLabelPopover}
+          />
+        </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={() => setIsOpen(false)}
       anchorPosition="downLeft"
     >
-      <EuiPopoverTitle>
-        <EuiFlexGroup alignItems="center" responsive={false}>
-          <EuiFlexItem>{popoverTitle}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverTitle>
+      <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>
       <EuiSelectable
+        id={`${dataTestSubj}Selectable`}
         singleSelection
         aria-label={popoverTitle}
         data-test-subj={`${dataTestSubj}Selectable`}
         options={options}
         onChange={onSelectionChange}
+        listProps={{
+          truncationProps: { truncation: 'middle' },
+          isVirtualized: searchable,
+        }}
         {...(searchable
           ? {
               searchable,
               searchProps,
               noMatchesMessage: (
-                <FormattedMessage
-                  id="unifiedHistogram.toolbarSelectorPopover.noResults"
-                  defaultMessage="No results found for {term}"
-                  values={{
-                    term: <strong>{searchTerm}</strong>,
-                  }}
-                />
+                <p>
+                  <FormattedMessage
+                    id="unifiedHistogram.toolbarSelectorPopover.noResults"
+                    defaultMessage="No results found for {term}"
+                    values={{
+                      term: <strong>{searchTerm}</strong>,
+                    }}
+                  />
+                </p>
               ),
             }
           : {})}
       >
         {(list, search) => (
           <>
-            {search}
+            {search && (
+              <EuiPanel paddingSize="s" hasShadow={false} css={{ paddingBottom: 0 }}>
+                {search}
+              </EuiPanel>
+            )}
             {list}
           </>
         )}
