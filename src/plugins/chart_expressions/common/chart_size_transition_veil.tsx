@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCallback, useRef, useState } from 'react';
 import fastIsEqual from 'fast-deep-equal';
+import { useResizeObserver } from '@elastic/eui';
 import type { ChartSizeSpec } from './types';
 
 /**
@@ -22,13 +23,24 @@ import type { ChartSizeSpec } from './types';
  */
 export function useSizeTransitionVeil(
   chartSizeSpec: ChartSizeSpec,
-  setChartSize: (d: ChartSizeSpec) => void,
-  containerSize: { width: number; height: number }
+  setChartSize: (d: ChartSizeSpec) => void
 ) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const containerSize = useResizeObserver(containerRef.current);
+  const currentContainerSize = useRef<{ width: number; height: number }>(containerSize);
+
+  // This useEffect hook is here to make up for the fact that the initial container size
+  // is not correctly reported by the useResizeObserver hook (see https://github.com/elastic/eui/issues/7458).
+  useEffect(() => {
+    currentContainerSize.current = {
+      width: containerRef.current?.clientWidth ?? 0,
+      height: containerRef.current?.clientHeight ?? 0,
+    };
+  }, []);
+
   const [showVeil, setShowVeil] = useState(false);
   const currentChartSizeSpec = useRef<ChartSizeSpec>();
   const specJustChanged = useRef<boolean>(false);
-  const currentContainerSize = useRef<{ width: number; height: number }>(containerSize);
 
   if (!fastIsEqual(containerSize, currentContainerSize.current) && specJustChanged.current) {
     // If the container size has changed, we need to show the veil to hide the chart since it
@@ -70,5 +82,6 @@ export function useSizeTransitionVeil(
       />
     ),
     onResize,
+    containerRef,
   };
 }
