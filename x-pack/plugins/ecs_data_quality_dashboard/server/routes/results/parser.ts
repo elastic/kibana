@@ -6,31 +6,31 @@
  */
 import type { ResultBody, ResultDocument, IndexArray, IndexObject } from '../../schemas/result';
 
-export const createDocumentFromResult = ({ meta, data }: ResultBody): ResultDocument => {
+export const createDocumentFromResult = ({ meta, rollup }: ResultBody): ResultDocument => {
   // convert objects with indexName as key to arrays so they can be stored in ES
-  const results = indexObjectToIndexArray(data.results);
-  const stats = indexObjectToIndexArray(data.stats);
-  const ilmExplain = indexObjectToIndexArray(data.ilmExplain);
+  const results = indexObjectToIndexArray(rollup.results);
+  const stats = indexObjectToIndexArray(rollup.stats);
+  const ilmExplain = indexObjectToIndexArray(rollup.ilmExplain);
 
   const document: ResultDocument = {
     '@timestamp': Date.now(),
+    rollup: { ...rollup, ilmExplain, stats, results },
     meta,
-    data: { ...data, ilmExplain, stats, results },
   };
 
   return document;
 };
 
 export const createResultFromDocument = (document: ResultDocument): ResultBody => {
-  const { data } = document;
+  const { rollup } = document;
   // convert index arrays back to objects with indexName as key
-  const results = indexArrayToIndexObject(data.results);
-  const stats = indexArrayToIndexObject(data.stats);
-  const ilmExplain = indexArrayToIndexObject(data.ilmExplain);
+  const results = indexArrayToIndexObject(rollup.results);
+  const stats = indexArrayToIndexObject(rollup.stats);
+  const ilmExplain = indexArrayToIndexObject(rollup.ilmExplain);
 
   const result = {
     ...document,
-    data: { ...data, ilmExplain, stats, results },
+    rollup: { ...rollup, ilmExplain, stats, results },
   };
 
   return result;

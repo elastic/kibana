@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import type {
+  IndicesGetMappingIndexMappingRecord,
   IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -17,6 +19,7 @@ import * as i18n from './translations';
 
 import type {
   DataQualityCheckResult,
+  DataQualityIndexCheckedParams,
   EcsMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
@@ -443,3 +446,27 @@ export const getErrorSummaries = (
     []
   );
 };
+
+export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
+
+export interface PostResultBody {
+  meta: DataQualityIndexCheckedParams;
+  rollup: PatternRollup;
+}
+
+export async function postResult({
+  abortController,
+  httpFetch,
+  result,
+}: {
+  abortController: AbortController;
+  httpFetch: HttpHandler;
+  result: PostResultBody;
+}): Promise<Record<string, IndicesGetMappingIndexMappingRecord>> {
+  return httpFetch<Record<string, IndicesGetMappingIndexMappingRecord>>(RESULTS_API_ROUTE, {
+    method: 'POST',
+    signal: abortController.signal,
+    version: INTERNAL_API_VERSION,
+    body: JSON.stringify(result),
+  });
+}

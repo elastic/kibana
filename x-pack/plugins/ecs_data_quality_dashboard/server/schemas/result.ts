@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const ResultsMeta = t.type({
+export const ResultMeta = t.type({
   batchId: t.string,
   ecsVersion: t.string,
   errorCount: t.number,
@@ -26,9 +26,9 @@ export const ResultsMeta = t.type({
   unallowedMappingFields: t.array(t.string),
   unallowedValueFields: t.array(t.string),
 });
-export type ResultsMeta = t.TypeOf<typeof ResultsMeta>;
+export type ResultMeta = t.TypeOf<typeof ResultMeta>;
 
-export const ResultsData = t.type({
+export const ResultRollup = t.type({
   docsCount: t.number,
   error: t.union([t.string, t.null]),
   indices: t.number,
@@ -39,20 +39,20 @@ export const ResultsData = t.type({
   stats: t.record(t.string, t.UnknownRecord),
   results: t.record(t.string, t.UnknownRecord),
 });
-export type ResultsData = t.TypeOf<typeof ResultsData>;
+export type ResultRollup = t.TypeOf<typeof ResultRollup>;
 
 export const ResultBody = t.type({
-  meta: ResultsMeta,
-  data: ResultsData,
+  meta: ResultMeta,
+  rollup: ResultRollup,
 });
 export type ResultBody = t.TypeOf<typeof ResultBody>;
 
 export type IndexArray = Array<{ _indexName: string } & Record<string, unknown>>;
 export type IndexObject = Record<string, Record<string, unknown>>;
 
-export type ResultDocument = Omit<ResultBody, 'data'> & {
+export type ResultDocument = Omit<ResultBody, 'rollup'> & {
   '@timestamp': number;
-  data: Omit<ResultsData, 'stats' | 'results' | 'ilmExplain'> & {
+  rollup: Omit<ResultRollup, 'stats' | 'results' | 'ilmExplain'> & {
     stats: IndexArray;
     results: IndexArray;
     ilmExplain: IndexArray;

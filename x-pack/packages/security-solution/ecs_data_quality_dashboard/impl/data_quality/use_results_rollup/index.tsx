@@ -15,12 +15,17 @@ import {
   getTotalIndicesChecked,
   getTotalSameFamily,
   getTotalSizeInBytes,
-  postResult,
   updateResultOnCheckCompleted,
 } from './helpers';
 
 import type { OnCheckCompleted, PatternRollup } from '../types';
-import { getDocsCount, getIndexId, getSizeInBytes, getTotalPatternSameFamily } from '../helpers';
+import {
+  getDocsCount,
+  getIndexId,
+  getSizeInBytes,
+  getTotalPatternSameFamily,
+  postResult,
+} from '../helpers';
 import { getIlmPhase, getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import {
@@ -128,7 +133,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
           requestTime > 0 &&
           partitionedFieldMetadata
         ) {
-          const checkMetadata = {
+          const metadata = {
             batchId,
             ecsVersion: EcsVersion,
             errorCount: error ? 1 : 0,
@@ -154,14 +159,14 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
               partitionedFieldMetadata.incompatible
             ),
           };
-          telemetryEvents.reportDataQualityIndexChecked?.(checkMetadata);
+          telemetryEvents.reportDataQualityIndexChecked?.(metadata);
 
           postResult({
             abortController: new AbortController(),
             httpFetch,
             result: {
-              meta: checkMetadata,
-              data: updatedRollup,
+              meta: metadata,
+              rollup: updatedRollup,
             },
           });
         }

@@ -33,7 +33,7 @@ const body = {
     unallowedMappingFields: [],
     unallowedValueFields: ['event.category', 'event.outcome'],
   },
-  data: {
+  rollup: {
     docsCount: 20,
     error: null,
     ilmExplain: {
@@ -158,7 +158,7 @@ describe('request validation', () => {
     const req = requestMock.create({
       method: 'post',
       path: RESULTS_ROUTE_PATH,
-      body: { data: body.data },
+      body: { rollup: body.rollup },
     });
     const result = server.validate(req);
 
