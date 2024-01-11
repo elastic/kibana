@@ -2,7 +2,11 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: Build serverless container images
     agents:
-      queue: n2-16-spot
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-16
+      preemptible: true
+      buildDirectory: /dev/shm/builds
     timeout_in_minutes: 60
     retry:
       automatic:
