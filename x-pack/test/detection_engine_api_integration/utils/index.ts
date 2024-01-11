@@ -31,7 +31,6 @@ export * from './prebuilt_rules/create_prebuilt_rule_saved_objects';
 export * from './prebuilt_rules/install_prebuilt_rules_and_timelines';
 export * from './get_simple_rule_update';
 export * from './get_simple_ml_rule_update';
-export * from './create_non_security_rule';
 export * from './get_simple_rule_as_ndjson';
 export * from './rule_to_ndjson';
 export * from './delete_rule';
