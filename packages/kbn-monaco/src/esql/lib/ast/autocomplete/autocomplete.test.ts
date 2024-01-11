@@ -53,6 +53,7 @@ const policies = [
     sourceIndices: ['enrichIndex1'],
     matchField: 'otherStringField',
     enrichFields: ['otherField', 'yetAnotherField', 'yet-special-field'],
+    suggestedAs: undefined,
   },
   ...['my-policy[quoted]', 'my-policy$', 'my_policy{}'].map((name) => ({
     name,
