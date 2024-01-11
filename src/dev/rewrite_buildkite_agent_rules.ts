@@ -6,74 +6,82 @@
  * Side Public License, v 1.
  */
 
-import globby from 'globby';
-
-import { REPO_ROOT } from '@kbn/repo-info';
-import { run } from '@kbn/dev-cli-runner';
-import { resolve } from 'path';
-import { readFile, writeFile } from 'fs/promises';
-import yaml from 'js-yaml';
-import { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
+import { readFile, writeFile } from 'fs/promises';
+import { resolve } from 'path';
 
-// const agentNameUpdateMap: Record<string, string> = {
-//   'kibana-default': 'n2-standard-2',
-//   'n2-16-spot': 'n2-standard-16',
-//   'n2-4-spot': 'n2-standard-4',
-//   'n2-8-spot': 'n2-standard-8',
-// };
-let agentNameUpdateMap: Record<string, { machineType: string; buildPath?: string }> = {};
-if (fs.existsSync('data/agents.json')) {
-  const agents = JSON.parse(fs.readFileSync('data/agents.json', 'utf8'));
-  agentNameUpdateMap = agents.gcp.agents.reduce((acc: typeof agentNameUpdateMap, agent: any) => {
-    acc[agent.queue] = { machineType: agent.machineType };
-    if (agent.buildPath) {
-      acc[agent.queue].buildPath = agent.buildPath;
-    }
-    return acc;
-  }, {});
-} else {
+import globby from 'globby';
+import yaml from 'js-yaml';
+
+import { run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
+
+interface BuildkiteStepFull {
+  agents: { queue: string };
+}
+interface BuildkiteStepPartial {
+  agents?: { queue?: string };
+}
+
+interface KBAgentDef {
+  queue: string;
+  name: string;
+  machineType: string;
+  minimumAgents?: number;
+  maximumAgents?: number;
+  idleTimeoutMins?: number;
+  exitAfterOneJob?: boolean;
+  localSsds?: number;
+  buildPath?: string;
+  diskSizeGb?: number;
+  spot?: boolean;
+  zones?: string[];
+}
+type KibanaBuildkiteAgentLookup = Record<string, KBAgentDef>;
+
+const DRY_RUN = process.argv.includes('--dry-run');
+
+if (!fs.existsSync('data/agents.json')) {
   throw new Error(
     'data/agents.json does not exist - download it from https://github.com/elastic/kibana-buildkite/blob/main/agents.json'
   );
 }
-
-const DRY_RUN = !process.argv.includes('--force');
-
-const isOldStyleAgentTargetingRule = (step: any) => {
-  return (
-    step.agents && Object.keys(step.agents).length === 1 && Object.keys(step.agents)[0] === 'queue'
-  );
-};
 
 /**
  * Finds all .yml files in the .buildkite folder,
  * rewrites all agent targeting rules from the shorthands to the full targeting syntax
  */
 run(
-  async ({ log }) => {
+  async ({ log, flags }) => {
     const paths = await globby('.buildkite/**/*.yml', {
       cwd: REPO_ROOT,
       onlyFiles: true,
       gitignore: true,
     });
 
-    /**
-     * For each path:
-     *  - open the file, read the yaml
-     *  - if there are no steps, skip
-     *  - if all steps' agents are old-style, and the same (only 'queue' key), remove these, add a global agent targeting rule
-     *  - if any individual step has an old-style, rewrite it to the new style
-     */
-    const promises: Array<Promise<void>> = [];
-    for (const ymlPath of paths) {
-      await rewriteFile(ymlPath, log).catch((e) => {
+    const failedRewrites: Array<{ path: string; error: Error }> = [];
+
+    const rewritePromises: Array<Promise<void>> = paths.map((ymlPath) => {
+      return rewriteFile(ymlPath, log).catch((e) => {
         // eslint-disable-next-line no-console
         console.error('Failed to rewrite: ' + ymlPath, e);
+        failedRewrites.push({
+          path: ymlPath,
+          error: e,
+        });
       });
-      // promises.push(rewriteFile(ymlPath));
+    });
+
+    await Promise.all(rewritePromises);
+
+    log.info(`Rewriting definitions complete with ${failedRewrites.length} errors.`);
+
+    if (failedRewrites.length) {
+      log.warning('Failed rewrites:', ...failedRewrites);
     }
-    await Promise.all(promises);
+
+    log.success('Done!');
   },
   {
     flags: {
@@ -83,18 +91,15 @@ run(
     Rewrites all agent targeting rules from the shorthands to the full targeting syntax
   `,
   }
-)
-  .then((log) => {
-    process.exit(0);
-  })
-  .catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error('Nem Szuccsesz', err);
-    process.exit(1);
-  });
+).catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('Failure:', err);
+  process.exit(1);
+});
 
 async function rewriteFile(ymlPath: string, log: ToolingLog) {
   let file = await readFile(resolve(REPO_ROOT, ymlPath), 'utf-8');
+
   log.info('Loading: ' + ymlPath);
   const doc = yaml.safeLoad(file);
 
@@ -103,20 +108,7 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
     return;
   }
 
-  const steps = doc.steps as any[];
-
-  // const shouldHaveGlobalRule =
-  //   steps.every(isOldStyleAgentTargetingRule) &&
-  //   steps.every((step) => step.agents.queue === steps[0].agents.queue);
-
-  // if (shouldHaveGlobalRule) {
-  //   const globalAgentRule = getFullAgentTargetingRule(steps[0].agents.queue);
-  //   file = file.replaceAll(
-  //     new RegExp(`/queue:\n${steps[0].agents.queue}`, 'g'),
-  //     yaml.safeDump({ queue: globalAgentRule })
-  //   );
-  // } else {
-  for (const step of steps) {
+  for (const step of doc.steps as BuildkiteStepPartial[]) {
     if (isOldStyleAgentTargetingRule(step)) {
       log.info('Rewriting: ' + ymlPath, step);
       file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
@@ -124,8 +116,6 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
       });
     }
   }
-  log.info('Rewriting: ' + ymlPath);
-  // }
 
   if (DRY_RUN) {
     await writeFile(resolve(REPO_ROOT, ymlPath + '.new'), file);
@@ -159,12 +149,53 @@ function editYmlInPlace(
   return lines.join('\n');
 }
 
+let agentNameUpdateMap: KibanaBuildkiteAgentLookup;
 function getFullAgentTargetingRule(queue: string) {
-  return {
+  if (!agentNameUpdateMap) {
+    const agents = JSON.parse(fs.readFileSync('data/agents.json', 'utf8'));
+    agentNameUpdateMap = agents.gcp.agents.reduce(
+      (acc: KibanaBuildkiteAgentLookup, agent: KBAgentDef) => {
+        acc[agent.queue] = agent;
+        return acc;
+      },
+      {}
+    );
+  }
+
+  const agent = agentNameUpdateMap[queue];
+
+  return removeNullish({
     provider: 'gcp',
-    preemptible: true,
+    preemptible: agent.spot,
     image: 'family/kibana-ubuntu-2004',
     imageProject: 'elastic-images-qa',
-    ...agentNameUpdateMap[queue],
-  };
+    machineType: agent.machineType,
+    buildPath: agent.buildPath,
+    // diskSizeGb: agent.diskSizeGb,
+    // localSsds: agent.localSsds,
+    // zones: agent.zones,
+    // minimumAgents: agent.minimumAgents,
+    // maximumAgents: agent.maximumAgents,
+    // idleTimeoutMins: agent.idleTimeoutMins,
+    // exitAfterOneJob: agent.exitAfterOneJob,
+  });
+}
+
+function isOldStyleAgentTargetingRule(
+  step: BuildkiteStepPartial
+): step is BuildkiteStepFull & boolean {
+  return !!(
+    step.agents &&
+    Object.keys(step.agents).length === 1 &&
+    Object.keys(step.agents)[0] === 'queue'
+  );
+}
+
+function removeNullish(obj: any) {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value != null && typeof value !== 'undefined') {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as any);
 }
