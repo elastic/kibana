@@ -27,7 +27,7 @@ export interface FlyoutWrapperProps {
   isNewPanel?: boolean;
   isSaveable?: boolean;
   onCancel?: () => void;
-  onApply?: (input: TypedLensByValueInput['attributes']) => void;
+  onApply?: () => void;
   navigateToLensEditor?: () => void;
 }
 

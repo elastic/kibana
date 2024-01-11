@@ -72,7 +72,7 @@ export const getLensAttributes = ({
   const attributes = {
     title: suggestion
       ? suggestion.title
-      : i18n.translate('xpack.lens.config.suggestion.title', {
+      : i18n.translate('visualizationUtils.config.suggestion.title', {
           defaultMessage: 'New suggestion',
         }),
     references: [
