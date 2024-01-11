@@ -3,7 +3,7 @@
 ++++
 <titleabbrev>SentinelOne</titleabbrev>
 ++++
-:frontmatter-description: Add a connector that can use SentinelOne API to send actions.
+:frontmatter-description: Add a connector that can use the SentinelOne API to send actions.
 :frontmatter-tags-products: [kibana] 
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [configure]
@@ -33,4 +33,4 @@ API Token::  A SentinelOne API token created by the user.
 [[sentinelone-action-parameters]]
 === Test connectors
 
-Currently we don't provide a way to test SentinelOne connector.
+Currently we don't provide a way to test the SentinelOne connector.
