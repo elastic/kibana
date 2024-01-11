@@ -44,6 +44,10 @@ export class ProgressReporter implements ProgressReporterInterface {
     const setIntId = setInterval(() => {
       if (this.options.reportStatus) {
         this.options.reportStatus(this.getStatus());
+
+        if (this.getState().prctDone === 100) {
+          this.stopReportingLoop();
+        }
       }
     }, this.reportIntervalMs);
 
@@ -70,6 +74,8 @@ export class ProgressReporter implements ProgressReporterInterface {
       totalCount,
       doneCount: 0,
     };
+
+    this.startReporting();
   }
 
   getReporter(categoryName: string): ReportProgressCallback {
