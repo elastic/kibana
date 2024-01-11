@@ -34,7 +34,7 @@ import {
 import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
-  UPGRADE_ENDPOINT_FOR_RESPONDER,
+  UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../common/translations';
 import { getCommandAboutInfo } from './get_command_about_info';
 
@@ -84,29 +84,34 @@ export const getRbacControl = ({
   return Boolean(privileges[RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[commandName]]);
 };
 
-const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
-  const privileges = command.commandDefinition.meta.privileges;
-  const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
-  const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-  const responderCapability = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
-  let errorMessage = '';
-  if (!responderCapability) {
-    errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
-  }
-  if (responderCapability) {
-    if (!endpointCapabilities.includes(responderCapability)) {
-      errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
+const capabilitiesAndPrivilegesValidator = (
+  agentType: ResponseActionAgentType
+): ((command: Command) => string | true) => {
+  return (command: Command) => {
+    const privileges = command.commandDefinition.meta.privileges;
+    const agentCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
+    const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
+    const responderCapability =
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+    let errorMessage = '';
+    if (!responderCapability) {
+      errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType));
     }
-  }
-  if (getRbacControl({ commandName, privileges }) !== true) {
-    errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
-  }
+    if (responderCapability) {
+      if (!agentCapabilities.includes(responderCapability)) {
+        errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType));
+      }
+    }
+    if (!getRbacControl({ commandName, privileges })) {
+      errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
+    }
 
-  if (errorMessage.length) {
-    return errorMessage;
-  }
+    if (errorMessage.length) {
+      return errorMessage;
+    }
 
-  return true;
+    return true;
+  };
 };
 
 export const HELP_GROUPS = Object.freeze({
@@ -175,7 +180,7 @@ export const getEndpointConsoleCommands = ({
       },
       exampleUsage: 'isolate --comment "isolate this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
         comment: {
           required: false,
@@ -206,7 +211,7 @@ export const getEndpointConsoleCommands = ({
       },
       exampleUsage: 'release --comment "release this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
         comment: {
           required: false,
@@ -240,7 +245,7 @@ export const getEndpointConsoleCommands = ({
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         comment: {
@@ -296,7 +301,7 @@ export const getEndpointConsoleCommands = ({
       },
       exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         comment: {
@@ -371,7 +376,7 @@ export const getEndpointConsoleCommands = ({
       },
       exampleUsage: 'processes --comment "get the processes"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
         comment: {
           required: false,
@@ -402,7 +407,7 @@ export const getEndpointConsoleCommands = ({
       },
       exampleUsage: 'get-file --path "/full/path/to/file.txt" --comment "Possible malware"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         path: {
@@ -450,7 +455,7 @@ export const getEndpointConsoleCommands = ({
       },
       exampleUsage: 'execute --command "ls -al" --timeout 2s --comment "Get list of all files"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         command: {
@@ -509,7 +514,7 @@ export const getEndpointConsoleCommands = ({
       },
       exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         file: {
