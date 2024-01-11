@@ -42,27 +42,31 @@ export function useSizeTransitionVeil(
   const currentChartSizeSpec = useRef<ChartSizeSpec>();
   const specJustChanged = useRef<boolean>(false);
 
-  if (!fastIsEqual(containerSize, currentContainerSize.current) && specJustChanged.current) {
-    // If the container size has changed, we need to show the veil to hide the chart since it
-    // be rendered based on the previous container size before being updated to the current size.
-    //
-    // 1. we show the veil
-    // 2. the charts library will render the chart based on the previous container dimensions
-    // 3. the charts library will resize the chart to the updated container dimensions
-    // 4. we hide the veil
-    setShowVeil(true);
-    currentContainerSize.current = containerSize;
-  }
+  useEffect(() => {
+    if (!fastIsEqual(containerSize, currentContainerSize.current) && specJustChanged.current) {
+      // If the container size has changed, we need to show the veil to hide the chart since it
+      // be rendered based on the previous container size before being updated to the current size.
+      //
+      // 1. we show the veil
+      // 2. the charts library will render the chart based on the previous container dimensions
+      // 3. the charts library will resize the chart to the updated container dimensions
+      // 4. we hide the veil
+      setShowVeil(true);
+      currentContainerSize.current = containerSize;
+    }
+  }, [setShowVeil, containerSize]);
 
-  if (!fastIsEqual(chartSizeSpec, currentChartSizeSpec.current)) {
-    setChartSize(chartSizeSpec);
-    currentChartSizeSpec.current = chartSizeSpec;
-    specJustChanged.current = true;
+  useEffect(() => {
+    if (!fastIsEqual(chartSizeSpec, currentChartSizeSpec.current)) {
+      setChartSize(chartSizeSpec);
+      currentChartSizeSpec.current = chartSizeSpec;
+      specJustChanged.current = true;
 
-    setTimeout(() => {
-      specJustChanged.current = false;
-    }, 500);
-  }
+      setTimeout(() => {
+        specJustChanged.current = false;
+      }, 500);
+    }
+  }, [chartSizeSpec, setChartSize]);
 
   const onResize = useCallback(() => {
     setShowVeil(false);
