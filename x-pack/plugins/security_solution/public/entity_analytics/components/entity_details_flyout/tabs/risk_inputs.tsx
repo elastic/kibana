@@ -8,11 +8,11 @@
 import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
 import { EuiHealth, EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
+import styled from '@emotion/styled';
 import type { CriticalityLevel } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { BasicTable } from '../../../../common/components/ml/tables/basic_table';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
@@ -39,6 +39,11 @@ export interface AlertRawData {
   _index: string;
   _id: string;
 }
+
+const FieldLabel = styled.span`
+  font-weight: ${euiLightVars.euiFontWeightMedium};
+  color: ${euiLightVars.euiTitleColor};
+`;
 
 const CriticalityField: React.FC<{ criticalityLevel?: CriticalityLevel }> = ({
   criticalityLevel,
@@ -82,16 +87,7 @@ const ContextsTable: React.FC<{ riskScore?: UserRiskScore | HostRiskScore; loadi
         />
       ),
       field: 'label',
-      render: (label: string) => (
-        <span
-          css={css`
-            font-weight: ${euiLightVars.euiFontWeightMedium};
-            color: ${euiLightVars.euiTitleColor};
-          `}
-        >
-          {label}
-        </span>
-      ),
+      render: (label: string) => <FieldLabel>{label}</FieldLabel>,
     },
     {
       name: (

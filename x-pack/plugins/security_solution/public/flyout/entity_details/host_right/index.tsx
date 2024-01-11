@@ -17,6 +17,7 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { HostPanelContent } from './content';
 import { HostPanelHeader } from './header';
@@ -96,6 +97,10 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
 
   const openDefaultPanel = useCallback(() => openTabPanel(), [openTabPanel]);
   const observedHost = useObservedHost(hostName);
+
+  if (riskScoreState.loading || observedHost.isLoading) {
+    return <FlyoutLoading />;
+  }
 
   return (
     <AnomalyTableProvider
