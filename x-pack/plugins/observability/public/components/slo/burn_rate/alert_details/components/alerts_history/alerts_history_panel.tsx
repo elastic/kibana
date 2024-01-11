@@ -172,10 +172,10 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
                 dataTimeRange={dataTimeRange}
                 threshold={actionGroupWindow!.burnRateThreshold}
                 annotations={data.histogramTriggeredAlerts
-                  .filter((alert) => alert.doc_count > 0)
-                  .map((alert) => ({
-                    date: new Date(alert.key_as_string!),
-                    total: alert.doc_count,
+                  .filter((a) => a.doc_count > 0)
+                  .map((a) => ({
+                    date: new Date(a.key_as_string!),
+                    total: a.doc_count,
                   }))}
               />
             )}
