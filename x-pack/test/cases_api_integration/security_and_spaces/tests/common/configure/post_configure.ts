@@ -64,7 +64,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const customFields = {
         customFields: [
           { key: 'hello', label: 'text', type: CustomFieldTypes.TEXT, required: false },
-          { key: 'goodbye', label: 'toggle', type: CustomFieldTypes.TOGGLE, required: true },
+          {
+            key: 'goodbye',
+            label: 'toggle',
+            type: CustomFieldTypes.TOGGLE,
+            required: true,
+            default_value: false,
+          },
         ],
       };
 

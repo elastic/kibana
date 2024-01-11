@@ -43,7 +43,7 @@ import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
 
-const CaseCustomFieldTextWithValidationValueRt = limitedStringSchema({
+export const CaseCustomFieldTextWithValidationValueRt = limitedStringSchema({
   fieldName: 'value',
   min: 1,
   max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,

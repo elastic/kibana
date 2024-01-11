@@ -51,7 +51,8 @@ import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain'
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
 import {
   validateCustomFieldTypesInRequest,
-  validateRequiredCustomFieldInRequest,
+  validateOptionalCustomFieldsInRequest,
+  validateRequiredCustomFieldsInRequest,
 } from './validators';
 
 /**
@@ -256,7 +257,8 @@ export async function update(
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
     validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
-    validateRequiredCustomFieldInRequest({ requestCustomFields: request.customFields });
+    validateRequiredCustomFieldsInRequest({ requestCustomFields: request.customFields });
+    validateOptionalCustomFieldsInRequest({ requestCustomFields: request.customFields });
 
     const { version, ...queryWithoutVersion } = request;
 
@@ -372,7 +374,10 @@ export async function create(
     validateDuplicatedCustomFieldKeysInRequest({
       requestCustomFields: validatedConfigurationRequest.customFields,
     });
-    validateRequiredCustomFieldInRequest({
+    validateRequiredCustomFieldsInRequest({
+      requestCustomFields: validatedConfigurationRequest.customFields,
+    });
+    validateOptionalCustomFieldsInRequest({
       requestCustomFields: validatedConfigurationRequest.customFields,
     });
 

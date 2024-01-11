@@ -369,6 +369,30 @@ describe('client', () => {
         'Failed to get patch configure in route: Error: The following required custom fields are missing the default value: missing_default'
       );
     });
+
+    it('throws when an optional custom field has a default value', async () => {
+      await expect(
+        update(
+          'test-id',
+          {
+            version: 'test-version',
+            customFields: [
+              {
+                key: 'extra_default',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+                defaultValue: 'foobar',
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to get patch configure in route: Error: The following optional custom fields try to define a default value: extra_default'
+      );
+    });
   });
 
   describe('create', () => {
@@ -450,6 +474,29 @@ describe('client', () => {
         )
       ).rejects.toThrow(
         'Failed to create case configuration: Error: The following required custom fields are missing the default value: missing_default'
+      );
+    });
+
+    it('throws when an optional custom field has a default value', async () => {
+      await expect(
+        create(
+          {
+            ...baseRequest,
+            customFields: [
+              {
+                key: 'extra_default',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+                defaultValue: 'foobar',
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to create case configuration: Error: The following optional custom fields try to define a default value: extra_default'
       );
     });
   });

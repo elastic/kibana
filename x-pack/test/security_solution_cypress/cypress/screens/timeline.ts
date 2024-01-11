@@ -30,8 +30,6 @@ export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
-export const CREATE_NEW_TIMELINE_WITH_BORDER = '[data-test-subj="timeline-new-with-border"]';
-
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
 export const DATA_PROVIDERS = '.field-value';
@@ -217,6 +215,8 @@ export const TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH = '[data-test-subj="save-as-
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
 
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
+
+export const TIMELINE_WRAPPER = '[data-test-subj="timeline-wrapper"]';
 
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
