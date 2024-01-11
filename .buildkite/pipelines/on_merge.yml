@@ -6,11 +6,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
+      queue: kibana-default
     retry:
       automatic:
         - exit_status: '*'
@@ -20,11 +16,7 @@ steps:
   - label: 'Triggering changes-based pipelines'
     branches: main
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
+      queue: kibana-default
     plugins:
       - chronotc/monorepo-diff#v2.0.4:
           watch:
@@ -39,12 +31,7 @@ steps:
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-16
-      buildPath: /dev/shm/builds
+      queue: n2-16-spot
     key: build
     timeout_in_minutes: 60
     retry:
@@ -56,11 +43,7 @@ steps:
     label: Check Public API Docs
     key: public-api-docs
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     timeout_in_minutes: 80
     retry:
       automatic:
@@ -72,11 +55,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
+      queue: kibana-default
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -89,11 +68,7 @@ steps:
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
+      queue: kibana-default
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -107,11 +82,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
     label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 2
@@ -123,11 +94,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_explore.sh
     label: 'Serverless Explore - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 4
@@ -139,11 +106,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 8
@@ -155,11 +118,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 8
@@ -171,11 +130,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
     label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 4
@@ -187,11 +142,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 8
@@ -203,11 +154,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
@@ -219,11 +166,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
@@ -235,11 +178,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
@@ -251,11 +190,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 8
@@ -267,11 +202,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
@@ -283,11 +214,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh
     label: 'Serverless AI Assistant - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 1
@@ -299,11 +226,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_ai_assistant.sh
     label: 'AI Assistant - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 1
@@ -315,11 +238,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
     label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 2
@@ -331,11 +250,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_explore.sh
     label: 'Explore - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 4
@@ -347,11 +262,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_investigations.sh
     label: 'Investigations - Security Solution Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 8
@@ -363,11 +274,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/threat_intelligence.sh
     label: 'Threat Intelligence Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 2
@@ -379,11 +286,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/osquery_cypress.sh
     label: 'Osquery Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
@@ -395,11 +298,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Serverless Osquery Cypress Tests'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
@@ -419,12 +318,7 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-8
-      buildPath: /dev/shm/builds
+      queue: n2-8-spot
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -435,12 +329,7 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-16
-      buildPath: /dev/shm/builds
+      queue: n2-16-spot
     key: linting_with_types
     timeout_in_minutes: 90
     retry:
@@ -451,11 +340,7 @@ steps:
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
+      queue: n2-2-spot
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -465,11 +350,7 @@ steps:
   - command: .buildkite/scripts/steps/check_types.sh
     label: 'Check Types'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -479,12 +360,7 @@ steps:
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-8
-      buildPath: /dev/shm/builds
+      queue: n2-8-spot
     key: storybooks
     timeout_in_minutes: 60
     retry:
@@ -495,11 +371,7 @@ steps:
   - command: .buildkite/scripts/steps/bazel_cache/bootstrap_linux.sh
     label: 'Populate local dev bazel cache (Linux)'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     timeout_in_minutes: 30
     retry:
       automatic:
@@ -509,11 +381,7 @@ steps:
   - command: .buildkite/scripts/steps/archive_so_migration_snapshot.sh target/plugin_so_types_snapshot.json
     label: 'Extract Saved Object migration plugin types'
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
+      queue: n2-4-spot
     artifact_paths:
       "target/plugin_so_types_snapshot.json"
 
@@ -524,11 +392,7 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
+      queue: kibana-default
 
   - wait
 

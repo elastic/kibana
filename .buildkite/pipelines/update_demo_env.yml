@@ -3,18 +3,10 @@ steps:
     label: Initialize Environment and Deploy ES
     timeout_in_minutes: 10
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
+      queue: kibana-default
 
   - command: .buildkite/scripts/steps/demo_env/kibana.sh
     label: Build and Deploy Kibana
     agents:
-      provider: gcp
-      preemptible: true
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: c2-standard-8
+      queue: c2-8
     timeout_in_minutes: 60
