@@ -150,6 +150,7 @@ export const config: PluginConfigDescriptor = {
       setup: schema.maybe(
         schema.object({
           agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
+          uninstallTokenVerificationBatchSize: schema.maybe(schema.number()),
         })
       ),
       developer: schema.object({
