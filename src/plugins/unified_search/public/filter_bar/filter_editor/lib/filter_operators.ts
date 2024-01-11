@@ -34,11 +34,11 @@ export const strings = {
     }),
   getIsGreaterOrEqualOperatorOptionLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.greaterThanOrEqualOptionLabel', {
-      defaultMessage: 'is greater or equal',
+      defaultMessage: 'greater or equal',
     }),
   getLessThanOperatorOptionLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.lessThanOrEqualOptionLabel', {
-      defaultMessage: 'is less than',
+      defaultMessage: 'less than',
     }),
   getIsNotBetweenOperatorOptionLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
