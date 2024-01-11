@@ -32,9 +32,9 @@ export const load = async ({
 
   reportProgress.addCategory('policies', policyCount);
 
-  // ==> Log state to a file in case of failure?
+  // DO ==> Log state to a file in case of failure?
 
-  // ==> Turn off task `endpoint:user-artifact-packager`
+  // DO ==> Turn off task `endpoint:user-artifact-packager`
 
   await installOrUpgradeEndpointFleetPackage(kbnClient, log);
 
@@ -45,10 +45,10 @@ export const load = async ({
     reportProgress: reportProgress.getReporter('policies'),
   });
 
-  // => create all artifacts
+  // DO => create all artifacts
   //
 
-  // => re-enable the task
+  // DO => re-enable the task
   //
 
   reportProgress.stopReporting();

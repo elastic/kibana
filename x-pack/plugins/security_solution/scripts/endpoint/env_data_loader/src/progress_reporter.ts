@@ -43,25 +43,7 @@ export class ProgressReporter implements ProgressReporterInterface {
 
     const setIntId = setInterval(() => {
       if (this.options.reportStatus) {
-        const state = this.getState();
-        const categoryNamesMaxChr = Object.keys(state.categories).reduce((acc, categoryName) => {
-          return Math.max(acc, categoryName.length);
-        }, 10);
-
-        this.options.reportStatus(`Overall progress: ${state.prctDone}%
-  ${Object.entries(state.categories).reduce((acc, [categoryName, categoryState]) => {
-    let updatedOutput = acc;
-
-    if (updatedOutput.length) {
-      updatedOutput += `\n  `;
-    }
-
-    updatedOutput += `${`${categoryName}:`
-      .concat(' '.repeat(categoryNamesMaxChr))
-      .substring(0, categoryNamesMaxChr + 1)}  ${categoryState.prctDone}%`;
-
-    return updatedOutput;
-  }, '')}`);
+        this.options.reportStatus(this.getStatus());
       }
     }, this.reportIntervalMs);
 
@@ -77,6 +59,10 @@ export class ProgressReporter implements ProgressReporterInterface {
 
   stopReporting() {
     this.stopReportingLoop();
+
+    if (this.options.reportStatus) {
+      this.options.reportStatus(this.getStatus());
+    }
   }
 
   addCategory(name: string, totalCount: number): void {
@@ -122,6 +108,28 @@ export class ProgressReporter implements ProgressReporterInterface {
     state.prctDone = calculatePercentage(state.totalCount, state.doneCount);
 
     return state;
+  }
+
+  getStatus(): string {
+    const state = this.getState();
+    const categoryNamesMaxChr = Object.keys(state.categories).reduce((acc, categoryName) => {
+      return Math.max(acc, categoryName.length);
+    }, 10);
+
+    return `Overall progress: ${state.prctDone}%
+  ${Object.entries(state.categories).reduce((acc, [categoryName, categoryState]) => {
+    let updatedOutput = acc;
+
+    if (updatedOutput.length) {
+      updatedOutput += `\n  `;
+    }
+
+    updatedOutput += `${`${categoryName}:`
+      .concat(' '.repeat(categoryNamesMaxChr))
+      .substring(0, categoryNamesMaxChr + 1)}  ${categoryState.prctDone}%`;
+
+    return updatedOutput;
+  }, '')}`;
   }
 }
 

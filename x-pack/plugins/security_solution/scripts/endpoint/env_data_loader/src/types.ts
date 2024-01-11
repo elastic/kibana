@@ -24,6 +24,8 @@ export interface ProgressReporterInterface {
 
   getState(): ProgressReporterState;
 
+  getStatus(): string;
+
   startReporting(): void;
 
   stopReporting(): void;
