@@ -171,7 +171,7 @@ export const buildPoliciesDefinitions = (
 ): AutocompleteCommandDefinition[] =>
   policies.map(({ name: label, sourceIndices }) => ({
     label,
-    insertText: label,
+    insertText: getSafeInsertText(label),
     kind: 5,
     detail: i18n.translate('monaco.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
