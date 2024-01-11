@@ -3538,14 +3538,6 @@
                 "path": "x-pack/plugins/observability/server/lib/rules/slo_burn_rate/executor.ts"
               },
               {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/register_jobs_monitoring_rule_type.ts"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/lib/alerts/register_jobs_monitoring_rule_type.ts"
-              },
-              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/server/lib/alerting/log_threshold/log_threshold_executor.ts"
               },
@@ -3588,10 +3580,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/alert_rules/status_rule/monitor_status_rule.ts"
-              },
-              {
-                "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/lib/alerting/transform_health_rule_type/register_transform_health_rule_type.ts"
               },
               {
                 "plugin": "uptime",
@@ -5204,6 +5192,70 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.DEFAULT_AAD_CONFIG",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_AAD_CONFIG",
+        "description": [],
+        "path": "x-pack/plugins/alerting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.DEFAULT_AAD_CONFIG.context",
+            "type": "string",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.DEFAULT_AAD_CONFIG.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.DEFAULT_AAD_CONFIG.mappings.fieldMap",
+                "type": "Object",
+                "tags": [],
+                "label": "fieldMap",
+                "description": [],
+                "path": "x-pack/plugins/alerting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": []
+              }
+            ]
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.DEFAULT_AAD_CONFIG.shouldWrite",
+            "type": "boolean",
+            "tags": [],
+            "label": "shouldWrite",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "alerting",
         "id": "def-server.DEFAULT_ALERTS_ILM_POLICY",
