@@ -33,7 +33,7 @@ export function createIndexDocRecordsStream(
     await client.helpers.bulk(
       {
         retries: 5,
-        concurrency: performance?.concurrency || 5,
+        concurrency: performance?.concurrency || 4,
         datasource: docs.map((doc) => {
           const body = doc.source;
           const op = doc.data_stream ? BulkOperation.Create : operation;
