@@ -19,6 +19,7 @@ import { AlertPropertyActions } from './alert_property_actions';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174667
 // FLAKY: https://github.com/elastic/kibana/issues/174668
+// FLAKY: https://github.com/elastic/kibana/issues/174669
 describe.skip('AlertPropertyActions', () => {
   let appMock: AppMockRenderer;
 
