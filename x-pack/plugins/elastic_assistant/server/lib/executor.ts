@@ -58,7 +58,7 @@ export const executeAction = async ({
     readableTy: typeof readable.iterator,
   });
 
-  if (typeof readable?.iterator !== 'function') {
+  if (typeof readable?.toReadableStream !== 'function') {
     throw new Error('Action result status is error: result is not streamable');
   }
   // for await (const chunk of readable) {

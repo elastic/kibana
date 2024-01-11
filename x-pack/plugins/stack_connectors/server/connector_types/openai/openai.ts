@@ -9,6 +9,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
 import { PassThrough } from 'stream';
+import { IncomingMessage } from 'http';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -102,6 +103,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_STREAM,
       method: 'invokeStream',
+      schema: InvokeAIActionParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_ASYNC_ITERATOR,
+      method: 'invokeAsyncIterator',
       schema: InvokeAIActionParamsSchema,
     });
   }
@@ -215,20 +222,21 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body - the OpenAI Invoke request body
    */
   public async invokeStream(body: InvokeAIActionParams): Promise<PassThrough> {
+    const res = (await this.streamApi({
+      body: JSON.stringify(body),
+      stream: true,
+    })) as unknown as IncomingMessage;
+
+    return res.pipe(new PassThrough());
+  }
+
+  public async invokeAsyncIterator(body: InvokeAIActionParams): Promise<PassThrough> {
     const stream = await this.openAI.chat.completions.create({
       ...body,
       stream: true,
     });
-    // const chatCompletion = await stream.finalChatCompletion();
     console.log('stream', stream);
-    // console.log('chatCompletion', chatCompletion);
     return stream;
-    // const res = (await this.streamApi({
-    //   body: JSON.stringify(body),
-    //   stream: true,
-    // })) as unknown as IncomingMessage;
-    //
-    // return res.pipe(new PassThrough());
   }
 
   /**

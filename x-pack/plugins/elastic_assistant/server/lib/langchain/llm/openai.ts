@@ -12,8 +12,6 @@ import { get } from 'lodash/fp';
 
 // import { BaseMessageChunk, ChatGeneration } from 'langchain/schema';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { IncomingMessage } from 'http';
-import { PassThrough } from 'stream';
 import { RequestBody } from '../types';
 
 const LLM_TYPE = 'ActionsClientLlm';
@@ -118,6 +116,8 @@ export class ActionsClientLlm extends ChatOpenAI {
         const result = get('data', actionResult) as
           | AsyncIterable<OpenAIClient.Chat.Completions.ChatCompletionChunk>
           | OpenAIClient.Chat.Completions.ChatCompletion;
+
+        return result;
         // TODO validation
         // if (typeof content !== 'string') {
         //   throw new Error(
@@ -126,7 +126,7 @@ export class ActionsClientLlm extends ChatOpenAI {
         // }
         // this.#actionResultData = result; // save the raw response from the connector, because that's what the assistant expects
         // The type you're expecting from OpenAI is AsyncIterable where I am expecting IncomingMessage.
-        return (result as unknown as IncomingMessage).pipe(new PassThrough());
+        // return (result as unknown as IncomingMessage).pipe(new PassThrough());
       } catch (e) {
         console.log('there was an error', e);
         // const error = wrapOpenAIClientError(e);
@@ -142,27 +142,43 @@ export class ActionsClientLlm extends ChatOpenAI {
     actionId: string;
     params: {
       // StreamActionParamsSchema
-      subActionParams: { body: string; stream: boolean };
+      subActionParams: {
+        messages: Array<{
+          role: string;
+          content: string;
+        }>;
+        model?: string;
+        n?: number;
+        stop?: string | string[];
+        temperature?: number;
+      };
       subAction: string;
     };
   } {
     this.#logger.debug(`ActionsClientLlm#_call assistantMessage:\n${JSON.stringify('todo')} `);
+    console.log('completionRequest', completionRequest);
     // create a new connector request body with the assistant message:
     return {
       actionId: this.#connectorId,
       params: {
         ...this.#request.body.params, // the original request body params
-        // same subaction for stream and non-stream, determined by boolean subActionParams.stream
-        subAction: 'stream',
+        // TODO make dynamic
+        subAction: 'invokeAsyncIterator',
         subActionParams: {
-          body: JSON.stringify({
-            ...completionRequest,
-            // overrides from client request, such as model
-            ...this.#request.body.params.subActionParams,
-            // ensure we take the messages from the completion request
-            messages: completionRequest.messages,
-          }),
-          stream: completionRequest.stream ?? false,
+          // model: completionRequest.model,
+          // n: completionRequest.n,
+          // stop: completionRequest.stop,
+          // temperature: completionRequest.temperature,
+          // overrides from client request, such as model
+          ...this.#request.body.params.subActionParams,
+          // ensure we take the messages from the completion request
+          // TODO right now actions api expects just role and content
+          // ask andrew/garrett if we should include these properties:
+          // name, function_call, tool_calls, tool_call_id
+          messages: completionRequest.messages.map((message) => ({
+            role: message.role,
+            content: message.content ?? '',
+          })),
         },
       },
     };

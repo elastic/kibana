@@ -120,7 +120,6 @@ export const callAgentExecutor = async ({
   });
 
   if (true) {
-    console.log('latestMessage[0]', latestMessage[0]);
     const logStream = await executor.streamLog({
       input: latestMessage[0].content,
       chat_history: [],
@@ -132,9 +131,8 @@ export const callAgentExecutor = async ({
         for await (const chunk of logStream) {
           if (chunk.ops?.length > 0 && chunk.ops[0].op === 'add') {
             const addOp = chunk.ops[0];
-            console.log('CHUNKCHUNK', addOp);
             if (
-              addOp.path.startsWith('/logs/ChatOpenAI') &&
+              addOp.path.startsWith('/logs/ActionsClientLlm') &&
               typeof addOp.value === 'string' &&
               addOp.value.length
             ) {
