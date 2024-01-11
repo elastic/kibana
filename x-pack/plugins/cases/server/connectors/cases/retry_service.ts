@@ -9,7 +9,7 @@ import { CasesConnectorError } from './cases_connector_error';
 import type { BackoffStrategy, BackoffFactory } from './types';
 
 export class CaseConnectorRetryService {
-  private maxAttempts: number = 10;
+  private maxAttempts: number;
   /**
    * 409 - Conflict
    * 429 - Too Many Requests

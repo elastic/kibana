@@ -81,7 +81,7 @@ describe('CryptoService', () => {
     }
   );
 
-  it('should succeed if cb does not throws', async () => {
+  it('should succeed if cb does not throw', async () => {
     service = new CaseConnectorRetryService(backOffFactory);
 
     cb.mockResolvedValue({ status: 'ok' });
