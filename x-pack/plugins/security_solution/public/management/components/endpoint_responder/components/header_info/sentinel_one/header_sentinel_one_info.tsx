@@ -6,11 +6,9 @@
  */
 
 import React, { memo } from 'react';
-import { EuiSkeletonText } from '@elastic/eui';
 import { SentinelOneAgentStatus } from '../../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import type { ThirdPartyAgentInfo } from '../../../../../../../common/types';
 import { HeaderAgentInfo } from '../header_agent_info';
-import { useGetEndpointPendingActionsSummary } from '../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import type { Platform } from '../platforms';
 
 interface HeaderSentinelOneInfoProps {
@@ -22,18 +20,6 @@ interface HeaderSentinelOneInfoProps {
 
 export const HeaderSentinelOneInfo = memo<HeaderSentinelOneInfoProps>(
   ({ agentId, platform, hostName, lastCheckin }) => {
-    // fetch pending actions using the agent id and action status API
-    const { data: agentPendingActions, isFetching } = useGetEndpointPendingActionsSummary(
-      [agentId],
-      {
-        refetchInterval: 10000,
-      }
-    );
-
-    if (isFetching && agentPendingActions === undefined) {
-      return <EuiSkeletonText lines={2} />;
-    }
-
     return (
       <HeaderAgentInfo
         platform={platform.toLowerCase() as Platform}

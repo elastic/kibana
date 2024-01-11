@@ -10,7 +10,6 @@ import { EuiSkeletonText } from '@elastic/eui';
 import { EndpointAgentStatus } from '../../../../../../common/components/endpoint/endpoint_agent_status';
 import { HeaderAgentInfo } from '../header_agent_info';
 import { useGetEndpointDetails } from '../../../../../hooks';
-import { useGetEndpointPendingActionsSummary } from '../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import type { Platform } from '../platforms';
 
 interface HeaderEndpointInfoProps {
@@ -18,15 +17,11 @@ interface HeaderEndpointInfoProps {
 }
 
 export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId }) => {
-  const { data: endpointDetails, isFetching } = useGetEndpointDetails(endpointId, {
-    refetchInterval: 10000,
-  });
-  // fetch pending actions using the agent id and action status API
-  const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary([endpointId], {
+  const { data: endpointDetails, isLoading } = useGetEndpointDetails(endpointId, {
     refetchInterval: 10000,
   });
 
-  if (isFetching && endpointPendingActions === undefined) {
+  if (isLoading) {
     return <EuiSkeletonText lines={2} />;
   }
 
