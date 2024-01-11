@@ -32,6 +32,9 @@ export const stepDetailsSlice = createSlice({
     setCreateDataView: (state, action: PayloadAction<boolean>) => {
       state.createDataView = action.payload;
     },
+    setDataViewTimeField: (state, action: PayloadAction<string | undefined>) => {
+      state.dataViewTimeField = action.payload;
+    },
     setContinuousModeEnabled: (state, action: PayloadAction<boolean>) => {
       state.isContinuousModeEnabled = action.payload;
     },

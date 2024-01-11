@@ -14,8 +14,14 @@ import { i18n } from '@kbn/i18n';
 import { SwitchModal } from '../switch_modal';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { selectPreviewRequest } from '../../state_management/step_define_selectors';
+
+import { useWizardContext } from '../wizard/wizard';
 
 export const AdvancedPivotEditorSwitch: FC = () => {
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
+
   const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
   const advancedEditorConfigLastApplied = useWizardSelector(
     (s) => s.advancedPivotEditor.advancedEditorConfigLastApplied
@@ -29,7 +35,13 @@ export const AdvancedPivotEditorSwitch: FC = () => {
   const isAdvancedEditorSwitchModalVisible = useWizardSelector(
     (s) => s.advancedPivotEditor.isAdvancedEditorSwitchModalVisible
   );
-  const { setAdvancedEditorSwitchModalVisible, toggleAdvancedEditor } = useWizardActions();
+  const previewRequest = useWizardSelector((s) => selectPreviewRequest(s, dataView));
+  const {
+    setAdvancedEditorConfig,
+    setAdvancedEditorConfigLastApplied,
+    setAdvancedEditorSwitchModalVisible,
+    toggleAdvancedEditor,
+  } = useWizardActions();
 
   return (
     <EuiFormRow>
@@ -48,6 +60,12 @@ export const AdvancedPivotEditorSwitch: FC = () => {
               ) {
                 setAdvancedEditorSwitchModalVisible(true);
                 return;
+              }
+
+              if (!isAdvancedPivotEditorEnabled) {
+                const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
+                setAdvancedEditorConfigLastApplied(stringifiedPivotConfig);
+                setAdvancedEditorConfig(stringifiedPivotConfig);
               }
 
               toggleAdvancedEditor();

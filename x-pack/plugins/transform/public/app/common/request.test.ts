@@ -262,7 +262,6 @@ describe('Transform: Common', () => {
       transformSettingsDocsPerSecond: null,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
-      touched: true,
       valid: true,
     };
 
@@ -326,7 +325,6 @@ describe('Transform: Common', () => {
       transformSettingsNumFailureRetries: 5,
       destinationIndex: 'the-destination-index',
       destinationIngestPipeline: 'the-destination-ingest-pipeline',
-      touched: true,
       valid: true,
     };
 

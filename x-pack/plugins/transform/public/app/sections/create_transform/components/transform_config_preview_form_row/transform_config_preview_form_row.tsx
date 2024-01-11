@@ -56,12 +56,6 @@ export const TransformConfigPreviewFormRow: FC = () => {
       : {}),
   };
 
-  if (
-    transformFunction === TRANSFORM_FUNCTION.LATEST &&
-    latestFunctionOptions.sortFieldOptions.length > 0
-  )
-    return null;
-
   return (
     <EuiFormRow
       fullWidth

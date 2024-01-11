@@ -77,6 +77,7 @@ export const StepDetailsForm: FC = () => {
     (s) => s.stepDetails.destinationIngestPipeline
   );
   const createDataView = useWizardSelector((s) => s.stepDetails.createDataView);
+  const dataViewTimeField = useWizardSelector((s) => s.stepDetails.dataViewTimeField);
   const isContinuousModeEnabled = useWizardSelector((s) => s.stepDetails.isContinuousModeEnabled);
   const continuousModeDelay = useWizardSelector((s) => s.stepDetails.continuousModeDelay);
   const isRetentionPolicyEnabled = useWizardSelector((s) => s.stepDetails.isRetentionPolicyEnabled);
@@ -92,6 +93,7 @@ export const StepDetailsForm: FC = () => {
   const {
     setTransformId,
     setTransformDescription,
+    setDataViewTimeField,
     setDestinationIndex,
     setDestinationIngestPipeline,
     setCreateDataView,
@@ -123,8 +125,6 @@ export const StepDetailsForm: FC = () => {
     }
   });
 
-  const [dataViewTimeField, setDataViewTimeField] = useState<string | undefined>();
-
   const previewRequest = useWizardSelector((state) => selectPreviewRequest(state, dataView));
 
   const { error: transformsPreviewError, data: transformPreview } = useGetTransformsPreview(
@@ -145,6 +145,8 @@ export const StepDetailsForm: FC = () => {
     function resetDataViewTimeField() {
       setDataViewTimeField(destIndexAvailableTimeFields[0]);
     },
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [destIndexAvailableTimeFields]
   );
 

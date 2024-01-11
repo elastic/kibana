@@ -27,7 +27,6 @@ export interface StepDetailsState {
   isRetentionPolicyEnabled: boolean;
   retentionPolicyDateField: string;
   retentionPolicyMaxAge: string;
-  touched: boolean;
   transformId: TransformId;
   transformDescription: string;
   transformFrequency: string;
@@ -56,7 +55,6 @@ export function getDefaultStepDetailsState(): StepDetailsState {
     transformSettingsNumFailureRetries: undefined,
     destinationIndex: '',
     destinationIngestPipeline: '',
-    touched: false,
     valid: false,
     dataViewTimeField: undefined,
   };

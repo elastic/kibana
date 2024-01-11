@@ -15,53 +15,24 @@ import { CodeEditor } from '@kbn/code-editor';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
-import { selectPreviewRequest } from '../../state_management/step_define_selectors';
-
-import { useWizardContext } from '../wizard/wizard';
 
 const { collapseLiteralStrings, useXJsonMode } = XJson;
 
 export const AdvancedPivotEditor: FC = () => {
-  const initialized = useRef(false);
-
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
-
-  const {
-    setAdvancedEditorConfig,
-    setAdvancedEditorConfigLastApplied,
-    setAdvancedPivotEditorApplyButtonEnabled,
-  } = useWizardActions();
+  const { setAdvancedEditorConfig, setAdvancedPivotEditorApplyButtonEnabled } = useWizardActions();
   const advancedEditorConfigLastApplied = useWizardSelector(
     (s) => s.advancedPivotEditor.advancedEditorConfigLastApplied
   );
   const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
 
-  const { setXJson, xJson } = useXJsonMode(null);
+  const { setXJson, xJson } = useXJsonMode(advancedEditorConfig);
 
   useEffect(() => {
-    if (xJson !== advancedEditorConfig && initialized.current) {
+    if (xJson !== advancedEditorConfig) {
       setAdvancedEditorConfig(xJson);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [xJson]);
-
-  useEffect(() => {
-    if (xJson !== advancedEditorConfig) {
-      setXJson(advancedEditorConfig);
-      initialized.current = true;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [advancedEditorConfig]);
-
-  // Apply the current preview request config once the editor mounts
-  const previewRequest = useWizardSelector((s) => selectPreviewRequest(s, dataView));
-  useEffect(() => {
-    const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
-    setAdvancedEditorConfigLastApplied(stringifiedPivotConfig);
-    setAdvancedEditorConfig(stringifiedPivotConfig);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <EuiFormRow

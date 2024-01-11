@@ -28,13 +28,11 @@ export const StepDetailsSummary: FC = () => {
     transformSettingsNumFailureRetries,
     destinationIndex,
     destinationIngestPipeline,
-    touched,
     dataViewTimeField,
+    valid,
   } = useWizardSelector((s) => s.stepDetails);
 
-  if (touched === false) {
-    return null;
-  }
+  if (!valid) return null;
 
   const destinationIndexHelpText = createDataView
     ? i18n.translate('xpack.transform.stepDetailsSummary.createDataViewMessage', {
