@@ -15,12 +15,12 @@ import {
   PartialTheme,
   Tooltip,
   TooltipType,
-  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import { Axes } from './axes';
 import { LoadingWrapper } from './loading_wrapper';
+import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 
 export interface LineChartPoint {
   time: number | string;
@@ -45,8 +45,22 @@ export const EventRateChart: FC<Props> = ({
   loading = false,
   onBrushEnd,
 }) => {
+  const { euiColorLightShade } = useCurrentEuiTheme();
   const theme: PartialTheme = {
     scales: { histogramPadding: 0.2 },
+    background: {
+      color: 'transparent',
+    },
+    axes: {
+      gridLine: {
+        horizontal: {
+          stroke: euiColorLightShade,
+        },
+        vertical: {
+          stroke: euiColorLightShade,
+        },
+      },
+    },
   };
 
   return (
@@ -58,12 +72,7 @@ export const EventRateChart: FC<Props> = ({
         <Chart>
           {showAxis === true && <Axes />}
           <Tooltip type={TooltipType.None} />
-          <Settings
-            onBrushEnd={onBrushEnd}
-            baseTheme={LEGACY_LIGHT_THEME}
-            theme={theme}
-            locale={i18n.getLocale()}
-          />
+          <Settings onBrushEnd={onBrushEnd} theme={theme} locale={i18n.getLocale()} />
 
           <HistogramBarSeries
             id="event_rate"
