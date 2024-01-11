@@ -18,7 +18,7 @@ import {
   MOCK_IDP_SECURITY_ROLE_NAMES,
   MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
   MOCK_IDP_SEARCH_ROLE_NAMES,
-} from '@kbn/mock-idp-utils';
+} from '@kbn/mock-idp-utils/src/constants';
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
 
