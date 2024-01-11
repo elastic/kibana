@@ -25,11 +25,17 @@ export const cli = () => {
 
       const options = {
         policyCount: Number(cliContext.flags.policyCount) || 10,
+        trustedAppsCount: Number(cliContext.flags.trustedAppsCount) || 10,
+        eventFiltersCount: Number(cliContext.flags.eventFiltersCount) || 10,
+        blocklistsCount: Number(cliContext.flags.blocklistsCount) || 10,
+        hostIsolationExceptionsCount: Number(cliContext.flags.hostIsolationExceptionsCount) || 10,
+        endpointExceptionsCount: Number(cliContext.flags.endpointExceptionsCount) || 10,
+        globalArtifactRatio: Number(cliContext.flags.globalArtifactRatio) || 10,
       };
 
       /*
         load_env_data
-            --policyCount=5000
+            [x] --policyCount=5000
             --trustedAppsCount=1000
             --eventFiltersCount=1000
             --blocklists=10
@@ -43,7 +49,7 @@ export const cli = () => {
       await load({
         kbnClient,
         log,
-        policyCount: options.policyCount,
+        ...options,
       });
     },
 
@@ -57,15 +63,24 @@ export const cli = () => {
           username: 'elastic',
           password: 'changeme',
           policyCount: 10,
+          trustedAppsCount: 10,
+          eventFiltersCount: 10,
+          blocklists: 10,
+          hostIsolationExceptions: 10,
+          globalArtifactRatio: 50,
         },
         help: `
-        --username          User name to be used for auth against elasticsearch and
-                            kibana (Default: elastic).
-                            **IMPORTANT:** if 'asSuperuser' option is not used, then the
-                            user defined here MUST have 'superuser' AND 'kibana_system' roles
-        --password          User name Password (Default: changeme)
-        --kibana            The url to Kibana (Default: http://127.0.0.1:5601)
-        --policyCount       How many policies to create (Default: 10)
+        --username                      User name to be used for auth against elasticsearch and
+                                        kibana (Default: elastic).
+        --password                      User name Password (Default: changeme)
+        --kibana                        The url to Kibana (Default: http://127.0.0.1:5601)
+        --policyCount                   How many policies to create (Default: 10)
+        --trustedAppsCount              How many Trusted Applications to create (Default: 10)
+        --eventFiltersCount             How many Event Filters to create (Default: 10)
+        --blocklistsCount               How many Blocklists to create (Default: 10)
+        --hostIsolationExceptionsCount  How many Host Isolation Exceptions to create (Default: 10)
+        --globalArtifactRatio           The percentage ratio of all artifacts that should be global
+                                        rather than per-policy. (Default: 50)
       `,
       },
     }

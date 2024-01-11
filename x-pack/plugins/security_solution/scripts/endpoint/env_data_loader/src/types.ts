@@ -18,7 +18,7 @@ export interface ProgressReporterState extends ProgressReporterStateProperties {
 }
 
 export interface ProgressReporterInterface {
-  addCategory(name: string, totalCount: number): void;
+  addCategory(name: string, totalCount: number): ReportProgressCallback;
 
   getReporter(categoryName: string): ReportProgressCallback;
 

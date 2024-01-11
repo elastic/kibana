@@ -7,6 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
+import { createTrustedApps } from './create_artifacts';
 import { installOrUpgradeEndpointFleetPackage } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { ProgressReporter } from './progress_reporter';
 import type { ProgressReporterInterface } from './types';
@@ -17,12 +18,24 @@ interface LoadOptions {
   kbnClient: KbnClient;
   log?: ToolingLog;
   policyCount: number;
+  trustedAppsCount: number;
+  eventFiltersCount: number;
+  blocklistsCount: number;
+  hostIsolationExceptionsCount: number;
+  endpointExceptionsCount: number;
+  globalArtifactRatio: number;
 }
 
 export const load = async ({
   kbnClient,
   log = createToolingLogger(),
   policyCount,
+  trustedAppsCount,
+  eventFiltersCount,
+  blocklistsCount,
+  hostIsolationExceptionsCount,
+  endpointExceptionsCount,
+  globalArtifactRatio,
 }: LoadOptions) => {
   const reportProgress: ProgressReporterInterface = new ProgressReporter({
     reportStatus: (status) => {
@@ -30,7 +43,18 @@ export const load = async ({
     },
   });
 
-  reportProgress.addCategory('policies', policyCount);
+  const policyReporter = reportProgress.addCategory('policies', policyCount);
+  const trustedAppsReporter = reportProgress.addCategory('trusted apps', trustedAppsCount);
+  const eventFiltersReporter = reportProgress.addCategory('event filters', eventFiltersCount);
+  const blocklistsReporter = reportProgress.addCategory('blocklists', blocklistsCount);
+  const hostIsolationExceptionsReporter = reportProgress.addCategory(
+    'host isolation exceptions',
+    hostIsolationExceptionsCount
+  );
+  const endpointExceptionsReporter = reportProgress.addCategory(
+    'endpoint exceptions',
+    endpointExceptionsCount
+  );
 
   // DO ==> Log state to a file in case of failure?
 
@@ -42,11 +66,17 @@ export const load = async ({
     kbnClient,
     log,
     count: policyCount,
-    reportProgress: reportProgress.getReporter('policies'),
+    reportProgress: policyReporter,
   });
 
-  // DO => create all artifacts
-  //
+  await Promise.all([
+    createTrustedApps({
+      kbnClient,
+      log,
+      reportProgress: trustedAppsReporter,
+      count: trustedAppsCount,
+    }),
+  ]);
 
   // DO => re-enable the task
   //

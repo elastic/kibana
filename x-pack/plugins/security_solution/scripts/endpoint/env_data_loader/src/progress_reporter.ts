@@ -69,13 +69,14 @@ export class ProgressReporter implements ProgressReporterInterface {
     }
   }
 
-  addCategory(name: string, totalCount: number): void {
+  addCategory(name: string, totalCount: number): ReportProgressCallback {
     this.categories[name] = {
       totalCount,
       doneCount: 0,
     };
 
     this.startReporting();
+    return this.getReporter(name);
   }
 
   getReporter(categoryName: string): ReportProgressCallback {
