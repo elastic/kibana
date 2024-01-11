@@ -106,7 +106,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickPagerNextButton() {
     // Clear all toasts that could hide pagination controls
-    await this.common.clearAllToasts();
+    await this.toasts.clearAllToasts();
 
     const addPanel = await this.testSubjects.find('dashboardAddPanel');
 
@@ -243,7 +243,7 @@ export class DashboardAddPanelService extends FtrService {
     await this.closeAddPanel();
 
     // close "Added successfully" toast
-    await this.common.clearAllToasts();
+    await this.toasts.clearAllToasts();
     return embeddableName;
   }
 

@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const monacoEditor = getService('monacoEditor');
+  const toasts = getService('toasts');
 
   describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
@@ -97,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await PageObjects.common.clearAllToasts();
+      await toasts.clearAllToasts();
     });
 
     it('should show search warnings as toasts', async () => {
