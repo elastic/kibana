@@ -144,9 +144,10 @@ export const callAgentExecutor = async ({
         controller.close();
       },
     });
-
-    return Readable.from(transformStream).pipe(new PassThrough()); // new StreamingTextResponse(transformStream);
-    return logStream; // new StreamingTextResponse(transformStream);
+    // return Readable.from(transformStream).pipe(new PassThrough());
+    return Readable.from(transformStream, { highWaterMark: 16 }).pipe(
+      new PassThrough({ highWaterMark: 16 })
+    );
   }
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
