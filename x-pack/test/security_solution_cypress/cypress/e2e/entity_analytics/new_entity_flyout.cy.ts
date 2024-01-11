@@ -52,11 +52,11 @@ describe(
     beforeEach(() => {
       mockRiskEngineEnabled();
       login();
+      visitWithTimeRange(ALERTS_URL);
     });
 
     describe('User details', () => {
       it('should display entity flyout and open risk input panel', () => {
-        visitWithTimeRange(ALERTS_URL);
         waitForAlerts();
         expandFirstAlertUserFlyout();
 
@@ -71,7 +71,6 @@ describe(
 
     describe('Host details', () => {
       it('should display entity flyout and open risk input panel', () => {
-        visitWithTimeRange(ALERTS_URL);
         waitForAlerts();
         expandFirstAlertHostFlyout();
 
