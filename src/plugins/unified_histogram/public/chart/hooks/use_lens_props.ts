@@ -45,6 +45,11 @@ export const useLensProps = ({
   const [lensPropsContext, setLensPropsContext] = useState(buildLensProps());
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
+  // Reverting a saved search changes might change only attributesContext without a refetch
+  useEffect(() => {
+    setLensPropsContext(buildLensProps());
+  }, [buildLensProps, setLensPropsContext]);
+
   useEffect(() => {
     const subscription = refetch$.subscribe(updateLensPropsContext);
     return () => subscription.unsubscribe();
