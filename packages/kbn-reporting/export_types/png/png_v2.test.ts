@@ -63,7 +63,6 @@ beforeEach(async () => {
   });
 
   getScreenshotsSpy.mockImplementation(() => {
-    mockLogger.get('screenshotting');
     return Rx.of({
       metrics: { cpu: 0 },
       results: [{ screenshots: [{ data: Buffer.from(testContent) }] }] as CaptureResult['results'],
@@ -121,22 +120,4 @@ test(`returns buffer content base64 encoded`, async () => {
   );
 
   expect(content).toEqual(testContent);
-});
-
-test(`screenshotting plugin uses the logger provided by the PNG export-type`, async () => {
-  const logSpy = jest.spyOn(mockLogger, 'get');
-
-  await mockPngExportType.runTask(
-    'pngJobId',
-    getBasePayload({
-      layout: { dimensions: {} },
-      locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
-      headers: encryptedHeaders,
-    }),
-    taskInstanceFields,
-    cancellationToken,
-    stream
-  );
-
-  expect(logSpy).toHaveBeenCalledWith('screenshotting');
 });

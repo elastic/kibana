@@ -66,7 +66,6 @@ beforeEach(async () => {
   });
 
   getScreenshotsSpy.mockImplementation(() => {
-    mockLogger.get('screenshotting');
     return Rx.of({
       metrics: { cpu: 0, pages: 1 },
       data: Buffer.from(testContent),
@@ -127,22 +126,4 @@ test(`returns buffer content base64 encoded`, async () => {
   );
 
   expect(content).toEqual(testContent);
-});
-
-test(`screenshotting plugin uses the logger provided by the PDF export-type`, async () => {
-  const logSpy = jest.spyOn(mockLogger, 'get');
-
-  await mockPdfExportType.runTask(
-    'pdfJobId',
-    getBasePayload({
-      layout: { dimensions: {} },
-      locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
-      headers: encryptedHeaders,
-    }),
-    taskInstanceFields,
-    cancellationToken,
-    stream
-  );
-
-  expect(logSpy).toHaveBeenCalledWith('screenshotting');
 });
