@@ -192,110 +192,6 @@
     "functions": [
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.CodeEditor",
-        "type": "Function",
-        "tags": [
-          "see"
-        ],
-        "label": "CodeEditor",
-        "description": [
-          "\nRenders a Monaco code editor with EUI color theme.\n"
-        ],
-        "signature": [
-          "(props: React.PropsWithChildren<",
-          {
-            "pluginId": "@kbn/code-editor",
-            "scope": "common",
-            "docId": "kibKbnCodeEditorPluginApi",
-            "section": "def-common.CodeEditorProps",
-            "text": "CodeEditorProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.CodeEditor.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "@kbn/code-editor",
-                "scope": "common",
-                "docId": "kibKbnCodeEditorPluginApi",
-                "section": "def-common.CodeEditorProps",
-                "text": "CodeEditorProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.CodeEditorField",
-        "type": "Function",
-        "tags": [],
-        "label": "CodeEditorField",
-        "description": [
-          "\nRenders a Monaco code editor in the same style as other EUI form fields."
-        ],
-        "signature": [
-          "(props: React.PropsWithChildren<",
-          {
-            "pluginId": "@kbn/code-editor",
-            "scope": "common",
-            "docId": "kibKbnCodeEditorPluginApi",
-            "section": "def-common.CodeEditorProps",
-            "text": "CodeEditorProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.CodeEditorField.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "@kbn/code-editor",
-                "scope": "common",
-                "docId": "kibKbnCodeEditorPluginApi",
-                "section": "def-common.CodeEditorProps",
-                "text": "CodeEditorProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.createKibanaReactContext",
         "type": "Function",
         "tags": [],
@@ -1400,6 +1296,22 @@
             "path": "x-pack/plugins/osquery/public/application.tsx"
           },
           {
+            "plugin": "ingestPipelines",
+            "path": "x-pack/plugins/ingest_pipelines/public/shared_imports.ts"
+          },
+          {
+            "plugin": "ingestPipelines",
+            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
+          },
+          {
+            "plugin": "ingestPipelines",
+            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
+          },
+          {
+            "plugin": "ingestPipelines",
+            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
+          },
+          {
             "plugin": "profiling",
             "path": "x-pack/plugins/profiling/public/app.tsx"
           },
@@ -1578,22 +1490,6 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/shared_imports.ts"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
-          },
-          {
-            "plugin": "ingestPipelines",
-            "path": "x-pack/plugins/ingest_pipelines/public/application/index.tsx"
           },
           {
             "plugin": "logstash",
@@ -2751,6 +2647,14 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/edit_action_helpers.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers.tsx"
           },
           {
             "plugin": "security",
@@ -4866,18 +4770,6 @@
     "misc": [
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.CodeEditorProps",
-        "type": "Type",
-        "tags": [],
-        "label": "CodeEditorProps",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.ElasticAgentCardProps",
         "type": "Type",
         "tags": [],
@@ -5080,96 +4972,6 @@
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"css\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/css/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"markdown\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/markdown/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"yaml\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/yaml/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"handlebars\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/handlebars/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"hjson\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/hjson/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.LANG",
-        "type": "string",
-        "tags": [],
-        "label": "LANG",
-        "description": [],
-        "signature": [
-          "\"grok\""
-        ],
-        "path": "packages/shared-ux/code_editor/languages/grok/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

@@ -22,28 +22,41 @@ export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
+function formatTime(minutes: number) {
+  if (minutes > 59) {
+    const mins = minutes % 60;
+    const hours = (minutes - mins) / 60;
+    return i18n.translate(
+      'xpack.observability.slo.sloDetails.errorBudgetChartPanel.minuteHoursLabel',
+      {
+        defaultMessage: '{hours}h {mins}m',
+        values: { hours: Math.trunc(hours), mins: Math.trunc(mins) },
+      }
+    );
+  }
+  return i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.minuteLabel', {
+    defaultMessage: '{minutes}m',
+    values: { minutes },
+  });
+}
+
 export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
 
-  let remainingBudgetFormatted;
+  let errorBudgetTimeRemainingFormatted;
   if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
     const totalSlices =
       toMinutes(toDuration(slo.timeWindow.duration)) /
       toMinutes(toDuration(slo.objective.timesliceWindow!));
-    const remainingBudgetInTimeUnit =
+    const errorBudgetRemainingInMinute =
       slo.summary.errorBudget.remaining * (slo.summary.errorBudget.initial * totalSlices);
 
-    if (remainingBudgetInTimeUnit <= 0) {
-      remainingBudgetFormatted = '0min';
-    } else {
-      if (remainingBudgetInTimeUnit / 60 >= 1) {
-        remainingBudgetFormatted = `${Math.trunc(remainingBudgetInTimeUnit / 60)}h`;
-      }
-      remainingBudgetFormatted += `${Math.trunc(remainingBudgetInTimeUnit % 60)}min`;
-    }
+    errorBudgetTimeRemainingFormatted = formatTime(
+      errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0
+    );
   }
 
   return (
@@ -87,11 +100,11 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
               reverse
             />
           </EuiFlexItem>
-          {!!remainingBudgetFormatted && (
+          {errorBudgetTimeRemainingFormatted ? (
             <EuiFlexItem grow={false}>
               <EuiStat
                 titleColor={isSloFailed ? 'danger' : 'success'}
-                title={remainingBudgetFormatted}
+                title={errorBudgetTimeRemainingFormatted}
                 titleSize="s"
                 description={i18n.translate(
                   'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',
@@ -100,7 +113,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
                 reverse
               />
             </EuiFlexItem>
-          )}
+          ) : null}
         </EuiFlexGroup>
 
         <EuiFlexItem>

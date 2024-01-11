@@ -744,7 +744,7 @@ describe('createStreamingBatchedFunction()', () => {
       const [, error1] = await promise1;
       const [result1] = await promise2;
       expect(error1).toMatchObject({
-        message: 'Unexpected token N in JSON at position 0',
+        message: `Unexpected token 'N', "Not a JSON\n" is not valid JSON`,
         code: 'STREAM',
       });
       expect(result1).toMatchObject({
