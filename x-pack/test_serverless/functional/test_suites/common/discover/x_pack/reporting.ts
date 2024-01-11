@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -30,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const getReport = async () => {
     // close any open notification toasts
-    await PageObjects.reporting.clearToastNotifications();
+    await toasts.dismissAllToasts();
 
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
