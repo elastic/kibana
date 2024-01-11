@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/security-plugin-types-server';
 
+import { MAX_NAME_LENGTH, ROLE_DESCRIPTION_METADATA_KEY } from '../../../../../common/constants';
 import type { ElasticsearchRole } from '../../../../authorization';
 import { transformPrivilegesToElasticsearchPrivileges } from '../../../../lib';
 
@@ -51,7 +52,16 @@ export function getPutPayloadSchema(
      * An optional meta-data dictionary. Within the metadata, keys that begin with _ are reserved
      * for system usage.
      */
-    metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    metadata: schema.maybe(
+      schema.object(
+        {
+          [ROLE_DESCRIPTION_METADATA_KEY]: schema.maybe(
+            schema.string({ maxLength: MAX_NAME_LENGTH })
+          ),
+        },
+        { unknowns: 'allow' }
+      )
+    ),
 
     /**
      * Elasticsearch specific portion of the role definition.

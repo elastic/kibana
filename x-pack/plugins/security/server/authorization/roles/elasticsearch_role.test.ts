@@ -11,6 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { transformElasticsearchRoleToRole } from './elasticsearch_role';
 import type { ElasticsearchRole } from './elasticsearch_role';
+import { ROLE_DESCRIPTION_METADATA_KEY } from '../../../common/constants';
 
 const roles = [
   {
@@ -289,4 +290,38 @@ describe('#transformElasticsearchRoleToRole', () => {
       { name: 'default-malformed', _transform_error: ['kibana'] },
     ]
   );
+
+  describe('description', () => {
+    const elasticsearchRole = roles[0];
+
+    it('should be set to empty string if metadata description is not set', () => {
+      const role = transformElasticsearchRoleToRole(
+        [],
+        {
+          ...omit(elasticsearchRole, 'name'),
+          metadata: {},
+        },
+        elasticsearchRole.name,
+        'kibana-.kibana',
+        loggerMock.create()
+      );
+      expect(role).toHaveProperty('description', '');
+    });
+
+    it('should contain the description if metadata description is set', () => {
+      const role = transformElasticsearchRoleToRole(
+        [],
+        {
+          ...omit(elasticsearchRole, 'name'),
+          metadata: {
+            [ROLE_DESCRIPTION_METADATA_KEY]: 'role-description',
+          },
+        },
+        elasticsearchRole.name,
+        'kibana-.kibana',
+        loggerMock.create()
+      );
+      expect(role).toHaveProperty('description', 'role-description');
+    });
+  });
 });

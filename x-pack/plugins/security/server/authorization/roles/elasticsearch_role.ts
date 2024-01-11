@@ -10,7 +10,10 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import type { Role, RoleKibanaPrivilege } from '../../../common';
-import { RESERVED_PRIVILEGES_APPLICATION_WILDCARD } from '../../../common/constants';
+import {
+  RESERVED_PRIVILEGES_APPLICATION_WILDCARD,
+  ROLE_DESCRIPTION_METADATA_KEY,
+} from '../../../common/constants';
 import { getDetailedErrorMessage } from '../../errors';
 import { PrivilegeSerializer } from '../privilege_serializer';
 import { ResourceSerializer } from '../resource_serializer';
@@ -42,6 +45,7 @@ export function transformElasticsearchRoleToRole(
   );
   return {
     name,
+    description: elasticsearchRole?.metadata?.[ROLE_DESCRIPTION_METADATA_KEY] || '',
     metadata: elasticsearchRole.metadata,
     transient_metadata: elasticsearchRole.transient_metadata,
     elasticsearch: {

@@ -81,6 +81,29 @@ export class RoleValidator {
     return valid();
   }
 
+  public validateRoleDescription(role: Role): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    if (!role.description) {
+      return valid();
+    }
+
+    if (role.description.length > MAX_NAME_LENGTH) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.descriptionLengthWarningMessage',
+          {
+            defaultMessage: 'Description must not exceed {maxLength} characters.',
+            values: { maxLength: MAX_NAME_LENGTH },
+          }
+        )
+      );
+    }
+    return valid();
+  }
+
   public validateIndexPrivileges(role: Role): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();
@@ -310,12 +333,14 @@ export class RoleValidator {
 
   public validateForSave(role: Role): RoleValidationResult {
     const { isInvalid: isNameInvalid } = this.validateRoleName(role);
+    const { isInvalid: isDescriptionInvalid } = this.validateRoleDescription(role);
     const { isInvalid: areIndicesInvalid } = this.validateIndexPrivileges(role);
     const { isInvalid: areRemoteIndicesInvalid } = this.validateRemoteIndexPrivileges(role);
     const { isInvalid: areSpacePrivilegesInvalid } = this.validateSpacePrivileges(role);
 
     if (
       isNameInvalid ||
+      isDescriptionInvalid ||
       areIndicesInvalid ||
       areRemoteIndicesInvalid ||
       areSpacePrivilegesInvalid

@@ -92,3 +92,8 @@ export const SESSION_EXTENSION_THROTTLE_MS = 60 * 1000;
  * Route to get session info and extend session expiration
  */
 export const SESSION_ROUTE = '/internal/security/session';
+
+/**
+ * Name of the role metadata key that stores the role description.
+ */
+export const ROLE_DESCRIPTION_METADATA_KEY = 'kibana_description';

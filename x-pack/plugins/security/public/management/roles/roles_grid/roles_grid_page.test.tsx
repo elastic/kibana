@@ -53,23 +53,33 @@ describe('<RolesGridPage />', () => {
     apiClientMock.getRoles.mockResolvedValue([
       {
         name: 'test-role-1',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
       {
         name: 'reserved-role',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
         metadata: { _reserved: true },
       },
       {
         name: 'disabled-role',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
         transient_metadata: { enabled: false },
       },
       {
         name: 'special%chars%role',
+        description: '',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
+        name: 'role-with-description',
+        description: 'role-description',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
@@ -191,23 +201,33 @@ describe('<RolesGridPage />', () => {
     expect(wrapper.find(EuiBasicTable).props().items).toEqual([
       {
         name: 'disabled-role',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
         transient_metadata: { enabled: false },
       },
       {
         name: 'reserved-role',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
         metadata: { _reserved: true },
       },
       {
+        name: 'role-with-description',
+        description: 'role-description',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
         name: 'special%chars%role',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
       {
         name: 'test-role-1',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
@@ -218,17 +238,26 @@ describe('<RolesGridPage />', () => {
     expect(wrapper.find(EuiBasicTable).props().items).toEqual([
       {
         name: 'disabled-role',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
         transient_metadata: { enabled: false },
       },
       {
+        name: 'role-with-description',
+        description: 'role-description',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
         name: 'special%chars%role',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
       {
         name: 'test-role-1',
+        description: '',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
