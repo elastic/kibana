@@ -11,12 +11,6 @@ export interface HistogramData {
   g: string;
 }
 
-export interface AlertsAggregation {
-  alertsByGrouping: {
-    buckets: AlertsGroupBucket[];
-  };
-}
-
 export interface AlertsBucket {
   key_as_string: string;
   key: number;

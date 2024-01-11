@@ -21,15 +21,7 @@ import { useVisualizationResponse } from './use_visualization_response';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();
-  const {
-    inputId = InputsModelId.global,
-    id,
-    isDonut,
-    label,
-    donutTextWrapperClassName,
-    onLoad,
-    ...lensProps
-  } = props;
+  const { inputId = InputsModelId.global, id, isDonut, label, onLoad, ...lensProps } = props;
   const { session, refetchByRestartingSession, refetchByDeletingSession } =
     useRefetchByRestartingSession({
       inputId,
@@ -122,11 +114,9 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   if (isDonut) {
     return (
       <DonutChartWrapper
-        isChartEmbeddablesEnabled={true}
         dataExists={dataExists}
         label={label}
         title={visualizationData ? <ChartLabel count={visualizationData[0]?.hits?.total} /> : null}
-        donutTextWrapperClassName={donutTextWrapperClassName}
         donutTextWrapperStyles={donutTextWrapperStyles}
       >
         <LensEmbeddable {...lensProps} id={id} onLoad={onEmbeddableLoad} />

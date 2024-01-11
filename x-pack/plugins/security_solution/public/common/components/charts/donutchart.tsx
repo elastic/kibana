@@ -62,9 +62,7 @@ export interface DonutChartProps {
 export interface DonutChartWrapperProps {
   children?: React.ReactElement;
   dataExists: boolean;
-  donutTextWrapperClassName?: string;
   donutTextWrapperStyles?: FlattenSimpleInterpolation;
-  isChartEmbeddablesEnabled?: boolean;
   label?: React.ReactElement | string;
   title: React.ReactElement | string | number | null;
 }
@@ -74,12 +72,10 @@ export const DonutTextWrapper = styled(EuiFlexGroup)<
   EuiFlexGroupProps & {
     $dataExists?: boolean;
     $donutTextWrapperStyles?: FlattenSimpleInterpolation;
-    $isChartEmbeddablesEnabled?: boolean;
     className?: string;
   }
 >`
-  top: ${({ $isChartEmbeddablesEnabled, $dataExists }) =>
-    $isChartEmbeddablesEnabled && !$dataExists ? `66%` : `34%;`};
+  top: ${({ $dataExists }) => (!$dataExists ? `66%` : `34%;`)};
   width: 100%;
   max-width: 77px;
   position: absolute;
@@ -97,9 +93,7 @@ export const StyledEuiFlexItem = styled(EuiFlexItem)`
 const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
   children,
   dataExists,
-  donutTextWrapperClassName,
   donutTextWrapperStyles,
-  isChartEmbeddablesEnabled,
   label,
   title,
 }) => {
@@ -110,7 +104,6 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
     }),
     [euiTheme.colors.disabled]
   );
-  const className = isChartEmbeddablesEnabled ? undefined : 'eui-textTruncate';
 
   return (
     <EuiFlexGroup
@@ -120,26 +113,20 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
       gutterSize="l"
       data-test-subj="donut-chart"
     >
-      <StyledEuiFlexItem grow={isChartEmbeddablesEnabled}>
+      <StyledEuiFlexItem grow={true}>
         <DonutTextWrapper
           $dataExists={dataExists}
           $donutTextWrapperStyles={donutTextWrapperStyles}
-          $isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
           alignItems="center"
-          className={donutTextWrapperClassName}
           direction="column"
           gutterSize="none"
           justifyContent="center"
         >
           <EuiFlexItem>{title}</EuiFlexItem>
           {label && (
-            <EuiFlexItem className={className}>
+            <EuiFlexItem>
               <EuiToolTip content={label}>
-                <EuiText
-                  className={className}
-                  size="s"
-                  style={dataExists ? undefined : emptyLabelStyle}
-                >
+                <EuiText size="s" style={dataExists ? undefined : emptyLabelStyle}>
                   {label}
                 </EuiText>
               </EuiToolTip>
@@ -185,12 +172,7 @@ export const DonutChart = ({
   );
 
   return (
-    <DonutChartWrapper
-      dataExists={data != null && data.length > 0}
-      label={label}
-      title={title}
-      isChartEmbeddablesEnabled={false}
-    >
+    <DonutChartWrapper dataExists={data != null && data.length > 0} label={label} title={title}>
       <>
         {data == null || totalCount == null || totalCount === 0 ? (
           <DonutChartEmpty size={height} />

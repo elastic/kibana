@@ -72,19 +72,15 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
 
   return (
     <AlertsHistogramPanel
-      combinedQueries={combinedQueries}
       filters={filtersForSignalsByCategory}
       headerChildren={headerChildren}
-      legendPosition={'right'}
       onlyField={onlyField}
       paddingSize={paddingSize}
-      query={query}
       showLegend={showLegend}
       showLinkToAlerts={onlyField == null ? true : false}
       showStackBy={onlyField == null}
       showTotalAlertsCount={true}
       signalIndexName={signalIndexName}
-      runtimeMappings={runtimeMappings}
       title={i18n.ALERT_TREND}
       titleSize={onlyField == null ? 'm' : 's'}
       updateDateRange={updateDateRangeCallback}

@@ -6,38 +6,12 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Embeddable } from '@kbn/embeddable-plugin/public';
-import type { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } from './types';
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import type { LensDataTableEmbeddable } from '../../../../common/components/visualization_actions/types';
-
-const EMPTY_ALERTS_DATA: HistogramData[] = [];
-
-export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggregation> | null) => {
-  const groupBuckets: AlertsGroupBucket[] =
-    alertsData?.aggregations?.alertsByGrouping?.buckets ?? [];
-  return groupBuckets.reduce<HistogramData[]>(
-    (acc, { key_as_string: keyAsString, key: group, alerts }) => {
-      const alertsBucket: AlertsBucket[] = alerts.buckets ?? [];
-
-      return [
-        ...acc,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        ...alertsBucket.map(({ key, doc_count }: AlertsBucket) => ({
-          x: key,
-          y: doc_count,
-          g: keyAsString ?? group.toString(),
-        })),
-      ];
-    },
-    EMPTY_ALERTS_DATA
-  );
-};
 
 export const getAlertsHistogramQuery = (
   stackByField: string,
@@ -107,22 +81,6 @@ export const showInitialLoadingSpinner = ({
   isInitialLoading: boolean;
   isLoadingAlerts: boolean;
 }): boolean => isInitialLoading && isLoadingAlerts;
-
-export const parseCombinedQueries = (query?: string) => {
-  try {
-    return query != null && !isEmpty(query) ? JSON.parse(query) : {};
-  } catch {
-    return {};
-  }
-};
-
-export const buildCombinedQueries = (query?: string) => {
-  try {
-    return isEmpty(query) ? [] : [parseCombinedQueries(query)];
-  } catch {
-    return [];
-  }
-};
 
 interface CreateResetGroupByFieldActionProps {
   callback?: () => void;
