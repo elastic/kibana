@@ -2,7 +2,10 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
-      queue: n2-4-virt
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-4
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 16
@@ -14,7 +17,10 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
-      queue: n2-4-virt
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-4
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
