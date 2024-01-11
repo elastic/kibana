@@ -36,7 +36,7 @@ export interface HighlightedFieldsTableRow {
      */
     field: string;
     /**
-     * Highlighted overrideField name
+     * Highlighted field's original name, when the field is overridden
      */
     originalField?: string;
     /**
