@@ -76,7 +76,7 @@ describe.skip('When using isolate action from response actions console', () => {
     enterConsoleCommand(renderResult, 'isolate');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+      'The current version of the Endpoint Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
     );
   });
 
