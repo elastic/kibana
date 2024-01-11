@@ -14,7 +14,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
 import { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../types';
-
 jest.mock('../../id_generator');
 
 const fieldsOne = [
@@ -98,15 +97,6 @@ describe('Textbased Data Source', () => {
       layers: {
         a: {
           columns: [
-            {
-              columnId: 'col1',
-              fieldName: 'Test 1',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
-          allColumns: [
             {
               columnId: 'col1',
               fieldName: 'Test 1',
@@ -208,15 +198,6 @@ describe('Textbased Data Source', () => {
         layers: {
           a: {
             columns: [],
-            allColumns: [
-              {
-                columnId: 'col1',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
             query: { esql: 'FROM foo' },
             index: 'foo',
           },
@@ -253,15 +234,6 @@ describe('Textbased Data Source', () => {
           newLayer: {
             index: 'foo',
             query: { esql: 'FROM foo' },
-            allColumns: [
-              {
-                columnId: 'col1',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
           },
         },
@@ -278,15 +250,6 @@ describe('Textbased Data Source', () => {
           layers: {
             a: {
               columns: [],
-              allColumns: [
-                {
-                  columnId: 'col1',
-                  fieldName: 'Test 1',
-                  meta: {
-                    type: 'number',
-                  },
-                },
-              ],
               query: { esql: 'FROM foo' },
               index: 'foo',
             },
@@ -312,22 +275,6 @@ describe('Textbased Data Source', () => {
           layers: {
             a: {
               columns: [
-                {
-                  columnId: 'a',
-                  fieldName: 'Test 1',
-                  meta: {
-                    type: 'number',
-                  },
-                },
-                {
-                  columnId: 'b',
-                  fieldName: 'Test 2',
-                  meta: {
-                    type: 'number',
-                  },
-                },
-              ],
-              allColumns: [
                 {
                   columnId: 'a',
                   fieldName: 'Test 1',
@@ -401,23 +348,6 @@ describe('Textbased Data Source', () => {
         ],
         layers: {
           newid: {
-            allColumns: [
-              {
-                columnId: 'bytes',
-                fieldName: 'bytes',
-                inMetricDimension: true,
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'dest',
-                fieldName: 'dest',
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
             columns: [
               {
                 columnId: 'bytes',
@@ -552,24 +482,6 @@ describe('Textbased Data Source', () => {
         ],
         layers: {
           newid: {
-            allColumns: [
-              {
-                columnId: '@timestamp',
-                fieldName: '@timestamp',
-                inMetricDimension: true,
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                columnId: 'dest',
-                fieldName: 'dest',
-                inMetricDimension: true,
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
             columns: [
               {
                 columnId: '@timestamp',
@@ -623,80 +535,12 @@ describe('Textbased Data Source', () => {
     });
   });
 
-  describe('#suggestsLimitedColumns', () => {
-    it('should return true if query returns big number of columns', () => {
-      const state = {
-        totalFields: 5,
-        layers: {
-          a: {
-            query: { esql: 'from foo' },
-            index: 'foo',
-            allColumns: [
-              {
-                id: 'a',
-                name: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                id: 'b',
-                name: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                id: 'c',
-                name: 'Test 3',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                id: 'd',
-                name: 'Test 4',
-                meta: {
-                  type: 'string',
-                },
-              },
-              {
-                id: 'e',
-                name: 'Test 5',
-                meta: {
-                  type: 'string',
-                },
-              },
-            ],
-          },
-        },
-      } as unknown as TextBasedPrivateState;
-      expect(TextBasedDatasource?.suggestsLimitedColumns?.(state)).toBeTruthy();
-    });
-  });
-
   describe('#getUserMessages', () => {
     it('should use the results of getUserMessages directly when single layer', () => {
       const state = {
         layers: {
           a: {
             columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
-            allColumns: [
               {
                 columnId: 'a',
                 fieldName: 'Test 1',
@@ -779,22 +623,6 @@ describe('Textbased Data Source', () => {
                 },
               },
             ],
-            allColumns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             query: { esql: 'FROM foo' },
             index: '1',
           },
@@ -811,22 +639,6 @@ describe('Textbased Data Source', () => {
         layers: {
           a: {
             columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
-            allColumns: [
               {
                 columnId: 'a',
                 fieldName: 'Test 1',
@@ -869,22 +681,6 @@ describe('Textbased Data Source', () => {
         layers: {
           a: {
             columns: [
-              {
-                columnId: 'a',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                columnId: 'b',
-                fieldName: 'Test 2',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
-            allColumns: [
               {
                 columnId: 'a',
                 fieldName: 'Test 1',
