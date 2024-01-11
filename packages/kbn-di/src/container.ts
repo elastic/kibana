@@ -13,23 +13,29 @@ import {
   isServiceIdParam,
   isServiceMarkerParam,
 } from './service';
+import type { ServiceFactory } from './types/service_factory';
+import type { ServiceConstructor } from './types/service_contructor';
+import type { ServiceRegistration } from './types/service_registration';
+import { isConstructorRegistration, isFactoryRegistration } from './helpers';
 
-export interface InjectionContainer {
+export interface InjectionContainer<Ctx = unknown> {
+  getId(): string;
+
+  isRoot(): boolean;
+
+  getParent(): InjectionContainer | undefined;
+
+  getContext(): Ctx;
+
+  getServiceMetadata(): ServiceMetadataRegistry;
+
+  createChild<ChildCtx = unknown>(
+    options: CreateChildOptions<ChildCtx>
+  ): InjectionContainer<ChildCtx>;
+
   get<T = unknown>(identifier: ServiceIdentifier<T>): T;
 
-  register<T = unknown>(registration: ContainerServiceRegistrationOptions<T>): void;
-}
-
-interface ServiceRegistrationOptions {}
-
-interface ServiceFactoryRegistration<T> {
-  id: ServiceIdentifier<T>;
-  scope: ServiceScope;
-  // TODO: implement. If true, the service will be registered at the root container
-  atRoot?: boolean;
-  factory: (...args: any[]) => T;
-  parameters: InjectionParameter[];
-  // TODO: markers for
+  register<T = unknown>(registration: ServiceRegistration<T>): void;
 }
 
 interface ServiceMetadata<T = unknown> {
@@ -41,61 +47,128 @@ interface ServiceMetadata<T = unknown> {
    * The scope for this service
    */
   scope: ServiceScope;
-  /**
-   * The instance of the service. Will be undefined until instantiated.
-   */
-  instance: T | undefined;
 
   /**
    * The type of provider that was used to define this service
    * - factory: registered using a {@link ServiceFactoryRegistration}
-   * - constructor: TODO
+   * - constructor: registered using a {@link ServiceConstructorRegistration}
    * - instance: TODO
    */
   providerType: 'factory' | 'constructor' | 'instance';
 
   /**
-   * The factory function
+   * The factory definition
    * only present when providerType === 'factory'
    */
-  factory: (...args: any[]) => T;
+  factory?: ServiceFactory<T>;
   /**
-   * The factory parameter types
+   * The constructor definition
    * only present when providerType === 'factory'
    */
-  factoryParameters: InjectionParameter[];
+  service?: ServiceConstructor<T>;
 }
 
-type ContainerServiceRegistrationOptions<T = unknown> = ServiceFactoryRegistration<T>;
-
-export interface InjectionContainerConstructorOptions {
+export interface InjectionContainerConstructorOptions<Ctx = unknown> {
   containerId: string;
+  context: Ctx;
+  parent?: InjectionContainerImpl;
 }
 
-export class InjectionContainerImpl implements InjectionContainer {
-  public readonly containerId;
+export interface CreateChildOptions<Ctx = unknown> {
+  id: string;
+  context: Ctx;
+}
 
-  private readonly serviceMetadataMap = new Map<ServiceIdentifier, ServiceMetadata<unknown>>();
+type ServiceMetadataRegistry = Map<ServiceIdentifier, ServiceMetadata<unknown>>;
 
-  constructor({ containerId }: InjectionContainerConstructorOptions) {
+export const CONTEXT_SERVICE_KEY = Symbol('InjectionContainerContext');
+
+export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer<Ctx> {
+  protected readonly containerId: string;
+  protected readonly context: Ctx;
+
+  protected readonly root: InjectionContainerImpl;
+  protected readonly parent: InjectionContainerImpl | undefined;
+  protected readonly childMap: Map<string, InjectionContainerImpl> = new Map();
+
+  protected readonly serviceMetadata: ServiceMetadataRegistry = new Map();
+  protected readonly serviceMap = new Map();
+
+  constructor({ containerId, parent, context }: InjectionContainerConstructorOptions<Ctx>) {
     this.containerId = containerId;
+    this.parent = parent;
+    this.context = context;
+    this.root = getRoot(this);
+    this.serviceMap.set(CONTEXT_SERVICE_KEY, this.context);
+    this.serviceMetadata.set(CONTEXT_SERVICE_KEY, {
+      id: CONTEXT_SERVICE_KEY,
+      scope: 'container',
+      providerType: 'factory', // TODO: need to change to instance
+    });
+  }
+
+  getId() {
+    return this.containerId;
+  }
+
+  isRoot() {
+    return this.parent === undefined;
+  }
+
+  getParent() {
+    return this.parent;
+  }
+
+  getContext() {
+    return this.context;
+  }
+
+  getServiceMetadata() {
+    return this.serviceMetadata;
   }
 
   get<T = unknown>(identifier: ServiceIdentifier<T>): T {
     return this._resolveService(identifier, []);
   }
 
-  register<T = unknown>(registration: ContainerServiceRegistrationOptions<T>): void {
+  createChild<ChildCtx = unknown>({
+    id: childId,
+    context: childContext,
+  }: CreateChildOptions<ChildCtx>): InjectionContainer<ChildCtx> {
+    if (this.childMap.has(childId)) {
+      throw new Error(`Child container of ${this.containerId} already exists for id ${childId}`);
+    }
+
+    const child = new InjectionContainerImpl({
+      parent: this,
+      context: childContext,
+      containerId: childId,
+    });
+    this.childMap.set(childId, child);
+
+    return child;
+  }
+
+  register<T = unknown>(registration: ServiceRegistration<T>): void {
     // TODO: check if service present
 
+    // TODO: check scope / registerAt to find the correct owner
+    const registry = this.root.getServiceMetadata();
+
     if (isFactoryRegistration(registration)) {
-      this.serviceMetadataMap.set(registration.id, {
+      registry.set(registration.id, {
         id: registration.id,
-        scope: registration.scope, // TODO: if scope global we will want to register on the top container instead
+        scope: registration.scope,
         providerType: 'factory',
         factory: registration.factory,
-        factoryParameters: registration.parameters,
-        instance: undefined,
+      });
+    } else if (isConstructorRegistration(registration)) {
+      // TODO: should probably convert everything to factory given it's easy and would simplify impl
+      registry.set(registration.id, {
+        id: registration.id,
+        scope: registration.scope,
+        providerType: 'constructor',
+        service: registration.service,
       });
     } else {
       // TODO later
@@ -103,54 +176,94 @@ export class InjectionContainerImpl implements InjectionContainer {
     }
   }
 
-  _resolveService<T>(identifier: ServiceIdentifier<T>, identifierChain: ServiceIdentifier[]): T {
-    // TODO: check cyclic dependency of identifiers
+  protected _resolveService<T>(
+    identifier: ServiceIdentifier<T>,
+    identifierChain: ServiceIdentifier[]
+  ): T {
+    const cycle = getCycle(identifier, identifierChain);
+    if (cycle) {
+      throw new Error(`Cyclic dependency detected: ${cycle.join('->')}`);
+    }
 
+    const registry = this.root.getServiceMetadata();
     // TODO: we will want to check on the parents too
-    const metadata = this.serviceMetadataMap.get(identifier);
+    const metadata = registry.get(identifier);
 
     if (!metadata) {
       throw new Error(
-        `Service ${identifier} not found in container chain starting at id ${this.containerId}`
+        `Service ${String(identifier)} not found in container chain starting at id ${
+          this.containerId
+        }`
       );
     }
 
-    if (metadata.instance) {
-      return metadata.instance as T;
+    const scope = metadata.scope;
+    const owningContainer = scope === 'global' ? this.root : this;
+
+    let instance: T = owningContainer.serviceMap.get(identifier);
+    if (instance) {
+      return instance;
     }
 
-    let instance: T;
+    const resolveParameter = (parameter: InjectionParameter): unknown => {
+      if (isServiceIdParam(parameter)) {
+        return owningContainer._resolveService(parameter.serviceId, [
+          ...identifierChain,
+          identifier,
+        ]);
+      } else if (isServiceMarkerParam(parameter)) {
+        // TODO: inject all
+      } else {
+        throw new Error(`unsupported injection parameter type: ${parameter}`);
+      }
+    };
+
     if (metadata.providerType === 'factory') {
       const parameters: unknown[] = [];
-      for (const parameter of metadata.factoryParameters!) {
-        if (isServiceIdParam(parameter)) {
-          parameters.push(
-            this._resolveService(parameter.serviceId, [...identifierChain, identifier])
-          );
-        } else if (isServiceMarkerParam(parameter)) {
-          // TODO: inject all
-        } else {
-          throw new Error(`unsupported injection parameter type: ${parameter}`);
-        }
+      for (const parameter of metadata.factory!.params) {
+        parameters.push(resolveParameter(parameter));
       }
       try {
-        instance = metadata.factory!(...parameters) as T;
+        instance = metadata.factory!.fn(...parameters) as T;
       } catch (e) {
-        throw new Error(`Error calling factory for service ${identifier}: ${e.message}`);
+        throw new Error(`Error calling factory for service ${String(identifier)}: ${e.message}`);
+      }
+    } else if (metadata.providerType === 'constructor') {
+      const parameters: unknown[] = [];
+      for (const parameter of metadata.service!.params) {
+        parameters.push(resolveParameter(parameter));
+      }
+      try {
+        instance = new metadata.service!.type(...parameters) as T;
+      } catch (e) {
+        throw new Error(`Error calling factory for service ${String(identifier)}: ${e.message}`);
       }
     } else {
       // TODO later
       throw new Error('unsupported for now');
     }
 
-    metadata.instance = instance;
+    owningContainer.serviceMap.set(identifier, instance);
 
     return instance;
   }
 }
 
-function isFactoryRegistration<T>(
-  registration: ContainerServiceRegistrationOptions<T>
-): registration is ServiceFactoryRegistration<T> {
-  return 'factory' in registration && 'parameters' in registration;
+function getRoot(container: InjectionContainerImpl) {
+  let current = container;
+  while (!current.isRoot()) {
+    current = current.getParent()!;
+  }
+  return current;
+}
+
+function getCycle(
+  next: ServiceIdentifier,
+  chain: ServiceIdentifier[]
+): ServiceIdentifier[] | undefined {
+  const lastIndex = chain.lastIndexOf(next);
+  if (lastIndex > -1) {
+    return [...chain.slice(lastIndex), next];
+  }
+  return undefined;
 }

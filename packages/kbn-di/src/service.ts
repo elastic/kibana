@@ -9,11 +9,9 @@
 /**
  * Only string for now.
  */
-export type ServiceIdentifier<T = unknown> = string;
+export type ServiceIdentifier<T = unknown> = string | symbol;
 
 export type ServiceScope = 'global' | 'container';
-
-// TODO from here
 
 /**
  *
@@ -21,7 +19,7 @@ export type ServiceScope = 'global' | 'container';
  */
 interface ServiceIdParameter {
   type: 'serviceId';
-  serviceId: string;
+  serviceId: ServiceIdentifier;
 }
 
 /**
@@ -35,7 +33,7 @@ interface ServiceMarkerParameter {
 
 export type InjectionParameter = ServiceIdParameter | ServiceMarkerParameter;
 
-export function serviceId(id: string): ServiceIdParameter {
+export function serviceId(id: ServiceIdentifier): ServiceIdParameter {
   return {
     type: 'serviceId',
     serviceId: id,

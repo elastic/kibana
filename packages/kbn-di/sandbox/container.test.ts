@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { InjectionContainerImpl } from '../src/container';
+/* eslint-disable max-classes-per-file */
+
+import { InjectionContainerImpl, CONTEXT_SERVICE_KEY } from '../src/container';
 import { serviceId } from '../src/service';
 
 interface TestInterfaceA {
@@ -18,39 +20,335 @@ interface TestInterfaceB {
 }
 
 describe('InjectionContainerImpl', () => {
-  describe('registration', () => {
-    // TODO
-  });
-
   describe('single container', () => {
     it('injects one factory into another one', () => {
-      const container = new InjectionContainerImpl({ containerId: 'root' });
+      const container = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
 
       container.register<TestInterfaceA>({
         id: 'TestA',
         scope: 'global',
-        factory: () => {
-          return {
-            foo: 'it works',
-          };
+        factory: {
+          fn: () => {
+            return {
+              foo: 'it works',
+            };
+          },
+          params: [],
         },
-        parameters: [],
       });
 
       container.register<TestInterfaceB>({
         id: 'TestB',
         scope: 'global',
-        factory: (testA: TestInterfaceA) => {
-          return {
-            bar: `value from A: ${testA.foo}`,
-          };
+        factory: {
+          fn: (testA: TestInterfaceA) => {
+            return {
+              bar: `value from A: ${testA.foo}`,
+            };
+          },
+          params: [serviceId('TestA')],
         },
-        parameters: [serviceId('TestA')],
       });
 
       const testB = container.get<TestInterfaceB>('TestB');
 
       expect(testB.bar).toEqual(`value from A: it works`);
+    });
+
+    it('injects one constructor service into another one', () => {
+      const container = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      class ClassA {
+        getA() {
+          return 'A';
+        }
+      }
+
+      class ClassB {
+        constructor(private classA: ClassA) {}
+
+        getB() {
+          return `value from B: ${this.classA.getA()}`;
+        }
+      }
+
+      container.register<ClassA>({
+        id: 'ClassA',
+        scope: 'global',
+        service: {
+          type: ClassA,
+          params: [],
+        },
+      });
+
+      container.register<ClassB>({
+        id: 'ClassB',
+        scope: 'global',
+        service: {
+          type: ClassB,
+          params: [serviceId('ClassA')],
+        },
+      });
+
+      const instanceB = container.get<ClassB>('ClassB');
+
+      expect(instanceB.getB()).toEqual(`value from B: A`);
+    });
+
+    it('only calls a factory once for a given container', () => {
+      const container = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      container.register<TestInterfaceA>({
+        id: 'TestA',
+        scope: 'global',
+        factory: {
+          fn: jest.fn(() => {
+            return {
+              foo: 'it works',
+            };
+          }),
+          params: [],
+        },
+      });
+
+      const resultA = container.get<TestInterfaceA>('TestA');
+      const resultB = container.get<TestInterfaceA>('TestA');
+
+      expect(resultA).toBe(resultB);
+    });
+  });
+
+  describe('parent and single child containers', () => {
+    it('retrieves global service registered to parent from child', () => {
+      const root = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      const child = root.createChild({
+        id: 'child',
+        context: {},
+      });
+
+      root.register<string>({
+        id: 'someString',
+        scope: 'global',
+        factory: {
+          fn: () => {
+            return 'some string';
+          },
+          params: [],
+        },
+      });
+
+      const someString = child.get<string>('someString');
+
+      expect(someString).toEqual('some string');
+    });
+
+    it('retrieves global service registered to child from parent', () => {
+      const root = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      const child = root.createChild({
+        id: 'child',
+        context: {},
+      });
+
+      child.register<string>({
+        id: 'someString',
+        scope: 'global',
+        factory: {
+          fn: () => {
+            return 'some string';
+          },
+          params: [],
+        },
+      });
+
+      const someString = root.get<string>('someString');
+
+      expect(someString).toEqual('some string');
+    });
+
+    it('shares the global instance between parent and child', () => {
+      const root = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      const child = root.createChild({
+        id: 'child',
+        context: {},
+      });
+
+      const factory = jest.fn(() => {
+        return { someObject: true };
+      });
+      child.register<Record<string, unknown>>({
+        id: 'someService',
+        scope: 'global',
+        factory: {
+          fn: factory,
+          params: [],
+        },
+      });
+
+      const serviceFromRoot = root.get<string>('someService');
+      const serviceFromChild = child.get<string>('someService');
+
+      expect(factory).toHaveBeenCalledTimes(1);
+      expect(serviceFromRoot).toBe(serviceFromChild);
+    });
+  });
+
+  describe('parent and two children', () => {
+    it('instantiate container-scoped services once per child', () => {
+      const root = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      const child1 = root.createChild({
+        id: 'child1',
+        context: {
+          someMeta: 'foo',
+        },
+      });
+
+      const child2 = root.createChild({
+        id: 'child2',
+        context: {
+          someMeta: 'bar',
+        },
+      });
+
+      const factory = jest.fn().mockImplementation((context: { someMeta: string }) => {
+        return `created with meta ${context.someMeta}`;
+      });
+
+      root.register<string>({
+        id: 'containerService',
+        scope: 'container',
+        factory: {
+          fn: factory,
+          params: [serviceId(CONTEXT_SERVICE_KEY)],
+        },
+      });
+
+      const child1Service = child1.get<string>('containerService');
+      expect(child1Service).toEqual('created with meta foo');
+
+      const child2Service = child2.get<string>('containerService');
+      expect(child2Service).toEqual('created with meta bar');
+
+      expect(factory).toHaveBeenCalledTimes(2);
+
+      child1.get<string>('containerService');
+      child2.get<string>('containerService');
+
+      expect(factory).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('Cyclic dependencies', () => {
+    it('detects direct graphs', () => {
+      const root = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      root.register<string>({
+        id: 'stringA',
+        scope: 'container',
+        factory: {
+          fn: (stringB: string) => {
+            return `from stringA: ${stringB}`;
+          },
+          params: [serviceId('stringB')],
+        },
+      });
+
+      root.register<string>({
+        id: 'stringB',
+        scope: 'container',
+        factory: {
+          fn: (stringA: string) => {
+            return `from stringB: ${stringA}`;
+          },
+          params: [serviceId('stringA')],
+        },
+      });
+
+      expect(() => root.get('stringA')).toThrowErrorMatchingInlineSnapshot(
+        `"Cyclic dependency detected: stringA->stringB->stringA"`
+      );
+    });
+
+    it('detects indirect graphs', () => {
+      const root = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      root.register<string>({
+        id: 'stringA',
+        scope: 'container',
+        factory: {
+          fn: (stringB: string) => {
+            return `from stringA: ${stringB}`;
+          },
+          params: [serviceId('stringB')],
+        },
+      });
+
+      root.register<string>({
+        id: 'stringB',
+        scope: 'container',
+        factory: {
+          fn: (stringC: string) => {
+            return `from stringB: ${stringC}`;
+          },
+          params: [serviceId('stringC')],
+        },
+      });
+
+      root.register<string>({
+        id: 'stringC',
+        scope: 'container',
+        factory: {
+          fn: (stringD: string) => {
+            return `from stringC: ${stringD}`;
+          },
+          params: [serviceId('stringD')],
+        },
+      });
+
+      root.register<string>({
+        id: 'stringD',
+        scope: 'container',
+        factory: {
+          fn: (stringB: string) => {
+            return `from stringD: ${stringB}`;
+          },
+          params: [serviceId('stringB')],
+        },
+      });
+
+      expect(() => root.get('stringA')).toThrowErrorMatchingInlineSnapshot(
+        `"Cyclic dependency detected: stringB->stringC->stringD->stringB"`
+      );
     });
   });
 });
