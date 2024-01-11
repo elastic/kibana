@@ -223,6 +223,8 @@ const patchEqlParams = (
     timestampField: params.timestamp_field ?? existingRule.timestampField,
     eventCategoryOverride: params.event_category_override ?? existingRule.eventCategoryOverride,
     tiebreakerField: params.tiebreaker_field ?? existingRule.tiebreakerField,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -257,6 +259,8 @@ const patchThreatMatchParams = (
     threatIndicatorPath: params.threat_indicator_path ?? existingRule.threatIndicatorPath,
     concurrentSearches: params.concurrent_searches ?? existingRule.concurrentSearches,
     itemsPerSearch: params.items_per_search ?? existingRule.itemsPerSearch,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
