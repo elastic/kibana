@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
+  assignStatically,
   removeAssignment,
   updateAssignmentColor,
   updateAssignmentRule,
@@ -30,7 +31,7 @@ export function Assignment({
   assignment,
   disableDelete,
   index,
-  total,
+  assignments,
   canPickColor,
   editable,
   palette,
@@ -42,7 +43,7 @@ export function Assignment({
 }: {
   data: ColorMappingInputData;
   index: number;
-  total: number;
+  assignments: ColorMapping.Config['assignments'];
   colorMode: ColorMapping.Config['colorMode'];
   assignment: ColorMapping.Config['assignments'][number];
   disableDelete: boolean;
@@ -74,8 +75,9 @@ export function Assignment({
           getPaletteFn={getPaletteFn}
           index={index}
           palette={palette}
-          total={total}
+          total={assignments.length}
           onColorChange={(color) => {
+            dispatch(assignStatically(assignments));
             dispatch(updateAssignmentColor({ assignmentIndex: index, color }));
           }}
         />
@@ -91,6 +93,7 @@ export function Assignment({
           options={data.type === 'categories' ? data.categories : []}
           specialTokens={specialTokens}
           updateValue={(values: Array<string | string[]>) => {
+            dispatch(assignStatically(assignments));
             dispatch(
               updateAssignmentRule({
                 assignmentIndex: index,
@@ -112,6 +115,7 @@ export function Assignment({
               minInclusive,
               maxInclusive,
             };
+            dispatch(assignStatically(assignments));
             dispatch(updateAssignmentRule({ assignmentIndex: index, rule }));
           }}
         />
@@ -122,7 +126,10 @@ export function Assignment({
           iconType="trash"
           size="xs"
           disabled={disableDelete}
-          onClick={() => dispatch(removeAssignment(index))}
+          onClick={() => {
+            dispatch(assignStatically(assignments));
+            dispatch(removeAssignment(index));
+          }}
           aria-label={i18n.translate(
             'coloring.colorMapping.assignments.deleteAssignmentButtonLabel',
             {

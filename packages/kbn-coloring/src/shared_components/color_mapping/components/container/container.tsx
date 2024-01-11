@@ -161,15 +161,15 @@ export function Container(props: {
                   <Assignment
                     data={props.data}
                     index={i}
-                    total={assignments.length}
+                    assignments={assignments}
                     colorMode={colorMode}
-                    editable={!autoAssignmentMode}
-                    canPickColor={!autoAssignmentMode && colorMode.type !== 'gradient'}
+                    editable={true}
+                    canPickColor={colorMode.type !== 'gradient'}
                     palette={palette}
                     isDarkMode={props.isDarkMode}
                     getPaletteFn={getPaletteFn}
                     assignment={assignment}
-                    disableDelete={assignments.length <= 1 || autoAssignmentMode}
+                    disableDelete={assignments.length <= 1}
                     specialTokens={props.specialTokens}
                     assignmentValuesCounter={assignmentValuesCounter}
                   />

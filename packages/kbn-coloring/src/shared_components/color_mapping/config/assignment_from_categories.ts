@@ -25,7 +25,18 @@ export function generateAutoAssignmentsForCategories(
 
   const autoRules: Array<ColorMapping.RuleMatchExactly | ColorMapping.RuleRange> =
     data.type === 'categories'
-      ? data.categories.map((c) => ({ type: 'matchExactly', values: [c] }))
+      ? data.categories // we loop colors automatically as multi-term assignments for a max of `assignableColors` length
+          .reduce<Array<typeof data.categories>>((categoriesGroups, category, index) => {
+            let groupedCategories = categoriesGroups[index % assignableColors];
+            if (groupedCategories) {
+              groupedCategories.push(category);
+            } else {
+              groupedCategories = [category];
+            }
+            categoriesGroups[index % assignableColors] = groupedCategories;
+            return categoriesGroups;
+          }, [])
+          .map((c) => ({ type: 'matchExactly', values: c }))
       : Array.from({ length: data.bins }, (d, i) => {
           const step = (data.max - data.min) / data.bins;
           return {
@@ -37,9 +48,8 @@ export function generateAutoAssignmentsForCategories(
           };
         });
 
-  const assignments = autoRules
-    .slice(0, assignableColors)
-    .map<ColorMapping.Config['assignments'][number]>((rule, colorIndex) => {
+  const assignments = autoRules.map<ColorMapping.Config['assignments'][number]>(
+    (rule, colorIndex) => {
       if (isCategorical) {
         return {
           rule,
@@ -59,7 +69,8 @@ export function generateAutoAssignmentsForCategories(
           touched: false,
         };
       }
-    });
+    }
+  );
 
   return assignments;
 }
