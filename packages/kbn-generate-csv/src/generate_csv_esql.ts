@@ -30,6 +30,7 @@ import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { zipObject } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 import { CONTENT_TYPE_CSV } from './constants';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
@@ -90,12 +91,12 @@ export class CsvESQLGenerator {
       params: {
         query: this.job.query.esql,
         filter,
+        // locale can be used for number/date formatting
+        locale: i18n.getLocale(),
         // TODO: time_zone support was temporarily removed from ES|QL,
         // we will need to add it back in once it is supported again.
         // https://github.com/elastic/elasticsearch/pull/102767
         // timezone
-        // TODO: pass locale from browser?
-        // locale
       },
     };
 

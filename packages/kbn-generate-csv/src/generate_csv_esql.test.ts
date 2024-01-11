@@ -115,7 +115,10 @@ describe('CsvESQLGenerator', () => {
       stream
     );
     const csvResult = await generateCsv.generateData();
-    expect(content).toMatchInlineSnapshot();
+    expect(content).toMatchInlineSnapshot(`
+      "
+      "
+    `);
     expect(csvResult.csv_contains_formulas).toBe(false);
   });
 
@@ -287,6 +290,7 @@ describe('CsvESQLGenerator', () => {
                 should: [],
               },
             },
+            locale: 'en',
             query: '',
           },
         },
