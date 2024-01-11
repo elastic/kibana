@@ -33,37 +33,42 @@ function isCreateFromTemplate(
 
 export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${API_ROUTE_WORKPAD}`,
-      validate: {
-        body: createRequestBodySchema,
-      },
       options: {
         body: {
           maxBytes: 26214400,
           accepts: ['application/json'],
         },
       },
-    },
-    catchErrorHandler(async (context, request, response) => {
-      let workpad = request.body as CanvasWorkpad;
-
-      if (isCreateFromTemplate(request.body)) {
-        const soClient = (await context.core).savedObjects.client;
-        const templateSavedObject = await soClient.get<TemplateAttributes>(
-          TEMPLATE_TYPE,
-          request.body.templateId
-        );
-        workpad = templateSavedObject.attributes.template;
-      }
-
-      const canvasContext = await context.canvas;
-      const createdObject = await canvasContext.workpad.create(workpad);
-
-      return response.ok({
-        body: { ...okResponse, id: createdObject.id },
-      });
+      access: 'internal',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { body: createRequestBodySchema },
+        },
+      },
+      catchErrorHandler(async (context, request, response) => {
+        let workpad = request.body as CanvasWorkpad;
+
+        if (isCreateFromTemplate(request.body)) {
+          const soClient = (await context.core).savedObjects.client;
+          const templateSavedObject = await soClient.get<TemplateAttributes>(
+            TEMPLATE_TYPE,
+            request.body.templateId
+          );
+          workpad = templateSavedObject.attributes.template;
+        }
+
+        const canvasContext = await context.canvas;
+        const createdObject = await canvasContext.workpad.create(workpad);
+
+        return response.ok({
+          body: { ...okResponse, id: createdObject.id },
+        });
+      })
+    );
 }

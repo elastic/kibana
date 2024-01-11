@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { LayerAction } from '../../../../types';
+import { FIRST_ACTION_ORDER } from './order_bounds';
 
 export const getOpenLayerSettingsAction = (props: {
   openLayerSettings: () => void;
@@ -17,11 +18,11 @@ export const getOpenLayerSettingsAction = (props: {
   });
 
   return {
-    id: 'openLayerSettings',
     displayName,
     execute: props.openLayerSettings,
     icon: 'gear',
     isCompatible: props.hasLayerSettings,
     'data-test-subj': 'lnsLayerSettings',
+    order: FIRST_ACTION_ORDER,
   };
 };

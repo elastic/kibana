@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export const VULNERABILITY_SEVERITY_FIELD = 'vulnerability.severity';
 import { i18n } from '@kbn/i18n';
 
 export const severitySchemaConfig = {
@@ -29,16 +28,32 @@ export const severitySortScript = (direction: string) => ({
     script: {
       lang: 'painless',
       inline:
-        "if(params.scores.containsKey(doc['vulnerability.severity'].value)) { return params.scores[doc['vulnerability.severity'].value];} return 1000;",
+        "if(doc.containsKey('vulnerability.severity') && !doc['vulnerability.severity'].empty && doc['vulnerability.severity'].size()!=0 && doc['vulnerability.severity'].value!=null && params.scores.containsKey(doc['vulnerability.severity'].value)) { return params.scores[doc['vulnerability.severity'].value];} return 0;",
       params: {
         scores: {
-          LOW: 0,
-          MEDIUM: 1,
-          HIGH: 2,
-          CRITICAL: 3,
+          LOW: 1,
+          MEDIUM: 2,
+          HIGH: 3,
+          CRITICAL: 4,
         },
       },
     },
     order: direction,
   },
 });
+
+/**
+ * Generates Painless sorting in case-insensitive manner
+ */
+export const getCaseInsensitiveSortScript = (field: string, direction: string) => {
+  return {
+    _script: {
+      type: 'string',
+      order: direction,
+      script: {
+        source: `doc["${field}"].value.toLowerCase()`,
+        lang: 'painless',
+      },
+    },
+  };
+};

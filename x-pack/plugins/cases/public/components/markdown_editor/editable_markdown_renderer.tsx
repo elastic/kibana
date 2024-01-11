@@ -46,7 +46,7 @@ const EditableMarkDownRenderer = forwardRef<
       options: { stripEmptyFields: false },
       schema: formSchema,
     });
-    const { submit, setFieldValue } = form;
+    const { submit, setFieldValue, isValid: isFormValid } = form;
 
     const setComment = useCallback(
       (newComment) => {
@@ -90,6 +90,7 @@ const EditableMarkDownRenderer = forwardRef<
               <EditableMarkdownFooter
                 handleSaveAction={handleSaveAction}
                 handleCancelAction={handleCancelAction}
+                isSaveDisabled={isFormValid !== undefined && !isFormValid}
               />
             ),
             initialValue: content,

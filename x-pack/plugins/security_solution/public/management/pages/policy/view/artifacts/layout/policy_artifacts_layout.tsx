@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiButton,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -218,13 +218,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
           />
         )}
         <EuiSpacer size="l" />
-        <EuiPageContent
-          hasBorder={false}
-          hasShadow={false}
-          paddingSize="none"
-          color="transparent"
-          borderRadius="none"
-        >
+        <EuiPageSection paddingSize="none" color="transparent">
           <PolicyArtifactsList
             policy={policyItem}
             apiClient={exceptionsListApiClient}
@@ -235,7 +229,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             getPolicyArtifactsPath={getPolicyArtifactsPath}
             getArtifactPath={getArtifactPath}
           />
-        </EuiPageContent>
+        </EuiPageSection>
       </div>
     );
   }

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getServiceAllowedRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.SERVICE_ALLOWED,
+  path: SYNTHETICS_API_URLS.SERVICE_ALLOWED,
   validate: {},
   handler: async ({ syntheticsMonitorClient, server }): Promise<any> => {
     const isESS = Boolean(server.cloud?.isCloudEnabled) && server.config.service?.manifestUrl;

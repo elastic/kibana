@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../../../common';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
+import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 import { ServerError } from '../types';
-import { bulkGetCases, Case, CasesBulkGetResponse } from './api';
+import { bulkGetCases, Case, CasesBulkGetResponse } from './apis/bulk_get_cases';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',
@@ -34,11 +35,9 @@ export const useBulkGetCases = (caseIds: string[], fetchCases: boolean) => {
 
   return useQuery(
     triggersActionsUiQueriesKeys.casesBulkGet(caseIds),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return bulkGetCases(http, { ids: caseIds }, abortCtrlRef.signal);
-    },
+    ({ signal }) => bulkGetCases(http, { ids: caseIds }, signal),
     {
+      context: AlertsTableQueryContext,
       enabled: caseIds.length > 0 && fetchCases,
       select: transformCases,
       onError: (error: ServerError) => {

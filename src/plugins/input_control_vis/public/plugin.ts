@@ -15,9 +15,13 @@ import {
 } from '@kbn/unified-search-plugin/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
+import { InputControlPublicConfig } from '../config';
+import { InputControlDeprecationBadge } from './deprecation_badge';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
@@ -47,11 +51,12 @@ export interface InputControlVisPluginStartDependencies {
   visualizations: VisualizationsStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 
 /** @internal */
 export class InputControlVisPlugin implements Plugin<void, void> {
-  constructor(public initializerContext: PluginInitializerContext) {}
+  constructor(public initializerContext: PluginInitializerContext<InputControlPublicConfig>) {}
 
   public setup(
     core: InputControlVisCoreSetup,
@@ -69,12 +74,20 @@ export class InputControlVisPlugin implements Plugin<void, void> {
 
     expressions.registerFunction(createInputControlVisFn);
     expressions.registerRenderer(getInputControlVisRenderer(visualizationDependencies));
+    const { readOnly } = this.initializerContext.config.get<InputControlPublicConfig>();
     visualizations.createBaseVisualization(
-      createInputControlVisTypeDefinition(visualizationDependencies)
+      createInputControlVisTypeDefinition(visualizationDependencies, Boolean(readOnly))
     );
   }
 
   public start(core: CoreStart, deps: InputControlVisPluginStartDependencies) {
     // nothing to do here
+    const { uiActions } = deps;
+
+    const deprecationBadge = new InputControlDeprecationBadge();
+
+    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, deprecationBadge);
+
+    return {};
   }
 }

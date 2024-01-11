@@ -8,14 +8,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
-import '../../../../../../test/global_mocks';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
+import { serializeAsESLifecycle } from '../../../../../../common/lib/data_stream_serialization';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -53,6 +53,7 @@ describe('<ComponentTemplateCreate />', () => {
   let testBed: ComponentTemplateCreateTestBed;
 
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   describe('On component mount', () => {
     beforeEach(async () => {
@@ -61,6 +62,12 @@ describe('<ComponentTemplateCreate />', () => {
       });
 
       testBed.component.update();
+    });
+
+    test('updates the breadcrumbs to component templates', () => {
+      expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+        IndexManagementBreadcrumb.componentTemplateCreate
+      );
     });
 
     test('should set the correct page header', async () => {
@@ -92,6 +99,19 @@ describe('<ComponentTemplateCreate />', () => {
         expect(exists('metaEditor')).toBe(true);
       });
 
+      test('should toggle the data retention field', async () => {
+        const { exists, component, form } = testBed;
+
+        expect(exists('valueDataRetentionField')).toBe(false);
+
+        await act(async () => {
+          form.toggleEuiSwitch('dataRetentionToggle.input');
+        });
+        component.update();
+
+        expect(exists('valueDataRetentionField')).toBe(true);
+      });
+
       describe('Validation', () => {
         test('should require a name', async () => {
           const { form, actions, component, find } = testBed;
@@ -114,6 +134,11 @@ describe('<ComponentTemplateCreate />', () => {
       const COMPONENT_TEMPLATE_NAME = 'comp-1';
       const SETTINGS = { number_of_shards: 1 };
       const ALIASES = { my_alias: {} };
+      const LIFECYCLE = {
+        enabled: true,
+        value: 2,
+        unit: 'd',
+      };
 
       const BOOLEAN_MAPPING_FIELD = {
         name: 'boolean_datatype',
@@ -130,7 +155,10 @@ describe('<ComponentTemplateCreate />', () => {
         component.update();
 
         // Complete step 1 (logistics)
-        await actions.completeStepLogistics({ name: COMPONENT_TEMPLATE_NAME });
+        await actions.completeStepLogistics({
+          name: COMPONENT_TEMPLATE_NAME,
+          lifecycle: LIFECYCLE,
+        });
 
         // Complete step 2 (index settings)
         await actions.completeStepSettings(SETTINGS);
@@ -193,6 +221,7 @@ describe('<ComponentTemplateCreate />', () => {
                   },
                 },
                 aliases: ALIASES,
+                lifecycle: serializeAsESLifecycle(LIFECYCLE),
               },
               _kbnMeta: { usedBy: [], isManaged: false },
             }),

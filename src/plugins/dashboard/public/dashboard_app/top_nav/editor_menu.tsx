@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiBadge,
   EuiContextMenu,
@@ -18,16 +18,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
+import { ADD_PANEL_TRIGGER } from '../../triggers';
+import { getAddPanelActionMenuItems } from './add_panel_action_menu_items';
 
 interface Props {
+  isDisabled?: boolean;
   /** Handler for creating new visualization of a specified type */
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
   /** Handler for creating a new embeddable of a specified type */
   createNewEmbeddable: (embeddableFactory: EmbeddableFactory) => void;
+  /** Handler for deleting an embeddable */
+  deleteEmbeddable: (embeddableId: string) => void;
 }
 
 interface FactoryGroup {
@@ -43,7 +49,13 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => {
+export const EditorMenu = ({
+  createNewVisType,
+  createNewEmbeddable,
+  deleteEmbeddable,
+  isDisabled,
+}: Props) => {
+  const isMounted = useRef(false);
   const {
     embeddable,
     visualizations: {
@@ -51,6 +63,7 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       getByGroup: getVisTypesByGroup,
       showNewVisModal,
     },
+    uiActions,
   } = pluginServices.getServices();
 
   const { euiTheme } = useEuiTheme();
@@ -62,6 +75,10 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
     UnwrappedEmbeddableFactory[]
   >([]);
+
+  const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>> | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     Promise.all(
@@ -87,24 +104,27 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
 
   const getSortedVisTypesByGroup = (group: VisGroups) =>
     getVisTypesByGroup(group)
-      .sort(({ name: a }: BaseVisType | VisTypeAlias, { name: b }: BaseVisType | VisTypeAlias) => {
-        if (a < b) {
+      .sort((a: BaseVisType | VisTypeAlias, b: BaseVisType | VisTypeAlias) => {
+        const labelA = 'titleInWizard' in a ? a.titleInWizard || a.title : a.title;
+        const labelB = 'titleInWizard' in b ? b.titleInWizard || a.title : a.title;
+        if (labelA < labelB) {
           return -1;
         }
-        if (a > b) {
+        if (labelA > labelB) {
           return 1;
         }
         return 0;
       })
-      .filter(({ hidden, stage }: BaseVisType) => !hidden);
+      .filter(({ disableCreate }: BaseVisType) => !disableCreate);
 
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
   const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
-  const visTypeAliases = getVisTypeAliases().sort(
-    ({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
+  const visTypeAliases = getVisTypeAliases()
+    .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
-  );
+    )
+    .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
 
   const factories = unwrappedEmbeddableFactories.filter(
     ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
@@ -116,6 +136,28 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   const aggBasedPanelID = 1;
 
   let panelCount = 1 + aggBasedPanelID;
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // Retrieve ADD_PANEL_TRIGGER actions
+  useEffect(() => {
+    async function loadPanelActions() {
+      const registeredActions = await uiActions?.getTriggerCompatibleActions?.(
+        ADD_PANEL_TRIGGER,
+        {}
+      );
+      if (isMounted.current) {
+        setAddPanelActions(registeredActions);
+      }
+    }
+    loadPanelActions();
+  }, [uiActions]);
 
   factories.forEach(({ factory }) => {
     const { grouping } = factory;
@@ -218,29 +260,40 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
   });
 
   const getEditorMenuPanels = (closePopover: () => void) => {
+    const initialPanelItems = [
+      ...visTypeAliases.map(getVisTypeAliasMenuItem),
+      ...toolVisTypes.map(getVisTypeMenuItem),
+      ...ungroupedFactories.map((factory) => {
+        return getEmbeddableFactoryMenuItem(factory, closePopover);
+      }),
+      ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
+        name: appName,
+        icon,
+        panel: panelId,
+        'data-test-subj': `dashboardEditorMenu-${id}Group`,
+      })),
+
+      ...promotedVisTypes.map(getVisTypeMenuItem),
+      ...getAddPanelActionMenuItems(
+        addPanelActions,
+        createNewEmbeddable,
+        deleteEmbeddable,
+        closePopover
+      ),
+    ];
+    if (aggsBasedVisTypes.length > 0) {
+      initialPanelItems.push({
+        name: aggsPanelTitle,
+        icon: 'visualizeApp',
+        panel: aggBasedPanelID,
+        'data-test-subj': `dashboardEditorAggBasedMenuItem`,
+      });
+    }
+
     return [
       {
         id: 0,
-        items: [
-          ...visTypeAliases.map(getVisTypeAliasMenuItem),
-          ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
-            name: appName,
-            icon,
-            panel: panelId,
-            'data-test-subj': `dashboardEditorMenu-${id}Group`,
-          })),
-          ...ungroupedFactories.map((factory) => {
-            return getEmbeddableFactoryMenuItem(factory, closePopover);
-          }),
-          ...promotedVisTypes.map(getVisTypeMenuItem),
-          {
-            name: aggsPanelTitle,
-            icon: 'visualizeApp',
-            panel: aggBasedPanelID,
-            'data-test-subj': `dashboardEditorAggBasedMenuItem`,
-          },
-          ...toolVisTypes.map(getVisTypeMenuItem),
-        ],
+        items: initialPanelItems,
       },
       {
         id: aggBasedPanelID,
@@ -264,8 +317,11 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       repositionOnScroll
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-        defaultMessage: 'Select type',
+        defaultMessage: 'Add panel',
       })}
+      isDisabled={isDisabled}
+      size="s"
+      iconType="plusInCircle"
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >

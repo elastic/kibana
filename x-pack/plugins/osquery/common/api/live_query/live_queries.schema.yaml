@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: Live Queries Schema
+  version: '2023-10-31'
+paths:
+  /api/osquery/live_queries:
+    get:
+      summary: Find live queries
+      parameters:
+          - $ref: './find_live_query.schema.yaml#/components/parameters/FindLiveQueryRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './find_live_query.schema.yaml#/components/schemas/SuccessResponse'
+    post:
+      summary: Create a live query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './create_live_query.schema.yaml#/components/schemas/CreateLiveQueryRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './create_live_query.schema.yaml#/components/schemas/SuccessResponse'
+  /api/osquery/live_queries/{id}:
+    get:
+      summary: Get live query details
+      parameters:
+        - $ref: './get_live_query_details.schema.yaml#/components/parameters/GetLiveQueryDetailsRequestQueryParameter'
+        - $ref: './get_live_query_details.schema.yaml#/components/parameters/GetLiveQueryDetailsRequestParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './get_live_query_details.schema.yaml#/components/schemas/SuccessResponse'
+  /api/osquery/live_queries/{id}/results/{actionId}:
+      get:
+        summary: Get live query results
+        parameters:
+          - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsQueryParameter'
+          - $ref: './get_live_query_results.schema.yaml#/components/parameters/GetLiveQueryRequestResultsParameter'
+        responses:
+          '200':
+            description: OK
+            content:
+              application/json:
+                schema:
+                  $ref: './get_live_query_results.schema.yaml#/components/schemas/SuccessResponse'

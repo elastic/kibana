@@ -22,7 +22,6 @@ const uiMock: jest.Mocked<CasesUiStart['ui']> = {
   getCases: jest.fn(),
   getCasesContext: jest.fn().mockImplementation(() => mockCasesContext),
   getAllCasesSelectorModal: jest.fn(),
-  getCreateCaseFlyout: jest.fn(),
   getRecentCases: jest.fn(),
 };
 
@@ -47,6 +46,8 @@ const helpersMock: jest.Mocked<CasesUiStart['helpers']> = {
     update: false,
     delete: false,
     push: false,
+    connectors: false,
+    settings: false,
   }),
   getRuleIdFromEvent: jest.fn(),
   groupAlertsByRule: jest.fn(),

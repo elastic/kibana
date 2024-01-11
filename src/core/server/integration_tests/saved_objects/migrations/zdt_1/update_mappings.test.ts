@@ -38,7 +38,7 @@ describe('ZDT upgrades - basic mapping update', () => {
     const fooType = getFooType();
     const barType = getBarType();
     const { runMigrations } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams(),
+      ...getBaseMigratorParams({ kibanaVersion: '8.8.0' }),
       types: [fooType, barType],
     });
     await runMigrations();
@@ -70,7 +70,7 @@ describe('ZDT upgrades - basic mapping update', () => {
     };
 
     const { runMigrations, client } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams(),
+      ...getBaseMigratorParams({ kibanaVersion: '8.8.0' }),
       logFilePath,
       types: [fooType, barType],
     });

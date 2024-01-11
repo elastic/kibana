@@ -57,7 +57,11 @@ export const TokenField: FunctionComponent<TokenFieldProps> = (props) => {
         })}
         className="euiFieldText euiFieldText--inGroup"
         value={props.value}
-        style={{ fontFamily: euiThemeVars.euiCodeFontFamily, fontSize: euiThemeVars.euiFontSizeXS }}
+        style={{
+          fontFamily: euiThemeVars.euiCodeFontFamily,
+          fontSize: euiThemeVars.euiFontSizeXS,
+          backgroundColor: 'transparent',
+        }}
         onFocus={(event) => event.currentTarget.select()}
         readOnly
       />

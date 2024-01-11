@@ -49,8 +49,8 @@ plugins/
   "configPath": "path/to/config",
   "type": "standard",
   "owner": {
-    "name": "App Services",
-    "githubTeam": "kibana-app-services"
+    "name": "Shared UX",
+    "githubTeam": "appex-sharedux"
   },
   "description": "A description about this plugin!",
   "requiredPlugins": ["data"],
@@ -122,7 +122,7 @@ If you are developing in TypeScript (which we recommend), you will need to add a
 core capabilities as an argument. It should return an instance of its plugin class for Kibana to load.
 
 ```ts
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { DemoPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -177,7 +177,16 @@ export class DemoPlugin implements Plugin {
 
 ### server/index.ts
 
-`server/index.ts` is the entry-point into the server-side code of this plugin. It is identical in almost every way to the client-side entry-point:
+`server/index.ts` is the entry-point into the server-side code of this plugin.
+
+```ts
+import type { PluginInitializerContext } from '@kbn/core/server';
+
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { DemoPlugin } = await import('./plugin');
+  return new DemoPlugin(initializerContext);
+}
+```
 
 ### server/plugin.ts
 

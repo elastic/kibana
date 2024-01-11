@@ -8,7 +8,7 @@
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ProfilingESField } from '../../common/elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-utils';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { topNElasticSearchQuery } from './topn';
 
@@ -38,10 +38,6 @@ describe('TopN data from Elasticsearch', () => {
       (operationName, request) =>
         context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
     ),
-    mget: jest.fn(
-      (operationName, request) =>
-        context.elasticsearch.client.asCurrentUser.search(request) as Promise<any>
-    ),
     profilingStacktraces: jest.fn(
       (request) =>
         context.elasticsearch.client.asCurrentUser.transport.request({
@@ -53,7 +49,26 @@ describe('TopN data from Elasticsearch', () => {
           },
         }) as Promise<any>
     ),
+    profilingStatus: jest.fn(
+      () =>
+        context.elasticsearch.client.asCurrentUser.transport.request({
+          method: 'GET',
+          path: encodeURI('_profiling/status'),
+          body: {},
+        }) as Promise<any>
+    ),
     getEsClient: jest.fn(() => context.elasticsearch.client.asCurrentUser),
+    profilingFlamegraph: jest.fn(
+      (request) =>
+        context.elasticsearch.client.asCurrentUser.transport.request({
+          method: 'POST',
+          path: encodeURI('_profiling/flamegraph'),
+          body: {
+            query: request.query,
+            sample_size: request.sampleSize,
+          },
+        }) as Promise<any>
+    ),
   };
   const logger = loggerMock.create();
 
@@ -62,7 +77,7 @@ describe('TopN data from Elasticsearch', () => {
   });
 
   describe('when fetching Stack Traces', () => {
-    it('should search first then skip mget', async () => {
+    it('should call search twice', async () => {
       await topNElasticSearchQuery({
         client,
         logger,
@@ -73,9 +88,7 @@ describe('TopN data from Elasticsearch', () => {
         kuery: '',
       });
 
-      // Calls to mget are skipped since data doesn't exist
       expect(client.search).toHaveBeenCalledTimes(2);
-      expect(client.mget).toHaveBeenCalledTimes(0);
     });
   });
 });

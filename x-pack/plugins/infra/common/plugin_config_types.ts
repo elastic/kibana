@@ -14,11 +14,9 @@ export interface InfraConfig {
       group_by_page_size: number;
     };
   };
+  enabled: boolean;
   inventory: {
     compositeSize: number;
-  };
-  logs: {
-    app_target: 'logs-ui' | 'discover';
   };
   sources?: {
     default?: {
@@ -27,11 +25,22 @@ export interface InfraConfig {
       };
     };
   };
+  featureFlags: {
+    customThresholdAlertsEnabled: boolean;
+    logsUIEnabled: boolean;
+    metricsExplorerEnabled: boolean;
+    osqueryEnabled: boolean;
+    inventoryThresholdAlertRuleEnabled: boolean;
+    metricThresholdAlertRuleEnabled: boolean;
+    logThresholdAlertRuleEnabled: boolean;
+    alertsAndRulesDropdownEnabled: boolean;
+    profilingEnabled: boolean;
+  };
 }
 
 export const publicConfigKeys = {
   sources: true,
-  logs: true,
+  featureFlags: true,
 } as const;
 
 export type InfraPublicConfigKey = keyof {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityAppServices } from '../application/types';
+import { useKibana } from '../utils/kibana_react';
 
-export const useToasts = () => useKibana<ObservabilityAppServices>().services.notifications.toasts;
+export const useToasts = () => useKibana().services.notifications.toasts;

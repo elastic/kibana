@@ -55,7 +55,7 @@ export function processInferenceResult(
   inferenceResult: InferenceResult,
   model: estypes.MlTrainedModelConfig
 ): FormattedTextClassificationResponse {
-  const labels: string[] = model.inference_config.text_classification?.classification_labels ?? [];
+  const labels: string[] = model.inference_config?.text_classification?.classification_labels ?? [];
 
   let formattedResponse = [
     {

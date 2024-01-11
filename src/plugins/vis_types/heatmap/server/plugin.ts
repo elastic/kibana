@@ -9,7 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup, Plugin, UiSettingsParams } from '@kbn/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext, UiSettingsParams } from '@kbn/core/server';
+import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
+import { HeatmapConfig } from '../config';
 
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
 
@@ -45,9 +47,22 @@ export const getUiSettingsConfig: () => Record<string, UiSettingsParams<boolean>
   },
 });
 
+interface PluginSetupDependencies {
+  visualizations: VisualizationsServerSetup;
+}
+
 export class VisTypeHeatmapServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.initializerContext = initializerContext;
+  }
+
+  public setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     core.uiSettings.register(getUiSettingsConfig());
+
+    const { readOnly } = this.initializerContext.config.get<HeatmapConfig>();
+    if (readOnly) {
+      plugins.visualizations.registerReadOnlyVisType('heatmap');
+    }
 
     return {};
   }

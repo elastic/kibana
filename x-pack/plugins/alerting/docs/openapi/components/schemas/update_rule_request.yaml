@@ -1,5 +1,5 @@
 title: Update rule request
-description: >-
+description: >
   The update rule API request body varies depending on the type of rule and actions.
 type: object
 required:
@@ -12,7 +12,8 @@ properties:
   name:
     type: string
     description: The name of the rule.
-    example: cluster_health_rule
+    examples:
+      - cluster_health_rule
   notify_when:
     $ref: 'notify_when.yaml'
   params:

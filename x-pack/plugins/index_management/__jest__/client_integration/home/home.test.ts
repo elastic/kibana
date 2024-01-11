@@ -7,17 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, nextTick } from '../helpers';
+import { setupEnvironment } from '../helpers';
 import { HomeTestBed, setup } from './home.helpers';
-
-/**
- * The below import is required to avoid a console error warn from the "brace" package
- * console.warn ../node_modules/brace/index.js:3999
-      Could not load worker ReferenceError: Worker is not defined
-          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
- */
-import { stubWebWorker } from '@kbn/test-jest-helpers';
-stubWebWorker();
 
 describe('<IndexManagementHome />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
@@ -27,14 +18,10 @@ describe('<IndexManagementHome />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
 
-      testBed = await setup(httpSetup);
-
       await act(async () => {
-        const { component } = testBed;
-
-        await nextTick();
-        component.update();
+        testBed = await setup(httpSetup);
       });
+      testBed.component.update();
     });
 
     test('should set the correct app title', () => {
@@ -56,9 +43,15 @@ describe('<IndexManagementHome />', () => {
         const indexManagementContainer = find('indexManagementHeaderContent');
         const tabListContainer = indexManagementContainer.find('div.euiTabs');
         const allTabs = tabListContainer.children();
-        const allTabsLabels = ['Indices', 'Data Streams', 'Index Templates', 'Component Templates'];
+        const allTabsLabels = [
+          'Indices',
+          'Data Streams',
+          'Index Templates',
+          'Component Templates',
+          'Enrich Policies',
+        ];
 
-        expect(allTabs.length).toBe(4);
+        expect(allTabs.length).toBe(5);
         for (let i = 0; i < allTabs.length; i++) {
           expect(tabListContainer.childAt(i).text()).toEqual(allTabsLabels[i]);
         }
@@ -72,13 +65,11 @@ describe('<IndexManagementHome />', () => {
 
         httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-        actions.selectHomeTab('templatesTab');
-
         await act(async () => {
-          await nextTick();
-          component.update();
+          actions.selectHomeTab('templatesTab');
         });
 
+        component.update();
         expect(exists('indicesList')).toBe(false);
         expect(exists('templateList')).toBe(true);
       });

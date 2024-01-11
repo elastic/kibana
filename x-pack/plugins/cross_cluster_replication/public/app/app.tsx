@@ -6,14 +6,14 @@
  */
 
 import React, { Component } from 'react';
-import { Switch, Router, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { ScopedHistory, ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 
 import { getFatalErrors } from './services/notifications';
 import { routing } from './services/routing';
@@ -109,14 +109,12 @@ class AppComponent extends Component<AppProps, AppState> {
 
     if (isFetchingPermissions) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-          <SectionLoading>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.app.permissionCheckTitle"
-              defaultMessage="Checking permissions…"
-            />
-          </SectionLoading>
-        </EuiPageContent>
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.crossClusterReplication.app.permissionCheckTitle"
+            defaultMessage="Checking permissions…"
+          />
+        </SectionLoading>
       );
     }
 
@@ -136,45 +134,43 @@ class AppComponent extends Component<AppProps, AppState> {
 
     if (!hasPermission) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-          <EuiEmptyPrompt
-            iconType="securityApp"
-            title={
-              <h2>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.app.deniedPermissionTitle"
-                  defaultMessage="You're missing cluster privileges"
-                />
-              </h2>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.app.deniedPermissionDescription"
-                  defaultMessage="To use Cross-Cluster Replication, you must have {clusterPrivilegesCount,
-                    plural, one {this cluster privilege} other {these cluster privileges}}: {clusterPrivileges}."
-                  values={{
-                    clusterPrivileges: missingClusterPrivileges.join(', '),
-                    clusterPrivilegesCount: missingClusterPrivileges.length,
-                  }}
-                />
-              </p>
-            }
-          />
-        </EuiPageContent>
+        <EuiPageTemplate.EmptyPrompt
+          iconType="securityApp"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.app.deniedPermissionTitle"
+                defaultMessage="You're missing cluster privileges"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.app.deniedPermissionDescription"
+                defaultMessage="To use Cross-Cluster Replication, you must have {clusterPrivilegesCount,
+                  plural, one {this cluster privilege} other {these cluster privileges}}: {clusterPrivileges}."
+                values={{
+                  clusterPrivileges: missingClusterPrivileges.join(', '),
+                  clusterPrivilegesCount: missingClusterPrivileges.length,
+                }}
+              />
+            </p>
+          }
+        />
       );
     }
 
     return (
       <Router history={this.props.history}>
-        <Switch>
+        <Routes>
           <Redirect exact from="/" to="/follower_indices" />
           <Route exact path="/auto_follow_patterns/add" component={AutoFollowPatternAdd} />
           <Route exact path="/auto_follow_patterns/edit/:id" component={AutoFollowPatternEdit} />
           <Route exact path="/follower_indices/add" component={FollowerIndexAdd} />
           <Route exact path="/follower_indices/edit/:id" component={FollowerIndexEdit} />
           <Route exact path={['/:section']} component={CrossClusterReplicationHome} />
-        </Switch>
+        </Routes>
       </Router>
     );
   }

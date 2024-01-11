@@ -9,9 +9,8 @@ import React, { memo, ReactNode, useMemo } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { History } from 'history';
-import useObservable from 'react-use/lib/useObservable';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -68,8 +67,8 @@ const AppRootProvider = memo<{
   history: History;
   coreStart: CoreStart;
   children: ReactNode | ReactNode[];
-}>(({ history, coreStart: { http, notifications, uiSettings, application }, children }) => {
-  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+}>(({ history, coreStart: { http, notifications, theme, application }, children }) => {
+  const isDarkMode = theme.getTheme().darkMode;
   const services = useMemo(
     () => ({ http, notifications, application }),
     [application, http, notifications]

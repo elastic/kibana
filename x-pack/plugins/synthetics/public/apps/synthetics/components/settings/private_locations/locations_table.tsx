@@ -18,18 +18,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { useCanManagePrivateLocation } from '../../../hooks';
 import { setAddingNewPrivateLocation } from '../../../state/private_locations';
 import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
-import {
-  CANNOT_SAVE_INTEGRATION_LABEL,
-  NoPermissionsTooltip,
-} from '../../common/components/permissions';
+import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
 import { PolicyName } from './policy_name';
@@ -56,7 +53,6 @@ export const PrivateLocationsTable = ({
   const { locationMonitors, loading } = useLocationMonitors();
 
   const { canSave } = useSyntheticsSettingsContext();
-  const canManagePrivateLocations = useCanManagePrivateLocation();
 
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -67,6 +63,7 @@ export const PrivateLocationsTable = ({
     {
       field: 'label',
       name: LOCATION_NAME_LABEL,
+      render: (label: string) => <CopyName text={label} />,
     },
     {
       field: 'monitors',
@@ -87,7 +84,7 @@ export const PrivateLocationsTable = ({
       render: (val: string[]) => {
         const tags = val ?? [];
         if (tags.length === 0) {
-          return <EuiText>--</EuiText>;
+          return '--';
         }
         return (
           <EuiFlexGroup gutterSize="xs" wrap>
@@ -137,10 +134,9 @@ export const PrivateLocationsTable = ({
           fill
           data-test-subj={'addPrivateLocationButton'}
           isLoading={loading}
-          disabled={!canManagePrivateLocations || !canSave}
+          disabled={!canSave}
           onClick={() => setIsAddingNew(true)}
           iconType="plusInCircle"
-          title={!canManagePrivateLocations ? CANNOT_SAVE_INTEGRATION_LABEL : undefined}
         >
           {ADD_LABEL}
         </EuiButton>

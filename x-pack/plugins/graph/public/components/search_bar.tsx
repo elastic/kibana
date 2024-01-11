@@ -7,14 +7,18 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
-
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { toElasticsearchQuery, fromKueryExpression, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
+import {
+  IUnifiedSearchPluginServices,
+  UnifiedSearchPublicPluginStart,
+} from '@kbn/unified-search-plugin/public/types';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -25,8 +29,6 @@ import {
   submitSearch,
   selectedFieldsSelector,
 } from '../state_management';
-
-import { TooltipWrapper } from './tooltip_wrapper';
 
 export interface SearchBarProps {
   isLoading: boolean;
@@ -95,19 +97,21 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     fetchPattern();
   }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
-  const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const kibana = useKibana<
+    IUnifiedSearchPluginServices & {
+      contentManagement: ContentManagementPublicStart;
+      unifiedSearch: UnifiedSearchPublicPluginStart;
+    }
+  >();
+
   const { services, overlays } = kibana;
   const {
     uiSettings,
     appName,
-    unifiedSearch,
-    data,
-    dataViews,
-    storage,
-    notifications,
-    http,
-    docLinks,
-    savedObjectsManagement,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
+    contentManagement,
   } = services;
   if (!overlays) return null;
   return (
@@ -133,7 +137,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
                 confirmWipeWorkspace(
                   () =>
                     openSourceModal(
-                      { overlays, http, uiSettings, savedObjectsManagement },
+                      { overlays, contentManagement, uiSettings },
                       onIndexPatternSelected
                     ),
                   i18n.translate('xpack.graph.clearWorkspace.confirmText', {
@@ -176,16 +180,6 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             query={query}
             onChange={setQuery}
             appName={appName}
-            deps={{
-              unifiedSearch,
-              data,
-              dataViews,
-              storage,
-              notifications,
-              http,
-              docLinks,
-              uiSettings,
-            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

@@ -73,13 +73,14 @@ export function mapHitSource(
     references: SavedObjectReference[];
     url: string;
     savedObjectType?: string;
-    editUrl?: string;
+    editor?: { editUrl?: string };
     updatedAt?: string;
     type?: BaseVisType;
     icon?: BaseVisType['icon'];
     image?: BaseVisType['image'];
     typeTitle?: BaseVisType['title'];
     error?: string;
+    readOnly?: boolean;
   } = {
     id,
     references,
@@ -107,7 +108,8 @@ export function mapHitSource(
   newAttributes.icon = newAttributes.type?.icon;
   newAttributes.image = newAttributes.type?.image;
   newAttributes.typeTitle = newAttributes.type?.title;
-  newAttributes.editUrl = `/edit/${id}`;
+  newAttributes.editor = { editUrl: `/edit/${id}` };
+  newAttributes.readOnly = Boolean(visTypes.get(typeName as string)?.disableEdit);
 
   return newAttributes;
 }
@@ -166,7 +168,6 @@ export async function findListItems(
       return acc;
     }, acc);
   }, {} as { [visType: string]: VisualizationsAppExtension });
-
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
 

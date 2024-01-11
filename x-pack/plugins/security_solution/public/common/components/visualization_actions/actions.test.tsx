@@ -101,6 +101,7 @@ describe('VisualizationActions', () => {
               .fn()
               .mockReturnValue({ open: mockGetCreateCaseFlyoutOpen }),
           },
+          helpers: { canUseCases: jest.fn().mockReturnValue(allCasesPermissions()) },
         },
         application: {
           capabilities: { [CASES_FEATURE_ID]: allCasesCapabilities() },

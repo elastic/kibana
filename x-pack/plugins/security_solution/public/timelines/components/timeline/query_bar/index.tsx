@@ -14,18 +14,19 @@ import deepEqual from 'fast-deep-equal';
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import styled from '@emotion/styled';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
-import type { KqlMode } from '../../../store/timeline/model';
+import type { KqlMode } from '../../../store/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { QueryBar } from '../../../../common/components/query_bar';
 import type { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery } from '../helpers';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 
 export interface QueryBarTimelineComponentProps {
@@ -47,11 +48,48 @@ export interface QueryBarTimelineComponentProps {
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
+const SearchBarContainer = styled.div`
+  /*
+  *
+  * hide search bar default filters as they are disturbing the layout  as shown below
+  *
+  * Filters are displayed with QueryBar so below is how is the layout with default filters.
+  *
+  *
+  *                    --------------------------------
+  *   -----------------|                              |------------
+  *   | DataViewPicker |        QueryBar              | Date      |
+  *   -------------------------------------------------------------
+  *                    |      Filters                 |
+  *                    --------------------------------
+  *
+  * The tree under this component makes sure that default filters are not rendered and we can separately display
+  * them outside query component so that layout is as below:
+  *
+  *   -----------------------------------------------------------
+  *   | DataViewPicker |      QueryBar              |   Date    |
+  *   -----------------------------------------------------------
+  *   |                       Filters                           |
+  *   -----------------------------------------------------------
+  *
+  * */
+  .uniSearchBar .filter-items-group {
+    display: none;
+  }
+
+  .euiDataGrid__restrictBody & {
+    .kbnQueryBar {
+      display: flex;
+    }
+  }
+`;
+
 export const TIMELINE_FILTER_DROP_AREA = 'timeline-filter-drop-area';
 
 const getNonDropAreaFilters = (filters: Filter[] = []) =>
   filters.filter((f: Filter) => f.meta.controlledBy !== TIMELINE_FILTER_DROP_AREA);
 
+// eslint-disable-next-line react/display-name
 export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({
     dataProviders,
@@ -220,6 +258,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             isInvalid: false,
             isQuickSelection,
             timelineId,
+            hasRangeChanged: true,
           });
         }
       },
@@ -263,22 +302,24 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     );
 
     return (
-      <QueryBar
-        dateRangeFrom={dateRangeFrom}
-        dateRangeTo={dateRangeTo}
-        hideSavedQuery={kqlMode === 'search'}
-        indexPattern={indexPattern}
-        isRefreshPaused={isRefreshPaused}
-        filterQuery={filterQueryConverted}
-        filterManager={filterManager}
-        filters={queryBarFilters}
-        onSubmitQuery={onSubmitQuery}
-        refreshInterval={refreshInterval}
-        savedQuery={savedQuery}
-        onSavedQuery={onSavedQuery}
-        dataTestSubj={'timelineQueryInput'}
-        displayStyle="inPage"
-      />
+      <SearchBarContainer className="search_bar_container">
+        <QueryBar
+          dateRangeFrom={dateRangeFrom}
+          dateRangeTo={dateRangeTo}
+          hideSavedQuery={kqlMode === 'search'}
+          indexPattern={indexPattern}
+          isRefreshPaused={isRefreshPaused}
+          filterQuery={filterQueryConverted}
+          filterManager={filterManager}
+          filters={queryBarFilters}
+          onSubmitQuery={onSubmitQuery}
+          refreshInterval={refreshInterval}
+          savedQuery={savedQuery}
+          onSavedQuery={onSavedQuery}
+          dataTestSubj={'timelineQueryInput'}
+          displayStyle="inPage"
+        />
+      </SearchBarContainer>
     );
   }
 );

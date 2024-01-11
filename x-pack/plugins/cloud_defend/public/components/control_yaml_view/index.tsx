@@ -6,21 +6,24 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
-import { CodeEditor, YamlLang } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, YamlLang } from '@kbn/code-editor';
 import { monaco } from '@kbn/monaco';
 import { uniq } from 'lodash';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import {
-  getInputFromPolicy,
   validateStringValuesForCondition,
-  getSelectorsAndResponsesFromYaml,
   validateMaxSelectorsAndResponses,
   validateBlockRestrictions,
 } from '../../common/utils';
+import {
+  getInputFromPolicy,
+  getSelectorsAndResponsesFromYaml,
+} from '../../../common/utils/helpers';
 import * as i18n from './translations';
-import { ViewDeps, SelectorConditionsMap, SelectorCondition } from '../../types';
+import { ViewDeps, SelectorConditionsMap } from '../../types';
+import { SelectorCondition } from '../../../common';
 
 const { editor } = monaco;
 

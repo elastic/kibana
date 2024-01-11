@@ -7,13 +7,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { OptionsListSearchTechnique } from '../../../common/options_list/suggestions_searching';
 
 export const OptionsListStrings = {
   control: {
-    getSeparator: () =>
-      i18n.translate('controls.optionsList.control.separator', {
+    getSeparator: (type?: string) => {
+      if (['date', 'number'].includes(type ?? '')) {
+        return i18n.translate('controls.optionsList.control.dateSeparator', {
+          defaultMessage: ';  ',
+        });
+      }
+      return i18n.translate('controls.optionsList.control.separator', {
         defaultMessage: ', ',
-      }),
+      });
+    },
     getPlaceholder: () =>
       i18n.translate('controls.optionsList.control.placeholder', {
         defaultMessage: 'Any',
@@ -28,9 +35,65 @@ export const OptionsListStrings = {
       }),
   },
   editor: {
-    getAllowMultiselectTitle: () =>
-      i18n.translate('controls.optionsList.editor.allowMultiselectTitle', {
-        defaultMessage: 'Allow multiple selections in dropdown',
+    getSelectionOptionsTitle: () =>
+      i18n.translate('controls.optionsList.editor.selectionOptionsTitle', {
+        defaultMessage: 'Selections',
+      }),
+    selectionTypes: {
+      multi: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.multiSelectLabel', {
+            defaultMessage: 'Allow  multiple selections',
+          }),
+      },
+      single: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.singleSelectLabel', {
+            defaultMessage: 'Only allow a single selection',
+          }),
+      },
+    },
+    getSearchOptionsTitle: () =>
+      i18n.translate('controls.optionsList.editor.searchOptionsTitle', {
+        defaultMessage: `Searching`,
+      }),
+    searchTypes: {
+      prefix: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.prefixSearchLabel', {
+            defaultMessage: 'Prefix',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.prefixSearchTooltip', {
+            defaultMessage: 'Matches values that begin with the given search string.',
+          }),
+      },
+      wildcard: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.wildcardSearchLabel', {
+            defaultMessage: 'Contains',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.wildcardSearchTooltip', {
+            defaultMessage:
+              'Matches values that contain the given search string. Results might take longer to populate.',
+          }),
+      },
+      exact: {
+        getLabel: () =>
+          i18n.translate('controls.optionsList.editor.exactSearchLabel', {
+            defaultMessage: 'Exact',
+          }),
+        getTooltip: () =>
+          i18n.translate('controls.optionsList.editor.exactSearchTooltip', {
+            defaultMessage:
+              'Matches values that are equal to the given search string. Returns results quickly.',
+          }),
+      },
+    },
+    getAdditionalSettingsTitle: () =>
+      i18n.translate('controls.optionsList.editor.additionalSettingsTitle', {
+        defaultMessage: `Additional settings`,
       }),
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
@@ -76,6 +139,26 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectionsEmpty', {
         defaultMessage: 'You have no selections',
       }),
+    getInvalidSearchMessage: (fieldType: string) => {
+      switch (fieldType) {
+        case 'ip': {
+          return i18n.translate('controls.optionsList.popover.invalidSearch.ip', {
+            defaultMessage: 'Your search is not a valid IP address.',
+          });
+        }
+        case 'number': {
+          return i18n.translate('controls.optionsList.popover.invalidSearch.number', {
+            defaultMessage: 'Your search is not a valid number.',
+          });
+        }
+        default: {
+          // this shouldn't happen, but giving a fallback error message just in case
+          return i18n.translate('controls.optionsList.popover.invalidSearch.invalidCharacters', {
+            defaultMessage: 'Your search contains invalid characters.',
+          });
+        }
+      }
+    },
     getAllOptionsButtonTitle: () =>
       i18n.translate('controls.optionsList.popover.allOptionsTitle', {
         defaultMessage: 'Show all options',
@@ -84,14 +167,25 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.popover.selectedOptionsTitle', {
         defaultMessage: 'Show only selected options',
       }),
-    getClearAllSelectionsButtonTitle: () =>
-      i18n.translate('controls.optionsList.popover.clearAllSelectionsTitle', {
-        defaultMessage: 'Clear selections',
-      }),
-    getSearchPlaceholder: () =>
-      i18n.translate('controls.optionsList.popover.searchPlaceholder', {
-        defaultMessage: 'Search',
-      }),
+    getSearchPlaceholder: (searchTechnique?: OptionsListSearchTechnique) => {
+      switch (searchTechnique) {
+        case 'prefix': {
+          return i18n.translate('controls.optionsList.popover.prefixSearchPlaceholder', {
+            defaultMessage: 'Starts with...',
+          });
+        }
+        case 'wildcard': {
+          return i18n.translate('controls.optionsList.popover.wildcardSearchPlaceholder', {
+            defaultMessage: 'Contains...',
+          });
+        }
+        case 'exact': {
+          return i18n.translate('controls.optionsList.popover.exactSearchPlaceholder', {
+            defaultMessage: 'Equals...',
+          });
+        }
+      }
+    },
     getCardinalityLabel: (totalOptions: number) =>
       i18n.translate('controls.optionsList.popover.cardinalityLabel', {
         defaultMessage:
@@ -177,10 +271,22 @@ export const OptionsListStrings = {
           }),
       },
       _key: {
-        getSortByLabel: () =>
-          i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
-            defaultMessage: 'Alphabetically',
-          }),
+        getSortByLabel: (type?: string) => {
+          switch (type) {
+            case 'date':
+              return i18n.translate('controls.optionsList.popover.sortBy.date', {
+                defaultMessage: 'By date',
+              });
+            case 'number':
+              return i18n.translate('controls.optionsList.popover.sortBy.numeric', {
+                defaultMessage: 'Numerically',
+              });
+            default:
+              return i18n.translate('controls.optionsList.popover.sortBy.alphabetical', {
+                defaultMessage: 'Alphabetically',
+              });
+          }
+        },
       },
     },
     sortOrder: {

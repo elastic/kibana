@@ -7,22 +7,31 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import {
-  NavigationPublicPluginSetup,
-  NavigationPublicPluginStart,
-  NavigationPluginStartDependencies,
+  NavigationPublicSetup,
+  NavigationPublicStart,
+  NavigationPublicSetupDependencies,
+  NavigationPublicStartDependencies,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
+import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
 export class NavigationPublicPlugin
-  implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart>
+  implements
+    Plugin<
+      NavigationPublicSetup,
+      NavigationPublicStart,
+      NavigationPublicSetupDependencies,
+      NavigationPublicStartDependencies
+    >
 {
   private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
     new TopNavMenuExtensionsRegistry();
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): NavigationPublicPluginSetup {
+  public setup(_core: CoreSetup): NavigationPublicSetup {
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(
         this.topNavMenuExtensionsRegistry
@@ -31,15 +40,36 @@ export class NavigationPublicPlugin
   }
 
   public start(
-    core: CoreStart,
-    { unifiedSearch }: NavigationPluginStartDependencies
-  ): NavigationPublicPluginStart {
+    _core: CoreStart,
+    { unifiedSearch }: NavigationPublicStartDependencies
+  ): NavigationPublicStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
+
+    /*
+     *
+     *  This helps clients of navigation to create
+     *  a TopNav Search Bar which does not uses global unifiedSearch/data/query service
+     *
+     *  Useful in creating multiple stateful SearchBar in the same app without affecting
+     *  global filters
+     *
+     * */
+    const createCustomTopNav = (
+      /*
+       * Custom instance of unified search if it needs to be overridden
+       *
+       * */
+      customUnifiedSearch?: UnifiedSearchPublicPluginStart,
+      customExtensions?: RegisteredTopNavMenuData[]
+    ) => {
+      return createTopNav(customUnifiedSearch ?? unifiedSearch, customExtensions ?? extensions);
+    };
 
     return {
       ui: {
         TopNavMenu: createTopNav(unifiedSearch, extensions),
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        createTopNavWithCustomContext: createCustomTopNav,
       },
     };
   }

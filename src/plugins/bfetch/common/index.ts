@@ -11,5 +11,8 @@ export type { StreamingResponseHandler } from './streaming';
 export type { ItemBufferParams, TimedItemBufferParams, BatchedFunctionParams } from './buffer';
 export { ItemBuffer, TimedItemBuffer, createBatchedFunction } from './buffer';
 export type { ErrorLike, BatchRequestData, BatchResponseItem, BatchItemWrapper } from './batch';
-export { DISABLE_BFETCH_COMPRESSION, DISABLE_BFETCH } from './constants';
-export { BfetchRequestError } from './bfetch_error';
+export {
+  DISABLE_BFETCH_COMPRESSION,
+  DISABLE_BFETCH,
+  BFETCH_ROUTE_VERSION_LATEST,
+} from './constants';

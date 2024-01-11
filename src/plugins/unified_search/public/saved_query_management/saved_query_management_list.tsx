@@ -199,6 +199,13 @@ export function SavedQueryManagementList({
     ' ' +
     savedQueryDescriptionText;
 
+  const savedQueryMultipleNamespacesDeleteWarning = i18n.translate(
+    'unifiedSearch.search.searchBar.savedQueryMultipleNamespacesDeleteWarning',
+    {
+      defaultMessage: `This saved query is shared in multiple spaces. When you delete it, you remove it from every space it is shared in. You can't undo this action.`,
+    }
+  );
+
   const savedQueriesOptions = () => {
     const savedQueriesWithoutCurrent = savedQueries.filter((savedQuery) => {
       if (!loadedSavedQuery) return true;
@@ -379,7 +386,12 @@ export function SavedQueryManagementList({
           onCancel={() => {
             setShowDeletionConfirmationModal(false);
           }}
-        />
+        >
+          {toBeDeletedSavedQuery.namespaces.length > 1 ||
+          toBeDeletedSavedQuery.namespaces.includes('*')
+            ? savedQueryMultipleNamespacesDeleteWarning
+            : null}
+        </EuiConfirmModal>
       )}
     </>
   );

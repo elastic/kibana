@@ -14,6 +14,7 @@ const runSetupAll: RunFn = async (cliContext) => {
   const password = cliContext.flags.password as string;
   const kibanaUrl = cliContext.flags.kibanaUrl as string;
   const elasticUrl = cliContext.flags.elasticUrl as string;
+  const fleetServerUrl = cliContext.flags.fleetServerUrl as string;
   const version = cliContext.flags.version as string;
   const policy = cliContext.flags.policy as string;
   const log = cliContext.log;
@@ -21,6 +22,7 @@ const runSetupAll: RunFn = async (cliContext) => {
   await setupAll({
     elasticUrl,
     kibanaUrl,
+    fleetServerUrl,
     username,
     password,
     version,

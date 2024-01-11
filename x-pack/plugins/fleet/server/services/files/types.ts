@@ -10,24 +10,9 @@ import type { Readable } from 'stream';
 import type { BaseFileMetadata, FileCompression, FileStatus } from '@kbn/shared-ux-file-types';
 
 /**
- * The type of file.
- * Use `from-host` when interacting with files that were sent to ES from the
- * host (via Fleet-Server)
- * Use `to-host` when interacting with files that are being sent to the host
- * (via fleet-server)
+ * Interface for files that were created by a host and consumed in kibana
  */
-export type FleetFileTransferDirection = 'from-host' | 'to-host';
-
-export interface FleetFileClientInterface {
-  /** Creates a new file. Only applicable when type of file is `to-host`. */
-  create(fileStream: HapiReadableStream, agentIds: string[]): Promise<FleetFile>;
-
-  /** Deletes a file. Only applicable when type of file is `to-host`. */
-  delete(fileId: string): Promise<void>;
-
-  /** Updates metadata for the file. Only applicable when type of file is `to-host`. */
-  update(fileId: string, updates: Partial<FleetFileUpdatableFields>): Promise<FleetFile>;
-
+export interface FleetFromHostFileClientInterface {
   /** Checks if a file has chunks */
   doesFileHaveData(fileId: string): Promise<boolean>;
 
@@ -36,6 +21,20 @@ export interface FleetFileClientInterface {
 
   /** Returns meta info about the file */
   get(fileId: string): Promise<FleetFile>;
+}
+
+/**
+ * Interface for files created via kibana to be delivered to a hosts
+ */
+export interface FleetToHostFileClientInterface extends FleetFromHostFileClientInterface {
+  /** Creates a new file */
+  create(fileStream: HapiReadableStream, agentIds: string[]): Promise<FleetFile>;
+
+  /** Deletes a file */
+  delete(fileId: string): Promise<void>;
+
+  /** Updates metadata for the file */
+  update(fileId: string, updates: Partial<FleetFileUpdatableFields>): Promise<FleetFile>;
 }
 
 export interface FleetFile {
@@ -119,4 +118,27 @@ export interface HostUploadedFileMetadata {
 export interface FileCustomMeta {
   target_agents: string[];
   action_id: string;
+}
+
+export interface FilesClientFactory {
+  /**
+   * Client to interact with files that will be sent to a host.
+   * @param packageName
+   * @param maxSizeBytes
+   */
+  toHost: (
+    /** The integration package name */
+    packageName: string,
+    /** Max file size allow to be created (in bytes) */
+    maxSizeBytes?: number
+  ) => FleetToHostFileClientInterface;
+
+  /**
+   * Client to interact with files that were sent from the host
+   * @param packageName
+   */
+  fromHost: (
+    /** The integration package name */
+    packageName: string
+  ) => FleetFromHostFileClientInterface;
 }

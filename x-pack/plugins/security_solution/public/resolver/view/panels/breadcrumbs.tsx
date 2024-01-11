@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import type { EuiBreadcrumb } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { ThemedBreadcrumbs } from './styles';
@@ -15,6 +13,7 @@ import { useColors } from '../use_colors';
 /**
  * Breadcrumb menu
  */
+// eslint-disable-next-line react/display-name
 export const Breadcrumbs = memo(function ({ breadcrumbs }: { breadcrumbs: EuiBreadcrumb[] }) {
   // Just tagging the last crumb with `data-test-subj` for testing
   const crumbsWithLastSubject: EuiBreadcrumb[] = useMemo(() => {

@@ -6,19 +6,19 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import { Actions, ActionTypes } from '../../../../common/api';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class DescriptionUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'description'>): UserActionEvent {
-    const action = Actions.update;
+    const action = UserActionActions.update;
 
     const parameters = this.buildCommonUserAction({
       ...args,
       action,
       valueKey: 'description',
-      type: ActionTypes.description,
+      type: UserActionTypes.description,
       value: args.payload.description,
     });
 

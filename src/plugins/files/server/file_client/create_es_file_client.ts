@@ -31,10 +31,11 @@ export interface CreateEsFileClientArgs {
    */
   elasticsearchClient: ElasticsearchClient;
   /**
-   * Treat the indices provided as Aliases. If set to true, ES `search()` will be used to
-   * retrieve the file info and content instead of `get()`. This is needed to ensure the
-   * content can be retrieved in cases where an index may have rolled over (ES `get()`
-   * needs a "real" index)
+   * Treat the indices provided as Aliases/Datastreams.
+   * When set to `true`:
+   * - additional ES calls will be made to get the real backing indexes
+   * - will not check if indexes exists and attempt to create them if not
+   * - an additional `@timestamp` property will be written to all documents (at root of document)
    */
   indexIsAlias?: boolean;
   /**
@@ -69,6 +70,7 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
       id: NO_FILE_KIND,
       http: {},
       maxSizeBytes,
+      hashes: ['md5', 'sha1', 'sha256', 'sha512'],
     },
     new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger, indexIsAlias),
     new ElasticsearchBlobStorageClient(
@@ -76,6 +78,7 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
       blobStorageIndex,
       undefined,
       logger,
+      undefined,
       undefined,
       indexIsAlias
     ),

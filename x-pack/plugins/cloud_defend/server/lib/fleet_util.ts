@@ -24,7 +24,8 @@ import {
   CLOUD_DEFEND_FLEET_PACKAGE_KUERY,
   INTEGRATION_PACKAGE_NAME,
 } from '../../common/constants';
-import { POLICIES_PACKAGE_POLICY_PREFIX, PoliciesQueryParams } from '../../common/schemas/policy';
+import { POLICIES_PACKAGE_POLICY_PREFIX } from '../../common/constants';
+import type { PoliciesQueryParams } from '../../common';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 

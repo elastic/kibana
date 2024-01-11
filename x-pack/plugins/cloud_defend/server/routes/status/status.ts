@@ -5,22 +5,32 @@
  * 2.0.
  */
 
+/* te
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackageService,
+  PackagePolicyClient,
+} from '@kbn/fleet-plugin/server';
 import moment from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  ALERTS_INDEX_PATTERN,
+  ALERTS_INDEX_PATTERN_DEFAULT_NS,
+  FILE_INDEX_PATTERN_DEFAULT_NS,
   INTEGRATION_PACKAGE_NAME,
+  PROCESS_INDEX_PATTERN_DEFAULT_NS,
   STATUS_ROUTE_PATH,
 } from '../../../common/constants';
 import type { CloudDefendApiRequestHandlerContext, CloudDefendRouter } from '../../types';
-import type {
-  CloudDefendSetupStatus,
-  CloudDefendStatusCode,
-  IndexStatus,
-} from '../../../common/types';
+import type { CloudDefendSetupStatus, CloudDefendStatusCode, IndexStatus } from '../../../common';
 import {
   getAgentStatusesByAgentPolicies,
   getCloudDefendAgentPolicies,
@@ -28,6 +38,16 @@ import {
   getInstalledPolicyTemplates,
 } from '../../lib/fleet_util';
 import { checkIndexStatus } from '../../lib/check_index_status';
+
+interface CloudDefendStatusDependencies {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  agentPolicyService: AgentPolicyServiceInterface;
+  agentService: AgentService;
+  packagePolicyService: PackagePolicyClient;
+  packageService: PackageService;
+}
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
@@ -64,14 +84,25 @@ const getHealthyAgents = async (
 const calculateCloudDefendStatusCode = (
   indicesStatus: {
     alerts: IndexStatus;
+    process: IndexStatus;
+    file: IndexStatus;
   },
   installedCloudDefendPackagePolicies: number,
   healthyAgents: number,
   timeSinceInstallationInMinutes: number
 ): CloudDefendStatusCode => {
-  // We check privileges only for the relevant indices for our pages to appear
-  if (indicesStatus.alerts === 'unprivileged') return 'unprivileged';
-  if (indicesStatus.alerts === 'not-empty') return 'indexed';
+  if (
+    indicesStatus.alerts === 'unprivileged' ||
+    indicesStatus.file === 'unprivileged' ||
+    indicesStatus.process === 'unprivileged'
+  )
+    return 'unprivileged';
+  if (
+    indicesStatus.alerts === 'not-empty' ||
+    indicesStatus.file === 'not-empty' ||
+    indicesStatus.process === 'not-empty'
+  )
+    return 'indexed';
   if (installedCloudDefendPackagePolicies === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
@@ -92,7 +123,7 @@ const assertResponse = (
   }
 };
 
-const getCloudDefendStatus = async ({
+export const getCloudDefendStatus = async ({
   logger,
   esClient,
   soClient,
@@ -100,15 +131,19 @@ const getCloudDefendStatus = async ({
   packagePolicyService,
   agentPolicyService,
   agentService,
-}: CloudDefendApiRequestHandlerContext): Promise<CloudDefendSetupStatus> => {
+}: CloudDefendStatusDependencies): Promise<CloudDefendSetupStatus> => {
   const [
     alertsIndexStatus,
+    fileIndexStatus,
+    processIndexStatus,
     installation,
     latestCloudDefendPackage,
     installedPackagePolicies,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexStatus(esClient.asCurrentUser, ALERTS_INDEX_PATTERN, logger),
+    checkIndexStatus(esClient, ALERTS_INDEX_PATTERN_DEFAULT_NS, logger),
+    checkIndexStatus(esClient, FILE_INDEX_PATTERN_DEFAULT_NS, logger),
+    checkIndexStatus(esClient, PROCESS_INDEX_PATTERN_DEFAULT_NS, logger),
     packageService.asInternalUser.getInstallation(INTEGRATION_PACKAGE_NAME),
     packageService.asInternalUser.fetchFindLatestPackage(INTEGRATION_PACKAGE_NAME),
     getCloudDefendPackagePolicies(soClient, packagePolicyService, INTEGRATION_PACKAGE_NAME, {
@@ -131,14 +166,24 @@ const getCloudDefendStatus = async ({
   const MIN_DATE = 0;
   const indicesDetails = [
     {
-      index: ALERTS_INDEX_PATTERN,
+      index: ALERTS_INDEX_PATTERN_DEFAULT_NS,
       status: alertsIndexStatus,
+    },
+    {
+      index: FILE_INDEX_PATTERN_DEFAULT_NS,
+      status: fileIndexStatus,
+    },
+    {
+      index: PROCESS_INDEX_PATTERN_DEFAULT_NS,
+      status: processIndexStatus,
     },
   ];
 
   const status = calculateCloudDefendStatusCode(
     {
       alerts: alertsIndexStatus,
+      file: fileIndexStatus,
+      process: processIndexStatus,
     },
     installedPackagePoliciesTotal,
     healthyAgents,
@@ -168,19 +213,22 @@ const getCloudDefendStatus = async ({
   return response;
 };
 
-export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter): void =>
-  router.get(
-    {
+export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter) =>
+  router.versioned
+    .get({
+      access: 'internal',
       path: STATUS_ROUTE_PATH,
-      validate: {},
       options: {
         tags: ['access:cloud-defend-read'],
       },
-    },
-    async (context, request, response) => {
+    })
+    .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const cloudDefendContext = await context.cloudDefend;
       try {
-        const status = await getCloudDefendStatus(cloudDefendContext);
+        const status = await getCloudDefendStatus({
+          ...cloudDefendContext,
+          esClient: cloudDefendContext.esClient.asCurrentUser,
+        });
         return response.ok({
           body: status,
         });
@@ -194,5 +242,4 @@ export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter): void
           statusCode: error.statusCode,
         });
       }
-    }
-  );
+    });

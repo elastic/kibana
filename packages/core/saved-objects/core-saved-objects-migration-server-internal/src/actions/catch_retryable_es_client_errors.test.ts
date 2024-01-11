@@ -72,7 +72,7 @@ describe('catchRetryableEsClientErrors', () => {
       });
     });
     it('ResponseError with retryable status code', async () => {
-      const statusCodes = [503, 401, 403, 408, 410];
+      const statusCodes = [503, 401, 403, 408, 410, 429];
       return Promise.all(
         statusCodes.map(async (status) => {
           const error = new esErrors.ResponseError(

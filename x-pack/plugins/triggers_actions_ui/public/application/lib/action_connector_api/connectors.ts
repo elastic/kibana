@@ -25,6 +25,7 @@ const transformConnector: RewriteRequestCase<
   is_deprecated: isDeprecated,
   referenced_by_count: referencedByCount,
   is_missing_secrets: isMissingSecrets,
+  is_system_action: isSystemAction,
   ...res
 }) => ({
   actionTypeId,
@@ -32,6 +33,7 @@ const transformConnector: RewriteRequestCase<
   isDeprecated,
   referencedByCount,
   isMissingSecrets,
+  isSystemAction,
   ...res,
 });
 
@@ -39,5 +41,6 @@ export async function loadAllActions({ http }: { http: HttpSetup }): Promise<Act
   const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(
     `${BASE_ACTION_API_PATH}/connectors`
   );
-  return rewriteResponseRes(res);
+
+  return rewriteResponseRes(res) as ActionConnector[];
 }

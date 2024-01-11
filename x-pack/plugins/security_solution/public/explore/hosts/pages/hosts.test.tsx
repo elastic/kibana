@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 
 import type { Filter } from '@kbn/es-query';
 import '../../../common/mock/match_media';
@@ -18,7 +18,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
-import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { inputsActions } from '../../../common/store/inputs';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
@@ -26,11 +26,10 @@ import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { LandingPageComponent } from '../../../common/components/landing_page';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 
 jest.mock('../../../common/containers/sourcerer');
-
+jest.mock('../../../common/components/landing_page');
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../common/components/search_bar', () => ({
@@ -107,7 +106,7 @@ describe('Hosts - rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="siem-landing-page"]').exists()).toBe(true);
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
@@ -138,7 +137,7 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(TabNavigationWithBreadcrumbs).exists()).toBe(true);
+    expect(wrapper.find(TabNavigation).exists()).toBe(true);
   });
 
   test('it should add the new filters after init', async () => {

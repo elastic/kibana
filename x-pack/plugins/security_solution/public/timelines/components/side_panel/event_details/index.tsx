@@ -5,22 +5,49 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { useAssistantOverlay } from '@kbn/elastic-assistant';
+import { EuiSpacer, EuiFlyoutBody, EuiPanel } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 
 import deepEqual from 'fast-deep-equal';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EntityType } from '@kbn/timelines-plugin/common';
+
+import { useGetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { getRawData } from '../../../../assistant/helpers';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
+import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
 import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
+import {
+  ALERT_SUMMARY_CONVERSATION_ID,
+  ALERT_SUMMARY_CONTEXT_DESCRIPTION,
+  ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+  EVENT_SUMMARY_CONVERSATION_ID,
+  EVENT_SUMMARY_CONTEXT_DESCRIPTION,
+  EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP,
+  SUMMARY_VIEW,
+  TIMELINE_VIEW,
+} from '../../../../common/components/event_details/translations';
+import {
+  PROMPT_CONTEXT_ALERT_CATEGORY,
+  PROMPT_CONTEXT_EVENT_CATEGORY,
+  PROMPT_CONTEXTS,
+} from '../../../../assistant/content/prompt_contexts';
+
+const FlyoutFooterContainerPanel = styled(EuiPanel)`
+  .side-panel-flyout-footer {
+    background-color: transparent;
+  }
+`;
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -33,11 +60,13 @@ interface EventDetailsPanelProps {
   handleOnEventClosed: () => void;
   isDraggable?: boolean;
   isFlyoutView?: boolean;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
   tabType: TimelineTabs;
   scopeId: string;
   isReadOnly?: boolean;
 }
+
+const useAssistantNoop = () => ({ promptContextId: undefined });
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   browserFields,
@@ -51,6 +80,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   scopeId,
   isReadOnly,
 }) => {
+  const { hasAssistantPrivilege } = useAssistantAvailability();
+  // TODO: changing feature flags requires a hard refresh to take effect, but this temporary workaround technically violates the rules of hooks:
+  const useAssistant = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const currentSpaceId = useSpaceId();
   const { indexName } = expandedEvent;
   const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
@@ -63,6 +95,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       skip: !expandedEvent.eventId,
     }
   );
+  const getFieldsData = useGetFieldsData(rawEventData?.fields);
 
   const {
     isolateAction,
@@ -75,6 +108,22 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const { alertId, isAlert, hostName, ruleName, timestamp } =
     useBasicDataFromDetailsData(detailsData);
+
+  const view = useMemo(() => (isFlyoutView ? SUMMARY_VIEW : TIMELINE_VIEW), [isFlyoutView]);
+
+  const getPromptContext = useCallback(async () => getRawData(detailsData ?? []), [detailsData]);
+
+  const { promptContextId } = useAssistant(
+    isAlert ? 'alert' : 'event',
+    isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID,
+    isAlert ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(view) : EVENT_SUMMARY_CONTEXT_DESCRIPTION(view),
+    getPromptContext,
+    null,
+    isAlert
+      ? PROMPT_CONTEXTS[PROMPT_CONTEXT_ALERT_CATEGORY].suggestedUserPrompt
+      : PROMPT_CONTEXTS[PROMPT_CONTEXT_EVENT_CATEGORY].suggestedUserPrompt,
+    isAlert ? ALERT_SUMMARY_VIEW_CONTEXT_TOOLTIP : EVENT_SUMMARY_VIEW_CONTEXT_TOOLTIP
+  );
 
   const header = useMemo(
     () =>
@@ -89,6 +138,10 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           ruleName={ruleName}
           showAlertDetails={showAlertDetails}
           timestamp={timestamp}
+          promptContextId={promptContextId}
+          scopeId={scopeId}
+          refetchFlyoutData={refetchFlyoutData}
+          getFieldsData={getFieldsData}
         />
       ) : (
         <ExpandableEventTitle
@@ -99,20 +152,28 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
           ruleName={ruleName}
           timestamp={timestamp}
           handleOnEventClosed={handleOnEventClosed}
+          promptContextId={promptContextId}
+          scopeId={scopeId}
+          refetchFlyoutData={refetchFlyoutData}
+          getFieldsData={getFieldsData}
         />
       ),
     [
-      expandedEvent.eventId,
-      eventIndex,
-      handleOnEventClosed,
-      isAlert,
       isFlyoutView,
       isHostIsolationPanelOpen,
+      expandedEvent.eventId,
+      eventIndex,
+      isAlert,
       isolateAction,
       loading,
       ruleName,
       showAlertDetails,
       timestamp,
+      promptContextId,
+      handleOnEventClosed,
+      scopeId,
+      refetchFlyoutData,
+      getFieldsData,
     ]
   );
 
@@ -211,18 +272,19 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     <>
       {header}
       {body}
-      <FlyoutFooter
-        detailsData={detailsData}
-        detailsEcsData={ecsData}
-        expandedEvent={expandedEvent}
-        refetchFlyoutData={refetchFlyoutData}
-        handleOnEventClosed={handleOnEventClosed}
-        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        isReadOnly={isReadOnly}
-        loadingEventDetails={loading}
-        onAddIsolationStatusClick={showHostIsolationPanel}
-        scopeId={scopeId}
-      />
+      <FlyoutFooterContainerPanel hasShadow={false} borderRadius="none">
+        <FlyoutFooter
+          detailsData={detailsData}
+          detailsEcsData={ecsData}
+          refetchFlyoutData={refetchFlyoutData}
+          handleOnEventClosed={handleOnEventClosed}
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          isReadOnly={isReadOnly}
+          loadingEventDetails={loading}
+          onAddIsolationStatusClick={showHostIsolationPanel}
+          scopeId={scopeId}
+        />
+      </FlyoutFooterContainerPanel>
     </>
   );
 };

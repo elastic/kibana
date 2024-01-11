@@ -22,29 +22,35 @@ export function registerActionStateRoutes(
   endpointContext: EndpointAppContext,
   canEncrypt?: boolean
 ) {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: ACTION_STATE_ROUTE,
-      validate: false,
+
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
+    })
+    .addVersion(
       {
-        any: [
-          'canIsolateHost',
-          'canUnIsolateHost',
-          'canKillProcess',
-          'canSuspendProcess',
-          'canGetRunningProcesses',
-          'canAccessResponseConsole',
-          'canWriteExecuteOperations',
-          'canWriteFileOperations',
-        ],
+        version: '2023-10-31',
+        validate: false,
       },
-      endpointContext.logFactory.get('actionState'),
-      getActionStateRequestHandler(canEncrypt)
-    )
-  );
+      withEndpointAuthz(
+        {
+          any: [
+            'canIsolateHost',
+            'canUnIsolateHost',
+            'canKillProcess',
+            'canSuspendProcess',
+            'canGetRunningProcesses',
+            'canAccessResponseConsole',
+            'canWriteExecuteOperations',
+            'canWriteFileOperations',
+          ],
+        },
+        endpointContext.logFactory.get('actionState'),
+        getActionStateRequestHandler(canEncrypt)
+      )
+    );
 }
 
 export const getActionStateRequestHandler = function (

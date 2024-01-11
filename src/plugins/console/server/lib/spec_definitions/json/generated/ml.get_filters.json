@@ -1,8 +1,14 @@
 {
   "ml.get_filters": {
     "url_params": {
-      "from": 0,
-      "size": 0
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "from": "",
+      "size": [
+        "100"
+      ]
     },
     "methods": [
       "GET"
@@ -11,6 +17,10 @@
       "_ml/filters",
       "_ml/filters/{filter_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-filter.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-filter.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

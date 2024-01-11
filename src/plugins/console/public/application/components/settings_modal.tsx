@@ -81,6 +81,9 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
   const [isKeyboardShortcutsEnabled, setIsKeyboardShortcutsEnabled] = useState(
     props.settings.isKeyboardShortcutsEnabled
   );
+  const [isAccessibilityOverlayEnabled, setIsAccessibilityOverlayEnabled] = useState(
+    props.settings.isAccessibilityOverlayEnabled
+  );
 
   const autoCompleteCheckboxes = [
     {
@@ -142,6 +145,7 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       tripleQuotes,
       isHistoryEnabled,
       isKeyboardShortcutsEnabled,
+      isAccessibilityOverlayEnabled,
     });
   }
 
@@ -160,6 +164,11 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
       }
     },
     [props.editorInstance]
+  );
+
+  const toggleAccessibilityOverlay = useCallback(
+    (isEnabled: boolean) => setIsAccessibilityOverlayEnabled(isEnabled),
+    []
   );
 
   const toggleSavingToHistory = useCallback(
@@ -317,6 +326,27 @@ export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
               />
             }
             onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="console.settingsPage.accessibilityOverlayLabel"
+              defaultMessage="Accessibility overlay"
+            />
+          }
+        >
+          <EuiSwitch
+            data-test-subj="enableA11yOverlay"
+            checked={isAccessibilityOverlayEnabled}
+            label={
+              <FormattedMessage
+                defaultMessage="Enable accessibility overlay"
+                id="console.settingsPage.enableAccessibilityOverlayLabel"
+              />
+            }
+            onChange={(e) => toggleAccessibilityOverlay(e.target.checked)}
           />
         </EuiFormRow>
 

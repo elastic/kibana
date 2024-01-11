@@ -139,8 +139,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('returns a 400 when there are 51 ids being deleted', async () => {
-        const ids = Array.from(Array(51).keys()).map((item) => item.toString());
+      it('returns a 400 when there are 11 ids being deleted', async () => {
+        const ids = Array.from(Array(11).keys()).map((item) => item.toString());
         await bulkDeleteFileAttachments({
           supertest,
           caseId: postedCase.id,

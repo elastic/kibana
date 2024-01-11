@@ -397,7 +397,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
-        timeout: 5000,
+        timeout: 10000,
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
@@ -409,7 +409,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         counterType: 'docs_sent',
         incrementBy: events.length,
       });
-      tlog(this.logger, `Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
+      tlog(this.logger, `Events sent!. Response: ${resp.status}`);
     } catch (err) {
       tlog(this.logger, `Error sending events: ${err}`);
       const errorStatus = err?.response?.status;

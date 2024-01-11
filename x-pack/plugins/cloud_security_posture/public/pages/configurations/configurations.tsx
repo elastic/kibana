@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect, Switch, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useLocation } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
@@ -29,11 +29,11 @@ export const Configurations = () => {
   const noFindingsForPostureType =
     getSetupStatus?.cspm.status !== 'not-installed' ? 'cspm' : 'kspm';
 
-  if (!hasConfigurationFindings) return <NoFindingsStates posturetype={noFindingsForPostureType} />;
+  if (!hasConfigurationFindings) return <NoFindingsStates postureType={noFindingsForPostureType} />;
 
   return (
     <CloudPosturePage query={dataViewQuery}>
-      <Switch>
+      <Routes>
         <Route
           exact
           path={cloudPosturePages.findings.path}
@@ -50,7 +50,11 @@ export const Configurations = () => {
           path={findingsNavigation.findings_default.path}
           render={() => (
             <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
-              <LatestFindingsContainer dataView={dataViewQuery.data!} />
+              <LatestFindingsContainer
+                dataView={dataViewQuery.data!}
+                dataViewRefetch={dataViewQuery.refetch}
+                dataViewIsRefetching={dataViewQuery.isRefetching}
+              />
             </TrackApplicationView>
           )}
         />
@@ -59,7 +63,7 @@ export const Configurations = () => {
           render={() => <FindingsByResourceContainer dataView={dataViewQuery.data!} />}
         />
         <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
-      </Switch>
+      </Routes>
     </CloudPosturePage>
   );
 };

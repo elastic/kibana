@@ -23,7 +23,6 @@ export class FleetActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action (isolate or unisolate) */
   generate(overrides: DeepPartial<EndpointAction> = {}): EndpointAction {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
-
     return merge(
       {
         action_id: this.seededUUIDv4(),
@@ -31,7 +30,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
         expiration: this.randomFutureDate(timeStamp),
         type: 'INPUT_ACTION',
         input_type: 'endpoint',
-        agents: [this.seededUUIDv4()],
+        agents: overrides.agents ? overrides.agents : [this.seededUUIDv4()],
         user_id: 'elastic',
         data: {
           command: this.randomResponseActionCommand(),

@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
+import { omit } from 'lodash';
 
 import type { AgentStatus } from '../../common';
 import type { Agent } from '../../common';
@@ -27,11 +28,13 @@ const printUsage = () =>
     [--password]: password for kibana, defaults to changeme
     [--batches]: run the script in batches, defaults to 1 e.g if count is 50 and batches is 10, 500 agents will be created and 10 agent policies
     [--concurrentBatches]: how many batches to run concurrently, defaults to 10
+    [--outdated]: agents will show as outdated (their revision is below the policies), defaults to false
 `);
 
 const DEFAULT_KIBANA_URL = 'http://localhost:5601';
 const DEFAULT_KIBANA_USERNAME = 'elastic';
 const DEFAULT_KIBANA_PASSWORD = 'changeme';
+const PUBLIC_VERSION_V1 = '2023-10-31';
 
 const DEFAULT_UNENROLL_TIMEOUT = 300; // 5 minutes
 const ES_URL = 'http://localhost:9200';
@@ -40,7 +43,7 @@ const ES_PASSWORD = 'password';
 
 const DEFAULT_AGENT_COUNT = 50000;
 
-const INDEX_BULK_OP = '{ "index":{ } }\n';
+const INDEX_BULK_OP = '{ "index":{ "_id": "{{id}}" } }\n';
 
 const {
   delete: deleteAgentsFirst = false,
@@ -51,7 +54,8 @@ const {
   agentVersion: agentVersionArg,
   username: kbnUsername = DEFAULT_KIBANA_USERNAME,
   password: kbnPassword = DEFAULT_KIBANA_PASSWORD,
-  batches: batchesArg,
+  batches: batchesArg = 1,
+  outdated: outdatedArg = false,
   concurrentBatches: concurrentBatchesArg = 10,
   // ignore yargs positional args, we only care about named args
   _,
@@ -133,12 +137,18 @@ function createAgentWithStatus({
   policyId,
   status,
   version,
+  hostname,
 }: {
   policyId: string;
   status: AgentStatus;
   version: string;
+  hostname: string;
 }) {
   const baseAgent = {
+    agent: {
+      id: uuidv4(),
+      version,
+    },
     access_api_key_id: 'api-key-1',
     active: true,
     policy_id: policyId,
@@ -153,7 +163,7 @@ function createAgentWithStatus({
           version,
         },
       },
-      host: { hostname: uuidv4() },
+      host: { hostname },
     },
     user_provided_metadata: {},
     enrolled_at: new Date().toISOString(),
@@ -167,7 +177,8 @@ function createAgentWithStatus({
 function createAgentsWithStatuses(
   statusMap: Partial<{ [status in AgentStatus]: number }>,
   policyId: string,
-  version: string
+  version: string,
+  namePrefix?: string
 ) {
   // loop over statuses and create agents with that status
   const agents = [];
@@ -176,11 +187,34 @@ function createAgentsWithStatuses(
     const currentAgentStatus = currentStatus as AgentStatus;
     const statusCount = statusMap[currentAgentStatus] || 0;
     for (let i = 0; i < statusCount; i++) {
-      agents.push(createAgentWithStatus({ policyId, status: currentAgentStatus, version }));
+      const hostname = `${namePrefix ? namePrefix + '-' : ''}${currentAgentStatus}-${i}`;
+      agents.push(
+        createAgentWithStatus({ policyId, status: currentAgentStatus, version, hostname })
+      );
     }
   }
 
   return agents;
+}
+
+async function getAgentPolicy(id: string) {
+  const res = await fetch(`${kibanaUrl}/api/fleet/agent_policies/${id}`, {
+    method: 'get',
+    headers: {
+      Authorization: kbnAuth,
+      'Content-Type': 'application/json',
+      'kbn-xsrf': 'kibana',
+      'x-elastic-product-origin': 'fleet',
+      'Elastic-Api-Version': PUBLIC_VERSION_V1,
+    },
+  });
+  const data = await res.json();
+
+  if (!data.item) {
+    logger.error('Agent policy not found, API response: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+  return data;
 }
 
 async function deleteAgents() {
@@ -205,7 +239,12 @@ async function deleteAgents() {
 
 async function createAgentDocsBulk(agents: Agent[]) {
   const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
-  const body = agents.flatMap((agent) => [INDEX_BULK_OP, JSON.stringify(agent) + '\n']).join('');
+  const body = agents
+    .flatMap((agent) => [
+      INDEX_BULK_OP.replace(/{{id}}/, agent.agent?.id ?? ''),
+      JSON.stringify(agent) + '\n',
+    ])
+    .join('');
   const res = await fetch(`${ES_URL}/.fleet-agents/_bulk`, {
     method: 'post',
     body,
@@ -256,12 +295,12 @@ async function createSuperUser() {
   return { role, user };
 }
 
-async function createAgentPolicy(id: string) {
+async function createAgentPolicy(id: string, name: string) {
   const res = await fetch(`${kibanaUrl}/api/fleet/agent_policies`, {
     method: 'post',
     body: JSON.stringify({
       id,
-      name: id,
+      name,
       namespace: 'default',
       description: '',
       monitoring_enabled: ['logs', 'metrics'],
@@ -272,12 +311,59 @@ async function createAgentPolicy(id: string) {
       'Content-Type': 'application/json',
       'kbn-xsrf': 'kibana',
       'x-elastic-product-origin': 'fleet',
+      // Note: version can change in the future
+      'Elastic-Api-Version': PUBLIC_VERSION_V1,
     },
   });
   const data = await res.json();
 
   if (!data.item) {
+    if (data.message.includes('already exists')) {
+      // use regex to get the id from the error message, id is the first string in single quotes
+      const idRegex = /'([^']+)'/;
+      const idMatch = data.message.match(idRegex);
+      if (!idMatch || !idMatch[1]) {
+        logger.error('Cannot extract id from error message, API response: ' + JSON.stringify(data));
+        process.exit(1);
+      }
+      logger.info(`Agent policy ${idMatch[1]} already exists, using existing policy`);
+      return getAgentPolicy(idMatch![1]);
+    }
     logger.error('Agent policy not created, API response: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+  return data;
+}
+
+async function bumpAgentPolicyRevision(id: string, policy: any) {
+  const res = await fetch(`${kibanaUrl}/api/fleet/agent_policies/${id}`, {
+    method: 'put',
+    body: JSON.stringify({
+      ...omit(policy, [
+        'id',
+        'updated_at',
+        'updated_by',
+        'revision',
+        'status',
+        'schema_version',
+        'package_policies',
+        'agents',
+      ]),
+      monitoring_enabled: ['logs'], // change monitoring to add  a revision
+    }),
+    headers: {
+      Authorization: kbnAuth,
+      'Content-Type': 'application/json',
+      'kbn-xsrf': 'kibana',
+      'x-elastic-product-origin': 'fleet',
+      'Elastic-Api-Version': PUBLIC_VERSION_V1,
+    },
+  });
+
+  const data = await res.json();
+
+  if (!data.item) {
+    logger.error('Agent policy not updated, API response: ' + JSON.stringify(data));
     process.exit(1);
   }
   return data;
@@ -337,14 +423,24 @@ export async function run() {
       Array(currentBatchSize)
         .fill(0)
         .map(async (__, i) => {
-          const agentPolicyId = uuidv4();
-          const agentPolicy = await createAgentPolicy(agentPolicyId);
+          let agentPolicyId = uuidv4();
+          const agentPolicy = await createAgentPolicy(agentPolicyId, `Policy ${i}`);
+          agentPolicyId = agentPolicy.item.id;
           logger.info(`Created agent policy ${agentPolicy.item.id}`);
 
           const statusMap = statusesArg.reduce((acc, status) => ({ ...acc, [status]: count }), {});
           logStatusMap(statusMap);
-          const agents = createAgentsWithStatuses(statusMap, agentPolicyId, agentVersion);
+          const agents = createAgentsWithStatuses(
+            statusMap,
+            agentPolicyId,
+            agentVersion,
+            i > 0 ? `batch-${i}` : undefined
+          );
           const createRes = await createAgentDocsBulk(agents);
+          if (outdatedArg) {
+            logger.info(`Bumping agent policy revision so that agents will have outdated policies`);
+            bumpAgentPolicyRevision(agentPolicyId, agentPolicy.item);
+          }
           logger.info(
             `Batch complete, created ${createRes.items.length} agent docs, took ${createRes.took}, errors: ${createRes.errors}`
           );

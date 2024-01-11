@@ -47,7 +47,7 @@ export class CalendarManager {
   }
 
   async getAllCalendars() {
-    const body = await this._mlClient.getCalendars({ body: { page: { from: 0, size: 1000 } } });
+    const body = await this._mlClient.getCalendars({ body: { page: { from: 0, size: 10000 } } });
 
     const events: ScheduledEvent[] = await this._eventManager.getAllEvents();
     const calendars: Calendar[] = body.calendars as Calendar[];

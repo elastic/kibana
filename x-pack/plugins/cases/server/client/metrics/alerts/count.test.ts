@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Case } from '../../../../common/api';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createAttachmentServiceMock } from '../../../services/mocks';
 
 import { AlertsCount } from './count';
+import type { Case } from '../../../../common/types/domain';
 
 const clientMock = createCasesClientMock();
 const attachmentService = createAttachmentServiceMock();

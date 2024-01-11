@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SelectorCondition, SelectorType } from '../../types';
+import { SelectorCondition, SelectorType } from '../../../common';
 
 export const fileSelector = i18n.translate('xpack.cloudDefend.fileSelector', {
   defaultMessage: 'File selector',

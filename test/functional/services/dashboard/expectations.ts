@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 export class DashboardExpectService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -202,6 +202,7 @@ export class DashboardExpectService extends FtrService {
     if (tagCloudVisualizations.length > 0) {
       const matches = await Promise.all(
         tagCloudVisualizations.map(async (tagCloud) => {
+          await this.visChart.waitForVisualization();
           const tagCloudData = await this.tagCloud.getTextTagByElement(tagCloud);
           for (let i = 0; i < values.length; i++) {
             const valueExists = tagCloudData.includes(values[i]);

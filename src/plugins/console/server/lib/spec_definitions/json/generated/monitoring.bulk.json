@@ -1,17 +1,29 @@
 {
   "monitoring.bulk": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "system_id": "",
       "system_api_version": "",
-      "interval": ""
+      "interval": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST",
       "PUT"
     ],
     "patterns": [
-      "_monitoring/bulk"
+      "_monitoring/bulk",
+      "_monitoring/{type}/bulk"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/monitor-elasticsearch-cluster.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

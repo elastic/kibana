@@ -10,6 +10,12 @@ Remove {kib} saved objects.
 
 WARNING: Once you delete a saved object, _it cannot be recovered_.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 [[saved-objects-api-delete-request]]
 ==== Request
 
@@ -45,7 +51,7 @@ TIP: Use this if you attempted to delete an object and received an HTTP 400 erro
 
 ==== Example
 
-Delete {a-data-source} object with the `my-pattern` ID:
+Delete a {data-source} object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------

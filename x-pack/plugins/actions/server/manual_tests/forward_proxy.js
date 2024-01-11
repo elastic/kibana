@@ -34,11 +34,13 @@ echo done - you should run all the lines above as one command
 
 */
 
+// @ts-check
+
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
-const proxySetup = require('proxy');
+const proxy = require('proxy');
 
 const PROGRAM = path.basename(__filename).replace(/.js$/, '');
 const CertDir = path.resolve(__dirname, '../../../../../packages/kbn-dev-utils/certs');
@@ -60,12 +62,14 @@ async function main() {
 
   const specs = args.map(argToSpec);
   for (const spec of specs) {
+    if (!spec) continue;
+
     const { protocol, port, auth } = spec;
     createServer(protocol, port, auth);
   }
 }
 
-/** @type { (protocol: string, port: number, auth: boolean) => Promise<http.Server | httpServer> } */
+/** @type { (protocol: string, port: number, auth: boolean) => Promise<http.Server> } */
 async function createServer(protocol, port, auth) {
   let proxyServer;
 
@@ -75,11 +79,12 @@ async function createServer(protocol, port, auth) {
     proxyServer = https.createServer(HttpsOptions);
   }
 
-  proxySetup(proxyServer);
+  proxy.createProxy(proxyServer);
 
   let authLabel = '';
   if (auth) {
     authLabel = `${Auth}@`;
+    // @ts-ignore
     proxyServer.authenticate = (req, callback) => {
       const auth = req.headers['proxy-authorization'];
       callback(null, auth === `Basic ${AuthB64}`);
@@ -90,6 +95,8 @@ async function createServer(protocol, port, auth) {
   proxyServer.listen(port, 'localhost', () => {
     console.log(`proxy server started on ${serverLabel}`);
   });
+
+  return proxyServer;
 }
 
 /* convert 'proto-port-auth' into object with shape shown below */

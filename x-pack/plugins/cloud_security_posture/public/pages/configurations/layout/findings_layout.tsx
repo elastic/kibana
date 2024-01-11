@@ -36,16 +36,17 @@ export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate
 
 export const PageTitle: React.FC = ({ children }) => (
   <EuiTitle size="l">
-    <div>
-      {children}
-      <EuiSpacer />
-    </div>
+    <div>{children}</div>
   </EuiTitle>
 );
 
-export const PageTitleText = ({ title }: { title: React.ReactNode }) => <h2>{title}</h2>;
+export const PageTitleText = ({ title }: { title: React.ReactNode }) => (
+  <EuiText grow={false} size="s">
+    <h1>{title}</h1>
+  </EuiText>
+);
 
-export const getExpandColumn = <T extends unknown>({
+export const getExpandColumn = <T extends object>({
   onClick,
 }: {
   onClick(item: T): void;
@@ -163,7 +164,7 @@ const baseColumns = [
         )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnTooltipLabel',
-          { defaultMessage: 'The benchmark(s) rules used to evaluate this resource came from' }
+          { defaultMessage: 'The benchmark used to evaluate this resource' }
         )}
       />
     ),
@@ -302,7 +303,7 @@ const FilterableCell: React.FC<{
 export const LimitedResultsBar = () => (
   <>
     <EuiSpacer size="xxl" />
-    <EuiBottomBar data-test-subj="test-bottom-bar">
+    <EuiBottomBar data-test-subj="test-bottom-bar" paddingSize="s">
       <EuiText textAlign="center">
         <FormattedMessage
           id="xpack.csp.findings..bottomBarLabel"

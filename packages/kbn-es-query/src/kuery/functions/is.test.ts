@@ -14,6 +14,7 @@ import { DataViewBase } from '../../..';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
+import { KqlIsFunctionNode } from './is';
 
 jest.mock('../grammar');
 
@@ -69,7 +70,7 @@ describe('kuery functions', () => {
         const expected = {
           match_all: {},
         };
-        const node = nodeTypes.function.buildNode('is', '*', '*');
+        const node = nodeTypes.function.buildNode('is', '*', '*') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -79,7 +80,7 @@ describe('kuery functions', () => {
         const expected = {
           match_all: {},
         };
-        const node = nodeTypes.function.buildNode('is', 'n*', '*');
+        const node = nodeTypes.function.buildNode('is', 'n*', '*') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, {
           ...indexPattern,
           fields: indexPattern.fields.filter((field) => field.name.startsWith('n')),
@@ -92,7 +93,7 @@ describe('kuery functions', () => {
         const expected = {
           match_all: {},
         };
-        const node = nodeTypes.function.buildNode('is', '*', '*');
+        const node = nodeTypes.function.buildNode('is', '*', '*') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node);
 
         expect(result).toEqual(expected);
@@ -106,7 +107,7 @@ describe('kuery functions', () => {
             lenient: true,
           },
         };
-        const node = nodeTypes.function.buildNode('is', null, 200);
+        const node = nodeTypes.function.buildNode('is', null, 200) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -118,14 +119,14 @@ describe('kuery functions', () => {
             query: 'jpg*',
           },
         };
-        const node = nodeTypes.function.buildNode('is', null, 'jpg*');
+        const node = nodeTypes.function.buildNode('is', null, 'jpg*') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
 
       test('should return an ES bool query with a sub-query for each field when fieldName is "*"', () => {
-        const node = nodeTypes.function.buildNode('is', '*', 200);
+        const node = nodeTypes.function.buildNode('is', '*', 200) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
@@ -141,7 +142,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', '*');
+        const node = nodeTypes.function.buildNode('is', 'extension', '*') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -154,7 +155,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -167,7 +168,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node);
 
         expect(result).toEqual(expected);
@@ -180,7 +181,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', '"jpg"');
+        const node = nodeTypes.function.buildNode('is', 'extension', '"jpg"') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -200,7 +201,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg*');
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg*') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -219,7 +220,11 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'win*');
+        const node = nodeTypes.function.buildNode(
+          'is',
+          'machine.os.keyword',
+          'win*'
+        ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -238,14 +243,45 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'win*');
+        const node = nodeTypes.function.buildNode(
+          'is',
+          'machine.os.keyword',
+          'win*'
+        ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern, { caseInsensitive: true });
 
         expect(result).toEqual(expected);
       });
 
+      test('should create a wildcard query with backslashes properly escaped', () => {
+        const expected = {
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  'machine.os.keyword': { value: '*\\\\*' },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+        const node = nodeTypes.function.buildNode(
+          'is',
+          'machine.os.keyword',
+          '*\\\\*'
+        ) as KqlIsFunctionNode;
+        const result = is.toElasticsearchQuery(node, indexPattern);
+
+        expect(result).toEqual(expected);
+      });
+
       test('should support scripted fields', () => {
-        const node = nodeTypes.function.buildNode('is', 'script string', 'foo');
+        const node = nodeTypes.function.buildNode(
+          'is',
+          'script string',
+          'foo'
+        ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
@@ -269,7 +305,11 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
+        const node = nodeTypes.function.buildNode(
+          'is',
+          '@timestamp',
+          '"2018-04-03T19:04:17"'
+        ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -293,7 +333,11 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
+        const node = nodeTypes.function.buildNode(
+          'is',
+          '@timestamp',
+          '"2018-04-03T19:04:17"'
+        ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern, config);
 
         expect(result).toEqual(expected);
@@ -306,7 +350,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg');
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(
           node,
           indexPattern,
@@ -324,7 +368,7 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', 'ext*', 'jpg');
+        const node = nodeTypes.function.buildNode('is', 'ext*', 'jpg') as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -349,7 +393,11 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', '*doublyNested*', 'foo');
+        const node = nodeTypes.function.buildNode(
+          'is',
+          '*doublyNested*',
+          'foo'
+        ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -375,14 +423,22 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('is', '*doublyNested*', 'foo');
+        const node = nodeTypes.function.buildNode(
+          'is',
+          '*doublyNested*',
+          'foo'
+        ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern, { nestedIgnoreUnmapped: true });
 
         expect(result).toEqual(expected);
       });
 
       test('should use a term query for keyword fields', () => {
-        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'Win 7');
+        const node = nodeTypes.function.buildNode(
+          'is',
+          'machine.os.keyword',
+          'Win 7'
+        ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
         expect(result).toEqual({
           bool: {
@@ -399,7 +455,11 @@ describe('kuery functions', () => {
       });
 
       test('should use a case-insensitive term query for keyword fields', () => {
-        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'Win 7');
+        const node = nodeTypes.function.buildNode(
+          'is',
+          'machine.os.keyword',
+          'Win 7'
+        ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern, { caseInsensitive: true });
         expect(result).toEqual({
           bool: {
@@ -413,6 +473,72 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         });
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test('match all fields and all values', () => {
+        const node = nodeTypes.function.buildNode('is', '*', '*') as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"*: *"`);
+      });
+
+      test('no field with literal value', () => {
+        const node = nodeTypes.function.buildNode('is', null, 200) as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"200"`);
+      });
+
+      test('no field with wildcard value', () => {
+        const node = nodeTypes.function.buildNode('is', null, 'jpg*') as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"jpg*"`);
+      });
+
+      test('match all fields with value', () => {
+        const node = nodeTypes.function.buildNode('is', '*', 200) as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"*: 200"`);
+      });
+
+      test('field with match all value"', () => {
+        const node = nodeTypes.function.buildNode('is', 'extension', '*') as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"extension: *"`);
+      });
+
+      test('field with value', () => {
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg') as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"extension: jpg"`);
+      });
+
+      test('field with phrase value', () => {
+        const node = nodeTypes.function.buildNode('is', 'extension', '"jpg"') as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"extension: \\"jpg\\""`);
+      });
+
+      test('phrase field with phrase value', () => {
+        const node = nodeTypes.function.buildNode(
+          'is',
+          '"extension"',
+          '"jpg"'
+        ) as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"\\"extension\\": \\"jpg\\""`);
+      });
+
+      test('field with wildcard value', () => {
+        const node = nodeTypes.function.buildNode('is', 'extension', 'jpg*') as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"extension: jpg*"`);
+      });
+
+      test('wildcard field with value', () => {
+        const node = nodeTypes.function.buildNode('is', 'ext*', 'jpg') as KqlIsFunctionNode;
+        const result = is.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"ext*: jpg"`);
       });
     });
   });

@@ -19,9 +19,9 @@ import { useKibana } from '../../lib/kibana';
 import { combineQueries } from '../../lib/kuery';
 import type { inputsModel, State } from '../../store';
 import { inputsSelectors } from '../../store';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { timelineSelectors } from '../../../timelines/store/timeline';
-import type { TimelineModel } from '../../../timelines/store/timeline/model';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import { timelineSelectors } from '../../../timelines/store';
+import type { TimelineModel } from '../../../timelines/store/model';
 
 import { getOptions, isDetectionsAlertsTable } from './helpers';
 import { TopN } from './top_n';
@@ -83,7 +83,6 @@ export interface OwnProps {
   onFilterAdded?: () => void;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   showLegend?: boolean;
-  value?: string[] | string | null;
   globalFilters?: Filter[];
 }
 type PropsFromRedux = ConnectedProps<typeof connector>;
@@ -107,7 +106,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
   showLegend,
   scopeId,
   toggleTopN,
-  value,
 }) => {
   const { uiSettings } = useKibana().services;
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
@@ -169,7 +167,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
       to={isActiveTimeline(scopeId ?? '') ? activeTimelineTo : to}
       toggleTopN={toggleTopN}
       onFilterAdded={onFilterAdded}
-      value={value}
     />
   );
 };

@@ -5,30 +5,54 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
+import { EuiFormLabel } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ActionForm } from '../action_connector_form';
+import { AlertConsumers, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { RuleFormConsumerSelection } from './rule_form_consumer_selection';
 import {
   ValidationResult,
   Rule,
   RuleType,
   RuleTypeModel,
   GenericValidationResult,
+  RuleCreationValidConsumer,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { coreMock } from '@kbn/core/public/mocks';
 import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 
+const toMapById = [
+  (acc: Map<unknown, unknown>, val: { id: unknown }) => acc.set(val.id, val),
+  new Map(),
+] as const;
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
-jest.mock('../../hooks/use_load_rule_types', () => ({
-  useLoadRuleTypes: jest.fn(),
+const mockSetConsumer = jest.fn();
+
+export const TestExpression: FunctionComponent<any> = () => {
+  return (
+    <EuiFormLabel>
+      <FormattedMessage
+        defaultMessage="Metadata: {val}. Fields: {fields}."
+        id="xpack.triggersActionsUI.sections.ruleAdd.metadataTest"
+        values={{ val: 'test', fields: '' }}
+      />
+    </EuiFormLabel>
+  );
+};
+
+jest.mock('../../hooks/use_load_rule_types_query', () => ({
+  useLoadRuleTypesQuery: jest.fn(),
 }));
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/capabilities', () => ({
@@ -94,7 +118,7 @@ describe('rule_form', () => {
 
     async function setup(enforceMinimum = false, schedule = '1m') {
       const mocks = coreMock.createSetup();
-      const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
+      const { useLoadRuleTypesQuery } = jest.requireMock('../../hooks/use_load_rule_types_query');
       const myRuleModel = {
         id: 'my-rule-type',
         description: 'Sample rule type model',
@@ -153,12 +177,13 @@ describe('rule_form', () => {
         },
         enabledInLicense: false,
       };
-      useLoadRuleTypes.mockReturnValue({
-        ruleTypes: [myRule, disabledByLicenseRule],
-        ruleTypeIndex: new Map([
-          [myRule.id, myRule],
-          [disabledByLicenseRule.id, disabledByLicenseRule],
-        ]),
+      useLoadRuleTypesQuery.mockReturnValue({
+        ruleTypesState: {
+          data: new Map([
+            [myRule.id, myRule],
+            [disabledByLicenseRule.id, disabledByLicenseRule],
+          ]),
+        },
       });
       const [
         {
@@ -233,15 +258,34 @@ describe('rule_form', () => {
   describe('rule_form create rule', () => {
     let wrapper: ReactWrapper<any>;
 
-    async function setup(
-      showRulesList = false,
-      enforceMinimum = false,
-      schedule = '1m',
-      featureId = 'alerting'
-    ) {
+    async function setup(options?: {
+      showRulesList?: boolean;
+      enforceMinimum?: boolean;
+      schedule?: string;
+      featureId?: string;
+      initialRuleOverwrite?: Partial<Rule>;
+      validConsumers?: RuleCreationValidConsumer[];
+      ruleTypesOverwrite?: RuleType[];
+      ruleTypeModelOverwrite?: RuleTypeModel;
+      useRuleProducer?: boolean;
+      selectedConsumer?: RuleCreationValidConsumer | null;
+    }) {
+      const {
+        showRulesList = false,
+        enforceMinimum = false,
+        schedule = '1m',
+        featureId = 'alerting',
+        initialRuleOverwrite,
+        validConsumers,
+        ruleTypesOverwrite,
+        ruleTypeModelOverwrite,
+        useRuleProducer = false,
+        selectedConsumer,
+      } = options || {};
+
       const mocks = coreMock.createSetup();
-      const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
-      const ruleTypes: RuleType[] = [
+      const { useLoadRuleTypesQuery } = jest.requireMock('../../hooks/use_load_rule_types_query');
+      const ruleTypes: RuleType[] = ruleTypesOverwrite || [
         {
           id: 'my-rule-type',
           name: 'Test',
@@ -289,7 +333,11 @@ describe('rule_form', () => {
           enabledInLicense: false,
         },
       ];
-      useLoadRuleTypes.mockReturnValue({ ruleTypes });
+      useLoadRuleTypesQuery.mockReturnValue({
+        ruleTypesState: {
+          data: ruleTypes.reduce(...toMapById),
+        },
+      });
       const [
         {
           application: { capabilities },
@@ -305,10 +353,11 @@ describe('rule_form', () => {
         },
       };
       ruleTypeRegistry.list.mockReturnValue([
-        ruleType,
+        ruleTypeModelOverwrite || ruleType,
         ruleTypeNonEditable,
         disabledByLicenseRuleType,
       ]);
+      ruleTypeRegistry.get.mockReturnValue(ruleTypeModelOverwrite || ruleType);
       ruleTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.list.mockReturnValue([actionType]);
       actionTypeRegistry.has.mockReturnValue(true);
@@ -330,18 +379,26 @@ describe('rule_form', () => {
 
       wrapper = mountWithIntl(
         <RuleForm
-          rule={initialRule}
+          canShowConsumerSelection
+          rule={{
+            ...initialRule,
+            ...initialRuleOverwrite,
+          }}
           config={{
             isUsingSecurity: true,
             minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
           }}
           dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           connectorFeatureId={featureId}
           onChangeMetaData={jest.fn()}
+          validConsumers={validConsumers}
+          setConsumer={mockSetConsumer}
+          useRuleProducer={useRuleProducer}
+          selectedConsumer={selectedConsumer}
         />
       );
 
@@ -359,20 +416,20 @@ describe('rule_form', () => {
     });
 
     it('renders registered selected rule type', async () => {
-      await setup(true);
+      await setup({ showRulesList: true });
       const ruleTypeSelectOptions = wrapper.find('[data-test-subj="my-rule-type-SelectOption"]');
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
     });
 
     it('renders minimum schedule interval helper text when enforce = true', async () => {
-      await setup(false, true);
+      await setup({ enforceMinimum: true });
       expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
         `Interval must be at least 1 minute.`
       );
     });
 
     it('renders minimum schedule interval helper suggestion when enforce = false and schedule is less than configuration', async () => {
-      await setup(false, false, '10s');
+      await setup({ schedule: '10s' });
       expect(wrapper.find('[data-test-subj="intervalFormRow"]').first().prop('helpText')).toEqual(
         `Intervals less than 1 minute are not recommended due to performance considerations.`
       );
@@ -440,7 +497,7 @@ describe('rule_form', () => {
     });
 
     it('renders uses feature id to load action types', async () => {
-      await setup(false, false, '1m', 'anotherFeature');
+      await setup({ schedule: '1m', featureId: 'anotherFeature' });
       const ruleTypeSelectOptions = wrapper.find(
         '[data-test-subj=".server-log-anotherFeature-ActionTypeSelectOption"]'
       );
@@ -448,7 +505,7 @@ describe('rule_form', () => {
     });
 
     it('renders rule type description', async () => {
-      await setup(true);
+      await setup({ showRulesList: true });
       wrapper.find('button[data-test-subj="my-rule-type-SelectOption"]').first().simulate('click');
       const ruleDescription = wrapper.find('[data-test-subj="ruleDescription"]');
       expect(ruleDescription.exists()).toBeTruthy();
@@ -456,7 +513,7 @@ describe('rule_form', () => {
     });
 
     it('renders rule type documentation link', async () => {
-      await setup(true);
+      await setup({ showRulesList: true });
       wrapper.find('button[data-test-subj="my-rule-type-SelectOption"]').first().simulate('click');
       const ruleDocumentationLink = wrapper.find('[data-test-subj="ruleDocumentationLink"]');
       expect(ruleDocumentationLink.exists()).toBeTruthy();
@@ -464,12 +521,518 @@ describe('rule_form', () => {
     });
 
     it('renders rule types disabled by license', async () => {
-      await setup(true);
+      await setup({ showRulesList: true });
       const actionOption = wrapper.find(`[data-test-subj="disabled-by-license-SelectOption"]`);
       expect(actionOption.exists()).toBeTruthy();
       expect(
         wrapper.find('[data-test-subj="disabled-by-license-disabledTooltip"]').exists()
       ).toBeTruthy();
+    });
+
+    it('should select the only one available consumer', async () => {
+      await setup({
+        initialRuleOverwrite: {
+          name: 'Simple rule',
+          consumer: 'alerts',
+          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          schedule: {
+            interval: '1h',
+          },
+        },
+        ruleTypesOverwrite: [
+          {
+            id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+            name: 'Threshold Rule 1',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            enabledInLicense: true,
+            defaultActionGroupId: 'threshold.fired',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+            producer: ALERTS_FEATURE_ID,
+            authorizedConsumers: {
+              alerts: { read: true, all: true },
+              apm: { read: true, all: true },
+              discover: { read: true, all: true },
+              infrastructure: { read: true, all: true },
+              // Setting logs all to false, this shouldn't show up
+              logs: { read: true, all: false },
+              ml: { read: true, all: true },
+              monitoring: { read: true, all: true },
+              siem: { read: true, all: true },
+              slo: { read: true, all: false },
+              stackAlerts: { read: true, all: true },
+              uptime: { read: true, all: true },
+            },
+            actionVariables: {
+              context: [],
+              state: [],
+              params: [],
+            },
+          },
+        ],
+        ruleTypeModelOverwrite: {
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          iconClass: 'test',
+          description: 'test',
+          documentationUrl: null,
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          ruleParamsExpression: TestExpression,
+          requiresAppContext: false,
+        },
+        validConsumers: [AlertConsumers.INFRASTRUCTURE, AlertConsumers.LOGS],
+      });
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      expect(wrapper.find('[data-test-subj="ruleFormConsumerSelect"]').exists()).toBeFalsy();
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      expect(mockSetConsumer).toHaveBeenLastCalledWith('infrastructure');
+    });
+
+    it('should render multiple consumers in the dropdown and select the first one in the list if no default is specified', async () => {
+      await setup({
+        initialRuleOverwrite: {
+          name: 'Simple rule',
+          consumer: 'alerts',
+          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          schedule: {
+            interval: '1h',
+          },
+        },
+        ruleTypesOverwrite: [
+          {
+            id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+            name: 'Threshold Rule',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            enabledInLicense: true,
+            defaultActionGroupId: 'threshold.fired',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+            producer: ALERTS_FEATURE_ID,
+            authorizedConsumers: {
+              infrastructure: { read: true, all: true },
+              logs: { read: true, all: true },
+            },
+            actionVariables: {
+              context: [],
+              state: [],
+              params: [],
+            },
+          },
+        ],
+        ruleTypeModelOverwrite: {
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          iconClass: 'test',
+          description: 'test',
+          documentationUrl: null,
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          ruleParamsExpression: TestExpression,
+          requiresAppContext: false,
+        },
+      });
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('[data-test-subj="ruleFormConsumerSelect"]').exists()).toBeTruthy();
+      expect(wrapper.find(RuleFormConsumerSelection).props().consumers).toEqual([
+        'infrastructure',
+        'logs',
+      ]);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(mockSetConsumer).toHaveBeenLastCalledWith('infrastructure');
+    });
+
+    it('should not display the consumer select for invalid rule types', async () => {
+      await setup();
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find('[data-test-subj="ruleFormConsumerSelect"]').exists()).toBeFalsy();
+    });
+
+    it('Do not show alert query in action when multi consumer rule type does not have a consumer selected', async () => {
+      await setup({
+        initialRuleOverwrite: {
+          name: 'Simple rule',
+          consumer: 'alerts',
+          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          schedule: {
+            interval: '1h',
+          },
+        },
+        ruleTypesOverwrite: [
+          {
+            id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+            name: 'Threshold Rule',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            enabledInLicense: true,
+            defaultActionGroupId: 'threshold.fired',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+            producer: ALERTS_FEATURE_ID,
+            authorizedConsumers: {
+              infrastructure: { read: true, all: true },
+              logs: { read: true, all: true },
+            },
+            actionVariables: {
+              context: [],
+              state: [],
+              params: [],
+            },
+            hasFieldsForAAD: true,
+            hasAlertsMappings: true,
+          },
+        ],
+        ruleTypeModelOverwrite: {
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          iconClass: 'test',
+          description: 'test',
+          documentationUrl: null,
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          ruleParamsExpression: TestExpression,
+          requiresAppContext: false,
+        },
+      });
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(false);
+    });
+
+    it('Do not show alert query in action when we do not have  hasFieldsForAAD or hasAlertsMappings or belong to security', async () => {
+      await setup({
+        initialRuleOverwrite: {
+          name: 'Simple rule',
+          consumer: 'alerts',
+          ruleTypeId: 'my-rule-type',
+          schedule: {
+            interval: '1h',
+          },
+        },
+        ruleTypesOverwrite: [
+          {
+            id: 'my-rule-type',
+            name: 'Threshold Rule',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            enabledInLicense: true,
+            defaultActionGroupId: 'threshold.fired',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+            producer: ALERTS_FEATURE_ID,
+            authorizedConsumers: {
+              infrastructure: { read: true, all: true },
+              logs: { read: true, all: true },
+            },
+            actionVariables: {
+              context: [],
+              state: [],
+              params: [],
+            },
+            hasFieldsForAAD: false,
+            hasAlertsMappings: false,
+          },
+        ],
+        ruleTypeModelOverwrite: {
+          id: 'my-rule-type',
+          iconClass: 'test',
+          description: 'test',
+          documentationUrl: null,
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          ruleParamsExpression: TestExpression,
+          requiresAppContext: false,
+        },
+      });
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(false);
+    });
+
+    it('Show alert query in action when rule type  hasFieldsForAAD', async () => {
+      await setup({
+        initialRuleOverwrite: {
+          name: 'Simple rule',
+          consumer: 'alerts',
+          ruleTypeId: 'my-rule-type',
+          schedule: {
+            interval: '1h',
+          },
+        },
+        ruleTypesOverwrite: [
+          {
+            id: 'my-rule-type',
+            name: 'Threshold Rule',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            enabledInLicense: true,
+            defaultActionGroupId: 'threshold.fired',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+            producer: ALERTS_FEATURE_ID,
+            authorizedConsumers: {
+              infrastructure: { read: true, all: true },
+              logs: { read: true, all: true },
+            },
+            actionVariables: {
+              context: [],
+              state: [],
+              params: [],
+            },
+            hasFieldsForAAD: true,
+            hasAlertsMappings: false,
+          },
+        ],
+        ruleTypeModelOverwrite: {
+          id: 'my-rule-type',
+          iconClass: 'test',
+          description: 'test',
+          documentationUrl: null,
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          ruleParamsExpression: TestExpression,
+          requiresAppContext: false,
+        },
+      });
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(true);
+    });
+
+    it('Show alert query in action when rule type  hasAlertsMappings', async () => {
+      await setup({
+        initialRuleOverwrite: {
+          name: 'Simple rule',
+          consumer: 'alerts',
+          ruleTypeId: 'my-rule-type',
+          schedule: {
+            interval: '1h',
+          },
+        },
+        ruleTypesOverwrite: [
+          {
+            id: 'my-rule-type',
+            name: 'Threshold Rule',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            enabledInLicense: true,
+            defaultActionGroupId: 'threshold.fired',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+            producer: ALERTS_FEATURE_ID,
+            authorizedConsumers: {
+              infrastructure: { read: true, all: true },
+              logs: { read: true, all: true },
+            },
+            actionVariables: {
+              context: [],
+              state: [],
+              params: [],
+            },
+            hasFieldsForAAD: false,
+            hasAlertsMappings: true,
+          },
+        ],
+        ruleTypeModelOverwrite: {
+          id: 'my-rule-type',
+          iconClass: 'test',
+          description: 'test',
+          documentationUrl: null,
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          ruleParamsExpression: TestExpression,
+          requiresAppContext: false,
+        },
+      });
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(true);
+    });
+
+    it('Show alert query in action when rule type is from security solution', async () => {
+      await setup({
+        initialRuleOverwrite: {
+          name: 'Simple rule',
+          consumer: 'siem',
+          ruleTypeId: 'my-rule-type',
+          schedule: {
+            interval: '1h',
+          },
+        },
+        ruleTypesOverwrite: [
+          {
+            id: 'my-rule-type',
+            name: 'Threshold Rule',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            enabledInLicense: true,
+            defaultActionGroupId: 'threshold.fired',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+            producer: 'siem',
+            authorizedConsumers: {
+              infrastructure: { read: true, all: true },
+              logs: { read: true, all: true },
+            },
+            actionVariables: {
+              context: [],
+              state: [],
+              params: [],
+            },
+            hasFieldsForAAD: false,
+            hasAlertsMappings: false,
+          },
+        ],
+        ruleTypeModelOverwrite: {
+          id: 'my-rule-type',
+          iconClass: 'test',
+          description: 'test',
+          documentationUrl: null,
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          ruleParamsExpression: TestExpression,
+          requiresAppContext: false,
+        },
+      });
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(true);
+    });
+
+    it('show alert query in action when multi consumer rule type does not have a consumer selected', async () => {
+      await setup({
+        initialRuleOverwrite: {
+          name: 'Simple rule',
+          consumer: 'alerts',
+          ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          schedule: {
+            interval: '1h',
+          },
+        },
+        ruleTypesOverwrite: [
+          {
+            id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+            name: 'Threshold Rule',
+            actionGroups: [
+              {
+                id: 'testActionGroup',
+                name: 'Test Action Group',
+              },
+            ],
+            enabledInLicense: true,
+            defaultActionGroupId: 'threshold.fired',
+            minimumLicenseRequired: 'basic',
+            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+            producer: ALERTS_FEATURE_ID,
+            authorizedConsumers: {
+              infrastructure: { read: true, all: true },
+              logs: { read: true, all: true },
+            },
+            actionVariables: {
+              context: [],
+              state: [],
+              params: [],
+            },
+            hasFieldsForAAD: true,
+            hasAlertsMappings: true,
+          },
+        ],
+        ruleTypeModelOverwrite: {
+          id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+          iconClass: 'test',
+          description: 'test',
+          documentationUrl: null,
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          ruleParamsExpression: TestExpression,
+          requiresAppContext: false,
+        },
+        selectedConsumer: 'logs',
+      });
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(true);
     });
   });
 
@@ -477,46 +1040,48 @@ describe('rule_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
-      useLoadRuleTypes.mockReturnValue({
-        ruleTypes: [
-          {
-            id: 'other-consumer-producer-rule-type',
-            name: 'Test',
-            actionGroups: [
-              {
-                id: 'testActionGroup',
-                name: 'Test Action Group',
+      const { useLoadRuleTypesQuery } = jest.requireMock('../../hooks/use_load_rule_types_query');
+      useLoadRuleTypesQuery.mockReturnValue({
+        ruleTypesState: {
+          data: [
+            {
+              id: 'other-consumer-producer-rule-type',
+              name: 'Test',
+              actionGroups: [
+                {
+                  id: 'testActionGroup',
+                  name: 'Test Action Group',
+                },
+              ],
+              defaultActionGroupId: 'testActionGroup',
+              minimumLicenseRequired: 'basic',
+              recoveryActionGroup: RecoveredActionGroup,
+              producer: ALERTS_FEATURE_ID,
+              authorizedConsumers: {
+                [ALERTS_FEATURE_ID]: { read: true, all: true },
+                test: { read: true, all: true },
               },
-            ],
-            defaultActionGroupId: 'testActionGroup',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: RecoveredActionGroup,
-            producer: ALERTS_FEATURE_ID,
-            authorizedConsumers: {
-              [ALERTS_FEATURE_ID]: { read: true, all: true },
-              test: { read: true, all: true },
             },
-          },
-          {
-            id: 'same-consumer-producer-rule-type',
-            name: 'Test',
-            actionGroups: [
-              {
-                id: 'testActionGroup',
-                name: 'Test Action Group',
+            {
+              id: 'same-consumer-producer-rule-type',
+              name: 'Test',
+              actionGroups: [
+                {
+                  id: 'testActionGroup',
+                  name: 'Test Action Group',
+                },
+              ],
+              defaultActionGroupId: 'testActionGroup',
+              minimumLicenseRequired: 'basic',
+              recoveryActionGroup: RecoveredActionGroup,
+              producer: 'test',
+              authorizedConsumers: {
+                [ALERTS_FEATURE_ID]: { read: true, all: true },
+                test: { read: true, all: true },
               },
-            ],
-            defaultActionGroupId: 'testActionGroup',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: RecoveredActionGroup,
-            producer: 'test',
-            authorizedConsumers: {
-              [ALERTS_FEATURE_ID]: { read: true, all: true },
-              test: { read: true, all: true },
             },
-          },
-        ],
+          ].reduce(...toMapById),
+        },
       });
       const mocks = coreMock.createSetup();
       const [
@@ -595,7 +1160,7 @@ describe('rule_form', () => {
         wrapper.update();
       });
 
-      expect(useLoadRuleTypes).toHaveBeenCalled();
+      expect(useLoadRuleTypesQuery).toHaveBeenCalled();
     }
 
     it('renders rule type options which producer correspond to the rule consumer', async () => {
@@ -604,14 +1169,6 @@ describe('rule_form', () => {
         '[data-test-subj="same-consumer-producer-rule-type-SelectOption"]'
       );
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
-    });
-
-    it('does not render rule type options which producer does not correspond to the rule consumer', async () => {
-      await setup();
-      const ruleTypeSelectOptions = wrapper.find(
-        '[data-test-subj="other-consumer-producer-rule-type-SelectOption"]'
-      );
-      expect(ruleTypeSelectOptions.exists()).toBeFalsy();
     });
   });
 
@@ -649,7 +1206,7 @@ describe('rule_form', () => {
             minimumScheduleInterval: { value: '1m', enforce: false },
           }}
           dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}

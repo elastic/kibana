@@ -7,32 +7,33 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiText,
-  EuiLoadingChart,
-  EuiResizeObserver,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingChart,
+  EuiResizeObserver,
+  EuiText,
 } from '@elastic/eui';
-
 import { throttle } from 'lodash';
 import {
-  Chart,
   BrushEndListener,
-  Settings,
-  Heatmap,
-  HeatmapElementEvent,
+  Chart,
   ElementClickListener,
-  TooltipValue,
-  HeatmapSpec,
-  TooltipSettings,
+  CustomTooltip,
+  Heatmap,
   HeatmapBrushEvent,
+  HeatmapElementEvent,
+  HeatmapSpec,
+  HeatmapStyle,
+  PartialTheme,
   Position,
   ScaleType,
-  PartialTheme,
-  HeatmapStyle,
+  Settings,
+  TooltipProps,
+  TooltipValue,
+  Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import moment from 'moment';
-
 import { i18n } from '@kbn/i18n';
 import { ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
@@ -41,19 +42,18 @@ import {
   ML_ANOMALY_THRESHOLD,
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
-import { formatHumanReadableDateTime } from '../../../common/util/date_utils';
-
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
-import { useUiSettings } from '../contexts/kibana';
-import { Y_AXIS_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './swimlane_annotation_container';
-import { useCurrentEuiTheme } from '../components/color_range_legend';
+import { Y_AXIS_LABEL_PADDING, Y_AXIS_LABEL_WIDTH } from './swimlane_annotation_container';
+import { useCurrentThemeVars, useMlKibana } from '../contexts/kibana';
 
 declare global {
   interface Window {
@@ -69,7 +69,7 @@ declare global {
  */
 const RESIZE_THROTTLE_TIME_MS = 500;
 const BORDER_WIDTH = 1;
-const CELL_HEIGHT = 30;
+export const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
 
@@ -83,7 +83,7 @@ export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
  * Provides a custom tooltip for the anomaly swim lane chart.
  */
 const SwimLaneTooltip =
-  (fieldName?: string): FC<{ values: TooltipValue[] }> =>
+  (fieldName?: string): CustomTooltip =>
   ({ values }) => {
     const tooltipData: TooltipValue[] = [];
 
@@ -161,6 +161,7 @@ export interface SwimlaneProps {
   showYAxis?: boolean;
   yAxisWidth?: HeatmapStyle['yAxisLabel']['width'];
   chartsService: ChartsPluginStart;
+  onRenderComplete?: () => void;
 }
 
 /**
@@ -188,11 +189,16 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   showLegend = true,
   'data-test-subj': dataTestSubj,
   yAxisWidth,
+  onRenderComplete,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const isDarkTheme = !!useUiSettings().get('theme:darkMode');
-  const { euiTheme } = useCurrentEuiTheme();
+  const {
+    services: { theme: themeService },
+  } = useMlKibana();
+
+  const isDarkTheme = useIsDarkTheme(themeService);
+  const { euiTheme } = useCurrentThemeVars();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -241,6 +247,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const isPaginationVisible =
     (showSwimlane || isLoading) &&
     swimlaneLimit !== undefined &&
+    swimlaneLimit > (perPage ?? 5) &&
     onPaginationChange &&
     fromPage &&
     perPage;
@@ -366,7 +373,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneType, swimlaneData?.fieldName, swimlaneData?.interval, onCellsSelection]
   ) as ElementClickListener;
 
-  const tooltipOptions: TooltipSettings = useMemo(
+  const tooltipOptions = useMemo<TooltipProps>(
     () => ({
       placement: 'auto',
       fallbackPlacements: ['left'],
@@ -403,6 +410,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const noSwimLaneData = !isLoading && !showSwimlane && !!noDataWarning;
 
+  if (noSwimLaneData) {
+    onRenderComplete?.();
+  }
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -437,17 +448,24 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 >
                   {showSwimlane && !isLoading && (
                     <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
+                      <Tooltip {...tooltipOptions} />
                       <Settings
-                        // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                         theme={themeOverrides}
+                        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                        baseTheme={LEGACY_LIGHT_THEME}
                         onElementClick={onElementClick}
                         onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}
                         legendPosition={Position.Top}
                         xDomain={xDomain}
-                        tooltip={tooltipOptions}
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
+                        locale={i18n.getLocale()}
+                        onRenderChange={(isRendered) => {
+                          if (isRendered && onRenderComplete) {
+                            onRenderComplete();
+                          }
+                        }}
                       />
 
                       <Heatmap
@@ -515,7 +533,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   {isLoading && (
                     <EuiText
                       textAlign={'center'}
-                      style={{
+                      css={{
                         position: 'absolute',
                         top: '50%',
                         left: '50%',

@@ -13,7 +13,7 @@ import { capitalize } from 'lodash';
 import { Observable, Subscription } from 'rxjs';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
-import { PLUGIN } from '../constants/plugin';
+import { PLUGIN } from '../../common/constants/plugin';
 import { getRuleTypeFeatureUsageName } from './get_rule_type_feature_usage_name';
 import {
   RuleType,
@@ -21,6 +21,7 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  RuleAlertData,
 } from '../types';
 import { RuleTypeDisabledError } from './errors/rule_type_disabled';
 
@@ -179,7 +180,8 @@ export class LicenseState {
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
+    RecoveryActionGroupId extends string,
+    AlertData extends RuleAlertData
   >(
     ruleType: RuleType<
       Params,
@@ -188,7 +190,8 @@ export class LicenseState {
       InstanceState,
       InstanceContext,
       ActionGroupIds,
-      RecoveryActionGroupId
+      RecoveryActionGroupId,
+      AlertData
     >
   ) {
     this.notifyUsage(ruleType.name, ruleType.minimumLicenseRequired);

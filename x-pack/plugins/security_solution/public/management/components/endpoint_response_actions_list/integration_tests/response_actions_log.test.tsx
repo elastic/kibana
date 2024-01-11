@@ -7,12 +7,13 @@
 
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
-  createAppRootMockRenderer,
   type AppContextTestRender,
+  createAppRootMockRenderer,
 } from '../../../../common/mock/endpoint';
 import { ResponseActionsLog } from '../response_actions_log';
 import type {
@@ -29,11 +30,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
-import { waitFor } from '@testing-library/react';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { OUTPUT_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { getUiCommand } from '../components/hooks';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 
@@ -198,9 +199,6 @@ describe('Response actions history', () => {
       (renderResult = mockedContext.render(
         <ResponseActionsLog data-test-subj={testPrefix} {...(props ?? {})} />
       ));
-    reactTestingLibrary.act(() => {
-      history.push(`${MANAGEMENT_PATH}/response_actions`);
-    });
 
     useGetEndpointActionListMock.mockReturnValue({
       ...getBaseMockedActionList(),
@@ -227,6 +225,29 @@ describe('Response actions history', () => {
   afterEach(() => {
     useGetEndpointActionListMock.mockReturnValue(getBaseMockedActionList());
     useUserPrivilegesMock.mockReset();
+  });
+
+  it('should call API with default date range', () => {
+    reactTestingLibrary.act(() => {
+      history.push(`${MANAGEMENT_PATH}/response_actions_history`);
+    });
+
+    render();
+    expect(useGetEndpointActionListMock).toHaveBeenCalledWith(
+      {
+        page: 1,
+        pageSize: 10,
+        agentIds: undefined,
+        commands: [],
+        statuses: [],
+        types: [],
+        userIds: [],
+        withOutputs: [],
+        startDate: 'now-24h/h',
+        endDate: 'now',
+      },
+      { retry: false }
+    );
   });
 
   describe('When index does not exist yet', () => {
@@ -292,9 +313,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -450,7 +471,7 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should expand each row to show details', async () => {
+    it('should expand/collapse each row to show/hide details', async () => {
       render();
       const { getAllByTestId, queryAllByTestId } = renderResult;
 
@@ -941,8 +962,7 @@ describe('Response actions history', () => {
 
       const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
       expandButtons.map((button) => userEvent.click(button));
-      const outputs = getAllByTestId(`${testPrefix}-details-tray-output`);
-      return outputs;
+      return getAllByTestId(`${testPrefix}-details-tray-output`);
     };
 
     it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
@@ -962,10 +982,12 @@ describe('Response actions history', () => {
 
         render();
 
+        const outputCommand = getUiCommand(command);
+
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          expect.stringContaining(`${command} completed successfully`),
-          expect.stringContaining(`${command} completed successfully`),
+          expect.stringContaining(`${outputCommand} completed successfully`),
+          expect.stringContaining(`${outputCommand} completed successfully`),
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -987,10 +1009,11 @@ describe('Response actions history', () => {
         });
         render();
 
+        const outputCommand = getUiCommand(command);
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${command} failed`,
-          `${command} failed`,
+          `${outputCommand} failed`,
+          `${outputCommand} failed`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1013,10 +1036,11 @@ describe('Response actions history', () => {
         });
         render();
 
+        const outputCommand = getUiCommand(command);
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${command} failed: action expired`,
-          `${command} failed: action expired`,
+          `${outputCommand} failed: action expired`,
+          `${outputCommand} failed: action expired`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1069,14 +1093,14 @@ describe('Response actions history', () => {
         RESPONSE_ACTION_API_COMMANDS_NAMES.length
       );
       expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
-        'isolate',
-        'release',
-        'kill-process',
-        'suspend-process',
-        'processes',
-        'get-file',
-        'execute',
-        'upload',
+        'isolate. To check this option, press Enter.',
+        'release. To check this option, press Enter.',
+        'kill-process. To check this option, press Enter.',
+        'suspend-process. To check this option, press Enter.',
+        'processes. To check this option, press Enter.',
+        'get-file. To check this option, press Enter.',
+        'execute. To check this option, press Enter.',
+        'upload. To check this option, press Enter.',
       ]);
     });
 
@@ -1140,9 +1164,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: ['failed', 'pending'],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );
@@ -1342,9 +1366,9 @@ describe('Response actions history', () => {
           pageSize: 10,
           startDate: 'now-24h/h',
           statuses: [],
+          types: [],
           userIds: [],
           withOutputs: [],
-          withAutomatedActions: false,
         },
         expect.anything()
       );

@@ -7,14 +7,22 @@ date: 2022-05-24
 tags: ['kibana', 'dev', 'contributor', 'operations', 'es']
 ---
 
-> A command line utility for running elasticsearch from snapshot, source, archive or even building snapshot artifacts. 
+> A command line utility for running elasticsearch from snapshot, source, archive, docker, serverless or even building snapshot artifacts. 
 
 ## Getting started
-If running elasticsearch from source, elasticsearch needs to be cloned to a sibling directory of Kibana.
-
 To run, go to the Kibana root and run `node scripts/es --help` to get the latest command line options.
 
 The script attempts to preserve the existing interfaces used by Elasticsearch CLI. This includes passing through options with the `-E` argument and the `ES_JAVA_OPTS` environment variable for Java options.
+
+If running elasticsearch from source, elasticsearch needs to be cloned to a sibling directory of Kibana.
+
+### Serverless & Docker Prerequisites 
+If running elasticsearch serverless or a docker container, there is some required initial setup:
+
+1. Install Docker. Instructions can be found [here](https://www.docker.com/).
+1. Authentication with Elastic's Docker registry [here](https://docker-auth.elastic.co/github_auth).
+1. Increase OS virtual memory limits. More info in the [ES docs](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-prod-prerequisites).
+
 
 ### Examples
 
@@ -26,6 +34,16 @@ node scripts/es snapshot --license=trial
 Run from source with a configured data directory
 ```
 node scripts/es source --Epath.data=/home/me/es_data
+```
+
+Run serverless with a specific image tag
+```
+node scripts/es serverless --tag git-fec36430fba2-x86_64
+```
+
+Run an official Docker release
+```
+node scripts/es docker --tag 8.8.2
 ```
 
 ## API
@@ -50,7 +68,7 @@ es.run({
 
 Type: `String`
 
-License type, one of: trial, basic, gold, platinum
+License type, one of: basic, trial
 
 ##### options.version
 

@@ -8,6 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
+import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import { NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getInfraHref } from '../../../../shared/links/infra_link';
 import {
@@ -37,11 +41,15 @@ export function getMenuSections({
   basePath,
   onFilterByInstanceClick,
   metricsHref,
+  allDatasetsLocator,
+  nodeLogsLocator,
 }: {
   instanceDetails: InstaceDetails;
   basePath: IBasePath;
   onFilterByInstanceClick: () => void;
   metricsHref: string;
+  allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
+  nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
 }) {
   const podId = instanceDetails.kubernetes?.pod?.uid;
   const containerId = instanceDetails.container?.id;
@@ -50,6 +58,18 @@ export function getMenuSections({
     : undefined;
   const infraMetricsQuery = getInfraMetricsQuery(instanceDetails['@timestamp']);
 
+  const podLogsHref = nodeLogsLocator.getRedirectUrl({
+    nodeField: findInventoryFields('pod').id,
+    nodeId: podId!,
+    time,
+  });
+
+  const containerLogsHref = nodeLogsLocator.getRedirectUrl({
+    nodeField: findInventoryFields('container').id,
+    nodeId: containerId!,
+    time,
+  });
+
   const podActions: Action[] = [
     {
       key: 'podLogs',
@@ -57,12 +77,7 @@ export function getMenuSections({
         'xpack.apm.serviceOverview.instancesTable.actionMenus.podLogs',
         { defaultMessage: 'Pod logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/pod-logs/${podId}`,
-        query: { time },
-      }),
+      href: podLogsHref,
       condition: !!podId,
     },
     {
@@ -88,12 +103,7 @@ export function getMenuSections({
         'xpack.apm.serviceOverview.instancesTable.actionMenus.containerLogs',
         { defaultMessage: 'Container logs' }
       ),
-      href: getInfraHref({
-        app: 'logs',
-        basePath,
-        path: `/link-to/container-logs/${containerId}`,
-        query: { time },
-      }),
+      href: containerLogsHref,
       condition: !!containerId,
     },
     {

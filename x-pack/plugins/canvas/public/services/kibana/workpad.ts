@@ -64,13 +64,14 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
 
   return {
     get: async (id: string) => {
-      const workpad = await coreStart.http.get<any>(`${getApiPath()}/${id}`);
+      const workpad = await coreStart.http.get<any>(`${getApiPath()}/${id}`, { version: '1' });
 
       return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
     },
     export: async (id: string) => {
       const workpad = await coreStart.http.get<SavedObject<CanvasWorkpad>>(
-        `${getApiPath()}/export/${id}`
+        `${getApiPath()}/export/${id}`,
+        { version: '1' }
       );
       const { attributes } = workpad;
 
@@ -85,7 +86,8 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
     },
     resolve: async (id: string) => {
       const { workpad, ...resolveProps } = await coreStart.http.get<ResolveWorkpadResponse>(
-        `${getApiPath()}/resolve/${id}`
+        `${getApiPath()}/resolve/${id}`,
+        { version: '1' }
       );
 
       return {
@@ -106,6 +108,7 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
           assets: workpad.assets || {},
           variables: workpad.variables || [],
         }),
+        version: '1',
       });
     },
     import: (workpad: CanvasWorkpad) =>
@@ -115,13 +118,15 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
           assets: workpad.assets || {},
           variables: workpad.variables || [],
         }),
+        version: '1',
       }),
     createFromTemplate: (templateId: string) => {
       return coreStart.http.post(getApiPath(), {
         body: JSON.stringify({ templateId }),
+        version: '1',
       });
     },
-    findTemplates: async () => coreStart.http.get(API_ROUTE_TEMPLATES),
+    findTemplates: async () => coreStart.http.get(API_ROUTE_TEMPLATES, { version: '1' }),
     find: (searchTerm: string) => {
       // TODO: this shouldn't be necessary.  Check for usage.
       const validSearchTerm = typeof searchTerm === 'string' && searchTerm.length > 0;
@@ -131,29 +136,34 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
           perPage: 10000,
           name: validSearchTerm ? searchTerm : '',
         },
+        version: '1',
       });
     },
     remove: (id: string) => {
-      return coreStart.http.delete(`${getApiPath()}/${id}`);
+      return coreStart.http.delete(`${getApiPath()}/${id}`, { version: '1' });
     },
     update: (id, workpad) => {
       return coreStart.http.put(`${getApiPath()}/${id}`, {
         body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
+        version: '1',
       });
     },
     updateWorkpad: (id, workpad) => {
       return coreStart.http.put(`${API_ROUTE_WORKPAD_STRUCTURES}/${id}`, {
         body: JSON.stringify({ ...sanitizeWorkpad({ ...workpad }) }),
+        version: '1',
       });
     },
     updateAssets: (id, assets) => {
       return coreStart.http.put(`${API_ROUTE_WORKPAD_ASSETS}/${id}`, {
         body: JSON.stringify(assets),
+        version: '1',
       });
     },
     getRuntimeZip: (workpad) => {
       return coreStart.http.post<Blob>(API_ROUTE_SHAREABLE_ZIP, {
         body: JSON.stringify(workpad),
+        version: '1',
       });
     },
   };

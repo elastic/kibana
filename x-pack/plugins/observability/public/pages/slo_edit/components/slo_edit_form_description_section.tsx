@@ -19,12 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import type { CreateSLOInput } from '@kbn/slo-schema';
-
+import { CreateSLOForm } from '../types';
 import { maxWidth } from './slo_edit_form';
 
 export function SloEditFormDescriptionSection() {
-  const { control, getFieldState } = useFormContext<CreateSLOInput>();
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
@@ -107,7 +106,6 @@ export function SloEditFormDescriptionSection() {
             })}
           >
             <Controller
-              shouldUnregister
               name="tags"
               control={control}
               defaultValue={[]}

@@ -3,7 +3,14 @@
 exports[`#add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen component 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRootContextProvider
+      analytics={
+        Object {
+          "optIn": [MockFunction],
+          "reportEvent": [MockFunction],
+          "telemetryCounter$": Rx.Observable,
+        }
+      }
       globalStyles={true}
       i18n={
         Object {
@@ -12,6 +19,7 @@ Array [
       }
       theme={
         Object {
+          "getTheme": [MockFunction],
           "theme$": Rx.Observable,
         }
       }
@@ -20,7 +28,7 @@ Array [
         errorInfo$={Rx.Observable}
         kibanaVersion="kibanaVersion"
       />
-    </CoreContextProvider>,
+    </KibanaRootContextProvider>,
     <div />,
   ],
 ]

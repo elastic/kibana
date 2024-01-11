@@ -8,19 +8,10 @@
 export interface LogsOsqueryAction {
   '@timestamp': string;
   action_id: string;
-  alert_ids: string[];
+  alert_ids: string | string[];
+  agents: string | string[];
   expiration: string;
   input_type: 'osquery';
-  queries: Array<{
-    action_id: string;
-    id: string;
-    query: string;
-    agents: string[];
-    ecs_mapping?: unknown;
-    version?: string;
-    platform?: string;
-    saved_query_id?: string;
-    expiration?: string;
-  }>;
+  queries: Record<string, unknown>;
   type: 'INPUT_ACTION';
 }

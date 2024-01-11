@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiPageBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -27,6 +26,7 @@ import { FileContents } from '../file_contents';
 import { AnalysisMarkup } from '../analysis_markup';
 import { AnalysisSummary } from '../analysis_summary';
 import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
+import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 
 interface Props {
   data: string;
@@ -42,6 +42,9 @@ interface Props {
     data: string,
     overrides: InputOverrides
   ): Promise<{ results: FindFileStructureResponse }>;
+  onChangeMode: (mode: DATAVISUALIZER_MODE) => void;
+  onCancel: () => void;
+  disableImport?: boolean;
 }
 
 export const ResultsView: FC<Props> = ({
@@ -55,15 +58,33 @@ export const ResultsView: FC<Props> = ({
   overrides,
   originalSettings,
   analyzeFile,
+  onChangeMode,
+  onCancel,
+  disableImport,
 }) => {
   const [selectedTab, setSelectedTab] = useState(0);
   return (
     <EuiPageBody data-test-subj="dataVisualizerPageFileResults">
-      <EuiPageContentHeader>
-        <EuiTitle>
-          <h2 data-test-subj="dataVisualizerFileResultsTitle">{fileName}</h2>
-        </EuiTitle>
-      </EuiPageContentHeader>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h2 data-test-subj="dataVisualizerFileResultsTitle">{fileName}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={onCancel}
+            data-test-subj="dataVisualizerFileResultsCancelButton"
+            size="s"
+          >
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.resultsView.cancelButtonLabel"
+              defaultMessage="Select a different file"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <EuiSpacer size="m" />
       <div className="results">
         <EuiPanel data-test-subj="dataVisualizerFileFileContentPanel" hasShadow={false} hasBorder>
@@ -102,6 +123,19 @@ export const ResultsView: FC<Props> = ({
           <EuiSpacer size="m" />
 
           <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isDisabled={disableImport}
+                onClick={() => onChangeMode(DATAVISUALIZER_MODE.IMPORT)}
+                data-test-subj="dataVisualizerFileOpenImportPageButton"
+              >
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.resultsView.importButtonLabel"
+                  defaultMessage="Import"
+                />
+              </EuiButton>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton onClick={() => showEditFlyout()} disabled={disableButtons}>
                 <FormattedMessage

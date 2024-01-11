@@ -17,7 +17,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { CaseStatuses } from '@kbn/cases-plugin/common';
+import type { CaseStatuses } from '@kbn/cases-components';
 
 import { SecurityPageName } from '../../../../app/types';
 import { FormattedDate } from '../../../../common/components/formatted_date';

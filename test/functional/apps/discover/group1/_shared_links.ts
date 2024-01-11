@@ -8,6 +8,7 @@
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
+import { decompressFromBase64 } from 'lz-string';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -32,11 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       baseUrl = baseUrl.replace(':80', '').replace(':443', '');
       log.debug('New baseUrl = ' + baseUrl);
 
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-      });
-
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -44,17 +40,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.uiSettings.replace({
         'state:storeInSessionStorage': storeStateInSessionStorage,
+        defaultIndex: 'logstash-*',
       });
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
 
-      log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-
-      // After hiding the time picker, we need to wait for
-      // the refresh button to hide before clicking the share button
-      await PageObjects.common.sleep(1000);
-
       await PageObjects.share.clickShareTopNavButton();
 
       return async () => {
@@ -74,14 +64,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
-          const lz =
-            'N4IgjgrgpgTgniAXKSsGJCANCANgQwDsBzCfYqJEAa2nhAF8cBnAexgBckBtbkAAQ4BLALZRmHfCIAO2EABNxAYxABdVTiWtcEEYWY8N' +
-            'IIYUUAPKrlbEJ%2BZgAsAtACo5JjrABu%2BXFXwQOVjkAMyFcDxgDRG4jeXxJADUhKAB3AEl5S2tbBxc5YTEAJSIKJFBgmFYRKgAmAAY' +
-            'ARgBWRzqATkcGtoAVOoA2RABmBsQAFlGAOjrpgC18oIx65taOmsHuhoAOIZHxqdnGHBgoCvF7NMII719kEGvoJD7p6Zxpf2ZKRA4YaAY' +
-            'GIA%3D';
           const actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
-          expect(actualUrl).to.contain(`&lz=${lz}`);
+          const urlSearchParams = new URLSearchParams(actualUrl);
+          expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
+            query: {
+              language: 'kuery',
+              query: '',
+            },
+            sort: [['@timestamp', 'desc']],
+            columns: [],
+            index: 'logstash-*',
+            interval: 'auto',
+            filters: [],
+            dataViewId: 'logstash-*',
+            timeRange: {
+              from: '2015-09-19T06:31:44.000Z',
+              to: '2015-09-23T18:31:44.000Z',
+            },
+            refreshInterval: {
+              value: 60000,
+              pause: true,
+            },
+          });
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
@@ -151,30 +156,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await browser.clearSessionStorage();
         await browser.get(actualUrl, false);
-        await retry.waitFor('shortUrl resolves and opens', async () => {
+        await retry.try(async () => {
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
           const resolvedTime = await PageObjects.timePicker.getTimeConfig();
           expect(resolvedTime.start).to.equal(actualTime.start);
           expect(resolvedTime.end).to.equal(actualTime.end);
-          return true;
         });
+        await toasts.dismissAllToasts();
       });
 
       it("sharing hashed url shouldn't crash the app", async () => {
         const currentUrl = await browser.getCurrentUrl();
-        await browser.clearSessionStorage();
-        await browser.get(currentUrl, false);
-        await retry.waitFor('discover to open', async () => {
+        await retry.try(async () => {
+          await browser.clearSessionStorage();
+          await browser.get(currentUrl, false);
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
-          const { message } = await toasts.getErrorToast();
-          expect(message).to.contain(
+          const { title } = await toasts.getErrorToast(1, true);
+          expect(title).to.contain(
             'Unable to completely restore the URL, be sure to use the share functionality.'
           );
-          await toasts.dismissAllToasts();
-          return true;
         });
+        await toasts.dismissAllToasts();
       });
     });
   });

@@ -12,7 +12,7 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useRiskScore } from '../../../explore/containers/risk_score/all';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { UserSummaryProps } from '.';
 import { UserOverview } from '.';
 
@@ -21,11 +21,11 @@ const defaultProps = {
   inspect: null,
   refetch: () => {},
   isModuleEnabled: true,
-  isLicenseValid: true,
+  isAuthorized: true,
   loading: false,
 };
 
-jest.mock('../../../explore/containers/risk_score/all');
+jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockRiskScore = useRiskScore as jest.Mock;
 
@@ -101,7 +101,7 @@ describe('User Summary Component', () => {
       data: [
         {
           user: {
-            name: 'testUsermame',
+            name: 'testUsername',
             risk: {
               rule_risks: [],
               calculated_level: risk,

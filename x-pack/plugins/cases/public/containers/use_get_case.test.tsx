@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useGetCase } from './use_get_case';
 import * as api from './api';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useToasts } from '../common/lib/kibana';
@@ -32,7 +32,11 @@ describe('Use get case hook', () => {
     const spy = jest.spyOn(api, 'resolveCase');
     const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
     await waitForNextUpdate();
-    expect(spy).toHaveBeenCalledWith('case-1', true, expect.any(AbortSignal));
+    expect(spy).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      includeComments: true,
+      signal: expect.any(AbortSignal),
+    });
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -42,7 +46,11 @@ describe('Use get case hook', () => {
     const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
     await waitForNextUpdate();
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith('case-1', true, expect.any(AbortSignal));
+      expect(spy).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        includeComments: true,
+        signal: expect.any(AbortSignal),
+      });
       expect(addError).toHaveBeenCalled();
     });
   });

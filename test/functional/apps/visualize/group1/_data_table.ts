@@ -29,13 +29,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
       await PageObjects.visualize.clickDataTable();
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Split rows');
       await PageObjects.visEditor.clickBucket('Split rows');
       log.debug('Aggregation = Histogram');
@@ -45,6 +45,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Interval = 2000');
       await PageObjects.visEditor.setInterval('2000', { type: 'numeric' });
       await PageObjects.visEditor.clickGo();
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
 
     it('should allow applying changed params', async () => {
@@ -131,7 +135,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Range');
       await PageObjects.visEditor.selectField('bytes');
@@ -174,7 +177,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visEditor.clickBucket('Metric', 'metrics');
       await PageObjects.visEditor.selectAggregation('Average Bucket', 'metrics');
       await PageObjects.visEditor.selectAggregation('Terms', 'metrics', true);
@@ -188,7 +190,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Date Histogram');
       await PageObjects.visEditor.selectField('@timestamp');
@@ -206,7 +207,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Date Histogram');
       await PageObjects.visEditor.selectField('UTC time');
@@ -244,7 +244,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visEditor.clickMetricEditor();
       await PageObjects.visEditor.selectAggregation('Top Hit', 'metrics');
       await PageObjects.visEditor.selectField('agent.raw', 'metrics');
@@ -258,7 +257,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Range');
       await PageObjects.visEditor.selectField('bytes');
@@ -275,7 +273,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('Split rows');
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('extension.raw');
@@ -313,7 +310,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('Split rows');
         await PageObjects.visEditor.selectAggregation('Terms');
         await PageObjects.visEditor.selectField('extension.raw');
@@ -407,7 +403,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visEditor.clickBucket('Split table');
         // split by column to make all tables rows visible
         await PageObjects.visEditor.clickSplitDirection('Columns');

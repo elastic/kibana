@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ALL_VALUE, FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
-import { v1 as uuidv1 } from 'uuid';
-import { FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { v4 as uuidv4 } from 'uuid';
 import {
   buildDegradingSummary,
   buildHealthySummary,
@@ -16,8 +16,8 @@ import {
   buildTimeslicesObjective,
   buildViolatedSummary,
 } from './common';
-import { buildCalendarAlignedTimeWindow, buildRollingTimeWindow } from './time_window';
 import { buildApmAvailabilityIndicator, buildCustomKqlIndicator } from './indicator';
+import { buildCalendarAlignedTimeWindow, buildRollingTimeWindow } from './time_window';
 
 export const emptySloList: FindSLOResponse = {
   results: [],
@@ -43,7 +43,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   },
   timeWindow: {
     duration: '30d',
-    isRolling: true,
+    type: 'rolling',
   },
   objective: { target: 0.98 },
   budgetingMethod: 'occurrences',
@@ -62,10 +62,13 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       isEstimated: false,
     },
   },
+  groupBy: ALL_VALUE,
+  instanceId: ALL_VALUE,
   tags: ['k8s', 'production', 'critical'],
   enabled: true,
   createdAt: now,
   updatedAt: now,
+  version: 2,
 };
 
 export const sloList: FindSLOResponse = {
@@ -149,5 +152,5 @@ export function buildForecastedSlo(
 }
 
 export function buildSlo(params: Partial<SLOWithSummaryResponse> = {}): SLOWithSummaryResponse {
-  return cloneDeep({ ...baseSlo, id: uuidv1(), ...params });
+  return cloneDeep({ ...baseSlo, id: uuidv4(), ...params });
 }

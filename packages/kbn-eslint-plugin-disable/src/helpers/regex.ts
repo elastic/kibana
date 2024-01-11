@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type Eslint from 'eslint';
+import type { AST } from 'eslint';
 
 const ESLINT_DISABLE_RE = /^eslint-disable(?:-next-line|-line)?(?<rulesBlock>.*)/;
 
@@ -17,16 +17,16 @@ export enum ESLINT_DISABLE_VALUE {
 }
 
 export interface ParsedEslintDisableComment {
-  type: Eslint.AST.Program['comments'][0]['type'];
-  range: Eslint.AST.Program['comments'][0]['range'];
-  loc: Eslint.AST.Program['comments'][0]['loc'];
-  value: Eslint.AST.Program['comments'][0]['value'];
+  type: AST.Program['comments'][0]['type'];
+  range: AST.Program['comments'][0]['range'];
+  loc: AST.Program['comments'][0]['loc'];
+  value: AST.Program['comments'][0]['value'];
   disableValueType: ESLINT_DISABLE_VALUE;
   rules: string[];
 }
 
 export function parseEslintDisableComment(
-  comment: Eslint.AST.Program['comments'][0]
+  comment: AST.Program['comments'][0]
 ): ParsedEslintDisableComment | undefined {
   const commentVal = comment.value.trim();
   const nakedESLintRegexResult = commentVal.match(ESLINT_DISABLE_RE);

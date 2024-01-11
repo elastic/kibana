@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from '../config';
-import { VisTypePieServerPlugin } from './plugin';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { configSchema, PieConfig } from '../config';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
+export const config: PluginConfigDescriptor<PieConfig> = {
+  exposeToBrowser: {
+    readOnly: true,
+  },
   schema: configSchema,
 };
 
-export const plugin = () => new VisTypePieServerPlugin();
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { VisTypePieServerPlugin } = await import('./plugin');
+  return new VisTypePieServerPlugin(initializerContext);
+};

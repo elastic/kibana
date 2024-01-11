@@ -29,7 +29,7 @@ import { EmptyState } from '../../../../components/empty_state';
 export interface ResourceFindingsTableProps {
   items: CspFinding[];
   loading: boolean;
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   sorting: Required<EuiBasicTableProps<CspFinding>>['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
   onAddFilter: OnAddFilter;
@@ -106,4 +106,7 @@ const ResourceFindingsTableComponent = ({
   );
 };
 
+/**
+ * @deprecated: This component is deprecated and will be removed in the next release.
+ */
 export const ResourceFindingsTable = React.memo(ResourceFindingsTableComponent);

@@ -7,13 +7,18 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 
 import type { UiSettingsState } from '@kbn/core-ui-settings-browser';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 export interface UiSettingsApiResponse {
   settings: UiSettingsState;
+}
+
+export interface ValidationApiResponse {
+  valid: boolean;
+  errorMessage?: string;
 }
 
 interface Changes {
@@ -37,7 +42,7 @@ export class UiSettingsApi {
 
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(private readonly http: HttpSetup) {}
+  constructor(private readonly http: InternalHttpSetup) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is
@@ -95,6 +100,15 @@ export class UiSettingsApi {
   }
 
   /**
+   * Sends a validation request to the server for the provided key+value pair.
+   */
+  public async validate(key: string, value: any): Promise<ValidationApiResponse> {
+    return await this.sendRequest('POST', `/internal/kibana/settings/${key}/validate`, {
+      value,
+    });
+  }
+
+  /**
    * Gets an observable that notifies subscribers of the current number of active requests
    */
   public getLoadingCount$() {
@@ -137,7 +151,8 @@ export class UiSettingsApi {
 
     try {
       this.sendInProgress = true;
-      const path = scope === 'namespace' ? '/api/kibana/settings' : '/api/kibana/global_settings';
+      const path =
+        scope === 'namespace' ? '/internal/kibana/settings' : '/internal/kibana/global_settings';
       changes.callback(
         undefined,
         await this.sendRequest('POST', path, {

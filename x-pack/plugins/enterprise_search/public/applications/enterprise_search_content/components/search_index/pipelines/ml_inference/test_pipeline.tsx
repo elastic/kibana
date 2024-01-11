@@ -24,8 +24,8 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
+import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { TestPipelineLogic } from './test_pipeline_logic';
 
@@ -34,7 +34,7 @@ import './add_inference_pipeline_flyout.scss';
 export const TestPipeline: React.FC = () => {
   const {
     addInferencePipelineModal: {
-      configuration: { sourceField, fieldMappings },
+      configuration: { fieldMappings },
       indexName,
     },
     getDocumentsErr,
@@ -168,7 +168,7 @@ export const TestPipeline: React.FC = () => {
                                   `"${fieldMapping.sourceField}": "${sampleFieldValue}"`
                               )
                               .join(', ')
-                          : `"${sourceField}":"${sampleFieldValue}"`
+                          : `"my_field": "${sampleFieldValue}"`
                       }}}]`
                     ),
                     null,

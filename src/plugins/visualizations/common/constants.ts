@@ -20,6 +20,7 @@ export const VISUALIZE_APP_NAME = 'visualize';
 export const VisualizeConstants = {
   VISUALIZE_BASE_PATH: '/app/visualize',
   LANDING_PAGE_PATH: '/',
+  LANDING_PAGE_PATH_WITH_TAB: '/:activeTab',
   WIZARD_STEP_1_PAGE_PATH: '/new',
   WIZARD_STEP_2_PAGE_PATH: '/new/configure',
   CREATE_PATH: '/create',

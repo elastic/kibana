@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { AssetCriticalitySelector } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import {
   ExpandableUserDetailsTitle,
   ExpandableUserDetailsPageLink,
@@ -33,8 +34,9 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
 
 export const UserDetailsFlyout = ({
   contextID,
+  scopeId,
   userName,
-}: Pick<UserDetailsProps, 'contextID' | 'userName'>) => (
+}: Pick<UserDetailsProps, 'scopeId' | 'contextID' | 'userName'>) => (
   <>
     <EuiFlyoutHeader hasBorder>
       <ExpandableUserDetailsTitle userName={userName} />
@@ -42,8 +44,9 @@ export const UserDetailsFlyout = ({
     <StyledEuiFlyoutBody>
       <EuiSpacer size="m" />
       <ExpandableUserDetailsPageLink userName={userName} />
-      <EuiSpacer size="m" />
-      <ExpandableUserDetails contextID={contextID} userName={userName} />
+      <EuiHorizontalRule />
+      <AssetCriticalitySelector entity={{ type: 'user', name: userName }} />
+      <ExpandableUserDetails contextID={contextID} scopeId={scopeId} userName={userName} />
     </StyledEuiFlyoutBody>
   </>
 );

@@ -39,7 +39,7 @@ const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   const {
     savedObjectsTagging: { components },
-    dashboardSavedObject: { checkForDuplicateDashboardTitle },
+    dashboardContentManagement: { checkForDuplicateDashboardTitle },
   } = pluginServices.getServices();
 
   const dashboard = useDashboardContainer();

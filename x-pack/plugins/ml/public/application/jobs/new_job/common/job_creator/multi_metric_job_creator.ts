@@ -6,15 +6,14 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
+import type { Field, Aggregation, SplitField, AggFieldPair } from '@kbn/ml-anomaly-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { JobCreator } from './job_creator';
-import {
-  Field,
-  Aggregation,
-  SplitField,
-  AggFieldPair,
-} from '../../../../../../common/types/fields';
-import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
+import type {
+  Job,
+  Datafeed,
+  Detector,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
@@ -27,7 +26,7 @@ export class MultiMetricJobCreator extends JobCreator {
 
   protected _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
     this._wizardInitialized$.next(true);

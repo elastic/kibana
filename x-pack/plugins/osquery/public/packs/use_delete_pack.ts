@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
@@ -28,24 +29,30 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => http.delete(`/api/osquery/packs/${packId}`), {
-    onError: (error: { body: { error: string; message: string } }) => {
-      setErrorToast(error, {
-        title: error.body.error,
-        toastMessage: error.body.message,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries([PACKS_ID]);
-      if (withRedirect) {
-        navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
-      }
+  return useMutation(
+    () =>
+      http.delete(`/api/osquery/packs/${packId}`, {
+        version: API_VERSIONS.public.v1,
+      }),
+    {
+      onError: (error: { body: { error: string; message: string } }) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries([PACKS_ID]);
+        if (withRedirect) {
+          navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
+        }
 
-      toasts.addSuccess(
-        i18n.translate('xpack.osquery.deletePack.successToastMessageText', {
-          defaultMessage: 'Successfully deleted pack',
-        })
-      );
-    },
-  });
+        toasts.addSuccess(
+          i18n.translate('xpack.osquery.deletePack.successToastMessageText', {
+            defaultMessage: 'Successfully deleted pack',
+          })
+        );
+      },
+    }
+  );
 };

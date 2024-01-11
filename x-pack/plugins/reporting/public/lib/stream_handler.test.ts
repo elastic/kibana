@@ -6,9 +6,12 @@
  */
 
 import sinon, { stub } from 'sinon';
+
 import { NotificationsStart } from '@kbn/core/public';
-import { coreMock, themeServiceMock, docLinksServiceMock } from '@kbn/core/public/mocks';
-import { JobSummary, ReportApiJSON } from '../../common/types';
+import { coreMock, docLinksServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
+
+import { JobSummary } from '../types';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
@@ -34,7 +37,7 @@ jobQueueClientMock.getInfo = () =>
   Promise.resolve({ content: 'this is the completed report data' } as unknown as Job);
 jobQueueClientMock.getError = () => Promise.resolve('this is the failed report error');
 jobQueueClientMock.getManagementLink = () => '/#management';
-jobQueueClientMock.getDownloadLink = () => '/reporting/download/job-123';
+jobQueueClientMock.getReportURL = () => '/reporting/download/job-123';
 
 const mockShowDanger = stub();
 const mockShowSuccess = stub();

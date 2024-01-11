@@ -11,6 +11,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MapExtent } from './map_descriptor';
 
 export type Timeslice = {
@@ -46,6 +47,9 @@ export type SourceRequestMeta = DataFilters & {
 };
 
 export type VectorSourceRequestMeta = SourceRequestMeta & {
+  /*
+   * List of feature property keys used in client for data driven styling, join keys, and feature masking
+   */
   fieldNames: string[];
   timesliceMaskField?: string;
   sourceMeta: object | null;
@@ -88,6 +92,7 @@ export type VectorTileLayerMeta = {
 export type DataRequestMeta = {
   // request stop time in milliseconds since epoch
   requestStopTime?: number;
+  warnings?: SearchResponseWarning[];
 } & Partial<
   SourceRequestMeta &
     VectorSourceRequestMeta &
@@ -120,4 +125,5 @@ export type DataRequestDescriptor = {
   dataRequestToken?: symbol;
   data?: object;
   dataRequestMeta?: DataRequestMeta;
+  error?: Error;
 };

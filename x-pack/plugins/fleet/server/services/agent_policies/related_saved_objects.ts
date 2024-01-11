@@ -16,6 +16,7 @@ import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils'
 import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
 import { appContextService } from '../app_context';
 import { bulkGetFleetProxies } from '../fleet_proxies';
+import { OutputNotFoundError } from '../../errors';
 
 export async function fetchRelatedSavedObjects(
   soClient: SavedObjectsClientContract,
@@ -27,34 +28,35 @@ export async function fetchRelatedSavedObjects(
   ]);
 
   if (!defaultDataOutputId) {
-    throw new Error('Default output is not setup');
+    throw new OutputNotFoundError('Default output is not setup');
   }
 
   const dataOutputId = agentPolicy.data_output_id || defaultDataOutputId;
   const monitoringOutputId =
     agentPolicy.monitoring_output_id || defaultMonitoringOutputId || dataOutputId;
 
-  const [outputs, sourceUri, fleetServerHosts] = await Promise.all([
-    outputService.bulkGet(soClient, uniq([dataOutputId, monitoringOutputId]), {
-      ignoreNotFound: true,
-    }),
-    getSourceUriForAgentPolicy(soClient, agentPolicy),
-    getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
-      appContextService
-        .getLogger()
-        ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
+  const [outputs, { host: downloadSourceUri, proxy_id: downloadSourceProxyId }, fleetServerHosts] =
+    await Promise.all([
+      outputService.bulkGet(soClient, uniq([dataOutputId, monitoringOutputId]), {
+        ignoreNotFound: true,
+      }),
+      getSourceUriForAgentPolicy(soClient, agentPolicy),
+      getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
+        appContextService
+          .getLogger()
+          ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
 
-      return;
-    }),
-  ]);
+        return;
+      }),
+    ]);
 
   const dataOutput = outputs.find((output) => output.id === dataOutputId);
   if (!dataOutput) {
-    throw new Error(`Data output not found ${dataOutputId}`);
+    throw new OutputNotFoundError(`Data output not found ${dataOutputId}`);
   }
   const monitoringOutput = outputs.find((output) => output.id === monitoringOutputId);
   if (!monitoringOutput) {
-    throw new Error(`Monitoring output not found ${monitoringOutputId}`);
+    throw new OutputNotFoundError(`Monitoring output not found ${monitoringOutputId}`);
   }
 
   const proxyIds = uniq(
@@ -62,16 +64,27 @@ export async function fetchRelatedSavedObjects(
       .flatMap((output) => output.proxy_id)
       .filter((proxyId): proxyId is string => typeof proxyId !== 'undefined' && proxyId !== null)
       .concat(fleetServerHosts?.proxy_id ? [fleetServerHosts.proxy_id] : [])
+      .concat(downloadSourceProxyId ? [downloadSourceProxyId] : [])
   );
 
   const proxies = proxyIds.length ? await bulkGetFleetProxies(soClient, proxyIds) : [];
+
+  let downloadSourceProxyUri: string | null = null;
+
+  if (downloadSourceProxyId) {
+    const downloadSourceProxy = proxies.find((proxy) => proxy.id === downloadSourceProxyId);
+    if (downloadSourceProxy) {
+      downloadSourceProxyUri = downloadSourceProxy.url;
+    }
+  }
 
   return {
     outputs,
     proxies,
     dataOutput,
     monitoringOutput,
-    sourceUri,
+    downloadSourceUri,
+    downloadSourceProxyUri,
     fleetServerHosts,
   };
 }

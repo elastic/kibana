@@ -9,6 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
 import pRetry from 'p-retry';
 import { kibanaPackageJson } from '@kbn/repo-info';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
 import {
   ENDPOINT_ALERTS_INDEX,
@@ -40,17 +41,20 @@ export interface CyLoadEndpointDataOptions
   numResponseActions?: number;
   isolation: boolean;
   bothIsolatedAndNormalEndpoints?: boolean;
+  alertIds?: string[];
 }
 
 /**
  * Cypress plugin for handling loading Endpoint data into ES
  * @param esClient
  * @param kbnClient
+ * @param log
  * @param options
  */
 export const cyLoadEndpointDataHandler = async (
   esClient: Client,
   kbnClient: KbnClient,
+  log: ToolingLog,
   options: Partial<CyLoadEndpointDataOptions> = {}
 ): Promise<IndexedHostsAndAlertsResponse> => {
   const {
@@ -65,6 +69,7 @@ export const cyLoadEndpointDataHandler = async (
     withResponseActions,
     isolation,
     numResponseActions,
+    alertIds,
   } = options;
 
   const DocGenerator = EndpointDocGenerator.custom({
@@ -94,7 +99,9 @@ export const cyLoadEndpointDataHandler = async (
     undefined,
     DocGenerator,
     withResponseActions,
-    numResponseActions
+    numResponseActions,
+    alertIds,
+    log
   );
 
   if (waitUntilTransformed) {

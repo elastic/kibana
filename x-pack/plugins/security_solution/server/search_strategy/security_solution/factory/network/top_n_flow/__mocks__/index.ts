@@ -6,11 +6,9 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { NetworkTopNFlowRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-import type {
-  NetworkTopNFlowRequestOptions,
-  NetworkTopNFlowStrategyResponse,
-} from '../../../../../../../common/search_strategy';
+import type { NetworkTopNFlowStrategyResponse } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,

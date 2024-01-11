@@ -28,7 +28,6 @@ import { i18n } from '@kbn/i18n';
 
 import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
-import { decodeCloudId } from '../../../../shared/decode_cloud_id/decode_cloud_id';
 import { docLinks } from '../../../../shared/doc_links';
 
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -196,8 +195,7 @@ export const AnalyticsCollectionIntegrateView: React.FC<AnalyticsCollectionInteg
   const DEFAULT_URL = 'https://localhost:9200';
   const cloudContext = useCloudDetails();
 
-  const baseUrl =
-    (cloudContext.cloudId && decodeCloudId(cloudContext.cloudId)?.elasticsearchUrl) || DEFAULT_URL;
+  const baseUrl = cloudContext.elasticsearchUrl || DEFAULT_URL;
 
   const analyticsConfig: AnalyticsConfig = {
     apiKey: apiKey || '########',

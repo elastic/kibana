@@ -24,7 +24,7 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
@@ -130,11 +130,287 @@ Object {
       Object {
         "range": Object {
           "@timestamp": Object {
-            "gte": "now-7d",
+            "gte": "now-7d/d",
           },
         },
       },
     ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'service.environment' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.environment": "production",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'service.environment' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "service.environment": Object {
+    "terms": Object {
+      "field": "service.environment",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'service.name' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.name": "my-service",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'service.name' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "service.name": Object {
+    "terms": Object {
+      "field": "service.name",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'transaction.name' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.name": "GET /foo",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'transaction.name' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+  "transaction.name": Object {
+    "terms": Object {
+      "field": "transaction.name",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'transaction.type' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.type": "request",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Duration Transform Generator groups by the 'transaction.type' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+  "transaction.type": Object {
+    "terms": Object {
+      "field": "transaction.type",
+    },
   },
 }
 `;
@@ -144,12 +420,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 1,
+    "version": 3,
   },
-  "description": "Rolled-up SLI data for SLO: irrelevant",
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v1",
-    "pipeline": ".slo-observability.sli.monthly",
+    "index": ".slo-observability.sli-v3",
+    "pipeline": ".slo-observability.sli.pipeline-v3",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -157,8 +434,10 @@ Object {
       "_numerator": Object {
         "range": Object {
           "field": "transaction.duration.histogram",
+          "keyed": true,
           "ranges": Array [
             Object {
+              "key": "target",
               "to": 500000,
             },
           ],
@@ -181,7 +460,7 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "numerator": "_numerator['*-500000.0']>_count",
+            "numerator": "_numerator['target']>_count",
           },
           "script": "params.numerator",
         },
@@ -194,9 +473,24 @@ Object {
           "fixed_interval": "2m",
         },
       },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
+        },
+      },
+      "slo.instanceId": Object {
+        "terms": Object {
+          "field": "slo.instanceId",
         },
       },
       "slo.revision": Object {
@@ -204,10 +498,21 @@ Object {
           "field": "slo.revision",
         },
       },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+        },
+      },
     },
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": "metrics-apm*",
@@ -234,7 +539,7 @@ Object {
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
@@ -264,7 +569,13 @@ Object {
     "runtime_mappings": Object {
       "slo.id": Object {
         "script": Object {
-          "source": Any<String>,
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.instanceId": Object {
+        "script": Object {
+          "source": "emit('*')",
         },
         "type": "keyword",
       },
@@ -282,7 +593,7 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": Any<String>,
+  "transform_id": "slo-irrelevant-1",
 }
 `;
 
@@ -291,12 +602,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 1,
+    "version": 3,
   },
-  "description": "Rolled-up SLI data for SLO: irrelevant",
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v1",
-    "pipeline": ".slo-observability.sli.monthly",
+    "index": ".slo-observability.sli-v3",
+    "pipeline": ".slo-observability.sli.pipeline-v3",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -304,8 +616,10 @@ Object {
       "_numerator": Object {
         "range": Object {
           "field": "transaction.duration.histogram",
+          "keyed": true,
           "ranges": Array [
             Object {
+              "key": "target",
               "to": 500000,
             },
           ],
@@ -319,7 +633,7 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "numerator": "_numerator['*-500000.0']>_count",
+            "numerator": "_numerator['target']>_count",
           },
           "script": "params.numerator",
         },
@@ -332,9 +646,24 @@ Object {
           "fixed_interval": "1m",
         },
       },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
+        },
+      },
+      "slo.instanceId": Object {
+        "terms": Object {
+          "field": "slo.instanceId",
         },
       },
       "slo.revision": Object {
@@ -342,10 +671,21 @@ Object {
           "field": "slo.revision",
         },
       },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+        },
+      },
     },
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": "metrics-apm*",
@@ -372,7 +712,7 @@ Object {
           Object {
             "range": Object {
               "@timestamp": Object {
-                "gte": "now-7d",
+                "gte": "now-7d/d",
               },
             },
           },
@@ -402,7 +742,13 @@ Object {
     "runtime_mappings": Object {
       "slo.id": Object {
         "script": Object {
-          "source": Any<String>,
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.instanceId": Object {
+        "script": Object {
+          "source": "emit('*')",
         },
         "type": "keyword",
       },
@@ -420,6 +766,6 @@ Object {
       "field": "@timestamp",
     },
   },
-  "transform_id": Any<String>,
+  "transform_id": "slo-irrelevant-1",
 }
 `;

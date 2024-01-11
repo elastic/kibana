@@ -5,17 +5,15 @@
  * 2.0.
  */
 import { invert, mapValues } from 'lodash';
+import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
 import * as i18n from './translations';
 import { ISO_WEEKDAYS, MaintenanceWindowStatus } from '../../../common';
 
-// TODO - consolidate enum with backend
-export enum Frequency {
-  YEARLY = '0',
-  MONTHLY = '1',
-  WEEKLY = '2',
-  DAILY = '3',
-}
+export type MaintenanceWindowFrequency = Extract<
+  Frequency,
+  Frequency.YEARLY | Frequency.MONTHLY | Frequency.WEEKLY | Frequency.DAILY
+>;
 
 export const DEFAULT_FREQUENCY_OPTIONS = [
   {
@@ -125,3 +123,5 @@ export const STATUS_OPTIONS = [
   { value: MaintenanceWindowStatus.Finished, name: i18n.TABLE_STATUS_FINISHED },
   { value: MaintenanceWindowStatus.Archived, name: i18n.TABLE_STATUS_ARCHIVED },
 ];
+
+export const IS_SCOPED_QUERY_ENABLED = true;

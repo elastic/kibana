@@ -5,13 +5,37 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DASHBOARD_LOCATORS_IDS } from '../../../../../../../common/constants';
 
-import { useDashboardLocator } from '../../../../hooks';
+import { useDashboardLocator, useStartServices } from '../../../../hooks';
+
+const useDashboardExists = (dashboardId: string) => {
+  const [dashboardExists, setDashboardExists] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const { dashboard: dashboardPlugin } = useStartServices();
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const findDashboardsService = await dashboardPlugin.findDashboardsService();
+        const [dashboard] = await findDashboardsService.findByIds([dashboardId]);
+        setLoading(false);
+        setDashboardExists(dashboard?.status === 'success');
+      } catch (e) {
+        setLoading(false);
+        setDashboardExists(false);
+      }
+    };
+
+    fetchDashboard();
+  }, [dashboardId, dashboardPlugin]);
+
+  return { dashboardExists, loading };
+};
 
 export const DashboardsButtons: React.FunctionComponent = () => {
   const dashboardLocator = useDashboardLocator();
@@ -19,6 +43,14 @@ export const DashboardsButtons: React.FunctionComponent = () => {
   const getDashboardHref = (dashboardId: string) => {
     return dashboardLocator?.getRedirectUrl({ dashboardId }) || '';
   };
+
+  const { dashboardExists, loading: dashboardLoading } = useDashboardExists(
+    DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_OVERVIEW
+  );
+
+  if (dashboardLoading || !dashboardExists) {
+    return null;
+  }
 
   return (
     <>

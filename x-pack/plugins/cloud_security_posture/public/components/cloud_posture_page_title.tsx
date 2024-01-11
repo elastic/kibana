@@ -6,14 +6,29 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-export const CloudPosturePageTitle = ({ title }: { title: string }) => (
+export const CloudPosturePageTitle = ({ title, isBeta }: { title: string; isBeta?: boolean }) => (
   <EuiFlexGroup alignItems="center" gutterSize="s">
     <EuiFlexItem grow={false}>
       <EuiTitle>
         <h1>{title}</h1>
       </EuiTitle>
     </EuiFlexItem>
+    {isBeta && (
+      <EuiFlexItem grow={false}>
+        <EuiBetaBadge
+          label="Beta"
+          tooltipContent={
+            <FormattedMessage
+              id="xpack.csp.cloudPosturePage.betaLabel"
+              defaultMessage="This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features."
+            />
+          }
+          tooltipPosition="bottom"
+        />
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );

@@ -1,0 +1,39 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "./emotion.d.ts", // Emotion EUI theme typing
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/field-types",
+    "@kbn/ml-nested-property",
+    "@kbn/ml-agg-utils",
+    "@kbn/ml-error-utils",
+    "@kbn/ml-data-frame-analytics-utils",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/ml-is-populated-object",
+    "@kbn/ml-date-picker",
+    "@kbn/field-formats-plugin",
+    "@kbn/ml-query-utils",
+    "@kbn/ml-date-utils",
+  ]
+}

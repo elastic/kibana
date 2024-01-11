@@ -14,7 +14,6 @@ import {
 import { ObservabilityAlertSearchBar } from './alert_search_bar';
 import { AlertSearchBarWithUrlSyncProps } from './types';
 import { useKibana } from '../../utils/kibana_react';
-import { ObservabilityAppServices } from '../../application/types';
 import { useToasts } from '../../hooks/use_toast';
 
 function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
@@ -27,13 +26,14 @@ function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
       },
     },
     triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
-  } = useKibana<ObservabilityAppServices>().services;
+    uiSettings,
+  } = useKibana().services;
 
   return (
     <ObservabilityAlertSearchBar
       {...stateProps}
       {...searchBarProps}
-      services={{ timeFilterService, AlertsSearchBar, useToasts }}
+      services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
     />
   );
 }

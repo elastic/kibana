@@ -17,7 +17,7 @@ import {
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 
 type Config =
-  APIReturnType<'GET /api/apm/settings/agent-configuration 2023-05-22'>['configurations'][0];
+  APIReturnType<'GET /api/apm/settings/agent-configuration 2023-10-31'>['configurations'][0];
 
 interface Props {
   config: Config;
@@ -72,7 +72,7 @@ async function deleteConfig(
 ) {
   try {
     await callApmApi(
-      'DELETE /api/apm/settings/agent-configuration 2023-05-22',
+      'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       {
         signal: null,
         params: {

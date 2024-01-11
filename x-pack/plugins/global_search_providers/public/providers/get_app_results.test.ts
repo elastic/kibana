@@ -104,6 +104,56 @@ describe('getAppResults', () => {
     ]);
   });
 
+  it('deep links "category" and "icon" should take precedence over the same app properties', () => {
+    const apps = [
+      createApp({
+        euiIconType: 'logoKibana',
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        deepLinks: [
+          {
+            id: 'sub-observability',
+            title: 'Sub Observability',
+            path: '/sub-observability',
+            deepLinks: [],
+            keywords: [],
+            navLinkStatus: AppNavLinkStatus.hidden,
+            searchable: true,
+          },
+          {
+            id: 'sub-security',
+            title: 'Sub Security',
+            path: '/sub-security',
+            deepLinks: [],
+            keywords: [],
+            navLinkStatus: AppNavLinkStatus.visible,
+            searchable: true,
+            euiIconType: 'logoSecurity',
+            category: DEFAULT_APP_CATEGORIES.security,
+          },
+        ],
+        keywords: [],
+      }),
+    ];
+
+    const results = getAppResults('App 1', apps);
+    const [appLink, observabilityLink, securityLink] = results;
+    expect(appLink).toMatchObject({
+      icon: 'logoKibana',
+      meta: { categoryId: 'kibana', categoryLabel: 'Analytics' },
+      title: 'App 1',
+    });
+    expect(observabilityLink).toMatchObject({
+      icon: 'logoKibana',
+      meta: { categoryId: 'kibana', categoryLabel: 'Analytics' },
+      title: 'App 1 / Sub Observability',
+    });
+    expect(securityLink).toMatchObject({
+      icon: 'logoSecurity',
+      meta: { categoryId: 'securitySolution', categoryLabel: 'Security' },
+      title: 'App 1 / Sub Security',
+    });
+  });
+
   it('only includes deepLinks when search term is non-empty', () => {
     const apps = [
       createApp({

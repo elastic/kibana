@@ -31,6 +31,12 @@ describe('Embedded Map', () => {
       }),
     }));
 
+    const mockSpaces = {
+      getActiveSpace: jest
+        .fn()
+        .mockImplementation(() => ({ id: 'mockSpaceId' })),
+    };
+
     const { findByTestId } = render(
       <MemoryRouter
         initialEntries={[
@@ -38,7 +44,9 @@ describe('Embedded Map', () => {
         ]}
       >
         <MockApmPluginContextWrapper>
-          <KibanaContextProvider services={{ embeddable: mockEmbeddable }}>
+          <KibanaContextProvider
+            services={{ embeddable: mockEmbeddable, spaces: mockSpaces }}
+          >
             <EmbeddedMap
               selectedMap={MapTypes.Http}
               filters={[]}

@@ -1,0 +1,441 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UnifiedFieldList FieldItemButton renders properly 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview bytes: number",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+  dataTestSubj="field-bytes-showDetails"
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="number"
+        />
+      </div>
+    </div>
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-bytes"
+      search="by"
+      title="bytes"
+    >
+      bytes
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-bytes"
+  onClick={[MockFunction]}
+  size="s"
+/>
+`;
+
+exports[`UnifiedFieldList FieldItemButton renders properly for Records (Lens field) 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview Records: document",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--document unifiedFieldListItemButton--exists"
+  dataTestSubj="field-___records___-showDetails"
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="document"
+        />
+      </div>
+    </div>
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-___records___"
+      search="re"
+      title="Records"
+    >
+      Records
+    </EuiHighlight>
+  }
+  isActive={true}
+  key="field-item-button-___records___"
+  onClick={[MockFunction]}
+  size="s"
+/>
+`;
+
+exports[`UnifiedFieldList FieldItemButton renders properly for search with spaces 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview script date: date",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
+  dataTestSubj="field-script date-showDetails"
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={true}
+          type="date"
+        />
+      </div>
+    </div>
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-script date"
+      search="script date"
+      title="script date"
+    >
+      script date
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-script date"
+  size="s"
+/>
+`;
+
+exports[`UnifiedFieldList FieldItemButton renders properly for text-based column field 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview agent: string",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--string unifiedFieldListItemButton--exists"
+  dataTestSubj="field-agent-showDetails"
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          type="string"
+        />
+      </div>
+    </div>
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-agent"
+      search="ag"
+      title="agent"
+    >
+      agent
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-agent"
+  size="s"
+/>
+`;
+
+exports[`UnifiedFieldList FieldItemButton renders properly for wildcard search 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview script date: date",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--exists"
+  dataTestSubj="field-script date-showDetails"
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={true}
+          type="date"
+        />
+      </div>
+    </div>
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-script date"
+      search="script date"
+      title="script date"
+    >
+      script date
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-script date"
+  size="s"
+/>
+`;
+
+exports[`UnifiedFieldList FieldItemButton renders properly when a conflict field 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview custom_user_field: conflict",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--conflict unifiedFieldListItemButton--exists"
+  dataTestSubj="field-custom_user_field-showDetails"
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="conflict"
+        />
+      </div>
+    </div>
+  }
+  fieldInfoIcon={
+    <FieldConflictInfoIcon
+      conflictDescriptions={
+        Object {
+          "keyword": Array [
+            "index_a",
+          ],
+          "long": Array [
+            "index_b",
+          ],
+        }
+      }
+    />
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-custom_user_field"
+      search=""
+      title="custom_user_field"
+    >
+      custom_user_field
+    </EuiHighlight>
+  }
+  isActive={true}
+  key="field-item-button-custom_user_field"
+  onClick={[MockFunction]}
+  size="s"
+/>
+`;
+
+exports[`UnifiedFieldList FieldItemButton renders properly when empty 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview script date: date",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--date unifiedFieldListItemButton--missing"
+  dataTestSubj="field-script date-showDetails"
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={true}
+          type="date"
+        />
+      </div>
+    </div>
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-script date"
+      search=""
+      title="script date"
+    >
+      script date
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-script date"
+  onClick={[MockFunction]}
+  size="s"
+/>
+`;
+
+exports[`UnifiedFieldList FieldItemButton renders properly with a drag icon 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview bytes: number",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists unifiedFieldListItemButton--withDragIcon custom"
+  dataTestSubj="test-subj"
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="number"
+        />
+      </div>
+      <div
+        className="unifiedFieldListItemButton__fieldIconDrag"
+      >
+        <EuiIcon
+          size="m"
+          type="grabOmnidirectional"
+        />
+      </div>
+    </div>
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-bytes"
+      search=""
+      title="bytes"
+    >
+      bytes
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-bytes"
+  size="xs"
+/>
+`;
+
+exports[`UnifiedFieldList FieldItemButton renders properly with an action when deselected 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview bytes: number",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+  dataTestSubj="field-bytes-showDetails"
+  fieldAction={
+    <EuiToolTip
+      content="Add \\"bytes\\" field"
+      delay="regular"
+      display="inlineBlock"
+      position="top"
+    >
+      <EuiButtonIcon
+        aria-label="Add \\"bytes\\" field"
+        className="unifiedFieldListItemButton__action unifiedFieldListItemButton__action--always"
+        color="text"
+        data-test-subj="fieldToggle-bytes"
+        iconType="plusInCircle"
+        onClick={[Function]}
+      />
+    </EuiToolTip>
+  }
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="number"
+        />
+      </div>
+    </div>
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-bytes"
+      search=""
+      title="bytes"
+    >
+      bytes
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-bytes"
+  size="s"
+/>
+`;
+
+exports[`UnifiedFieldList FieldItemButton renders properly with an action when selected 1`] = `
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview bytes: number",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+  dataTestSubj="field-bytes-showDetails"
+  fieldAction={
+    <EuiToolTip
+      content="Remove \\"bytes\\" field"
+      delay="regular"
+      display="inlineBlock"
+      position="top"
+    >
+      <EuiButtonIcon
+        aria-label="Remove \\"bytes\\" field"
+        className="unifiedFieldListItemButton__action"
+        color="danger"
+        data-test-subj="fieldToggle-bytes"
+        iconType="cross"
+        onClick={[Function]}
+      />
+    </EuiToolTip>
+  }
+  fieldIcon={
+    <div
+      className="unifiedFieldListItemButton__fieldIconContainer"
+    >
+      <div
+        className="unifiedFieldListItemButton__fieldIcon"
+      >
+        <WrappedFieldIcon
+          scripted={false}
+          type="number"
+        />
+      </div>
+    </div>
+  }
+  fieldName={
+    <EuiHighlight
+      data-test-subj="field-bytes"
+      search=""
+      title="bytes"
+    >
+      bytes
+    </EuiHighlight>
+  }
+  isActive={false}
+  key="field-item-button-bytes"
+  onClick={[MockFunction click]}
+  size="s"
+/>
+`;

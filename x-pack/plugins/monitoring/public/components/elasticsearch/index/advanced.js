@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiPage,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
@@ -51,7 +50,7 @@ export const AdvancedIndex = ({ indexSummary, metrics, alerts, ...props }) => {
         <EuiSpacer size="m" />
         <AlertsCallout alerts={alerts} />
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
@@ -60,7 +59,7 @@ export const AdvancedIndex = ({ indexSummary, metrics, alerts, ...props }) => {
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

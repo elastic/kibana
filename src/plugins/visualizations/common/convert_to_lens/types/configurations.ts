@@ -166,6 +166,7 @@ export interface XYConfiguration {
   labelsOrientation?: LabelsOrientationConfig;
   curveType?: XYCurveType;
   fillOpacity?: number;
+  minBarHeight?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   showCurrentTimeMarker?: boolean;
@@ -333,10 +334,23 @@ export type HeatmapConfiguration = HeatmapLayerState & {
   palette?: Palette;
 };
 
+export interface TagcloudVisConfiguration {
+  layerId: string;
+  layerType: LayerType;
+  valueAccessor: string;
+  tagAccessor: string;
+  maxFontSize: number;
+  minFontSize: number;
+  orientation: string;
+  palette: PaletteOutput;
+  showLabel: boolean;
+}
+
 export type Configuration =
   | XYConfiguration
   | TableVisConfiguration
   | PartitionVisConfiguration
   | MetricVisConfiguration
   | GaugeVisConfiguration
-  | HeatmapConfiguration;
+  | HeatmapConfiguration
+  | TagcloudVisConfiguration;

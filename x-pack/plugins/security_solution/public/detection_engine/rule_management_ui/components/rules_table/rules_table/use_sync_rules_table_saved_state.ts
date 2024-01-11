@@ -74,6 +74,11 @@ export function useSyncRulesTableSavedState(): void {
       storageStateToSave.perPage = state.pagination.perPage;
     }
 
+    if (state.filterOptions.ruleExecutionStatus !== undefined) {
+      urlStateToSave.ruleExecutionStatus = state.filterOptions.ruleExecutionStatus;
+      storageStateToSave.ruleExecutionStatus = state.filterOptions.ruleExecutionStatus;
+    }
+
     const hasUrlStateToSave = Object.keys(urlStateToSave).length > 0;
     const hasStorageStateToSave = Object.keys(storageStateToSave).length > 0;
 

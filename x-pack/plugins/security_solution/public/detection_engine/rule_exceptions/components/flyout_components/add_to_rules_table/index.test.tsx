@@ -11,8 +11,7 @@ import { fireEvent, render, within } from '@testing-library/react';
 import { ExceptionsAddToRulesTable } from '.';
 import { TestProviders } from '../../../../../common/mock';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
-import type { Rule } from '../../../../rule_management/logic/types';
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 jest.mock('../../../../rule_management/logic/use_find_rules');
 
@@ -40,7 +39,7 @@ describe('ExceptionsAddToRulesTable', () => {
     const wrapper = render(
       <TestProviders>
         <ExceptionsAddToRulesTable
-          initiallySelectedRules={[{ ...getRulesSchemaMock(), id: '345', name: 'My rule' } as Rule]}
+          initiallySelectedRules={[{ ...getRulesSchemaMock(), id: '345', name: 'My rule' }]}
           onRuleSelectionChange={jest.fn()}
         />
       </TestProviders>
@@ -64,7 +63,7 @@ describe('ExceptionsAddToRulesTable', () => {
     const { queryByTestId, getByText } = render(
       <TestProviders>
         <ExceptionsAddToRulesTable
-          initiallySelectedRules={[rule as Rule]}
+          initiallySelectedRules={[rule]}
           onRuleSelectionChange={onRuleSelectionChangeMock}
         />
       </TestProviders>

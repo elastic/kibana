@@ -59,7 +59,8 @@ describe('PUT custom element', () => {
     const routerDeps = getMockedRouterDeps();
     initializeUpdateCustomElementRoute(routerDeps);
 
-    routeHandler = routerDeps.router.put.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.put.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   afterEach(() => {

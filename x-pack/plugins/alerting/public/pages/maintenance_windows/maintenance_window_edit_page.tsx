@@ -14,14 +14,15 @@ import { useMaintenanceWindowsNavigation } from '../../hooks/use_navigation';
 import * as i18n from './translations';
 import { PageHeader } from './components/page_header';
 import { CreateMaintenanceWindowForm } from './components/create_maintenance_windows_form';
-import { AlertingDeepLinkId } from '../../config';
+import { MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
 import { useGetMaintenanceWindow } from '../../hooks/use_get_maintenance_window';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { IS_SCOPED_QUERY_ENABLED } from './constants';
 
 export const MaintenanceWindowsEditPage = React.memo(() => {
   const { navigateToMaintenanceWindows } = useMaintenanceWindowsNavigation();
 
-  useBreadcrumbs(AlertingDeepLinkId.maintenanceWindowsEdit);
+  useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindowsEdit);
 
   const { maintenanceWindowId } = useParams<{ maintenanceWindowId: string }>();
   const { maintenanceWindow, isLoading, isError } = useGetMaintenanceWindow(maintenanceWindowId);
@@ -43,6 +44,7 @@ export const MaintenanceWindowsEditPage = React.memo(() => {
         maintenanceWindowId={maintenanceWindowId}
         onCancel={navigateToMaintenanceWindows}
         onSuccess={navigateToMaintenanceWindows}
+        scopedQueryFeatureFlag={IS_SCOPED_QUERY_ENABLED}
       />
     </EuiPageSection>
   );

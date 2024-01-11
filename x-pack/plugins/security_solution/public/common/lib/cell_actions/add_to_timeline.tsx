@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { getPageRowIndex } from '@kbn/securitysolution-data-table';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { DataProvider } from '../../../../common/types';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import {
   EXISTS_OPERATOR,
@@ -20,7 +20,7 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { EmptyComponent, useKibanaServices } from './helpers';
-import { addProvider } from '../../../timelines/store/timeline/actions';
+import { addProvider } from '../../../timelines/store/actions';
 
 export const getAddToTimelineCellAction = ({
   data,

@@ -176,7 +176,7 @@ export interface SavedObjectUpdateOptions<Attributes = unknown> {
 }
 
 /** Return value for Saved Object get, T is item returned */
-export type GetResultSO<T extends object> = GetResult<
+export type GetResultSO<T extends object = object> = GetResult<
   T,
   {
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
@@ -200,6 +200,7 @@ export interface SOWithMetadata<Attributes extends object = object> {
     statusCode: number;
     metadata?: Record<string, unknown>;
   };
+  managed?: boolean;
   attributes: Attributes;
   references: Reference[];
   namespaces?: string[];
@@ -347,7 +348,7 @@ export interface ContentManagementCrudTypes<
   /**
    * Update item params
    */
-  UpdateIn: UpdateIn<ContentType, Attributes, UpdateOptions>;
+  UpdateIn: UpdateIn<ContentType, Partial<Attributes>, UpdateOptions>;
   /**
    * Update item result
    */

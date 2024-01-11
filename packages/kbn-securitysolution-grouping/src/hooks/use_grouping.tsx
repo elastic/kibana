@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
 import { GroupingProps, GroupSelectorProps, isNoneGroup } from '..';
-import { groupByIdSelector } from './state';
+import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
 import { defaultGroup, GroupOption } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
@@ -19,10 +19,11 @@ import { Grouping as GroupingComponent } from '../components/grouping';
 /** Interface for grouping object where T is the `GroupingAggregation`
  *  @interface GroupingArgs<T>
  */
-interface Grouping<T> {
+export interface UseGrouping<T> {
   getGrouping: (props: DynamicGroupingProps<T>) => React.ReactElement;
   groupSelector: React.ReactElement<GroupSelectorProps>;
   selectedGroups: string[];
+  setSelectedGroups: (selectedGroups: string[]) => void;
 }
 
 /** Type for static grouping component props where T is the consumer `GroupingAggregation`
@@ -65,11 +66,13 @@ interface GroupingArgs<T> {
    * @param param { groupByField: string; tableId: string } selected group and table id
    */
   onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
+  onOptionsChange?: (options: GroupOption[]) => void;
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
     count?: number | undefined
   ) => void;
+  title?: string;
 }
 
 /**
@@ -81,7 +84,9 @@ interface GroupingArgs<T> {
  * @param groupingId Unique identifier of the grouping component. Used in local storage
  * @param maxGroupingLevels maximum group nesting levels (optional)
  * @param onGroupChange callback executed when selected group is changed, used for tracking
+ * @param onOptionsChange callback executed when grouping options are changed, used for consumer grouping selector
  * @param tracker telemetry handler
+ * @param title of the grouping selector component
  * @returns {@link Grouping} the grouping constructor { getGrouping, groupSelector, pagination, selectedGroups }
  */
 export const useGrouping = <T,>({
@@ -91,12 +96,26 @@ export const useGrouping = <T,>({
   groupingId,
   maxGroupingLevels,
   onGroupChange,
+  onOptionsChange,
   tracker,
-}: GroupingArgs<T>): Grouping<T> => {
+  title,
+}: GroupingArgs<T>): UseGrouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
   const { activeGroups: selectedGroups } = useMemo(
     () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
     [groupingId, groupingState]
+  );
+
+  const setSelectedGroups = useCallback(
+    (activeGroups: string[]) => {
+      dispatch(
+        groupActions.updateActiveGroups({
+          id: groupingId,
+          activeGroups,
+        })
+      );
+    },
+    [groupingId]
   );
 
   const groupSelector = useGetGroupSelector({
@@ -107,7 +126,9 @@ export const useGrouping = <T,>({
     groupingState,
     maxGroupingLevels,
     onGroupChange,
+    onOptionsChange,
     tracker,
+    title,
   });
 
   const getGrouping = useCallback(
@@ -135,7 +156,8 @@ export const useGrouping = <T,>({
       getGrouping,
       groupSelector,
       selectedGroups,
+      setSelectedGroups,
     }),
-    [getGrouping, groupSelector, selectedGroups]
+    [getGrouping, groupSelector, selectedGroups, setSelectedGroups]
   );
 };

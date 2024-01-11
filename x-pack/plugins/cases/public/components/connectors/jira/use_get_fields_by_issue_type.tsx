@@ -11,7 +11,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { isEmpty } from 'lodash';
 import type { ServerError } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import type { ActionConnector } from '../../../../common/api';
+import type { ActionConnector } from '../../../../common/types/domain';
 import { getFieldsByIssueType } from './api';
 import type { Fields } from './types';
 import * as i18n from './translations';
@@ -27,11 +27,10 @@ export const useGetFieldsByIssueType = ({ http, connector, issueType }: Props) =
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<Fields>, ServerError>(
     connectorsQueriesKeys.jiraGetFieldsByIssueType(connector?.id ?? '', issueType ?? ''),
-    () => {
-      const abortCtrlRef = new AbortController();
+    ({ signal }) => {
       return getFieldsByIssueType({
         http,
-        signal: abortCtrlRef.signal,
+        signal,
         connectorId: connector?.id ?? '',
         id: issueType ?? '',
       });

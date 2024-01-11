@@ -14,8 +14,8 @@ import { deleteAnalyticsCollectionById } from './delete_analytics_collection';
 describe('delete analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      transport: {
-        request: jest.fn(),
+      searchApplication: {
+        deleteBehavioralAnalytics: jest.fn(),
       },
     },
     asInternalUser: {},
@@ -31,14 +31,15 @@ describe('delete analytics collection lib function', () => {
         deleteAnalyticsCollectionById(mockClient as unknown as IScopedClusterClient, 'example')
       ).resolves.toBeUndefined();
 
-      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
-        method: 'DELETE',
-        path: '/_application/analytics/example',
+      expect(
+        mockClient.asCurrentUser.searchApplication.deleteBehavioralAnalytics
+      ).toHaveBeenCalledWith({
+        name: 'example',
       });
     });
 
     it('should throw an exception when analytics collection does not exist', async () => {
-      mockClient.asCurrentUser.transport.request.mockImplementation(() =>
+      mockClient.asCurrentUser.searchApplication.deleteBehavioralAnalytics.mockImplementation(() =>
         Promise.reject({
           meta: {
             body: {

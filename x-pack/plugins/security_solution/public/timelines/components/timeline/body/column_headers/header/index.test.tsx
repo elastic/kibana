@@ -8,7 +8,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { timelineActions } from '../../../../../store/timeline';
+import { timelineActions } from '../../../../../store';
 import { TestProviders } from '../../../../../../common/mock';
 import type { Sort } from '../../sort';
 import { CloseButton } from '../actions';
@@ -19,7 +19,7 @@ import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } fr
 import { Direction } from '../../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
 import type { ColumnHeaderType } from '../../../../../../../common/types';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

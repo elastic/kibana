@@ -7,9 +7,9 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { ScheduleItem } from '../../../../../../detections/components/rules/schedule_item_form';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
+import { ScheduleItem } from '../../../../../rule_creation/components/schedule_item_form';
 import type { FormSchema } from '../../../../../../shared_imports';
 import { UseField, useForm } from '../../../../../../shared_imports';
 import { bulkSetSchedule as i18n } from '../translations';
@@ -55,7 +55,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
     }
 
     onConfirm({
-      type: BulkActionEditType.set_schedule,
+      type: BulkActionEditTypeEnum.set_schedule,
       value: {
         interval: data.interval,
         lookback: data.lookback,

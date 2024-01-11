@@ -7,7 +7,7 @@
 
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/detection_engine/routes/__mocks__/request_context';
 import type { AwaitedProperties } from '@kbn/utility-types';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { License } from '@kbn/licensing-plugin/common/license';
 import {
@@ -15,6 +15,7 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import {
   elasticsearchServiceMock,
@@ -22,7 +23,7 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { KibanaResponseFactory, RequestHandler, RouteConfig } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { LicenseService } from '../../../../common/license';
@@ -59,7 +60,6 @@ describe('Action List Route', () => {
   let licenseEmitter: Subject<ILicense>;
 
   let callApiRoute: (
-    routePrefix: string,
     opts: CallApiRouteInterface
   ) => Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>>;
 
@@ -83,10 +83,13 @@ describe('Action List Route', () => {
 
     registerActionListRoutes(routerMock, createMockEndpointAppContext());
 
-    callApiRoute = async (
-      routePrefix: string,
-      { query, license, authz = {} }: CallApiRouteInterface
-    ): Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>> => {
+    callApiRoute = async ({
+      query,
+      license,
+      authz = {},
+    }: CallApiRouteInterface): Promise<
+      AwaitedProperties<SecuritySolutionRequestHandlerContextMock>
+    > => {
       (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
         () => superUser
       );
@@ -108,12 +111,13 @@ describe('Action List Route', () => {
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({ query });
-      const [, routeHandler]: [
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        RouteConfig<any, any, any, any>,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        RequestHandler<any, any, any, any>
-      ] = routerMock.get.mock.calls.find(([{ path }]) => path.startsWith(routePrefix))!;
+
+      const { routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        BASE_ENDPOINT_ACTION_ROUTE,
+        '2023-10-31'
+      );
 
       await routeHandler(ctx, mockRequest, mockResponse);
 
@@ -129,35 +133,35 @@ describe('Action List Route', () => {
 
   describe('User auth level', () => {
     it('allows user with `canReadActionsLogManagement` access for API requests', async () => {
-      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
+      await callApiRoute({
         authz: { canReadActionsLogManagement: true },
       });
       expect(mockResponse.ok).toBeCalled();
     });
 
     it('allows user with `canAccessEndpointActionsLogManagement` access for API requests', async () => {
-      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
+      await callApiRoute({
         authz: { canAccessEndpointActionsLogManagement: true },
       });
       expect(mockResponse.ok).toBeCalled();
     });
 
     it('does not allow user without `canReadActionsLogManagement` or `canAccessEndpointActionsLogManagement` access for API requests', async () => {
-      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
+      await callApiRoute({
         authz: { canReadActionsLogManagement: false, canAccessEndpointActionsLogManagement: false },
       });
       expect(mockResponse.forbidden).toBeCalled();
     });
 
     it('does allow user access to API requests if license is at least platinum', async () => {
-      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
+      await callApiRoute({
         license: Platinum,
       });
       expect(mockResponse.ok).toBeCalled();
     });
 
     it('does not allow user access to API requests if license is below platinum', async () => {
-      await callApiRoute(BASE_ENDPOINT_ACTION_ROUTE, {
+      await callApiRoute({
         license: Gold,
       });
       expect(mockResponse.forbidden).toBeCalled();

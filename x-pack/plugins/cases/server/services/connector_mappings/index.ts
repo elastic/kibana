@@ -21,11 +21,11 @@ import type {
 import type {
   ConnectorMappingsPersistedAttributes,
   ConnectorMappingsSavedObjectTransformed,
-  ConnectorMappingsTransformed,
+  ConnectorMappingsAttributesTransformed,
 } from '../../common/types/connector_mappings';
 import {
-  ConnectorMappingsTransformedRt,
-  ConnectorMappingsPartialRt,
+  ConnectorMappingsAttributesPartialRt,
+  ConnectorMappingsAttributesTransformedRt,
 } from '../../common/types/connector_mappings';
 import { decodeOrThrow } from '../../../common/api';
 
@@ -35,7 +35,9 @@ export class ConnectorMappingsService {
   public async find({
     unsecuredSavedObjectsClient,
     options,
-  }: FindConnectorMappingsArgs): Promise<SavedObjectsFindResponse<ConnectorMappingsTransformed>> {
+  }: FindConnectorMappingsArgs): Promise<
+    SavedObjectsFindResponse<ConnectorMappingsAttributesTransformed>
+  > {
     try {
       this.log.debug(`Attempting to find all connector mappings`);
       const connectorMappings =
@@ -44,10 +46,14 @@ export class ConnectorMappingsService {
           type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
         });
 
-      const validatedMappings: Array<SavedObjectsFindResult<ConnectorMappingsTransformed>> = [];
+      const validatedMappings: Array<
+        SavedObjectsFindResult<ConnectorMappingsAttributesTransformed>
+      > = [];
 
       for (const mapping of connectorMappings.saved_objects) {
-        const validatedMapping = decodeOrThrow(ConnectorMappingsTransformedRt)(mapping.attributes);
+        const validatedMapping = decodeOrThrow(ConnectorMappingsAttributesTransformedRt)(
+          mapping.attributes
+        );
 
         validatedMappings.push(Object.assign(mapping, { attributes: validatedMapping }));
       }
@@ -67,17 +73,20 @@ export class ConnectorMappingsService {
   }: PostConnectorMappingsArgs): Promise<ConnectorMappingsSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to POST a new connector mappings`);
+
+      const decodedAttributes = decodeOrThrow(ConnectorMappingsAttributesTransformedRt)(attributes);
+
       const connectorMappings =
         await unsecuredSavedObjectsClient.create<ConnectorMappingsPersistedAttributes>(
           CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-          attributes,
+          decodedAttributes,
           {
             references,
             refresh,
           }
         );
 
-      const validatedAttributes = decodeOrThrow(ConnectorMappingsTransformedRt)(
+      const validatedAttributes = decodeOrThrow(ConnectorMappingsAttributesTransformedRt)(
         connectorMappings.attributes
       );
 
@@ -95,22 +104,25 @@ export class ConnectorMappingsService {
     references,
     refresh,
   }: UpdateConnectorMappingsArgs): Promise<
-    SavedObjectsUpdateResponse<ConnectorMappingsTransformed>
+    SavedObjectsUpdateResponse<ConnectorMappingsAttributesTransformed>
   > {
     try {
       this.log.debug(`Attempting to UPDATE connector mappings ${mappingId}`);
+
+      const decodedAttributes = decodeOrThrow(ConnectorMappingsAttributesPartialRt)(attributes);
+
       const updatedMappings =
         await unsecuredSavedObjectsClient.update<ConnectorMappingsPersistedAttributes>(
           CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
           mappingId,
-          attributes,
+          decodedAttributes,
           {
             references,
             refresh,
           }
         );
 
-      const validatedAttributes = decodeOrThrow(ConnectorMappingsPartialRt)(
+      const validatedAttributes = decodeOrThrow(ConnectorMappingsAttributesPartialRt)(
         updatedMappings.attributes
       );
 

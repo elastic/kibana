@@ -11,15 +11,12 @@ import React from 'react';
 import { EuiText, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
 
 export const StepTwo = () => {
   return (
     <>
-      <EuiPageContentHeader>
+      <EuiPageHeader>
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -28,8 +25,8 @@ export const StepTwo = () => {
             />
           </h2>
         </EuiTitle>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
+      </EuiPageHeader>
+      <EuiPageSection>
         <EuiText>
           <p>
             <FormattedMessage
@@ -39,7 +36,7 @@ export const StepTwo = () => {
             />
           </p>
         </EuiText>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

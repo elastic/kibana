@@ -12,6 +12,7 @@ import {
   KibanaRequest,
 } from '@kbn/core/server';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
@@ -33,6 +34,7 @@ export async function createCloudApmPackgePolicy({
   logger,
   internalESClient,
   request,
+  apmIndices,
 }: {
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
@@ -41,6 +43,7 @@ export async function createCloudApmPackgePolicy({
   logger: Logger;
   internalESClient: APMInternalESClient;
   request: KibanaRequest;
+  apmIndices: APMIndices;
 }): Promise<PackagePolicy> {
   const { attributes } = await savedObjectsClient.get(
     APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
@@ -61,6 +64,7 @@ export async function createCloudApmPackgePolicy({
       internalESClient,
       packagePolicy: apmPackagePolicyDefinition,
       fleetPluginStart,
+      apmIndices,
     });
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create start`);
   const apmPackagePolicy = await fleetPluginStart.packagePolicyService.create(

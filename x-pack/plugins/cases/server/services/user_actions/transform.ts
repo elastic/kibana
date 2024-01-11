@@ -7,6 +7,7 @@
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 
+import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
 import { isCommentRequestTypePersistableState } from '../../../common/utils/attachments';
 import {
   isConnectorUserAction,
@@ -14,9 +15,11 @@ import {
   isCreateCaseUserAction,
   isCommentUserAction,
 } from '../../../common/utils/user_actions';
-import type { CaseUserActionDeprecatedResponse, UserActionAttributes } from '../../../common/api';
-import { NONE_CONNECTOR_ID } from '../../../common/api';
-import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  NONE_CONNECTOR_ID,
+} from '../../../common/constants';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
@@ -34,6 +37,7 @@ import type {
   UserActionSavedObjectTransformed,
   UserActionTransformedAttributes,
 } from '../../common/types/user_actions';
+import type { UserActionAttributes } from '../../../common/types/domain';
 
 export function transformFindResponseToExternalModel(
   userActions: SavedObjectsFindResponse<UserActionPersistedAttributes>,

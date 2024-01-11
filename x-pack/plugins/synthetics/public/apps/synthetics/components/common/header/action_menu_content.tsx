@@ -13,7 +13,7 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { LastRefreshed } from '../components/last_refreshed';
 import { AutoRefreshButton } from '../components/auto_refresh_button';
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSyntheticsSettingsContext, useSyntheticsStartPlugins } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../../common/constants';
 import { stringifyUrlParams } from '../../../utils/url_params';
@@ -26,11 +26,14 @@ const ANALYZE_DATA = i18n.translate('xpack.synthetics.analyzeDataButtonLabel', {
 
 const ANALYZE_MESSAGE = i18n.translate('xpack.synthetics.analyzeDataButtonLabel.message', {
   defaultMessage:
-    'Explore Data allows you to select and filter result data in any dimension and look for the cause or impact of performance problems.',
+    'Go to Explore Data, where you can select and filter result data in any dimension and look for the cause or impact of performance problems.',
 });
 
 export function ActionMenuContent(): React.ReactElement {
   const { basePath } = useSyntheticsSettingsContext();
+
+  const { observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem } = {} } =
+    useSyntheticsStartPlugins();
   const params = useGetUrlParams();
   const { dateRangeStart, dateRangeEnd } = params;
   const history = useHistory();
@@ -102,8 +105,10 @@ export function ActionMenuContent(): React.ReactElement {
           {ANALYZE_DATA}
         </EuiHeaderLink>
       </EuiToolTip>
-
       <InspectorHeaderLink />
+      {ObservabilityAIAssistantActionMenuItem && ObservabilityAIAssistantActionMenuItem ? (
+        <ObservabilityAIAssistantActionMenuItem />
+      ) : null}
     </EuiHeaderLinks>
   );
 }

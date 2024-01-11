@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react';
 import React, { useEffect, useState } from 'react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';
@@ -105,7 +105,7 @@ export const GenerateMap: Story<{}> = () => {
       </Cytoscape>
 
       {json && (
-        <CodeEditor
+        <CodeEditor // TODO Unable to find context that provides theme. Need CODEOWNER Input
           languageId="json"
           value={json}
           height="200px"
@@ -152,7 +152,7 @@ export const MapFromJSON: Story<{}> = () => {
       <EuiForm isInvalid={error !== undefined} error={error}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CodeEditor
+            <CodeEditor // TODO Unable to find context that provides theme. Need CODEOWNER Input
               languageId="json"
               value={json}
               options={{ fontFamily: 'monospace' }}

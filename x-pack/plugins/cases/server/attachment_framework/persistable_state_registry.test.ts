@@ -35,7 +35,6 @@ describe('PersistableStateAttachmentTypeRegistry', () => {
           "extract": [Function],
           "id": "test",
           "inject": [Function],
-          "migrations": Object {},
           "telemetry": [Function],
         }
       `);
@@ -43,7 +42,6 @@ describe('PersistableStateAttachmentTypeRegistry', () => {
       expect(item.telemetry(attachmentState, { foo: 'bar' })).toEqual({ foo: 'bar' });
       expect(item.inject(attachmentState, [])).toEqual(attachmentState);
       expect(item.extract(attachmentState)).toEqual({ state: attachmentState, references: [] });
-      expect(item.migrations).toEqual({});
     });
 
     it('throws error if item is already registered', () => {

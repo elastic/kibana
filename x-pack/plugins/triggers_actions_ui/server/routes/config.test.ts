@@ -31,6 +31,7 @@ const ruleTypes = [
       context: [],
       state: [],
     },
+    category: 'test',
     producer: 'test',
     enabledInLicense: true,
     minimumScheduleInterval: '1m',
@@ -51,6 +52,7 @@ describe('createConfigRoute', () => {
       baseRoute: `/internal/triggers_actions_ui`,
       alertingConfig: () => ({
         isUsingSecurity: true,
+        maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
       }),
       getRulesClientWithRequest: () => mockRulesClient,
@@ -64,7 +66,11 @@ describe('createConfigRoute', () => {
 
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
-      body: { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } },
+      body: {
+        isUsingSecurity: true,
+        maxScheduledPerMinute: 10000,
+        minimumScheduleInterval: { value: '1m', enforce: false },
+      },
     });
   });
 
@@ -80,6 +86,7 @@ describe('createConfigRoute', () => {
       baseRoute: `/internal/triggers_actions_ui`,
       alertingConfig: () => ({
         isUsingSecurity: true,
+        maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
       }),
       getRulesClientWithRequest: () => mockRulesClient,

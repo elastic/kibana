@@ -10,6 +10,9 @@ import pMap from 'p-map';
 import { chunk } from 'lodash';
 import type { SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import type { FileServiceStart } from '@kbn/files-plugin/server';
+import type { CasesDeleteRequest } from '../../../common/types/api';
+import { CasesDeleteRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -26,15 +29,20 @@ import { createFileEntities, deleteFiles } from '../files';
 /**
  * Deletes the specified cases and their attachments.
  */
-export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
+export async function deleteCases(
+  ids: CasesDeleteRequest,
+  clientArgs: CasesClientArgs
+): Promise<void> {
   const {
     services: { caseService, attachmentService, userActionService, alertsService },
     logger,
     authorization,
     fileService,
   } = clientArgs;
+
   try {
-    const cases = await caseService.getCases({ caseIds: ids });
+    const caseIds = decodeWithExcessOrThrow(CasesDeleteRequestRt)(ids);
+    const cases = await caseService.getCases({ caseIds });
     const entities = new Map<string, OwnerEntity>();
 
     for (const theCase of cases.saved_objects) {

@@ -19,11 +19,11 @@ export function TopTracesOverview() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/traces');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const response = useProgressiveFetcher(
     (callApmApi) => {

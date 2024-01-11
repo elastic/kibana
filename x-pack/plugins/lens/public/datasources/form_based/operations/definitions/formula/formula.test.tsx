@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import { createMockedIndexPattern } from '../../../mocks';
 import {
   formulaOperation,
@@ -15,7 +16,6 @@ import type { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { FormBasedLayer } from '../../../types';
 import { IndexPattern } from '../../../../../types';
-import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
 import { MovingAverageIndexPatternColumn } from '../calculations';
 import { StaticValueIndexPatternColumn } from '../static_value';
@@ -73,9 +73,16 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     }),
   }),
   cumulative_sum: createOperationDefinitionMock('cumulative_sum', { input: 'fullReference' }),
+  interval: createOperationDefinitionMock('interval', {
+    input: 'managedReference',
+    usedInMath: true,
+  }),
+  opertion_not_available: createOperationDefinitionMock('operation_not_available', {
+    input: 'managedReference',
+  }),
 };
 
-describe('formula', () => {
+describe('[Lens] formula', () => {
   let layer: FormBasedLayer;
 
   beforeEach(() => {
@@ -1870,6 +1877,28 @@ invalid: "
           operationDefinitionMap
         )
       ).toHaveLength(1);
+    });
+
+    it('should work with managed reference operations only when "usedInMath" flag is enabled', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula('interval()', false),
+          'col1',
+          indexPattern,
+          undefined,
+          operationDefinitionMap
+        )
+      ).toEqual(undefined);
+
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula('operation_not_available()', false),
+          'col1',
+          indexPattern,
+          undefined,
+          operationDefinitionMap
+        )
+      ).toEqual(['Operation operation_not_available not found']);
     });
   });
 });

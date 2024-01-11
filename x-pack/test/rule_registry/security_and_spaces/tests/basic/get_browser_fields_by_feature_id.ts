@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-
+import expect from 'expect';
 import { superUser, obsOnlySpacesAll, secOnlyRead } from '../../../common/lib/authentication/users';
 import type { User } from '../../../common/lib/authentication/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -40,35 +39,36 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Users:', () => {
       it(`${obsOnlySpacesAll.username} should be able to get browser fields for o11y featureIds`, async () => {
-        const browserFields = await getBrowserFieldsByFeatureId(obsOnlySpacesAll, [
+        const resp = await getBrowserFieldsByFeatureId(obsOnlySpacesAll, [
           'apm',
           'infrastructure',
           'logs',
           'uptime',
         ]);
-        expect(Object.keys(browserFields)).to.eql(['base', 'event', 'kibana', 'message']);
+        expect(Object.keys(resp.browserFields)).toEqual([
+          'base',
+          'cloud',
+          'container',
+          'host',
+          'kibana',
+          'orchestrator',
+        ]);
       });
 
       it(`${superUser.username} should be able to get browser fields for o11y featureIds`, async () => {
-        const browserFields = await getBrowserFieldsByFeatureId(superUser, [
+        const resp = await getBrowserFieldsByFeatureId(superUser, [
           'apm',
           'infrastructure',
           'logs',
           'uptime',
         ]);
-        expect(Object.keys(browserFields)).to.eql([
+        expect(Object.keys(resp.browserFields)).toEqual([
           'base',
-          'agent',
-          'anomaly',
-          'ecs',
-          'error',
-          'event',
+          'cloud',
+          'container',
+          'host',
           'kibana',
-          'message',
-          'monitor',
-          'observer',
-          'tls',
-          'url',
+          'orchestrator',
         ]);
       });
 

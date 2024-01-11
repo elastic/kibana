@@ -11,7 +11,7 @@ import { EventActionOptions, SeverityActionOptions } from '../types';
 import PagerDutyParamsFields from './pagerduty_params';
 
 describe('PagerDutyParamsFields renders', () => {
-  test('all params fields is rendered', () => {
+  test('all params fields are rendered', () => {
     const actionParams = {
       eventAction: EventActionOptions.TRIGGER,
       dedupKey: 'test',
@@ -22,6 +22,11 @@ describe('PagerDutyParamsFields renders', () => {
       component: 'test',
       group: 'group',
       class: 'test class',
+      customDetails: '{"foo":"bar"}',
+      links: [
+        { href: 'foo', text: 'bar' },
+        { href: 'foo', text: 'bar' },
+      ],
     };
 
     const wrapper = mountWithIntl(
@@ -55,6 +60,9 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyAddVariableButton"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="customDetailsJsonEditor"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="linksList"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="pagerDutyAddLinkButton"]').length > 0).toBeTruthy();
   });
 
   test('params select fields do not auto set values eventActionSelect', () => {

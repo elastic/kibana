@@ -61,44 +61,27 @@ describe('LayerControl', () => {
       expect(component).toMatchSnapshot();
     });
 
-    describe('spinner icon', () => {
-      const isLayerLoading = true;
-      let isVisible = true;
-      const mockLayerThatIsLoading = {
-        hasErrors: () => {
-          return false;
-        },
-        isLayerLoading: () => {
-          return isLayerLoading;
-        },
-        isVisible: () => {
-          return isVisible;
-        },
-        showAtZoomLevel: () => {
-          return true;
-        },
-      } as unknown as ILayer;
-      test('Should render expand button with loading icon when layer is loading', () => {
-        const component = shallow(
-          <LayerControl
-            {...defaultProps}
-            isLayerTOCOpen={false}
-            layerList={[mockLayerThatIsLoading]}
-          />
-        );
-        expect(component).toMatchSnapshot();
-      });
-      test('Should not render expand button with loading icon when layer is invisible', () => {
-        isVisible = false;
-        const component = shallow(
-          <LayerControl
-            {...defaultProps}
-            isLayerTOCOpen={false}
-            layerList={[mockLayerThatIsLoading]}
-          />
-        );
-        expect(component).toMatchSnapshot();
-      });
+    test('Should render expand button with loading icon when layer is loading', () => {
+      const component = shallow(
+        <LayerControl
+          {...defaultProps}
+          isLayerTOCOpen={false}
+          layerList={[
+            {
+              hasErrors: () => {
+                return false;
+              },
+              hasWarnings: () => {
+                return false;
+              },
+              isLayerLoading: () => {
+                return true;
+              },
+            } as unknown as ILayer,
+          ]}
+        />
+      );
+      expect(component).toMatchSnapshot();
     });
 
     test('Should render expand button with error icon when layer has error', () => {
@@ -106,14 +89,11 @@ describe('LayerControl', () => {
         hasErrors: () => {
           return true;
         },
-        isLayerLoading: () => {
+        hasWarnings: () => {
           return false;
         },
-        isVisible: () => {
-          return true;
-        },
-        showAtZoomLevel: () => {
-          return true;
+        isLayerLoading: () => {
+          return false;
         },
       } as unknown as ILayer;
       const component = shallow(

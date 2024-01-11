@@ -28,6 +28,10 @@ describe('FullStoryShipper', () => {
     );
   });
 
+  afterEach(() => {
+    fullstoryShipper.shutdown();
+  });
+
   describe('extendContext', () => {
     describe('FS.identify', () => {
       test('calls `identify` when the userId is provided', () => {
@@ -85,7 +89,6 @@ describe('FullStoryShipper', () => {
         expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           cloudId_str: 'test-es-org-id',
-          org_id_str: 'test-es-org-id',
         });
       });
 
@@ -94,7 +97,6 @@ describe('FullStoryShipper', () => {
         expect(fullStoryApiMock.setVars).toHaveBeenCalledWith('page', {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           cloudId_str: 'test-es-org-id',
-          org_id_str: 'test-es-org-id',
           version_str: '1.2.3',
           version_major_int: 1,
           version_minor_int: 2,
@@ -102,11 +104,12 @@ describe('FullStoryShipper', () => {
         });
       });
 
-      test('adds the rest of the context to `setVars`', () => {
+      test('adds the rest of the context to `setVars` (only if they match one of the valid keys)', () => {
         const context = {
           userId: 'test-user-id',
           version: '1.2.3',
           cloudId: 'test-es-org-id',
+          labels: { serverless: 'test' },
           foo: 'bar',
         };
         fullstoryShipper.extendContext(context);
@@ -117,9 +120,23 @@ describe('FullStoryShipper', () => {
           version_patch_int: 3,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           cloudId_str: 'test-es-org-id',
-          org_id_str: 'test-es-org-id',
-          foo_str: 'bar',
+          labels: { serverless_str: 'test' },
         });
+      });
+
+      test('emits once only if nothing changes', () => {
+        const context = {
+          userId: 'test-user-id',
+          version: '1.2.3',
+          cloudId: 'test-es-org-id',
+          labels: { serverless: 'test' },
+          foo: 'bar',
+        };
+        fullstoryShipper.extendContext(context);
+        fullstoryShipper.extendContext(context);
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledTimes(1);
+        fullstoryShipper.extendContext(context);
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledTimes(1);
       });
     });
   });

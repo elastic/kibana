@@ -21,7 +21,7 @@ import {
   FieldPopoverFooter,
   FieldItemButton,
   type GetCustomFieldType,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -186,6 +186,7 @@ export function InnerFieldItem(props: FieldItemProps) {
     isSelected: false, // multiple selections are allowed
     isEmpty: !exists,
     isActive: infoIsOpen,
+    withDragIcon: true,
     fieldSearchHighlight: highlight,
     onClick: togglePopover,
     buttonAddFieldToWorkspaceProps,

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -13,16 +14,18 @@ export default function ({ getService }) {
   describe('validate drawing index', () => {
     it('confirm valid drawing index', async () => {
       await supertest
-        .post(`/api/maps/docSource`)
+        .post(`/internal/maps/docSource`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({
           index: 'valid-drawing-index',
           mappings: { properties: { coordinates: { type: 'geo_point' } } },
         });
 
       const resp = await supertest
-        .get(`/api/maps/checkIsDrawingIndex?index=valid-drawing-index`)
+        .get(`/internal/maps/checkIsDrawingIndex?index=valid-drawing-index`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200);
 
       expect(resp.body.success).to.be(true);
@@ -31,8 +34,9 @@ export default function ({ getService }) {
 
     it('confirm valid index that is not a drawing index', async () => {
       const resp = await supertest
-        .get(`/api/maps/checkIsDrawingIndex?index=geo_shapes`)
+        .get(`/internal/maps/checkIsDrawingIndex?index=geo_shapes`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200);
 
       expect(resp.body.success).to.be(true);
@@ -41,8 +45,9 @@ export default function ({ getService }) {
 
     it('confirm invalid index', async () => {
       const resp = await supertest
-        .get(`/api/maps/checkIsDrawingIndex?index=not-an-index`)
+        .get(`/internal/maps/checkIsDrawingIndex?index=not-an-index`)
         .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200);
 
       expect(resp.body.success).to.be(false);

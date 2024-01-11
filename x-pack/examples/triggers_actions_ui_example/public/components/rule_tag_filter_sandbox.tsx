@@ -18,7 +18,7 @@ export const RuleTagFilterSandbox = ({ triggersActionsUi }: SandboxProps) => {
   return (
     <div style={{ flex: 1 }}>
       {triggersActionsUi.getRuleTagFilter({
-        tags: ['tag1', 'tag2', 'tag3', 'tag4'],
+        canLoadRules: true,
         selectedTags,
         onChange: setSelectedTags,
       })}

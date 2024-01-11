@@ -18,6 +18,8 @@ import type {
   HttpSetup,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { createReporter, trackApplicationUsageChange } from './services';
 import { ApplicationUsageContext } from './components/track_application_view';
 
@@ -31,6 +33,10 @@ export type IApplicationUsageTracker = Pick<
   ApplicationUsageTracker,
   'trackApplicationViewUsage' | 'flushTrackedView' | 'updateViewClickCounter'
 >;
+
+interface UsageCollectionStartDependencies {
+  screenshotMode: ScreenshotModePluginStart;
+}
 
 /** Public's setup APIs exposed by the UsageCollection Service **/
 export interface UsageCollectionSetup {
@@ -96,7 +102,10 @@ export function isUnauthenticated(http: HttpSetup) {
   return anonymousPaths.isAnonymous(window.location.pathname);
 }
 
-export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, UsageCollectionStart> {
+export class UsageCollectionPlugin
+  implements
+    Plugin<UsageCollectionSetup, UsageCollectionStart, {}, UsageCollectionStartDependencies>
+{
   private applicationUsageTracker?: ApplicationUsageTracker;
   private subscriptions: Subscription[] = [];
   private reporter?: Reporter;
@@ -131,12 +140,20 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     };
   }
 
-  public start({ http, application }: CoreStart) {
+  public start(
+    { http, application }: CoreStart,
+    { screenshotMode }: UsageCollectionStartDependencies
+  ) {
     if (!this.reporter || !this.applicationUsageTracker) {
       throw new Error('Usage collection reporter not set up correctly');
     }
 
-    if (this.config.uiCounters.enabled && !isUnauthenticated(http)) {
+    if (
+      this.config.uiCounters.enabled &&
+      !isUnauthenticated(http) &&
+      !screenshotMode.isScreenshotMode() &&
+      !isSyntheticsMonitor()
+    ) {
       this.reporter.start();
       this.applicationUsageTracker.start();
       this.subscriptions = trackApplicationUsageChange(

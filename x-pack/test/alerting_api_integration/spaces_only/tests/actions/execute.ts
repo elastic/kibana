@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -131,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         message: 'an error occurred while running the action',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
         retry: true,
+        errorSource: TaskErrorSource.USER,
       });
 
       await validateEventLog({
@@ -326,7 +328,58 @@ export default function ({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
           retry: true,
+          errorSource: TaskErrorSource.USER,
         });
+      });
+    });
+
+    it('should execute system actions correctly', async () => {
+      const connectorId = 'system-connector-test.system-action';
+      const name = 'System action: test.system-action';
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${connectorId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {},
+        });
+
+      expect(response.status).to.eql(200);
+
+      await validateEventLog({
+        spaceId: Spaces.space1.id,
+        actionId: connectorId,
+        actionTypeId: 'test.system-action',
+        outcome: 'success',
+        message: `action executed: test.system-action:${connectorId}: ${name}`,
+        startMessage: `action started: test.system-action:${connectorId}: ${name}`,
+        source: ActionExecutionSourceType.HTTP_REQUEST,
+        spaceAgnostic: true,
+      });
+    });
+
+    it('should execute system actions with kibana privileges correctly', async () => {
+      const connectorId = 'system-connector-test.system-action-kibana-privileges';
+      const name = 'System action: test.system-action-kibana-privileges';
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${connectorId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {},
+        });
+
+      expect(response.status).to.eql(200);
+
+      await validateEventLog({
+        spaceId: Spaces.space1.id,
+        actionId: connectorId,
+        actionTypeId: 'test.system-action-kibana-privileges',
+        outcome: 'success',
+        message: `action executed: test.system-action-kibana-privileges:${connectorId}: ${name}`,
+        startMessage: `action started: test.system-action-kibana-privileges:${connectorId}: ${name}`,
+        source: ActionExecutionSourceType.HTTP_REQUEST,
+        spaceAgnostic: true,
       });
     });
   });
@@ -340,6 +393,7 @@ export default function ({ getService }: FtrProviderContext) {
     errorMessage?: string;
     startMessage?: string;
     source?: string;
+    spaceAgnostic?: boolean;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
@@ -352,6 +406,7 @@ export default function ({ getService }: FtrProviderContext) {
       startMessage,
       errorMessage,
       source,
+      spaceAgnostic,
     } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
@@ -398,6 +453,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: actionId,
         namespace: 'space1',
         type_id: actionTypeId,
+        ...(spaceAgnostic ? { space_agnostic: true } : {}),
       },
     ]);
     expect(startExecuteEvent?.kibana?.saved_objects).to.eql(executeEvent?.kibana?.saved_objects);

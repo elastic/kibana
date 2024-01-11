@@ -9,7 +9,7 @@ import { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
-  setState,
+  setExecutionContext,
   LensDispatch,
   LensStoreDeps,
   navigateAway,
@@ -93,7 +93,7 @@ function updateTimeRange(data: DataPublicPluginStart, dispatch: LensDispatch) {
   // if the lag is significant, start a new session to clear the cache
   if (nowDiff > Math.max(timeRangeLength * TIME_LAG_PERCENTAGE_LIMIT, TIME_LAG_MIN_LIMIT)) {
     dispatch(
-      setState({
+      setExecutionContext({
         searchSessionId: data.search.session.start(),
         resolvedDateRange: getResolvedDateRange(timefilter),
       })

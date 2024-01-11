@@ -74,6 +74,17 @@
             "path": "packages/core/status/core-status-common-internal/src/status.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common-internal",
+            "id": "def-common.ServerVersion.build_date",
+            "type": "string",
+            "tags": [],
+            "label": "build_date",
+            "description": [],
+            "path": "packages/core/status/core-status-common-internal/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -201,7 +212,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "\"degraded\" | \"unavailable\" | \"critical\" | \"available\""
+              "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
             ],
             "path": "packages/core/status/core-status-common-internal/src/status.ts",
             "deprecated": false,

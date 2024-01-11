@@ -29,7 +29,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -74,13 +74,6 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
     stroke: color,
     opacity: 0.8,
   },
-  details: {
-    fontSize: 8,
-    fontFamily: 'Arial',
-    fontStyle: 'normal',
-    fill: color,
-    padding: 0,
-  },
 });
 
 // With a log based y axis in combination with the `CURVE_STEP_AFTER` style,
@@ -118,7 +111,7 @@ export function DurationDistributionChart({
   status,
   eventType,
 }: DurationDistributionChartProps) {
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
   const euiTheme = useTheme();
   const markerPercentile = DEFAULT_PERCENTILE_THRESHOLD;
 
@@ -209,11 +202,13 @@ export function DurationDistributionChart({
                   },
                 },
               },
-              ...chartTheme,
+              ...chartThemes.theme,
             ]}
+            baseTheme={chartThemes.baseTheme}
             showLegend={true}
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}
+            locale={i18n.getLocale()}
           />
           {selectionAnnotation !== undefined && (
             <RectAnnotation

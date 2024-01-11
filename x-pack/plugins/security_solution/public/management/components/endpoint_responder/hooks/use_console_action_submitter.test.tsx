@@ -199,6 +199,7 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123',
+        version: '2023-10-31',
       });
     });
   });
@@ -218,6 +219,7 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123',
+        version: '2023-10-31',
       });
     });
 
@@ -241,6 +243,7 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123',
+        version: '2023-10-31',
       });
     });
 
@@ -263,6 +266,7 @@ describe('When using `useConsoleActionSubmitter()` hook', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123',
+        version: '2023-10-31',
       });
     });
 

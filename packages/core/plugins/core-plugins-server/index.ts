@@ -18,6 +18,7 @@ export type {
   SharedGlobalConfig,
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
+  DynamicConfigDescriptor,
 } from './src';
 
 export { SharedGlobalConfigKeys } from './src';

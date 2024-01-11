@@ -101,6 +101,7 @@ export const PARENT_ID = 'parent.id';
 
 export const ERROR_ID = 'error.id';
 export const ERROR_GROUP_ID = 'error.grouping_key';
+export const ERROR_GROUP_NAME = 'error.grouping_name';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';
 export const ERROR_LOG_MESSAGE = 'error.log.message';
@@ -139,6 +140,7 @@ export const LABEL_NAME = 'labels.name';
 export const LABEL_GC = 'labels.gc';
 export const LABEL_TYPE = 'labels.type';
 export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
+export const LABEL_LIFECYCLE_STATE = 'labels.lifecycle_state';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.

@@ -176,27 +176,23 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiPopover emotion-euiPopover"
+        class="euiPopover emotion-euiPopover-inline-block"
         id="inspectorDownloadData"
       >
-        <div
-          class="euiPopover__anchor css-16vtueo-render"
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          type="button"
         >
-          <button
-            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
-            type="button"
+          <span
+            class="emotion-euiButtonDisplayContent"
           >
+            Download CSV
             <span
-              class="emotion-euiButtonDisplayContent"
-            >
-              Download CSV
-              <span
-                color="inherit"
-                data-euiicon-type="arrowDown"
-              />
-            </span>
-          </button>
-        </div>
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
       </div>
     </div>
   </div>,
@@ -224,31 +220,26 @@ Array [
               class="euiTableSortMobile"
             >
               <div
-                class="euiPopover emotion-euiPopover"
+                class="euiPopover emotion-euiPopover-inline-block"
               >
-                <div
-                  class="euiPopover__anchor css-16vtueo-render"
+                <button
+                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
+                  type="button"
                 >
-                  <button
-                    class="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
-                    type="button"
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
-                      <span
-                        class="euiButtonContent__icon"
-                        color="inherit"
-                        data-euiicon-type="arrowDown"
-                      />
-                      <span
-                        class="euiButtonEmpty__text"
-                      >
-                        Sorting
-                      </span>
+                      Sorting
                     </span>
-                  </button>
-                </div>
+                    <span
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -340,32 +331,27 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+              data-test-subj="tablePaginationPopoverButton"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
-                data-test-subj="tablePaginationPopoverButton"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Rows per page: 20
-                  </span>
+                  Rows per page: 20
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
         <div
@@ -373,7 +359,7 @@ Array [
         >
           <nav
             aria-label="Pagination for table: "
-            class="euiPagination emotion-euiPagination-EuiPagination"
+            class="euiPagination emotion-euiPagination"
           >
             <span
               aria-atomic="true"
@@ -385,7 +371,7 @@ Array [
             </span>
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -408,16 +394,16 @@ Array [
                   aria-controls="__table_generated-id"
                   aria-current="true"
                   aria-label="Page 1 of 1"
-                  class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-7ubx5w-empty-disabled-euiPaginationButton-isActive"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
                 >
                   <span
-                    class="euiButtonContent euiButtonEmpty__content"
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
                       1
                     </span>
@@ -427,7 +413,7 @@ Array [
             </ul>
             <button
               aria-label="Next page"
-              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-next"
               disabled=""
               type="button"
@@ -483,33 +469,28 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-grow-1"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             id="inspectorTableChooser"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+              data-test-subj="inspectorTableChooser"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
-                data-test-subj="inspectorTableChooser"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Table 1
-                  </span>
+                  Table 1
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -518,27 +499,23 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <div
-        class="euiPopover emotion-euiPopover"
+        class="euiPopover emotion-euiPopover-inline-block"
         id="inspectorDownloadData"
       >
-        <div
-          class="euiPopover__anchor css-16vtueo-render"
+        <button
+          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          type="button"
         >
-          <button
-            class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
-            type="button"
+          <span
+            class="emotion-euiButtonDisplayContent"
           >
+            Download CSV
             <span
-              class="emotion-euiButtonDisplayContent"
-            >
-              Download CSV
-              <span
-                color="inherit"
-                data-euiicon-type="arrowDown"
-              />
-            </span>
-          </button>
-        </div>
+              color="inherit"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </button>
       </div>
     </div>
   </div>,
@@ -566,31 +543,26 @@ Array [
               class="euiTableSortMobile"
             >
               <div
-                class="euiPopover emotion-euiPopover"
+                class="euiPopover emotion-euiPopover-inline-block"
               >
-                <div
-                  class="euiPopover__anchor css-16vtueo-render"
+                <button
+                  class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
+                  type="button"
                 >
-                  <button
-                    class="euiButtonEmpty euiButtonEmpty--xSmall euiButtonEmpty--flushRight css-9t7nyf-empty-primary"
-                    type="button"
+                  <span
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
-                      <span
-                        class="euiButtonContent__icon"
-                        color="inherit"
-                        data-euiicon-type="arrowDown"
-                      />
-                      <span
-                        class="euiButtonEmpty__text"
-                      >
-                        Sorting
-                      </span>
+                      Sorting
                     </span>
-                  </button>
-                </div>
+                    <span
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -683,32 +655,27 @@ Array [
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-text"
+              data-test-subj="tablePaginationPopoverButton"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
-                data-test-subj="tablePaginationPopoverButton"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
-                  <span
-                    class="euiButtonContent__icon"
-                    color="inherit"
-                    data-euiicon-type="arrowDown"
-                  />
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Rows per page: 20
-                  </span>
+                  Rows per page: 20
                 </span>
-              </button>
-            </div>
+                <span
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </button>
           </div>
         </div>
         <div
@@ -716,7 +683,7 @@ Array [
         >
           <nav
             aria-label="Pagination for table: "
-            class="euiPagination emotion-euiPagination-EuiPagination"
+            class="euiPagination emotion-euiPagination"
           >
             <span
               aria-atomic="true"
@@ -728,7 +695,7 @@ Array [
             </span>
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -751,16 +718,16 @@ Array [
                   aria-controls="__table_generated-id"
                   aria-current="true"
                   aria-label="Page 1 of 1"
-                  class="euiButtonEmpty euiButtonEmpty--small euiPaginationButton css-7ubx5w-empty-disabled-euiPaginationButton-isActive"
+                  class="euiButtonEmpty euiPaginationButton emotion-euiButtonDisplay-euiButtonEmpty-s-empty-disabled-isDisabled-euiPaginationButton-isActive"
                   data-test-subj="pagination-button-0"
                   disabled=""
                   type="button"
                 >
                   <span
-                    class="euiButtonContent euiButtonEmpty__content"
+                    class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="euiButtonEmpty__text"
+                      class="eui-textTruncate euiButtonEmpty__text"
                     >
                       1
                     </span>
@@ -770,7 +737,7 @@ Array [
             </ul>
             <button
               aria-label="Next page"
-              class="euiButtonIcon euiButtonIcon--xSmall euiPaginationArrowButton emotion-euiButtonIcon-empty-disabled-hoverStyles-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-next"
               disabled=""
               type="button"

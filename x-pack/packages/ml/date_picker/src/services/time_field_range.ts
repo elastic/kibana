@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import type { HttpStart } from '@kbn/core/public';
 
@@ -54,5 +54,6 @@ export async function getTimeFieldRange(options: GetTimeFieldRangeOptions) {
     path,
     method: 'POST',
     body: JSON.stringify(body),
+    version: '1',
   });
 }

@@ -18,7 +18,7 @@ import {
 import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
 import { bulkUpdateRulesRoute } from './route';
 import type { BulkError } from '../../../../routes/utils';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
+import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
@@ -178,7 +178,9 @@ describe('Bulk update rules route', () => {
         ],
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        '0.from: Failed to parse date-math expression'
+      );
     });
   });
 });

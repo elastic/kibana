@@ -46,6 +46,12 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
   const agentConfigurationAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.AgentConfigurationAvailable
   );
+  const migrationToFleetAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.MigrationToFleetAvailable
+  );
+  const indicesAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.ConfigurableIndicesAvailable
+  );
 
   const tabs = getTabs({
     core,
@@ -53,6 +59,8 @@ export function SettingsTemplate({ children, selectedTab }: Props) {
     router,
     defaultEnvironment,
     agentConfigurationAvailable,
+    migrationToFleetAvailable,
+    indicesAvailable,
   });
 
   return (
@@ -76,12 +84,16 @@ function getTabs({
   router,
   defaultEnvironment,
   agentConfigurationAvailable,
+  migrationToFleetAvailable,
+  indicesAvailable,
 }: {
   core: CoreStart;
   selectedTab: Tab['key'];
   router: ApmRouter;
   defaultEnvironment: Environment;
   agentConfigurationAvailable: boolean;
+  migrationToFleetAvailable: boolean;
+  indicesAvailable: boolean;
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
 
@@ -147,20 +159,29 @@ function getTabs({
       }),
       href: router.link('/settings/custom-links'),
     },
-    {
-      key: 'apm-indices',
-      label: i18n.translate('xpack.apm.settings.indices', {
-        defaultMessage: 'Indices',
-      }),
-      href: router.link('/settings/apm-indices'),
-    },
-    {
-      key: 'schema',
-      label: i18n.translate('xpack.apm.settings.schema', {
-        defaultMessage: 'Schema',
-      }),
-      href: router.link('/settings/schema'),
-    },
+    ...(indicesAvailable
+      ? [
+          {
+            key: 'apm-indices' as const,
+            label: i18n.translate('xpack.apm.settings.indices', {
+              defaultMessage: 'Indices',
+            }),
+            href: router.link('/settings/apm-indices'),
+          },
+        ]
+      : []),
+
+    ...(migrationToFleetAvailable
+      ? [
+          {
+            key: 'schema' as const,
+            label: i18n.translate('xpack.apm.settings.schema', {
+              defaultMessage: 'Schema',
+            }),
+            href: router.link('/settings/schema'),
+          },
+        ]
+      : []),
   ];
 
   return tabs

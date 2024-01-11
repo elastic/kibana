@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { SortOrder } from '../../../common/ui';
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
-export const sort_order = t.keyof({ asc: null, desc: null });
-export type SortOrder = t.TypeOf<typeof sort_order>;
+export const CASES_TABLE_PERPAGE_VALUES = [10, 25, 50, 100];
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -28,4 +25,10 @@ export interface Solution {
   id: string;
   label: string;
   iconType: string;
+}
+
+export interface CasesColumnSelection {
+  field: string;
+  name: string;
+  isChecked: boolean;
 }

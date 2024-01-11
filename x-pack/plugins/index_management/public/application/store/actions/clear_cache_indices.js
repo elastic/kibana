@@ -21,14 +21,15 @@ export const clearCacheIndices =
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.message);
+      notificationService.showDangerToast(error.body.message);
       return dispatch(clearRowStatus({ indexNames }));
     }
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
-        defaultMessage: 'Successfully cleared cache: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage:
+          'Successfully cleared cache for {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
   };

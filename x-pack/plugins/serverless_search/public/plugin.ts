@@ -5,7 +5,19 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+} from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { appIds } from '@kbn/management-cards-navigation';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
+import { createIndexMappingsDocsLinkContent as createIndexMappingsContent } from './application/components/index_management/index_mappings_docs_link';
+import { createIndexOverviewContent } from './application/components/index_management/index_overview_content';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
 import {
@@ -14,6 +26,8 @@ import {
   ServerlessSearchPluginStart,
   ServerlessSearchPluginStartDependencies,
 } from './types';
+import { createIndexDocumentsContent } from './application/components/index_documents/documents_tab';
+import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 
 export class ServerlessSearchPlugin
   implements
@@ -28,18 +42,72 @@ export class ServerlessSearchPlugin
     core: CoreSetup<ServerlessSearchPluginStartDependencies, ServerlessSearchPluginStart>,
     _setupDeps: ServerlessSearchPluginSetupDependencies
   ): ServerlessSearchPluginSetup {
+    const queryClient = new QueryClient({
+      mutationCache: new MutationCache({
+        onError: (error) => {
+          core.notifications.toasts.addError(error as Error, {
+            title: (error as Error).name,
+            toastMessage: getErrorMessage(error),
+            toastLifeTimeMs: 1000,
+          });
+        },
+      }),
+      queryCache: new QueryCache({
+        onError: (error) => {
+          // 404s are often functionally okay and shouldn't show toasts by default
+          if (getErrorCode(error) === 404) {
+            return;
+          }
+          if (isKibanaServerError(error) && !error.skipToast) {
+            core.notifications.toasts.addError(error, {
+              title: error.name,
+              toastMessage: getErrorMessage(error),
+              toastLifeTimeMs: 1000,
+            });
+          }
+        },
+      }),
+    });
     core.application.register({
       id: 'serverlessElasticsearch',
-      title: 'Elasticsearch',
+      title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
+        defaultMessage: 'Elasticsearch',
+      }),
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       appRoute: '/app/elasticsearch',
-      async mount({ element }: AppMountParameters) {
-        const { renderApp } = await import('./application');
-        const [coreStart, { cloud, security }] = await core.getStartServices();
+      async mount({ element, history }: AppMountParameters) {
+        const { renderApp } = await import('./application/elasticsearch');
+        const [coreStart, services] = await core.getStartServices();
+        const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
+        let user: AuthenticatedUser | undefined;
+        try {
+          const response = await security.authc.getCurrentUser();
+          user = response;
+        } catch {
+          user = undefined;
+        }
 
-        const userProfile = await security.userProfiles.getCurrent();
+        return await renderApp(element, coreStart, { history, user, ...services }, queryClient);
+      },
+    });
 
-        return await renderApp(element, coreStart, { cloud, userProfile });
+    core.application.register({
+      id: 'serverlessConnectors',
+      title: i18n.translate('xpack.serverlessSearch.app.connectors.title', {
+        defaultMessage: 'Connectors',
+      }),
+      appRoute: '/app/connectors',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      searchable: false,
+      async mount({ element, history }: AppMountParameters) {
+        const { renderApp } = await import('./application/connectors');
+        const [coreStart, services] = await core.getStartServices();
+
+        docLinks.setDocLinks(coreStart.docLinks.links);
+        return await renderApp(element, coreStart, { history, ...services }, queryClient);
       },
     });
     return {};
@@ -47,9 +115,23 @@ export class ServerlessSearchPlugin
 
   public start(
     core: CoreStart,
-    { serverless }: ServerlessSearchPluginStartDependencies
+    services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
-    serverless.setSideNavComponent(createComponent(core, { serverless }));
+    const { serverless, management, cloud, indexManagement } = services;
+    serverless.setProjectHome('/app/elasticsearch');
+    serverless.setSideNavComponent(createComponent(core, { serverless, cloud }));
+    management.setIsSidebarEnabled(false);
+    management.setupCardsNavigation({
+      enabled: true,
+      hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+    });
+    indexManagement?.extensionsService.setIndexMappingsContent(createIndexMappingsContent(core));
+    indexManagement?.extensionsService.addIndexDetailsTab(
+      createIndexDocumentsContent(core, services)
+    );
+    indexManagement?.extensionsService.setIndexOverviewContent(
+      createIndexOverviewContent(core, services)
+    );
     return {};
   }
 

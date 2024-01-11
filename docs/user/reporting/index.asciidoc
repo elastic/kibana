@@ -1,13 +1,11 @@
-[role="xpack"]
 [[reporting-getting-started]]
 = Reporting and sharing
 
 [partintro]
 
 --
-
-:keywords: analyst, concept, task, reporting
-:description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
+:frontmatter-description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
+:frontmatter-tags-products: [kibana]
 
 {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads.
 
@@ -32,6 +30,8 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 [[reporting-on-cloud-resource-requirements]]
 NOTE: For Elastic Cloud deployments, {kib} instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
 change {kib} sizing, {ess-console}[edit the deployment].
+
+For more information on how to configure reporting in {kib}, refer to <<secure-reporting,Configure reporting in {kib}>>
 
 [float]
 [[manually-generate-reports]]

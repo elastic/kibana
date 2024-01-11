@@ -6,18 +6,20 @@
  */
 
 import * as rt from 'io-ts';
-import _ from 'lodash';
+import { pick } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { useMemo } from 'react';
 import { useUrlState } from '../../../../utils/use_url_state';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
-const availableControlsPanels = {
+export const availableControlsPanels = {
   HOST_OS_NAME: 'host.os.name',
   CLOUD_PROVIDER: 'cloud.provider',
+  SERVICE_NAME: 'service.name',
 };
 
 const controlPanelConfigs: ControlPanels = {
@@ -43,6 +45,17 @@ const controlPanelConfigs: ControlPanels = {
       title: 'Cloud Provider',
     },
   },
+  [availableControlsPanels.SERVICE_NAME]: {
+    order: 2,
+    width: 'medium',
+    grow: false,
+    type: 'optionsListControl',
+    explicitInput: {
+      id: availableControlsPanels.SERVICE_NAME,
+      fieldName: availableControlsPanels.SERVICE_NAME,
+      title: 'Service Name',
+    },
+  },
 };
 
 const availableControlPanelFields = Object.values(availableControlsPanels);
@@ -50,7 +63,7 @@ const availableControlPanelFields = Object.values(availableControlsPanels);
 export const useControlPanels = (
   dataView: DataView | undefined
 ): [ControlPanels, (state: ControlPanels) => void] => {
-  const defaultState = getVisibleControlPanelsConfig(dataView);
+  const defaultState = useMemo(() => getVisibleControlPanelsConfig(dataView), [dataView]);
 
   const [controlPanels, setControlPanels] = useUrlState<ControlPanels>({
     defaultState,
@@ -90,19 +103,26 @@ const getVisibleControlPanelsConfig = (dataView: DataView | undefined) => {
 };
 
 const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: string = '') => {
-  return _.mapValues(controlPanels, (controlPanelConfig) => {
-    const controlsClone = _.cloneDeep(controlPanelConfig);
-    controlsClone.explicitInput.dataViewId = dataViewId;
-    return controlsClone;
-  });
+  return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
+    return {
+      ...acc,
+      [key]: {
+        ...controlPanelConfig,
+        explicitInput: { ...controlPanelConfig.explicitInput, dataViewId },
+      },
+    };
+  }, {});
 };
 
 const cleanControlPanels = (controlPanels: ControlPanels) => {
-  return _.mapValues(controlPanels, (controlPanelConfig) => {
-    const controlsClone = _.cloneDeep(controlPanelConfig);
-    delete controlsClone.explicitInput.dataViewId;
-    return controlsClone;
-  });
+  return Object.entries(controlPanels).reduce((acc, [key, controlPanelConfig]) => {
+    const { explicitInput } = controlPanelConfig;
+    const { dataViewId, ...rest } = explicitInput;
+    return {
+      ...acc,
+      [key]: { ...controlPanelConfig, explicitInput: rest },
+    };
+  }, {});
 };
 
 const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlPanels = {}) => {
@@ -111,7 +131,7 @@ const mergeDefaultPanelsWithUrlConfig = (dataView: DataView, urlPanels: ControlP
 
   // Get list of panel which can be overridden to avoid merging additional config from url
   const existingKeys = Object.keys(visiblePanels);
-  const controlPanelsToOverride = _.pick(urlPanels, existingKeys);
+  const controlPanelsToOverride = pick(urlPanels, existingKeys);
 
   // Merge default and existing configs and add dataView.id to each of them
   return addDataViewIdToControlPanels(

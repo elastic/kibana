@@ -25,23 +25,20 @@ import {
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
 import { PlaceholderWidget } from './placeholder_widget';
 import {
-  codeEditorControlsStyles,
-  codeEditorControlsWithinFullScreenStyles,
-  codeEditorFullScreenStyles,
-  codeEditorKeyboardHintStyles,
-  codeEditorStyles,
+  styles,
   DARK_THEME,
   LIGHT_THEME,
   DARK_THEME_TRANSPARENT,
   LIGHT_THEME_TRANSPARENT,
 } from './editor.styles';
 
-export interface Props {
+export interface CodeEditorProps {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
 
@@ -132,16 +129,17 @@ export interface Props {
   allowFullScreen?: boolean;
 }
 
-export const CodeEditor: React.FC<Props> = ({
+export const CodeEditor: React.FC<CodeEditorProps> = ({
   languageId,
   value,
   onChange,
   width,
+  height,
   options,
   overrideEditorWillMount,
   editorDidMount,
   editorWillMount,
-  useDarkTheme,
+  useDarkTheme: useDarkThemeProp,
   transparentBackground,
   suggestionProvider,
   signatureProvider,
@@ -154,7 +152,8 @@ export const CodeEditor: React.FC<Props> = ({
   isCopyable = false,
   allowFullScreen = false,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const { colorMode, euiTheme } = useEuiTheme();
+  const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
 
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
@@ -180,12 +179,6 @@ export const CodeEditor: React.FC<Props> = ({
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
-  const defaultStyles = codeEditorStyles();
-  const hintStyles = codeEditorKeyboardHintStyles(euiTheme.levels);
-
-  const promptClasses = useMemo(() => {
-    return isHintActive ? [defaultStyles, hintStyles] : [defaultStyles];
-  }, [isHintActive, defaultStyles, hintStyles]);
 
   const _updateDimensions = useCallback(() => {
     _editor.current?.layout();
@@ -267,14 +260,12 @@ export const CodeEditor: React.FC<Props> = ({
             <p>
               {isReadOnly ? (
                 <FormattedMessage
-                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.startEditingReadOnly"
                   defaultMessage="Press {key} to start interacting with the code."
                   values={{ key: enterKey }}
                 />
               ) : (
                 <FormattedMessage
-                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.startEditing"
                   defaultMessage="Press {key} to start editing."
                   values={{ key: enterKey }}
@@ -284,14 +275,12 @@ export const CodeEditor: React.FC<Props> = ({
             <p>
               {isReadOnly ? (
                 <FormattedMessage
-                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.stopEditingReadOnly"
                   defaultMessage="Press {key} to stop interacting with the code."
                   values={{ key: escapeKey }}
                 />
               ) : (
                 <FormattedMessage
-                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.stopEditing"
                   defaultMessage="Press {key} to stop editing."
                   values={{ key: escapeKey }}
@@ -302,7 +291,13 @@ export const CodeEditor: React.FC<Props> = ({
         }
       >
         <div
-          css={promptClasses}
+          css={[
+            styles.keyboardHint(euiTheme),
+            !isHintActive &&
+              css`
+                display: none;
+              `,
+          ]}
           id={htmlIdGenerator('codeEditor')()}
           ref={editorHint}
           tabIndex={0}
@@ -310,19 +305,11 @@ export const CodeEditor: React.FC<Props> = ({
           onClick={startEditing}
           onKeyDown={onKeyDownHint}
           aria-label={ariaLabel}
-          data-test-subj={isHintActive ? 'codeEditorHint' : 'codeEditor'}
+          data-test-subj={`codeEditorHint codeEditorHint--${isHintActive ? 'active' : 'inactive'}`}
         />
       </EuiToolTip>
     );
-  }, [
-    onKeyDownHint,
-    startEditing,
-    ariaLabel,
-    isReadOnly,
-    promptClasses,
-    defaultStyles,
-    isHintActive,
-  ]);
+  }, [isHintActive, isReadOnly, euiTheme, startEditing, onKeyDownHint, ariaLabel]);
 
   const _editorWillMount = useCallback(
     (__monaco: unknown) => {
@@ -355,6 +342,7 @@ export const CodeEditor: React.FC<Props> = ({
         }
       });
 
+      // Register themes
       monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
       monaco.editor.defineTheme(
         'euiColorsTransparent',
@@ -431,35 +419,46 @@ export const CodeEditor: React.FC<Props> = ({
   useEffect(() => {
     if (placeholder && !value && _editor.current) {
       // Mounts editor inside constructor
-      _placeholderWidget.current = new PlaceholderWidget(placeholder, _editor.current);
+      _placeholderWidget.current = new PlaceholderWidget(placeholder, euiTheme, _editor.current);
     }
 
     return () => {
       _placeholderWidget.current?.dispose();
       _placeholderWidget.current = null;
     };
-  }, [placeholder, value]);
+  }, [placeholder, value, euiTheme]);
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
-  const controlStyles = useMemo(() => {
-    const copyableStyles = [defaultStyles, codeEditorControlsStyles(euiTheme.size, euiTheme.base)];
-    return allowFullScreen || isCopyable ? copyableStyles && defaultStyles : defaultStyles;
-  }, [allowFullScreen, isCopyable, defaultStyles, euiTheme]);
-
-  const theme = useMemo(() => {
-    // register theme for dark or light
+  useEffect(() => {
+    // Register themes when 'useDarkThem' changes
     monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-    return options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors');
-  }, [useDarkTheme, transparentBackground, options]);
+    monaco.editor.defineTheme(
+      'euiColorsTransparent',
+      useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+    );
+  }, [useDarkTheme]);
+
+  const theme = options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors');
 
   return (
-    <div css={codeEditorStyles()} onKeyDown={onKeyDown}>
+    <div
+      css={styles.container}
+      onKeyDown={onKeyDown}
+      data-test-subj="kibanaCodeEditor"
+      className="kibanaCodeEditor"
+    >
       {renderPrompt()}
 
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
-          <div css={controlStyles}>
+          <div
+            css={
+              isFullScreen
+                ? [styles.controls.base(euiTheme), styles.controls.fullscreen(euiTheme)]
+                : styles.controls.base(euiTheme)
+            }
+          >
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
                 <CopyButton />
@@ -476,8 +475,7 @@ export const CodeEditor: React.FC<Props> = ({
           value={value}
           onChange={onChange}
           width={isFullScreen ? '100vw' : width}
-          // previously defaulted to height which defaulted to 100% but this makes it unviewable
-          height={isFullScreen ? '100vh' : '100px'}
+          height={isFullScreen ? '100vh' : height}
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}
           options={{
@@ -537,7 +535,6 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
       >
         {([fullscreenCollapse, fullscreenExpand]: string[]) => (
           <EuiButtonIcon
-            css={[codeEditorStyles(), codeEditorFullScreenStyles]}
             onClick={toggleFullScreen}
             iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
             color="text"
@@ -549,8 +546,6 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
     );
   };
 
-  const { euiTheme } = useEuiTheme();
-
   const FullScreenDisplay = useMemo(
     () =>
       ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
@@ -559,20 +554,12 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
         return (
           <EuiOverlayMask>
             <EuiFocusTrap clickOutsideDisables={true}>
-              <div
-                css={[
-                  codeEditorStyles(),
-                  codeEditorFullScreenStyles(),
-                  codeEditorControlsWithinFullScreenStyles(euiTheme.size.l),
-                ]}
-              >
-                {children}
-              </div>
+              <div css={styles.fullscreenContainer}>{children}</div>
             </EuiFocusTrap>
           </EuiOverlayMask>
         );
       },
-    [isFullScreen, euiTheme]
+    [isFullScreen]
   );
 
   return {
@@ -591,7 +578,7 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
     if (!showCopyButton) return null;
 
     return (
-      <div css={codeEditorStyles()} className="euiCodeBlock__copyButton">
+      <div className="euiCodeBlock__copyButton">
         <EuiI18n token="euiCodeBlock.copyButton" default="Copy">
           {(copyButton: string) => (
             <EuiCopy textToCopy={value}>

@@ -22,19 +22,22 @@ export const customElementServiceFactory: CanvasCustomElementServiceFactory = ({
   const apiPath = `${API_ROUTE_CUSTOM_ELEMENT}`;
 
   return {
-    create: (customElement) => http.post(apiPath, { body: JSON.stringify(customElement) }),
+    create: (customElement) =>
+      http.post(apiPath, { body: JSON.stringify(customElement), version: '1' }),
     get: (customElementId) =>
       http
-        .get<{ data: CustomElement }>(`${apiPath}/${customElementId}`)
+        .get<{ data: CustomElement }>(`${apiPath}/${customElementId}`, { version: '1' })
         .then(({ data: element }) => element),
-    update: (id, element) => http.put(`${apiPath}/${id}`, { body: JSON.stringify(element) }),
-    remove: (id) => http.delete(`${apiPath}/${id}`),
+    update: (id, element) =>
+      http.put(`${apiPath}/${id}`, { body: JSON.stringify(element), version: '1' }),
+    remove: (id) => http.delete(`${apiPath}/${id}`, { version: '1' }),
     find: async (name) => {
       return http.get(`${apiPath}/find`, {
         query: {
           name,
           perPage: 10000,
         },
+        version: '1',
       });
     },
   };

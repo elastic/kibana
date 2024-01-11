@@ -14,6 +14,7 @@ import {
   FilterKey,
 } from '../../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
+import { getEncodedCustomLinkUrl } from '../../../../../../common/custom_link';
 
 interface FilterSelectOption {
   value: 'DEFAULT' | FilterKey;
@@ -102,15 +103,10 @@ const validateUrl = (url: string, transaction?: Transaction) => {
 export const replaceTemplateVariables = (
   url: string,
   transaction?: Transaction
-) => {
-  const error = validateUrl(url, transaction);
-  try {
-    return { formattedUrl: Mustache.render(url, transaction), error };
-  } catch (e) {
-    // errors will be caught on validateUrl function
-    return { formattedUrl: url, error };
-  }
-};
+) => ({
+  formattedUrl: getEncodedCustomLinkUrl(url, transaction),
+  error: validateUrl(url, transaction),
+});
 
 export const convertFiltersToQuery = (filters: Filter[]) => {
   return filters.reduce((acc: Record<string, string>, { key, value }) => {

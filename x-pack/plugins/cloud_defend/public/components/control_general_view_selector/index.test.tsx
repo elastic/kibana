@@ -6,11 +6,12 @@
  */
 import React from 'react';
 import { act, render, waitFor, fireEvent } from '@testing-library/react';
+import { showEuiComboBoxOptions } from '@elastic/eui/lib/test/rtl';
 import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewSelector } from '.';
-import { Selector } from '../../types';
+import { Selector } from '../../../common';
 import { getSelectorConditions } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
 
@@ -100,11 +101,11 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(getByText(i18n.unusedSelector)).toBeTruthy();
   });
 
-  it('allows the user to add a limited set of file operations', () => {
+  it('allows the user to add a limited set of file operations', async () => {
     const { getByTestId, rerender } = render(<WrappedComponent />);
 
     getByTestId('cloud-defend-selectorcondition-operation').click();
-    getByTestId('comboBoxSearchInput').focus();
+    await showEuiComboBoxOptions();
 
     const options = getByTestId(
       'comboBoxOptionsList cloud-defend-selectorcondition-operation-optionsList'
@@ -132,11 +133,11 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(updatedOptions).toHaveLength(3);
   });
 
-  it('allows the user to add a limited set of process operations', () => {
+  it('allows the user to add a limited set of process operations', async () => {
     const { getByTestId, rerender } = render(<WrappedComponent selector={mockProcessSelector2} />);
 
     getByTestId('cloud-defend-selectorcondition-operation').click();
-    getByTestId('comboBoxSearchInput').focus();
+    await showEuiComboBoxOptions();
 
     const options = getByTestId(
       'comboBoxOptionsList cloud-defend-selectorcondition-operation-optionsList'
@@ -399,6 +400,9 @@ describe('<ControlGeneralViewSelector />', () => {
 
     if (el) {
       userEvent.type(el, 'docker.io/nginx{enter}');
+      userEvent.type(el, 'docker.io/nginx-dev{enter}');
+      userEvent.type(el, 'docker.io/nginx.dev{enter}');
+      userEvent.type(el, '127.0.0.1:8080/nginx_dev{enter}');
     } else {
       throw new Error("Can't find input");
     }
@@ -409,7 +413,7 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(findByText(regexError)).toMatchObject({});
 
     userEvent.type(el, 'nginx{enter}');
-    updatedSelector = onChange.mock.calls[2][0];
+    updatedSelector = onChange.mock.calls[5][0];
     rerender(<WrappedComponent selector={updatedSelector} />);
 
     expect(getByText(regexError)).toBeTruthy();
@@ -506,7 +510,8 @@ describe('<ControlGeneralViewSelector />', () => {
       throw new Error("Can't find input");
     }
 
-    const expectedError = '"containerImageName" values must match the pattern: /^[a-z0-9]+$/';
+    const expectedError =
+      '"containerImageName" values must match the pattern: /^([a-z0-9]+(?:[._-][a-z0-9]+)*)$/';
 
     expect(getByText(expectedError)).toBeTruthy();
   });

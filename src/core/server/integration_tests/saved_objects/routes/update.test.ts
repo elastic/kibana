@@ -24,8 +24,8 @@ import { setupConfig } from './routes_test_utils';
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const testTypes = [
-  { name: 'index-pattern', hide: false },
-  { name: 'hidden-type', hide: true },
+  { name: 'index-pattern', hide: false }, // multi-namespace type
+  { name: 'hidden-type', hide: true }, // hidden
   { name: 'hidden-from-http', hide: false, hideFromHttpApis: true },
 ];
 
@@ -117,7 +117,7 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
       'index-pattern',
       'logstash-*',
       { title: 'Testing' },
-      { version: 'foo' }
+      { version: 'foo', migrationVersionCompatibility: 'raw' }
     );
   });
 

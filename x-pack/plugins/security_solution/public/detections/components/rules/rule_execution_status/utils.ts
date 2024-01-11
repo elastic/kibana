@@ -8,13 +8,14 @@
 import type { IconColor } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 export const getStatusText = (value: RuleExecutionStatus | null | undefined): string | null => {
   if (value == null) {
     return null;
   }
-  if (value === RuleExecutionStatus['partial failure']) {
+  if (value === RuleExecutionStatusEnum['partial failure']) {
     return 'warning';
   }
   return value;
@@ -31,16 +32,16 @@ export const getStatusColor = (status: RuleExecutionStatus | null | undefined): 
   if (status == null) {
     return 'subdued';
   }
-  if (status === RuleExecutionStatus.succeeded) {
+  if (status === RuleExecutionStatusEnum.succeeded) {
     return 'success';
   }
-  if (status === RuleExecutionStatus.failed) {
+  if (status === RuleExecutionStatusEnum.failed) {
     return 'danger';
   }
   if (
-    status === RuleExecutionStatus.running ||
-    status === RuleExecutionStatus['partial failure'] ||
-    status === RuleExecutionStatus['going to run']
+    status === RuleExecutionStatusEnum.running ||
+    status === RuleExecutionStatusEnum['partial failure'] ||
+    status === RuleExecutionStatusEnum['going to run']
   ) {
     return 'warning';
   }

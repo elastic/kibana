@@ -8,7 +8,7 @@
 import { difference } from 'lodash';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import { processCreatedBy } from '../../../../../../common/util/job_utils';
-import { getSavedObjectsClient, getDataViews } from '../../../../util/dependency_cache';
+import { getDataViews } from '../../../../util/dependency_cache';
 import { ml } from '../../../../services/ml_api_service';
 
 export function saveJob(job, newJobData, finish) {
@@ -72,39 +72,9 @@ function saveDatafeed(datafeedConfig, job) {
   });
 }
 
-export function loadSavedDashboards(maxNumber) {
-  // Loads the list of saved dashboards, as used in editing custom URLs.
-  return new Promise((resolve, reject) => {
-    const savedObjectsClient = getSavedObjectsClient();
-    savedObjectsClient
-      .find({
-        type: 'dashboard',
-        fields: ['title'],
-        perPage: maxNumber,
-      })
-      .then((resp) => {
-        const savedObjects = resp.savedObjects;
-        if (savedObjects !== undefined) {
-          const dashboards = savedObjects.map((savedObj) => {
-            return { id: savedObj.id, title: savedObj.attributes.title };
-          });
-
-          dashboards.sort((dash1, dash2) => {
-            return dash1.title.localeCompare(dash2.title);
-          });
-
-          resolve(dashboards);
-        }
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
-}
-
 export async function loadDataViewListItems() {
-  const dataViewsContract = getDataViews();
-  return (await dataViewsContract.getIdsWithTitle()).sort((a, b) => a.title.localeCompare(b.title));
+  const dataViewsService = getDataViews();
+  return (await dataViewsService.getIdsWithTitle()).sort((a, b) => a.title.localeCompare(b.title));
 }
 
 function extractDescription(job, newJobData) {

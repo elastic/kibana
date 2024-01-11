@@ -15,39 +15,44 @@ import { catchErrorHandler } from '../catch_error_handler';
 
 export function initializeCreateCustomElementRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.post(
-    {
+  router.versioned
+    .post({
       path: `${API_ROUTE_CUSTOM_ELEMENT}`,
-      validate: {
-        body: CustomElementSchema,
-      },
       options: {
         body: {
           maxBytes: 26214400, // 25MB payload limit
           accepts: ['application/json'],
         },
       },
-    },
-    catchErrorHandler(async (context, request, response) => {
-      const customElement = request.body;
-
-      const now = new Date().toISOString();
-      const { id, ...payload } = customElement;
-
-      const soClient = (await context.core).savedObjects.client;
-      await soClient.create<CustomElementAttributes>(
-        CUSTOM_ELEMENT_TYPE,
-        {
-          ...payload,
-          '@timestamp': now,
-          '@created': now,
-        },
-        { id: id || getId('custom-element') }
-      );
-
-      return response.ok({
-        body: okResponse,
-      });
+      access: 'internal',
     })
-  );
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: { body: CustomElementSchema },
+        },
+      },
+      catchErrorHandler(async (context, request, response) => {
+        const customElement = request.body;
+
+        const now = new Date().toISOString();
+        const { id, ...payload } = customElement;
+
+        const soClient = (await context.core).savedObjects.client;
+        await soClient.create<CustomElementAttributes>(
+          CUSTOM_ELEMENT_TYPE,
+          {
+            ...payload,
+            '@timestamp': now,
+            '@created': now,
+          },
+          { id: id || getId('custom-element') }
+        );
+
+        return response.ok({
+          body: okResponse,
+        });
+      })
+    );
 }

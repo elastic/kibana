@@ -81,7 +81,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
       }
 
       const { agentKey } = await callApmApi(
-        'POST /api/apm/agent_keys 2023-05-22',
+        'POST /api/apm/agent_keys 2023-10-31',
         {
           signal: null,
           params: {

@@ -20,7 +20,9 @@ export function convertToGeoJson(esResponse: any, entitySplitFieldName: string) 
   for (let i = 0; i < entityKeys.length; i++) {
     const entityKey = entityKeys[i];
     const bucket = buckets[entityKey];
-    const feature = bucket.path as Feature;
+    const feature = {
+      ...(bucket.path as Feature),
+    };
     if (!feature.properties!.complete) {
       numTrimmedTracks++;
     }

@@ -17,6 +17,7 @@ export function isRouteWithTimeRange({
   const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
   const matchesRoute = matchingRoutes.some((route) => {
     return (
+      route.path === '/diagnostics' ||
       route.path === '/services' ||
       route.path === '/traces' ||
       route.path === '/service-map' ||

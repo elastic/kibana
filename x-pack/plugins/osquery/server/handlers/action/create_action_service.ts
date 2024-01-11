@@ -7,8 +7,8 @@
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { Subscription } from 'rxjs';
+import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import type { OsqueryActiveLicenses } from './validate_license';
 import { validateLicense } from './validate_license';
 import { createActionHandler } from './create_action_handler';

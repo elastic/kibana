@@ -15,6 +15,7 @@ import type {
   IndexTypesMap,
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import {
   getOutdatedDocumentsQuery,
   type OutdatedDocumentsQueryParams,
@@ -35,6 +36,7 @@ export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
   logger: Logger;
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 /**
@@ -54,6 +56,7 @@ export const createInitialState = ({
   typeRegistry,
   docLinks,
   logger,
+  esCapabilities,
 }: CreateInitialStateParams): InitState => {
   const outdatedDocumentsQuery = getOutdatedDocumentsQuery({
     coreMigrationVersionPerType,
@@ -117,6 +120,7 @@ export const createInitialState = ({
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
     tempIndex: getTempIndexName(indexPrefix, kibanaVersion),
+    tempIndexAlias: getTempIndexName(indexPrefix, kibanaVersion) + '_alias',
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings,
@@ -126,7 +130,9 @@ export const createInitialState = ({
     retryDelay: 0,
     retryAttempts: migrationsConfig.retryAttempts,
     batchSize: migrationsConfig.batchSize,
+    maxBatchSize: migrationsConfig.batchSize,
     maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
+    maxReadBatchSizeBytes: migrationsConfig.maxReadBatchSizeBytes.getValueInBytes(),
     discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
     discardCorruptObjects: migrationsConfig.discardCorruptObjects === kibanaVersion,
     logs: [],
@@ -134,5 +140,6 @@ export const createInitialState = ({
     knownTypes,
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
     migrationDocLinks,
+    esCapabilities,
   };
 };

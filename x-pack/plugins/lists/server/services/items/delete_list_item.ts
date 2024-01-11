@@ -25,10 +25,14 @@ export const deleteListItem = async ({
   if (listItem == null) {
     return null;
   } else {
-    await esClient.delete({
-      id,
+    await esClient.deleteByQuery({
       index: listItemIndex,
-      refresh: 'wait_for',
+      query: {
+        ids: {
+          values: [id],
+        },
+      },
+      refresh: false,
     });
   }
   return listItem;

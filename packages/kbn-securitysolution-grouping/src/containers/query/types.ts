@@ -11,14 +11,19 @@ import type {
   MappingRuntimeField,
   MappingRuntimeFields,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-interface BoolAgg {
+type RunTimeMappings =
+  | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>
+  | undefined;
+
+export interface BoolAgg {
   bool: BoolQuery;
 }
 
-interface RangeAgg {
+export interface RangeAgg {
   range: { '@timestamp': { gte: string; lte: string } };
 }
 
@@ -29,7 +34,7 @@ export interface GroupingQueryArgs {
   from: string;
   groupByField: string;
   rootAggregations?: NamedAggregation[];
-  runtimeMappings?: MappingRuntimeFields;
+  runtimeMappings?: RunTimeMappings;
   additionalAggregationsRoot?: NamedAggregation[];
   pageNumber?: number;
   uniqueValue: string;

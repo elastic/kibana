@@ -187,6 +187,7 @@ describe('TelemetryEventsSender', () => {
             env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              services: ['SepScanService'],
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               device: {
@@ -384,6 +385,7 @@ describe('TelemetryEventsSender', () => {
             env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              services: ['SepScanService'],
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               device: {
@@ -555,6 +557,13 @@ describe('getV3UrlFromV2', () => {
     const sender = new TelemetryEventsSender(logger);
     expect(
       sender.getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')
+    ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
+  });
+
+  it('should work when receiving a V3 URL', () => {
+    const sender = new TelemetryEventsSender(logger);
+    expect(
+      sender.getV3UrlFromV2('https://telemetry.elastic.co/v3/send/channel', 'alerts-endpoint')
     ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
   });
 

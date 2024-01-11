@@ -60,7 +60,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     const entry = modelVersionMap[version];
     return {
       version,
-      changeTypes: entry.changes.map((change) => change.type),
+      changeTypes: [...new Set(entry.changes.map((change) => change.type))].sort(),
       hasTransformation: hasTransformation(entry.changes),
       newMappings: Object.keys(getFlattenedObject(aggregateMappingAdditions(entry.changes))),
       schemas: {
@@ -83,6 +83,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
   };
 };
 
+const changesWithTransform = ['data_backfill', 'data_removal', 'unsafe_transform'];
 const hasTransformation = (changes: SavedObjectsModelChange[]): boolean => {
-  return changes.some((change) => change.type === 'data_backfill');
+  return changes.some((change) => changesWithTransform.includes(change.type));
 };

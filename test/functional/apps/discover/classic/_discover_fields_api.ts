@@ -14,7 +14,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker', 'settings']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'settings',
+    'unifiedFieldList',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:searchFieldsFromSource': false,
@@ -48,13 +55,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding a column removes a default column', async function () {
-      await PageObjects.discover.clickFieldListItemAdd('_score');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('_score');
       expect(await PageObjects.discover.getDocHeader()).to.have.string('_score');
       expect(await PageObjects.discover.getDocHeader()).not.to.have.string('Document');
     });
 
     it('removing a column adds a default column', async function () {
-      await PageObjects.discover.clickFieldListItemRemove('_score');
+      await PageObjects.unifiedFieldList.clickFieldListItemRemove('_score');
       expect(await PageObjects.discover.getDocHeader()).not.to.have.string('_score');
       expect(await PageObjects.discover.getDocHeader()).to.have.string('Document');
     });
@@ -62,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('displays _source viewer in doc viewer', async function () {
       await PageObjects.discover.clickDocTableRowToggle(0);
       await PageObjects.discover.isShowingDocViewer();
-      await PageObjects.discover.clickDocViewerTab(1);
+      await PageObjects.discover.clickDocViewerTab('doc_view_source');
       await PageObjects.discover.expectSourceViewerToExist();
     });
 

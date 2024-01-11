@@ -18,6 +18,7 @@ export const createConfigurationMock = (): FleetConfigType => {
       elasticsearch: {
         hosts: [''],
         ca_sha256: '',
+        ca_trusted_fingerprint: '',
       },
     },
   };

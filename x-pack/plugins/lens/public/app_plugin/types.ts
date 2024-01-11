@@ -32,6 +32,7 @@ import type { DashboardFeatureFlagConfig } from '@kbn/dashboard-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
@@ -45,7 +46,9 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   DatasourceMap,
   EditorFrameInstance,
@@ -148,6 +151,7 @@ export interface LensAppServices {
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   data: DataPublicPluginStart;
+  eventAnnotationService: EventAnnotationServiceType;
   inspector: LensInspector;
   uiSettings: IUiSettingsClient;
   settings: SettingsStart;
@@ -158,6 +162,7 @@ export interface LensAppServices {
   stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
+  contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
   presentationUtil: PresentationUtilPluginStart;
@@ -172,6 +177,7 @@ export interface LensAppServices {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   locator?: LensAppLocator;
   savedObjectStore: SavedObjectIndexStore;
+  serverless?: ServerlessPluginStart;
 }
 
 interface TopNavAction {

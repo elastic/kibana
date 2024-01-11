@@ -11,8 +11,6 @@ import { css } from '@emotion/react';
 import type { FC } from 'react';
 import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { Pagination as PaginationType } from '@elastic/eui';
-
 import type {
   CommentsArray,
   ExceptionListItemSchema,
@@ -20,7 +18,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EmptyViewerState, ExceptionItemCard, Pagination } from '../..';
+import { EmptyViewerState, ExceptionItemCard, Pagination, PaginationProps } from '../..';
 
 import type {
   RuleReferences,
@@ -46,7 +44,7 @@ interface ExceptionItemsProps {
   exceptions: ExceptionListItemSchema[];
   listType: ExceptionListTypeEnum;
   ruleReferences: RuleReferences;
-  pagination: PaginationType;
+  pagination: PaginationProps['pagination'];
   editActionLabel?: string;
   deleteActionLabel?: string;
   dataTestSubj?: string;

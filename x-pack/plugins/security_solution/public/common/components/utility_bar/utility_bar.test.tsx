@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-theme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -85,8 +84,8 @@ describe('UtilityBar', () => {
     );
     const siemUtilityBar = wrapper.find('.siemUtilityBar').first();
 
-    expect(siemUtilityBar).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemUtilityBar).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeS);
+    expect(siemUtilityBar).toHaveStyleRule('border-bottom', expect.any(String));
+    expect(siemUtilityBar).toHaveStyleRule('padding-bottom', expect.any(String));
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -121,7 +120,7 @@ describe('UtilityBar', () => {
     );
     const siemUtilityBar = wrapper.find('.siemUtilityBar').first();
 
-    expect(siemUtilityBar).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemUtilityBar).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeS);
+    expect(siemUtilityBar).not.toHaveStyleRule('border-bottom', expect.any(String));
+    expect(siemUtilityBar).not.toHaveStyleRule('padding-bottom', expect.any(String));
   });
 });

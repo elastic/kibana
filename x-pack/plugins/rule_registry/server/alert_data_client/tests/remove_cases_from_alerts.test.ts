@@ -31,6 +31,9 @@ describe('remove cases from alerts', () => {
       esClient: esClientMock,
       auditLogger,
       ruleDataService: ruleDataServiceMock.create(),
+      getRuleType: jest.fn(),
+      getRuleList: jest.fn(),
+      getAlertIndicesAlias: jest.fn(),
     };
 
     beforeEach(() => {
@@ -87,6 +90,9 @@ describe('remove cases from alerts', () => {
       esClient: esClientMock,
       auditLogger,
       ruleDataService: ruleDataServiceMock.create(),
+      getRuleType: jest.fn(),
+      getRuleList: jest.fn(),
+      getAlertIndicesAlias: jest.fn(),
     };
 
     beforeEach(() => {
@@ -164,7 +170,6 @@ describe('remove cases from alerts', () => {
           "conflicts": "proceed",
           "ignore_unavailable": true,
           "index": "undefined-*",
-          "refresh": true,
         }
       `);
     });

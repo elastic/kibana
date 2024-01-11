@@ -17,11 +17,11 @@ import {
   Tooltip,
   XYChartElementEvent,
   TooltipContainer,
-  TooltipInfo,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import { keyBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { TopNSample, TopNSubchart } from '../../../common/topn';
 import { useKibanaTimeZoneSetting } from '../../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
@@ -37,7 +37,7 @@ export interface StackedBarChartProps {
   onBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
   charts: TopNSubchart[];
   showFrames: boolean;
-  onClick?: (category: string) => void;
+  onClick?: (selectedChart: TopNSubchart) => void;
 }
 
 export function StackedBarChart({
@@ -57,7 +57,7 @@ export function StackedBarChart({
 
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
 
-  function CustomTooltipWithSubChart(props: TooltipInfo) {
+  function CustomTooltipWithSubChart() {
     if (!highlightedSample) {
       return null;
     }
@@ -79,13 +79,11 @@ export function StackedBarChart({
             percentage={highlightedSubchart.Percentage}
             sample={highlightedSample}
             showFrames={showFrames}
-            /* we don't show metadata in tooltips */
-            metadata={[]}
             height={128}
             width={MAX_TOOLTIP_WIDTH}
             showAxes={false}
-            onShowMoreClick={null}
             padTitle={false}
+            onClick={onClick ? () => onClick(highlightedSubchart) : undefined}
           />
         </EuiPanel>
       </TooltipContainer>
@@ -114,13 +112,14 @@ export function StackedBarChart({
             ? (elements) => {
                 const [value] = elements[0] as XYChartElementEvent;
                 const sample = value.datum as TopNSample;
-                onClick(sample.Category);
+                onClick(chartsbyCategoryMap[sample.Category]);
               }
             : undefined
         }
         onElementOut={() => {
           setHighlightedSample(undefined);
         }}
+        locale={i18n.getLocale()}
       />
       <Tooltip customTooltip={CustomTooltipWithSubChart} />
       {charts.map((chart) => (
@@ -132,6 +131,7 @@ export function StackedBarChart({
           color={chart.Color}
           xAccessor={'Timestamp'}
           yAccessors={['Count']}
+          stackAccessors={['true']}
           stackMode={asPercentages ? StackMode.Percentage : undefined}
           xScaleType={ScaleType.Time}
           timeZone={timeZone}
@@ -141,7 +141,7 @@ export function StackedBarChart({
       <Axis
         id="left-axis"
         position="left"
-        showGridLines
+        gridLine={{ visible: true }}
         tickFormat={(d) => (asPercentages ? asPercentage(d) : d.toFixed(0))}
       />
     </Chart>

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+export * from './bazel_packages';
+export * from './brotli_compress_bundles';
 export * from './clean';
 export * from './create_archive';
 export * from './optimize';

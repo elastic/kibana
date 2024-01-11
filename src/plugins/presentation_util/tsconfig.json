@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -29,8 +29,11 @@
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/ui-actions-plugin",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/shared-ux-button-toolbar",
+    "@kbn/code-editor",
+    "@kbn/calculate-width-from-char-count",
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

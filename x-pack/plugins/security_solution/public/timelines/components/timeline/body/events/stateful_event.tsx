@@ -29,13 +29,13 @@ import { useEventDetailsWidthContext } from '../../../../../common/components/ev
 import { EventColumnView } from './event_column_view';
 import type { inputsModel } from '../../../../../common/store';
 import { appSelectors } from '../../../../../common/store';
-import { timelineActions, timelineSelectors } from '../../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../../store';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
-import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../../store/defaults';
 import { useGetMappedNonEcsValue } from '../data_driven_columns';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type {

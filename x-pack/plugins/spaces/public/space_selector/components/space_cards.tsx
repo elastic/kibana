@@ -10,8 +10,8 @@ import './space_cards.scss';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { Component } from 'react';
 
-import type { Space } from '../../../common';
 import { SpaceCard } from './space_card';
+import type { Space } from '../../../common';
 
 interface Props {
   spaces: Space[];

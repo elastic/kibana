@@ -20,7 +20,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { useBreadcrumbs, useLocations, useFleetPermissions } from '../../hooks';
+import { useBreadcrumbs, useEnablement, useLocations } from '../../hooks';
 import { usePrivateLocationsAPI } from '../settings/private_locations/hooks/use_locations_api';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import {
@@ -32,25 +32,23 @@ import {
   cleanMonitorListState,
 } from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
-import { PrivateLocation } from '../../../../../common/runtime_types';
 import { SimpleMonitorForm } from './simple_monitor_form';
-import { AddLocationFlyout } from '../settings/private_locations/add_location_flyout';
+import { AddLocationFlyout, NewLocation } from '../settings/private_locations/add_location_flyout';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const { canReadAgentPolicies } = useFleetPermissions();
+  useEnablement();
 
   useEffect(() => {
     dispatch(getServiceLocations());
-    if (canReadAgentPolicies) {
-      dispatch(getAgentPoliciesAction.get());
-    }
+    dispatch(getAgentPoliciesAction.get());
+
     return () => {
       dispatch(cleanMonitorListState());
     };
-  }, [canReadAgentPolicies, dispatch]);
+  }, [dispatch]);
 
   useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
 
@@ -112,7 +110,7 @@ export const GettingStartedOnPrem = () => {
 
   const { onSubmit, privateLocations, loading } = usePrivateLocationsAPI();
 
-  const handleSubmit = (formData: PrivateLocation) => {
+  const handleSubmit = (formData: NewLocation) => {
     onSubmit(formData);
   };
 

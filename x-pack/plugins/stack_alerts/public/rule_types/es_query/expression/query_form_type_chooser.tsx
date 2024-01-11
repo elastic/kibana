@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
+  EuiBetaBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,39 +20,25 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SearchType } from '../types';
+import { useTriggerUiActionServices } from '../util';
 
-const FORM_TYPE_ITEMS: Array<{ formType: SearchType; label: string; description: string }> = [
-  {
-    formType: SearchType.searchSource,
-    label: i18n.translate(
-      'xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeLabel',
+export const ExperimentalBadge = React.memo(() => (
+  <EuiBetaBadge
+    size="s"
+    label={i18n.translate('xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    tooltipContent={i18n.translate(
+      'xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalDescription',
       {
-        defaultMessage: 'KQL or Lucene',
+        defaultMessage:
+          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
       }
-    ),
-    description: i18n.translate(
-      'xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeDescription',
-      {
-        defaultMessage: 'Use KQL or Lucene to define a text-based query.',
-      }
-    ),
-  },
-  {
-    formType: SearchType.esQuery,
-    label: i18n.translate(
-      'xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeLabel',
-      {
-        defaultMessage: 'Query DSL',
-      }
-    ),
-    description: i18n.translate(
-      'xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeDescription',
-      {
-        defaultMessage: 'Use the Elasticsearch Query DSL to define a query.',
-      }
-    ),
-  },
-];
+    )}
+    tooltipPosition="bottom"
+  />
+));
+ExperimentalBadge.displayName = 'ExperimentalBadge';
 
 export interface QueryFormTypeProps {
   searchType: SearchType | null;
@@ -62,16 +49,82 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
   searchType,
   onFormTypeSelect,
 }) => {
+  const { uiSettings } = useTriggerUiActionServices();
+  const isEsqlEnabled = uiSettings?.get('discover:enableESQL');
+
+  const formTypeItems = useMemo(() => {
+    const items: Array<{ formType: SearchType; label: string; description: string }> = [
+      {
+        formType: SearchType.searchSource,
+        label: i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeLabel',
+          {
+            defaultMessage: 'KQL or Lucene',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeDescription',
+          {
+            defaultMessage: 'Use KQL or Lucene to define a text-based query.',
+          }
+        ),
+      },
+      {
+        formType: SearchType.esQuery,
+        label: i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeLabel',
+          {
+            defaultMessage: 'Query DSL',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeDescription',
+          {
+            defaultMessage: 'Use the Elasticsearch Query DSL to define a query.',
+          }
+        ),
+      },
+    ];
+
+    if (isEsqlEnabled) {
+      items.push({
+        formType: SearchType.esqlQuery,
+        label: i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeLabel',
+          {
+            defaultMessage: 'ES|QL',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeDescription',
+          {
+            defaultMessage: 'Use ES|QL to define a text-based query.',
+          }
+        ),
+      });
+    }
+    return items;
+  }, [isEsqlEnabled]);
+
   if (searchType) {
-    const activeFormTypeItem = FORM_TYPE_ITEMS.find((item) => item.formType === searchType);
+    const activeFormTypeItem = formTypeItems.find((item) => item.formType === searchType);
 
     return (
       <>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
-            <EuiTitle size="xs" data-test-subj="selectedRuleFormTypeTitle">
-              <h5>{activeFormTypeItem?.label}</h5>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs" data-test-subj="selectedRuleFormTypeTitle">
+                  <h5>{activeFormTypeItem?.label}</h5>
+                </EuiTitle>
+              </EuiFlexItem>
+              {activeFormTypeItem?.formType === SearchType.esqlQuery && (
+                <EuiFlexItem>
+                  <ExperimentalBadge />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -107,7 +160,7 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
         </h5>
       </EuiTitle>
       <EuiListGroup flush gutterSize="m" size="m" maxWidth={false}>
-        {FORM_TYPE_ITEMS.map((item) => (
+        {formTypeItems.map((item) => (
           <EuiListGroupItem
             wrapText
             key={`form-type-${item.formType}`}
@@ -115,7 +168,16 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
             color="primary"
             label={
               <span>
-                <strong>{item.label}</strong>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <strong>{item.label}</strong>
+                  </EuiFlexItem>
+                  {item.formType === SearchType.esqlQuery && (
+                    <EuiFlexItem>
+                      <ExperimentalBadge />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
                 <EuiText color="subdued" size="s">
                   <p>{item.description}</p>
                 </EuiText>

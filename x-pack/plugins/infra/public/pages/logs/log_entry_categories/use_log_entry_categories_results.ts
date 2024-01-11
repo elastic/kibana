@@ -7,11 +7,12 @@
 
 import { useMemo, useState } from 'react';
 
-import { PersistedLogViewReference } from '../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { IdFormat } from '../../../../common/http_api/latest';
 import {
   GetLogEntryCategoriesSuccessResponsePayload,
   GetLogEntryCategoryDatasetsSuccessResponsePayload,
-} from '../../../../common/http_api/log_analysis';
+} from '../../../../common/http_api';
 import { CategoriesSort } from '../../../../common/log_analysis';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetTopLogEntryCategoriesAPI } from './service_calls/get_top_log_entry_categories';
@@ -32,6 +33,7 @@ export const useLogEntryCategoriesResults = ({
   onGetLogEntryCategoryDatasetsError,
   onGetTopLogEntryCategoriesError,
   logViewReference,
+  idFormat,
   startTime,
 }: {
   categoriesCount: number;
@@ -40,6 +42,7 @@ export const useLogEntryCategoriesResults = ({
   onGetLogEntryCategoryDatasetsError?: (error: Error) => void;
   onGetTopLogEntryCategoriesError?: (error: Error) => void;
   logViewReference: PersistedLogViewReference;
+  idFormat: IdFormat;
   startTime: number;
 }) => {
   const [sortOptions, setSortOptions] = useState<SortOptions>({
@@ -58,6 +61,7 @@ export const useLogEntryCategoriesResults = ({
         return await callGetTopLogEntryCategoriesAPI(
           {
             logViewReference,
+            idFormat,
             startTime,
             endTime,
             categoryCount: categoriesCount,
@@ -80,7 +84,15 @@ export const useLogEntryCategoriesResults = ({
         }
       },
     },
-    [categoriesCount, endTime, filteredDatasets, logViewReference, startTime, sortOptions]
+    [
+      categoriesCount,
+      endTime,
+      filteredDatasets,
+      logViewReference.logViewId,
+      startTime,
+      sortOptions,
+      idFormat,
+    ]
   );
 
   const [getLogEntryCategoryDatasetsRequest, getLogEntryCategoryDatasets] = useTrackedPromise(
@@ -88,7 +100,7 @@ export const useLogEntryCategoriesResults = ({
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         return await callGetLogEntryCategoryDatasetsAPI(
-          { logViewReference, startTime, endTime },
+          { logViewReference, idFormat, startTime, endTime },
           services.http.fetch
         );
       },
@@ -105,7 +117,7 @@ export const useLogEntryCategoriesResults = ({
         }
       },
     },
-    [categoriesCount, endTime, logViewReference, startTime]
+    [categoriesCount, endTime, logViewReference.logViewId, idFormat, startTime]
   );
 
   const isLoadingTopLogEntryCategories = useMemo(

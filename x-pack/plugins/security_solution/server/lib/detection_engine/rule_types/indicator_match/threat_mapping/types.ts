@@ -27,7 +27,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import type {
   BulkCreate,
@@ -72,6 +72,7 @@ export interface CreateThreatSignalsOptions {
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
+  inputIndexFields: DataViewFieldBase[];
 }
 
 export interface CreateThreatSignalOptions {
@@ -109,6 +110,8 @@ export interface CreateThreatSignalOptions {
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
+  inputIndexFields: DataViewFieldBase[];
+  threatIndexFields: DataViewFieldBase[];
 }
 
 export interface CreateEventSignalOptions {
@@ -147,6 +150,8 @@ export interface CreateEventSignalOptions {
   unprocessedExceptions: ExceptionListItemSchema[];
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   threatMatchedFields: ThreatMatchedFields;
+  inputIndexFields: DataViewFieldBase[];
+  threatIndexFields: DataViewFieldBase[];
 }
 
 type EntryKey = 'field' | 'value';
@@ -217,6 +222,7 @@ export interface GetThreatListOptions {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   listClient: ListClient;
   exceptionFilter: Filter | undefined;
+  indexFields: DataViewFieldBase[];
 }
 
 export interface ThreatListCountOptions {
@@ -226,6 +232,7 @@ export interface ThreatListCountOptions {
   query: string;
   threatFilters: unknown[];
   exceptionFilter: Filter | undefined;
+  indexFields: DataViewFieldBase[];
 }
 
 export interface ThreatListDoc {
@@ -274,6 +281,7 @@ export interface BuildThreatEnrichmentOptions {
   exceptionFilter: Filter | undefined;
   threatMapping: ThreatMapping;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  threatIndexFields: DataViewFieldBase[];
 }
 
 export interface EventsOptions {
@@ -291,6 +299,7 @@ export interface EventsOptions {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   exceptionFilter: Filter | undefined;
   eventListConfig?: OverrideBodyQuery;
+  indexFields: DataViewFieldBase[];
 }
 
 export interface EventDoc {
@@ -308,6 +317,7 @@ export interface EventCountOptions {
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
+  indexFields: DataViewFieldBase[];
 }
 
 export interface SignalMatch {

@@ -7,18 +7,10 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import type { Inspect, Maybe, TimerangeInput } from '../../../common';
+import type { Inspect, Maybe } from '../../../common';
 import type { UserItem } from '../common';
-import type { RequestBasicOptions } from '../..';
 
 export interface ObservedUserDetailsStrategyResponse extends IEsSearchResponse {
   userDetails: UserItem;
-  inspect?: Maybe<Inspect>;
-}
-
-export interface ObservedUserDetailsRequestOptions extends Partial<RequestBasicOptions> {
-  userName: string;
-  skip?: boolean;
-  timerange: TimerangeInput;
   inspect?: Maybe<Inspect>;
 }

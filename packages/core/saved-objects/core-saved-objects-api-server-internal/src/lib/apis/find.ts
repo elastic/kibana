@@ -57,6 +57,7 @@ export const performFind = async <T = unknown, A = unknown>(
     common: commonHelper,
     encryption: encryptionHelper,
     serializer: serializerHelper,
+    migration: migrationHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
   let namespaces!: string[];
@@ -237,15 +238,20 @@ export const performFind = async <T = unknown, A = unknown>(
       per_page: perPage,
       total: body.hits.total,
       saved_objects: body.hits.hits.map(
-        (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
-          ...(migrator.migrateDocument(
-            serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
-              migrationVersionCompatibility,
-            })
-          ) as SavedObject),
-          score: hit._score!,
-          sort: hit.sort,
-        })
+        (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => {
+          let savedObject = serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
+            migrationVersionCompatibility,
+          });
+          // can't migrate a document with partial attributes
+          if (!fields) {
+            savedObject = migrationHelper.migrateStorageDocument(savedObject) as SavedObject;
+          }
+          return {
+            ...savedObject,
+            score: hit._score!,
+            sort: hit.sort,
+          };
+        }
       ),
       pit_id: body.pit_id,
     } as typeof result;

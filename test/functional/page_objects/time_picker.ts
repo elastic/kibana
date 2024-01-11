@@ -7,8 +7,8 @@
  */
 
 import moment from 'moment';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export type CommonlyUsed =
   | 'Today'
@@ -57,6 +57,7 @@ export class TimePickerPageObject extends FtrService {
     });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
+      await this.testSubjects.waitForDeleted('noDataPopoverDismissButton');
     }
   }
 
@@ -92,7 +93,9 @@ export class TimePickerPageObject extends FtrService {
    * @param option 'Today' | 'This_week' | 'Last_15 minutes' | 'Last_24 hours' ...
    */
   async setCommonlyUsedTime(option: CommonlyUsed | string) {
+    await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
     await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
+    await this.testSubjects.exists(`superDatePickerCommonlyUsed_${option}`, { timeout: 5000 });
     await this.testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
   }
 
@@ -104,6 +107,8 @@ export class TimePickerPageObject extends FtrService {
     } else {
       await this.testSubjects.setValue(dataTestSubj, value);
     }
+
+    await this.testSubjects.pressEnter(dataTestSubj);
   }
 
   private async showStartEndTimes() {
@@ -144,12 +149,10 @@ export class TimePickerPageObject extends FtrService {
     }
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.showStartEndTimes();
-    let panel!: WebElementWrapper;
 
     // set to time
     await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
       await this.testSubjects.click('superDatePickerendDatePopoverButton');
-      panel = await this.getTimePickerPanel();
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
@@ -164,8 +167,6 @@ export class TimePickerPageObject extends FtrService {
     // set from time
     await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
       await this.testSubjects.click('superDatePickerstartDatePopoverButton');
-      await this.waitPanelIsGone(panel);
-      panel = await this.getTimePickerPanel();
       await this.testSubjects.click('superDatePickerAbsoluteTab');
       await this.testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
@@ -196,7 +197,6 @@ export class TimePickerPageObject extends FtrService {
       await this.testSubjects.click('querySubmitButton');
     }
 
-    await this.waitPanelIsGone(panel);
     await this.header.awaitGlobalLoadingIndicatorHidden();
   }
 

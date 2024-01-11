@@ -8,12 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-
-import { useKibana } from '../../../utils/kibana_react';
-import { toDurationLabel } from '../../../utils/slo/labels';
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { ChartData } from '../../../typings/slo';
+import { useKibana } from '../../../utils/kibana_react';
+import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import { WideChart } from './wide_chart';
 
 export interface Props {
@@ -22,11 +22,42 @@ export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
+function formatTime(minutes: number) {
+  if (minutes > 59) {
+    const mins = minutes % 60;
+    const hours = (minutes - mins) / 60;
+    return i18n.translate(
+      'xpack.observability.slo.sloDetails.errorBudgetChartPanel.minuteHoursLabel',
+      {
+        defaultMessage: '{hours}h {mins}m',
+        values: { hours: Math.trunc(hours), mins: Math.trunc(mins) },
+      }
+    );
+  }
+  return i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.minuteLabel', {
+    defaultMessage: '{minutes}m',
+    values: { minutes },
+  });
+}
+
 export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
+
+  let errorBudgetTimeRemainingFormatted;
+  if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
+    const totalSlices =
+      toMinutes(toDuration(slo.timeWindow.duration)) /
+      toMinutes(toDuration(slo.objective.timesliceWindow!));
+    const errorBudgetRemainingInMinute =
+      slo.summary.errorBudget.remaining * (slo.summary.errorBudget.initial * totalSlices);
+
+    errorBudgetTimeRemainingFormatted = formatTime(
+      errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0
+    );
+  }
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorBudgetChartPanel">
@@ -43,10 +74,15 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration', {
-                defaultMessage: 'Last {duration}',
-                values: { duration: toDurationLabel(slo.timeWindow.duration) },
-              })}
+              {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+                ? i18n.translate(
+                    'xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration',
+                    {
+                      defaultMessage: 'Last {duration}',
+                      values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                    }
+                  )
+                : toDurationAdverbLabel(slo.timeWindow.duration)}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -64,6 +100,20 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
               reverse
             />
           </EuiFlexItem>
+          {errorBudgetTimeRemainingFormatted ? (
+            <EuiFlexItem grow={false}>
+              <EuiStat
+                titleColor={isSloFailed ? 'danger' : 'success'}
+                title={errorBudgetTimeRemainingFormatted}
+                titleSize="s"
+                description={i18n.translate(
+                  'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',
+                  { defaultMessage: 'Remaining' }
+                )}
+                reverse
+              />
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
 
         <EuiFlexItem>

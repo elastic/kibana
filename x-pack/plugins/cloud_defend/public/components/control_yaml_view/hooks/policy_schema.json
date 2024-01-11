@@ -1,6 +1,7 @@
 {
   "$id": "https://elastic.co/cloud-defend/policy-schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "policy-version=1.0.0",
   "type": "object",
   "anyOf": [
     {
@@ -10,8 +11,11 @@
       "required": ["process"]
     }
   ],
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
+    "version": {
+      "type": "string"
+    },
     "file": {
       "type": "object",
       "required": ["selectors", "responses"],
@@ -57,7 +61,7 @@
     "fileSelector": {
       "type": "object",
       "required": ["name"],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "anyOf": [
         {
           "required": ["operation"]
@@ -118,7 +122,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^[a-z0-9]+$"
+            "pattern": "^([a-z0-9]+(?:[._-][a-z0-9]+)*)$"
           }
         },
         "containerImageTag": {
@@ -133,7 +137,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
+            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$"
           }
         },
         "kubernetesClusterId": {
@@ -206,7 +210,7 @@
     "processSelector": {
       "type": "object",
       "required": ["name"],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "anyOf": [
         {
           "required": ["operation"]
@@ -261,7 +265,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^[a-z0-9]+$"
+            "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$"
           }
         },
         "containerImageTag": {
@@ -276,7 +280,7 @@
           "minItems": 1,
           "items": {
             "type": "string",
-            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
+            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+(?:[._-][a-z0-9]+)*)+$"
           }
         },
         "kubernetesClusterId": {
@@ -346,7 +350,7 @@
     "fileResponse": {
       "type": "object",
       "required": ["match", "actions"],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "match": {
           "type": "array",
@@ -373,7 +377,7 @@
     "processResponse": {
       "type": "object",
       "required": ["match", "actions"],
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
         "match": {
           "type": "array",
@@ -392,7 +396,7 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "enum": ["alert", "log"]
+            "enum": ["alert", "block", "log"]
           }
         }
       }

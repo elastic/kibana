@@ -54,19 +54,16 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return `table source ${uuidv4()}`;
   }
 
-  getSyncMeta(): null {
-    return null;
-  }
-
-  async getPropertiesMap(
+  async getJoinMetrics(
     requestMeta: VectorSourceRequestMeta,
-    leftSourceName: string,
-    leftFieldName: string,
+    layerName: string,
     registerCancelCallback: (callback: () => void) => void
-  ): Promise<PropertiesMap> {
+  ) {
     const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
 
-    const fieldNames = await this.getFieldNames();
+    const columnNames = this._descriptor.__columns.map((column) => {
+      return column.name;
+    });
 
     for (let i = 0; i < this._descriptor.__rows.length; i++) {
       const row: { [key: string]: string | number } = this._descriptor.__rows[i];
@@ -77,7 +74,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
           if (key === this._descriptor.term && row[key]) {
             propKey = row[key];
           }
-          if (fieldNames.indexOf(key) >= 0 && key !== this._descriptor.term) {
+          if (columnNames.indexOf(key) >= 0 && key !== this._descriptor.term) {
             props[key] = row[key];
           }
         }
@@ -88,7 +85,10 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       }
     }
 
-    return propertiesMap;
+    return {
+      joinMetrics: propertiesMap,
+      warnings: [],
+    };
   }
 
   getTermField(): IField {
@@ -137,22 +137,8 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     });
   }
 
-  getFieldNames(): string[] {
-    return this._descriptor.__columns.map((column) => {
-      return column.name;
-    });
-  }
-
   hasTooltipProperties(): boolean {
     return false;
-  }
-
-  createField({ fieldName }: { fieldName: string }): IField {
-    const field = this.getFieldByName(fieldName);
-    if (!field) {
-      throw new Error(`Cannot find field for ${fieldName}`);
-    }
-    return field;
   }
 
   async getBoundsForFilters(

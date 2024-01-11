@@ -5,13 +5,26 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFieldSearch,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+  EuiFlexGroup,
+  type EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 interface RulesTableToolbarProps {
-  search(value: string): void;
+  search: (value: string) => void;
+  onSectionChange: (value: string | undefined) => void;
+  onRuleNumberChange: (value: string | undefined) => void;
+  sectionSelectOptions: string[];
+  ruleNumberSelectOptions: string[];
   totalRulesCount: number;
   searchValue: string;
   isSearching: boolean;
@@ -29,15 +42,84 @@ export const RulesTableHeader = ({
   isSearching,
   totalRulesCount,
   pageSize,
-}: RulesTableToolbarProps) => (
-  <SearchField
-    isSearching={isSearching}
-    searchValue={searchValue}
-    search={search}
-    totalRulesCount={totalRulesCount}
-    pageSize={pageSize}
-  />
-);
+  onSectionChange,
+  onRuleNumberChange,
+  sectionSelectOptions,
+  ruleNumberSelectOptions,
+}: RulesTableToolbarProps) => {
+  const [selectedSection, setSelectedSection] = useState<EuiComboBoxOptionOption[]>([]);
+  const [selectedRuleNumber, setSelectedRuleNumber] = useState<EuiComboBoxOptionOption[]>([]);
+
+  const sectionOptions = sectionSelectOptions.map((option) => ({
+    label: option,
+  }));
+
+  const ruleNumberOptions = ruleNumberSelectOptions.map((option) => ({
+    label: option,
+  }));
+
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <SearchField
+          isSearching={isSearching}
+          searchValue={searchValue}
+          search={search}
+          totalRulesCount={totalRulesCount}
+          pageSize={pageSize}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={0}>
+        <EuiFlexGroup gutterSize="xs" direction="row">
+          <EuiFlexItem
+            css={css`
+              min-width: 160px;
+            `}
+          >
+            <EuiComboBox
+              fullWidth={true}
+              placeholder={i18n.translate(
+                'xpack.csp.rules.rulesTableHeader.sectionSelectPlaceholder',
+                {
+                  defaultMessage: 'CIS Section',
+                }
+              )}
+              singleSelection={{ asPlainText: true }}
+              options={sectionOptions}
+              selectedOptions={selectedSection}
+              onChange={(option) => {
+                setSelectedSection(option);
+                onSectionChange(option.length ? option[0].label : undefined);
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              min-width: 160px;
+            `}
+          >
+            <EuiComboBox
+              fullWidth={true}
+              placeholder={i18n.translate(
+                'xpack.csp.rules.rulesTableHeader.ruleNumberSelectPlaceholder',
+                {
+                  defaultMessage: 'Rule Number',
+                }
+              )}
+              singleSelection={{ asPlainText: true }}
+              options={ruleNumberOptions}
+              selectedOptions={selectedRuleNumber}
+              onChange={(option) => {
+                setSelectedRuleNumber(option);
+                onRuleNumberChange(option.length ? option[0].label : undefined);
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const SEARCH_DEBOUNCE_MS = 300;
 

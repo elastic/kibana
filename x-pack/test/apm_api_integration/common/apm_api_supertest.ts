@@ -20,6 +20,7 @@ export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
     options: {
       type?: 'form-data';
       endpoint: TEndpoint;
+      spaceId?: string;
     } & APIClientRequestParamsOf<TEndpoint> & { params?: { query?: { _inspect?: boolean } } }
   ): Promise<SupertestReturnType<TEndpoint>> => {
     const { endpoint, type } = options;
@@ -27,9 +28,13 @@ export function createApmApiClient(st: supertest.SuperTest<supertest.Test>) {
     const params = 'params' in options ? (options.params as Record<string, any>) : {};
 
     const { method, pathname, version } = formatRequest(endpoint, params.path);
-    const url = format({ pathname, query: params?.query });
+    const pathnameWithSpaceId = options.spaceId ? `/s/${options.spaceId}${pathname}` : pathname;
+    const url = format({ pathname: pathnameWithSpaceId, query: params?.query });
 
-    const headers: Record<string, string> = { 'kbn-xsrf': 'foo' };
+    const headers: Record<string, string> = {
+      'kbn-xsrf': 'foo',
+      'x-elastic-internal-origin': 'foo',
+    };
 
     if (version) {
       headers['Elastic-Api-Version'] = version;

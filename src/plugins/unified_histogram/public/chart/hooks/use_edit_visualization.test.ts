@@ -81,6 +81,21 @@ describe('useEditVisualization', () => {
     expect(hook.result.current).toBeUndefined();
   });
 
+  it('should return undefined if is on text based mode', async () => {
+    getTriggerCompatibleActions.mockReturnValue(Promise.resolve([{ id: 'test' }]));
+    const hook = renderHook(() =>
+      useEditVisualization({
+        services: unifiedHistogramServicesMock,
+        dataView: dataViewWithTimefieldMock,
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
+        lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
+        isPlainRecord: true,
+      })
+    );
+    await act(() => setTimeout(0));
+    expect(hook.result.current).toBeUndefined();
+  });
+
   it('should return undefined if the time field is not visualizable', async () => {
     getTriggerCompatibleActions.mockReturnValue(Promise.resolve([{ id: 'test' }]));
     const dataView = {

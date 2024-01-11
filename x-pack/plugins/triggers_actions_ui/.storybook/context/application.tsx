@@ -16,6 +16,7 @@ export const getDefaultServicesApplication = (
   const applications = new Map();
 
   return {
+    currentLocation$: of(),
     currentAppId$: of('fleet'),
     navigateToUrl: async (url: string) => {
       action(`Navigate to: ${url}`);

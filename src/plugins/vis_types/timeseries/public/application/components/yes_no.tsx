@@ -23,7 +23,7 @@ export function YesNo({
   name,
   value,
   disabled,
-  'data-test-subj': dataTestSubj,
+  'data-test-subj': dataTestSubj = name,
   onChange,
 }: YesNoProps) {
   const handleChange = useCallback(

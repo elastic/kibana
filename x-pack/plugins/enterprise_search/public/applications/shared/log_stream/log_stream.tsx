@@ -7,17 +7,17 @@
 
 import React from 'react';
 
-import { LogStream, LogStreamProps } from '@kbn/infra-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { LogStream, LogStreamProps } from '@kbn/logs-shared-plugin/public';
 
 /*
- * EnterpriseSearchLogStream is a light wrapper on top of infra's embeddable LogStream component.
+ * EnterpriseSearchLogStream is a light wrapper on top of logsShared's embeddable LogStream component.
  * It prepopulates our log source ID (set in server/plugin.ts) and sets a basic 24-hours-ago
  * default for timestamps. All other props get passed as-is to the underlying LogStream.
  *
  * Documentation links for reference:
- * - https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx
- * - Run `yarn storybook infra` for live docs
+ * - https://github.com/elastic/kibana/blob/main/x-pack/plugins/logs_shared/public/components/log_stream/log_stream.stories.mdx
+ * - Run `yarn storybook logsShared` for live docs
  */
 
 interface Props extends Omit<LogStreamProps, 'startTimestamp' | 'endTimestamp'> {

@@ -7,14 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
-import {
+import type { InventoryMapBounds } from '../../common/inventory_views';
+import type {
   InfraTimerangeInput,
   SnapshotGroupBy,
   SnapshotMetricInput,
   SnapshotNodeMetric,
   SnapshotNodePath,
 } from '../../common/http_api/snapshot_api';
-import { WaffleSortOption } from '../pages/metrics/inventory_view/hooks/use_waffle_options';
+import type { WaffleSortOption } from '../pages/metrics/inventory_view/hooks/use_waffle_options';
+export type { InventoryColorPalette } from '../../common/inventory_views';
 
 export interface InfraWaffleMapNode {
   pathId: string;
@@ -71,9 +73,6 @@ export const PALETTES = {
     defaultMessage: 'Negative',
   }),
 };
-
-export const InventoryColorPaletteRT = rt.keyof(PALETTES);
-export type InventoryColorPalette = rt.TypeOf<typeof InventoryColorPaletteRT>;
 
 export const StepRuleRT = rt.intersection([
   rt.type({
@@ -136,10 +135,7 @@ export interface InfraOptions {
   wafflemap: InfraWaffleMapOptions;
 }
 
-export interface InfraWaffleMapBounds {
-  min: number;
-  max: number;
-}
+export type InfraWaffleMapBounds = InventoryMapBounds;
 
 export type InfraFormatter = (value: string | number) => string;
 export enum InfraFormatterType {

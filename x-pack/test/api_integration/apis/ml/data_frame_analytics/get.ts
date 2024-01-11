@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -273,9 +273,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body.elements.length).to.eql(0);
         expect(body.details).to.eql({});
-        expect(body.error).to.eql(`No known job with id '${jobId}_fake'`);
-
-        expect(body).to.have.keys('elements', 'details', 'error');
+        expect(body).to.have.keys('elements', 'details');
       });
     });
 

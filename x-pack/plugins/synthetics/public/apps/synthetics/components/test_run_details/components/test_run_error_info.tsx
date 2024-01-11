@@ -42,7 +42,7 @@ export const TestRunErrorInfo = ({
         </EuiCallOut>
       )}
       <EuiSpacer size="m" />
-      {isDownMonitor && (showErrorLogs || hasNoSteps) && (
+      {(showErrorLogs || hasNoSteps) && (
         <StdErrorLogs
           checkGroup={journeyDetails?.journey?.monitor.check_group}
           hideTitle={false}

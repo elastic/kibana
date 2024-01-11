@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
@@ -46,7 +47,32 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should work with deprecated api', async () => {
-      await supertest.post(`/api/fleet/service-tokens`).set('kbn-xsrf', 'xxxx').expect(200);
+      await supertest
+        .post(`/api/fleet/service-tokens`)
+        .set('kbn-xsrf', 'xxxx')
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .expect(200);
+    });
+
+    it('should create a valid remote service account token', async () => {
+      const { body: apiResponse } = await supertest
+        .post(`/api/fleet/service_tokens`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ remote: true })
+        .expect(200);
+
+      expect(apiResponse).have.property('name');
+      expect(apiResponse).have.property('value');
+
+      const { body: tokensResponse } = await esClient.transport.request<any>(
+        {
+          method: 'GET',
+          path: `_security/service/elastic/fleet-server-remote/credential`,
+        },
+        { meta: true }
+      );
+
+      expect(tokensResponse.tokens).have.property(apiResponse.name);
     });
   });
 }

@@ -7,18 +7,15 @@
 
 import { chunk, intersection } from 'lodash';
 import moment from 'moment';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { getHttp } from '../kibana_services';
 import { MB } from '../../common/constants';
-import type {
-  ImportDoc,
-  ImportFailure,
-  ImportResponse,
-  Mappings,
-  Settings,
-  IngestPipeline,
-} from '../../common/types';
+import type { ImportDoc, ImportFailure, ImportResponse, IngestPipeline } from '../../common/types';
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
 
 const CHUNK_SIZE = 5000;
@@ -63,8 +60,8 @@ export abstract class Importer implements IImporter {
 
   public async initializeImport(
     index: string,
-    settings: Settings,
-    mappings: Mappings,
+    settings: IndicesIndexSettings,
+    mappings: MappingTypeMapping,
     pipeline: IngestPipeline
   ) {
     updatePipelineTimezone(pipeline);
@@ -279,8 +276,8 @@ export function callImportRoute({
   id: string | undefined;
   index: string;
   data: ImportDoc[];
-  settings: Settings | unknown;
-  mappings: Mappings | unknown;
+  settings: IndicesIndexSettings;
+  mappings: MappingTypeMapping;
   ingestPipeline: {
     id?: string;
     pipeline?: IngestPipeline;
@@ -298,6 +295,7 @@ export function callImportRoute({
   return getHttp().fetch<ImportResponse>({
     path: `/internal/file_upload/import`,
     method: 'POST',
+    version: '1',
     query,
     body,
   });

@@ -8,9 +8,19 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { DynamicSettings } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
-import { getConnectorsAction, getDynamicSettingsAction, setDynamicSettingsAction } from './actions';
+import {
+  getConnectorsAction,
+  getDynamicSettingsAction,
+  getLocationMonitorsAction,
+  setDynamicSettingsAction,
+} from './actions';
 import { ActionConnector } from './api';
 import { syncGlobalParamsAction } from './actions';
+
+export interface LocationMonitor {
+  id: string;
+  count: number;
+}
 
 export interface DynamicSettingsState {
   settings?: DynamicSettings;
@@ -19,11 +29,14 @@ export interface DynamicSettingsState {
   loading: boolean;
   connectors?: ActionConnector[];
   connectorsLoading?: boolean;
+  locationMonitors: LocationMonitor[];
+  locationMonitorsLoading?: boolean;
 }
 
 const initialState: DynamicSettingsState = {
   loading: true,
   connectors: [],
+  locationMonitors: [],
 };
 
 export const dynamicSettingsReducer = createReducer(initialState, (builder) => {
@@ -57,8 +70,18 @@ export const dynamicSettingsReducer = createReducer(initialState, (builder) => {
       state.connectors = action.payload;
       state.connectorsLoading = false;
     })
-    .addCase(getConnectorsAction.fail, (state, action) => {
+    .addCase(getConnectorsAction.fail, (state, _action) => {
       state.connectorsLoading = false;
+    })
+    .addCase(getLocationMonitorsAction.get, (state) => {
+      state.locationMonitorsLoading = true;
+    })
+    .addCase(getLocationMonitorsAction.success, (state, action) => {
+      state.locationMonitors = action.payload;
+      state.locationMonitorsLoading = false;
+    })
+    .addCase(getLocationMonitorsAction.fail, (state) => {
+      state.locationMonitorsLoading = false;
     });
 });
 

@@ -22,12 +22,13 @@ import {
   Settings,
   XYBrushEvent,
   XYChartSeriesIdentifier,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
 
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
@@ -73,7 +74,7 @@ export function TimeseriesChart({
   const history = useHistory();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const theme = useTheme();
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
     theme,
@@ -150,34 +151,34 @@ export function TimeseriesChart({
       id={id}
     >
       <Chart ref={chartRef} id={id}>
-        <Settings
-          tooltip={{
-            stickTo: 'top',
-            showNullValues: false,
-            headerFormatter: ({ value }) => {
-              const formattedValue = xFormatter(value);
-              if (max === value) {
-                return (
-                  <>
-                    <EuiFlexGroup
-                      alignItems="center"
-                      responsive={false}
-                      gutterSize="xs"
-                      style={{ fontWeight: 'normal' }}
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="iInCircle" />
-                      </EuiFlexItem>
-                      <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer size="xs" />
-                    {formattedValue}
-                  </>
-                );
-              }
-              return formattedValue;
-            },
+        <Tooltip
+          stickTo="top"
+          showNullValues={false}
+          headerFormatter={({ value }) => {
+            const formattedValue = xFormatter(value);
+            if (max === value) {
+              return (
+                <>
+                  <EuiFlexGroup
+                    alignItems="center"
+                    responsive={false}
+                    gutterSize="xs"
+                    style={{ fontWeight: 'normal' }}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="iInCircle" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="xs" />
+                  {formattedValue}
+                </>
+              );
+            }
+            return formattedValue;
           }}
+        />
+        <Settings
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
@@ -188,8 +189,9 @@ export function TimeseriesChart({
                 line: { visible: false },
               },
             },
-            ...chartTheme,
+            ...chartThemes.theme,
           ]}
+          baseTheme={chartThemes.baseTheme}
           onPointerUpdate={updatePointerEvent}
           externalPointerEvents={{
             tooltip: { visible: true },
@@ -203,6 +205,7 @@ export function TimeseriesChart({
               onToggleLegend(legend);
             }
           }}
+          locale={i18n.getLocale()}
         />
         <Axis
           id="x-axis"

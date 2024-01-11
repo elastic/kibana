@@ -39,7 +39,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       cases: ['securitySolutionFixture'],
       privileges: {
         all: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles', 'casesGetConnectorsConfigure'],
           app: ['kibana'],
           cases: {
             create: ['securitySolutionFixture'],
@@ -54,7 +54,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
         read: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles', 'casesGetConnectorsConfigure'],
           app: ['kibana'],
           cases: {
             read: ['securitySolutionFixture'],
@@ -68,17 +68,40 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
       subFeatures: [
         {
-          name: 'Custom privileges',
+          name: 'Delete',
           privilegeGroups: [
             {
               groupType: 'independent',
               privileges: [
                 {
-                  name: 'Delete',
+                  name: 'Delete cases and comments',
                   id: 'cases_delete',
                   includeIn: 'all',
                   cases: {
                     delete: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Case settings',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Edit case settings',
+                  id: 'cases_settings',
+                  includeIn: 'all',
+                  cases: {
+                    settings: ['securitySolutionFixture'],
                   },
                   savedObject: {
                     all: [...filesSavedObjectTypes],

@@ -6,8 +6,8 @@
  */
 
 import React, { lazy, Suspense, useCallback } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -53,7 +53,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   return (
     <>
       <ReactQueryDevtools initialIsOpen={false} />
-      <Switch>
+      <Routes>
         <Route strict exact path={basePath}>
           <AllCases />
         </Route>
@@ -71,7 +71,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         </Route>
 
         <Route path={getCasesConfigurePath(basePath)}>
-          {permissions.update ? (
+          {permissions.settings ? (
             <ConfigureCases />
           ) : (
             <NoPrivilegesPage pageName={i18n.CONFIGURE_CASES_PAGE_NAME} />
@@ -95,7 +95,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
         <Route path={basePath}>
           <Redirect to={basePath} />
         </Route>
-      </Switch>
+      </Routes>
     </>
   );
 };

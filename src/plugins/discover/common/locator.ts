@@ -10,9 +10,11 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { VIEW_MODE } from './constants';
+import { addProfile } from './customizations';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -70,6 +72,11 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   columns?: string[];
 
   /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
+
+  /**
    * Used interval of the histogram
    */
   interval?: string;
@@ -99,6 +106,10 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Used when navigating to particular alert results
    */
   isAlertResults?: boolean;
+  /**
+   * The Discover profile to use
+   */
+  profile?: string;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
@@ -134,6 +145,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       timeRange,
       searchSessionId,
       columns,
+      grid,
       savedQuery,
       sort,
       interval,
@@ -141,6 +153,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       hideAggregatedPreview,
       breakdownField,
       isAlertResults,
+      profile,
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -148,6 +161,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       filters?: Filter[];
       index?: string;
       columns?: string[];
+      grid?: DiscoverGridSettings;
       interval?: string;
       sort?: string[][];
       savedQuery?: string;
@@ -163,6 +177,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (indexPatternId) appState.index = indexPatternId;
     if (dataViewId) appState.index = dataViewId;
     if (columns) appState.columns = columns;
+    if (grid) appState.grid = grid;
     if (savedQuery) appState.savedQuery = savedQuery;
     if (sort) appState.sort = sort;
     if (interval) appState.interval = interval;
@@ -178,12 +193,29 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (dataViewSpec) state.dataViewSpec = dataViewSpec;
     if (isAlertResults) state.isAlertResults = isAlertResults;
 
-    let path = `#/${savedSearchPath}`;
-    path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-    path = this.deps.setStateToKbnUrl('_a', appState, { useHash }, path);
+    let path = '#/';
+
+    if (profile) {
+      path = addProfile(path, profile);
+    }
+
+    path = `${path}${savedSearchPath}`;
 
     if (searchSessionId) {
-      path = `${path}&searchSessionId=${searchSessionId}`;
+      path = `${path}?searchSessionId=${searchSessionId}`;
+    }
+
+    if (Object.keys(queryState).length) {
+      path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>(
+        '_g',
+        queryState,
+        { useHash },
+        path
+      );
+    }
+
+    if (Object.keys(appState).length) {
+      path = this.deps.setStateToKbnUrl('_a', appState, { useHash }, path);
     }
 
     return {

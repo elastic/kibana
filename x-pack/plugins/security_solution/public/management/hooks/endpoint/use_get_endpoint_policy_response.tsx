@@ -20,6 +20,7 @@ export function useGetEndpointPolicyResponse(
     ['getEndpointPolicyResponse', selectedEndpoint],
     () => {
       return http.get<GetHostPolicyResponse>(BASE_POLICY_RESPONSE_ROUTE, {
+        version: '2023-10-31',
         query: { agentId: selectedEndpoint },
       });
     },

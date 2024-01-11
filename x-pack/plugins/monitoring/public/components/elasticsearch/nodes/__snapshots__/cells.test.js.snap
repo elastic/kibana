@@ -26,26 +26,22 @@ exports[`Node Listing Metric Cell should format a non-percentage metric 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiPopover emotion-euiPopover"
+          class="euiPopover emotion-euiPopover-inline-block"
         >
-          <div
-            class="euiPopover__anchor css-16vtueo-render"
+          <button
+            aria-label="More information about this metric"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+            data-test-subj="monitoringCellIcon-testCell2"
+            title="More information about this metric"
+            type="button"
           >
-            <button
-              aria-label="More information about this metric"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
-              data-test-subj="monitoringCellIcon-testCell2"
-              title="More information about this metric"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="sortDown"
-              />
-            </button>
-          </div>
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="sortDown"
+            />
+          </button>
         </div>
       </div>
       <div
@@ -80,26 +76,22 @@ exports[`Node Listing Metric Cell should format a percentage metric 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiPopover emotion-euiPopover"
+          class="euiPopover emotion-euiPopover-inline-block"
         >
-          <div
-            class="euiPopover__anchor css-16vtueo-render"
+          <button
+            aria-label="More information about this metric"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+            data-test-subj="monitoringCellIcon-testCell"
+            title="More information about this metric"
+            type="button"
           >
-            <button
-              aria-label="More information about this metric"
-              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-text-hoverStyles"
-              data-test-subj="monitoringCellIcon-testCell"
-              title="More information about this metric"
-              type="button"
-            >
-              <span
-                aria-hidden="true"
-                class="euiButtonIcon__icon"
-                color="inherit"
-                data-euiicon-type="sortDown"
-              />
-            </button>
-          </div>
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="sortDown"
+            />
+          </button>
         </div>
       </div>
       <div

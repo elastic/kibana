@@ -414,7 +414,7 @@
         "label": "TimeDuration",
         "description": [],
         "signature": [
-          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "({ allowedUnits }: TimeDurationType) => ",
           "Type",
           "<string, string, unknown>"
         ],
@@ -425,9 +425,9 @@
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-types",
             "id": "def-common.TimeDuration.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{ allowedUnits, allowedDurations }",
+            "label": "{ allowedUnits }",
             "description": [],
             "signature": [
               "TimeDurationType"
@@ -532,6 +532,23 @@
           "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; overwrite_action_connectors?: boolean | undefined; as_new_list?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\" | \"overwrite_action_connectors\" | \"as_new_list\"> & { overwrite: boolean; overwrite_exceptions: boolean; overwrite_action_connectors: boolean; as_new_list: boolean; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.IsoDateString",
+        "type": "Type",
+        "tags": [],
+        "label": "IsoDateString",
+        "description": [
+          "\nTypes the IsoDateString as:\n  - A string that is an ISOString"
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/iso_date_string/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -679,7 +696,7 @@
         "label": "TimeDurationC",
         "description": [],
         "signature": [
-          "({ allowedUnits, allowedDurations }: TimeDurationType) => ",
+          "({ allowedUnits }: TimeDurationType) => ",
           "Type",
           "<string, string, unknown>"
         ],
@@ -691,12 +708,12 @@
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-types",
             "id": "def-common.TimeDurationC.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "__0",
             "description": [],
             "signature": [
-              "TimeDurationWithAllowedDurations | TimeDurationWithAllowedUnits"
+              "TimeDurationType"
             ],
             "path": "packages/kbn-securitysolution-io-ts-types/src/time_duration/index.ts",
             "deprecated": false,
@@ -929,9 +946,7 @@
         "type": "Object",
         "tags": [],
         "label": "IsoDateString",
-        "description": [
-          "\nTypes the IsoDateString as:\n  - A string that is an ISOString"
-        ],
+        "description": [],
         "signature": [
           "Type",
           "<string, string, unknown>"
@@ -997,6 +1012,24 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.NumberBetweenZeroAndOneInclusive",
+        "type": "Object",
+        "tags": [],
+        "label": "NumberBetweenZeroAndOneInclusive",
+        "description": [
+          "\nTypes a number between 0 and 1 inclusive. Useful for specifying a probability, weighting, etc."
+        ],
+        "signature": [
+          "Type",
+          "<number, number, unknown>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/number_between_zero_and_one_inclusive/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
         "id": "def-common.OnlyFalseAllowed",
         "type": "Object",
         "tags": [],
@@ -1023,6 +1056,22 @@
         "signature": [
           "KeyofC",
           "<{ equals: null; }>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.operatorExcluded",
+        "type": "Object",
+        "tags": [],
+        "label": "operatorExcluded",
+        "description": [],
+        "signature": [
+          "KeyofC",
+          "<{ excluded: null; }>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/operator/index.ts",
         "deprecated": false,

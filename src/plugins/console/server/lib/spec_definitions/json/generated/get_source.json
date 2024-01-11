@@ -1,26 +1,36 @@
 {
   "get_source": {
     "url_params": {
-      "preference": "random",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "preference": "",
       "realtime": "__flag__",
       "refresh": "__flag__",
       "routing": "",
-      "_source": [],
+      "_source": "__flag__",
       "_source_excludes": [],
       "_source_includes": [],
+      "stored_fields": [],
       "version": "",
       "version_type": [
         "internal",
         "external",
-        "external_gte"
+        "external_gte",
+        "force"
       ]
     },
     "methods": [
       "GET"
     ],
     "patterns": [
-      "{indices}/_source/{id}"
+      "{index}/_source/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-get.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

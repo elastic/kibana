@@ -6,7 +6,7 @@
  */
 
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
 
 describe('addItemsToArray', () => {
@@ -47,7 +47,7 @@ describe('ruleParamsModifier', () => {
   test('should increment version if rule is custom (immutable === false)', () => {
     const { modifiedParams } = ruleParamsModifier(ruleParamsMock, [
       {
-        type: BulkActionEditType.add_index_patterns,
+        type: BulkActionEditTypeEnum.add_index_patterns,
         value: ['my-index-*'],
       },
     ]);
@@ -57,7 +57,7 @@ describe('ruleParamsModifier', () => {
   test('should not increment version if rule is prebuilt (immutable === true)', () => {
     const { modifiedParams } = ruleParamsModifier({ ...ruleParamsMock, immutable: true }, [
       {
-        type: BulkActionEditType.add_index_patterns,
+        type: BulkActionEditTypeEnum.add_index_patterns,
         value: ['my-index-*'],
       },
     ]);
@@ -130,7 +130,7 @@ describe('ruleParamsModifier', () => {
             { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
             [
               {
-                type: BulkActionEditType.add_index_patterns,
+                type: BulkActionEditTypeEnum.add_index_patterns,
                 value: indexPatternsToAdd,
               },
             ]
@@ -194,7 +194,7 @@ describe('ruleParamsModifier', () => {
             { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
             [
               {
-                type: BulkActionEditType.delete_index_patterns,
+                type: BulkActionEditTypeEnum.delete_index_patterns,
                 value: indexPatternsToDelete,
               },
             ]
@@ -249,7 +249,7 @@ describe('ruleParamsModifier', () => {
             { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
             [
               {
-                type: BulkActionEditType.set_index_patterns,
+                type: BulkActionEditTypeEnum.set_index_patterns,
                 value: indexPatternsToOverwrite,
               },
             ]
@@ -267,7 +267,7 @@ describe('ruleParamsModifier', () => {
         { dataViewId: testDataViewId } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.delete_index_patterns,
+            type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['index-2-*'],
           },
         ]
@@ -281,7 +281,7 @@ describe('ruleParamsModifier', () => {
         { dataViewId: 'test-data-view', index: ['test-*'] } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.set_index_patterns,
+            type: BulkActionEditTypeEnum.set_index_patterns,
             value: ['index'],
             overwrite_data_views: true,
           },
@@ -296,7 +296,7 @@ describe('ruleParamsModifier', () => {
         { dataViewId: 'test-data-view', index: ['test-*'] } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.add_index_patterns,
+            type: BulkActionEditTypeEnum.add_index_patterns,
             value: ['index'],
             overwrite_data_views: true,
           },
@@ -311,7 +311,7 @@ describe('ruleParamsModifier', () => {
         { dataViewId: 'test-data-view', index: ['test-*', 'index'] } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.delete_index_patterns,
+            type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['index'],
             overwrite_data_views: true,
           },
@@ -327,7 +327,7 @@ describe('ruleParamsModifier', () => {
         { dataViewId: 'test-data-view', index: undefined } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.delete_index_patterns,
+            type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['index'],
             overwrite_data_views: true,
           },
@@ -342,7 +342,7 @@ describe('ruleParamsModifier', () => {
       expect(() =>
         ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
           {
-            type: BulkActionEditType.add_index_patterns,
+            type: BulkActionEditTypeEnum.add_index_patterns,
             value: ['my-index-*'],
           },
         ])
@@ -355,7 +355,7 @@ describe('ruleParamsModifier', () => {
       expect(() =>
         ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
           {
-            type: BulkActionEditType.delete_index_patterns,
+            type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['my-index-*'],
           },
         ])
@@ -368,12 +368,47 @@ describe('ruleParamsModifier', () => {
       expect(() =>
         ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
           {
-            type: BulkActionEditType.set_index_patterns,
+            type: BulkActionEditTypeEnum.set_index_patterns,
             value: ['my-index-*'],
           },
         ])
       ).toThrow(
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+      );
+    });
+
+    test('should throw error on adding index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.add_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow("Index patterns can't be added. ES|QL rule doesn't have index patterns property");
+    });
+
+    test('should throw error on deleting index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.delete_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow("Index patterns can't be deleted. ES|QL rule doesn't have index patterns property");
+    });
+
+    test('should throw error on overwriting index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.set_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow(
+        "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
       );
     });
   });
@@ -382,7 +417,7 @@ describe('ruleParamsModifier', () => {
     test('should set timeline', () => {
       const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
         {
-          type: BulkActionEditType.set_timeline,
+          type: BulkActionEditTypeEnum.set_timeline,
           value: {
             timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
             timeline_title: 'Test timeline',
@@ -403,7 +438,7 @@ describe('ruleParamsModifier', () => {
       const FROM_IN_SECONDS = (INTERVAL_IN_MINUTES + LOOKBACK_IN_MINUTES) * 60;
       const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
         {
-          type: BulkActionEditType.set_schedule,
+          type: BulkActionEditTypeEnum.set_schedule,
           value: {
             interval: `${INTERVAL_IN_MINUTES}m`,
             lookback: `${LOOKBACK_IN_MINUTES}m`,

@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
-import type {
-  LogsEndpointAction,
-  EndpointActionResponse,
-  LogsEndpointActionResponse,
-} from '../../../common/endpoint/types';
-import { ACTIONS_SEARCH_PAGE_SIZE, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
+import type { LogsEndpointAction } from '../../../common/endpoint/types';
 import { getDateFilters } from '../services/actions/utils';
 import { catchAndWrapError } from './wrap_errors';
 import type { GetActionDetailsListParam } from '../services/actions/action_list';
@@ -36,8 +30,7 @@ export const getActions = async ({
   startDate,
   userIds,
   unExpiredOnly,
-  withAutomatedActions,
-  alertId,
+  types,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
   actionRequests: TransportResult<estypes.SearchResponse<LogsEndpointAction>, unknown>;
@@ -52,10 +45,6 @@ export const getActions = async ({
     });
   }
 
-  if (alertId?.length) {
-    additionalFilters.push({ terms: { 'data.alert_id': alertId } });
-  }
-
   if (elasticAgentIds?.length) {
     additionalFilters.push({ terms: { agents: elasticAgentIds } });
   }
@@ -66,12 +55,7 @@ export const getActions = async ({
 
   const dateFilters = getDateFilters({ startDate, endDate });
 
-  const actionsFilters = [
-    { term: { input_type: 'endpoint' } },
-    { term: { type: 'INPUT_ACTION' } },
-    ...dateFilters,
-    ...additionalFilters,
-  ];
+  const actionsFilters = [...dateFilters, ...additionalFilters];
 
   const must: SearchRequest = [
     {
@@ -81,8 +65,12 @@ export const getActions = async ({
     },
   ];
 
-  const mustNot: SearchRequest =
-    withAutomatedActions === false
+  const getTypesFilter = (): SearchRequest => {
+    const singleType = types?.length === 1 && types[0];
+    if (!singleType) {
+      return {};
+    }
+    return singleType === 'manual'
       ? {
           must_not: {
             exists: {
@@ -90,7 +78,16 @@ export const getActions = async ({
             },
           },
         }
+      : singleType === 'automated'
+      ? {
+          filter: {
+            exists: {
+              field: 'data.alert_id',
+            },
+          },
+        }
       : {};
+  };
 
   if (userIds?.length) {
     const userIdsKql = userIds.map((userId) => `user_id:${userId}`).join(' or ');
@@ -106,7 +103,7 @@ export const getActions = async ({
       query: {
         bool: {
           must,
-          ...mustNot,
+          ...getTypesFilter(),
         },
       },
       sort: [
@@ -135,54 +132,4 @@ export const getActions = async ({
   });
 
   return { actionIds, actionRequests };
-};
-
-export const getActionResponses = async ({
-  actionIds,
-  elasticAgentIds,
-  esClient,
-}: {
-  actionIds: string[];
-  elasticAgentIds?: string[];
-  esClient: ElasticsearchClient;
-}): Promise<
-  TransportResult<
-    estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>,
-    unknown
-  >
-> => {
-  const filter = [];
-  if (elasticAgentIds?.length) {
-    filter.push({ terms: { agent_id: elasticAgentIds } });
-  }
-  if (actionIds.length) {
-    filter.push({ terms: { action_id: actionIds } });
-  }
-
-  const responsesSearchQuery: SearchRequest = {
-    index: ACTION_RESPONSE_INDICES,
-    size: ACTIONS_SEARCH_PAGE_SIZE,
-    from: 0,
-    body: {
-      query: {
-        bool: {
-          filter: filter.length ? filter : [],
-        },
-      },
-    },
-  };
-
-  const actionResponses: TransportResult<
-    estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>,
-    unknown
-  > = await esClient
-    .search<EndpointActionResponse | LogsEndpointActionResponse>(responsesSearchQuery, {
-      ...queryOptions,
-      headers: {
-        'X-elastic-product-origin': 'fleet',
-      },
-      meta: true,
-    })
-    .catch(catchAndWrapError);
-  return actionResponses;
 };

@@ -6,14 +6,15 @@
  */
 
 import React, { useState, Fragment, useEffect, useCallback } from 'react';
+import { get, sortBy } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiFormRow, EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
@@ -32,7 +33,7 @@ import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { useTriggerUiActionServices } from '../util';
+import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
 
@@ -54,6 +55,7 @@ export const EsQueryExpression: React.FC<
     termSize,
     termField,
     excludeHitsFromPreviousRun,
+    sourceFields,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<EsQueryRuleParams<SearchType.esQuery>>(
@@ -71,6 +73,7 @@ export const EsQueryExpression: React.FC<
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+      sourceFields,
     }
   );
 
@@ -89,6 +92,8 @@ export const EsQueryExpression: React.FC<
   const { http, docLinks } = services;
 
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
+  const [runtimeFields, setRuntimeFields] = useState<FieldOption[]>([]);
+  const [combinedFields, setCombinedFields] = useState<FieldOption[]>([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
 
   const setDefaultExpressionValues = async () => {
@@ -108,6 +113,21 @@ export const EsQueryExpression: React.FC<
   const refreshEsFields = async (indices: string[]) => {
     const currentEsFields = await getFields(http, indices);
     setEsFields(currentEsFields);
+    setCombinedFields(sortBy(currentEsFields.concat(runtimeFields), 'name'));
+  };
+
+  const getRuntimeFields = (xjson: string) => {
+    let runtimeMappings;
+    try {
+      runtimeMappings = get(JSON.parse(xjson), 'runtime_mappings');
+    } catch (e) {
+      // ignore error
+    }
+    if (runtimeMappings) {
+      const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
+      setRuntimeFields(currentRuntimeFields);
+      setCombinedFields(sortBy(esFields.concat(currentRuntimeFields), 'name'));
+    }
   };
 
   const onTestQuery = useCallback(async () => {
@@ -175,59 +195,49 @@ export const EsQueryExpression: React.FC<
 
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectIndexPrompt"
-            defaultMessage="Select an index and time field"
+            defaultMessage="Select indices"
           />
-        </h5>
-      </EuiTitle>
+        }
+      >
+        <IndexSelectPopover
+          index={index}
+          data-test-subj="indexSelectPopover"
+          esFields={esFields}
+          timeField={timeField}
+          errors={errors}
+          onIndexChange={async (indices: string[]) => {
+            setParam('index', indices);
 
-      <EuiSpacer size="s" />
-
-      <IndexSelectPopover
-        index={index}
-        data-test-subj="indexSelectPopover"
-        esFields={esFields}
-        timeField={timeField}
-        errors={errors}
-        onIndexChange={async (indices: string[]) => {
-          setParam('index', indices);
-
-          // reset expression fields if indices are deleted
-          if (indices.length === 0) {
-            setRuleProperty('params', {
-              timeField: ruleParams.timeField,
-              index: indices,
-              esQuery: DEFAULT_VALUES.QUERY,
-              size: DEFAULT_VALUES.SIZE,
-              thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-              timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-              timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-              threshold: DEFAULT_VALUES.THRESHOLD,
-              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-              groupBy: DEFAULT_VALUES.GROUP_BY,
-              termSize: DEFAULT_VALUES.TERM_SIZE,
-              searchType: SearchType.esQuery,
-              excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-            });
-          } else {
-            await refreshEsFields(indices);
-          }
-        }}
-        onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
-      />
-      <EuiSpacer size="s" />
-
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.defineQueryPrompt"
-            defaultMessage="Define your query using Query DSL"
-          />
-        </h5>
-      </EuiTitle>
+            // reset expression fields if indices are deleted
+            if (indices.length === 0) {
+              setRuleProperty('params', {
+                timeField: ruleParams.timeField,
+                index: indices,
+                esQuery: DEFAULT_VALUES.QUERY,
+                size: DEFAULT_VALUES.SIZE,
+                thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                threshold: DEFAULT_VALUES.THRESHOLD,
+                aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+                groupBy: DEFAULT_VALUES.GROUP_BY,
+                termSize: DEFAULT_VALUES.TERM_SIZE,
+                searchType: SearchType.esQuery,
+                excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
+                sourceFields: undefined,
+              });
+            } else {
+              await refreshEsFields(indices);
+            }
+          }}
+          onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
+        />
+      </EuiFormRow>
       <EuiSpacer size="s" />
       <EuiFormRow
         id="queryEditor"
@@ -243,6 +253,12 @@ export const EsQueryExpression: React.FC<
             />
           </EuiLink>
         }
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.defineQueryPrompt"
+            defaultMessage="Define your query using Query DSL"
+          />
+        }
       >
         <CodeEditor
           languageId="xjson"
@@ -252,6 +268,7 @@ export const EsQueryExpression: React.FC<
           onChange={(xjson: string) => {
             setXJson(xjson);
             setParam('esQuery', convertToJson(xjson));
+            getRuntimeFields(xjson);
           }}
           options={{
             ariaLabel: i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
@@ -276,7 +293,7 @@ export const EsQueryExpression: React.FC<
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
         size={size}
-        esFields={esFields}
+        esFields={combinedFields}
         aggType={aggType}
         aggField={aggField}
         groupBy={groupBy}
@@ -332,6 +349,12 @@ export const EsQueryExpression: React.FC<
           (exclude) => setParam('excludeHitsFromPreviousRun', exclude),
           [setParam]
         )}
+        canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
+        onChangeSourceFields={useCallback(
+          (selectedSourceFields) => setParam('sourceFields', selectedSourceFields),
+          [setParam]
+        )}
+        sourceFields={sourceFields}
       />
 
       <EuiSpacer />

@@ -10,13 +10,13 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { defineRecordAnalyticsOnAuthTypeRoutes } from './authentication_type';
 import type { RouteDefinitionParams } from '..';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { HTTPAuthenticationProvider, TokenAuthenticationProvider } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineRecordAnalyticsOnAuthTypeRoutes } from './authentication_type';
 
 const FAKE_TIMESTAMP = 1637665318135;
 

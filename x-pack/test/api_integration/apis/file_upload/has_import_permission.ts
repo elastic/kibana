@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -54,6 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
           )
           .auth(IMPORTER_USER_NAME, IMPORT_USER_PASSWORD)
           .set('kbn-xsrf', 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .expect(200);
 
         expect(resp.body.hasImportPermission).to.be(true);
@@ -80,6 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
           )
           .auth(IMPORTER_USER_NAME, IMPORT_USER_PASSWORD)
           .set('kbn-xsrf', 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send()
           .expect(200);
 
@@ -107,6 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
           )
           .auth(IMPORTER_USER_NAME, IMPORT_USER_PASSWORD)
           .set('kbn-xsrf', 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .expect(200);
 
         expect(resp.body.hasImportPermission).to.be(false);
@@ -134,6 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
           )
           .auth(IMPORTER_USER_NAME, IMPORT_USER_PASSWORD)
           .set('kbn-xsrf', 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .expect(200);
 
         expect(resp.body.hasImportPermission).to.be(false);

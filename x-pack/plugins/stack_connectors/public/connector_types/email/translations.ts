@@ -161,6 +161,20 @@ export const SUBJECT_REQUIRED = i18n.translate(
   }
 );
 
+export const PASSWORD_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.email.error.requiredPasswordText',
+  {
+    defaultMessage: 'Password is required.',
+  }
+);
+
+export const CLIENT_SECRET_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.email.requiredClientSecretText',
+  {
+    defaultMessage: 'Client Secret is required.',
+  }
+);
+
 export function getInvalidEmailAddress(email: string) {
   return i18n.translate('xpack.stackConnectors.components.email.error.invalidEmail', {
     defaultMessage: 'Email address {email} is not valid.',

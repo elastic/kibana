@@ -28,9 +28,9 @@ import {
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { OverviewCardWithActions, OverviewCard } from './overview_card';
 import { StatusPopoverButton } from './status_popover_button';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
-import { isNotNull } from '../../../../timelines/store/timeline/helpers';
+import { isNotNull } from '../../../../timelines/store/helpers';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;
@@ -42,22 +42,12 @@ interface Props {
   data: TimelineEventsDetailsItem[];
   eventId: string;
   handleOnEventClosed: () => void;
-  indexName: string;
   scopeId: string;
   isReadOnly?: boolean;
 }
 
 export const Overview = React.memo<Props>(
-  ({
-    browserFields,
-    contextId,
-    data,
-    eventId,
-    handleOnEventClosed,
-    indexName,
-    scopeId,
-    isReadOnly,
-  }) => {
+  ({ browserFields, contextId, data, eventId, handleOnEventClosed, scopeId, isReadOnly }) => {
     const statusData = useMemo(() => {
       const item = find({ field: SIGNAL_STATUS_FIELD_NAME, category: 'kibana' }, data);
       return (
@@ -128,7 +118,6 @@ export const Overview = React.memo<Props>(
               eventId={eventId}
               contextId={contextId}
               enrichedFieldInfo={statusData}
-              indexName={indexName}
               scopeId={scopeId}
               handleOnEventClosed={handleOnEventClosed}
             />
@@ -198,7 +187,7 @@ export const Overview = React.memo<Props>(
 
     // 675px is the container width at which none of the cards, when hovered,
     // creates a visual overflow in a single row setup
-    const showAsSingleRow = width === 0 || width >= 675;
+    const showAsSingleRow = width === 0 || (width && width >= 675);
 
     // Only render cards with content
     const cards = [signalCard, severityCard, riskScoreCard, ruleNameCard].filter(isNotNull);

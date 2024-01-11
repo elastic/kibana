@@ -202,6 +202,11 @@ describe('strictKeysRt', () => {
           { body: { duration: false } },
         ],
       },
+      {
+        type: t.array(t.type({ foo: t.string })),
+        passes: [[{ foo: 'bar' }], [{ foo: 'baz' }, { foo: 'bar' }]],
+        fails: [],
+      },
     ];
 
     checks.forEach((check) => {

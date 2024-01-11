@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -24,12 +25,15 @@ import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails } from '../../common/types';
-import { NO_VULNERABILITIES_STATUS_TEST_SUBJ } from './test_subjects';
+import type { IndexDetails } from '../../common/types_old';
+import {
+  NO_VULNERABILITIES_STATUS_TEST_SUBJ,
+  CNVM_NOT_INSTALLED_ACTION_SUBJ,
+} from './test_subjects';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
-import { useCspBenchmarkIntegrations } from '../pages/benchmarks/use_csp_benchmark_integrations';
+import { PostureTypes } from '../../common/types_old';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -88,7 +92,12 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
       actions={
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton color="primary" fill href={vulnMgmtIntegrationLink}>
+            <EuiButton
+              color="primary"
+              fill
+              href={vulnMgmtIntegrationLink}
+              data-test-subj={CNVM_NOT_INSTALLED_ACTION_SUBJ}
+            >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.addVulMngtIntegrationButtonTitle"
                 defaultMessage="Install Cloud Native Vulnerability Management"
@@ -108,6 +117,40 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
     />
   );
 };
+
+const CnvmIndexTimeout = () => (
+  <EuiEmptyPrompt
+    data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
+    color="plain"
+    icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutTitle"
+          defaultMessage="Findings Delayed"
+        />
+      </h2>
+    }
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription"
+          defaultMessage="Scanning workloads is taking longer than expected. Please check {docs}"
+          values={{
+            docs: (
+              <EuiLink href="https://ela.st/cnvm-faq" target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDocLink"
+                  defaultMessage="CNVM FAQ"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    }
+  />
+);
 
 const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }) => (
   <EuiEmptyPrompt
@@ -148,21 +191,9 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
     }
   />
 );
-const AgentNotDeployedEmptyPrompt = () => {
-  // using an existing hook to get agent id and package policy id
-  const benchmarks = useCspBenchmarkIntegrations({
-    name: '',
-    page: 1,
-    perPage: 1,
-    sortField: 'package_policy.name',
-    sortOrder: 'asc',
-  });
-
-  // the ids are not a must, but as long as we have them we can open the add agent flyout
-  const firstBenchmark = benchmarks.data?.items?.[0];
+const AgentNotDeployedEmptyPrompt = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({
-    addAgentToPolicyId: firstBenchmark?.agent_policy.id || '',
-    integration: firstBenchmark?.package_policy.id || '',
+    postureType,
   });
 
   return (
@@ -218,13 +249,15 @@ export const NoVulnerabilitiesStates = () => {
       .sort((a, b) => a.localeCompare(b));
 
   const render = () => {
-    if (status === 'indexing' || status === 'waiting_for_results' || status === 'index-timeout')
+    if (status === 'indexing' || status === 'waiting_for_results')
       return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added// agent added, index timeout has passed
+    if (status === 'index-timeout') return <CnvmIndexTimeout />;
     if (status === 'not-installed')
       return (
         <CnvmIntegrationNotInstalledEmptyPrompt vulnMgmtIntegrationLink={vulnMgmtIntegrationLink} />
       );
-    if (status === 'not-deployed') return <AgentNotDeployedEmptyPrompt />;
+    if (status === 'not-deployed')
+      return <AgentNotDeployedEmptyPrompt postureType={VULN_MGMT_POLICY_TEMPLATE} />;
     if (status === 'unprivileged')
       return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices
   };

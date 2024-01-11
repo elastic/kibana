@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import {
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ObservabilityOnboardingPlugin } from './plugin';
 
 const configSchema = schema.object({
   ui: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  serverless: schema.object({
+    enabled: offeringBasedSchema({
+      serverless: schema.literal(true),
+      options: { defaultValue: schema.contextRef('serverless') },
+    }),
   }),
 });
 
@@ -24,11 +29,13 @@ export type ObservabilityOnboardingConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<ObservabilityOnboardingConfig> = {
   exposeToBrowser: {
     ui: true,
+    serverless: true,
   },
   schema: configSchema,
 };
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ObservabilityOnboardingPlugin } = await import('./plugin');
   return new ObservabilityOnboardingPlugin(initializerContext);
 }
 

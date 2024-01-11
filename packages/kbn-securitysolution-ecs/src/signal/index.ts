@@ -23,6 +23,8 @@ export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
   severity?: string[];
   building_block_type?: string[];
   workflow_status?: string[];
+  workflow_tags?: string[];
+  workflow_assignee_ids?: string[];
   suppression?: {
     docs_count: string[];
   };

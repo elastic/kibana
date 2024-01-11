@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation';
 import { useShowBulkErrorToast } from './use_show_bulk_error_toast';
@@ -24,12 +24,12 @@ export function useBulkExport() {
     async (queryOrIds: QueryOrIds) => {
       try {
         setLoadingRules?.({
-          ids: queryOrIds.ids ?? guessRuleIdsForBulkAction(BulkActionType.export),
-          action: BulkActionType.export,
+          ids: queryOrIds.ids ?? guessRuleIdsForBulkAction(BulkActionTypeEnum.export),
+          action: BulkActionTypeEnum.export,
         });
         return await mutateAsync(queryOrIds);
       } catch (error) {
-        showBulkErrorToast({ actionType: BulkActionType.export, error });
+        showBulkErrorToast({ actionType: BulkActionTypeEnum.export, error });
       } finally {
         setLoadingRules?.({ ids: [], action: null });
       }

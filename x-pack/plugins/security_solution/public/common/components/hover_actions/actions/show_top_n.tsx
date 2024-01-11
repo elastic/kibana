@@ -146,7 +146,6 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
           showLegend={showLegend}
           scopeId={scopeId ?? undefined}
           toggleTopN={onClick}
-          value={value}
           globalFilters={globalFilters}
         />
       ),
@@ -159,7 +158,6 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
         showLegend,
         scopeId,
         onClick,
-        value,
         globalFilters,
       ]
     );

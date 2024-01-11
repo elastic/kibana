@@ -33,11 +33,9 @@ import {
   ALERT_SUPPRESSION_VALUE,
   ALERT_SYSTEM_STATUS,
   ALERT_WORKFLOW_REASON,
+  ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_USER,
   ECS_VERSION,
-  EVENT_ACTION,
-  EVENT_KIND,
-  TAGS,
 } from '@kbn/rule-data-utils';
 
 export const legacyAlertFieldMap = {
@@ -176,25 +174,15 @@ export const legacyAlertFieldMap = {
     array: false,
     required: false,
   },
+  [ALERT_WORKFLOW_STATUS_UPDATED_AT]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
   // get these from ecs field map when available
   [ECS_VERSION]: {
     type: 'keyword',
     array: false,
-    required: false,
-  },
-  [EVENT_ACTION]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [EVENT_KIND]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [TAGS]: {
-    type: 'keyword',
-    array: true,
     required: false,
   },
 } as const;

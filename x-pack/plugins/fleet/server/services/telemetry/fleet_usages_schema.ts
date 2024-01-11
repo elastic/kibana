@@ -9,6 +9,10 @@ import type { RootSchema } from '@kbn/analytics-client';
 
 export const fleetAgentsSchema: RootSchema<any> = {
   agents_per_version: {
+    _meta: {
+      description: 'Agents per version telemetry',
+      optional: true,
+    },
     properties: {
       version: {
         type: 'keyword',
@@ -20,6 +24,145 @@ export const fleetAgentsSchema: RootSchema<any> = {
         type: 'long',
         _meta: {
           description: 'Number of agents enrolled that use this version',
+        },
+      },
+      healthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in a healthy state',
+        },
+      },
+      unhealthy: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an unhealthy state',
+        },
+      },
+      updating: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents in an updating state',
+        },
+      },
+      offline: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently offline',
+        },
+      },
+      inactive: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of enrolled agents currently inactive',
+        },
+      },
+      unenrolled: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of unenrolled agents',
+        },
+      },
+    },
+  },
+  agents_per_output_type: {
+    _meta: {
+      description: 'Agents per output type telemetry',
+      optional: true,
+    },
+    properties: {
+      output_type: {
+        type: 'keyword',
+        _meta: {
+          description: 'Output type used by agent',
+        },
+      },
+      preset_counts: {
+        _meta: {
+          description: 'Count of agents per preset',
+          optional: true,
+        },
+        properties: {
+          balanced: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose output uses the balanced preset',
+            },
+          },
+          custom: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose outputs uses the custom preset',
+            },
+          },
+          throughput: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose output uses the throughput preset',
+            },
+          },
+          scale: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose output uses the scale preset',
+            },
+          },
+          latency: {
+            type: 'long',
+            _meta: {
+              description: 'Number of agents enrolled whose output uses the latency preset',
+            },
+          },
+        },
+      },
+      output_preset: {
+        type: 'keyword',
+        _meta: {
+          description: 'Output preset used by agent, if applicable',
+          optional: true,
+        },
+      },
+      count_as_data: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents enrolled that use this output type as data output',
+        },
+      },
+      count_as_monitoring: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agents enrolled that use this output type as monitoring output',
+        },
+      },
+    },
+  },
+  upgrade_details: {
+    _meta: {
+      description: 'Agent upgrade details telemetry',
+      optional: true,
+    },
+    properties: {
+      target_version: {
+        type: 'keyword',
+        _meta: {
+          description: 'Target version of the agent upgrade',
+        },
+      },
+      state: {
+        type: 'keyword',
+        _meta: {
+          description: 'State of the agent upgrade',
+        },
+      },
+      error_msg: {
+        type: 'keyword',
+        _meta: {
+          description: 'Error message of the agent upgrade if failed',
+        },
+      },
+      agent_count: {
+        type: 'long',
+        _meta: {
+          description: 'How many agents have this upgrade details',
         },
       },
     },
@@ -206,6 +349,45 @@ export const fleetUsagesSchema: RootSchema<any> = {
           type: 'text',
           _meta: {
             description: 'Log message containing the word panic',
+          },
+        },
+      },
+    },
+  },
+  agent_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from agent error logs' },
+    },
+  },
+  fleet_server_logs_top_errors: {
+    type: 'array',
+    items: {
+      type: 'text',
+      _meta: { description: 'Top messages from fleet server error logs' },
+    },
+  },
+  agents_per_os: {
+    type: 'array',
+    items: {
+      properties: {
+        name: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS enrolled to this kibana',
+          },
+        },
+        version: {
+          type: 'keyword',
+          _meta: {
+            description: 'Agent OS version enrolled to this kibana',
+          },
+        },
+        count: {
+          type: 'long',
+          _meta: {
+            description: 'Number of agents enrolled that use this OS',
           },
         },
       },

@@ -4,4 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export type { RowRenderer } from '@kbn/timelines-plugin/common';
+
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { RowRendererId } from '../../../api/timeline';
+
+export interface RowRenderer {
+  id: RowRendererId;
+  isInstance: (data: Ecs) => boolean;
+  renderRow: ({
+    contextId,
+    data,
+    isDraggable,
+    scopeId,
+  }: {
+    contextId?: string;
+    data: Ecs;
+    isDraggable: boolean;
+    scopeId: string;
+  }) => React.ReactNode;
+}

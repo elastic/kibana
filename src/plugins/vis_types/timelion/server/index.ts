@@ -7,13 +7,17 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from '../config';
-import { TimelionPlugin } from './plugin';
+import { configSchema, TimelionConfig } from '../config';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
+export const config: PluginConfigDescriptor<TimelionConfig> = {
+  exposeToBrowser: {
+    readOnly: true,
+  },
   schema: configSchema,
   deprecations: ({ unused }) => [unused('graphiteUrls', { level: 'warning' })],
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new TimelionPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { TimelionPlugin } = await import('./plugin');
+  return new TimelionPlugin(initializerContext);
+};

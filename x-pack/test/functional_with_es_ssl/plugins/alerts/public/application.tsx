@@ -7,7 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, RouteComponentProps } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
 import { EuiPage, EuiText } from '@elastic/eui';
@@ -24,7 +24,7 @@ const AlertingExampleApp = (deps: AlertingExampleComponentParams) => {
       <EuiPage>
         <Route
           path={`/rule/:id`}
-          render={(props: RouteComponentProps<{ id: string }>) => {
+          render={(props) => {
             return (
               <EuiText data-test-subj="noop-title">
                 <h2>View Rule {props.match.params.id}</h2>

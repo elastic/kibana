@@ -11,7 +11,6 @@ import 'react-grid-layout/css/styles.css';
 
 import { pick } from 'lodash';
 import classNames from 'classnames';
-import { useEffectOnce } from 'react-use/lib';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
 
@@ -31,19 +30,21 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const useMargins = dashboard.select((state) => state.explicitInput.useMargins);
   const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
+  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
+  const animatePanelTransforms = dashboard.select(
+    (state) => state.componentState.animatePanelTransforms
+  );
 
-  // turn off panel transform animations for the first 500ms so that the dashboard doesn't animate on its first render.
-  const [animatePanelTransforms, setAnimatePanelTransforms] = useState(false);
-  useEffectOnce(() => {
-    setTimeout(() => setAnimatePanelTransforms(true), 500);
-  });
-
+  /**
+   *  Track panel maximized state delayed by one tick and use it to prevent
+   * panel sliding animations on maximize and minimize.
+   */
+  const [delayedIsPanelExpanded, setDelayedIsPanelMaximized] = useState(false);
   useEffect(() => {
     if (expandedPanelId) {
-      setAnimatePanelTransforms(false);
+      setDelayedIsPanelMaximized(true);
     } else {
-      // delaying enabling CSS transforms to the next tick prevents a panel slide animation on minimize
-      setTimeout(() => setAnimatePanelTransforms(true), 0);
+      setTimeout(() => setDelayedIsPanelMaximized(false), 0);
     }
   }, [expandedPanelId]);
 
@@ -78,14 +79,17 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
           index={index + 1}
           type={type}
           expandedPanelId={expandedPanelId}
+          focusedPanelId={focusedPanelId}
           onPanelStatusChange={onPanelStatusChange}
         />
       );
     });
-  }, [expandedPanelId, onPanelStatusChange, panels, panelsInOrder]);
+  }, [expandedPanelId, onPanelStatusChange, panels, panelsInOrder, focusedPanelId]);
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {
+      if (viewMode !== ViewMode.EDIT) return;
+
       const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
         (updatedPanelsAcc, panelLayout) => {
           updatedPanelsAcc[panelLayout.i] = {
@@ -100,14 +104,14 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         dashboard.dispatch.setPanels(updatedPanels);
       }
     },
-    [dashboard, panels]
+    [dashboard, panels, viewMode]
   );
 
   const classes = classNames({
     'dshLayout-withoutMargins': !useMargins,
     'dshLayout--viewing': viewMode === ViewMode.VIEW,
     'dshLayout--editing': viewMode !== ViewMode.VIEW,
-    'dshLayout--noAnimation': !animatePanelTransforms || expandedPanelId,
+    'dshLayout--noAnimation': !animatePanelTransforms || delayedIsPanelExpanded,
     'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
 
@@ -125,10 +129,9 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
       className={classes}
       width={viewportWidth}
       breakpoints={breakpoints}
-      onDragStop={onLayoutChange}
-      onResizeStop={onLayoutChange}
-      isResizable={!expandedPanelId}
-      isDraggable={!expandedPanelId}
+      onLayoutChange={onLayoutChange}
+      isResizable={!expandedPanelId && !focusedPanelId}
+      isDraggable={!expandedPanelId && !focusedPanelId}
       rowHeight={DASHBOARD_GRID_HEIGHT}
       margin={useMargins ? [DASHBOARD_MARGIN_SIZE, DASHBOARD_MARGIN_SIZE] : [0, 0]}
       draggableHandle={'.embPanel--dragHandle'}

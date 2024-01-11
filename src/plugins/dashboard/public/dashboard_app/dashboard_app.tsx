@@ -30,15 +30,18 @@ import {
   createSessionRestorationDataProvider,
 } from './url/search_sessions_integration';
 import { DashboardAPI, DashboardRenderer } from '..';
-import { DASHBOARD_APP_ID } from '../dashboard_constants';
+import { type DashboardEmbedSettings } from './types';
+import { DASHBOARD_APP_LOCATOR } from './locator/locator';
 import { pluginServices } from '../services/plugin_services';
-import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import { AwaitingDashboardAPI } from '../dashboard_container';
-import { type DashboardEmbedSettings, DashboardRedirect } from './types';
+import { DashboardRedirect } from '../dashboard_container/types';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
+import { createDashboardEditUrl, DASHBOARD_APP_ID } from '../dashboard_constants';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
+import { DashboardTopNav } from '../dashboard_top_nav';
+import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
 
 export interface DashboardAppProps {
   history: History;
@@ -81,13 +84,9 @@ export function DashboardApp({
     settings: { uiSettings },
     data: { search },
     customBranding,
+    share: { url },
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
-
-  const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
-    DASHBOARD_APP_ID,
-    true
-  );
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
   useExecutionContext(executionContext, {
@@ -118,20 +117,33 @@ export function DashboardApp({
   /**
    * Validate saved object load outcome
    */
-  const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation({
-    redirectTo,
-  });
+  const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation();
 
   /**
    * Create options to pass into the dashboard renderer
    */
-  const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
-    const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+    const getInitialInput = () => {
+      const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
+      const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
 
-    return Promise.resolve({
-      incomingEmbeddable,
+      // Override all state with URL + Locator input
+      return {
+        // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
+        ...initialUrlState,
+        ...stateFromLocator,
+
+        // if print mode is active, force viewMode.PRINT
+        ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
+          ? { viewMode: ViewMode.PRINT }
+          : {}),
+      };
+    };
+
+    return Promise.resolve<DashboardCreationOptions>({
+      getIncomingEmbeddable: () =>
+        getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, true),
 
       // integrations
       useControlGroupIntegration: true,
@@ -148,28 +160,22 @@ export function DashboardApp({
         getSearchSessionIdFromURL: () => getSearchSessionIdFromURL(history),
         removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
       },
-
-      // Override all state with URL + Locator input
-      initialInput: {
-        // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
-        ...initialUrlState,
-        ...stateFromLocator,
-
-        // if print mode is active, force viewMode.PRINT
-        ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
-          ? { viewMode: ViewMode.PRINT }
-          : {}),
-      },
-
+      getInitialInput,
       validateLoadedSavedObject: validateOutcome,
+      isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
+      getEmbeddableAppContext: (dashboardId) => ({
+        currentAppId: DASHBOARD_APP_ID,
+        getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
+      }),
     });
   }, [
     history,
+    embedSettings,
     validateOutcome,
-    stateFromLocator,
+    getScopedHistory,
     isScreenshotMode,
+    getStateTransfer,
     kbnUrlStateStorage,
-    incomingEmbeddable,
     getScreenshotContext,
   ]);
 
@@ -183,31 +189,39 @@ export function DashboardApp({
       dashboardAPI,
     });
     return () => stopWatchingAppStateInUrl();
-  }, [dashboardAPI, kbnUrlStateStorage]);
+  }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
+
+  const locator = useMemo(() => url?.locators.get(DASHBOARD_APP_LOCATOR), [url]);
 
   return (
-    <div className="dshAppWrapper">
+    <>
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
         <>
           {dashboardAPI && (
-            <DashboardAPIContext.Provider value={dashboardAPI}>
-              <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
-            </DashboardAPIContext.Provider>
+            <>
+              <DashboardTabTitleSetter dashboardContainer={dashboardAPI} />
+              <DashboardTopNav
+                redirectTo={redirectTo}
+                embedSettings={embedSettings}
+                dashboardContainer={dashboardAPI}
+              />
+            </>
           )}
 
           {getLegacyConflictWarning?.()}
-
           <DashboardRenderer
+            locator={locator}
             ref={setDashboardAPI}
+            dashboardRedirect={redirectTo}
             savedObjectId={savedDashboardId}
             showPlainSpinner={showPlainSpinner}
             getCreationOptions={getCreationOptions}
           />
         </>
       )}
-    </div>
+    </>
   );
 }

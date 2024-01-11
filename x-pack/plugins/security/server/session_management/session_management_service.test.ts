@@ -8,6 +8,7 @@
 import { Subject } from 'rxjs';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
@@ -15,16 +16,15 @@ import type {
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import type { AuditServiceSetup } from '../audit';
-import { auditServiceMock } from '../audit/mocks';
-import { ConfigSchema, createConfig } from '../config';
-import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';
 import { SessionIndex } from './session_index';
 import {
   SESSION_INDEX_CLEANUP_TASK_NAME,
   SessionManagementService,
 } from './session_management_service';
+import { auditServiceMock } from '../audit/mocks';
+import { ConfigSchema, createConfig } from '../config';
+import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 
 const mockSessionIndexInitialize = jest.spyOn(SessionIndex.prototype, 'initialize');
 mockSessionIndexInitialize.mockResolvedValue();
@@ -41,8 +41,8 @@ describe('SessionManagementService', () => {
   });
 
   afterEach(() => {
-    mockSessionIndexInitialize.mockReset();
-    mockSessionIndexCleanUp.mockReset();
+    mockSessionIndexInitialize.mockClear();
+    mockSessionIndexCleanUp.mockClear();
   });
 
   describe('setup()', () => {

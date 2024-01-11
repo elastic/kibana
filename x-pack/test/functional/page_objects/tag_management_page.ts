@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService, FtrProviderContext } from '../ftr_provider_context';
 
 interface FillTagFormFields {
@@ -51,13 +51,24 @@ class TagModal extends FtrService {
    * If a field is undefined, will not set the value (use a empty string for that)
    * If `submit` is true, will call `clickConfirm` once the fields have been filled.
    */
-  async fillForm(fields: FillTagFormFields, { submit = false }: { submit?: boolean } = {}) {
+  async fillForm(
+    fields: FillTagFormFields,
+    {
+      submit = false,
+      clearWithKeyboard = false,
+    }: { submit?: boolean; clearWithKeyboard?: boolean } = {}
+  ) {
     if (fields.name !== undefined) {
       await this.testSubjects.click('createModalField-name');
-      await this.testSubjects.setValue('createModalField-name', fields.name);
+      await this.testSubjects.setValue('createModalField-name', fields.name, {
+        clearWithKeyboard,
+      });
     }
     if (fields.color !== undefined) {
-      await this.testSubjects.setValue('~createModalField-color', fields.color);
+      await this.testSubjects.click('~createModalField-color');
+      await this.testSubjects.setValue('~createModalField-color', fields.color, {
+        clearWithKeyboard,
+      });
       // Close the popover before moving to the next input, as it can get in the way of interacting with other elements
       await this.testSubjects.existOrFail('euiSaturation');
       await this.retry.try(async () => {
@@ -69,7 +80,9 @@ class TagModal extends FtrService {
     }
     if (fields.description !== undefined) {
       await this.testSubjects.click('createModalField-description');
-      await this.testSubjects.setValue('createModalField-description', fields.description);
+      await this.testSubjects.setValue('createModalField-description', fields.description, {
+        clearWithKeyboard,
+      });
     }
 
     if (submit) {
@@ -239,7 +252,6 @@ class TagAssignmentFlyout extends FtrService {
  */
 export class TagManagementPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
   private readonly browser = this.ctx.getService('browser');
   private readonly retry = this.ctx.getService('retry');
   private readonly header = this.ctx.getPageObject('header');
@@ -270,10 +282,7 @@ export class TagManagementPageObject extends FtrService {
    */
   async waitUntilTableIsLoaded() {
     return this.retry.try(async () => {
-      const isLoaded = await this.find.existsByDisplayedByCssSelector(
-        '*[data-test-subj="tagsManagementTable"]:not(.euiBasicTable-loading)'
-      );
-
+      const isLoaded = await this.testSubjects.exists('tagsManagementTable table-is-ready');
       if (isLoaded) {
         return true;
       } else {
@@ -416,6 +425,16 @@ export class TagManagementPageObject extends FtrService {
   async selectTagByName(tagName: string) {
     const tagRow = await this.getRowByName(tagName);
     const checkbox = await tagRow.findByCssSelector('.euiTableRowCellCheckbox .euiCheckbox__input');
+    await checkbox.click();
+  }
+
+  /**
+   * Select all checkboxes
+   */
+  async selectAllTagRows() {
+    const checkbox = await this.testSubjects.find(
+      'tagsManagementTable table-is-ready > checkboxSelectAll'
+    );
     await checkbox.click();
   }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '@kbn/cases-plugin/common';
+import { CaseStatuses } from '@kbn/cases-components';
 
 export const mockCasesResult = {
   cases: [

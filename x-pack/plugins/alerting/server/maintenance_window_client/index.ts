@@ -6,4 +6,4 @@
  */
 
 export * from './maintenance_window_client';
-export * from './generate_maintenance_window_events';
+export * from '../application/maintenance_window/lib/generate_maintenance_window_events';

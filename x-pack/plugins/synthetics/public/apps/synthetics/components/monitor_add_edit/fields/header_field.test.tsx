@@ -106,4 +106,35 @@ describe('<HeaderField />', () => {
       });
     });
   });
+
+  it('shows custom Content-Type', async () => {
+    const contentMode: CodeEditorMode = CodeEditorMode.PLAINTEXT;
+    const { getByTestId } = render(
+      <HeaderField
+        defaultValue={{ ...defaultValue, 'Content-Type': 'custom' }}
+        onChange={onChange}
+        contentMode={contentMode}
+      />
+    );
+
+    const key = getByTestId('keyValuePairsKey0') as HTMLInputElement;
+    const value = getByTestId('keyValuePairsValue0') as HTMLInputElement;
+
+    expect(key.value).toBe('Content-Type');
+    expect(value.value).toBe('custom');
+  });
+
+  it('hides default Content-Type', async () => {
+    const contentMode: CodeEditorMode = CodeEditorMode.PLAINTEXT;
+    const { queryByTestId } = render(
+      <HeaderField
+        defaultValue={{ ...defaultValue, 'Content-Type': 'text/plain' }}
+        onChange={onChange}
+        contentMode={contentMode}
+      />
+    );
+
+    expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
+    expect(queryByTestId('keyValuePairsValue0')).not.toBeInTheDocument();
+  });
 });

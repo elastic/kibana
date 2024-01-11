@@ -44,6 +44,7 @@ export const performCreate = async <T>(
     encryption: encryptionHelper,
     preflight: preflightHelper,
     serializer: serializerHelper,
+    migration: migrationHelper,
   } = helpers;
   const { securityExtension } = extensions;
 
@@ -114,7 +115,7 @@ export const performCreate = async <T>(
   // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
   // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
   const originId = Object.keys(options).includes('originId') ? options.originId : existingOriginId;
-  const migrated = migrator.migrateDocument({
+  const migrated = migrationHelper.migrateInputDocument({
     id,
     type,
     ...(savedObjectNamespace && { namespace: savedObjectNamespace }),

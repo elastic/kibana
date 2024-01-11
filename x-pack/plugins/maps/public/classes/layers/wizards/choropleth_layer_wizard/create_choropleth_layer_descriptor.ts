@@ -28,7 +28,6 @@ import {
 import { VectorStyle } from '../../../styles/vector/vector_style';
 import { GeoJsonVectorLayer, MvtVectorLayer } from '../../vector_layer';
 import { EMSFileSource } from '../../../sources/ems_file_source';
-// @ts-ignore
 import { ESSearchSource } from '../../../sources/es_search_source';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
 

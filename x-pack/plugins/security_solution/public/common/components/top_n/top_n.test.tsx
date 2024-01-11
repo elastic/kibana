@@ -44,7 +44,6 @@ jest.mock('uuid', () => {
 });
 
 const field = 'host.name';
-const value = 'nice';
 const combinedQueries = {
   bool: {
     must: [],
@@ -116,7 +115,6 @@ describe('TopN', () => {
     setQuery: jest.fn(),
     to: '2020-04-15T00:31:47.695Z',
     toggleTopN,
-    value,
   };
   describe('common functionality', () => {
     let wrapper: ReactWrapper;

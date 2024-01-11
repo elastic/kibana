@@ -17,8 +17,9 @@ export interface RetryableBulkUpdateOpts {
   taskIds: string[];
   getTasks: (taskIds: string[]) => Promise<BulkGetResult>;
   filter: (task: ConcreteTaskInstance) => boolean;
-  map: (task: ConcreteTaskInstance) => ConcreteTaskInstance;
+  map: (task: ConcreteTaskInstance, i: number, arr: ConcreteTaskInstance[]) => ConcreteTaskInstance;
   store: TaskStore;
+  validate: boolean;
 }
 
 export async function retryableBulkUpdate({
@@ -27,6 +28,7 @@ export async function retryableBulkUpdate({
   filter,
   map,
   store,
+  validate,
 }: RetryableBulkUpdateOpts): Promise<BulkUpdateTaskResult> {
   const resultMap: Record<string, BulkUpdateResult> = {};
 
@@ -42,7 +44,7 @@ export async function retryableBulkUpdate({
       }, [])
       .filter(filter)
       .map(map);
-    const bulkUpdateResult = await store.bulkUpdate(tasksToUpdate);
+    const bulkUpdateResult = await store.bulkUpdate(tasksToUpdate, { validate });
     for (const result of bulkUpdateResult) {
       const taskId = getId(result);
       resultMap[taskId] = result;

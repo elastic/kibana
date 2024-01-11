@@ -15,7 +15,7 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../mock';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../severity_badge';
 import type { State } from '../../../store';
 import { createStore } from '../../../store';
 import { TimelineId } from '../../../../../common/types';
@@ -75,14 +75,14 @@ const props = {
 
 jest.mock('../../../lib/kibana');
 
+jest.mock('../../../hooks/use_get_field_spec');
+
 const mockAction = createAction({
   id: 'test_action',
   execute: async () => {},
   getIconType: () => 'test-icon',
   getDisplayName: () => 'test-actions',
 });
-
-// jest.useFakeTimers();
 
 describe('OverviewCardWithActions', () => {
   test('it renders correctly', async () => {

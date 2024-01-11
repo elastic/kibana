@@ -23,7 +23,7 @@ const action = createAction<CellActionExecutionContext>({
   getDisplayName: () => displayName,
 });
 const context = {
-  field: { name: fieldName, value: fieldValue, type: 'text' },
+  data: [{ field: { name: fieldName, type: 'text' }, value: fieldValue }],
   metadata,
 } as CellActionExecutionContext;
 

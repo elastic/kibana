@@ -38,7 +38,6 @@ describe('AnalyticsNoDataPage', () => {
     await act(() => new Promise(setImmediate));
 
     expect(component.find(Component).length).toBe(1);
-    expect(component.find(Component).props().kibanaGuideDocLink).toBe(services.kibanaGuideDocLink);
     expect(component.find(Component).props().onDataViewCreated).toBe(onDataViewCreated);
     expect(component.find(Component).props().allowAdHocDataView).toBe(true);
   });

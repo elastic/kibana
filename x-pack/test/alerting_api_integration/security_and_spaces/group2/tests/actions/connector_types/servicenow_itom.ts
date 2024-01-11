@@ -13,6 +13,7 @@ import http from 'http';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getServiceNowServer } from '@kbn/actions-simulators-plugin/server/plugin';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -111,6 +112,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow-itom',
@@ -131,6 +133,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow-itom',
@@ -163,6 +166,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
         expect(createdConnector).to.eql({
           id: createdConnector.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow-itom',
@@ -183,6 +187,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
         expect(fetchedConnector).to.eql({
           id: fetchedConnector.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow-itom',
@@ -408,7 +413,13 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+              expect(Object.keys(resp.body)).to.eql([
+                'status',
+                'message',
+                'retry',
+                'errorSource',
+                'connector_id',
+              ]);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
             });
@@ -426,6 +437,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
+                errorSource: TaskErrorSource.FRAMEWORK,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
               });
@@ -444,6 +456,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
+                errorSource: TaskErrorSource.FRAMEWORK,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subAction]: expected value to equal [getChoices]',
               });
@@ -466,6 +479,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                   connector_id: simulatedActionId,
                   status: 'error',
                   retry: false,
+                  errorSource: TaskErrorSource.FRAMEWORK,
                   message:
                     'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [addEvent]\n- [1.subActionParams.fields]: expected value of type [array] but got [undefined]',
                 });

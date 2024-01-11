@@ -10,7 +10,14 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
-  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'dashboard',
+    'discover',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
@@ -54,7 +61,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       it('Starts a new session on sort', async () => {
-        await PageObjects.discover.clickFieldListItemAdd('speaker');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('speaker');
         await PageObjects.discover.clickFieldSort('speaker', 'Sort A-Z');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sessionIds = await getSessionIds();

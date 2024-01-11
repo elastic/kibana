@@ -42,5 +42,7 @@ export function useDateRangeRedirect() {
   return {
     isDateRangeSet,
     redirect,
+    // does not add date range for this page
+    skipDataRangeSet: history.location.pathname === '/add-data-instructions',
   };
 }

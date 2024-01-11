@@ -35,7 +35,7 @@ describe('RuleStatusFilter', () => {
 
     expect(wrapper.find('[data-test-subj="ruleStateFilterSelect"]').exists()).toBeFalsy();
 
-    wrapper.find(EuiFilterButton).simulate('click');
+    wrapper.find(EuiFilterButton).find('button').simulate('click');
 
     const statusItems = wrapper.find(EuiSelectableListItem);
     expect(statusItems.length).toEqual(3);
@@ -46,7 +46,7 @@ describe('RuleStatusFilter', () => {
       <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
     );
 
-    wrapper.find(EuiFilterButton).simulate('click');
+    wrapper.find(EuiFilterButton).find('button').simulate('click');
 
     wrapper.find(EuiSelectableListItem).at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['enabled']);

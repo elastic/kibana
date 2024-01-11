@@ -6,8 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { NetworkTopCountriesRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-import type { NetworkTopCountriesRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,

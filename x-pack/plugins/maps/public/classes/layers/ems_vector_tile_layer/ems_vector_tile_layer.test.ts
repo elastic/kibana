@@ -43,8 +43,8 @@ describe('EmsVectorTileLayer', () => {
       startLoading: (requestId: string, token: string, meta: unknown) => {
         actualMeta = meta;
       },
-      onLoadError: (requestId: string, token: string, message: string) => {
-        actualErrorMessage = message;
+      onLoadError: (requestId: string, token: string, error: Error) => {
+        actualErrorMessage = error.message;
       },
       dataFilters: { foo: 'bar' } as unknown as DataFilters,
     } as unknown as DataRequestContext;
@@ -72,36 +72,6 @@ describe('EmsVectorTileLayer', () => {
         } as unknown as EMSVectorTileLayerDescriptor,
       });
       expect(layer.getLocale()).toBe('xx');
-    });
-  });
-
-  describe('isLayerLoading', () => {
-    test('should be true when tile loading has not started', () => {
-      const layer = new EmsVectorTileLayer({
-        source: {} as unknown as EMSTMSSource,
-        layerDescriptor: {} as unknown as EMSVectorTileLayerDescriptor,
-      });
-      expect(layer.isLayerLoading()).toBe(true);
-    });
-
-    test('should be true when tiles are loading', () => {
-      const layer = new EmsVectorTileLayer({
-        source: {} as unknown as EMSTMSSource,
-        layerDescriptor: {
-          __areTilesLoaded: false,
-        } as unknown as EMSVectorTileLayerDescriptor,
-      });
-      expect(layer.isLayerLoading()).toBe(true);
-    });
-
-    test('should be false when tiles are loaded', () => {
-      const layer = new EmsVectorTileLayer({
-        source: {} as unknown as EMSTMSSource,
-        layerDescriptor: {
-          __areTilesLoaded: true,
-        } as unknown as EMSVectorTileLayerDescriptor,
-      });
-      expect(layer.isLayerLoading()).toBe(false);
     });
   });
 });

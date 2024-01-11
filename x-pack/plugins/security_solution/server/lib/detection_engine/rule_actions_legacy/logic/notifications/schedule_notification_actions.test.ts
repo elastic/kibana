@@ -7,7 +7,7 @@
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import type { DetectionAlert } from '../../../../../../common/detection_engine/schemas/alerts';
+import type { DetectionAlert } from '../../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_THRESHOLD_RESULT_COUNT } from '../../../../../../common/field_maps/field_names';
 import { sampleThresholdAlert } from '../../../rule_types/__mocks__/threshold';
 import type { NotificationRuleTypeParams } from './schedule_notification_actions';
@@ -44,6 +44,7 @@ describe('schedule_notification_actions', () => {
     responseActions: [],
     riskScore: 80,
     riskScoreMapping: [],
+    investigationFields: undefined,
     ruleNameOverride: undefined,
     dataViewId: undefined,
     outputIndex: 'output-1',
@@ -147,5 +148,68 @@ describe('schedule_notification_actions', () => {
         }),
       })
     );
+  });
+
+  describe('formatAlertsForNotificationActions', () => {
+    it('should properly format alerts with the field represented as an object followed by similar dotted field', () => {
+      const signals = [
+        {
+          'kibana.alert.uuid': '1',
+          user: {
+            risk: {
+              calculated_level: 'Unknown',
+              calculated_score_norm: 5,
+            },
+          },
+          'user.name': 'my-user',
+        },
+      ];
+      expect(formatAlertsForNotificationActions(signals)).toEqual([
+        {
+          kibana: {
+            alert: {
+              uuid: '1',
+            },
+          },
+          user: {
+            risk: {
+              calculated_level: 'Unknown',
+              calculated_score_norm: 5,
+            },
+            name: 'my-user',
+          },
+        },
+      ]);
+    });
+    it('should properly format alerts with the dotted field followed by similar field represented as an object', () => {
+      const signals = [
+        {
+          'kibana.alert.uuid': '1',
+          'user.name': 'my-user',
+          user: {
+            risk: {
+              calculated_level: 'Unknown',
+              calculated_score_norm: 5,
+            },
+          },
+        },
+      ];
+      expect(formatAlertsForNotificationActions(signals)).toEqual([
+        {
+          kibana: {
+            alert: {
+              uuid: '1',
+            },
+          },
+          user: {
+            risk: {
+              calculated_level: 'Unknown',
+              calculated_score_norm: 5,
+            },
+            name: 'my-user',
+          },
+        },
+      ]);
+    });
   });
 });

@@ -7,9 +7,9 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-import type { NewAgentAction } from '../../../common/types';
+import type { NewAgentAction, AgentActionType } from '../../../common/types';
 
-import { createAppContextStartContractMock } from '../../mocks';
+import { createAppContextStartContractMock, type MockedFleetAppContext } from '../../mocks';
 import { appContextService } from '../app_context';
 import { auditLoggingService } from '../audit_logging';
 
@@ -29,8 +29,11 @@ const mockedBulkUpdateAgents = bulkUpdateAgents as jest.MockedFunction<typeof bu
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
 describe('Agent actions', () => {
+  let mockContext: MockedFleetAppContext;
+
   beforeEach(async () => {
-    appContextService.start(createAppContextStartContractMock());
+    mockContext = createAppContextStartContractMock();
+    appContextService.start(mockContext);
   });
 
   afterEach(() => {
@@ -66,6 +69,17 @@ describe('Agent actions', () => {
   });
 
   describe('createAgentAction', () => {
+    beforeEach(() => {
+      mockContext.messageSigningService.sign = jest
+        .fn()
+        .mockImplementation((message: Record<string, unknown>) =>
+          Promise.resolve({
+            data: Buffer.from(JSON.stringify(message), 'utf8'),
+            signature: 'thisisasignature',
+          })
+        );
+    });
+
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
       esClient.search.mockResolvedValue({
@@ -92,6 +106,85 @@ describe('Agent actions', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: expect.stringMatching(/User created Fleet action/),
       });
+    });
+
+    it.each(['UNENROLL', 'UPGRADE'] as AgentActionType[])(
+      'should sign %s action',
+      async (actionType: AgentActionType) => {
+        const esClient = elasticsearchServiceMock.createInternalClient();
+        esClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  type: actionType,
+                  action_id: 'action1',
+                  agents: ['agent1', 'agent2'],
+                  expiration: new Date().toISOString(),
+                },
+              },
+            ],
+          },
+        } as any);
+
+        await createAgentAction(esClient, {
+          id: 'action1',
+          type: actionType,
+          agents: ['agent1'],
+        });
+
+        expect(esClient.create).toBeCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              signed: {
+                data: expect.any(String),
+                signature: expect.any(String),
+              },
+            }),
+          })
+        );
+      }
+    );
+
+    it.each([
+      'SETTINGS',
+      'POLICY_REASSIGN',
+      'CANCEL',
+      'FORCE_UNENROLL',
+      'UPDATE_TAGS',
+      'REQUEST_DIAGNOSTICS',
+      'POLICY_CHANGE',
+      'INPUT_ACTION',
+    ] as AgentActionType[])('should not sign %s action', async (actionType: AgentActionType) => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                type: actionType,
+                action_id: 'action1',
+                agents: ['agent1', 'agent2'],
+                expiration: new Date().toISOString(),
+              },
+            },
+          ],
+        },
+      } as any);
+
+      await createAgentAction(esClient, {
+        id: 'action1',
+        type: actionType,
+        agents: ['agent1'],
+      });
+
+      expect(esClient.create).toBeCalledWith(
+        expect.objectContaining({
+          body: expect.not.objectContaining({
+            signed: expect.any(Object),
+          }),
+        })
+      );
     });
   });
 
@@ -124,6 +217,75 @@ describe('Agent actions', () => {
           message: `User created Fleet action [id=${action.id}]`,
         });
       }
+    });
+
+    it('should sign UNENROLL and UPGRADE actions', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      const newActions: NewAgentAction[] = (['UNENROLL', 'UPGRADE'] as AgentActionType[]).map(
+        (actionType, i) => {
+          const actionId = `action${i + 1}`;
+          return {
+            id: actionId,
+            type: actionType,
+            agents: [actionId],
+          };
+        }
+      );
+
+      await bulkCreateAgentActions(esClient, newActions);
+      expect(esClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            expect.arrayContaining([
+              expect.objectContaining({
+                signed: {
+                  data: expect.any(String),
+                  signature: expect.any(String),
+                },
+              }),
+            ]),
+          ]),
+        })
+      );
+    });
+
+    it('should not sign actions other than UNENROLL and UPGRADE', async () => {
+      const esClient = elasticsearchServiceMock.createInternalClient();
+      const newActions: NewAgentAction[] = (
+        [
+          'SETTINGS',
+          'POLICY_REASSIGN',
+          'CANCEL',
+          'FORCE_UNENROLL',
+          'UPDATE_TAGS',
+          'REQUEST_DIAGNOSTICS',
+          'POLICY_CHANGE',
+          'INPUT_ACTION',
+        ] as AgentActionType[]
+      ).map((actionType, i) => {
+        const actionId = `action${i + 1}`;
+        return {
+          id: actionId,
+          type: actionType,
+          agents: [actionId],
+        };
+      });
+
+      await bulkCreateAgentActions(esClient, newActions);
+      expect(esClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            expect.arrayContaining([
+              expect.not.objectContaining({
+                signed: {
+                  data: expect.any(String),
+                  signature: expect.any(String),
+                },
+              }),
+            ]),
+          ]),
+        })
+      );
     });
   });
 

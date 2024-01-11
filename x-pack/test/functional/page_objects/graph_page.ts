@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 interface Node {
@@ -100,7 +100,7 @@ export class GraphPageObject extends FtrService {
       const selectionLabel = await labelElement.getVisibleText();
       this.log.debug('Looking at selection ' + selectionLabel);
       if (selectionLabel !== from && selectionLabel !== to) {
-        (await selection.findByClassName('gphNode__text')).click();
+        (await selection.findByTestSubject(`graph-selected-${selectionLabel}`)).click();
         await this.common.sleep(200);
       }
     }

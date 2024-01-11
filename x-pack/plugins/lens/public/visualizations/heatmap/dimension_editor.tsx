@@ -26,7 +26,7 @@ export function HeatmapDimensionEditor(
     paletteService: PaletteRegistry;
   }
 ) {
-  const { state, setState, frame, accessor } = props;
+  const { state, setState, frame, accessor, isInlineEditing } = props;
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   if (state?.valueAccessor !== accessor) return null;
@@ -88,6 +88,10 @@ export function HeatmapDimensionEditor(
               siblingRef={props.panelRef}
               isOpen={isPaletteOpen}
               handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
+              title={i18n.translate('xpack.lens.table.colorByRangePanelTitle', {
+                defaultMessage: 'Color',
+              })}
+              isInlineEditing={isInlineEditing}
             >
               {activePalette && (
                 <CustomizablePalette

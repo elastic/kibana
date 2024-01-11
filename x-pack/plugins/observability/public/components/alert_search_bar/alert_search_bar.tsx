@@ -10,8 +10,9 @@ import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { AlertsStatusFilter } from './components';
-import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
+import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
 import { ObservabilityAlertSearchBarProps } from './types';
 import { buildEsQuery } from '../../utils/build_es_query';
@@ -22,6 +23,9 @@ const getAlertStatusQuery = (status: string): Query[] => {
     ? [{ query: ALERT_STATUS_QUERY[status], language: 'kuery' }]
     : [];
 };
+const toastTitle = i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
+  defaultMessage: 'Invalid query string',
+});
 
 export function ObservabilityAlertSearchBar({
   appName,
@@ -34,25 +38,42 @@ export function ObservabilityAlertSearchBar({
   kuery,
   rangeFrom,
   rangeTo,
-  services: { AlertsSearchBar, timeFilterService, useToasts },
+  services: { AlertsSearchBar, timeFilterService, useToasts, uiSettings },
   status,
 }: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
 
   const onAlertStatusChange = useCallback(
     (alertStatus: AlertStatus) => {
-      onEsQueryChange(
-        buildEsQuery(
-          {
-            to: rangeTo,
-            from: rangeFrom,
-          },
-          kuery,
-          [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries]
-        )
-      );
+      try {
+        onEsQueryChange(
+          buildEsQuery({
+            timeRange: {
+              to: rangeTo,
+              from: rangeFrom,
+            },
+            kuery,
+            queries: [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries],
+            config: getEsQueryConfig(uiSettings),
+          })
+        );
+      } catch (error) {
+        toasts.addError(error, {
+          title: toastTitle,
+        });
+        onKueryChange(DEFAULT_QUERY_STRING);
+      }
     },
-    [kuery, defaultSearchQueries, rangeFrom, rangeTo, onEsQueryChange]
+    [
+      onEsQueryChange,
+      rangeTo,
+      rangeFrom,
+      kuery,
+      defaultSearchQueries,
+      uiSettings,
+      toasts,
+      onKueryChange,
+    ]
   );
 
   useEffect(() => {
@@ -68,14 +89,15 @@ export function ObservabilityAlertSearchBar({
     ({ dateRange, query }) => {
       try {
         // First try to create es query to make sure query is valid, then save it in state
-        const esQuery = buildEsQuery(
-          {
+        const esQuery = buildEsQuery({
+          timeRange: {
             to: dateRange.to,
             from: dateRange.from,
           },
-          query,
-          [...getAlertStatusQuery(status), ...defaultSearchQueries]
-        );
+          kuery: query,
+          queries: [...getAlertStatusQuery(status), ...defaultSearchQueries],
+          config: getEsQueryConfig(uiSettings),
+        });
         if (query) onKueryChange(query);
         timeFilterService.setTime(dateRange);
         onRangeFromChange(dateRange.from);
@@ -83,21 +105,20 @@ export function ObservabilityAlertSearchBar({
         onEsQueryChange(esQuery);
       } catch (error) {
         toasts.addError(error, {
-          title: i18n.translate('xpack.observability.alerts.searchBar.invalidQueryTitle', {
-            defaultMessage: 'Invalid query string',
-          }),
+          title: toastTitle,
         });
         onKueryChange(DEFAULT_QUERY_STRING);
       }
     },
     [
+      status,
       defaultSearchQueries,
+      uiSettings,
+      onKueryChange,
       timeFilterService,
       onRangeFromChange,
       onRangeToChange,
-      onKueryChange,
       onEsQueryChange,
-      status,
       toasts,
     ]
   );

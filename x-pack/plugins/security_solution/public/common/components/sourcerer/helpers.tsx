@@ -10,6 +10,7 @@ import type { EuiSuperSelectOption, EuiFormRowProps } from '@elastic/eui';
 import { EuiIcon, EuiBadge, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { sourcererModel } from '../../store/sourcerer';
 
 import * as i18n from './translations';
@@ -23,7 +24,7 @@ export const StyledFormRow = styled(EuiFormRow)`
   max-width: none;
 `;
 
-export const StyledButton = styled(EuiButtonEmpty)`
+export const StyledButtonEmpty = styled(EuiButtonEmpty)`
   &:enabled:focus,
   &:focus {
     background-color: transparent;
@@ -43,7 +44,7 @@ export const PopoverContent = styled.div`
 `;
 
 export const StyledBadge = styled(EuiBadge)`
-  margin-left: 8px;
+  margin-left: ${euiThemeVars.euiSizeXS};
   &,
   .euiBadge__text {
     cursor: pointer;

@@ -17,11 +17,11 @@ import { getAlertId, getContainedAlertContext } from './alert_context';
 export function getEntitiesAndGenerateAlerts(
   prevLocationMap: Map<string, GeoContainmentAlertInstanceState[]>,
   currLocationMap: Map<string, GeoContainmentAlertInstanceState[]>,
-  alertFactory: RuleExecutorServices<
+  alertsClient: RuleExecutorServices<
     GeoContainmentAlertInstanceState,
     GeoContainmentAlertInstanceContext,
     typeof ActionGroupId
-  >['alertFactory'],
+  >['alertsClient'],
   shapesIdsNamesMap: Record<string, unknown>,
   windowEnd: Date
 ): {
@@ -43,9 +43,11 @@ export function getEntitiesAndGenerateAlerts(
           shapesIdsNamesMap,
           windowEnd,
         });
-        alertFactory
-          .create(getAlertId(entityName, context.containingBoundaryName))
-          .scheduleActions(ActionGroupId, context);
+        alertsClient!.report({
+          id: getAlertId(entityName, context.containingBoundaryName),
+          actionGroup: ActionGroupId,
+          context,
+        });
       }
     });
 
@@ -56,6 +58,11 @@ export function getEntitiesAndGenerateAlerts(
       return;
     }
 
+    // TODO remove otherCatIndex check
+    // Elasticsearch filters aggregation is used to group results into buckets matching entity locations intersecting boundary shapes
+    // filters.other_bucket_key returns bucket with entities that did not intersect any boundary shape.
+    // shapeLocationId === OTHER_CATEGORY can only occur when containments.length === 1
+    // test data does not follow this pattern and needs to be updated.
     const otherCatIndex = containments.findIndex(
       ({ shapeLocationId }) => shapeLocationId === OTHER_CATEGORY
     );

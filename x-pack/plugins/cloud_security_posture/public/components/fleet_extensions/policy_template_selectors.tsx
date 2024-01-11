@@ -7,17 +7,23 @@
 import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import {
   CSPM_POLICY_TEMPLATE,
   KSPM_POLICY_TEMPLATE,
   VULN_MGMT_POLICY_TEMPLATE,
   CNVM_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
-import { AwsCredentialsForm } from './aws_credentials_form';
+import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
+import { AwsCredentialsForm } from './aws_credentials_form/aws_credentials_form';
+import { AwsCredentialsFormAgentless } from './aws_credentials_form/aws_credentials_form_agentless';
+import { EksCredentialsForm } from './eks_credentials_form';
+import { GcpCredentialsForm } from './gcp_credential_form';
 
 interface PolicyTemplateSelectorProps {
   selectedTemplate: CloudSecurityPolicyTemplate;
@@ -66,13 +72,31 @@ interface PolicyTemplateVarsFormProps {
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyPostureInput;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
+  packageInfo: PackageInfo;
+  onChange: PackagePolicyReplaceDefineStepExtensionComponentProps['onChange'];
+  setIsValid: (isValid: boolean) => void;
+  disabled: boolean;
+  setupTechnology: SetupTechnology;
 }
 
-export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFormProps) => {
+export const PolicyTemplateVarsForm = ({
+  input,
+  setupTechnology,
+  ...props
+}: PolicyTemplateVarsFormProps) => {
   switch (input.type) {
     case 'cloudbeat/cis_aws':
-    case 'cloudbeat/cis_eks':
+      if (setupTechnology === SetupTechnology.AGENTLESS) {
+        return <AwsCredentialsFormAgentless {...props} input={input} />;
+      }
+
       return <AwsCredentialsForm {...props} input={input} />;
+    case 'cloudbeat/cis_eks':
+      return <EksCredentialsForm {...props} input={input} />;
+    case 'cloudbeat/cis_gcp':
+      return <GcpCredentialsForm {...props} input={input} />;
+    case 'cloudbeat/cis_azure':
+      return <AzureCredentialsForm {...props} input={input} />;
     default:
       return null;
   }
@@ -101,6 +125,7 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
         <EuiCallOut
           iconType="iInCircle"
           color="primary"
+          data-test-subj="additionalChargeCalloutTestSubj"
           title={
             <FormattedMessage
               id="xpack.csp.fleetIntegration.cnvm.additionalChargesCalloutTitle"

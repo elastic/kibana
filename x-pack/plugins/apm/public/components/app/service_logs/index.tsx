@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { LogStream } from '@kbn/infra-plugin/public';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';

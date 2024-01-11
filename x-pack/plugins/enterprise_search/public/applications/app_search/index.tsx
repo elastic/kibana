@@ -6,16 +6,17 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
+import { EndpointsHeaderAction } from '../shared/layout/endpoints_header_action';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
 import { AppLogic } from './app_logic';
@@ -68,22 +69,27 @@ export const AppSearch: React.FC<InitialAppData> = (props) => {
   };
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
       <Route>{showView()}</Route>
-    </Switch>
+    </Routes>
   );
 };
 
-export const AppSearchUnconfigured: React.FC = () => (
-  <Switch>
-    <Route>
-      <Redirect to={SETUP_GUIDE_PATH} />
-    </Route>
-  </Switch>
-);
+export const AppSearchUnconfigured: React.FC = () => {
+  const { renderHeaderActions } = useValues(KibanaLogic);
+  renderHeaderActions(EndpointsHeaderAction);
+
+  return (
+    <Routes>
+      <Route>
+        <Redirect to={SETUP_GUIDE_PATH} />
+      </Route>
+    </Routes>
+  );
+};
 
 export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
@@ -102,7 +108,7 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
   }, []);
 
   return (
-    <Switch>
+    <Routes>
       {process.env.NODE_ENV === 'development' && (
         <Route path={LIBRARY_PATH}>
           <Library />
@@ -145,6 +151,6 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

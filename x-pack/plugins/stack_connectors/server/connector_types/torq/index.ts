@@ -366,7 +366,6 @@ function retryResult(actionId: string, serviceMessage: string): ActionTypeExecut
 function retryResultSeconds(
   actionId: string,
   serviceMessage: string,
-
   retryAfter: number
 ): ActionTypeExecutorResult<void> {
   const retryEpoch = Date.now() + retryAfter * 1000;

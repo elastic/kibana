@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { InventoryItemType } from '../../../common/inventory_models/types';
+import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
-import { DEFAULT_LOG_VIEW_ID } from '../../observability_logs/log_view_state';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
 type RedirectToNodeLogsType = RouteComponentProps<{
@@ -21,49 +21,30 @@ type RedirectToNodeLogsType = RouteComponentProps<{
 
 export const RedirectToNodeLogs = ({
   match: {
-    params: { nodeId, nodeType, logViewId = DEFAULT_LOG_VIEW_ID },
+    params: { nodeId, nodeType, logViewId = DEFAULT_LOG_VIEW.logViewId },
   },
   location,
 }: RedirectToNodeLogsType) => {
   const {
-    services: { locators },
+    services: { share },
   } = useKibanaContextForPlugin();
+  const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
 
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
   useEffect(() => {
-    locators.nodeLogsLocator.navigate(
+    nodeLogsLocator.navigate(
       {
+        nodeField: findInventoryFields(nodeType).id,
         nodeId,
-        nodeType,
         time,
         filter,
         logView: { type: 'log-view-reference', logViewId },
       },
       { replace: true }
     );
-  }, [filter, locators.nodeLogsLocator, logViewId, nodeId, nodeType, time]);
+  }, [filter, nodeLogsLocator, logViewId, nodeId, nodeType, time]);
 
   return null;
-};
-
-export const getNodeLogsUrl = ({
-  nodeId,
-  nodeType,
-  time,
-}: {
-  nodeId: string;
-  nodeType: InventoryItemType;
-  time?: number;
-}): LinkDescriptor => {
-  return {
-    app: 'logs',
-    pathname: `link-to/${nodeType}-logs/${nodeId}`,
-    search: time
-      ? {
-          time: `${time}`,
-        }
-      : undefined,
-  };
 };

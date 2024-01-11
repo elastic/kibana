@@ -11,9 +11,10 @@ import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import Mustache from 'mustache';
 
 const publicUrlWarning = i18n.translate(
-  'xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl',
+  'xpack.triggersActionsUI.sections.actionTypeForm.warning.publicBaseUrl',
   {
-    defaultMessage: 'server.publicBaseUrl is not set. Actions will use relative URLs.',
+    defaultMessage:
+      'server.publicBaseUrl is not set. Generated URLs will be either relative or empty.',
   }
 );
 
@@ -31,15 +32,21 @@ export function validateParamsForWarnings(
       return acc;
     }, new Array<string>());
 
-    const variables = new Set(
-      (Mustache.parse(value) as Array<[string, string]>)
-        .filter(([type]) => type === 'name')
-        .map(([, v]) => v)
-    );
-    const hasUrlFields = some(publicUrlFields, (publicUrlField) => variables.has(publicUrlField));
-    if (hasUrlFields) {
+    try {
+      const variables = new Set(
+        (Mustache.parse(value) as Array<[string, string]>)
+          .filter(([type]) => type === 'name')
+          .map(([, v]) => v)
+      );
+      const hasUrlFields = some(publicUrlFields, (publicUrlField) => variables.has(publicUrlField));
+      if (hasUrlFields) {
+        return publicUrlWarning;
+      }
+    } catch (e) {
+      // Better to set the warning msg if you do not know if the mustache template is invalid
       return publicUrlWarning;
     }
   }
+
   return null;
 }

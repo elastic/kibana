@@ -49,12 +49,13 @@ export function textBasedQueryStateToExpressionAst({
 
   if (query && isOfAggregateQueryType(query)) {
     const mode = getAggregateQueryMode(query);
-    // sql query
-    if (mode === 'sql' && 'sql' in query) {
-      const essql = aggregateQueryToAst(query, timeFieldName);
+    for (const esMode of ['sql', 'esql']) {
+      if (mode === esMode && esMode in query) {
+        const essql = aggregateQueryToAst(query, timeFieldName);
 
-      if (essql) {
-        ast.chain.push(essql);
+        if (essql) {
+          ast.chain.push(essql);
+        }
       }
     }
   }

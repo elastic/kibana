@@ -18,13 +18,14 @@ import {
   Settings,
   TickFormatter,
   XYBrushEvent,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { Annotation } from '../../../../../common/annotations';
 import {
   asAbsoluteDateTime,
@@ -69,7 +70,7 @@ export function BreakdownChart({
   id,
 }: Props) {
   const history = useHistory();
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
   const { core } = useApmPluginContext();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const {
@@ -106,15 +107,16 @@ export function BreakdownChart({
       id={id}
     >
       <Chart ref={chartRef}>
+        <Tooltip stickTo="top" showNullValues />
         <Settings
-          tooltip={{ stickTo: 'top', showNullValues: true }}
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
-          theme={chartTheme}
+          theme={chartThemes.theme}
+          baseTheme={chartThemes.baseTheme}
           xDomain={{ min, max }}
           flatLegend
           onPointerUpdate={updatePointerEvent}
@@ -123,6 +125,7 @@ export function BreakdownChart({
               visible: true,
             },
           }}
+          locale={i18n.getLocale()}
         />
         <Axis
           id="x-axis"

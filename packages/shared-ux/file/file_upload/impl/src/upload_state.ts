@@ -97,15 +97,22 @@ export class UploadState {
     return this.uploading$.getValue();
   }
 
-  private validateFiles(files: File[]): undefined | string {
-    if (
-      this.fileKind.maxSizeBytes != null &&
-      files.some((file) => file.size > this.fileKind.maxSizeBytes!)
-    ) {
-      return i18nTexts.fileTooLarge(String(this.fileKind.maxSizeBytes));
+  private readonly validateFile = (file: File): void => {
+    const fileKind = this.fileKind;
+
+    if (fileKind.maxSizeBytes != null && file.size > this.fileKind.maxSizeBytes!) {
+      const message = i18nTexts.fileTooLarge(String(this.fileKind.maxSizeBytes));
+      throw new Error(message);
     }
-    return;
-  }
+
+    if (fileKind.allowedMimeTypes != null && !fileKind.allowedMimeTypes.includes(file.type)) {
+      const message = i18nTexts.mimeTypeNotSupported(
+        file.type,
+        fileKind.allowedMimeTypes.join(', ')
+      );
+      throw new Error(message);
+    }
+  };
 
   public setFiles = (files: File[]): void => {
     if (this.isUploading()) {
@@ -117,14 +124,19 @@ export class UploadState {
       this.error$.next(undefined);
     }
 
-    const validationError = this.validateFiles(files);
+    let error: undefined | Error;
+    try {
+      files.forEach(this.validateFile);
+    } catch (err) {
+      error = err;
+    }
 
     this.files$$.next(
       files.map((file) =>
         createStateSubject<FileState>({
           file,
           status: 'idle',
-          error: validationError ? new Error(validationError) : undefined,
+          error,
         })
       )
     );

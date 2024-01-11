@@ -12,12 +12,15 @@ import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
 import type { MigrationLog } from '../../../types';
 import { isTypeof } from '../../actions';
+import { getAliases } from '../../../model/helpers';
 import {
   getCurrentIndex,
   checkVersionCompatibility,
   buildIndexMappings,
   getAliasActions,
   generateAdditiveMappingDiff,
+  checkIndexCurrentAlgorithm,
+  removePropertiesFromV2,
 } from '../../utils';
 import type { ModelStage } from '../types';
 
@@ -43,9 +46,25 @@ export const init: ModelStage<
   const logs: MigrationLog[] = [...state.logs];
 
   const indices = res.right;
-  const currentIndex = getCurrentIndex(indices, context.indexPrefix);
+  const aliasesRes = getAliases(indices);
+  if (Either.isLeft(aliasesRes)) {
+    return {
+      ...state,
+      controlState: 'FATAL',
+      reason: `The ${
+        aliasesRes.left.alias
+      } alias is pointing to multiple indices: ${aliasesRes.left.indices.join(',')}.`,
+    };
+  }
+  const aliasMap = aliasesRes.right;
 
-  // No indices were found, likely because it is the first time Kibana boots.
+  const currentIndex = getCurrentIndex({
+    indices: Object.keys(indices),
+    aliases: aliasMap,
+    indexPrefix: context.indexPrefix,
+  });
+
+  // No indices were found, likely because it is a fresh cluster.
   // In that case, we just create the index.
   if (!currentIndex) {
     return {
@@ -60,6 +79,73 @@ export const init: ModelStage<
   // Index was found. This is the standard scenario, we check the model versions
   // compatibility before going further.
   const currentMappings = indices[currentIndex].mappings;
+
+  // Index is already present, so we check which algo was last used on it
+  const currentAlgo = checkIndexCurrentAlgorithm(currentMappings);
+
+  logs.push({
+    level: 'info',
+    message: `INIT: current algo check result: ${currentAlgo}`,
+  });
+
+  // incompatible (pre 8.8/index-split https://github.com/elastic/kibana/pull/154888) v2 algo => we terminate
+  if (currentAlgo === 'v2-incompatible') {
+    return {
+      ...state,
+      logs,
+      controlState: 'FATAL',
+      reason: `Index ${currentIndex} is using an incompatible version of the v2 algorithm`,
+    };
+  }
+  // unknown algo => we terminate
+  if (currentAlgo === 'unknown') {
+    return {
+      ...state,
+      logs,
+      controlState: 'FATAL',
+      reason: `Cannot identify algorithm used for index ${currentIndex}`,
+    };
+  }
+
+  const existingAliases = Object.keys(indices[currentIndex].aliases);
+  const aliasActions = getAliasActions({
+    existingAliases,
+    currentIndex,
+    indexPrefix: context.indexPrefix,
+    kibanaVersion: context.kibanaVersion,
+  });
+  // cloning as we may be mutating it in later stages.
+  let currentIndexMeta = cloneDeep(currentMappings._meta!);
+  if (currentAlgo === 'v2-compatible') {
+    currentIndexMeta = removePropertiesFromV2(currentIndexMeta);
+  }
+
+  const commonState = {
+    logs,
+    currentIndex,
+    currentIndexMeta,
+    aliases: existingAliases,
+    aliasActions,
+    previousMappings: currentMappings,
+    previousAlgorithm:
+      currentAlgo === 'v2-compatible' || currentAlgo === 'v2-partially-migrated'
+        ? ('v2' as const)
+        : ('zdt' as const),
+  };
+
+  // compatible (8.8+) v2 algo => we jump to update index mapping
+  if (currentAlgo === 'v2-compatible') {
+    const indexMappings = buildIndexMappings({ types });
+    return {
+      ...state,
+      controlState: 'UPDATE_INDEX_MAPPINGS',
+      ...commonState,
+      additiveMappingChanges: indexMappings.properties,
+    };
+  }
+
+  // Index was found and is already using ZDT algo. This is the standard scenario.
+  // We check the model versions compatibility before going further.
   const versionCheck = checkVersionCompatibility({
     mappings: currentMappings,
     types,
@@ -71,25 +157,6 @@ export const init: ModelStage<
     level: 'info',
     message: `INIT: mapping version check result: ${versionCheck.status}`,
   });
-
-  const aliases = Object.keys(indices[currentIndex].aliases);
-  const aliasActions = getAliasActions({
-    existingAliases: aliases,
-    currentIndex,
-    indexPrefix: context.indexPrefix,
-    kibanaVersion: context.kibanaVersion,
-  });
-  // cloning as we may be mutating it in later stages.
-  const currentIndexMeta = cloneDeep(currentMappings._meta!);
-
-  const commonState = {
-    logs,
-    currentIndex,
-    currentIndexMeta,
-    aliases,
-    aliasActions,
-    previousMappings: currentMappings,
-  };
 
   switch (versionCheck.status) {
     // app version is greater than the index mapping version.

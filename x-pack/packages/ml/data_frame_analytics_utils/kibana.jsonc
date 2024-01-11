@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-data-frame-analytics-utils",
+  "owner": "@elastic/ml-ui"
+}

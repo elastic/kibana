@@ -88,11 +88,24 @@ Object {
 exports[`KQL Custom Transform Generator filters the source using the kql query 1`] = `
 Object {
   "bool": Object {
-    "minimum_should_match": 1,
-    "should": Array [
+    "filter": Array [
       Object {
-        "match": Object {
-          "labels.groupId": "group-4",
+        "range": Object {
+          "log_timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "bool": Object {
+          "minimum_should_match": 1,
+          "should": Array [
+            Object {
+              "match": Object {
+                "labels.groupId": "group-4",
+              },
+            },
+          ],
         },
       },
     ],
@@ -105,12 +118,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 1,
+    "version": 3,
   },
-  "description": "Rolled-up SLI data for SLO: irrelevant",
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v1",
-    "pipeline": ".slo-observability.sli.monthly",
+    "index": ".slo-observability.sli-v3",
+    "pipeline": ".slo-observability.sli.pipeline-v3",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -158,6 +172,11 @@ Object {
           "field": "slo.id",
         },
       },
+      "slo.instanceId": Object {
+        "terms": Object {
+          "field": "slo.instanceId",
+        },
+      },
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
@@ -167,16 +186,33 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
-    "index": "my-index*",
+    "index": Array [
+      "my-index*",
+      "my-other-index*",
+    ],
     "query": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "labels.groupId": "group-3",
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
             },
           },
         ],
@@ -185,7 +221,13 @@ Object {
     "runtime_mappings": Object {
       "slo.id": Object {
         "script": Object {
-          "source": Any<String>,
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.instanceId": Object {
+        "script": Object {
+          "source": "emit('*')",
         },
         "type": "keyword",
       },
@@ -203,7 +245,7 @@ Object {
       "field": "log_timestamp",
     },
   },
-  "transform_id": Any<String>,
+  "transform_id": "slo-irrelevant-1",
 }
 `;
 
@@ -212,12 +254,13 @@ Object {
   "_meta": Object {
     "managed": true,
     "managed_by": "observability",
-    "version": 1,
+    "version": 3,
   },
-  "description": "Rolled-up SLI data for SLO: irrelevant",
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": ".slo-observability.sli-v1",
-    "pipeline": ".slo-observability.sli.monthly",
+    "index": ".slo-observability.sli-v3",
+    "pipeline": ".slo-observability.sli.pipeline-v3",
   },
   "frequency": "1m",
   "pivot": Object {
@@ -256,6 +299,11 @@ Object {
           "field": "slo.id",
         },
       },
+      "slo.instanceId": Object {
+        "terms": Object {
+          "field": "slo.instanceId",
+        },
+      },
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
@@ -265,16 +313,33 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
-    "index": "my-index*",
+    "index": Array [
+      "my-index*",
+      "my-other-index*",
+    ],
     "query": Object {
       "bool": Object {
-        "minimum_should_match": 1,
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "labels.groupId": "group-3",
+            "range": Object {
+              "log_timestamp": Object {
+                "gte": "now-7d/d",
+              },
+            },
+          },
+          Object {
+            "bool": Object {
+              "minimum_should_match": 1,
+              "should": Array [
+                Object {
+                  "match": Object {
+                    "labels.groupId": "group-3",
+                  },
+                },
+              ],
             },
           },
         ],
@@ -283,7 +348,13 @@ Object {
     "runtime_mappings": Object {
       "slo.id": Object {
         "script": Object {
-          "source": Any<String>,
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.instanceId": Object {
+        "script": Object {
+          "source": "emit('*')",
         },
         "type": "keyword",
       },
@@ -301,6 +372,6 @@ Object {
       "field": "log_timestamp",
     },
   },
-  "transform_id": Any<String>,
+  "transform_id": "slo-irrelevant-1",
 }
 `;

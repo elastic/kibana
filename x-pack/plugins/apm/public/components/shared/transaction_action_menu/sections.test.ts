@@ -13,12 +13,24 @@ import {
   apmRouter as apmRouterBase,
   ApmRouter,
 } from '../../routing/apm_route_config';
+import {
+  logsLocatorsMock,
+  observabilityLogExplorerLocatorsMock,
+} from '../../../context/apm_plugin/mock_apm_plugin_context';
 
 const apmRouter = {
   ...apmRouterBase,
   link: (...args: [any]) =>
     `some-basepath/app/apm${apmRouterBase.link(...args)}`,
 } as ApmRouter;
+
+const { allDatasetsLocator } = observabilityLogExplorerLocatorsMock;
+const { nodeLogsLocator, traceLogsLocator } = logsLocatorsMock;
+
+const expectLogsLocatorsToBeCalled = () => {
+  expect(nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
+  expect(traceLogsLocator.getRedirectUrl).toBeCalledTimes(1);
+};
 
 describe('Transaction action menu', () => {
   const basePath = {
@@ -35,6 +47,10 @@ describe('Transaction action menu', () => {
   );
   const location = history.location;
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('shows required sections only', () => {
     const transaction = {
       timestamp,
@@ -48,6 +64,13 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
+        allDatasetsLocator,
+        logsLocators: logsLocatorsMock,
+        infraLinksAvailable: false,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
+        dataViewId: 'apm_static_data_view_id_default',
       })
     ).toEqual([
       [
@@ -59,14 +82,13 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
               condition: true,
             },
           ],
         },
         {
           key: 'serviceMap',
-          title: 'Service map',
+          title: 'Service Map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
@@ -85,13 +107,14 @@ describe('Transaction action menu', () => {
             {
               key: 'sampleDocument',
               label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
         },
       ],
     ]);
+    expectLogsLocatorsToBeCalled();
   });
 
   it('shows pod and required sections only', () => {
@@ -108,6 +131,13 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
+        allDatasetsLocator,
+        logsLocators: logsLocatorsMock,
+        infraLinksAvailable: true,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
+        dataViewId: 'apm_static_data_view_id_default',
       })
     ).toEqual([
       [
@@ -120,7 +150,6 @@ describe('Transaction action menu', () => {
             {
               key: 'podLogs',
               label: 'Pod logs',
-              href: 'some-basepath/app/logs/link-to/pod-logs/123?time=1580986800',
               condition: true,
             },
             {
@@ -139,14 +168,13 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
               condition: true,
             },
           ],
         },
         {
           key: 'serviceMap',
-          title: 'Service map',
+          title: 'Service Map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
@@ -165,13 +193,14 @@ describe('Transaction action menu', () => {
             {
               key: 'sampleDocument',
               label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
         },
       ],
     ]);
+    expectLogsLocatorsToBeCalled();
   });
 
   it('shows host and required sections only', () => {
@@ -188,6 +217,13 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
+        allDatasetsLocator,
+        logsLocators: logsLocatorsMock,
+        infraLinksAvailable: true,
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
+        dataViewId: 'apm_static_data_view_id_default',
       })
     ).toEqual([
       [
@@ -199,7 +235,6 @@ describe('Transaction action menu', () => {
             {
               key: 'hostLogs',
               label: 'Host logs',
-              href: 'some-basepath/app/logs/link-to/host-logs/foo?time=1580986800',
               condition: true,
             },
             {
@@ -218,14 +253,13 @@ describe('Transaction action menu', () => {
             {
               key: 'traceLogs',
               label: 'Trace logs',
-              href: 'some-basepath/app/logs/link-to/logs?time=1580986800&filter=trace.id:%22123%22%20OR%20(not%20trace.id:*%20AND%20%22123%22)',
               condition: true,
             },
           ],
         },
         {
           key: 'serviceMap',
-          title: 'Service map',
+          title: 'Service Map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
@@ -244,12 +278,13 @@ describe('Transaction action menu', () => {
             {
               key: 'sampleDocument',
               label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
         },
       ],
     ]);
+    expectLogsLocatorsToBeCalled();
   });
 });

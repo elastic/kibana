@@ -6,10 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+
+  readOnly: offeringBasedSchema({
+    serverless: schema.boolean({ defaultValue: false }),
+  }),
 });
 
-export type ConfigSchema = TypeOf<typeof configSchema>;
+export type PieConfig = TypeOf<typeof configSchema>;
+
+export interface PiePublicConfig {
+  readOnly?: boolean;
+}

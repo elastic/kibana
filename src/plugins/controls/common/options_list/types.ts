@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { FieldSpec, DataView, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
-import type { Filter, Query, BoolQuery, TimeRange } from '@kbn/es-query';
+import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
+import type { BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
-import type { OptionsListSortingType } from './suggestions_sorting';
 import type { DataControlInput } from '../types';
+import { OptionsListSearchTechnique } from './suggestions_searching';
+import type { OptionsListSortingType } from './suggestions_sorting';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
 export interface OptionsListEmbeddableInput extends DataControlInput {
+  searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
   selectedOptions?: string[];
   existsSelected?: boolean;
@@ -23,9 +25,9 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   hideActionBar?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+  placeholder?: string;
   hideSort?: boolean;
   exclude?: boolean;
-  placeholder?: string;
 }
 
 export type OptionsListSuggestions = Array<{ value: string; docCount?: number }>;
@@ -61,6 +63,7 @@ export type OptionsListRequest = Omit<
   OptionsListRequestBody,
   'filters' | 'fieldName' | 'fieldSpec' | 'textFieldName'
 > & {
+  searchTechnique?: OptionsListSearchTechnique;
   allowExpensiveQueries: boolean;
   timeRange?: TimeRange;
   runPastTimeout?: boolean;
@@ -75,10 +78,11 @@ export type OptionsListRequest = Omit<
  */
 export interface OptionsListRequestBody {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
+  searchTechnique?: OptionsListSearchTechnique;
   allowExpensiveQueries: boolean;
   sort?: OptionsListSortingType;
   filters?: Array<{ bool: BoolQuery }>;
-  selectedOptions?: string[];
+  selectedOptions?: Array<string | number>;
   runPastTimeout?: boolean;
   searchString?: string;
   fieldSpec?: FieldSpec;

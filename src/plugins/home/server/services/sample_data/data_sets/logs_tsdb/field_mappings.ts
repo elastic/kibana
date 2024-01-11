@@ -9,7 +9,6 @@
 export const fieldMappings = {
   request: {
     type: 'keyword',
-    time_series_dimension: true,
   },
   geo: {
     properties: {
@@ -32,7 +31,6 @@ export const fieldMappings = {
   },
   url: {
     type: 'keyword',
-    time_series_dimension: true,
   },
   message: {
     type: 'text',
@@ -121,6 +119,9 @@ export const fieldMappings = {
     type: 'long',
     time_series_metric: 'counter',
   },
+  bytes_normal_counter: {
+    type: 'long',
+  },
   bytes_gauge: {
     type: 'long',
     time_series_metric: 'gauge',
@@ -141,6 +142,7 @@ export const fieldMappings = {
     properties: {
       dataset: {
         type: 'keyword',
+        time_series_dimension: true,
       },
     },
   },

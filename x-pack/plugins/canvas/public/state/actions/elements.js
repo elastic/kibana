@@ -7,7 +7,7 @@
 
 import { createAction } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { get, pick, cloneDeep, without, last, debounce } from 'lodash';
+import { get, pick, cloneDeep, without, last } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter';
 import { createThunk } from '../../lib/create_thunk';
 import { isGroupId } from '../../lib/workpad';
@@ -112,13 +112,7 @@ const fetchContextFn = ({ dispatch, getState }, index, element, fullRefresh = fa
     });
 };
 
-// It is necessary to debounce fetching of the context in the situations
-// when the components of the arguments update the expression. For example, suppose there are
-// multiple datacolumns that change the column to the first one from the list after datasource update.
-// In that case, it is necessary to fetch the context only for the last version of the expression.
-const fetchContextFnDebounced = debounce(fetchContextFn, 100);
-
-export const fetchContext = createThunk('fetchContext', fetchContextFnDebounced);
+export const fetchContext = createThunk('fetchContext', fetchContextFn);
 
 const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, context) => {
   const argumentPath = [element.id, 'expressionRenderable'];
@@ -148,15 +142,9 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
     });
 };
 
-// It is necessary to debounce fetching of the renderable with the context in the situations
-// when the components of the arguments update the expression. For example, suppose there are
-// multiple datacolumns that change the column to the first one from the list after datasource update.
-// In that case, it is necessary to fetch the context only for the last version of the expression.
-const fetchRenderableWithContextFnDebounced = debounce(fetchRenderableWithContextFn, 100);
-
 export const fetchRenderableWithContext = createThunk(
   'fetchRenderableWithContext',
-  fetchRenderableWithContextFnDebounced
+  fetchRenderableWithContextFn
 );
 
 export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, element) => {

@@ -11,13 +11,12 @@ import React, { Component } from 'react';
 
 import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
 
 export type IndexPatternSelectProps = Required<
-  Omit<
-    EuiComboBoxProps<any>,
-    'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'
-  >,
+  Omit<EuiComboBoxProps<any>, 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'>,
   'placeholder'
 > & {
   onChange: (indexPatternId?: string) => void;
@@ -31,7 +30,7 @@ export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
 
 interface IndexPatternSelectState {
   isLoading: boolean;
-  options: [];
+  options: Array<{ value: string; label: string }>;
   selectedIndexPattern: { value: string; label: string } | undefined;
   searchValue: string | undefined;
 }
@@ -150,16 +149,20 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
       ...rest
     } = this.props;
 
+    const panelMinWidth = calculateWidthFromEntries(this.state.options, ['label']);
+
     return (
       <EuiComboBox
         {...rest}
         placeholder={placeholder}
         singleSelection={true}
-        isLoading={this.state.isLoading}
+        isLoading={this.state.isLoading || this.props.isLoading}
         onSearchChange={this.fetchOptions}
         options={this.state.options}
         selectedOptions={this.state.selectedIndexPattern ? [this.state.selectedIndexPattern] : []}
         onChange={this.onChange}
+        truncationProps={MIDDLE_TRUNCATION_PROPS}
+        inputPopoverProps={{ panelMinWidth }}
       />
     );
   }

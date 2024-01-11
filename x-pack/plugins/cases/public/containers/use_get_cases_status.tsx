@@ -22,14 +22,12 @@ export const useGetCasesStatus = () => {
 
   return useQuery<CasesStatus, ServerError>(
     casesQueriesKeys.casesStatuses(),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return getCasesStatus({
+    ({ signal }) =>
+      getCasesStatus({
         http,
-        signal: abortCtrlRef.signal,
         query: { owner },
-      });
-    },
+        signal,
+      }),
     {
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_TITLE });

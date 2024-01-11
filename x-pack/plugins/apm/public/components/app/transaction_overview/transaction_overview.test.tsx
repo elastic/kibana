@@ -6,7 +6,7 @@
  */
 
 import { queryByLabelText } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, MemoryHistory } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -32,9 +32,7 @@ const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },
 } as unknown as Partial<CoreStart>);
 
-const history = createMemoryHistory();
-jest.spyOn(history, 'push');
-jest.spyOn(history, 'replace');
+let history: MemoryHistory<unknown>;
 
 function setup({
   urlParams,
@@ -43,6 +41,10 @@ function setup({
   urlParams: ApmUrlParams;
   serviceTransactionTypes: string[];
 }) {
+  history = createMemoryHistory();
+  jest.spyOn(history, 'push');
+  jest.spyOn(history, 'replace');
+
   history.replace({
     pathname: '/services/foo/transactions',
     search: fromQuery(urlParams),

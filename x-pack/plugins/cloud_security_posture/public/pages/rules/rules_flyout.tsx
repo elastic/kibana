@@ -18,14 +18,15 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { CspBenchmarkRule, CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
-import type { RuleSavedObject } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  rule: RuleSavedObject;
+  rule: CspBenchmarkRule;
 }
 
 const tabs = [
@@ -59,7 +60,7 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
     >
       <EuiFlyoutHeader>
         <EuiTitle size="l">
-          <h2>{rule.attributes.metadata.name}</h2>
+          <h2>{rule.metadata.name}</h2>
         </EuiTitle>
         <EuiSpacer />
         <EuiTabs>
@@ -76,22 +77,19 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
         </EuiTabs>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {tab === 'overview' && <RuleOverviewTab rule={rule} />}
+        {tab === 'overview' && <RuleOverviewTab rule={rule.metadata} />}
         {tab === 'remediation' && (
-          <EuiDescriptionList
-            compressed={false}
-            listItems={getRemediationList(rule.attributes.metadata)}
-          />
+          <EuiDescriptionList compressed={false} listItems={getRemediationList(rule.metadata)} />
         )}
       </EuiFlyoutBody>
     </EuiFlyout>
   );
 };
 
-const RuleOverviewTab = ({ rule }: { rule: RuleSavedObject }) => (
+const RuleOverviewTab = ({ rule }: { rule: CspBenchmarkRuleMetadata }) => (
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
-      <EuiDescriptionList listItems={getRuleList(rule.attributes.metadata)} />
+      <EuiDescriptionList listItems={getRuleList(rule)} />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

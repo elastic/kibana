@@ -11,7 +11,8 @@ import { EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 
-import { CodeEditor, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { suggest, getSuggestion } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
@@ -86,7 +87,9 @@ function TimelionExpressionInput({ value, setValue }: TimelionExpressionInputPro
     const abortController = new AbortController();
     if (kibana.services.http) {
       kibana.services.http
-        .get<ITimelionFunction[]>('../api/timelion/functions', { signal: abortController.signal })
+        .get<ITimelionFunction[]>('../internal/timelion/functions', {
+          signal: abortController.signal,
+        })
         .then((data) => {
           functionList.current = data;
         });

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { defaultTrigger } from '@kbn/ui-actions-browser';
 import { ActionExecutionContext, createAction } from '..';
-import { defaultTrigger } from '../triggers';
 
 const sayHelloAction = createAction<{ amICompatible: boolean }>({
   id: 'test',

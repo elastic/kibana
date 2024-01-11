@@ -369,7 +369,7 @@
                 "section": "def-common.AppDeepLink",
                 "text": "AppDeepLink"
               },
-              "[] | undefined"
+              "<string>[] | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
             "deprecated": false,
@@ -401,9 +401,7 @@
               "\nReturns a confirm action, resulting on prompting a message to the user before leaving the\napplication, allowing him to choose if he wants to stay on the app or confirm that he\nwants to leave.\n"
             ],
             "signature": [
-              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: ",
-              "EuiButtonColor",
-              " | undefined) => ",
+              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined) => ",
               {
                 "pluginId": "@kbn/core-application-browser",
                 "scope": "common",
@@ -494,8 +492,7 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "EuiButtonColor",
-                  " | undefined"
+                  "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
@@ -614,8 +611,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "EuiButtonColor",
-              " | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
@@ -1082,6 +1078,23 @@
             "signature": [
               "Observable",
               "<string | undefined>"
+            ],
+            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser",
+            "id": "def-common.ApplicationStart.currentLocation$",
+            "type": "Object",
+            "tags": [],
+            "label": "currentLocation$",
+            "description": [
+              "\nAn observable that emits the current path#hash and each subsequent update using the global history instance"
+            ],
+            "signature": [
+              "Observable",
+              "<string>"
             ],
             "path": "packages/core/application/core-application-browser/src/contracts.ts",
             "deprecated": false,
@@ -1769,7 +1782,7 @@
           "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
         ],
         "signature": [
-          "{ id: string; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
+          "{ id: Id; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -1777,7 +1790,15 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; searchable?: boolean | undefined; } & ",
+          " | undefined; searchable?: boolean | undefined; category?: ",
+          {
+            "pluginId": "@kbn/core-application-common",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationCommonPluginApi",
+            "section": "def-common.AppCategory",
+            "text": "AppCategory"
+          },
+          " | undefined; } & ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -1793,7 +1814,7 @@
             "section": "def-common.AppDeepLink",
             "text": "AppDeepLink"
           },
-          "[] | undefined; } | { path?: string | undefined; deepLinks: ",
+          "<Id>[] | undefined; } | { path?: string | undefined; deepLinks: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -1801,7 +1822,7 @@
             "section": "def-common.AppDeepLink",
             "text": "AppDeepLink"
           },
-          "[]; })"
+          "<Id>[]; })"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
@@ -2014,7 +2035,7 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; tooltip?: string | undefined; navLinkStatus?: ",
+          " | undefined; navLinkStatus?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2022,7 +2043,7 @@
             "section": "def-common.AppNavLinkStatus",
             "text": "AppNavLinkStatus"
           },
-          " | undefined; searchable?: boolean | undefined; deepLinks?: ",
+          " | undefined; searchable?: boolean | undefined; tooltip?: string | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2030,7 +2051,7 @@
             "section": "def-common.AppDeepLink",
             "text": "AppDeepLink"
           },
-          "[] | undefined; defaultPath?: string | undefined; }"
+          "<string>[] | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
@@ -2112,7 +2133,7 @@
             "section": "def-common.AppDeepLink",
             "text": "AppDeepLink"
           },
-          ", \"keywords\" | \"navLinkStatus\" | \"searchable\" | \"deepLinks\"> & { deepLinks: ",
+          "<string>, \"keywords\" | \"navLinkStatus\" | \"searchable\" | \"deepLinks\"> & { deepLinks: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",

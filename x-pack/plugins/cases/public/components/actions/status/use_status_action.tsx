@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import type { CasesUI } from '../../../../common';
-import { CaseStatuses } from '../../../../common';
+import { CaseStatuses } from '../../../../common/types/domain';
 
 import * as i18n from './translations';
 import type { UseActionProps } from '../types';

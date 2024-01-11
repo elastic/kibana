@@ -25,7 +25,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
         data-test-subj="loadSavedObjects"
         type="button"
       >
@@ -82,7 +82,7 @@ Array [
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
         data-test-subj="loadSavedObjects"
         type="button"
       >
@@ -138,11 +138,9 @@ exports[`renders 1`] = `
       grow={false}
     >
       <EuiButton
-        color="primary"
         data-test-subj="loadSavedObjects"
         isLoading={false}
         onClick={[Function]}
-        size="m"
       >
         Load Kibana objects
       </EuiButton>

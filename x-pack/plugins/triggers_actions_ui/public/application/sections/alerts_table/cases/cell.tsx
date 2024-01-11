@@ -12,7 +12,7 @@ import type { CaseTooltipContentProps } from '@kbn/cases-components';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { CellComponentProps } from '../types';
 import { useCaseViewNavigation } from './use_case_view_navigation';
-import { Case } from '../hooks/api';
+import { Case } from '../hooks/apis/bulk_get_cases';
 
 const formatCase = (theCase: Case): CaseTooltipContentProps => ({
   title: theCase.title,
@@ -27,8 +27,8 @@ const formatCase = (theCase: Case): CaseTooltipContentProps => ({
 });
 
 const CasesCellComponent: React.FC<CellComponentProps> = (props) => {
-  const { isLoading, alert, cases } = props;
-  const { navigateToCaseView } = useCaseViewNavigation();
+  const { isLoading, alert, cases, caseAppId } = props;
+  const { navigateToCaseView } = useCaseViewNavigation(caseAppId);
 
   const caseIds = alert[ALERT_CASE_IDS] ?? [];
 

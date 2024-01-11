@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { pick } from 'lodash';
+import { isEmpty, pick } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RawRule, RuleTypeParams, SanitizedRule, Rule } from '../../types';
@@ -29,11 +29,13 @@ import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import type { IndexType, RulesClientContext } from '../types';
 import { formatLegacyActions } from '../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface FindParams {
   options?: FindOptions;
   excludeFromPublicApi?: boolean;
   includeSnoozeData?: boolean;
+  featuresIds?: string[];
 }
 
 export interface FindOptions extends IndexType {
@@ -50,6 +52,7 @@ export interface FindOptions extends IndexType {
   };
   fields?: string[];
   filter?: string | KueryNode;
+  filterConsumers?: string[];
 }
 
 export interface FindResult<Params extends RuleTypeParams> {
@@ -62,7 +65,7 @@ export interface FindResult<Params extends RuleTypeParams> {
 export async function find<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   {
-    options: { fields, ...options } = {},
+    options: { fields, filterConsumers, ...options } = {},
     excludeFromPublicApi = false,
     includeSnoozeData = false,
   }: FindParams = {}
@@ -71,7 +74,8 @@ export async function find<Params extends RuleTypeParams = never>(
   try {
     authorizationTuple = await context.authorization.getFindAuthorizationFilter(
       AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts
+      alertingAuthorizationFilterOpts,
+      isEmpty(filterConsumers) ? undefined : new Set(filterConsumers)
     );
   } catch (error) {
     context.auditLogger?.log(
@@ -84,7 +88,6 @@ export async function find<Params extends RuleTypeParams = never>(
   }
 
   const { filter: authorizationFilter, ensureRuleTypeIsAuthorized } = authorizationTuple;
-
   const filterKueryNode = buildKueryNodeFilter(options.filter);
   let sortField = mapSortField(options.sortField);
   if (excludeFromPublicApi) {
@@ -131,7 +134,7 @@ export async function find<Params extends RuleTypeParams = never>(
         ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
         : authorizationFilter) ?? filterKueryNode,
     fields: fields ? includeFieldsRequiredForAuthentication(fields) : fields,
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
   });
 
   const siemRules: Rule[] = [];
@@ -147,7 +150,7 @@ export async function find<Params extends RuleTypeParams = never>(
       context.auditLogger?.log(
         ruleAuditEvent({
           action: RuleAuditAction.FIND,
-          savedObject: { type: 'alert', id },
+          savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
           error,
         })
       );
@@ -177,7 +180,7 @@ export async function find<Params extends RuleTypeParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.FIND,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
       })
     )
   );

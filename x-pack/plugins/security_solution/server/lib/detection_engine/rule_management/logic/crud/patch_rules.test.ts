@@ -13,7 +13,7 @@ import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks'
 import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateRulesSchemaMock,
-} from '../../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 describe('patchRules', () => {
   it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {

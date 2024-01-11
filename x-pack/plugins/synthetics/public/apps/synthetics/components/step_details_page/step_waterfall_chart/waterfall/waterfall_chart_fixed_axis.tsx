@@ -17,9 +17,11 @@ import {
   Settings,
   TickFormatter,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { useChartTheme } from '../../../../../../hooks/use_chart_theme';
+import { i18n } from '@kbn/i18n';
+import { useBaseChartTheme } from '../../../../../../hooks/use_base_chart_theme';
 import { WaterfallChartFixedAxisContainer } from './styles';
 import { WaterfallChartMarkers } from './waterfall_marker/waterfall_markers';
 
@@ -30,24 +32,26 @@ interface Props {
 }
 
 export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }: Props) => {
-  const theme = useChartTheme();
+  const baseChartTheme = useBaseChartTheme();
   const { euiTheme } = useEuiTheme();
 
   return (
     <WaterfallChartFixedAxisContainer>
       <Chart className="axis-only-chart" data-test-subj="axisOnlyChart">
+        <Tooltip type={TooltipType.None} />
         <Settings
           showLegend={false}
           rotation={90}
-          tooltip={{ type: TooltipType.None }}
           theme={[
             {
               background: {
                 color: 'transparent',
               },
             },
-            theme,
           ]}
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={baseChartTheme}
+          locale={i18n.getLocale()}
         />
 
         <Axis
@@ -61,7 +65,9 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
             },
           }}
           domain={domain}
-          showGridLines={true}
+          gridLine={{
+            visible: true,
+          }}
         />
 
         <BarSeries

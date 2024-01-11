@@ -6,7 +6,6 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import {
@@ -19,14 +18,12 @@ export function createIndexPatternServiceMock({
   core = coreMock.createStart(),
   dataViews = dataViewPluginMocks.createStartContract(),
   uiActions = uiActionsPluginMock.createStartContract(),
-  data = dataPluginMock.createStartContract(),
   updateIndexPatterns = jest.fn(),
   replaceIndexPattern = jest.fn(),
 }: Partial<IndexPatternServiceProps> = {}): IndexPatternServiceAPI {
   return createIndexPatternService({
     core,
     dataViews,
-    data,
     updateIndexPatterns,
     replaceIndexPattern,
     uiActions,

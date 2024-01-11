@@ -39,10 +39,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ? {
                   documentType: ApmDocumentType.TransactionMetric,
                   rollupInterval: RollupInterval.OneMinute,
+                  useDurationSummary: true,
                 }
               : {
                   documentType: ApmDocumentType.TransactionEvent,
                   rollupInterval: RollupInterval.None,
+                  useDurationSummary: false,
                 }),
           },
         },
@@ -72,13 +74,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
-  registry.when('Service maps APIs', { config: 'trial', archives: [] }, () => {
+  registry.when('Service Maps APIs', { config: 'trial', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;
       const GO_PROD_LIST_ERROR_RATE = 25;
       const GO_PROD_ID_RATE = 50;
       const GO_PROD_ID_ERROR_RATE = 50;
-      before(async () => {
+      before(() => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
@@ -86,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const transactionNameProductList = 'GET /api/product/list';
         const transactionNameProductId = 'GET /api/product/:id';
 
-        await synthtraceEsClient.index([
+        return synthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_RATE)

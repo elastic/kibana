@@ -28,12 +28,13 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
   const config: ConfigSchema = {
     unsafe: {
       alertDetails: {
-        logs: { enabled: false },
         metrics: { enabled: false },
         uptime: { enabled: false },
+        observability: { enabled: false },
       },
     },
   };
+
   const mockTheme: CoreTheme = {
     darkMode: false,
   };
@@ -65,7 +66,6 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         charts: {
           theme: {
             useChartsBaseTheme: () => {},
-            useChartsTheme: () => {},
           },
           activeCursor: () => {},
         },

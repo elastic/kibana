@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSkeletonText, EuiText } from '@elastic/eui';
 
-import type { ConnectorTypes } from '../../../common/api';
+import type { ConnectorTypes } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon } from '../utils';
 

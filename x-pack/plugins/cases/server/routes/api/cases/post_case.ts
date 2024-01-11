@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { CasePostRequest } from '../../../../common/api';
 import { CASES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { caseApiV1 } from '../../../../common/types/api';
+import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const postCaseRoute = createCasesRoute({
   method: 'post',
@@ -17,10 +18,12 @@ export const postCaseRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      const theCase = request.body as CasePostRequest;
+      const theCase = request.body as caseApiV1.CasePostRequest;
+
+      const res: caseDomainV1.Case = await casesClient.cases.create({ ...theCase });
 
       return response.ok({
-        body: await casesClient.cases.create({ ...theCase }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

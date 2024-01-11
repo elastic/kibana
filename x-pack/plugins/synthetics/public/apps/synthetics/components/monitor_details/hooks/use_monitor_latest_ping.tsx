@@ -15,7 +15,6 @@ import { useSelectedMonitor } from './use_selected_monitor';
 
 interface UseMonitorLatestPingParams {
   monitorId?: string;
-  locationLabel?: string;
 }
 
 export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
@@ -26,7 +25,7 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const location = useSelectedLocation();
 
   const monitorId = params?.monitorId ?? monitor?.id;
-  const locationLabel = params?.locationLabel ?? location?.label;
+  const locationLabel = location?.label;
 
   const { data: latestPing, loading, loaded } = useSelector(selectLastRunMetadata);
 

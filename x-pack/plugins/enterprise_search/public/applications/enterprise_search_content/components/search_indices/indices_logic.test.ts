@@ -11,11 +11,10 @@ import { connectorIndex, elasticsearchViewIndices } from '../../__mocks__/view_i
 
 import moment from 'moment';
 
+import { ConnectorStatus, SyncStatus } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { HttpError, Status } from '../../../../../common/types/api';
-
-import { ConnectorStatus, SyncStatus } from '../../../../../common/types/connectors';
 
 import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 

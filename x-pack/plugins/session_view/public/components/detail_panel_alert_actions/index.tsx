@@ -8,7 +8,7 @@ import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiContextMenuPanel, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessEvent } from '../../../common';
 
 export const BUTTON_TEST_ID = 'sessionView:detailPanelAlertActionsBtn';
 export const SHOW_DETAILS_TEST_ID = 'sessionView:detailPanelAlertActionShowDetails';

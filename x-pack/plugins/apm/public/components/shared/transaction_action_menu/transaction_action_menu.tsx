@@ -7,26 +7,38 @@
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import {
   ActionMenu,
   ActionMenuDivider,
+  getContextMenuItemsFromActions,
   Section,
   SectionLink,
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
-import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
+import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useApmFeatureFlag } from '../../../hooks/use_apm_feature_flag';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
+import { CustomLinkFlyout } from './custom_link_flyout';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 
 interface Props {
   readonly transaction?: Transaction;
@@ -61,8 +73,26 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 
   const [isActionPopoverOpen, setIsActionPopoverOpen] = useState(false);
 
+  const { isProfilingPluginInitialized, profilingLocators } =
+    useProfilingPlugin();
+
+  const [isCreateEditFlyoutOpen, setIsCreateEditFlyoutOpen] = useState(false);
+
+  function openCustomLinkFlyout() {
+    setIsCreateEditFlyoutOpen(true);
+    setIsActionPopoverOpen(false);
+  }
+
   return (
     <>
+      {hasGoldLicense && (
+        <CustomLinkFlyout
+          transaction={transaction}
+          isOpen={isCreateEditFlyoutOpen}
+          onClose={() => setIsCreateEditFlyoutOpen(false)}
+        />
+      )}
+
       <ActionMenu
         id="transactionActionMenu"
         closePopover={() => setIsActionPopoverOpen(false)}
@@ -70,7 +100,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
         anchorPosition="downRight"
         button={
           <ActionMenuButton
-            isLoading={isLoading}
+            isLoading={isLoading || isProfilingPluginInitialized === undefined}
             onClick={() =>
               setIsActionPopoverOpen(
                 (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen
@@ -79,23 +109,64 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
           />
         }
       >
-        <ActionMenuSections transaction={transaction} />
-        {hasGoldLicense && <CustomLinkMenuSection transaction={transaction} />}
+        <ActionMenuSections
+          transaction={transaction}
+          profilingLocators={profilingLocators}
+        />
+        {hasGoldLicense && (
+          <CustomLinkMenuSection
+            transaction={transaction}
+            openCreateCustomLinkFlyout={openCustomLinkFlyout}
+          />
+        )}
       </ActionMenu>
     </>
   );
 }
 
-function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
-  const { core, uiActions } = useApmPluginContext();
+function ActionMenuSections({
+  transaction,
+  profilingLocators,
+}: {
+  transaction?: Transaction;
+  profilingLocators?: ProfilingLocators;
+}) {
+  const { core, uiActions, share } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
+  const { dataView } = useAdHocApmDataView();
+
+  const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
+    ALL_DATASETS_LOCATOR_ID
+  )!;
+  const logsLocators = getLogsLocatorsFromUrlService(share.url);
+
+  const infraLinksAvailable = useApmFeatureFlag(
+    ApmFeatureFlagName.InfraUiAvailable
+  );
+
+  const {
+    query: { rangeFrom, rangeTo, environment },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall',
+    '/dependencies/operation'
+  );
 
   const sections = getSections({
     transaction,
     basePath: core.http.basePath,
     location,
     apmRouter,
+    infraLinksAvailable,
+    profilingLocators,
+    rangeFrom,
+    rangeTo,
+    environment,
+    allDatasetsLocator,
+    logsLocators,
+    dataViewId: dataView?.id,
   });
 
   const externalMenuItems = useAsync(() => {
@@ -126,7 +197,7 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
   }
 
   return (
-    <div>
+    <div data-test-subj="apmActionMenuInvestigateButtonPopup">
       {sections.map((section, idx) => {
         const isLastSection = idx !== sections.length - 1;
         return (
@@ -144,6 +215,7 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
                       label={action.label}
                       href={action.href}
                       onClick={action.onClick}
+                      showNewBadge={action.showNewBadge}
                     />
                   ))}
                 </SectionLinks>

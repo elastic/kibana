@@ -6,10 +6,12 @@
  */
 
 export function getFont(text: string) {
-  // We are matching Han characters which is one of the supported unicode scripts
+  // We are matching Han/Hangul/Hiragana/Katakana characters which is one of the supported unicode scripts
   // (you can see the full list of supported scripts here: http://www.unicode.org/standard/supported.html).
   // This will match Chinese, Japanese, Korean and some other Asian languages.
-  const isCKJ = /\p{Script=Han}/gu.test(text);
+  const isCKJ = /\p{Script=Han}|\p{Script=Hangul}|\p{Script=Hiragana}|\p{Script=Katakana}/gu.test(
+    text
+  );
   if (isCKJ) {
     return 'noto-cjk';
   } else {

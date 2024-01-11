@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { PingError, PingStatus } from '../../../common/runtime_types';
-import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { queryPings } from '../../common/pings/query_pings';
 
 import { getPingsRouteQuerySchema } from './get_pings';
 
-export const syntheticsGetPingStatusesRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const syntheticsGetPingStatusesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PING_STATUSES,
   validate: {

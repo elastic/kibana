@@ -17,17 +17,14 @@ import {
   Position,
   ScaleType,
   Settings,
-  TooltipValue,
-  TooltipValueFormatter,
+  TooltipHeaderFormatter,
+  Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { kibanaFieldFormat } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
-
-interface ChartTooltipValue extends TooltipValue {
-  skipHeader?: boolean;
-}
 
 export interface MetricDistributionChartData {
   x: number;
@@ -66,7 +63,7 @@ export const MetricDistributionChart: FC<Props> = ({
 
   const theme = useDataVizChartTheme();
 
-  const headerFormatter: TooltipValueFormatter = (tooltipData: ChartTooltipValue) => {
+  const headerFormatter: TooltipHeaderFormatter = (tooltipData) => {
     const xValue = tooltipData.value;
     const chartPoint: MetricDistributionChartData | undefined = chartData.find(
       (data) => data.x === xValue
@@ -87,7 +84,13 @@ export const MetricDistributionChart: FC<Props> = ({
       className="dataGridChart__histogram"
     >
       <Chart size={{ width, height }}>
-        <Settings theme={theme} tooltip={{ headerFormatter }} />
+        <Tooltip headerFormatter={headerFormatter} />
+        <Settings
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={LEGACY_LIGHT_THEME}
+          theme={theme}
+          locale={i18n.getLocale()}
+        />
         <Axis
           id="bottom"
           position={Position.Bottom}

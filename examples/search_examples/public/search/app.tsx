@@ -16,11 +16,7 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormLabel,
-  EuiHorizontalRule,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
+  EuiPageTemplate,
   EuiProgress,
   EuiSpacer,
   EuiTabbedContent,
@@ -33,10 +29,9 @@ import { IInspectorInfo } from '@kbn/data-plugin/common';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
+  isRunningResponse,
 } from '@kbn/data-plugin/public';
-import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -214,7 +209,7 @@ export const SearchExamplesApp = ({
       })
       .subscribe({
         next: (res) => {
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             setResponse(res);
             const aggResult: number | undefined = res.rawResponse.aggregations
@@ -251,9 +246,6 @@ export const SearchExamplesApp = ({
                 text: toMountPoint(res.warning),
               });
             }
-          } else if (isErrorResponse(res)) {
-            // TODO: Make response error status clearer
-            notifications.toasts.addDanger('An error has occurred');
           }
         },
         error: (e) => {
@@ -319,17 +311,15 @@ export const SearchExamplesApp = ({
       const result = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: abortController.signal,
-          disableShardFailureWarning: !showWarningToastNotifications,
+          disableWarningToasts: !showWarningToastNotifications,
           inspector,
         })
       );
       setRawResponse(result.rawResponse);
 
-      /* Here is an example of using showWarnings on the search service, using an optional callback to
-       * intercept the warnings before notification warnings are shown.
-       *
-       * Suppressing the shard failure warning notification from appearing by default requires setting
-       * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
+      /*
+       * Set disableWarningToasts to true to disable warning toasts and customize warning display.
+       * Then use showWarnings to customize warning notification.
        */
       if (showWarningToastNotifications) {
         setWarningContents([]);
@@ -399,16 +389,12 @@ export const SearchExamplesApp = ({
       .subscribe({
         next: (res) => {
           setResponse(res);
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             notifications.toasts.addSuccess({
               title: 'Query result',
               text: 'Query finished',
             });
-          } else if (isErrorResponse(res)) {
-            setIsLoading(false);
-            // TODO: Make response error status clearer
-            notifications.toasts.addWarning('An error has occurred');
           }
         },
         error: (e) => {
@@ -510,7 +496,7 @@ export const SearchExamplesApp = ({
             {' '}
             <FormattedMessage
               id="searchExamples.warningsObject"
-              defaultMessage="Timeout and shard failure warnings for high-level search may be handled in a callback to the showWarnings method on the search service."
+              defaultMessage="Search warnings may optionally be handed with search service showWarnings method."
             />{' '}
           </EuiText>{' '}
           <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />{' '}
@@ -531,333 +517,322 @@ export const SearchExamplesApp = ({
   ];
 
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiTitle size="l">
-          <h1>
-            <FormattedMessage
-              id="searchExamples.helloWorldText"
-              defaultMessage="{name}"
-              values={{ name: PLUGIN_NAME }}
+    <>
+      <EuiPageTemplate.Header
+        pageTitle={i18n.translate('searchExamples.helloWorldText', {
+          defaultMessage: '{name}',
+          values: { name: PLUGIN_NAME },
+        })}
+      />
+      <EuiPageTemplate.Section grow={false}>
+        <navigation.ui.TopNavMenu
+          appName={PLUGIN_ID}
+          showSearchBar={true}
+          useDefaultBehaviors={true}
+          indexPatterns={dataView ? [dataView] : undefined}
+        />
+        <EuiFlexGrid columns={4}>
+          <EuiFlexItem>
+            <EuiFormLabel>Data view</EuiFormLabel>
+            <IndexPatternSelect
+              placeholder={i18n.translate('searchSessionExample.selectDataViewPlaceholder', {
+                defaultMessage: 'Select data view',
+              })}
+              indexPatternId={dataView?.id || ''}
+              onChange={async (dataViewId?: string) => {
+                if (dataViewId) {
+                  const newDataView = await data.dataViews.get(dataViewId);
+                  setDataView(newDataView);
+                } else {
+                  setDataView(undefined);
+                }
+              }}
+              isClearable={false}
+              data-test-subj="dataViewSelector"
             />
-          </h1>
-        </EuiTitle>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            useDefaultBehaviors={true}
-            indexPatterns={dataView ? [dataView] : undefined}
-          />
-          <EuiFlexGrid columns={4}>
-            <EuiFlexItem>
-              <EuiFormLabel>Data view</EuiFormLabel>
-              <IndexPatternSelect
-                placeholder={i18n.translate('searchSessionExample.selectDataViewPlaceholder', {
-                  defaultMessage: 'Select data view',
-                })}
-                indexPatternId={dataView?.id || ''}
-                onChange={async (dataViewId?: string) => {
-                  if (dataViewId) {
-                    const newDataView = await data.dataViews.get(dataViewId);
-                    setDataView(newDataView);
-                  } else {
-                    setDataView(undefined);
-                  }
-                }}
-                isClearable={false}
-                data-test-subj="dataViewSelector"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormLabel>Field (using {bucketAggType} buckets)</EuiFormLabel>
-              <EuiComboBox
-                options={formatFieldsToComboBox(getAggregatableStrings(fields))}
-                selectedOptions={formatFieldToComboBox(selectedBucketField)}
-                singleSelection={true}
-                onChange={(option) => {
-                  if (option.length) {
-                    const fld = dataView?.getFieldByName(option[0].label);
-                    setSelectedBucketField(fld || null);
-                  } else {
-                    setSelectedBucketField(null);
-                  }
-                }}
-                sortMatchesBy="startsWith"
-                data-test-subj="searchBucketField"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormLabel>Numeric Field (using {metricAggType} metrics)</EuiFormLabel>
-              <EuiComboBox
-                options={formatFieldsToComboBox(getNumeric(fields))}
-                selectedOptions={formatFieldToComboBox(selectedNumericField)}
-                singleSelection={true}
-                onChange={(option) => {
-                  if (option.length) {
-                    const fld = dataView?.getFieldByName(option[0].label);
-                    setSelectedNumericField(fld || null);
-                  } else {
-                    setSelectedNumericField(null);
-                  }
-                }}
-                sortMatchesBy="startsWith"
-                data-test-subj="searchMetricField"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormLabel>Fields to queryString</EuiFormLabel>
-              <EuiComboBox
-                options={formatFieldsToComboBox(fields)}
-                selectedOptions={formatFieldsToComboBox(selectedFields)}
-                singleSelection={false}
-                onChange={(option) => {
-                  const flds = option
-                    .map((opt) => dataView?.getFieldByName(opt?.label))
-                    .filter((f) => f);
-                  setSelectedFields(flds.length ? (flds as DataViewField[]) : []);
-                }}
-                sortMatchesBy="startsWith"
-              />
-            </EuiFlexItem>
-          </EuiFlexGrid>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormLabel>Field (using {bucketAggType} buckets)</EuiFormLabel>
+            <EuiComboBox
+              options={formatFieldsToComboBox(getAggregatableStrings(fields))}
+              selectedOptions={formatFieldToComboBox(selectedBucketField)}
+              singleSelection={true}
+              onChange={(option) => {
+                if (option.length) {
+                  const fld = dataView?.getFieldByName(option[0].label);
+                  setSelectedBucketField(fld || null);
+                } else {
+                  setSelectedBucketField(null);
+                }
+              }}
+              sortMatchesBy="startsWith"
+              data-test-subj="searchBucketField"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormLabel>Numeric Field (using {metricAggType} metrics)</EuiFormLabel>
+            <EuiComboBox
+              options={formatFieldsToComboBox(getNumeric(fields))}
+              selectedOptions={formatFieldToComboBox(selectedNumericField)}
+              singleSelection={true}
+              onChange={(option) => {
+                if (option.length) {
+                  const fld = dataView?.getFieldByName(option[0].label);
+                  setSelectedNumericField(fld || null);
+                } else {
+                  setSelectedNumericField(null);
+                }
+              }}
+              sortMatchesBy="startsWith"
+              data-test-subj="searchMetricField"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormLabel>Fields to queryString</EuiFormLabel>
+            <EuiComboBox
+              options={formatFieldsToComboBox(fields)}
+              selectedOptions={formatFieldsToComboBox(selectedFields)}
+              singleSelection={false}
+              onChange={(option) => {
+                const flds = option
+                  .map((opt) => dataView?.getFieldByName(opt?.label))
+                  .filter((f) => f);
+                setSelectedFields(flds.length ? (flds as DataViewField[]) : []);
+              }}
+              sortMatchesBy="startsWith"
+            />
+          </EuiFlexItem>
+        </EuiFlexGrid>
 
-          <EuiHorizontalRule />
+        <EuiSpacer size="xl" />
 
-          <EuiFlexGrid columns={2}>
-            <EuiFlexItem style={{ width: '40%' }}>
+        <EuiFlexGrid columns={2}>
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3>
+                Searching Elasticsearch using <EuiCode>data.search</EuiCode>
+              </h3>
+            </EuiTitle>
+            <EuiText>
+              If you want to fetch data from Elasticsearch, you can use the different services
+              provided by the <EuiCode>data</EuiCode> plugin. These help you get the data view and
+              search bar configuration, format them into a DSL query and send it to Elasticsearch.
               <EuiSpacer />
-              <EuiTitle size="s">
-                <h3>
-                  Searching Elasticsearch using <EuiCode>data.search</EuiCode>
-                </h3>
-              </EuiTitle>
-              <EuiText>
-                If you want to fetch data from Elasticsearch, you can use the different services
-                provided by the <EuiCode>data</EuiCode> plugin. These help you get the data view and
-                search bar configuration, format them into a DSL query and send it to Elasticsearch.
-                <EuiSpacer />
-                <EuiButtonEmpty size="xs" onClick={onClickHandler} iconType="play">
-                  <FormattedMessage
-                    id="searchExamples.buttonText"
-                    defaultMessage="Request from low-level client (data.search.search)."
-                  />
-                </EuiButtonEmpty>
-                <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
-                  <FormattedMessage
-                    id="searchExamples.buttonText"
-                    defaultMessage="Metrics aggregation with raw documents in response."
-                  />
-                </EuiText>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => onSearchSourceClickHandler(true, true)}
-                  iconType="play"
-                  data-test-subj="searchSourceWithOther"
-                >
-                  <FormattedMessage
-                    id="searchExamples.searchSource.buttonText"
-                    defaultMessage="Request from high-level client (data.search.searchSource)"
-                  />
-                </EuiButtonEmpty>
-                <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
-                  <FormattedMessage
-                    id="searchExamples.buttonText"
-                    defaultMessage="Bucket and metrics aggregations, with other bucket and default warnings."
-                  />
-                </EuiText>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => onSearchSourceClickHandler(false, false)}
-                  iconType="play"
-                  data-test-subj="searchSourceWithoutOther"
-                >
-                  <FormattedMessage
-                    id="searchExamples.searchSource.buttonText"
-                    defaultMessage="Request from high-level client (data.search.searchSource)"
-                  />
-                </EuiButtonEmpty>
-                <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
-                  <FormattedMessage
-                    id="searchExamples.buttonText"
-                    defaultMessage="Bucket and metrics aggregations, without other bucket and with custom logic to handle warnings."
-                  />
-                </EuiText>
-              </EuiText>
-              <EuiSpacer />
-              <EuiTitle size="xs">
-                <h3>Handling errors & warnings</h3>
-              </EuiTitle>
-              <EuiText>
-                When fetching data from Elasticsearch, there are several different ways warnings and
-                errors may be returned. In general, it is recommended to surface these in the UX.
-                <EuiSpacer />
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={onWarningSearchClickHandler}
-                  iconType="play"
-                  data-test-subj="searchWithWarning"
-                >
-                  <FormattedMessage
-                    id="searchExamples.searchWithWarningButtonText"
-                    defaultMessage="Request with a warning in response"
-                  />
-                </EuiButtonEmpty>
-                <EuiText />
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={onErrorSearchClickHandler}
-                  iconType="play"
-                  data-test-subj="searchWithError"
-                >
-                  <FormattedMessage
-                    id="searchExamples.searchWithErrorButtonText"
-                    defaultMessage="Request with an error in response"
-                  />
-                </EuiButtonEmpty>
-              </EuiText>
-              <EuiSpacer />
-              <EuiTitle size="xs">
-                <h3>Handling partial results</h3>
-              </EuiTitle>
-              <EuiText>
-                The observable returned from <EuiCode>data.search</EuiCode> provides partial results
-                when the response is not yet complete. These can be handled to update a chart or
-                simply a progress bar:
-                <EuiSpacer />
-                <EuiCodeBlock language="html" fontSize="s" paddingSize="s" overflowHeight={450}>
-                  &lt;EuiProgress value=&#123;response.loaded&#125; max=&#123;response.total&#125;
-                  /&gt;
-                </EuiCodeBlock>
-                Below is an example showing a custom search strategy that emits partial Fibonacci
-                sequences up to the length provided, updates the response with each partial result,
-                and updates a progress bar (see the Response tab).
-                <EuiFieldNumber
-                  id="FibonacciN"
-                  placeholder="Number of Fibonacci numbers to generate"
-                  value={fibonacciN}
-                  onChange={(event) => setFibonacciN(parseInt(event.target.value, 10))}
+              <EuiButtonEmpty size="xs" onClick={onClickHandler} iconType="play">
+                <FormattedMessage
+                  id="searchExamples.buttonText"
+                  defaultMessage="Request from low-level client (data.search.search)."
                 />
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={onPartialResultsClickHandler}
-                  iconType="play"
-                  data-test-subj="requestFibonacci"
-                >
-                  Request Fibonacci sequence
-                </EuiButtonEmpty>
-              </EuiText>
-              <EuiSpacer />
-              <EuiTitle size="s">
-                <h3>Writing a custom search strategy</h3>
-              </EuiTitle>
-              <EuiText>
-                If you want to do some pre or post processing on the server, you might want to
-                create a custom search strategy. This example uses such a strategy, passing in
-                custom input and receiving custom output back.
-                <EuiSpacer />
-                <EuiCheckbox
-                  id="GetCool"
-                  label={
-                    <FormattedMessage
-                      id="searchExamples.getCoolCheckbox"
-                      defaultMessage="Get cool parameter?"
-                    />
-                  }
-                  checked={getCool}
-                  onChange={(event) => setGetCool(event.target.checked)}
+              </EuiButtonEmpty>
+              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+                <FormattedMessage
+                  id="searchExamples.buttonText"
+                  defaultMessage="Metrics aggregation with raw documents in response."
                 />
-                <EuiButtonEmpty size="xs" onClick={onMyStrategyClickHandler} iconType="play">
-                  <FormattedMessage
-                    id="searchExamples.myStrategyButtonText"
-                    defaultMessage="Request from low-level client via My Strategy"
-                  />
-                </EuiButtonEmpty>
               </EuiText>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => onSearchSourceClickHandler(true, true)}
+                iconType="play"
+                data-test-subj="searchSourceWithOther"
+              >
+                <FormattedMessage
+                  id="searchExamples.searchSource.buttonText"
+                  defaultMessage="Request from high-level client (data.search.searchSource)"
+                />
+              </EuiButtonEmpty>
+              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+                <FormattedMessage
+                  id="searchExamples.buttonText"
+                  defaultMessage="Bucket and metrics aggregations, with other bucket and default warnings."
+                />
+              </EuiText>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => onSearchSourceClickHandler(false, false)}
+                iconType="play"
+                data-test-subj="searchSourceWithoutOther"
+              >
+                <FormattedMessage
+                  id="searchExamples.searchSource.buttonText"
+                  defaultMessage="Request from high-level client (data.search.searchSource)"
+                />
+              </EuiButtonEmpty>
+              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+                <FormattedMessage
+                  id="searchExamples.buttonText"
+                  defaultMessage="Bucket and metrics aggregations, without other bucket and with custom logic to handle warnings."
+                />
+              </EuiText>
+            </EuiText>
+            <EuiSpacer />
+            <EuiTitle size="xs">
+              <h3>Handling errors & warnings</h3>
+            </EuiTitle>
+            <EuiText>
+              When fetching data from Elasticsearch, there are several different ways warnings and
+              errors may be returned. In general, it is recommended to surface these in the UX.
               <EuiSpacer />
-              <EuiTitle size="s">
-                <h3>Client side search session caching</h3>
-              </EuiTitle>
-              <EuiText>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => data.search.session.start()}
-                  iconType="warning"
-                  data-test-subj="searchExamplesStartSession"
-                >
-                  <FormattedMessage
-                    id="searchExamples.startNewSession"
-                    defaultMessage="Start a new session"
-                  />
-                </EuiButtonEmpty>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => data.search.session.clear()}
-                  iconType="warning"
-                  data-test-subj="searchExamplesClearSession"
-                >
-                  <FormattedMessage
-                    id="searchExamples.clearSession"
-                    defaultMessage="Clear session"
-                  />
-                </EuiButtonEmpty>
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={onClientSideSessionCacheClickHandler}
-                  iconType="play"
-                  data-test-subj="searchExamplesCacheSearch"
-                >
-                  <FormattedMessage
-                    id="searchExamples.myStrategyButtonText"
-                    defaultMessage="Request from low-level client via My Strategy"
-                  />
-                </EuiButtonEmpty>
-              </EuiText>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={onWarningSearchClickHandler}
+                iconType="play"
+                data-test-subj="searchWithWarning"
+              >
+                <FormattedMessage
+                  id="searchExamples.searchWithWarningButtonText"
+                  defaultMessage="Request with a warning in response"
+                />
+              </EuiButtonEmpty>
+              <EuiText />
+              <EuiButtonEmpty
+                size="xs"
+                onClick={onErrorSearchClickHandler}
+                iconType="play"
+                data-test-subj="searchWithError"
+              >
+                <FormattedMessage
+                  id="searchExamples.searchWithErrorButtonText"
+                  defaultMessage="Request with an error in response"
+                />
+              </EuiButtonEmpty>
+            </EuiText>
+            <EuiSpacer />
+            <EuiTitle size="xs">
+              <h3>Handling partial results</h3>
+            </EuiTitle>
+            <EuiText>
+              The observable returned from <EuiCode>data.search</EuiCode> provides partial results
+              when the response is not yet complete. These can be handled to update a chart or
+              simply a progress bar:
               <EuiSpacer />
-              <EuiTitle size="s">
-                <h3>Using search on the server</h3>
-              </EuiTitle>
-              <EuiText>
-                You can also run your search request from the server, without registering a search
-                strategy. This request does not take the configuration of{' '}
-                <EuiCode>TopNavMenu</EuiCode> into account, but you could pass those down to the
-                server as well.
-                <br />
-                When executing search on the server, make sure to cancel the search in case user
-                cancels corresponding network request. This could happen in case user re-runs a
-                query or leaves the page without waiting for the result. Cancellation API is similar
-                on client and server and use `AbortController`.
-                <EuiSpacer />
-                <EuiButtonEmpty size="xs" onClick={onServerClickHandler} iconType="play">
-                  <FormattedMessage
-                    id="searchExamples.myServerButtonText"
-                    defaultMessage="Request from low-level client on the server"
-                  />
-                </EuiButtonEmpty>
-              </EuiText>
-            </EuiFlexItem>
-
-            <EuiFlexItem style={{ width: '60%' }}>
-              <EuiTabbedContent
-                tabs={reqTabs}
-                selectedTab={reqTabs[selectedTab]}
-                onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
+              <EuiCodeBlock language="html" fontSize="s" paddingSize="s" overflowHeight={450}>
+                &lt;EuiProgress value=&#123;response.loaded&#125; max=&#123;response.total&#125;
+                /&gt;
+              </EuiCodeBlock>
+              Below is an example showing a custom search strategy that emits partial Fibonacci
+              sequences up to the length provided, updates the response with each partial result,
+              and updates a progress bar (see the Response tab).
+              <EuiFieldNumber
+                id="FibonacciN"
+                placeholder="Number of Fibonacci numbers to generate"
+                value={fibonacciN}
+                onChange={(event) => setFibonacciN(parseInt(event.target.value, 10))}
               />
+              <EuiButtonEmpty
+                size="xs"
+                onClick={onPartialResultsClickHandler}
+                iconType="play"
+                data-test-subj="requestFibonacci"
+              >
+                Request Fibonacci sequence
+              </EuiButtonEmpty>
+            </EuiText>
+            <EuiSpacer />
+            <EuiTitle size="s">
+              <h3>Writing a custom search strategy</h3>
+            </EuiTitle>
+            <EuiText>
+              If you want to do some pre or post processing on the server, you might want to create
+              a custom search strategy. This example uses such a strategy, passing in custom input
+              and receiving custom output back.
               <EuiSpacer />
-              {currentAbortController && isLoading && (
-                <EuiButtonEmpty size="xs" onClick={() => currentAbortController?.abort()}>
+              <EuiCheckbox
+                id="GetCool"
+                label={
                   <FormattedMessage
-                    id="searchExamples.abortButtonText"
-                    defaultMessage="Abort request"
+                    id="searchExamples.getCoolCheckbox"
+                    defaultMessage="Get cool parameter?"
                   />
-                </EuiButtonEmpty>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+                }
+                checked={getCool}
+                onChange={(event) => setGetCool(event.target.checked)}
+              />
+              <EuiButtonEmpty size="xs" onClick={onMyStrategyClickHandler} iconType="play">
+                <FormattedMessage
+                  id="searchExamples.myStrategyButtonText"
+                  defaultMessage="Request from low-level client via My Strategy"
+                />
+              </EuiButtonEmpty>
+            </EuiText>
+            <EuiSpacer />
+            <EuiTitle size="s">
+              <h3>Client side search session caching</h3>
+            </EuiTitle>
+            <EuiText>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => data.search.session.start()}
+                iconType="warning"
+                data-test-subj="searchExamplesStartSession"
+              >
+                <FormattedMessage
+                  id="searchExamples.startNewSession"
+                  defaultMessage="Start a new session"
+                />
+              </EuiButtonEmpty>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={() => data.search.session.clear()}
+                iconType="warning"
+                data-test-subj="searchExamplesClearSession"
+              >
+                <FormattedMessage id="searchExamples.clearSession" defaultMessage="Clear session" />
+              </EuiButtonEmpty>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={onClientSideSessionCacheClickHandler}
+                iconType="play"
+                data-test-subj="searchExamplesCacheSearch"
+              >
+                <FormattedMessage
+                  id="searchExamples.myStrategyButtonText"
+                  defaultMessage="Request from low-level client via My Strategy"
+                />
+              </EuiButtonEmpty>
+            </EuiText>
+            <EuiSpacer />
+            <EuiTitle size="s">
+              <h3>Using search on the server</h3>
+            </EuiTitle>
+            <EuiText>
+              You can also run your search request from the server, without registering a search
+              strategy. This request does not take the configuration of{' '}
+              <EuiCode>TopNavMenu</EuiCode> into account, but you could pass those down to the
+              server as well.
+              <br />
+              When executing search on the server, make sure to cancel the search in case user
+              cancels corresponding network request. This could happen in case user re-runs a query
+              or leaves the page without waiting for the result. Cancellation API is similar on
+              client and server and use `AbortController`.
+              <EuiSpacer />
+              <EuiButtonEmpty size="xs" onClick={onServerClickHandler} iconType="play">
+                <FormattedMessage
+                  id="searchExamples.myServerButtonText"
+                  defaultMessage="Request from low-level client on the server"
+                />
+              </EuiButtonEmpty>
+            </EuiText>
+          </EuiFlexItem>
+
+          <EuiFlexItem style={{ width: '60%' }}>
+            <EuiTabbedContent
+              tabs={reqTabs}
+              selectedTab={reqTabs[selectedTab]}
+              onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
+            />
+            <EuiSpacer />
+            {currentAbortController && isLoading && (
+              <EuiButtonEmpty size="xs" onClick={() => currentAbortController?.abort()}>
+                <FormattedMessage
+                  id="searchExamples.abortButtonText"
+                  defaultMessage="Abort request"
+                />
+              </EuiButtonEmpty>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGrid>
+      </EuiPageTemplate.Section>
+    </>
   );
 };

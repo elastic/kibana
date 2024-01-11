@@ -15,6 +15,7 @@ import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-r
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
+import { basicResolvers } from '../resolvers';
 import { ML_PAGES } from '../../../locator';
 import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
 
@@ -22,8 +23,7 @@ import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_j
 
 import { createPath, MlRoute, PageLoader, PageProps } from '../router';
 import { useRefresh } from '../use_refresh';
-import { useResolver } from '../use_resolver';
-import { basicResolvers } from '../resolvers';
+import { useRouteResolver } from '../use_resolver';
 import { Explorer } from '../../explorer';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
@@ -42,8 +42,8 @@ import { PageTitle } from '../../components/page_title';
 import { AnomalyResultsViewSelector } from '../../components/anomaly_results_view_selector';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state';
 import {
-  useAnomalyExplorerContext,
   AnomalyExplorerContextProvider,
+  useAnomalyExplorerContext,
 } from '../../explorer/anomaly_explorer_context';
 
 export const explorerRouteFactory = (
@@ -69,26 +69,28 @@ export const explorerRouteFactory = (
   'data-test-subj': 'mlPageAnomalyExplorer',
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context, results } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      ...basicResolvers(deps),
-      jobs: mlJobService.loadJobsWrapper,
-      jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
-    }
-  );
+const PageWrapper: FC<PageProps> = () => {
+  const {
+    services: {
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
+
+  const { context, results } = useRouteResolver('full', ['canGetJobs'], {
+    ...basicResolvers(),
+    jobs: mlJobService.loadJobsWrapper,
+    jobsWithTimeRange: () => mlApiServices.jobs.jobsWithTimerange(getDateFormatTz()),
+  });
+
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (
     <PageLoader context={context}>
       <MlAnnotationUpdatesContext.Provider value={annotationUpdatesService}>
         <AnomalyExplorerContextProvider>
-          <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
+          {results ? (
+            <ExplorerUrlStateManager jobsWithTimeRange={results.jobsWithTimeRange.jobs} />
+          ) : null}
         </AnomalyExplorerContextProvider>
       </MlAnnotationUpdatesContext.Provider>
     </PageLoader>
@@ -101,7 +103,7 @@ interface ExplorerUrlStateManagerProps {
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const {
-    services: { cases },
+    services: { cases, presentationUtil },
   } = useMlKibana();
 
   const [globalState] = useUrlState('_g');
@@ -251,6 +253,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   }
 
   const CasesContext = cases?.ui.getCasesContext() ?? React.Fragment;
+  const PresentationContextProvider = presentationUtil?.ContextProvider ?? React.Fragment;
 
   const casesPermissions = cases?.helpers.canUseCases();
 
@@ -275,25 +278,27 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       </MlPageHeader>
       <StyledComponentsThemeProvider>
         <CasesContext owner={[]} permissions={casesPermissions!}>
-          {jobsWithTimeRange.length === 0 ? (
-            <AnomalyDetectionEmptyState />
-          ) : (
-            <Explorer
-              {...{
-                explorerState,
-                overallSwimlaneData,
-                showCharts,
-                severity: tableSeverity.val,
-                stoppedPartitions,
-                invalidTimeRangeError,
-                selectedJobsRunning,
-                timeBuckets,
-                timefilter,
-                selectedCells,
-                swimLaneSeverity,
-              }}
-            />
-          )}
+          <PresentationContextProvider>
+            {jobsWithTimeRange.length === 0 ? (
+              <AnomalyDetectionEmptyState />
+            ) : (
+              <Explorer
+                {...{
+                  explorerState,
+                  overallSwimlaneData,
+                  showCharts,
+                  severity: tableSeverity.val,
+                  stoppedPartitions,
+                  invalidTimeRangeError,
+                  selectedJobsRunning,
+                  timeBuckets,
+                  timefilter,
+                  selectedCells,
+                  swimLaneSeverity,
+                }}
+              />
+            )}
+          </PresentationContextProvider>
         </CasesContext>
       </StyledComponentsThemeProvider>
     </div>

@@ -20,19 +20,15 @@ export const AnalyticsNoDataPage = ({
   onDataViewCreated,
   allowAdHocDataView,
 }: AnalyticsNoDataPageProps) => {
-  const services = useServices();
-  const { kibanaGuideDocLink, customBranding } = services;
-  const { hasCustomBranding$ } = customBranding;
-  const showPlainSpinner = useObservable(hasCustomBranding$) ?? false;
+  const { customBranding, ...services } = useServices();
+  const showPlainSpinner = useObservable(customBranding.hasCustomBranding$) ?? false;
 
   return (
     <Component
-      {...{
-        onDataViewCreated,
-        allowAdHocDataView,
-        kibanaGuideDocLink,
-        showPlainSpinner,
-      }}
+      {...services}
+      showPlainSpinner={showPlainSpinner}
+      allowAdHocDataView={allowAdHocDataView}
+      onDataViewCreated={onDataViewCreated}
     />
   );
 };

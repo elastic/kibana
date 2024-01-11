@@ -5,28 +5,11 @@
  * 2.0.
  */
 
-import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-
-export const findInventoryViewAttributesResponseRT = rt.strict({
-  name: nonEmptyStringRt,
-  isDefault: rt.boolean,
-  isStatic: rt.boolean,
-});
-
-const findInventoryViewResponseRT = rt.exact(
-  rt.intersection([
-    rt.type({
-      id: rt.string,
-      attributes: findInventoryViewAttributesResponseRT,
-    }),
-    rt.partial({
-      updatedAt: rt.number,
-      version: rt.string,
-    }),
-  ])
-);
+import { singleInventoryViewRT } from '../../../inventory_views';
 
 export const findInventoryViewResponsePayloadRT = rt.type({
-  data: rt.array(findInventoryViewResponseRT),
+  data: rt.array(singleInventoryViewRT),
 });
+
+export type FindInventoryViewResponsePayload = rt.TypeOf<typeof findInventoryViewResponsePayloadRT>;

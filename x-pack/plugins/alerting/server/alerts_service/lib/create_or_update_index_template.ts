@@ -14,6 +14,7 @@ import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { DataStreamAdapter } from './data_stream_adapter';
 
 interface GetIndexTemplateOpts {
   componentTemplateRefs: string[];
@@ -22,6 +23,7 @@ interface GetIndexTemplateOpts {
   kibanaVersion: string;
   namespace: string;
   totalFieldsLimit: number;
+  dataStreamAdapter: DataStreamAdapter;
 }
 
 export const getIndexTemplate = ({
@@ -31,6 +33,7 @@ export const getIndexTemplate = ({
   kibanaVersion,
   namespace,
   totalFieldsLimit,
+  dataStreamAdapter,
 }: GetIndexTemplateOpts): IndicesPutIndexTemplateRequest => {
   const indexMetadata: Metadata = {
     kibana: {
@@ -40,19 +43,32 @@ export const getIndexTemplate = ({
     namespace,
   };
 
+  const dataStreamFields = dataStreamAdapter.getIndexTemplateFields(
+    indexPatterns.alias,
+    indexPatterns.pattern
+  );
+
+  const indexLifecycle = {
+    name: ilmPolicyName,
+    rollover_alias: dataStreamFields.rollover_alias,
+  };
+
   return {
     name: indexPatterns.template,
     body: {
-      index_patterns: [indexPatterns.pattern],
+      ...(dataStreamFields.data_stream ? { data_stream: dataStreamFields.data_stream } : {}),
+      index_patterns: dataStreamFields.index_patterns,
       composed_of: componentTemplateRefs,
       template: {
         settings: {
           auto_expand_replicas: '0-1',
           hidden: true,
-          'index.lifecycle': {
-            name: ilmPolicyName,
-            rollover_alias: indexPatterns.alias,
-          },
+          ...(dataStreamAdapter.isUsingDataStreams()
+            ? {}
+            : {
+                'index.lifecycle': indexLifecycle,
+              }),
+          'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': totalFieldsLimit,
         },
         mappings: {
@@ -95,7 +111,7 @@ export const createOrUpdateIndexTemplate = async ({
   esClient,
   template,
 }: CreateOrUpdateIndexTemplateOpts) => {
-  logger.info(`Installing index template ${template.name}`);
+  logger.debug(`Installing index template ${template.name}`);
 
   let mappings: MappingTypeMapping = {};
   try {
@@ -107,7 +123,8 @@ export const createOrUpdateIndexTemplate = async ({
     mappings = simulateResponse.template.mappings;
   } catch (err) {
     logger.error(
-      `Failed to simulate index template mappings for ${template.name}; not applying mappings - ${err.message}`
+      `Failed to simulate index template mappings for ${template.name}; not applying mappings - ${err.message}`,
+      err
     );
     return;
   }
@@ -123,7 +140,7 @@ export const createOrUpdateIndexTemplate = async ({
       logger,
     });
   } catch (err) {
-    logger.error(`Error installing index template ${template.name} - ${err.message}`);
+    logger.error(`Error installing index template ${template.name} - ${err.message}`, err);
     throw err;
   }
 };

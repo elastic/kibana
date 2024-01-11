@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  generateTitle,
-  enterpriseSearchTitle,
-  appSearchTitle,
-  workplaceSearchTitle,
-} from './generate_title';
+import { generateTitle, searchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
 describe('generateTitle', () => {
   it('creates a hyphen separated string from an array of page titles', () => {
@@ -19,20 +14,20 @@ describe('generateTitle', () => {
   });
 });
 
-describe('enterpriseSearchTitle', () => {
+describe('searchTitle', () => {
   it('automatically appends the Enterprise Search product onto the pages array', () => {
-    const title = enterpriseSearchTitle(['Setup Guide']);
-    expect(title).toEqual('Setup Guide - Enterprise Search');
+    const title = searchTitle(['Setup Guide']);
+    expect(title).toEqual('Setup Guide - Search');
   });
 
   it('can be mixed and matched', () => {
-    const title = enterpriseSearchTitle([appSearchTitle(['Some Page'])]);
-    expect(title).toEqual('Some Page - App Search - Enterprise Search');
+    const title = searchTitle([appSearchTitle(['Some Page'])]);
+    expect(title).toEqual('Some Page - App Search - Search');
   });
 
   it('falls back to product name', () => {
-    const title = enterpriseSearchTitle();
-    expect(title).toEqual('Enterprise Search');
+    const title = searchTitle();
+    expect(title).toEqual('Search');
   });
 });
 

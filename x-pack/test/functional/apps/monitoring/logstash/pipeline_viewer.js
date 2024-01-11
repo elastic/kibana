@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const pipelinesList = getService('monitoringLogstashPipelines');
   const pipelineViewer = getService('monitoringLogstashPipelineViewer');
   const pageObjects = getPageObjects(['timePicker']);
+  const retry = getService('retry');
 
   describe('Logstash pipeline viewer', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
@@ -52,15 +53,17 @@ export default function ({ getService, getPageObjects }) {
         'Jan 22, 2018 @ 10:00:00.000'
       );
 
-      const { inputs, filters, outputs } = await pipelineViewer.getPipelineDefinition();
+      await retry.try(async () => {
+        const { inputs, filters, outputs } = await pipelineViewer.getPipelineDefinition();
 
-      expect(inputs).to.eql([{ name: 'generator', metrics: ['mygen01', '643.75 e/s emitted'] }]);
-      expect(filters).to.eql([
-        { name: 'sleep', metrics: ['1%', '96.37 ms/e', '643.75 e/s received'] },
-      ]);
-      expect(outputs).to.eql([
-        { name: 'stdout', metrics: ['0%', '0 ms/e', '643.75 e/s received'] },
-      ]);
+        expect(inputs).to.eql([{ name: 'generator', metrics: ['mygen01', '643.75 e/s emitted'] }]);
+        expect(filters).to.eql([
+          { name: 'sleep', metrics: ['1%', '96.37 ms/e', '643.75 e/s received'] },
+        ]);
+        expect(outputs).to.eql([
+          { name: 'stdout', metrics: ['0%', '0 ms/e', '643.75 e/s received'] },
+        ]);
+      });
     });
   });
 }

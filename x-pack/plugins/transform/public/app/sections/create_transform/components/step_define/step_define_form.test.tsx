@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -29,6 +30,7 @@ import { StepDefineForm } from './step_define_form';
 
 import { MlSharedContext } from '../../../../__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');
@@ -63,10 +65,10 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/150777
-describe.skip('Transform: <DefinePivotForm />', () => {
+describe('Transform: <DefinePivotForm />', () => {
   test('Minimal initialization', async () => {
     // Arrange
+    const queryClient = new QueryClient();
     const mlSharedImports = await getMlSharedImports();
 
     const searchItems = {
@@ -80,19 +82,24 @@ describe.skip('Transform: <DefinePivotForm />', () => {
     const services = {
       ...startMock,
       data: dataPluginMock.createStartContract(),
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       appName: 'the-test-app',
       storage: createMockStorage(),
     };
 
+    const mockOnChange = jest.fn();
+
     const { getByText } = render(
       <I18nProvider>
-        <KibanaContextProvider services={services}>
-          <MlSharedContext.Provider value={mlSharedImports}>
-            <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
-              <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
-            </DatePickerContextProvider>
-          </MlSharedContext.Provider>
-        </KibanaContextProvider>
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={services}>
+            <MlSharedContext.Provider value={mlSharedImports}>
+              <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
+                <StepDefineForm onChange={mockOnChange} searchItems={searchItems as SearchItems} />
+              </DatePickerContextProvider>
+            </MlSharedContext.Provider>
+          </KibanaContextProvider>
+        </QueryClientProvider>
       </I18nProvider>
     );
 
@@ -103,8 +110,9 @@ describe.skip('Transform: <DefinePivotForm />', () => {
     await waitFor(() => {
       expect(getByText('Data view')).toBeInTheDocument();
       expect(getByText(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
+      expect(mockOnChange).toBeCalled();
     });
-  });
+  }, 10000);
 });
 
 describe('Transform: isAggNameConflict()', () => {

@@ -4,23 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { syntheticsServiceAPIKeySavedObject } from '../../legacy_uptime/lib/saved_objects/service_api_key';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
-import { generateAndSaveServiceAPIKey } from '../../synthetics_service/get_api_key';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { syntheticsServiceAPIKeySavedObject } from '../../saved_objects/service_api_key';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import {
+  generateAndSaveServiceAPIKey,
+  getAPIKeyForSyntheticsService,
+  getSyntheticsEnablement,
+} from '../../synthetics_service/get_api_key';
 
-export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs) => ({
+export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_ENABLEMENT,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
   handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
     try {
-      const result = await libs.requests.getSyntheticsEnablement({
+      const result = await getSyntheticsEnablement({
         server,
       });
       const { canEnable, isEnabled } = result;
       const { security } = server;
-      const { apiKey, isValid } = await libs.requests.getAPIKeyForSyntheticsService({
+      const { apiKey, isValid } = await getAPIKeyForSyntheticsService({
         server,
       });
       if (apiKey && !isValid) {
@@ -42,7 +46,7 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs
         return result;
       }
 
-      return libs.requests.getSyntheticsEnablement({
+      return getSyntheticsEnablement({
         server,
       });
     } catch (e) {
@@ -52,13 +56,12 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs
   },
 });
 
-export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
+export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
-  path: API_URLS.SYNTHETICS_ENABLEMENT,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
   handler: async ({
     response,
-    request,
     server,
     syntheticsMonitorClient,
     savedObjectsClient,
@@ -66,12 +69,12 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => (
     const { security } = server;
     const { syntheticsService } = syntheticsMonitorClient;
     try {
-      const { canEnable } = await libs.requests.getSyntheticsEnablement({ server });
+      const { canEnable } = await getSyntheticsEnablement({ server });
       if (!canEnable) {
         return response.forbidden();
       }
       await syntheticsService.deleteAllConfigs();
-      const { apiKey } = await libs.requests.getAPIKeyForSyntheticsService({
+      const { apiKey } = await getAPIKeyForSyntheticsService({
         server,
       });
       await syntheticsServiceAPIKeySavedObject.delete(savedObjectsClient);

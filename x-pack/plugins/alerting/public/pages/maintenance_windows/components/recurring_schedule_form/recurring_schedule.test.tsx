@@ -6,18 +6,20 @@
  */
 
 import React from 'react';
+import { Frequency } from '@kbn/rrule';
 import { fireEvent, within } from '@testing-library/react';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { AppMockRenderer, createAppMockRenderer } from '../../../../lib/test_utils';
 import { FormProps, schema } from '../schema';
 import { RecurringSchedule } from './recurring_schedule';
-import { EndsOptions, Frequency } from '../../constants';
+import { EndsOptions } from '../../constants';
 
 const initialValue: FormProps = {
   title: 'test',
   startDate: '2023-03-24',
   endDate: '2023-03-26',
   recurring: true,
+  categoryIds: [],
 };
 
 describe('RecurringSchedule', () => {
@@ -92,7 +94,7 @@ describe('RecurringSchedule', () => {
     const endsInput = within(result.getByTestId('ends-field')).getByTestId('never');
 
     expect(frequencyInput).toHaveValue('3');
-    expect(endsInput).toBeChecked();
+    expect(endsInput).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('should prefill the form when provided with initialValue', () => {
@@ -117,7 +119,7 @@ describe('RecurringSchedule', () => {
       'Press the down key to open a popover containing a calendar.'
     );
     expect(frequencyInput).toHaveValue('1');
-    expect(endsInput).toBeChecked();
+    expect(endsInput).toHaveAttribute('aria-pressed', 'true');
     expect(untilInput).toHaveValue('03/24/2023');
   });
 });

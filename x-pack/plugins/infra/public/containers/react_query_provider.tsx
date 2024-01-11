@@ -39,6 +39,7 @@ function HideableReactQueryDevTools() {
   return !isHidden ? (
     <div>
       <EuiButtonIcon
+        data-test-subj="infraHideableReactQueryDevToolsButton"
         iconType="cross"
         color="primary"
         style={{ zIndex: 99999, position: 'fixed', bottom: '40px', left: '40px' }}

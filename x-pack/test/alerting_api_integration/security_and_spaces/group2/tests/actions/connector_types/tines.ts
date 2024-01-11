@@ -14,6 +14,7 @@ import {
   tinesAgentWebhook,
   tinesWebhookSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/tines_simulation';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const connectorTypeId = '.tines';
@@ -83,6 +84,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           name,
           connector_type_id: connectorTypeId,
@@ -183,7 +185,13 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             });
           expect(200);
 
-          expect(Object.keys(body)).to.eql(['status', 'message', 'retry', 'connector_id']);
+          expect(Object.keys(body)).to.eql([
+            'status',
+            'message',
+            'retry',
+            'errorSource',
+            'connector_id',
+          ]);
           expect(body.connector_id).to.eql(tinesActionId);
           expect(body.status).to.eql('error');
         });
@@ -202,6 +210,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${tinesActionId}. Connector name: Tines. Connector type: .tines`,
           });
         });
@@ -220,6 +229,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [storyId]: expected value of type [number] but got [undefined])',
           });
@@ -239,6 +249,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none',
           });
@@ -262,6 +273,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.storyId]: expected value of type [number] but got [undefined])',
           });
@@ -285,6 +297,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.name]: expected value of type [string] but got [undefined])',
           });
@@ -308,6 +321,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.path]: expected value of type [string] but got [undefined])',
           });
@@ -331,6 +345,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Request validation failed (Error: [webhook.secret]: expected value of type [string] but got [undefined])',
           });
@@ -488,6 +503,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
+              errorSource: TaskErrorSource.USER,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });
@@ -509,6 +525,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
+              errorSource: TaskErrorSource.USER,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });
@@ -528,6 +545,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
+              errorSource: TaskErrorSource.USER,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });

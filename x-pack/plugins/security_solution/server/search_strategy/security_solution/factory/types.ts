@@ -10,13 +10,12 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   FactoryQueryTypes,
   StrategyRequestType,
   StrategyResponseType,
-  StrategyParseResponseType,
 } from '../../../../common/search_strategy/security_solution';
 import type { EndpointAppContext } from '../../../endpoint/types';
 
@@ -24,7 +23,7 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
   buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: StrategyRequestType<T>,
-    response: StrategyParseResponseType<T>,
+    response: IEsSearchResponse,
     deps?: {
       esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;

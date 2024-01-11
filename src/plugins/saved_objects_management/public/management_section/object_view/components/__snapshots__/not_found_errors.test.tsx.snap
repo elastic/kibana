@@ -16,7 +16,10 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
     There is a problem with this saved object
   </p>
   <div
-    class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div>
       The data view associated with this object no longer exists.
@@ -32,13 +35,13 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
       >
         Saved objects APIs
         <span
-          class="emotion-euiLink__externalIcon"
+          class="emotion-EuiExternalLinkIcon"
           data-euiicon-type="popout"
         >
           External link
         </span>
         <span
-          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+          class="emotion-euiScreenReaderOnly"
         >
           (opens in a new tab or window)
         </span>
@@ -65,7 +68,10 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
     There is a problem with this saved object
   </p>
   <div
-    class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div>
       A field associated with this object no longer exists in the data view.
@@ -81,13 +87,13 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
       >
         Saved objects APIs
         <span
-          class="emotion-euiLink__externalIcon"
+          class="emotion-EuiExternalLinkIcon"
           data-euiicon-type="popout"
         >
           External link
         </span>
         <span
-          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+          class="emotion-euiScreenReaderOnly"
         >
           (opens in a new tab or window)
         </span>
@@ -114,7 +120,10 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
     There is a problem with this saved object
   </p>
   <div
-    class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div>
       The saved search associated with this object no longer exists.
@@ -130,13 +139,13 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
       >
         Saved objects APIs
         <span
-          class="emotion-euiLink__externalIcon"
+          class="emotion-EuiExternalLinkIcon"
           data-euiicon-type="popout"
         >
           External link
         </span>
         <span
-          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+          class="emotion-euiScreenReaderOnly"
         >
           (opens in a new tab or window)
         </span>
@@ -163,7 +172,10 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
     There is a problem with this saved object
   </p>
   <div
-    class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+  />
+  <div
+    class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div />
     <div>
@@ -177,13 +189,13 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
       >
         Saved objects APIs
         <span
-          class="emotion-euiLink__externalIcon"
+          class="emotion-EuiExternalLinkIcon"
           data-euiicon-type="popout"
         >
           External link
         </span>
         <span
-          class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+          class="emotion-euiScreenReaderOnly"
         >
           (opens in a new tab or window)
         </span>

@@ -11,9 +11,9 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 
+import { render as reactRender } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import { euiDarkVars } from '@kbn/ui-theme';
@@ -21,7 +21,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { render as reactRender } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
@@ -130,7 +129,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
-  AppWrapper: React.FC<{ children: React.ReactElement }>;
+  AppWrapper: React.FC<{ children: React.ReactNode }>;
   getFilesClient: () => ScopedFilesClient;
 }
 
@@ -177,7 +176,7 @@ export const createAppMockRenderer = ({
 
   const getFilesClient = mockGetFilesClient();
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
@@ -220,27 +219,3 @@ export const createAppMockRenderer = ({
     getFilesClient,
   };
 };
-
-export const useFormFieldMock = <T,>(options?: Partial<FieldHook<T>>): FieldHook<T> => ({
-  path: 'path',
-  type: 'type',
-  value: 'mockedValue' as unknown as T,
-  isPristine: false,
-  isDirty: false,
-  isModified: false,
-  isValidating: false,
-  isValidated: false,
-  isChangingValue: false,
-  errors: [],
-  isValid: true,
-  getErrorsMessages: jest.fn(),
-  onChange: jest.fn(),
-  setValue: jest.fn(),
-  setErrors: jest.fn(),
-  clearErrors: jest.fn(),
-  validate: jest.fn(),
-  reset: jest.fn(),
-  __isIncludedInOutput: true,
-  __serializeValue: jest.fn(),
-  ...options,
-});

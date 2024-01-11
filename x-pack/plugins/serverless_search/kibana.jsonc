@@ -13,12 +13,25 @@
       "search"
     ],
     "requiredPlugins": [
-      "serverless",
       "cloud",
+      "console",
+      "dataViews",
+      "dashboard",
+      "devTools",
+      "discover",
       "management",
+      "searchprofiler",
       "security",
+      "serverless",
+      "share",
+      "visualizations"
     ],
-    "optionalPlugins": [],
-    "requiredBundles": ["kibanaReact"]
+    "optionalPlugins": [
+      "indexManagement",
+      "usageCollection",
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

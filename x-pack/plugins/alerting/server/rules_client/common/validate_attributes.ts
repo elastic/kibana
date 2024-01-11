@@ -7,7 +7,8 @@
 
 import { KueryNode } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash';
-import { alertMappings } from '../../saved_objects/mappings';
+import { alertMappings } from '../../../common/saved_objects/rules/mappings';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const astFunctionType = ['is', 'range', 'nested'];
 
@@ -137,7 +138,10 @@ export const validateFilterKueryNode = ({
 }: ValidateFilterKueryNodeParams) => {
   const action = ({ index, fieldName }: IterateActionProps) => {
     if (index === 0) {
-      const firstAttribute = getFieldNameAttribute(fieldName, ['alert', 'attributes']);
+      const firstAttribute = getFieldNameAttribute(fieldName, [
+        RULE_SAVED_OBJECT_TYPE,
+        'attributes',
+      ]);
       if (excludedFieldNames.includes(firstAttribute)) {
         throw new Error(`Filter is not supported on this field ${fieldName}`);
       }

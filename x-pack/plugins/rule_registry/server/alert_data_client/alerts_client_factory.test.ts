@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { Request } from '@hapi/hapi';
-
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { AlertsClientFactory, AlertsClientFactoryProps } from './alerts_client_factory';
-import { ElasticsearchClient, KibanaRequest, CoreKibanaRequest } from '@kbn/core/server';
+import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -26,23 +25,10 @@ const alertsClientFactoryParams: AlertsClientFactoryProps = {
   securityPluginSetup,
   esClient: {} as ElasticsearchClient,
   ruleDataService: ruleDataServiceMock.create(),
+  getRuleType: jest.fn(),
+  getRuleList: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
 };
-
-const fakeRequest = {
-  app: {},
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-} as unknown as Request;
 
 const auditLogger = auditLoggerMock.create();
 
@@ -56,7 +42,10 @@ describe('AlertsClientFactory', () => {
   test('creates an alerts client with proper constructor arguments', async () => {
     const factory = new AlertsClientFactory();
     factory.initialize({ ...alertsClientFactoryParams });
-    const request = CoreKibanaRequest.from(fakeRequest);
+    const request = mockRouter.createKibanaRequest({
+      headers: {},
+      path: '/',
+    });
     await factory.create(request);
 
     expect(jest.requireMock('./alerts_client').AlertsClient).toHaveBeenCalledWith({
@@ -65,6 +54,9 @@ describe('AlertsClientFactory', () => {
       auditLogger,
       esClient: {},
       ruleDataService: alertsClientFactoryParams.ruleDataService,
+      getRuleList: alertsClientFactoryParams.getRuleList,
+      getRuleType: alertsClientFactoryParams.getRuleType,
+      getAlertIndicesAlias: alertsClientFactoryParams.getAlertIndicesAlias,
     });
   });
 

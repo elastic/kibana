@@ -11,6 +11,16 @@ import { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 import { CustomUrlList, CustomUrlListProps } from './list';
 
+jest.mock('../../../contexts/kibana');
+
+jest.mock('../../../services/toast_notification_service', () => ({
+  useToastNotificationService: () => {
+    return {
+      displayErrorToast: jest.fn(),
+    };
+  },
+}));
+
 function prepareTest(setCustomUrlsFn: jest.Mock) {
   const customUrls = [
     {
@@ -39,6 +49,7 @@ function prepareTest(setCustomUrlsFn: jest.Mock) {
     job: { job_id: 'test', analysis_config: {} } as Job,
     customUrls,
     onChange: setCustomUrlsFn,
+    dataViewListItems: [],
   };
 
   return shallow(<CustomUrlList {...props} />);

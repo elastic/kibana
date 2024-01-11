@@ -7,14 +7,13 @@
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Switch } from 'react-router-dom';
 
 import { useActions, useMountedLogic, useValues } from 'kea';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   COLLECTION_EXPLORER_PATH,
@@ -48,7 +47,7 @@ export const AnalyticsCollectionView: React.FC = () => {
 
   if (analyticsCollection) {
     return (
-      <Switch>
+      <Routes>
         <Route exact path={COLLECTION_OVERVIEW_PATH}>
           <AnalyticsCollectionOverview analyticsCollection={analyticsCollection} />
         </Route>
@@ -60,7 +59,7 @@ export const AnalyticsCollectionView: React.FC = () => {
         <Route exact path={COLLECTION_EXPLORER_PATH}>
           <AnalyticsCollectionExplorer />
         </Route>
-      </Switch>
+      </Routes>
     );
   }
 

@@ -6,67 +6,48 @@
  */
 
 import React from 'react';
-import {
-  createMockFramePublicAPI,
-  createMockVisualization,
-  mountWithProvider,
-} from '../../../mocks';
-import { Visualization } from '../../../types';
+import { screen } from '@testing-library/react';
+import faker from 'faker';
+import { createMockFramePublicAPI, createMockVisualization } from '../../../mocks';
 import { LayerSettings } from './layer_settings';
+import { renderWithReduxStore } from '../../../mocks';
 
 describe('LayerSettings', () => {
-  let mockVisualization: jest.Mocked<Visualization>;
-  const frame = createMockFramePublicAPI();
+  const renderLayerSettings = (propsOverrides = {}) => {
+    return renderWithReduxStore(
+      <LayerSettings
+        activeVisualization={createMockVisualization()}
+        layerConfigProps={{
+          layerId: 'myLayer',
+          state: {},
+          frame: createMockFramePublicAPI(),
+          setState: jest.fn(),
+          onChangeIndexPattern: jest.fn(),
+        }}
+        {...propsOverrides}
+      />
+    );
+  };
 
-  function getDefaultProps() {
-    return {
-      activeVisualization: mockVisualization,
-      layerConfigProps: {
-        layerId: 'myLayer',
-        state: {},
-        frame,
-        dateRange: { fromDate: 'now-7d', toDate: 'now' },
-        activeData: frame.activeData,
-        setState: jest.fn(),
-        onChangeIndexPattern: jest.fn(),
+  it('should render a static header if visualization has only a description value', () => {
+    renderLayerSettings({
+      activeVisualization: {
+        ...createMockVisualization(),
+        getDescription: () => ({ icon: 'myIcon', label: 'myVisualizationType' }),
       },
-    };
-  }
-
-  beforeEach(() => {
-    mockVisualization = {
-      ...createMockVisualization(),
-      id: 'testVis',
-      visualizationTypes: [
-        {
-          icon: 'empty',
-          id: 'testVis',
-          label: 'TEST1',
-          groupLabel: 'testVisGroup',
-        },
-      ],
-    };
-  });
-
-  it('should render nothing with no custom renderer nor description', async () => {
-    // @ts-expect-error
-    mockVisualization.getDescription.mockReturnValue(undefined);
-    const { instance } = await mountWithProvider(<LayerSettings {...getDefaultProps()} />);
-    expect(instance.html()).toBe(null);
-  });
-
-  it('should render a static header if visualization has only a description value', async () => {
-    mockVisualization.getDescription.mockReturnValue({
-      icon: 'myIcon',
-      label: 'myVisualizationType',
     });
-    const { instance } = await mountWithProvider(<LayerSettings {...getDefaultProps()} />);
-    expect(instance.find('StaticHeader').first().prop('label')).toBe('myVisualizationType');
+    expect(screen.getByText('myVisualizationType')).toBeInTheDocument();
   });
 
-  it('should call the custom renderer if available', async () => {
-    mockVisualization.renderLayerHeader = jest.fn();
-    await mountWithProvider(<LayerSettings {...getDefaultProps()} />);
-    expect(mockVisualization.renderLayerHeader).toHaveBeenCalled();
+  it('should use custom renderer if passed', () => {
+    const customLayerHeader = faker.lorem.word();
+
+    renderLayerSettings({
+      activeVisualization: {
+        ...createMockVisualization(),
+        LayerHeaderComponent: () => <div>{customLayerHeader}</div>,
+      },
+    });
+    expect(screen.getByText(customLayerHeader)).toBeInTheDocument();
   });
 });

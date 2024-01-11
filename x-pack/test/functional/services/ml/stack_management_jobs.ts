@@ -13,8 +13,8 @@ import path from 'path';
 
 import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 type SyncFlyoutObjectType =
@@ -27,7 +27,6 @@ export function MachineLearningStackManagementJobsProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
@@ -143,24 +142,22 @@ export function MachineLearningStackManagementJobsProvider({
       await testSubjects.missingOrFail('share-to-space-flyout', { timeout: 2000 });
     },
 
-    async selectShareToSpacesMode(inputTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId') {
+    async selectShareToSpacesMode(
+      buttonTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId'
+    ) {
       await retry.tryForTime(5000, async () => {
-        // The input element can not be clicked directly.
-        // Instead, we need to click the corresponding label
-        const inputId = await testSubjects.getAttribute(inputTestSubj, 'id', 1000);
-        const labelElement = await find.byCssSelector(`[for="${inputId}"]`, 1000);
-        await labelElement.click();
+        const button = await testSubjects.find(buttonTestSubj, 1000);
+        await button.click();
 
-        const checked = await testSubjects.getAttribute(inputTestSubj, 'checked', 1000);
-        expect(checked).to.eql('true', `Input '${inputTestSubj}' should be checked`);
+        const isPressed = await button.getAttribute('aria-pressed');
+        expect(isPressed).to.eql('true', `Button '${buttonTestSubj}' should be checked`);
 
-        // sometimes the checked attribute of the input is set but it's not actually
+        // sometimes the aria-pressed attribute of the button is set but it's not actually
         // selected, so we're also checking the class of the corresponding label
-        const updatedLabelElement = await find.byCssSelector(`[for="${inputId}"]`, 1000);
-        const labelClasses = await updatedLabelElement.getAttribute('class');
+        const labelClasses = await button.getAttribute('class');
         expect(labelClasses).to.contain(
           'euiButtonGroupButton-isSelected',
-          `Label for '${inputTestSubj}' should be selected`
+          `Label for '${buttonTestSubj}' should be selected`
         );
       });
     },
@@ -176,7 +173,7 @@ export function MachineLearningStackManagementJobsProvider({
     async isSpaceSelectionRowSelected(spaceId: string): Promise<boolean> {
       const state = await testSubjects.getAttribute(
         `sts-space-selector-row-${spaceId}`,
-        'data-test-selected',
+        'aria-checked',
         1000
       );
       return state === 'true';

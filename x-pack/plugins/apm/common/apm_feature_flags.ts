@@ -15,7 +15,7 @@ export enum ApmFeatureFlagName {
   InfraUiAvailable = 'infraUiAvailable',
   MigrationToFleetAvailable = 'migrationToFleetAvailable',
   SourcemapApiAvailable = 'sourcemapApiAvailable',
-  SpacesAvailable = 'spacesAvailable',
+  StorageExplorerAvailable = 'storageExplorerAvailable',
 }
 
 const apmFeatureFlagMap = {
@@ -43,7 +43,7 @@ const apmFeatureFlagMap = {
     default: true,
     type: t.boolean,
   },
-  [ApmFeatureFlagName.SpacesAvailable]: {
+  [ApmFeatureFlagName.StorageExplorerAvailable]: {
     default: true,
     type: t.boolean,
   },

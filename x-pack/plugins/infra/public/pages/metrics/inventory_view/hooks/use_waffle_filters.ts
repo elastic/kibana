@@ -7,11 +7,15 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import * as rt from 'io-ts';
+
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainter from 'constate';
+import {
+  type InventoryFiltersState,
+  inventoryFiltersStateRT,
+} from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useUrlState } from '../../../../utils/use_url_state';
 import { useSourceContext } from '../../../../containers/metrics_source';
@@ -26,20 +30,23 @@ const validateKuery = (expression: string) => {
   return true;
 };
 
-export const DEFAULT_WAFFLE_FILTERS_STATE: WaffleFiltersState = { kind: 'kuery', expression: '' };
+export const DEFAULT_WAFFLE_FILTERS_STATE: InventoryFiltersState = {
+  kind: 'kuery',
+  expression: '',
+};
 
 export const useWaffleFilters = () => {
   const { createDerivedIndexPattern } = useSourceContext();
   const indexPattern = createDerivedIndexPattern();
 
-  const [urlState, setUrlState] = useUrlState<WaffleFiltersState>({
+  const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
     defaultState: DEFAULT_WAFFLE_FILTERS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleFilter',
   });
 
-  const [state, setState] = useState<WaffleFiltersState>(urlState);
+  const [state, setState] = useState<InventoryFiltersState>(urlState);
 
   useEffect(() => setUrlState(state), [setUrlState, state]);
 
@@ -61,7 +68,7 @@ export const useWaffleFilters = () => {
     [setState]
   );
 
-  const applyFilterQuery = useCallback((filterQuery: WaffleFiltersState) => {
+  const applyFilterQuery = useCallback((filterQuery: InventoryFiltersState) => {
     setState(filterQuery);
     setFilterQueryDraft(filterQuery.expression);
   }, []);
@@ -87,14 +94,10 @@ export const useWaffleFilters = () => {
   };
 };
 
-export const WaffleFiltersStateRT = rt.type({
-  kind: rt.literal('kuery'),
-  expression: rt.string,
-});
-
-export type WaffleFiltersState = rt.TypeOf<typeof WaffleFiltersStateRT>;
-const encodeUrlState = WaffleFiltersStateRT.encode;
+// temporary
+export type WaffleFiltersState = InventoryFiltersState;
+const encodeUrlState = inventoryFiltersStateRT.encode;
 const decodeUrlState = (value: unknown) =>
-  pipe(WaffleFiltersStateRT.decode(value), fold(constant(undefined), identity));
+  pipe(inventoryFiltersStateRT.decode(value), fold(constant(undefined), identity));
 export const WaffleFilters = createContainter(useWaffleFilters);
 export const [WaffleFiltersProvider, useWaffleFiltersContext] = WaffleFilters;

@@ -77,5 +77,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./formula')); // 5m 52s
     loadTestFile(require.resolve('./heatmap')); // 51s
     loadTestFile(require.resolve('./gauge')); // 1m 17s
+    loadTestFile(require.resolve('./tagcloud')); // 1m
   });
 };

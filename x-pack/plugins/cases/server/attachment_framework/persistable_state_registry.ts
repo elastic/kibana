@@ -20,7 +20,6 @@ export class PersistableStateAttachmentTypeRegistry extends AttachmentTypeRegist
       telemetry: attachmentType.telemetry || ((state, stats) => stats),
       inject: attachmentType.inject || identity,
       extract: attachmentType.extract || ((state) => ({ state, references: [] })),
-      migrations: attachmentType.migrations || {},
     };
 
     super.register(item);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -40,12 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('classification job', function () {
     before(async () => {
       await ml.api.createAndRunDFAJob(classificationJobConfig as DataFrameAnalyticsConfig);
-      await ml.testResources.createIndexPatternIfNeeded(classificationJobConfig.dest!.index!);
+      await ml.testResources.createDataViewIfNeeded(classificationJobConfig.dest!.index!);
     });
 
     after(async () => {
       await ml.api.deleteDataFrameAnalyticsJobES(classificationJobConfig.id as string);
-      await ml.testResources.deleteIndexPatternByTitle(classificationJobConfig.dest!.index!);
+      await ml.testResources.deleteDataViewByTitle(classificationJobConfig.dest!.index!);
       await ml.api.deleteIndices(classificationJobConfig.dest!.index!);
       await ml.api.cleanMlIndices();
     });

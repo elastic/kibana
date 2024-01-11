@@ -27,7 +27,16 @@ export interface UseRequestResponse<D = any, E = Error> {
 
 export const useRequest = <D = any, E = Error>(
   httpClient: HttpSetup,
-  { path, method, query, body, pollIntervalMs, initialData, deserializer }: UseRequestConfig
+  {
+    path,
+    method,
+    query,
+    body,
+    pollIntervalMs,
+    initialData,
+    deserializer,
+    version,
+  }: UseRequestConfig
 ): UseRequestResponse<D, E> => {
   const isMounted = useRef(false);
 
@@ -60,10 +69,11 @@ export const useRequest = <D = any, E = Error>(
       method,
       query: queryStringified ? query : undefined,
       body: bodyStringified ? body : undefined,
+      version,
     };
     // queryStringified and bodyStringified stand in for query and body as dependencies.
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [path, method, queryStringified, bodyStringified]);
+  }, [path, method, queryStringified, bodyStringified, version]);
 
   const resendRequest = useCallback(
     async (asSystemRequest?: boolean) => {

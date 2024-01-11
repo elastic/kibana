@@ -14,6 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { TelemetryReceiver } from './receiver';
 import type { TelemetryEventsSender } from './sender';
+import { type LatestTaskStateSchema, stateSchemaByVersion } from './task_state';
 
 export interface OsqueryTelemetryTaskConfig {
   type: string;
@@ -79,8 +80,9 @@ export class OsqueryTelemetryTask {
       [this.config.type]: {
         title: this.config.title,
         timeout: this.config.timeout,
+        stateSchemaByVersion,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-          const { state } = taskInstance;
+          const state = taskInstance.state as LatestTaskStateSchema;
 
           return {
             run: async () => {
@@ -92,12 +94,14 @@ export class OsqueryTelemetryTask {
 
               const hits = await this.runTask(taskInstance.id, executionPeriod);
 
+              const updatedState: LatestTaskStateSchema = {
+                lastExecutionTimestamp: taskExecutionTime,
+                runs: state.runs + 1,
+                hits: typeof hits === 'number' ? hits : undefined,
+              };
+
               return {
-                state: {
-                  lastExecutionTimestamp: taskExecutionTime,
-                  runs: (state.runs || 0) + 1,
-                  hits,
-                },
+                state: updatedState,
               };
             },
             // eslint-disable-next-line @typescript-eslint/no-empty-function

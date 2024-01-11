@@ -53,5 +53,6 @@ export const createTargetIndex: ModelStage<
     aliases: [],
     aliasActions,
     skipDocumentMigration: true,
+    previousAlgorithm: 'zdt',
   };
 };

@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/content-management-tabbed-table-list-view",
+  "owner": "@elastic/appex-sharedux"
+}

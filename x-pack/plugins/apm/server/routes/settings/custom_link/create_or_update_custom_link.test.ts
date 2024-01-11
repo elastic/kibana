@@ -41,7 +41,7 @@ describe('Create or Update Custom link', () => {
     expect(internalClientIndexMock).toHaveBeenCalledWith(
       'create_or_update_custom_link',
       {
-        refresh: true,
+        refresh: 'wait_for',
         index: '.apm-custom-link',
         body: {
           '@timestamp': 1570737000000,
@@ -62,7 +62,7 @@ describe('Create or Update Custom link', () => {
     expect(internalClientIndexMock).toHaveBeenCalledWith(
       'create_or_update_custom_link',
       {
-        refresh: true,
+        refresh: 'wait_for',
         index: '.apm-custom-link',
         id: 'bar',
         body: {

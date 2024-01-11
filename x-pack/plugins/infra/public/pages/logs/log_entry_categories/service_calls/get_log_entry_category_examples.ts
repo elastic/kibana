@@ -6,17 +6,19 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { PersistedLogViewReference } from '../../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { IdFormat } from '../../../../../common/http_api/latest';
 
 import {
   getLogEntryCategoryExamplesRequestPayloadRT,
   getLogEntryCategoryExamplesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH,
-} from '../../../../../common/http_api/log_analysis';
+} from '../../../../../common/http_api';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs {
   logViewReference: PersistedLogViewReference;
+  idFormat: IdFormat;
   startTime: number;
   endTime: number;
   categoryId: number;
@@ -27,7 +29,7 @@ export const callGetLogEntryCategoryExamplesAPI = async (
   requestArgs: RequestArgs,
   fetch: HttpHandler
 ) => {
-  const { logViewReference, startTime, endTime, categoryId, exampleCount } = requestArgs;
+  const { logViewReference, idFormat, startTime, endTime, categoryId, exampleCount } = requestArgs;
 
   const response = await fetch(LOG_ANALYSIS_GET_LOG_ENTRY_CATEGORY_EXAMPLES_PATH, {
     method: 'POST',
@@ -37,6 +39,7 @@ export const callGetLogEntryCategoryExamplesAPI = async (
           categoryId,
           exampleCount,
           logView: logViewReference,
+          idFormat,
           timeRange: {
             startTime,
             endTime,
@@ -44,6 +47,7 @@ export const callGetLogEntryCategoryExamplesAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryCategoryExamplesSuccessReponsePayloadRT)(response);

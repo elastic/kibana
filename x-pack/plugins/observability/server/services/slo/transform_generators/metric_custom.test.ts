@@ -27,6 +27,17 @@ describe('Metric Custom Transform Generator', () => {
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid equation/);
     });
+    it('throws when the good filter is invalid', () => {
+      const anSLO = createSLO({
+        indicator: createMetricCustomIndicator({
+          good: {
+            metrics: [{ name: 'A', aggregation: 'sum', field: 'good', filter: 'foo:' }],
+            equation: 'A',
+          },
+        }),
+      });
+      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
+    });
     it('throws when the total equation is invalid', () => {
       const anSLO = createSLO({
         indicator: createMetricCustomIndicator({
@@ -38,6 +49,17 @@ describe('Metric Custom Transform Generator', () => {
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid equation/);
     });
+    it('throws when the total filter is invalid', () => {
+      const anSLO = createSLO({
+        indicator: createMetricCustomIndicator({
+          total: {
+            metrics: [{ name: 'A', aggregation: 'sum', field: 'total', filter: 'foo:' }],
+            equation: 'A',
+          },
+        }),
+      });
+      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
+    });
     it('throws when the query_filter is invalid', () => {
       const anSLO = createSLO({
         indicator: createMetricCustomIndicator({ filter: '{ kql.query: invalid' }),
@@ -47,32 +69,20 @@ describe('Metric Custom Transform Generator', () => {
   });
 
   it('returns the expected transform params with every specified indicator params', async () => {
-    const anSLO = createSLO({ indicator: createMetricCustomIndicator() });
+    const anSLO = createSLO({ id: 'irrelevant', indicator: createMetricCustomIndicator() });
     const transform = generator.getTransformParams(anSLO);
 
-    expect(transform).toMatchSnapshot({
-      transform_id: expect.any(String),
-      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
-    });
-    expect(transform.transform_id).toEqual(`slo-${anSLO.id}-${anSLO.revision}`);
-    expect(transform.source.runtime_mappings!['slo.id']).toMatchObject({
-      script: { source: `emit('${anSLO.id}')` },
-    });
-    expect(transform.source.runtime_mappings!['slo.revision']).toMatchObject({
-      script: { source: `emit(${anSLO.revision})` },
-    });
+    expect(transform).toMatchSnapshot();
   });
 
   it('returns the expected transform params for timeslices slo', async () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
       indicator: createMetricCustomIndicator(),
     });
     const transform = generator.getTransformParams(anSLO);
 
-    expect(transform).toMatchSnapshot({
-      transform_id: expect.any(String),
-      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
-    });
+    expect(transform).toMatchSnapshot();
   });
 
   it('filters the source using the kql query', async () => {
@@ -120,11 +130,83 @@ describe('Metric Custom Transform Generator', () => {
     expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
   });
 
+  it('support the same field used twice in the equation', async () => {
+    const anSLO = createSLO({
+      indicator: createMetricCustomIndicator({
+        good: {
+          metrics: [{ name: 'A', aggregation: 'sum', field: 'good' }],
+          equation: 'A + A * 100',
+        },
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
+  });
+
+  it('aggregates using the numerator equation with filter', async () => {
+    const anSLO = createSLO({
+      indicator: createMetricCustomIndicator({
+        good: {
+          metrics: [
+            { name: 'A', aggregation: 'sum', field: 'good', filter: 'outcome: "success" ' },
+          ],
+          equation: 'A * 100',
+        },
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
+  });
+
+  it('aggregates using doc_count the numerator equation with filter', async () => {
+    const anSLO = createSLO({
+      indicator: createMetricCustomIndicator({
+        good: {
+          metrics: [{ name: 'A', aggregation: 'doc_count', filter: 'outcome: "success" ' }],
+          equation: 'A * 100',
+        },
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.pivot!.aggregations!['slo.numerator']).toMatchSnapshot();
+  });
+
   it('aggregates using the denominator equation', async () => {
     const anSLO = createSLO({
       indicator: createMetricCustomIndicator({
         total: {
           metrics: [{ name: 'A', aggregation: 'sum', field: 'total' }],
+          equation: 'A / 100',
+        },
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
+  });
+
+  it('aggregates using the denominator equation with filter', async () => {
+    const anSLO = createSLO({
+      indicator: createMetricCustomIndicator({
+        total: {
+          metrics: [{ name: 'A', aggregation: 'sum', field: 'total', filter: 'outcome: *' }],
+          equation: 'A / 100',
+        },
+      }),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
+  });
+
+  it('aggregates using doc_count for the denominator equation with filter', async () => {
+    const anSLO = createSLO({
+      indicator: createMetricCustomIndicator({
+        total: {
+          metrics: [{ name: 'A', aggregation: 'doc_count', filter: 'outcome: *' }],
           equation: 'A / 100',
         },
       }),

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { SolutionSideNav, type SolutionSideNavProps } from './solution_side_nav';
 import type { SolutionSideNavItem } from './types';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -134,7 +134,8 @@ describe('SolutionSideNav', () => {
 
       result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
 
-      waitFor(() => {
+      // add check at the end of the event loop to ensure the panel is removed
+      setTimeout(() => {
         expect(result.queryByTestId('solutionSideNavPanel')).not.toBeInTheDocument();
       });
     });

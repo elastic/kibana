@@ -14,7 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
 } from '@elastic/eui';
 import React from 'react';
 import { Observable, Subscription, merge, tap, fromEvent } from 'rxjs';
@@ -75,9 +75,12 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage style={{ minHeight: '100vh' }}>
+      <EuiPage
+        style={{ minHeight: '100vh', alignItems: 'center' }}
+        data-test-subj="fatalErrorScreen"
+      >
         <EuiPageBody>
-          <EuiPageContent verticalPosition="center" horizontalPosition="center">
+          <EuiPageSection alignment="center">
             <EuiEmptyPrompt
               iconType="warning"
               iconColor="danger"
@@ -129,7 +132,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
                 </EuiCodeBlock>
               </EuiCallOut>
             ))}
-          </EuiPageContent>
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
     );

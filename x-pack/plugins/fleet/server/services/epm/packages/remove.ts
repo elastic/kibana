@@ -7,8 +7,6 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import Boom from '@hapi/boom';
-
 import type { SavedObject } from '@kbn/core/server';
 
 import { SavedObjectsClient } from '@kbn/core/server';
@@ -42,6 +40,9 @@ import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
 import { auditLoggingService } from '../../audit_logging';
+import { FleetError, PackageRemovalError } from '../../../errors';
+
+import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
 
 import { getInstallation, kibanaSavedObjectTypes } from '.';
 
@@ -54,29 +55,28 @@ export async function removeInstallation(options: {
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
+  if (!installation) throw new PackageRemovalError(`${pkgName} is not installed`);
 
   const { total, items } = await packagePolicyService.list(savedObjectsClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
     page: 1,
-    perPage: options.force ? SO_SEARCH_LIMIT : 0,
+    perPage: SO_SEARCH_LIMIT,
   });
 
+  if (!options.force) {
+    await populatePackagePolicyAssignedAgentsCount(esClient, items);
+  }
+
   if (total > 0) {
-    if (options.force) {
+    if (options.force || items.every((item) => (item.agents ?? 0) === 0)) {
       // delete package policies
       const ids = items.map((item) => item.id);
-      appContextService
-        .getLogger()
-        .info(
-          `deleting package policies of ${pkgName} package because force flag was enabled: ${ids}`
-        );
       await packagePolicyService.delete(savedObjectsClient, esClient, ids, {
         force: options.force,
       });
     } else {
-      throw Boom.badRequest(
-        `unable to remove package with existing package policy(s) in use by agent(s)`
+      throw new PackageRemovalError(
+        `Unable to remove package with existing package policy(s) in use by agent(s)`
       );
     }
   }
@@ -236,7 +236,7 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
     try {
       await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
     } catch {
-      throw new Error(`error deleting index template ${name}`);
+      throw new FleetError(`Error deleting index template ${name}`);
     }
   }
 }
@@ -247,7 +247,7 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
     try {
       await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
     } catch (error) {
-      throw new Error(`error deleting component template ${name}`);
+      throw new FleetError(`Error deleting component template ${name}`);
     }
   }
 }

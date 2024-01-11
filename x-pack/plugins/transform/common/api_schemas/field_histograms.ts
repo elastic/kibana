@@ -6,8 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-
-import { ChartData } from '../shared_imports';
+import type { ChartData } from '@kbn/ml-data-grid';
 
 import { runtimeMappingsSchema } from './common';
 

@@ -11,6 +11,8 @@ export const DASHBOARD_SUMMARY_CONTAINER = 'dashboard-summary-section';
 export const KUBERNETES_DASHBOARD_CONTAINER = 'kubernetes-dashboard-container';
 export const CLOUD_DASHBOARD_CONTAINER = 'cloud-dashboard-container';
 export const CLOUD_POSTURE_DASHBOARD_PAGE_HEADER = 'cloud-posture-dashboard-page-header';
+export const VULNERABILITY_DASHBOARD_PAGE_HEADER = 'vulnerability-dashboard-page-header';
+export const VULNERABILITY_DASHBOARD_CONTAINER = 'vulnerability-dashboard-container';
 
 export const DASHBOARD_COUNTER_CARDS = {
   CLUSTERS_EVALUATED: 'dashboard-counter-card-clusters-evaluated',

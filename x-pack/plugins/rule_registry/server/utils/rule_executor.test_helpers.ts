@@ -77,6 +77,7 @@ export const createDefaultAlertExecutorOptions = <
   params,
   spaceId: 'SPACE_ID',
   services: {
+    alertsClient: null,
     alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
       .alertFactory,
     savedObjectsClient: savedObjectsClientMock.create(),
@@ -95,4 +96,8 @@ export const createDefaultAlertExecutorOptions = <
   logger,
   flappingSettings: DEFAULT_FLAPPING_SETTINGS,
   ...(maintenanceWindowIds ? { maintenanceWindowIds } : {}),
+  getTimeRange: () => {
+    const date = new Date(Date.now()).toISOString();
+    return { dateStart: date, dateEnd: date };
+  },
 });

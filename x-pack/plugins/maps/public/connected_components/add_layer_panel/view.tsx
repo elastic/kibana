@@ -47,7 +47,6 @@ export interface Props {
   addPreviewLayers: (layerDescriptors: LayerDescriptor[]) => void;
   closeFlyout: () => void;
   hasPreviewLayers: boolean;
-  isLoadingPreviewLayers: boolean;
   addLayersAndClose: () => void;
   addLayersAndContinue: () => void;
   enableEditMode: () => void;
@@ -118,6 +117,7 @@ export class AddLayerPanel extends Component<Props, State> {
               disabled={isDisabled || isLoading}
               isLoading={isLoading}
               onClick={addLayersAndClose}
+              iconSide="right"
             >
               {ADD_LAYER_STEP_SECONDARY_ACTION_BUTTON_LABEL}
             </EuiButton>
@@ -178,22 +178,17 @@ export class AddLayerPanel extends Component<Props, State> {
       return null;
     }
 
-    let isDisabled = !this.state.isNextStepBtnEnabled;
-    let isLoading = this.state.isStepLoading;
-    if (this.state.currentStep.id === ADD_LAYER_STEP_ID) {
-      isDisabled = !this.props.hasPreviewLayers;
-      isLoading = this.props.isLoadingPreviewLayers;
-    } else {
-      isDisabled = !this.state.isNextStepBtnEnabled;
-      isLoading = this.state.isStepLoading;
-    }
+    const isDisabled =
+      this.state.currentStep.id === ADD_LAYER_STEP_ID
+        ? !this.props.hasPreviewLayers
+        : !this.state.isNextStepBtnEnabled;
 
     const nextButton = (
       <EuiFlexItem grow={false}>
         <EuiButton
           data-test-subj="importFileButton"
-          disabled={isDisabled || isLoading}
-          isLoading={isLoading}
+          disabled={isDisabled || this.state.isStepLoading}
+          isLoading={this.state.isStepLoading}
           iconSide="right"
           iconType={'arrowRight'}
           onClick={this._onNext}
@@ -212,7 +207,7 @@ export class AddLayerPanel extends Component<Props, State> {
           <EuiFlexItem grow={false}>
             {this.state.currentStep.renderSecondaryActionButton({
               isDisabled,
-              isLoading,
+              isLoading: this.state.isStepLoading,
               addLayersAndClose: this.props.addLayersAndClose,
             })}
           </EuiFlexItem>

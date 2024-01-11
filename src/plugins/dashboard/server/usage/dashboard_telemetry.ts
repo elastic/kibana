@@ -7,17 +7,18 @@
  */
 
 import { isEmpty } from 'lodash';
-import { SavedObjectAttributes } from '@kbn/core/server';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import {
-  type ControlGroupTelemetry,
-  CONTROL_GROUP_TYPE,
-  RawControlGroupAttributes,
-} from '@kbn/controls-plugin/common';
-import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
+
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { SavedDashboardPanel } from '../../common';
-import { TASK_ID, DashboardTelemetryTaskState } from './dashboard_telemetry_collection_task';
+import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import { type ControlGroupTelemetry, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+
+import { DashboardAttributes, SavedDashboardPanel } from '../../common/content_management';
+import { TASK_ID } from './dashboard_telemetry_collection_task';
+import { emptyState, type LatestTaskStateSchema } from './task_state';
+
+// TODO: Merge with LatestTaskStateSchema. Requires a refactor of collectPanelsByType() because
+// LatestTaskStateSchema doesn't allow mutations (uses ReadOnly<..>).
 export interface DashboardCollectorData {
   panels: {
     total: number;
@@ -90,13 +91,11 @@ export const collectPanelsByType = (
 
 export const controlsCollectorFactory =
   (embeddableService: EmbeddablePersistableStateService) =>
-  (attributes: SavedObjectAttributes, collectorData: DashboardCollectorData) => {
-    const controlGroupAttributes: RawControlGroupAttributes | undefined =
-      attributes.controlGroupInput as unknown as RawControlGroupAttributes;
-    if (!isEmpty(controlGroupAttributes)) {
+  (attributes: DashboardAttributes, collectorData: DashboardCollectorData) => {
+    if (!isEmpty(attributes.controlGroupInput)) {
       collectorData.controls = embeddableService.telemetry(
         {
-          ...controlGroupAttributes,
+          ...attributes.controlGroupInput,
           type: CONTROL_GROUP_TYPE,
           id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
         },
@@ -132,9 +131,9 @@ export async function collectDashboardTelemetry(taskManager: TaskManagerStartCon
   const latestTaskState = await getLatestTaskState(taskManager);
 
   if (latestTaskState !== null) {
-    const state = latestTaskState[0].state as DashboardTelemetryTaskState;
+    const state = latestTaskState[0].state as LatestTaskStateSchema;
     return state.telemetry;
   }
 
-  return getEmptyDashboardData();
+  return emptyState.telemetry;
 }

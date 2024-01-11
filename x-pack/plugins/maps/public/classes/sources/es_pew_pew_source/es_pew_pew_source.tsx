@@ -9,6 +9,7 @@ import React from 'react';
 import turfBbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { type Filter, buildExistsFilter } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
 import type {
@@ -23,7 +24,6 @@ import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
-import { registerSource } from '../source_registry';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
 import { mergeExecutionContext } from '../execution_context_utils';
@@ -35,7 +35,7 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
+import { BoundsRequestMeta, GeoJsonWithMeta, getLayerFeaturesRequestName } from '../vector_source';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -94,6 +94,7 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   getSyncMeta(dataFilters: DataFilters) {
     return {
+      ...super.getSyncMeta(dataFilters),
       geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
     };
   }
@@ -188,29 +189,21 @@ export class ESPewPewSource extends AbstractESAggSource {
       buildExistsFilter({ name: this._descriptor.sourceGeoField, type: 'geo_point' }, indexPattern),
     ]);
 
+    const warnings: SearchResponseWarning[] = [];
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: i18n.translate('xpack.maps.pewPew.requestName', {
-        defaultMessage: '{layerName} paths request',
-        values: { layerName },
-      }),
+      requestName: getLayerFeaturesRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-        defaultMessage:
-          'Get paths from data view: {dataViewName}, source: {sourceFieldName}, destination: {destFieldName}',
-        values: {
-          dataViewName: indexPattern.getName(),
-          destFieldName: this._descriptor.destGeoField,
-          sourceFieldName: this._descriptor.sourceGeoField,
-        },
-      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_pew_pew_source:connections' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
     const { featureCollection } = convertToLines(esResponse);
@@ -219,6 +212,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       data: featureCollection,
       meta: {
         areResultsTrimmed: false,
+        warnings,
       },
     };
   }
@@ -304,8 +298,3 @@ export class ESPewPewSource extends AbstractESAggSource {
     return true;
   }
 }
-
-registerSource({
-  ConstructorFunction: ESPewPewSource,
-  type: SOURCE_TYPES.ES_PEW_PEW,
-});

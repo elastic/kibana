@@ -21,6 +21,8 @@ import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { mountWithProvider } from '../../mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+
 import {
   applyChanges,
   LensAppState,
@@ -34,7 +36,7 @@ import { setChangesApplied } from '../../state_management/lens_slice';
 const SELECTORS = {
   APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsApplyChanges__suggestions"]',
   SUGGESTIONS_PANEL: '[data-test-subj="lnsSuggestionsPanel"]',
-  SUGGESTION_TILE_BUTTON: 'div[data-test-subj="lnsSuggestion"]',
+  SUGGESTION_TILE_BUTTON: 'button[data-test-subj="lnsSuggestion"]',
 };
 
 jest.mock('./suggestion_helpers');
@@ -105,6 +107,8 @@ describe('suggestion_panel', () => {
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
       getUserMessages: () => [],
+      nowProvider: { get: jest.fn(() => new Date()) },
+      core: coreMock.createStart(),
     };
   });
 
@@ -377,8 +381,9 @@ describe('suggestion_panel', () => {
       },
     ] as Suggestion[]);
 
-    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce(undefined);
-    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
+    (mockVisualization.toPreviewExpression as jest.Mock)
+      .mockReturnValue(undefined)
+      .mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
     mountWithProvider(<SuggestionPanel {...defaultProps} frame={createMockFramePublicAPI()} />);

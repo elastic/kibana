@@ -9,6 +9,7 @@ import https from 'https';
 import type { TypeOf } from '@kbn/config-schema';
 import fetch from 'node-fetch';
 
+import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { APP_API_ROUTES } from '../../constants';
@@ -18,16 +19,20 @@ import { PostHealthCheckRequestSchema } from '../../types';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // get fleet server health check by host
-  router.post(
-    {
+  router.versioned
+    .post({
       path: APP_API_ROUTES.HEALTH_CHECK_PATTERN,
-      validate: PostHealthCheckRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
-    },
-    postHealthCheckHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: PostHealthCheckRequestSchema },
+      },
+      postHealthCheckHandler
+    );
 };
 
 export const postHealthCheckHandler: FleetRequestHandler<

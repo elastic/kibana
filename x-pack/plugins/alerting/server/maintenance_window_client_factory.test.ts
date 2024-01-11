@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Request } from '@hapi/hapi';
-import { CoreKibanaRequest } from '@kbn/core/server';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   MaintenanceWindowClientFactory,
   MaintenanceWindowClientFactoryOpts,
@@ -16,7 +14,7 @@ import {
   savedObjectsServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
@@ -33,23 +31,6 @@ const maintenanceWindowClientFactoryParams: jest.Mocked<MaintenanceWindowClientF
   savedObjectsService,
 };
 
-const fakeRequest = {
-  app: {},
-  headers: {},
-  getBasePath: () => '',
-  path: '/',
-  route: { settings: {} },
-  url: {
-    href: '/',
-  },
-  raw: {
-    req: {
-      url: '/',
-    },
-  },
-  getSavedObjectsClient: () => savedObjectsClient,
-} as unknown as Request;
-
 beforeEach(() => {
   jest.resetAllMocks();
 });
@@ -60,7 +41,7 @@ test('creates a maintenance window client with proper constructor arguments when
     securityPluginStart,
     ...maintenanceWindowClientFactoryParams,
   });
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
 
@@ -82,7 +63,7 @@ test('creates a maintenance window client with proper constructor arguments when
 test('creates a maintenance window client with proper constructor arguments', async () => {
   const factory = new MaintenanceWindowClientFactory();
   factory.initialize(maintenanceWindowClientFactoryParams);
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
 
@@ -107,7 +88,7 @@ test('creates an unauthorized maintenance window client', async () => {
     securityPluginStart,
     ...maintenanceWindowClientFactoryParams,
   });
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
 
@@ -130,7 +111,7 @@ test('creates an unauthorized maintenance window client', async () => {
 test('getUserName() returns null when security is disabled', async () => {
   const factory = new MaintenanceWindowClientFactory();
   factory.initialize(maintenanceWindowClientFactoryParams);
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
   const constructorCall = jest.requireMock('./maintenance_window_client').MaintenanceWindowClient
@@ -146,7 +127,7 @@ test('getUserName() returns a name when security is enabled', async () => {
     securityPluginStart,
     ...maintenanceWindowClientFactoryParams,
   });
-  const request = CoreKibanaRequest.from(fakeRequest);
+  const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
 

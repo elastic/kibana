@@ -15,7 +15,7 @@ import { ctiFactoryTypes } from './cti';
 import { riskScoreFactory } from './risk_score';
 import { usersFactory } from './users';
 import { firstLastSeenFactory } from './last_first_seen';
-import { responseActionsFactory } from './response_actions';
+import { relatedEntitiesFactory } from './related_entities';
 
 export const securitySolutionFactory: Record<
   FactoryQueryTypes,
@@ -28,5 +28,5 @@ export const securitySolutionFactory: Record<
   ...ctiFactoryTypes,
   ...riskScoreFactory,
   ...firstLastSeenFactory,
-  ...responseActionsFactory,
+  ...relatedEntitiesFactory,
 };

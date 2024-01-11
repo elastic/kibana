@@ -16,15 +16,16 @@ import React from 'react';
 import d3 from 'd3';
 import $ from 'jquery';
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 
-import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
-import { formatValue } from '../../formatters/format_value';
+import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
 } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+
+import { formatValue } from '../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
@@ -256,9 +257,9 @@ export class ExplorerChartSingleMetric extends React.Component {
           return `M${xPosition},${chartHeight} ${xPosition},0`;
         })
         // Use elastic chart's cursor line style if possible
-        .style('stroke', `${chartTheme.crosshair.line.stroke ?? 'black'}`)
-        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth ?? '1'}px`)
-        .style('stroke-dasharray', chartTheme.crosshair.line.dash ?? '4,4');
+        .style('stroke', chartTheme.crosshair.line.stroke)
+        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth}px`)
+        .style('stroke-dasharray', chartTheme.crosshair.line.dash?.join(',') ?? '4,4');
 
       cursorMouseLine.exit().remove();
     }

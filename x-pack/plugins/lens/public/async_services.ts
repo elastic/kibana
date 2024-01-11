@@ -28,6 +28,9 @@ export * from './visualizations/heatmap/heatmap_visualization';
 export * from './visualizations/heatmap';
 export * from './visualizations/gauge/gauge_visualization';
 export * from './visualizations/gauge';
+export * from './visualizations/tagcloud/tagcloud_visualization';
+export * from './visualizations/tagcloud';
+export { getEditLensConfiguration } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export * from './datasources/form_based/form_based';
 export { getTextBasedDatasource } from './datasources/text_based/text_based_languages';
@@ -47,3 +50,6 @@ export * from './app_plugin/save_modal_container';
 export * from './chart_info_api';
 
 export * from './trigger_actions/open_in_discover_helpers';
+export * from './trigger_actions/open_lens_config/edit_action_helpers';
+export * from './trigger_actions/open_lens_config/create_action_helpers';
+export * from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers';

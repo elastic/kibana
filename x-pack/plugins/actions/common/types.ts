@@ -6,12 +6,14 @@
  */
 
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 export {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  GenerativeAIForSecurityConnectorFeatureId,
 } from './connector_feature_config';
 export interface ActionType {
   id: string;
@@ -21,6 +23,7 @@ export interface ActionType {
   enabledInLicense: boolean;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
+  isSystemActionType: boolean;
 }
 
 export enum InvalidEmailReason {
@@ -45,6 +48,7 @@ export interface ActionTypeExecutorResult<Data> {
   serviceMessage?: string;
   data?: Data;
   retry?: null | boolean | Date;
+  errorSource?: TaskErrorSource;
 }
 
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {

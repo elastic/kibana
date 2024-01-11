@@ -268,6 +268,11 @@ export type SavedObjectSaveModalTagSelectorComponentProps = EuiComboBoxProps<
    * tags selection callback
    */
   onTagsSelected: (ids: string[]) => void;
+
+  /**
+   * Add "Optional" to the label
+   */
+  markOptional?: boolean;
 };
 
 /**

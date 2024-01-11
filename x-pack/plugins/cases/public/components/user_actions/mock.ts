@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
@@ -13,9 +13,10 @@ import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import type { UserActionBuilderArgs } from './types';
+import { casesConfigurationsMock } from '../../containers/configure/mock';
 
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
-  const userAction = getUserAction('title', Actions.update);
+  const userAction = getUserAction('title', UserActionActions.update);
   const commentRefs = { current: {} };
 
   const alertData = {
@@ -63,6 +64,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
     caseData: basicCase,
+    casesConfiguration: casesConfigurationsMock,
     comments: basicCase.comments,
     index: 0,
     alertData,

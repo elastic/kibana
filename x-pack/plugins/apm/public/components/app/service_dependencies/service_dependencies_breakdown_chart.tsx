@@ -8,7 +8,7 @@ import React from 'react';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { BreakdownChart } from '../../shared/charts/breakdown_chart';
@@ -22,7 +22,10 @@ export function ServiceDependenciesBreakdownChart({
 
   const {
     query: { kuery, environment, rangeFrom, rangeTo },
-  } = useApmParams('/services/{serviceName}/dependencies');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/dependencies',
+    '/mobile-services/{serviceName}/dependencies'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

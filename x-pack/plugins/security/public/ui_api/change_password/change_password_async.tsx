@@ -9,8 +9,8 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { UserAPIClient } from '../../management/users';
 import type { ChangePasswordProps } from './change_password';
+import { UserAPIClient } from '../../management/users';
 
 export const getChangePasswordComponent = async (
   core: CoreStart

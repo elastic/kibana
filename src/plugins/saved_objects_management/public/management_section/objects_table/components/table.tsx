@@ -13,7 +13,7 @@ import {
   EuiSearchBar,
   EuiBasicTable,
   EuiButton,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiSpacer,
   EuiToolTip,
@@ -245,14 +245,13 @@ export class Table extends PureComponent<TableProps, TableState> {
         render: (type: string, object: SavedObjectWithMetadata) => {
           const typeLabel = getSavedObjectLabel(type, allowedTypes);
           return (
-            <EuiToolTip position="top" content={typeLabel}>
-              <EuiIcon
-                aria-label={typeLabel}
-                type={object.meta.icon || 'apps'}
-                size="s"
-                data-test-subj="objectType"
-              />
-            </EuiToolTip>
+            <EuiIconTip
+              aria-label={typeLabel}
+              type={object.meta.icon || 'apps'}
+              size="s"
+              content={typeLabel}
+              iconProps={{ 'data-test-subj': 'objectType' }}
+            />
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,

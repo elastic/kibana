@@ -23,7 +23,6 @@ import { SettingsPanel } from './settings_panel';
 export const Settings: React.FC = () => {
   const { makeRequest, setPipeline } = useActions(SettingsLogic);
   const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(SettingsLogic);
-
   const {
     extract_binary_content: extractBinaryContent,
     reduce_whitespace: reduceWhitespace,
@@ -41,7 +40,7 @@ export const Settings: React.FC = () => {
         description: (
           <FormattedMessage
             id="xpack.enterpriseSearch.content.settings.description"
-            defaultMessage="These settings apply to all new Elasticsearch indices created by Enterprise Search ingestion mechanisms. For API ingest-based indices, remember to include the pipeline when you ingest documents. These features are powered by {link}."
+            defaultMessage="These settings apply to all new Elasticsearch indices created by Search ingestion mechanisms. For API ingest-based indices, remember to include the pipeline when you ingest documents. These features are powered by {link}."
             values={{
               link: (
                 <EuiLink href={docLinks.ingestPipelines} target="_blank">
@@ -62,6 +61,7 @@ export const Settings: React.FC = () => {
             disabled={hasNoChanges}
             isLoading={isLoading}
             onClick={() => makeRequest(pipelineState)}
+            data-test-subj={'entSearchContentSettingsSaveButton'}
           >
             {i18n.translate('xpack.enterpriseSearch.content.settings.saveButtonLabel', {
               defaultMessage: 'Save',
@@ -71,6 +71,7 @@ export const Settings: React.FC = () => {
             disabled={hasNoChanges}
             isLoading={isLoading}
             onClick={() => setPipeline(defaultPipeline)}
+            data-test-subj={'entSearchContentSettingsResetButton'}
           >
             {i18n.translate('xpack.enterpriseSearch.content.settings.resetButtonLabel', {
               defaultMessage: 'Reset',

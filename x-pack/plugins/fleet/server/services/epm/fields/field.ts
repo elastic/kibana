@@ -7,8 +7,8 @@
 
 import { safeLoad } from 'js-yaml';
 
-import type { PackageInfo } from '../../../types';
-import { getAssetsData } from '../packages/assets';
+import type { PackageInstallContext } from '../../../../common/types';
+import { getAssetsDataFromAssetsMap } from '../packages/assets';
 
 // This should become a copy of https://github.com/elastic/beats/blob/d9a4c9c240a9820fab15002592e5bb6db318543b/libbeat/mapping/field.go#L39
 export interface Field {
@@ -39,6 +39,8 @@ export interface Field {
   null_value?: string;
   dimension?: boolean;
   default_field?: boolean;
+  runtime?: boolean | string;
+  subobjects?: boolean;
 
   // Fields specific of the aggregate_metric_double type
   metrics?: string[];
@@ -255,25 +257,35 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
 export function processFieldsWithWildcard(fields: Fields): Fields {
   const newFields: Fields = [];
   for (const field of fields) {
-    const hasWildcard = field.name.includes('*');
-    const hasObjectType = field.object_type;
-    if (hasWildcard && !hasObjectType) {
-      newFields.push({ ...field, type: 'object', object_type: field.type });
-    } else {
-      newFields.push({ ...field });
+    const objectTypeField = processFieldWithoutObjectType(field);
+    // adding object_type for fields under a group type
+    if (objectTypeField.type === 'group' && objectTypeField.fields) {
+      objectTypeField.fields = processFieldsWithWildcard(objectTypeField.fields);
     }
+    newFields.push(objectTypeField);
   }
   return newFields;
+}
+
+export function processFieldWithoutObjectType(field: Field): Field {
+  const hasWildcard = field.name.includes('*');
+  const hasObjectType = field.object_type;
+  if (hasWildcard && !hasObjectType && field.type !== 'object') {
+    return { ...field, type: 'object', object_type: field.type };
+  } else {
+    return { ...field };
+  }
 }
 
 export function processFields(fields: Fields): Fields {
   const processedFields = processFieldsWithWildcard(fields);
   const expandedFields = expandFields(processedFields);
   const dedupedFields = dedupFields(expandedFields);
+
   return validateFields(dedupedFields, dedupedFields);
 }
 
-const isFields = (path: string) => {
+export const isFields = (path: string) => {
   return path.includes('/fields/');
 };
 
@@ -284,11 +296,16 @@ const isFields = (path: string) => {
  */
 
 export const loadFieldsFromYaml = (
-  pkg: Pick<PackageInfo, 'version' | 'name' | 'type'>,
+  packageInstallContext: PackageInstallContext,
   datasetName?: string
 ): Field[] => {
   // Fetch all field definition files
-  const fieldDefinitionFiles = getAssetsData(pkg, isFields, datasetName);
+  const fieldDefinitionFiles = getAssetsDataFromAssetsMap(
+    packageInstallContext.packageInfo,
+    packageInstallContext.assetsMap,
+    isFields,
+    datasetName
+  );
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.
     if (file.buffer) {

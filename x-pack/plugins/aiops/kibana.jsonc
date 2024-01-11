@@ -15,12 +15,23 @@
       "uiActions",
       "unifiedFieldList",
       "fileUpload",
-      "dataViews"
+      "dataViews",
+      "embeddable",
+      "presentationUtil",
+      "dashboard",
+      "fieldFormats",
+      "unifiedSearch"
+    ],
+    "optionalPlugins": [
+      "cases",
+      "usageCollection"
     ],
     "requiredBundles": [
       "fieldFormats",
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils",
+      "embeddable",
+      "cases"
     ],
     "extraPublicDirs": [
       "common"

@@ -16,6 +16,8 @@ import {
   Incident,
   PushToServiceApiHandlerArgs,
   PushToServiceResponse,
+  CloseIncidentApiHandlerArgs,
+  ExternalServiceIncidentResponse,
 } from './types';
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
@@ -74,6 +76,20 @@ const pushToServiceHandler = async ({
   return res;
 };
 
+const closeIncidentHandler = async ({
+  externalService,
+  params,
+}: CloseIncidentApiHandlerArgs): Promise<ExternalServiceIncidentResponse | null> => {
+  const { externalId, correlation_id: correlationId } = params.incident;
+
+  const res = await externalService.closeIncident({
+    correlationId,
+    incidentId: externalId,
+  });
+
+  return res;
+};
+
 const getFieldsHandler = async ({
   externalService,
 }: GetCommonFieldsHandlerArgs): Promise<GetCommonFieldsResponse> => {
@@ -95,4 +111,5 @@ export const api: ExternalServiceAPI = {
   getIncident: getIncidentHandler,
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
+  closeIncident: closeIncidentHandler,
 };

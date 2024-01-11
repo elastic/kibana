@@ -6,8 +6,8 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
+
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Chart,
   Settings,
@@ -19,24 +19,28 @@ import {
   AxisStyle,
   PartialTheme,
   BarSeriesProps,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
-  TotalFeatureImportance,
+  getAnalysisType,
+  isClassificationAnalysis,
   isClassificationTotalFeatureImportance,
+  isRegressionAnalysis,
   isRegressionTotalFeatureImportance,
-  RegressionTotalFeatureImportance,
-  ClassificationTotalFeatureImportance,
-  FeatureImportanceClassName,
-} from '../../../../../../../common/types/feature_importance';
+  type DataFrameAnalyticsConfig,
+  type TotalFeatureImportance,
+  type RegressionTotalFeatureImportance,
+  type ClassificationTotalFeatureImportance,
+  type FeatureImportanceClassName,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { ExpandableSection } from '../expandable_section';
-import { DataFrameAnalyticsConfig } from '../../../../../../../common/types/data_frame_analytics';
-import { getAnalysisType } from '../../../../common';
-import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
 
 const { euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -292,9 +296,11 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
               >
                 <Settings
                   rotation={90}
-                  // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                   theme={theme}
+                  // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                  baseTheme={LEGACY_LIGHT_THEME}
                   showLegend={showLegend}
+                  locale={i18n.getLocale()}
                 />
 
                 <Axis

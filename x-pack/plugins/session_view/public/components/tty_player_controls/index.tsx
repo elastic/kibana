@@ -16,7 +16,7 @@ import {
   EuiRangeProps,
 } from '@elastic/eui';
 import { findIndex } from 'lodash';
-import { ProcessStartMarker, ProcessEvent } from '../../../common/types/process_tree';
+import type { ProcessStartMarker, ProcessEvent } from '../../../common';
 import { useStyles } from './styles';
 import {
   TTY_END,
@@ -59,7 +59,7 @@ export const TTYPlayerControls = ({
   const commonButtonProps: Partial<EuiButtonIconProps> = {
     display: 'empty',
     size: 's',
-    color: 'ghost',
+    color: 'text',
     css: styles.controlButton,
   };
 
@@ -188,7 +188,7 @@ export const TTYPlayerControls = ({
             onClick={handleViewInSession}
             iconType="arrowRight"
             aria-label={VIEW_IN_SESSION}
-            color="ghost"
+            color="text"
           >
             {VIEW_IN_SESSION}
           </EuiButtonEmpty>

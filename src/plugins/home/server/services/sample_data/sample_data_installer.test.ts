@@ -159,8 +159,14 @@ describe('SampleDataInstaller', () => {
       expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: 'kibana_sample_data_test_single_data_index',
         body: {
-          settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
-          mappings: { properties: { someField: { type: 'keyword' } } },
+          mappings: {
+            properties: {
+              someField: { type: 'keyword' },
+            },
+          },
+          settings: {
+            index: {},
+          },
         },
       });
     });

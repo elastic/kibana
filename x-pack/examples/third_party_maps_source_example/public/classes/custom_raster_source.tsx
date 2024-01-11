@@ -106,10 +106,6 @@ export class CustomRasterSource implements IRasterSource {
     return false;
   }
 
-  getFieldNames(): string[] {
-    return [];
-  }
-
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
     return null;
   }

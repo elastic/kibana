@@ -14,10 +14,12 @@ export function handleRouteHandlerError({
   error,
   logger,
   response,
+  message,
 }: {
   error: any;
   response: KibanaResponseFactory;
   logger: Logger;
+  message: string;
 }) {
   if (
     error instanceof WrappedElasticsearchClientError &&
@@ -34,8 +36,6 @@ export function handleRouteHandlerError({
 
   return response.customError({
     statusCode: error.statusCode ?? 500,
-    body: {
-      message: error.message,
-    },
+    body: { message },
   });
 }

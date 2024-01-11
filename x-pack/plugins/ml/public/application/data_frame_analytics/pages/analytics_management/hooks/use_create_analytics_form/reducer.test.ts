@@ -7,7 +7,10 @@
 
 import { merge } from 'lodash';
 
-import { ANALYSIS_CONFIG_TYPE, DataFrameAnalyticsConfig } from '../../../../common';
+import {
+  ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { ACTION } from './actions';
 import {
@@ -36,7 +39,7 @@ const getMockState = ({
       jobIdEmpty: false,
       jobIdValid: true,
       jobIdExists: false,
-      createIndexPattern: false,
+      createDataView: false,
     },
     jobConfig: {
       source: { index },

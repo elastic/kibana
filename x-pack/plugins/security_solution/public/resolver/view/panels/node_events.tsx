@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
@@ -17,34 +15,35 @@ import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import type { EventStats } from '../../../../common/endpoint/types';
 import * as selectors from '../../store/selectors';
-import type { ResolverState } from '../../types';
 import { StyledPanel } from '../styles';
 import { PanelLoading } from './panel_loading';
 import { useLinkProps } from '../use_link_props';
 import * as nodeDataModel from '../../models/node_data';
+import type { State } from '../../../common/store/types';
 
-export function NodeEvents({ nodeID }: { nodeID: string }) {
-  const processEvent = useSelector((state: ResolverState) =>
-    nodeDataModel.firstEvent(selectors.nodeDataForID(state)(nodeID))
+export function NodeEvents({ id, nodeID }: { id: string; nodeID: string }) {
+  const processEvent = useSelector((state: State) =>
+    nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
   );
-  const nodeStats = useSelector((state: ResolverState) => selectors.nodeStats(state)(nodeID));
+  const nodeStats = useSelector((state: State) => selectors.nodeStats(state.analyzer[id])(nodeID));
 
   if (processEvent === undefined || nodeStats === undefined) {
     return (
       <StyledPanel hasBorder>
-        <PanelLoading />
+        <PanelLoading id={id} />
       </StyledPanel>
     );
   } else {
     return (
       <StyledPanel hasBorder>
         <NodeEventsBreadcrumbs
+          id={id}
           nodeName={event.processNameSafeVersion(processEvent)}
           nodeID={nodeID}
           totalEventCount={nodeStats.total}
         />
         <EuiSpacer size="l" />
-        <EventCategoryLinks nodeID={nodeID} relatedStats={nodeStats} />
+        <EventCategoryLinks id={id} nodeID={nodeID} relatedStats={nodeStats} />
       </StyledPanel>
     );
   }
@@ -61,10 +60,13 @@ export function NodeEvents({ nodeID }: { nodeID: string }) {
  * | 2                      | Network                    |
  *
  */
+// eslint-disable-next-line react/display-name
 const EventCategoryLinks = memo(function ({
+  id,
   nodeID,
   relatedStats,
 }: {
+  id: string;
   nodeID: string;
   relatedStats: EventStats;
 }) {
@@ -104,23 +106,26 @@ const EventCategoryLinks = memo(function ({
         sortable: true,
         render(eventType: string) {
           return (
-            <NodeEventsLink nodeID={nodeID} eventType={eventType}>
+            <NodeEventsLink id={id} nodeID={nodeID} eventType={eventType}>
               {eventType}
             </NodeEventsLink>
           );
         },
       },
     ],
-    [nodeID]
+    [nodeID, id]
   );
   return <EuiInMemoryTable<EventCountsTableView> items={rows} columns={columns} sorting />;
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsBreadcrumbs = memo(function ({
+  id,
   nodeID,
   nodeName,
   totalEventCount,
 }: {
+  id: string;
   nodeID: string;
   nodeName: React.ReactNode;
   totalEventCount: number;
@@ -135,13 +140,13 @@ const NodeEventsBreadcrumbs = memo(function ({
               defaultMessage: 'Events',
             }
           ),
-          ...useLinkProps({
+          ...useLinkProps(id, {
             panelView: 'nodes',
           }),
         },
         {
           text: nodeName,
-          ...useLinkProps({
+          ...useLinkProps(id, {
             panelView: 'nodeDetail',
             panelParameters: { nodeID },
           }),
@@ -154,7 +159,7 @@ const NodeEventsBreadcrumbs = memo(function ({
               defaultMessage="{totalCount} Events"
             />
           ),
-          ...useLinkProps({
+          ...useLinkProps(id, {
             panelView: 'nodeEvents',
             panelParameters: { nodeID },
           }),
@@ -164,17 +169,20 @@ const NodeEventsBreadcrumbs = memo(function ({
   );
 });
 
+// eslint-disable-next-line react/display-name
 const NodeEventsLink = memo(
   ({
+    id,
     nodeID,
     eventType,
     children,
   }: {
+    id: string;
     nodeID: string;
     eventType: string;
     children: React.ReactNode;
   }) => {
-    const props = useLinkProps({
+    const props = useLinkProps(id, {
       panelView: 'nodeEventsInCategory',
       panelParameters: {
         nodeID,

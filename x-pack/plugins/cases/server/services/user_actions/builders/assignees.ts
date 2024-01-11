@@ -6,21 +6,21 @@
  */
 
 import { CASE_SAVED_OBJECT } from '../../../../common/constants';
-import type { ActionCategory } from '../../../../common/api';
-import { ActionTypes, Actions } from '../../../../common/api';
+import type { UserActionAction } from '../../../../common/types/domain';
+import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class AssigneesUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'assignees'>): UserActionEvent {
-    const action = args.action ?? Actions.add;
+    const action = args.action ?? UserActionActions.add;
 
     const soParams = this.buildCommonUserAction({
       ...args,
       action,
       valueKey: 'assignees',
       value: args.payload.assignees,
-      type: ActionTypes.assignees,
+      type: UserActionTypes.assignees,
     });
 
     const uids = args.payload.assignees.map((assignee) => assignee.uid);
@@ -44,7 +44,7 @@ export class AssigneesUserActionBuilder extends UserActionBuilder {
   }
 }
 
-const getVerbMessage = (action: ActionCategory, uids: string[]) => {
+const getVerbMessage = (action: UserActionAction, uids: string[]) => {
   const uidText = `uids: [${uids}]`;
 
   switch (action) {

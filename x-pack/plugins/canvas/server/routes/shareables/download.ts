@@ -13,12 +13,12 @@ import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../common/lib/consta
 
 export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.get(
-    {
+  router.versioned
+    .get({
       path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
-      validate: false,
-    },
-    async (_context, _request, response) => {
+      access: 'internal',
+    })
+    .addVersion({ version: '1', validate: false }, async (_context, _request, response) => {
       // TODO: check if this is still an issue on cloud after migrating to NP
       //
       // The option setting is not for typical use.  We're using it here to avoid
@@ -29,6 +29,5 @@ export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDe
         headers: { 'content-type': 'application/octet-stream' },
         body: file,
       });
-    }
-  );
+    });
 }

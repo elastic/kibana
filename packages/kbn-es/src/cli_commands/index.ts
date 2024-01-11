@@ -10,10 +10,14 @@ import { snapshot } from './snapshot';
 import { source } from './source';
 import { archive } from './archive';
 import { buildSnapshots } from './build_snapshots';
+import { docker } from './docker';
+import { serverless } from './serverless';
 
 export const commands = {
   snapshot,
   source,
   archive,
   build_snapshots: buildSnapshots,
+  docker,
+  serverless,
 };

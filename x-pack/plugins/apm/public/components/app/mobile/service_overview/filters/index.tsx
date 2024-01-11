@@ -13,6 +13,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { MobileProperty } from '../../../../../../common/mobile_types';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
@@ -31,25 +32,25 @@ const ALL_OPTION = {
 
 const MOBILE_FILTERS: Array<{ key: MobileFilter['key']; label: string }> = [
   {
-    key: 'device',
+    key: MobileProperty.Device,
     label: i18n.translate('xpack.apm.mobile.filters.device', {
       defaultMessage: 'Device',
     }),
   },
   {
-    key: 'osVersion',
+    key: MobileProperty.OsVersion,
     label: i18n.translate('xpack.apm.mobile.filters.osVersion', {
       defaultMessage: 'OS version',
     }),
   },
   {
-    key: 'appVersion',
+    key: MobileProperty.AppVersion,
     label: i18n.translate('xpack.apm.mobile.filters.appVersion', {
       defaultMessage: 'App version',
     }),
   },
   {
-    key: 'netConnectionType',
+    key: MobileProperty.NetworkConnectionType,
     label: i18n.translate('xpack.apm.mobile.filters.nct', {
       defaultMessage: 'NCT',
     }),
@@ -58,7 +59,7 @@ const MOBILE_FILTERS: Array<{ key: MobileFilter['key']; label: string }> = [
 
 export function MobileFilters() {
   const history = useHistory();
-  const { isSmall, isLarge } = useBreakpoints();
+  const { isLarge } = useBreakpoints();
   const { serviceName } = useApmServiceContext();
 
   const {
@@ -76,7 +77,8 @@ export function MobileFilters() {
   } = useAnyOfApmParams(
     '/mobile-services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/errors-and-crashes'
   );
 
   const filters = { netConnectionType, device, osVersion, appVersion };
@@ -134,7 +136,7 @@ export function MobileFilters() {
           >
             <EuiSelect
               data-test-subj="apmMobileFiltersSelect"
-              fullWidth={isSmall}
+              fullWidth
               isLoading={status === FETCH_STATUS.LOADING}
               prepend={label}
               options={toSelectOptions(selectOptions)}

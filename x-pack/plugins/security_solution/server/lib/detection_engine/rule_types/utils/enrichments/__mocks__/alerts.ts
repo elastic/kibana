@@ -40,14 +40,16 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_URL,
   ALERT_UUID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   EVENT_KIND,
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
 import type { EventsForEnrichment } from '../types';
-import type { BaseFieldsLatest } from '../../../../../../../common/detection_engine/schemas/alerts';
+import type { BaseFieldsLatest } from '../../../../../../../common/api/detection_engine/model/alerts';
 
 import {
   ALERT_ANCESTORS,
@@ -66,6 +68,8 @@ import {
   ALERT_RULE_TIMELINE_TITLE,
   ALERT_RULE_INDICES,
   ALERT_RULE_TIMESTAMP_OVERRIDE,
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
 } from '../../../../../../../common/field_maps/field_names';
 
 export const createAlert = (
@@ -94,6 +98,8 @@ export const createAlert = (
     [ALERT_ORIGINAL_TIME]: undefined,
     [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
     [ALERT_WORKFLOW_STATUS]: 'open',
+    [ALERT_WORKFLOW_TAGS]: [],
+    [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
     [ALERT_DEPTH]: 1,
     [ALERT_REASON]: 'reasonable reason',
     [ALERT_SEVERITY]: 'high',
@@ -190,6 +196,8 @@ export const createAlert = (
       rule_name_override: undefined,
       timestamp_override: undefined,
     },
+    [ALERT_HOST_CRITICALITY]: undefined,
+    [ALERT_USER_CRITICALITY]: undefined,
     ...data,
   },
 });

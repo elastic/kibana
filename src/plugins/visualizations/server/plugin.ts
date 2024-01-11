@@ -19,17 +19,17 @@ import { ContentManagementServerSetup } from '@kbn/content-management-plugin/ser
 import { capabilitiesProvider } from './capabilities_provider';
 import { VisualizationsStorage } from './content_management';
 
-import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
+import type { VisualizationsServerSetup, VisualizationsServerStart } from './types';
 import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
-import { getVisualizationSavedObjectType } from './saved_objects';
+import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './saved_objects';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export class VisualizationsPlugin
-  implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart>
+  implements Plugin<VisualizationsServerSetup, VisualizationsServerStart>
 {
   private readonly logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -55,13 +55,16 @@ export class VisualizationsPlugin
 
     plugins.contentManagement.register({
       id: CONTENT_ID,
-      storage: new VisualizationsStorage(),
+      storage: new VisualizationsStorage({
+        logger: this.logger,
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+      }),
       version: {
         latest: LATEST_VERSION,
       },
     });
 
-    return {};
+    return { registerReadOnlyVisType };
   }
 
   public start(core: CoreStart) {

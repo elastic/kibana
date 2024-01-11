@@ -14,7 +14,6 @@ import {
   anomalyDetectionJobSchema,
   anomalyDetectionUpdateJobSchema,
   jobIdSchema,
-  getRecordsSchema,
   getBucketsSchema,
   getOverallBucketsSchema,
   getCategoriesSchema,
@@ -24,7 +23,6 @@ import {
   updateModelSnapshotsSchema,
   updateModelSnapshotBodySchema,
   forceQuerySchema,
-  jobResetQuerySchema,
 } from './schemas/anomaly_detectors_schema';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 
@@ -365,53 +363,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {post} /internal/ml/anomaly_detectors/:jobId/_reset Reset specified job
-   * @apiName ResetAnomalyDetectorsJob
-   * @apiDescription Resets an anomaly detection job.
-   *
-   * @apiSchema (params) jobIdSchema
-   * @apiSchema (query) jobResetQuerySchema
-   */
-  router.versioned
-    .post({
-      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/_reset`,
-      access: 'internal',
-      options: {
-        tags: ['access:ml:canCloseJob'],
-      },
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: {
-          request: {
-            params: jobIdSchema,
-            query: jobResetQuerySchema,
-          },
-        },
-      },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-        try {
-          const options: { job_id: string; wait_for_completion?: boolean } = {
-            // TODO change this to correct resetJob request type
-            job_id: request.params.jobId,
-            ...(request.query.wait_for_completion !== undefined
-              ? { wait_for_completion: request.query.wait_for_completion }
-              : {}),
-          };
-          const body = await mlClient.resetJob(options);
-          return response.ok({
-            body,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
-        }
-      })
-    );
-
-  /**
-   * @apiGroup AnomalyDetectors
-   *
    * @api {delete} /internal/ml/anomaly_detectors/:jobId Delete specified job
    * @apiName DeleteAnomalyDetectorsJob
    * @apiDescription Deletes specified anomaly detection job.
@@ -530,52 +481,6 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
             body: {
               duration,
             },
-          });
-          return response.ok({
-            body,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
-        }
-      })
-    );
-
-  /**
-   * @apiGroup AnomalyDetectors
-   *
-   * @api {post} /internal/ml/anomaly_detectors/:jobId/results/records  Retrieves anomaly records for a job.
-   * @apiName GetRecords
-   * @apiDescription Retrieves anomaly records for a job.
-   *
-   * @apiSchema (params) jobIdSchema
-   * @apiSchema (body) getRecordsSchema
-   *
-   * @apiSuccess {Number} count
-   * @apiSuccess {Object[]} records
-   */
-  router.versioned
-    .post({
-      path: `${ML_INTERNAL_BASE_PATH}/anomaly_detectors/{jobId}/results/records`,
-      access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
-      },
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: {
-          request: {
-            params: jobIdSchema,
-            body: getRecordsSchema,
-          },
-        },
-      },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-        try {
-          const body = await mlClient.getRecords({
-            job_id: request.params.jobId,
-            body: request.body,
           });
           return response.ok({
             body,

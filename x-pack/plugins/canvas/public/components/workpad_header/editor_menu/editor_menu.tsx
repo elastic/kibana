@@ -14,11 +14,7 @@ import {
   EmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
-import {
-  useEmbeddablesService,
-  usePlatformService,
-  useVisualizationsService,
-} from '../../../services';
+import { useEmbeddablesService, useVisualizationsService } from '../../../services';
 import { CANVAS_APP } from '../../../../common/lib';
 import { encode } from '../../../../common/lib/embeddable_dataurl';
 import { ElementSpec } from '../../../../types';
@@ -39,10 +35,8 @@ interface UnwrappedEmbeddableFactory {
 export const EditorMenu: FC<Props> = ({ addElement }) => {
   const embeddablesService = useEmbeddablesService();
   const { pathname, search, hash } = useLocation();
-  const platformService = usePlatformService();
   const stateTransferService = embeddablesService.getStateTransfer();
   const visualizationsService = useVisualizationsService();
-  const IS_DARK_THEME = platformService.getUISetting('theme:darkMode');
 
   const embeddableFactories = useMemo(
     () => (embeddablesService ? Array.from(embeddablesService.getEmbeddableFactories()) : []),
@@ -74,12 +68,14 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
           trackCanvasUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
 
-        if ('aliasPath' in visType) {
-          appId = visType.aliasApp;
-          path = visType.aliasPath;
-        } else {
+        if (!('alias' in visType)) {
+          // this visualization is not an alias
           appId = 'visualize';
           path = `#/create?type=${encodeURIComponent(visType.name)}`;
+        } else if (visType.alias && 'path' in visType.alias) {
+          // this visualization **is** an alias, and it has an app to redirect to for creation
+          appId = visType.alias.app;
+          path = visType.alias.path;
         }
       } else {
         appId = 'visualize';
@@ -134,13 +130,14 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
         }
         return 0;
       })
-      .filter(({ hidden }: BaseVisType) => !hidden);
+      .filter(({ disableCreate }: BaseVisType) => !disableCreate);
 
   const visTypeAliases = visualizationsService
     .getAliases()
     .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
-    );
+    )
+    .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
 
   const factories = unwrappedEmbeddableFactories
     .filter(
@@ -148,7 +145,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
         isEditable &&
         !isContainerType &&
         canCreateNew() &&
-        !['visualization', 'ml'].some((factoryType) => {
+        !['visualization', 'ml', 'links'].some((factoryType) => {
           return type.includes(factoryType);
         })
     )
@@ -161,7 +158,6 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
       createNewVisType={createNewVisType}
       createNewEmbeddable={createNewEmbeddable}
       promotedVisTypes={promotedVisTypes}
-      isDarkThemeEnabled={IS_DARK_THEME}
       factories={factories}
       visTypeAliases={visTypeAliases}
     />

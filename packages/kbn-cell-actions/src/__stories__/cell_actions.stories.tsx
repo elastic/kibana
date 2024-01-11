@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { CellActionsProvider } from '../context/cell_actions_context';
 import { makeAction } from '../mocks/helpers';
 import { CellActions } from '../components/cell_actions';
@@ -16,7 +17,13 @@ import type { CellActionsProps } from '../types';
 
 const TRIGGER_ID = 'testTriggerId';
 
-const FIELD = { name: 'name', value: '123', type: 'text' };
+const VALUE = '123';
+const FIELD: FieldSpec = {
+  name: 'name',
+  type: 'text',
+  searchable: true,
+  aggregatable: true,
+};
 
 const getCompatibleActions = () =>
   Promise.resolve([
@@ -62,24 +69,56 @@ DefaultWithControls.args = {
   showActionTooltips: true,
   mode: CellActionsMode.INLINE,
   triggerId: TRIGGER_ID,
-  field: FIELD,
+  data: [
+    {
+      field: FIELD,
+      value: '',
+    },
+  ],
   visibleCellActions: 3,
 };
 
 export const CellActionInline = ({}: {}) => (
-  <CellActions mode={CellActionsMode.INLINE} triggerId={TRIGGER_ID} field={FIELD}>
+  <CellActions
+    mode={CellActionsMode.INLINE}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+  >
     Field value
   </CellActions>
 );
 
 export const CellActionHoverPopoverDown = ({}: {}) => (
-  <CellActions mode={CellActionsMode.HOVER_DOWN} triggerId={TRIGGER_ID} field={FIELD}>
+  <CellActions
+    mode={CellActionsMode.HOVER_DOWN}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+  >
     Hover me
   </CellActions>
 );
 
 export const CellActionHoverPopoverRight = ({}: {}) => (
-  <CellActions mode={CellActionsMode.HOVER_RIGHT} triggerId={TRIGGER_ID} field={FIELD}>
+  <CellActions
+    mode={CellActionsMode.HOVER_RIGHT}
+    triggerId={TRIGGER_ID}
+    data={[
+      {
+        field: FIELD,
+        value: VALUE,
+      },
+    ]}
+  >
     Hover me
   </CellActions>
 );
