@@ -459,7 +459,12 @@ export class LinkModal extends Component<LinkModalProps, State> {
               name="embed radio group"
               idSelected={this.state.exportUrlAs}
               legend={{
-                children: <span>Generate as</span>,
+                children: (
+                  <FormattedMessage
+                    id="share.urlModal.generateLinkAsLabel"
+                    defaultMessage="Generate as"
+                  />
+                ),
               }}
             />
             <EuiSpacer size="m" />
