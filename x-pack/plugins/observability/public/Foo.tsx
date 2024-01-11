@@ -7,12 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiTextArea } from '@elastic/eui';
 import { AlertStatusIndicator } from './components/alert_status_indicator';
 
 export function Foo() {
   return (
     <div>
       <AlertStatusIndicator />
+      <EuiTextArea />
       {i18n.translate('xpack.observability.foo.div.helloLabel', { defaultMessage: 'hello' })}
     </div>
   );
