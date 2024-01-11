@@ -9,25 +9,25 @@
 // import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core/server';
-import { DATA_VIEWS_FIELDS_FROM_FROZEN } from '../common/constants';
+import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../common/constants';
 
 export const uiSettingsConfig: Record<string, UiSettingsParams> = {
-  [DATA_VIEWS_FIELDS_FROM_FROZEN]: {
+  [DATA_VIEWS_FIELDS_EXCLUDED_TIERS]: {
     /*
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
     }),
     */
-    name: 'Exclude fields from frozen indices',
-    value: false,
-    type: 'boolean',
-    description: 'Exclude fields from frozen indices for faster performance',
+    name: 'Data tiers excluded from field requests',
+    value: '',
+    type: 'string',
+    description: 'Exclude fields from specified tiers (such as frozen) for faster performance',
     /*
     description: i18n.translate('discover.advancedSettings.defaultColumnsText', {
       defaultMessage:
         'Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.',
     }),
     */
-    schema: schema.boolean(),
+    schema: schema.string(),
   },
 };

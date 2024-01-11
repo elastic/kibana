@@ -64,4 +64,4 @@ export const FIELDS_FOR_WILDCARD_PATH = '/internal/data_views/_fields_for_wildca
  */
 export const EXISTING_INDICES_PATH = '/internal/data_views/_existing_indices';
 
-export const DATA_VIEWS_FIELDS_FROM_FROZEN = 'data_views:fields_from_frozen';
+export const DATA_VIEWS_FIELDS_EXCLUDED_TIERS = 'data_views:fields_excluded_data_tiers';

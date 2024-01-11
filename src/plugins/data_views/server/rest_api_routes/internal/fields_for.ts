@@ -17,7 +17,10 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
+import {
+  FIELDS_FOR_WILDCARD_PATH as path,
+  DATA_VIEWS_FIELDS_EXCLUDED_TIERS,
+} from '../../../common/constants';
 import { getIndexFilterDsl } from './utils';
 
 /**
@@ -118,7 +121,9 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
   (isRollupsEnabled) => async (context, request, response) => {
     const core = await context.core;
     const { asCurrentUser } = core.elasticsearch.client;
-    const excludeFrozen = await core.uiSettings.client.get<boolean>('dataViews:fieldsFromFrozen');
+    const excludedTiers = await core.uiSettings.client.get<string>(
+      DATA_VIEWS_FIELDS_EXCLUDED_TIERS
+    );
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
 
     const {
@@ -153,7 +158,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
-        indexFilter: getIndexFilterDsl({ indexFilter, excludeFrozen }),
+        indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
         allowHidden,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });

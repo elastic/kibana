@@ -8,36 +8,39 @@
 
 import type { QueryDslQueryContainer } from '../../../common/types';
 
-const excludeFrozenDsl = {
-  bool: {
-    must_not: [
-      {
-        terms: {
-          _tier: ['data_frozen'],
+const excludeTiersDsl = (excludedTiers: string) => {
+  const _tier = excludedTiers.split(',').map((tier) => `data_${tier.trim()}`);
+  return {
+    bool: {
+      must_not: [
+        {
+          terms: {
+            _tier,
+          },
         },
-      },
-    ],
-  },
+      ],
+    },
+  };
 };
 
 interface GetIndexFilterDslOptions {
   indexFilter?: QueryDslQueryContainer;
-  excludeFrozen: boolean;
+  excludedTiers: string;
 }
 
 export const getIndexFilterDsl = ({
   indexFilter,
-  excludeFrozen,
+  excludedTiers,
 }: GetIndexFilterDslOptions): QueryDslQueryContainer | undefined => {
   if (!indexFilter) {
-    return excludeFrozen ? excludeFrozenDsl : undefined;
+    return excludedTiers ? excludeTiersDsl(excludedTiers) : undefined;
   }
 
-  return !excludeFrozen
+  return !excludedTiers
     ? indexFilter
     : {
         bool: {
-          must: [indexFilter, excludeFrozenDsl],
+          must: [indexFilter, excludeTiersDsl(excludedTiers)],
         },
       };
 };
