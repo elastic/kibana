@@ -19,21 +19,23 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { RemoteConsoleProps, RemoteConsoleDependencies } from '../../../types/remote_console';
+import {
+  EmbeddableConsoleProps,
+  EmbeddableConsoleDependencies,
+} from '../../../types/embeddable_console';
 
 import { ConsoleWrapper } from './console_wrapper';
-
 import './_index.scss';
 
-const landmarkHeading = i18n.translate('console.remoteConsole.landmarkHeading', {
+const landmarkHeading = i18n.translate('console.embeddableConsole.landmarkHeading', {
   defaultMessage: 'Developer console',
 });
 
-export const RemoteConsole = ({
+export const EmbeddableConsole = ({
   size = 'm',
   core,
   usageCollection,
-}: RemoteConsoleProps & RemoteConsoleDependencies) => {
+}: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
   const toggleConsole = () => setIsConsoleOpen(!isConsoleOpen);
 
@@ -45,13 +47,13 @@ export const RemoteConsole = ({
     }
   };
 
-  const classes = classNames('remoteConsole', {
-    'remoteConsole-isOpen': isConsoleOpen,
-    'remoteConsole--large': size === 'l',
-    'remoteConsole--medium': size === 'm',
-    'remoteConsole--small': size === 's',
-    'remoteConsole--fixed': true,
-    'remoteConsole--showOnMobile': false,
+  const classes = classNames('embeddableConsole', {
+    'embeddableConsole-isOpen': isConsoleOpen,
+    'embeddableConsole--large': size === 'l',
+    'embeddableConsole--medium': size === 'm',
+    'embeddableConsole--small': size === 's',
+    'embeddableConsole--fixed': true,
+    'embeddableConsole--showOnMobile': false,
   });
 
   return (
@@ -62,24 +64,24 @@ export const RemoteConsole = ({
             <h2>{landmarkHeading}</h2>
           </EuiScreenReaderOnly>
           <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
-            <div className="remoteConsole__controls">
+            <div className="embeddableConsole__controls">
               <EuiButton
                 color="text"
                 iconType={isConsoleOpen ? 'arrowDown' : 'arrowRight'}
                 onClick={toggleConsole}
                 fullWidth
                 contentProps={{
-                  className: 'remoteConsole__controls--button',
+                  className: 'embeddableConsole__controls--button',
                 }}
               >
-                {i18n.translate('console.remoteConsole.title', {
+                {i18n.translate('console.embeddableConsole.title', {
                   defaultMessage: 'Console',
                 })}
               </EuiButton>
             </div>
           </EuiThemeProvider>
           {isConsoleOpen ? (
-            <div className="remoteConsole__content">
+            <div className="embeddableConsole__content">
               <EuiWindowEvent event="keydown" handler={onKeyDown} />
               <ConsoleWrapper core={core} usageCollection={usageCollection} />
             </div>
@@ -87,7 +89,7 @@ export const RemoteConsole = ({
         </section>
         <EuiScreenReaderOnly>
           <p aria-live="assertive">
-            {i18n.translate('console.remoteConsole.customScreenReaderAnnouncement', {
+            {i18n.translate('console.embeddableConsole.customScreenReaderAnnouncement', {
               defaultMessage:
                 'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
               values: { landmarkHeading },
@@ -101,4 +103,4 @@ export const RemoteConsole = ({
 
 // Default Export is needed to lazy load this react component
 // eslint-disable-next-line import/no-default-export
-export default RemoteConsole;
+export default EmbeddableConsole;

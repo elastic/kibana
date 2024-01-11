@@ -7,13 +7,16 @@
  */
 
 import React, { ReactElement, lazy, Suspense } from 'react';
-import { RemoteConsoleProps, RemoteConsoleDependencies } from '../../../types/remote_console';
+import {
+  EmbeddableConsoleProps,
+  EmbeddableConsoleDependencies,
+} from '../../../types/embeddable_console';
 
-const RemoteConsole = lazy(() => import('./remote_console'));
+const RemoteConsole = lazy(() => import('./embeddable_console'));
 
-export function renderRemoteConsole(
-  props: RemoteConsoleProps | undefined,
-  deps: RemoteConsoleDependencies
+export function renderEmbeddableConsole(
+  props: EmbeddableConsoleProps | undefined,
+  deps: EmbeddableConsoleDependencies
 ): ReactElement | null {
   return (
     <Suspense fallback={<></>}>

@@ -32,7 +32,7 @@ import {
   setStorage,
 } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
-import { MetricsTracker, RemoteConsoleDependencies } from '../../../types';
+import { MetricsTracker, EmbeddableConsoleDependencies } from '../../../types';
 
 import { createApi, createEsHostService } from '../../lib';
 import { EsHostService } from '../../lib/es_host_service';
@@ -63,7 +63,7 @@ interface ConsoleDependencies {
 const loadDependencies = ({
   core,
   usageCollection,
-}: RemoteConsoleDependencies): ConsoleDependencies => {
+}: EmbeddableConsoleDependencies): ConsoleDependencies => {
   const {
     docLinks: { DOC_LINK_VERSION, links },
     http,
@@ -104,7 +104,7 @@ const loadDependencies = ({
   };
 };
 
-export const ConsoleWrapper = (props: RemoteConsoleDependencies): React.ReactElement => {
+export const ConsoleWrapper = (props: EmbeddableConsoleDependencies): React.ReactElement => {
   const dependencies = useMemo(() => loadDependencies(props), [props]);
 
   const {

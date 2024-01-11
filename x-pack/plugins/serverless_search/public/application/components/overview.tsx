@@ -75,13 +75,8 @@ export const ElasticsearchOverview = () => {
       }
     }
   }, [hash]);
-  const remoteConsole = useMemo(
-    () =>
-      consolePlugin && consolePlugin.renderRemoteConsole ? (
-        consolePlugin.renderRemoteConsole()
-      ) : (
-        <></>
-      ),
+  const embeddableConsole = useMemo(
+    () => consolePlugin?.renderEmbeddableConsole?.() ?? <></>,
     [consolePlugin]
   );
 
@@ -350,7 +345,7 @@ export const ElasticsearchOverview = () => {
           links={[]}
           overviewPanelProps={{ color: 'transparent', hasShadow: false }}
         />
-        {remoteConsole}
+        {embeddableConsole}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

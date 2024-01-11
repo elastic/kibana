@@ -9,16 +9,16 @@ import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 /**
- * RemoteConsoleProps are optional props used when rendering the remote developer console.
+ * EmbeddableConsoleProps are optional props used when rendering the embeddable developer console.
  */
-export interface RemoteConsoleProps {
+export interface EmbeddableConsoleProps {
   /**
    * The default height of the content area.
    */
   size?: 's' | 'm' | 'l';
 }
 
-export interface RemoteConsoleDependencies {
+export interface EmbeddableConsoleDependencies {
   core: CoreStart;
   usageCollection?: UsageCollectionStart;
 }

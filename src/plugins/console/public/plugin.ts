@@ -9,15 +9,15 @@
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 
-import { renderRemoteConsole } from './application/containers/remote';
+import { renderEmbeddableConsole } from './application/containers/embeddable';
 import {
   AppSetupUIPluginDependencies,
   AppStartUIPluginDependencies,
   ClientConfigType,
   ConsolePluginSetup,
   ConsoleUILocatorParams,
-  RemoteConsoleProps,
-  RemoteConsoleDependencies,
+  EmbeddableConsoleProps,
+  EmbeddableConsoleDependencies,
 } from './types';
 import { AutocompleteInfo, setAutocompleteInfo } from './services';
 
@@ -107,12 +107,12 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     } = this.ctx.config.get<ClientConfigType>();
     if (isConsoleUiEnabled) {
       return {
-        renderRemoteConsole: (props: RemoteConsoleProps) => {
-          const consoleDeps: RemoteConsoleDependencies = {
+        renderEmbeddableConsole: (props: EmbeddableConsoleProps) => {
+          const consoleDeps: EmbeddableConsoleDependencies = {
             core,
             usageCollection: deps.usageCollection,
           };
-          return renderRemoteConsole(props, consoleDeps);
+          return renderEmbeddableConsole(props, consoleDeps);
         },
       };
     }

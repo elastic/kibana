@@ -30,13 +30,8 @@ export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();
   const { http, console: consolePlugin } = useKibanaServices();
   const { createConnector, isLoading } = useCreateConnector();
-  const remoteConsole = useMemo(
-    () =>
-      consolePlugin && consolePlugin.renderRemoteConsole ? (
-        consolePlugin.renderRemoteConsole()
-      ) : (
-        <></>
-      ),
+  const embeddableConsole = useMemo(
+    () => consolePlugin?.renderEmbeddableConsole?.() ?? <></>,
     [consolePlugin]
   );
 
@@ -124,7 +119,7 @@ export const ConnectorsOverview = () => {
           <EmptyConnectorsPrompt />
         </EuiPageTemplate.Section>
       )}
-      {remoteConsole}
+      {embeddableConsole}
     </EuiPageTemplate>
   );
 };

@@ -13,7 +13,7 @@ import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collectio
 import { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
 import { ConsoleUILocatorParams } from './locator';
-import { RemoteConsoleProps } from './remote_console';
+import { EmbeddableConsoleProps } from './embeddable_console';
 
 export interface AppSetupUIPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -43,8 +43,8 @@ export interface ConsolePluginSetup {
  */
 export interface ConsolePluginStart {
   /**
-   * renderRemoteConsole is available if the console UI is enabled. This function can be called to
-   * render a remote version of the developer console on the page.
+   * renderEmbeddableConsole is available if the console UI is enabled. This function can be called to
+   * render an embeddable version of the developer console on the page.
    */
-  renderRemoteConsole?: (props?: RemoteConsoleProps) => ReactElement | null;
+  renderEmbeddableConsole?: (props?: EmbeddableConsoleProps) => ReactElement | null;
 }
