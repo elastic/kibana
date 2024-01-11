@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Reporting APIs CSV Generation from ES|QL export from non-timebased data view csv from es|ql csv file matches 1`] = `
+"eon,epoch,era,period
+Phanerozoic,\\" Pliocene\\",Cenozoic,Neogene
+Phanerozoic,\\" Holocene\\",Cenozoic,Quaternary
+Phanerozoic,null,Mesozoic,Cretaceous
+Phanerozoic,null,Mesozoic,Jurassic
+Phanerozoic,null,Paleozoic,Cambrian
+Proterozoic,null,Paleozoic,Permian
+Archean,null,null,null
+Hadean,null,null,null
+"
+`;
+
+exports[`Reporting APIs CSV Generation from ES|QL export from non-timebased data view csv from es|ql job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=CSV%20Report.csv",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "CSV Report",
+}
+`;
+
+exports[`Reporting APIs CSV Generation from ES|QL export from timebased data view csv from es|ql export with time filter csv file matches 1`] = `
+"\\"@message\\",\\"@message.raw\\",\\"@tags\\",\\"@tags.raw\\",\\"@timestamp\\",agent,\\"agent.raw\\",bytes,clientip,extension,\\"extension.raw\\",\\"geo.coordinates\\",\\"geo.dest\\",\\"geo.src\\",\\"geo.srcdest\\",headings,\\"headings.raw\\",host,\\"host.raw\\",id,index,\\"index.raw\\",ip,links,\\"links.raw\\",\\"machine.os\\",\\"machine.os.raw\\",\\"machine.ram\\",\\"machine.ram_range\\",memory,\\"meta.char\\",\\"meta.related\\",\\"meta.user.firstname\\",\\"meta.user.lastname\\",phpmemory,referer,\\"relatedContent.article:modified_time\\",\\"relatedContent.article:published_time\\",\\"relatedContent.article:section\\",\\"relatedContent.article:section.raw\\",\\"relatedContent.article:tag\\",\\"relatedContent.article:tag.raw\\",\\"relatedContent.og:description\\",\\"relatedContent.og:description.raw\\",\\"relatedContent.og:image\\",\\"relatedContent.og:image.raw\\",\\"relatedContent.og:image:height\\",\\"relatedContent.og:image:height.raw\\",\\"relatedContent.og:image:width\\",\\"relatedContent.og:image:width.raw\\",\\"relatedContent.og:site_name\\",\\"relatedContent.og:site_name.raw\\",\\"relatedContent.og:title\\",\\"relatedContent.og:title.raw\\",\\"relatedContent.og:type\\",\\"relatedContent.og:type.raw\\",\\"relatedContent.og:url\\",\\"relatedContent.og:url.raw\\",\\"relatedContent.twitter:card\\",\\"relatedContent.twitter:card.raw\\",\\"relatedContent.twitter:description\\",\\"relatedContent.twitter:description.raw\\",\\"relatedContent.twitter:image\\",\\"relatedContent.twitter:image.raw\\",\\"relatedContent.twitter:site\\",\\"relatedContent.twitter:site.raw\\",\\"relatedContent.twitter:title\\",\\"relatedContent.twitter:title.raw\\",\\"relatedContent.url\\",\\"relatedContent.url.raw\\",request,\\"request.raw\\",response,\\"response.raw\\",spaces,\\"spaces.raw\\",type,url,\\"url.raw\\",\\"utc_time\\",xss,\\"xss.raw\\"
+"
+`;
+
+exports[`Reporting APIs CSV Generation from ES|QL export from timebased data view csv from es|ql export with time filter job response data is correct 1`] = `
+Object {
+  "contentDisposition": "attachment; filename=Untitled%20discover%20search.csv",
+  "contentType": "text/csv; charset=utf-8",
+  "title": "Untitled discover search",
+}
+`;
