@@ -15,11 +15,11 @@ import {
   PartialTheme,
   Tooltip,
   TooltipType,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-// import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { euiLightVars } from '@kbn/ui-theme';
 import { Axes } from './axes';
-// import { useChartColors } from '../common/settings';
 import { LoadingWrapper } from './loading_wrapper';
 
 export interface LineChartPoint {
@@ -43,12 +43,8 @@ export const EventRateChart: FC<Props> = ({
   width,
   showAxis,
   loading = false,
-  fadeChart,
   onBrushEnd,
 }) => {
-  const barColor = '#54b39a';
-  // const barColor = euiTheme.euiColorPrimary;
-
   const theme: PartialTheme = {
     scales: { histogramPadding: 0.2 },
   };
@@ -64,7 +60,7 @@ export const EventRateChart: FC<Props> = ({
           <Tooltip type={TooltipType.None} />
           <Settings
             onBrushEnd={onBrushEnd}
-            // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
             theme={theme}
             locale={i18n.getLocale()}
           />
@@ -76,7 +72,7 @@ export const EventRateChart: FC<Props> = ({
             xAccessor={'time'}
             yAccessors={['value']}
             data={eventRateChartData}
-            color={barColor}
+            color={euiLightVars.euiColorVis0}
           />
         </Chart>
       </LoadingWrapper>

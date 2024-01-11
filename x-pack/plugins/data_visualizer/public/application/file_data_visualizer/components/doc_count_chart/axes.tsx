@@ -8,7 +8,7 @@
 import React, { FC, Fragment } from 'react';
 import { Axis, Position, timeFormatter, niceTimeFormatByDay } from '@elastic/charts';
 import { getYRange } from './utils';
-import { LineChartPoint } from './event_rate_chart';
+import type { LineChartPoint } from './event_rate_chart';
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(3));
 
