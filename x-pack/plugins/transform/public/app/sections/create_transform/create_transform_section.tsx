@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo } from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import React, { FC, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,7 +17,6 @@ import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../se
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard, WizardContext } from './components/wizard';
-import { getTransformWizardStore } from './state_management/create_transform_store';
 
 type Props = RouteComponentProps<{ savedObjectId: string }>;
 export const CreateTransformSection: FC<Props> = ({ match }) => {
@@ -45,8 +43,6 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
       />
     </EuiButtonEmpty>
   );
-
-  const reduxStore = useMemo(() => getTransformWizardStore(), []);
 
   return (
     <CapabilitiesWrapper
@@ -84,9 +80,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
               searchItems,
             }}
           >
-            <ReduxProvider store={reduxStore}>
-              <Wizard />
-            </ReduxProvider>
+            <Wizard />
           </WizardContext.Provider>
         )}
       </EuiPageTemplate.Section>
