@@ -9,7 +9,7 @@ export function getLastDurationInUnit(timeRange: TimeRange): string {
   const oneMinute = 60;
   if (durationInSeconds < oneMinute) {
     return i18n.translate(
-      'xpack.observability.slo.burnRateRule.alertDetailsAppSection.lastDurationInHours',
+      'xpack.observability.slo.burnRateRule.alertDetailsAppSection.lastDurationInSeconds',
       {
         defaultMessage: 'Last {duration} seconds',
         values: {
@@ -22,7 +22,7 @@ export function getLastDurationInUnit(timeRange: TimeRange): string {
   const twoHours = 2 * 60 * 60;
   if (durationInSeconds < twoHours) {
     return i18n.translate(
-      'xpack.observability.slo.burnRateRule.alertDetailsAppSection.lastDurationInHours',
+      'xpack.observability.slo.burnRateRule.alertDetailsAppSection.lastDurationInMinutes',
       {
         defaultMessage: 'Last {duration} minutes',
         values: {
@@ -46,7 +46,7 @@ export function getLastDurationInUnit(timeRange: TimeRange): string {
   }
 
   return i18n.translate(
-    'xpack.observability.slo.burnRateRule.alertDetailsAppSection.lastDurationInHours',
+    'xpack.observability.slo.burnRateRule.alertDetailsAppSection.lastDurationInDays',
     {
       defaultMessage: 'Last {duration} days',
       values: {
