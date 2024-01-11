@@ -87,15 +87,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(azureDatasetSelectionTitle).to.be('[Azure Logs] activitylogs');
 
         // Go back to previous page selection
-        await retry.try(async () => {
+        await retry.tryForTime(30 * 1000, async () => {
           await browser.goBack();
           const backNavigationDatasetSelectionTitle =
             await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
           expect(backNavigationDatasetSelectionTitle).to.be('All logs');
         });
-
         // Go forward to previous page selection
-        await retry.try(async () => {
+        await retry.tryForTime(30 * 1000, async () => {
           await browser.goForward();
           const forwardNavigationDatasetSelectionTitle =
             await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
