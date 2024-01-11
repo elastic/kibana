@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
-import moment from 'moment';
 import React from 'react';
 import { WindowSchema } from '../../../../../../typings';
 import { useKibana } from '../../../../../../utils/kibana_react';
