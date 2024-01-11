@@ -51,11 +51,10 @@ import { kqlSearch } from '../../../tasks/security_header';
 import { setEndDate, setStartDate, updateDates } from '../../../tasks/date_picker';
 import {
   enableJob,
+  mockRiskEngineEnabled,
   navigateToNextPage,
   waitForAnomaliesToBeLoaded,
 } from '../../../tasks/entity_analytics';
-import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
-import { enableRiskEngine } from '../../../tasks/entity_analytics';
 
 const TEST_USER_ALERTS = 1;
 const TEST_USER_NAME = 'test';
@@ -68,8 +67,6 @@ const OLDEST_DATE = moment('2019-01-19T16:22:56.217Z').format(DATE_FORMAT);
 describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
-    login();
-    deleteRiskEngineConfiguration();
   });
 
   after(() => {
@@ -335,12 +332,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
       beforeEach(() => {
         login();
-        enableRiskEngine();
+        mockRiskEngineEnabled();
         visitWithTimeRange(ENTITY_ANALYTICS_URL);
-      });
-
-      afterEach(() => {
-        deleteRiskEngineConfiguration();
       });
 
       after(() => {
@@ -356,18 +349,16 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
     describe('With host risk data', () => {
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
-        login();
-        enableRiskEngine();
       });
 
       beforeEach(() => {
         login();
+        mockRiskEngineEnabled();
         visitWithTimeRange(ENTITY_ANALYTICS_URL);
       });
 
       after(() => {
         cy.task('esArchiverUnload', 'risk_scores_new');
-        deleteRiskEngineConfiguration();
       });
 
       it('renders donut chart', () => {
@@ -454,18 +445,16 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
     describe('With user risk data', () => {
       before(() => {
         cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
-        login();
-        enableRiskEngine();
       });
 
       beforeEach(() => {
         login();
+        mockRiskEngineEnabled();
         visitWithTimeRange(ENTITY_ANALYTICS_URL);
       });
 
       after(() => {
         cy.task('esArchiverUnload', 'risk_scores_new');
-        deleteRiskEngineConfiguration();
       });
 
       it('renders donut chart', () => {
