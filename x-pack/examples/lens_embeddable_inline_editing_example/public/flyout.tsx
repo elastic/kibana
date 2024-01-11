@@ -86,6 +86,7 @@ function InlineEditingContent({
   const style = css`
     padding: 0;
     position: relative;
+    height: 100%;
    }
 `;
 
@@ -104,6 +105,7 @@ function InlineEditingContent({
         `}
         direction="column"
         ref={containerRef}
+        gutterSize="none"
       />
     </EuiPanel>
   );
