@@ -181,14 +181,12 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
           },
         },
         indexPatternRefs: [],
-        fieldList: [],
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
@@ -247,29 +245,6 @@ describe('Text based languages utils', () => {
             name: 'Foo',
           },
         },
-        fieldList: [
-          {
-            name: 'timestamp',
-            id: 'timestamp',
-            meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
         indexPatternRefs: [
           {
             id: '3',
@@ -294,29 +269,6 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: '4',
@@ -333,14 +285,12 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
           },
         },
         indexPatternRefs: [],
-        fieldList: [],
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
           query: { sql: 'SELECT * FROM "foo"' },
@@ -404,29 +354,6 @@ describe('Text based languages utils', () => {
             name: 'Foo',
           },
         },
-        fieldList: [
-          {
-            name: 'timestamp',
-            id: 'timestamp',
-            meta: {
-              type: 'date',
-            },
-          },
-          {
-            name: 'bytes',
-            id: 'bytes',
-            meta: {
-              type: 'number',
-            },
-          },
-          {
-            name: 'memory',
-            id: 'memory',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
         indexPatternRefs: [
           {
             id: '3',
@@ -451,29 +378,6 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: 'adHoc-id',
