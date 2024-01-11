@@ -20,7 +20,6 @@ export const removeColumn: Datasource<TextBasedPrivateState>['removeColumn'] = (
       [layerId]: {
         ...prevState.layers[layerId],
         columns: prevState.layers[layerId].columns.filter((col) => col.columnId !== columnId),
-        allColumns: prevState.layers[layerId].allColumns.filter((col) => col.columnId !== columnId),
       },
     },
   };

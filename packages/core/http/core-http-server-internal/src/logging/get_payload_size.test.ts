@@ -285,8 +285,10 @@ describe('getPayloadSize', () => {
       } as unknown as Response,
       logger
     );
-    expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
-      `"Failed to calculate response payload bytes."`
-    );
+    expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(`
+      "Failed to calculate response payload bytes: Converting circular structure to JSON
+          --> starting at object with constructor 'Object'
+          --- property 'circular' closes the circle"
+    `);
   });
 });

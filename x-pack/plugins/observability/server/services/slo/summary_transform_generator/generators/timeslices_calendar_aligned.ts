@@ -157,6 +157,7 @@ export function generateSummaryTransformForTimeslicesAndCalendarAligned(
       deduce_mappings: false,
       unattended: true,
     },
+    defer_validation: true,
     _meta: {
       version: SLO_RESOURCES_VERSION,
       managed: true,
