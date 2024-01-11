@@ -63,6 +63,7 @@ import { Field, Form, getUseField, UseField, UseMultiFields } from '../../../../
 import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { getTermsAggregationFields } from './utils';
+import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
 import {
   isEqlRule,
@@ -1089,13 +1090,14 @@ const StepDefineRuleReadOnlyComponent: FC<StepDefineRuleReadOnlyProps> = ({
   indexPattern,
 }) => {
   const dataForDescription: Partial<DefineStepRule> = getStepDataDataSource(data);
+  const transformFields = useExperimentalFeatureFieldsTransform();
 
   return (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
         columns={descriptionColumns}
         schema={filterRuleFieldsForType(schema, data.ruleType)}
-        data={filterRuleFieldsForType(dataForDescription, data.ruleType)}
+        data={filterRuleFieldsForType(transformFields(dataForDescription), data.ruleType)}
         indexPatterns={indexPattern}
       />
     </StepContentWrapper>
