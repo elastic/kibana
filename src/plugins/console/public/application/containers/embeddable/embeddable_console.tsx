@@ -67,7 +67,7 @@ export const EmbeddableConsole = ({
             <div className="embeddableConsole__controls">
               <EuiButton
                 color="text"
-                iconType={isConsoleOpen ? 'arrowDown' : 'arrowRight'}
+                iconType={isConsoleOpen ? 'arrowUp' : 'arrowDown'}
                 onClick={toggleConsole}
                 fullWidth
                 contentProps={{
