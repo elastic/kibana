@@ -39,29 +39,23 @@ export class DiscoverEsqlLocatorDefinition implements LocatorDefinition<Discover
         pattern: '*',
         isRollupIndex: () => false,
       });
-      return indices.filter((index) => index.name.startsWith('.')).map((index) => index.name);
+      return indices.filter((index) => !index.name.startsWith('.')).map((index) => index.name);
     };
 
     const indices = await getIndicesList();
     let esql = `from * | limit 10`;
-    let dataViewSpec;
 
-    if (indices.length < 0) {
+    if (indices.length > 0) {
       let indexName = indices[0];
 
-      if (indices.find((index) => index.includes('logs'))) {
+      if (indices.find((index) => index.startsWith('logs'))) {
         indexName = 'logs*';
-        esql = `from ${indexName} | limit 10`;
-
-        dataViewSpec = await this.deps.createDataViewSpec(indexName);
       }
+      esql = `from ${indexName} | limit 10`;
     }
 
     const params = {
-      query: {
-        esql,
-        dataViewSpec,
-      },
+      query: { esql },
     };
 
     return await discoverAppLocator.getLocation(params);
