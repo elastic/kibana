@@ -12,14 +12,11 @@ import {
   savedObjectSchema,
 } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
-import { omit } from 'lodash';
 import {
   controlGroupInputSchema as controlGroupInputSchemaV1,
   dashboardAttributesSchema as dashboardAttributesSchemaV1,
-  DashboardCrudTypes as DashboardCrudTypesV1,
   serviceDefinition as serviceDefinitionV1,
 } from '../v1';
-import { DashboardCrudTypes as DashboardCrudTypesV2 } from './types';
 
 export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends({
   controlGroupInput: schema.maybe(
@@ -38,22 +35,6 @@ export const serviceDefinition: ServicesDefinition = {
     out: {
       result: {
         schema: objectTypeToGetResultSchema(dashboardSavedObjectSchema),
-        down: (result: DashboardCrudTypesV2['GetOut']): DashboardCrudTypesV1['GetOut'] => {
-          // Down transform the result to "v1" version
-          return {
-            ...result,
-            item: {
-              ...result.item,
-              attributes: {
-                ...result.item.attributes,
-                controlGroupInput: omit(result.item.attributes.controlGroupInput, [
-                  'showSelectionReset',
-                  'showApplySelections',
-                ]),
-              },
-            },
-          };
-        },
       },
     },
   },
