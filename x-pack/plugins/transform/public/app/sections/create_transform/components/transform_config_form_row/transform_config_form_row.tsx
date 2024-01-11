@@ -9,52 +9,20 @@ import React, { type FC } from 'react';
 
 import { EuiForm } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
-import { getTransformPreviewDevConsoleStatement } from '../../../../common/data_grid';
-
-import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 import { useWizardSelector } from '../../state_management/create_transform_store';
-
-import { useWizardContext } from '../wizard/wizard';
 
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
 
-const copyToClipboardDescription = i18n.translate(
-  'xpack.transform.pivotPreview.copyClipboardTooltip',
-  {
-    defaultMessage: 'Copy Dev Console statement of the transform preview to the clipboard.',
-  }
-);
-
 export const TransformConfigFormRow: FC = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
-
   const transformFunction = useWizardSelector((s) => s.stepDefine.transformFunction);
-
-  const copyToClipboardPreviewRequest = useWizardSelector((state) =>
-    selectPreviewRequest(state, dataView)
-  );
-  const copyToClipboard = getTransformPreviewDevConsoleStatement(copyToClipboardPreviewRequest);
 
   return (
     <EuiForm>
-      {transformFunction === TRANSFORM_FUNCTION.PIVOT ? (
-        <PivotFunctionForm
-          copyToClipboard={copyToClipboard}
-          copyToClipboardDescription={copyToClipboardDescription}
-        />
-      ) : null}
-      {transformFunction === TRANSFORM_FUNCTION.LATEST ? (
-        <LatestFunctionForm
-          copyToClipboard={copyToClipboard}
-          copyToClipboardDescription={copyToClipboardDescription}
-        />
-      ) : null}
+      {transformFunction === TRANSFORM_FUNCTION.PIVOT ? <PivotFunctionForm /> : null}
+      {transformFunction === TRANSFORM_FUNCTION.LATEST ? <LatestFunctionForm /> : null}
     </EuiForm>
   );
 };

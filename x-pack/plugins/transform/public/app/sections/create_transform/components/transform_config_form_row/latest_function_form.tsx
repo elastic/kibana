@@ -9,22 +9,16 @@ import React, { type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonIcon, EuiCallOut, EuiComboBox, EuiCopy, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 
 import { useLatestFunctionOptions } from '../step_define/hooks/use_latest_function_config';
 
-interface LatestFunctionFormProps {
-  copyToClipboard: string;
-  copyToClipboardDescription: string;
-}
+import { CopyConfigToClipboard } from './copy_config_to_clipboard';
 
-export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
-  copyToClipboard,
-  copyToClipboardDescription,
-}) => {
+export const LatestFunctionForm: FC = () => {
   const {
     ml: { useFieldStatsTrigger },
   } = useAppDependencies();
@@ -106,15 +100,7 @@ export const LatestFunctionForm: FC<LatestFunctionFormProps> = ({
                   id="xpack.transform.stepDefineForm.sortFieldOptionsEmptyError"
                   defaultMessage="No date fields are available to sort on. To use another field type, copy the configuration to the clipboard and continue creating the transform in the Console."
                 />{' '}
-                <EuiCopy beforeMessage={copyToClipboardDescription} textToCopy={copyToClipboard}>
-                  {(copy: () => void) => (
-                    <EuiButtonIcon
-                      onClick={copy}
-                      iconType="copyClipboard"
-                      aria-label={copyToClipboardDescription}
-                    />
-                  )}
-                </EuiCopy>
+                <CopyConfigToClipboard />
               </p>
             </EuiCallOut>
           )}

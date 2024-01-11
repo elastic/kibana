@@ -9,8 +9,6 @@ import React, { type FC } from 'react';
 
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -40,19 +38,13 @@ import { AdvancedPivotEditor } from '../advanced_pivot_editor';
 import { AdvancedPivotEditorSwitch } from '../advanced_pivot_editor_switch';
 import { PivotConfiguration } from '../pivot_configuration';
 
+import { CopyConfigToClipboard } from './copy_config_to_clipboard';
+
 const { collapseLiteralStrings } = XJson;
 
 const advancedEditorsSidebarWidth = '220px';
 
-interface PivotFunctionFormProps {
-  copyToClipboard: string;
-  copyToClipboardDescription: string;
-}
-
-export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
-  copyToClipboard,
-  copyToClipboardDescription,
-}) => {
+export const PivotFunctionForm: FC = () => {
   const { esTransformPivot } = useDocumentationLinks();
 
   const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
@@ -120,15 +112,7 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
                   <AdvancedPivotEditorSwitch />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiCopy beforeMessage={copyToClipboardDescription} textToCopy={copyToClipboard}>
-                    {(copy: () => void) => (
-                      <EuiButtonIcon
-                        onClick={copy}
-                        iconType="copyClipboard"
-                        aria-label={copyToClipboardDescription}
-                      />
-                    )}
-                  </EuiCopy>
+                  <CopyConfigToClipboard />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFormRow>
