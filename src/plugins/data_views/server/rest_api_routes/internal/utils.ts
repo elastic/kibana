@@ -9,7 +9,7 @@
 import type { QueryDslQueryContainer } from '../../../common/types';
 
 const excludeTiersDsl = (excludedTiers: string) => {
-  const _tier = excludedTiers.split(',').map((tier) => `data_${tier.trim()}`);
+  const _tier = excludedTiers.split(',').map((tier) => tier.trim());
   return {
     bool: {
       must_not: [

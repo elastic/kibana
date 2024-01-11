@@ -21,7 +21,7 @@ describe('getIndexFilterDsl', () => {
       ],
     },
   };
-  const excludedTiers = 'cold, frozen';
+  const excludedTiers = 'data_cold, data_frozen';
 
   it('no indexFilter, no excluded tiers', () => {
     expect(getIndexFilterDsl({})).toBeUndefined();
