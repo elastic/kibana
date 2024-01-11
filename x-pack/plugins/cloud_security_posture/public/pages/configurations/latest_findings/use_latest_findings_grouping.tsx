@@ -32,6 +32,8 @@ import {
 } from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { getFilters } from '../utils/get_filters';
+import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
+import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 const getTermAggregation = (key: keyof FindingsGroupingAggregation, field: string) => ({
   [key]: {
@@ -156,6 +158,9 @@ export const useLatestFindingsGrouping = ({
     groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
   });
 
+  const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
+  const mutedRulesFilterQuery = rulesStates ? buildMutedRulesFilter(rulesStates) : [];
+
   const groupingQuery = getGroupingQuery({
     additionalFilters: query ? [query] : [],
     groupByField: selectedGroup,
@@ -186,8 +191,16 @@ export const useLatestFindingsGrouping = ({
     ],
   });
 
+  const filteredGroupingQuery = {
+    ...groupingQuery,
+    query: {
+      ...groupingQuery.query,
+      bool: { ...groupingQuery.query.bool, must_not: mutedRulesFilterQuery },
+    },
+  };
+
   const { data, isFetching } = useGroupedFindings({
-    query: groupingQuery,
+    query: filteredGroupingQuery,
     enabled: !isNoneSelected,
   });
 

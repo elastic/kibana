@@ -22,6 +22,9 @@ import {
 } from '../../../../common/constants';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
+import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
+import { CspBenchmarkRulesStates } from '../../../../common/types/latest';
+import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
@@ -43,31 +46,40 @@ interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-export const getFindingsQuery = ({ query, sort }: UseFindingsOptions, pageParam: any) => ({
-  index: CSP_LATEST_FINDINGS_DATA_VIEW,
-  sort: getMultiFieldsSort(sort),
-  size: MAX_FINDINGS_TO_LOAD,
-  aggs: getFindingsCountAggQuery(),
-  ignore_unavailable: false,
-  query: {
-    ...query,
-    bool: {
-      ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter ?? []),
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
-              lte: 'now',
+export const getFindingsQuery = (
+  { query, sort }: UseFindingsOptions,
+  rulesStates: CspBenchmarkRulesStates,
+  pageParam: any
+) => {
+  const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
+
+  return {
+    index: CSP_LATEST_FINDINGS_DATA_VIEW,
+    sort: getMultiFieldsSort(sort),
+    size: MAX_FINDINGS_TO_LOAD,
+    aggs: getFindingsCountAggQuery(),
+    ignore_unavailable: false,
+    query: {
+      ...query,
+      bool: {
+        ...query?.bool,
+        filter: [
+          ...(query?.bool?.filter ?? []),
+          {
+            range: {
+              '@timestamp': {
+                gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
+                lte: 'now',
+              },
             },
           },
-        },
-      ],
+        ],
+        must_not: mutedRulesFilterQuery,
+      },
     },
-  },
   ...(pageParam ? { from: pageParam } : {}),
-});
+  };
+};
 
 const getMultiFieldsSort = (sort: string[][]) => {
   return sort.map(([id, direction]) => {
@@ -112,6 +124,8 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
     data,
     notifications: { toasts },
   } = useKibana().services;
+  const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
+
   /**
    * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
    * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array
@@ -125,7 +139,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getFindingsQuery(options, pageParam),
+          params: getFindingsQuery(options, rulesStates!, pageParam), // ruleStates always exists since it under the `enabled` dependency.
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be an defined');
@@ -139,7 +153,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       };
     },
     {
-      enabled: options.enabled,
+      enabled: options.enabled && !!rulesStates,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
       getNextPageParam: (lastPage, allPages) => {
