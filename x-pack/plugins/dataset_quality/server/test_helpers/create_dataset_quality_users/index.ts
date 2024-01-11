@@ -108,10 +108,8 @@ async function getIsCredentialsValid({
     return true;
   } catch (err) {
     const { username, password } = elasticsearch;
-    // eslint-disable-next-line no-console
-    console.error(
-      `***** Error in callKibana with username: ${username}, password: ${password}, message: ${err.message}`
+    throw new Error(
+      `callKibana failed with username: ${username}, password: ${password}, message: ${err.message}`
     );
-    return false;
   }
 }
