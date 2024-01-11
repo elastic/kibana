@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const monacoEditor = getService('monacoEditor');
+  const toasts = getService('toasts');
 
   describe('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
@@ -97,15 +98,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await PageObjects.common.clearAllToasts();
+      await toasts.clearAllToasts();
     });
 
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
 
       await retry.try(async () => {
-        const toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
+        const allToasts = await find.allByCssSelector(toastsSelector);
+        expect(allToasts.length).to.be(2);
         await testSubjects.click('viewWarningBtn');
       });
 
@@ -152,9 +153,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('searchSourceWithoutOther');
 
       // wait for toasts - toasts appear after the response is rendered
-      let toasts: WebElementWrapper[] = [];
+      let allToasts: WebElementWrapper[] = [];
       await retry.try(async () => {
-        toasts = await find.allByCssSelector(toastsSelector);
+        allToasts = await find.allByCssSelector(toastsSelector);
         expect(toasts.length).to.be(2);
       });
 

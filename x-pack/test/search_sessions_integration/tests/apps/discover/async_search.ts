@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
       await testSubjects.existOrFail('discoverErrorCalloutTitle'); // expect error because of fake searchSessionId
-      await PageObjects.common.clearAllToasts();
+      await toasts.clearAllToasts();
       const searchSessionId1 = await getSearchSessionId();
       expect(searchSessionId1).to.be(fakeSearchSessionId);
       await queryBar.clickQuerySubmitButton();
@@ -87,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // back navigation takes discover to fakeSearchSessionId which is in error state
       // clean up page to get out of error state before proceeding to next test
-      await PageObjects.common.clearAllToasts();
+      await toasts.clearAllToasts();
       await queryBar.clickQuerySubmitButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
