@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FC } from 'react';
+import type { FC } from 'react';
+import { nanoid } from '@reduxjs/toolkit';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -161,8 +162,8 @@ export interface PivotAggsConfigBase {
   isMultiField?: boolean;
   /** Indicates if aggregation supports sub-aggregations */
   isSubAggsSupported?: boolean;
-  /** Dictionary of the sub-aggregations */
-  subAggs?: PivotAggsConfigDict;
+  /** String of the sub-aggregation ids */
+  subAggs?: string[];
   /** Reference to the parent aggregation */
   parentAggId?: string;
   /** Nesting level to allow checks if another sub aggregation can be added */
@@ -175,7 +176,8 @@ export interface PivotAggsConfigBase {
 export function getAggConfigFromEsAgg(
   esAggDefinition: Record<string, any>,
   aggName: string,
-  nestingLevel?: number
+  nestingLevel?: number,
+  parentAggId?: string
 ) {
   const aggKeys = Object.keys(esAggDefinition);
 
@@ -192,6 +194,8 @@ export function getAggConfigFromEsAgg(
     ...esAggDefinition[agg],
     agg,
     aggName,
+    aggId: nanoid(),
+    parentAggId,
     dropDownName: aggName,
   };
 
@@ -206,20 +210,20 @@ export function getAggConfigFromEsAgg(
     if (utils) utils.setUiConfigFromEs(esAggDefinition[agg]);
   }
 
+  const subAggs: PivotAggsConfigBase[] = [];
   if (aggKeys.includes('aggs')) {
-    config.subAggs = {};
     for (const [subAggName, subAggConfigs] of Object.entries(
       esAggDefinition.aggs as Record<string, object>
     )) {
-      config.subAggs[subAggName] = getAggConfigFromEsAgg(
-        subAggConfigs,
-        subAggName,
-        config.nestingLevel
+      subAggs.push(
+        ...getAggConfigFromEsAgg(subAggConfigs, subAggName, config.nestingLevel, config.aggId)
       );
     }
+
+    config.subAggs = subAggs.map((d) => d.aggId);
   }
 
-  return config;
+  return [config, ...subAggs];
 }
 
 export interface PivotAggsConfigWithUiBase extends PivotAggsConfigBase {
@@ -318,7 +322,8 @@ export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
  * from the UI config
  */
 export function getEsAggFromAggConfig(
-  pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm
+  pivotAggsConfig: PivotAggsConfigBase | PivotAggsConfigWithExtendedForm,
+  allConfigs: PivotAggsConfigDict
 ): PivotAgg | null {
   let esAgg: { [key: string]: any } = { ...pivotAggsConfig };
 
@@ -350,8 +355,12 @@ export function getEsAggFromAggConfig(
     Object.keys(pivotAggsConfig.subAggs).length > 0
   ) {
     result.aggs = {};
-    for (const subAggConfig of Object.values(pivotAggsConfig.subAggs)) {
-      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(subAggConfig) as PivotAgg;
+    for (const subAggId of pivotAggsConfig.subAggs) {
+      const subAggConfig = allConfigs[subAggId];
+      result.aggs[subAggConfig.aggName] = getEsAggFromAggConfig(
+        subAggConfig,
+        allConfigs
+      ) as PivotAgg;
     }
   }
 

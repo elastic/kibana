@@ -39,6 +39,7 @@ import {
   isGroupByTerms,
   GroupByConfigWithUiSupport,
   PivotAggsConfig,
+  PivotAggsConfigDict,
   PivotGroupByConfig,
 } from '.';
 
@@ -158,8 +159,12 @@ export const getRequestPayload = (
     }
   });
 
+  const pivotAggsDict = pivotAggsArr.reduce<PivotAggsConfigDict>((p, c) => {
+    p[c.aggId] = c;
+    return p;
+  }, {});
   pivotAggsArr.forEach((agg) => {
-    const result = getEsAggFromAggConfig(agg);
+    const result = getEsAggFromAggConfig(agg, pivotAggsDict);
     if (result === null) {
       return;
     }

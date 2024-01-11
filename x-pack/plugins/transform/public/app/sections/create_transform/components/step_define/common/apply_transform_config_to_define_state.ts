@@ -19,7 +19,6 @@ import {
 
 import {
   matchAllQuery,
-  PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
@@ -46,13 +45,22 @@ export function applyTransformConfigToDefineState(
 
     // apply the transform configuration to wizard DEFINE state
     // transform aggregations config to wizard state
-    state.aggList = Object.keys(transformConfig.pivot.aggregations).reduce((aggList, aggName) => {
-      const aggConfig = transformConfig.pivot.aggregations[
-        aggName as PivotSupportedAggs
-      ] as Dictionary<any>;
-      aggList[aggName] = getAggConfigFromEsAgg(aggConfig, aggName) as PivotAggsConfig;
-      return aggList;
-    }, {} as PivotAggsConfigDict);
+    state.aggList = Object.keys(transformConfig.pivot.aggregations).reduce<PivotAggsConfigDict>(
+      (aggList, aggName) => {
+        const aggConfig = transformConfig.pivot.aggregations[
+          aggName as PivotSupportedAggs
+        ] as Dictionary<any>;
+        const aggListArray = getAggConfigFromEsAgg(aggConfig, aggName);
+        return {
+          ...aggList,
+          ...aggListArray.reduce<PivotAggsConfigDict>((p, c) => {
+            p[c.aggId] = c;
+            return p;
+          }, {}),
+        };
+      },
+      {}
+    );
 
     // transform group by config to wizard state
     state.groupByList = Object.keys(transformConfig.pivot.group_by).reduce(

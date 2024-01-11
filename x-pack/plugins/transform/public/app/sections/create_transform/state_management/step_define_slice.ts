@@ -60,27 +60,17 @@ export const stepDefineSlice = createSlice({
     setTransformFunction: (state, action: PayloadAction<TransformFunction>) => {
       state.transformFunction = action.payload;
     },
-    rAddAggregation: (
-      state,
-      action: PayloadAction<{ aggName: string; config: PivotAggsConfig }>
-    ) => {
-      state.aggList[action.payload.aggName] = action.payload.config;
+    rAddAggregation: (state, action: PayloadAction<PivotAggsConfig>) => {
+      state.aggList[action.payload.aggId] = action.payload;
     },
     rDeleteAggregation: (state, action: PayloadAction<string>) => {
       delete state.aggList[action.payload];
     },
-    rUpdateAggregation: (
-      state,
-      action: PayloadAction<{ previousAggName: string; config: PivotAggsConfig }>
-    ) => {
-      delete state.aggList[action.payload.previousAggName];
-      state.aggList[action.payload.config.aggName] = action.payload.config;
+    rUpdateAggregation: (state, action: PayloadAction<PivotAggsConfig>) => {
+      state.aggList[action.payload.aggId] = action.payload;
     },
-    rAddGroupBy: (
-      state,
-      action: PayloadAction<{ aggName: string; config: PivotGroupByConfig }>
-    ) => {
-      state.groupByList[action.payload.aggName] = action.payload.config;
+    rAddGroupBy: (state, action: PayloadAction<PivotGroupByConfig>) => {
+      state.groupByList[action.payload.groupById] = action.payload;
     },
     rDeleteGroupBy: (state, action: PayloadAction<string>) => {
       delete state.groupByList[action.payload];

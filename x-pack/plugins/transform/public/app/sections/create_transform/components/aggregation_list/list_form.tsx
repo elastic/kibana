@@ -5,45 +5,39 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { useMemo, Fragment, type FC } from 'react';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import { AggName } from '../../../../../../common/types/aggregations';
-
-import {
-  PivotAggsConfig,
-  PivotAggsConfigDict,
-  PivotAggsConfigWithUiSupportDict,
-} from '../../../../common';
+import { useWizardSelector } from '../../state_management/create_transform_store';
 
 import { AggLabelForm } from './agg_label_form';
 
-export interface AggListProps {
-  list: PivotAggsConfigDict;
-  options: PivotAggsConfigWithUiSupportDict;
-  deleteHandler(l: string): void;
-  onChange(previousAggName: AggName, item: PivotAggsConfig): void;
+interface AggListFormProps {
+  parentAggId?: string;
 }
 
-export const AggListForm: React.FC<AggListProps> = ({ deleteHandler, list, onChange, options }) => {
-  const listKeys = Object.keys(list);
+export const AggListForm: FC<AggListFormProps> = ({ parentAggId }) => {
+  const aggList = useWizardSelector((s) => s.stepDefine.aggList);
+  const filteredList = useMemo(
+    () =>
+      parentAggId
+        ? Object.values(aggList).filter((d) => d.parentAggId === parentAggId)
+        : Object.values(aggList),
+    [aggList, parentAggId]
+  );
+  const aggNames = useMemo(() => filteredList.map((d) => d.aggName), [filteredList]);
+
   return (
     <>
-      {listKeys.map((aggName: AggName, i) => {
-        const otherAggNames = listKeys.filter((k) => k !== aggName);
+      {filteredList.map((item, i) => {
+        const otherAggNames = aggNames.filter((k) => k !== item.aggName);
         return (
-          <Fragment key={aggName}>
+          <Fragment key={item.aggId}>
             <EuiPanel paddingSize="s" data-test-subj={`transformAggregationEntry_${i}`}>
-              <AggLabelForm
-                deleteHandler={deleteHandler}
-                item={list[aggName]}
-                onChange={(item) => onChange(aggName, item)}
-                otherAggNames={otherAggNames}
-                options={options}
-              />
+              <AggLabelForm item={item} otherAggNames={otherAggNames} parentAggId={parentAggId} />
             </EuiPanel>
-            {listKeys.length > 0 && <EuiSpacer size="s" />}
+            {filteredList.length > 0 && <EuiSpacer size="s" />}
           </Fragment>
         );
       })}

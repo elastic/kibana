@@ -5,48 +5,74 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState, type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 
-import {
-  isPivotAggsConfigWithUiBase,
-  PivotAggsConfig,
-  PivotAggsConfigWithUiSupportDict,
-} from '../../../../common';
+import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
+import { isPivotAggsConfigWithUiBase, PivotAggsConfig } from '../../../../common';
+import { useAppDependencies } from '../../../../app_dependencies';
+
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+
+import { getAggConfigUtils } from '../step_define/common/agg_utils';
+import { getPivotDropdownOptions } from '../step_define/common/get_pivot_dropdown_options';
+import { useWizardContext } from '../wizard/wizard';
 
 import { PopoverForm } from './popover_form';
-import { isPivotAggsWithExtendedForm } from '../../../../common/pivot_aggs';
 import { SubAggsSection } from './sub_aggs_section';
-import { getAggConfigUtils } from '../step_define/common/agg_utils';
 
 interface Props {
   item: PivotAggsConfig;
   otherAggNames: AggName[];
-  options: PivotAggsConfigWithUiSupportDict;
-  deleteHandler(l: AggName): void;
-  onChange(item: PivotAggsConfig): void;
+  parentAggId?: string;
 }
 
-export const AggLabelForm: React.FC<Props> = ({
-  deleteHandler,
-  item,
-  otherAggNames,
-  onChange,
-  options,
-}) => {
+export const AggLabelForm: FC<Props> = ({ item, otherAggNames, parentAggId }) => {
+  const {
+    ml: { useFieldStatsTrigger },
+  } = useAppDependencies();
+  const { closeFlyout } = useFieldStatsTrigger();
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
+
+  const { pivotConfig: actions } = useWizardActions();
+  const { deleteAggregation, deleteSubAggregation, updateAggregation, updateSubAggregation } =
+    actions;
+
   const utils = isPivotAggsWithExtendedForm(item) ? getAggConfigUtils(item) : undefined;
   const [isPopoverVisible, setPopoverVisibility] = useState(
     isPivotAggsWithExtendedForm(item) && !utils?.isValid()
   );
 
-  function update(updateItem: PivotAggsConfig) {
-    onChange({ ...updateItem });
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
+
+  const { aggOptionsData: options } = useMemo(
+    () => getPivotDropdownOptions(dataView, runtimeMappings),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [runtimeMappings]
+  );
+
+  function updateHandler(updateItem: PivotAggsConfig) {
+    if (parentAggId) {
+      updateSubAggregation(updateItem);
+    } else {
+      updateAggregation(updateItem);
+    }
     setPopoverVisibility(false);
+    closeFlyout();
+  }
+
+  function deleteHandler() {
+    if (parentAggId) {
+      deleteSubAggregation(item.aggId);
+    } else {
+      deleteAggregation(item.aggId);
+    }
   }
 
   const helperText = isPivotAggsWithExtendedForm(item) && utils?.helperText && utils.helperText();
@@ -96,7 +122,7 @@ export const AggLabelForm: React.FC<Props> = ({
           >
             <PopoverForm
               defaultData={item}
-              onChange={update}
+              onChange={updateHandler}
               otherAggNames={otherAggNames}
               options={options}
             />
@@ -109,7 +135,7 @@ export const AggLabelForm: React.FC<Props> = ({
             })}
             size="s"
             iconType="cross"
-            onClick={() => deleteHandler(item.aggName)}
+            onClick={deleteHandler}
             data-test-subj="transformAggregationEntryDeleteButton"
           />
         </EuiFlexItem>

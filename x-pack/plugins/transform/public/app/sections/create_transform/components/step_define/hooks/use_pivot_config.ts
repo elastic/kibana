@@ -43,25 +43,6 @@ import { isPivotAggConfigWithUiSupport } from '../../../../../common/pivot_group
 import { getAggConfigUtils } from '../common/agg_utils';
 
 /**
- * Clones aggregation configuration and updates parent references
- * for the sub-aggregations.
- */
-function cloneAggItem(item: PivotAggsConfig, nestingLevel: number = 0) {
-  const newItem = { ...item };
-  if (nestingLevel !== undefined) {
-    newItem.nestingLevel = nestingLevel;
-  }
-  if (newItem.subAggs !== undefined) {
-    const newSubAggs: PivotAggsConfigDict = {};
-    for (const [key, subItem] of Object.entries(newItem.subAggs)) {
-      newSubAggs[key] = cloneAggItem(subItem, nestingLevel + 1);
-    }
-    newItem.subAggs = newSubAggs;
-  }
-  return newItem;
-}
-
-/**
  * Checks if the aggregations collection is invalid.
  */
 function isConfigInvalid(aggsArray: PivotAggsConfig[]): boolean {
@@ -94,18 +75,6 @@ export function validatePivotConfig(config: TransformPivotConfig['pivot']) {
   };
 }
 
-/**
- * Returns a root aggregation configuration
- * for provided aggregation item.
- */
-function getRootAggregation(item: PivotAggsConfig, items: PivotAggsConfigDict) {
-  let rootItem = item;
-  while (rootItem.parentAggId !== undefined) {
-    rootItem = items[rootItem.parentAggId];
-  }
-  return rootItem;
-}
-
 export const usePivotConfigOptions = () => {
   const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
   const { searchItems } = useWizardContext();
@@ -118,8 +87,6 @@ export const usePivotConfigOptions = () => {
   );
 };
 export type PivotConfigOptions = ReturnType<typeof usePivotConfigOptions>;
-
-const items: PivotAggsConfigDict = {};
 
 export const getPivotConfigActions = (
   pivotConfigOptions: PivotConfigOptions,
@@ -148,7 +115,7 @@ export const getPivotConfigActions = (
         return;
       }
 
-      dispatch(rAddGroupBy({ aggName, config }));
+      dispatch(rAddGroupBy(config));
     };
 
   const updateGroupBy =
@@ -171,7 +138,7 @@ export const getPivotConfigActions = (
         return;
       }
 
-      dispatch(rAddGroupBy({ aggName: item.aggName, config: item }));
+      dispatch(rAddGroupBy(item));
     };
 
   const deleteGroupBy = rDeleteGroupBy;
@@ -241,22 +208,18 @@ export const getPivotConfigActions = (
         return;
       }
 
-      items[config.aggId] = config;
-
-      dispatch(rAddAggregation({ aggName, config }));
+      dispatch(rAddAggregation(config));
     };
   /**
    * Adds updated aggregation to the list
    */
   const updateAggregation =
     (
-      previousAggName: AggName,
       item: PivotAggsConfig
     ): ThunkAction<void, StoreState, unknown, ReturnType<typeof rUpdateAggregation>> =>
     (dispatch, getState) => {
       const { aggList, groupByList } = getState().stepDefine;
       const aggListWithoutPrevious = { ...aggList };
-      delete aggListWithoutPrevious[previousAggName];
 
       const aggNameConflictMessages = getAggNameConflictToastMessages(
         item.aggName,
@@ -268,30 +231,37 @@ export const getPivotConfigActions = (
         return;
       }
 
-      items[item.aggId] = item;
-      dispatch(rUpdateAggregation({ previousAggName, config: item }));
+      dispatch(rUpdateAggregation(item));
     };
   /**
    * Adds sub-aggregation to the aggregation item
    */
   const addSubAggregation =
     (
-      frozenItem: PivotAggsConfig,
-      d: DropDownLabel[]
+      d: DropDownLabel[],
+      parentAggId: string
     ): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
-    (dispatch) => {
-      const item = cloneDeep(frozenItem);
-      if (!item.isSubAggsSupported) {
-        throw new Error(`Aggregation "${item.agg}" does not support sub-aggregations`);
+    (dispatch, getState) => {
+      const fullState = getState();
+      const parentAggItem = fullState.stepDefine.aggList[parentAggId];
+      const parentItem = cloneDeep(parentAggItem);
+      if (!parentItem.isSubAggsSupported) {
+        throw new Error(`Aggregation "${parentItem.agg}" does not support sub-aggregations`);
       }
       const label: AggName = d[0].label;
       const config: PivotAggsConfig = aggOptionsData[label];
 
-      item.subAggs = item.subAggs ?? {};
+      parentItem.subAggs = parentItem.subAggs ?? [];
+      const subAggsItemsDict = Object.values(fullState.stepDefine.aggList)
+        .filter((agg) => agg.parentAggId === parentItem.aggId)
+        .reduce<PivotAggsConfigDict>((p, c) => {
+          p[c.aggId] = c;
+          return p;
+        }, {});
 
       const aggNameConflictMessages = getAggNameConflictToastMessages(
         config.aggName,
-        item.subAggs,
+        subAggsItemsDict,
         {}
       );
       if (aggNameConflictMessages.length > 0) {
@@ -299,33 +269,33 @@ export const getPivotConfigActions = (
         return;
       }
 
-      item.subAggs[config.aggName] = config;
-      items[config.aggId] = config;
-
-      const newRootItem = cloneAggItem(getRootAggregation(item, items));
-      items[newRootItem.aggId] = newRootItem;
-      dispatch(updateAggregation(newRootItem.aggName, newRootItem));
+      parentItem.subAggs.push(config.aggId);
+      dispatch(rAddAggregation(config));
+      dispatch(updateAggregation(parentItem));
     };
 
   /**
    * Updates sub-aggregation of the aggregation item
    */
   const updateSubAggregation =
-    (
-      prevSubItemName: AggName,
-      subItem: PivotAggsConfig
-    ): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
-    (dispatch) => {
-      const parent = subItem.parentAggId && items[subItem.parentAggId];
+    (subItem: PivotAggsConfig): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
+    (dispatch, getState) => {
+      const fullState = getState();
+      const parent = subItem.parentAggId && fullState.stepDefine.aggList[subItem.parentAggId];
       if (!parent || !parent.subAggs) {
         throw new Error('No parent aggregation reference found');
       }
 
-      const { [prevSubItemName]: deleted, ...newSubAgg } = parent.subAggs;
+      const otherSubAggsItemsDict = Object.values(fullState.stepDefine.aggList)
+        .filter((agg) => agg.parentAggId === parent.aggId && agg.aggId !== subItem.aggId)
+        .reduce<PivotAggsConfigDict>((p, c) => {
+          p[c.aggId] = c;
+          return p;
+        }, {});
 
       const aggNameConflictMessages = getAggNameConflictToastMessages(
         subItem.aggName,
-        newSubAgg,
+        otherSubAggsItemsDict,
         {}
       );
       if (aggNameConflictMessages.length > 0) {
@@ -333,34 +303,31 @@ export const getPivotConfigActions = (
         return;
       }
 
-      parent.subAggs = {
-        ...newSubAgg,
-        [subItem.aggName]: subItem,
-      };
-      items[parent.aggId] = parent;
-
-      const newRootItem = cloneAggItem(getRootAggregation(subItem, items));
-      items[newRootItem.aggId] = newRootItem;
-      dispatch(updateAggregation(newRootItem.aggName, newRootItem));
+      dispatch(updateAggregation(subItem));
     };
 
   /**
    * Deletes sub-aggregation of the aggregation item
    */
   const deleteSubAggregation =
-    (
-      item: PivotAggsConfig,
-      subAggName: string
-    ): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
-    (dispatch) => {
-      if (!item.subAggs || !item.subAggs[subAggName]) {
-        throw new Error('Unable to delete a sub-agg');
-      }
-      delete item.subAggs[subAggName];
-      delete items[item.subAggs[subAggName].aggId];
-      const newRootItem = cloneAggItem(getRootAggregation(item, items));
-      items[newRootItem.aggId] = newRootItem;
-      dispatch(updateAggregation(newRootItem.aggName, newRootItem));
+    (subAggId: string): ThunkAction<void, StoreState, unknown, Action<unknown>> =>
+    (dispatch, getState) => {
+      dispatch(rDeleteAggregation(subAggId));
+
+      const fullState = getState();
+      const { aggList } = fullState.stepDefine;
+
+      Object.values(aggList).forEach((agg) => {
+        if (agg.parentAggId === subAggId) {
+          dispatch(rDeleteAggregation(agg.aggId));
+          return;
+        }
+
+        if (agg.subAggs && agg.subAggs?.includes(subAggId)) {
+          agg.subAggs = agg.subAggs.filter((sa) => sa === subAggId);
+          dispatch(rUpdateAggregation(agg));
+        }
+      });
     };
 
   /**

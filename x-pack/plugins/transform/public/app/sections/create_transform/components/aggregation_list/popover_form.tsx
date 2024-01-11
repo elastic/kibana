@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -49,7 +49,7 @@ interface Props {
   onChange(d: PivotAggsConfig): void;
 }
 
-export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
+export const PopoverForm: FC<Props> = ({ defaultData, otherAggNames, onChange, options }) => {
   const [aggConfigDef, setAggConfigDef] = useState(cloneDeep(defaultData));
 
   const [aggName, setAggName] = useState(defaultData.aggName);
@@ -275,7 +275,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           paddingSize="s"
           css={{ width: '100%', height: '200px' }}
         >
-          {JSON.stringify(getEsAggFromAggConfig(defaultData), null, 2)}
+          {JSON.stringify(getEsAggFromAggConfig(defaultData, {}), null, 2)}
         </EuiCodeBlock>
       )}
       <EuiFormRow hasEmptyLabelSpace>

@@ -5,34 +5,36 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { useMemo, Fragment, type FC } from 'react';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { AggName } from '../../../../../../common/types/aggregations';
 
-import {
-  PivotGroupByConfig,
-  PivotGroupByConfigDict,
-  PivotGroupByConfigWithUiSupportDict,
-} from '../../../../common';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+
+import { getPivotDropdownOptions } from '../step_define/common/get_pivot_dropdown_options';
+import { useWizardContext } from '../wizard/wizard';
 
 import { GroupByLabelForm } from './group_by_label_form';
 
-interface ListProps {
-  list: PivotGroupByConfigDict;
-  options: PivotGroupByConfigWithUiSupportDict;
-  deleteHandler(l: string): void;
-  onChange(id: string, item: PivotGroupByConfig): void;
-}
+export const GroupByListForm: FC = () => {
+  const { searchItems } = useWizardContext();
+  const { dataView } = searchItems;
 
-export const GroupByListForm: React.FC<ListProps> = ({
-  deleteHandler,
-  list,
-  onChange,
-  options,
-}) => {
+  const { pivotConfig: actions } = useWizardActions();
+  const { deleteGroupBy, updateGroupBy } = actions;
+
+  const list = useWizardSelector((s) => s.stepDefine.groupByList);
   const listKeys = Object.keys(list);
+
+  const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
+
+  const { groupByOptionsData } = useMemo(
+    () => getPivotDropdownOptions(dataView, runtimeMappings),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [runtimeMappings]
+  );
   return (
     <>
       {listKeys.map((aggName: AggName, i) => {
@@ -41,11 +43,11 @@ export const GroupByListForm: React.FC<ListProps> = ({
           <Fragment key={aggName}>
             <EuiPanel paddingSize="s" data-test-subj={`transformGroupByEntry ${i}`}>
               <GroupByLabelForm
-                deleteHandler={deleteHandler}
+                deleteHandler={deleteGroupBy}
                 item={list[aggName]}
                 otherAggNames={otherAggNames}
-                onChange={(item) => onChange(aggName, item)}
-                options={options}
+                onChange={(item) => updateGroupBy(aggName, item)}
+                options={groupByOptionsData}
               />
             </EuiPanel>
             {listKeys.length > 0 && <EuiSpacer size="s" />}

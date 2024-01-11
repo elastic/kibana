@@ -6,6 +6,7 @@
  */
 
 import React, { type FC } from 'react';
+import { nanoid } from '@reduxjs/toolkit';
 
 import {
   EuiButton,
@@ -21,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import type {
-  PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PivotSupportedGroupByAggs,
@@ -66,15 +66,17 @@ export const PivotFunctionForm: FC = () => {
     const newGroupByList: PivotGroupByConfigDict = {};
     if (pivot !== undefined && pivot.group_by !== undefined) {
       Object.entries(pivot.group_by).forEach((d) => {
+        const groupById = nanoid();
         const aggName = d[0];
         const aggConfig = d[1] as PivotGroupByDict;
         const aggConfigKeys = Object.keys(aggConfig);
         const agg = aggConfigKeys[0] as PivotSupportedGroupByAggs;
-        newGroupByList[aggName] = {
+        newGroupByList[groupById] = {
           ...aggConfig[agg],
           agg,
           aggName,
           dropDownName: '',
+          groupById,
         };
       });
     }
@@ -86,7 +88,10 @@ export const PivotFunctionForm: FC = () => {
         const aggName = d[0];
         const aggConfig = d[1] as PivotAggDict;
 
-        newAggList[aggName] = getAggConfigFromEsAgg(aggConfig, aggName) as PivotAggsConfig;
+        const aggConfigs = getAggConfigFromEsAgg(aggConfig, aggName);
+        aggConfigs.forEach((config) => {
+          newAggList[config.aggId] = config;
+        });
       });
     }
     setAggList(newAggList);

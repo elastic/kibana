@@ -85,7 +85,7 @@ export const AdvancedRuntimeMappingsSettings: FC = () => {
       if (isPivotAggConfigWithUiSupport(agg)) {
         if (Array.isArray(agg.field)) {
           const newFields = agg.field.filter((f) => !isFieldDeleted(f));
-          updateAggregation(aggName, { ...agg, field: newFields });
+          updateAggregation({ ...agg, field: newFields });
         } else {
           if (isDefined(agg.field) && isFieldDeleted(agg.field)) {
             deleteAggregation(aggName);
