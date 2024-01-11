@@ -265,6 +265,19 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         package: pkg,
       } as NewPackagePolicy);
     }
+    // if the user didn't specify a namespace, use the one specified in agent policy
+    if (!newPackagePolicy.namespace) {
+      const agentPolicies = await agentPolicyService.getByIDs(
+        soClient,
+        [newPackagePolicy.policy_id],
+        {
+          withPackagePolicies: true,
+          ignoreMissing: false,
+        }
+      );
+      const defaultNamespace = agentPolicies[0]?.namespace;
+      newPackagePolicy = { ...newPackagePolicy, namespace: defaultNamespace };
+    }
 
     // Create package policy
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
@@ -371,7 +384,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         ...body,
         name: body.name ?? packagePolicy.name,
         description: body.description ?? packagePolicy.description,
-        namespace: body.namespace ?? packagePolicy.namespace,
+        namespace: body?.namespace ?? packagePolicy?.namespace,
         policy_id: body.policy_id ?? packagePolicy.policy_id,
         enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
         package: pkg ?? packagePolicy.package,

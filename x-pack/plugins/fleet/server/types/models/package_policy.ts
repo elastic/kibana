@@ -167,7 +167,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
   name: schema.string(),
   description: schema.maybe(schema.string()),
   policy_id: schema.string(),
-  namespace: schema.string({ defaultValue: 'default' }),
+  namespace: schema.string(),
   package: schema.object({
     name: schema.string(),
     version: schema.string(),
