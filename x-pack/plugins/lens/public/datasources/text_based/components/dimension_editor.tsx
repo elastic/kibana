@@ -13,7 +13,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../types';
 import { FieldSelect } from './field_select';
 import type { TextBasedPrivateState } from '../types';
-import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
+import { retrieveLayerColumnsFromCache, getColumnsFromCache } from '../fieldlist_cache';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
@@ -27,11 +27,12 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     props.state.layers[props.layerId]?.columns ?? [],
     query
   );
+  const allFields = query ? getColumnsFromCache(query) : [];
   const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
-  const fields = allColumns.map((col) => {
+  const fields = allFields.map((col) => {
     return {
-      id: col.columnId,
-      name: col.fieldName,
+      id: col.id,
+      name: col.name,
       meta: col?.meta ?? { type: 'number' },
       compatible:
         props.isMetricDimension && hasNumberTypeColumns
