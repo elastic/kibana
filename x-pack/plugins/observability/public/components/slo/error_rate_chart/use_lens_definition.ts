@@ -14,15 +14,15 @@ import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 
-export type TimeRange = {
+export interface TimeRange {
   from: Date;
   to: Date;
-};
+}
 
-export type AlertAnnotation = {
+export interface AlertAnnotation {
   date: Date;
   total: number;
-};
+}
 
 export function useLensDefinition(
   slo: SLOResponse,
