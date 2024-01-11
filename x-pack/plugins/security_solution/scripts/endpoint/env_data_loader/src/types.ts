@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type ProgressReporter = (options: { total: number; done: number }) => void;
+export type ProgressReporter = (options: { doneCount: number }) => void;

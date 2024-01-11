@@ -7,6 +7,11 @@
 
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  addEndpointIntegrationToAgentPolicy,
+  copyAgentPolicy,
+  createAgentPolicy,
+} from '../../common/fleet_services';
 import type { ProgressReporter } from './types';
 
 interface CreatePoliciesOptions {
@@ -23,14 +28,29 @@ export const createPolicies = async ({
   log,
 }: CreatePoliciesOptions): Promise<string[]> => {
   const endpointIntegrationPolicyIds: string[] = [];
+  let doneCount = 0;
 
   log.verbose(`creating [${count}] policies in fleet`);
 
   // Create first policy with endpoint
+  const agentPolicyId = (await createAgentPolicy({ kbnClient })).id;
+  const endpointPolicy = await addEndpointIntegrationToAgentPolicy({
+    kbnClient,
+    log,
+    agentPolicyId,
+    name: `endpoint protect policy (${Math.random().toString(32).substring(2)})`,
+  });
 
-  // THEN: use the copy API to clone it?
-  //        -- or --
-  //       Maybe use ES bulk create and bypass fleet? (for speed)
+  endpointIntegrationPolicyIds.push(endpointPolicy.id);
+  doneCount++;
+  reportProgress({ doneCount });
+
+  while (doneCount < count) {
+    // TODO:PT maybe use ES bulk create and bypass fleet so that we speed this up?
+    endpointIntegrationPolicyIds.push((await copyAgentPolicy({ kbnClient, agentPolicyId })).id);
+    doneCount++;
+    reportProgress({ doneCount });
+  }
 
   return endpointIntegrationPolicyIds;
 };
