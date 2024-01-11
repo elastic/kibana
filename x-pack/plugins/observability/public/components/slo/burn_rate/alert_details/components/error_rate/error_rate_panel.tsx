@@ -30,6 +30,7 @@ import { ErrorRateChart } from '../../../../error_rate_chart';
 import { TimeRange } from '../../../../error_rate_chart/use_lens_definition';
 import { BurnRateAlert } from '../../alert_details_app_section';
 import { getActionGroupFromReason } from '../../utils/alert';
+import { getLastDurationInUnit } from '../../utils/last_duration_i18n';
 
 function getDataTimeRange(
   timeRange: { gte: string; lte?: string },
@@ -110,21 +111,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              <span>
-                {i18n.translate(
-                  'xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.subtitle',
-                  {
-                    defaultMessage: 'Last {duration} hours',
-                    values: {
-                      duration: Math.round(
-                        moment
-                          .duration(moment(alertTimeRange.to).diff(alertTimeRange.from))
-                          .asHours()
-                      ),
-                    },
-                  }
-                )}
-              </span>
+              <span>{getLastDurationInUnit(dataTimeRange)}</span>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
