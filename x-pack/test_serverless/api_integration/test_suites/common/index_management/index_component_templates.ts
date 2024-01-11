@@ -107,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
             usedBy: [],
             isManaged: false,
             hasSettings: true,
+            isDeprecated: false,
             hasMappings: true,
             hasAliases: false,
           });
