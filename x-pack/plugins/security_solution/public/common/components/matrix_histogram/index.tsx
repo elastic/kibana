@@ -82,10 +82,14 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 
 const CHART_HEIGHT = 150;
 
-const visualizationResponseHasData = (response: VisualizationResponse): boolean =>
-  Object.values<AggregationsTermsAggregateBase<unknown[]>>(response.aggregations ?? {}).some(
-    ({ buckets }) => buckets.length > 0
-  );
+const visualizationResponseHasData = (response: VisualizationResponse[]): boolean => {
+  if (response.length === 0) {
+    return false;
+  }
+  return Object.values<AggregationsTermsAggregateBase<unknown[]>>(
+    response[0].aggregations ?? {}
+  ).some(({ buckets }) => buckets.length > 0);
+};
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
@@ -217,7 +221,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
     if (typeof subtitle === 'function') {
       if (isChartEmbeddablesEnabled) {
-        if (!responses || !visualizationResponseHasData(responses[0])) {
+        if (!responses || !visualizationResponseHasData(responses)) {
           return subtitle(0);
         }
         const visualizationCount = responses[0].hits.total;
