@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const from = 'Sep 19, 2015 @ 06:31:44.000';
   const to = 'Sep 23, 2015 @ 18:31:44.000';
 
-  describe('lens annotations tests', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/174653
+  describe.skip('lens annotations tests', () => {
     before(async () => {
       await PageObjects.common.setTime({ from, to });
     });
