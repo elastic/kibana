@@ -60,7 +60,11 @@
     "@kbn/expect",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/ui-actions-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/visualization-utils",
+    "@kbn/field-types"
   ],
   "exclude": ["target/**/*"]
 }
