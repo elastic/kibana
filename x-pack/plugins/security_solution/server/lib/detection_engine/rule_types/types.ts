@@ -26,7 +26,6 @@ import type { ListClient } from '@kbn/lists-plugin/server';
 import type {
   PersistenceServices,
   IRuleDataClient,
-  IRuleDataReader,
   SuppressedAlertService,
 } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
@@ -86,7 +85,7 @@ export interface RunOpts<TParams extends RuleParams> {
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
-  ruleDataReader: IRuleDataReader;
+  ruleDataClient: IRuleDataClient;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   mergeStrategy: ConfigType['alertMergeStrategy'];

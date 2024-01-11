@@ -17,7 +17,7 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../utils/get_filter';
@@ -59,7 +59,7 @@ export const thresholdExecutor = async ({
   state,
   bulkCreate,
   wrapHits,
-  ruleDataReader,
+  ruleDataClient,
   primaryTimestamp,
   secondaryTimestamp,
   aggregatableTimestampField,
@@ -81,7 +81,7 @@ export const thresholdExecutor = async ({
   state: ThresholdAlertState;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
-  ruleDataReader: IRuleDataReader;
+  ruleDataClient: IRuleDataClient;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   aggregatableTimestampField: string;
@@ -112,7 +112,9 @@ export const thresholdExecutor = async ({
           to: tuple.to.toISOString(),
           frameworkRuleId: completeRule.alertId,
           bucketByFields: ruleParams.threshold.field,
-          ruleDataReader,
+          spaceId,
+          ruleDataClient,
+          esClient: services.scopedClusterClient.asCurrentUser,
         });
 
     const validSignalHistory = getSignalHistory(state, signalHistory, tuple);
