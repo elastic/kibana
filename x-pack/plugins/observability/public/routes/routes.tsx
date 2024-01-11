@@ -40,6 +40,7 @@ import {
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
+import { IntegrationsOverviewPage } from '../pages/integrations_overview/integrations_overview';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -177,6 +178,13 @@ export const routes = {
   [SLO_DETAIL_PATH]: {
     handler: () => {
       return <SloDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/integrations': {
+    handler: () => {
+      return <IntegrationsOverviewPage />;
     },
     params: {},
     exact: true,

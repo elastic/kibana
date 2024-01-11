@@ -40,7 +40,8 @@
       "dashboard",
       "expressions",
       "logExplorer",
-      "licensing"
+      "licensing",
+      "fleet"
     ],
     "optionalPlugins": [
       "discover",

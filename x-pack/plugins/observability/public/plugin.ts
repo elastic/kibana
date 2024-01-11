@@ -223,6 +223,15 @@ export class Plugin
         },
       },
     }),
+    {
+      id: 'integrations',
+      title: i18n.translate('xpack.observability.integrationsLinkTitle', {
+        defaultMessage: 'Integrations',
+      }),
+      order: 8004,
+      path: '/integrations',
+      navLinkStatus: AppNavLinkStatus.hidden,
+    },
   ];
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}

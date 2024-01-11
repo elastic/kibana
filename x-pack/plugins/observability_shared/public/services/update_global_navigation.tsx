@@ -54,6 +54,11 @@ export function updateGlobalNavigation({
             ? AppNavLinkStatus.visible
             : AppNavLinkStatus.hidden,
         };
+      case 'integrations':
+        return {
+          ...link,
+          navLinkStatus: AppNavLinkStatus.visible,
+        };
       default:
         return link;
     }
