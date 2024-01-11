@@ -75,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Create index template', () => {
-      const TEST_TEMPLATE_NAME = `test_template_${Math.random()}`;
+      const TEST_TEMPLATE_NAME = `test_template_${Date.now()}`;
 
       after(async () => {
         await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE_NAME }, { ignore: [404] });

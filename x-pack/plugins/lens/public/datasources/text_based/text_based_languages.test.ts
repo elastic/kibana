@@ -119,15 +119,6 @@ describe('Textbased Data Source', () => {
           query: { esql: 'FROM foo' },
         },
       },
-      fieldList: [
-        {
-          id: 'col1',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-      ],
     } as unknown as TextBasedPrivateState;
   });
 
@@ -308,7 +299,6 @@ describe('Textbased Data Source', () => {
   describe('#createEmptyLayer', () => {
     it('creates state with empty layers', () => {
       expect(TextBasedDatasource.createEmptyLayer('index-pattern-id')).toEqual({
-        fieldList: [],
         layers: {},
         indexPatternRefs: [],
       });
@@ -402,7 +392,6 @@ describe('Textbased Data Source', () => {
       expect(suggestions[0].state).toEqual({
         ...state,
         initialContext: undefined,
-        fieldList: textBasedQueryColumns,
         indexPatternRefs: [
           {
             id: '1',
@@ -554,7 +543,6 @@ describe('Textbased Data Source', () => {
       expect(suggestions[0].state).toEqual({
         ...state,
         initialContext: undefined,
-        fieldList: textBasedQueryColumns,
         indexPatternRefs: [
           {
             id: '1',
@@ -637,49 +625,49 @@ describe('Textbased Data Source', () => {
 
   describe('#suggestsLimitedColumns', () => {
     it('should return true if query returns big number of columns', () => {
-      const fieldList = [
-        {
-          id: 'a',
-          name: 'Test 1',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'b',
-          name: 'Test 2',
-          meta: {
-            type: 'number',
-          },
-        },
-        {
-          id: 'c',
-          name: 'Test 3',
-          meta: {
-            type: 'date',
-          },
-        },
-        {
-          id: 'd',
-          name: 'Test 4',
-          meta: {
-            type: 'string',
-          },
-        },
-        {
-          id: 'e',
-          name: 'Test 5',
-          meta: {
-            type: 'string',
-          },
-        },
-      ];
       const state = {
-        fieldList,
+        totalFields: 5,
         layers: {
           a: {
             query: { esql: 'from foo' },
             index: 'foo',
+            allColumns: [
+              {
+                id: 'a',
+                name: 'Test 1',
+                meta: {
+                  type: 'number',
+                },
+              },
+              {
+                id: 'b',
+                name: 'Test 2',
+                meta: {
+                  type: 'number',
+                },
+              },
+              {
+                id: 'c',
+                name: 'Test 3',
+                meta: {
+                  type: 'date',
+                },
+              },
+              {
+                id: 'd',
+                name: 'Test 4',
+                meta: {
+                  type: 'string',
+                },
+              },
+              {
+                id: 'e',
+                name: 'Test 5',
+                meta: {
+                  type: 'string',
+                },
+              },
+            ],
           },
         },
       } as unknown as TextBasedPrivateState;
@@ -1009,22 +997,6 @@ describe('Textbased Data Source', () => {
               index: 'foo',
             },
           },
-          fieldList: [
-            {
-              id: 'col1',
-              name: 'Test 1',
-              meta: {
-                type: 'number',
-              },
-            },
-            {
-              id: 'col2',
-              name: 'Test 2',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
         } as unknown as TextBasedPrivateState;
 
         publicAPI = TextBasedDatasource.getPublicAPI({
@@ -1039,25 +1011,17 @@ describe('Textbased Data Source', () => {
       });
 
       it('should return only the columns that exist on the query', () => {
-        const state = {
-          ...baseState,
-          fieldList: [
-            {
-              id: 'col2',
-              name: 'Test 2',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
-        } as unknown as TextBasedPrivateState;
-
         publicAPI = TextBasedDatasource.getPublicAPI({
-          state,
+          state: baseState,
           layerId: 'a',
           indexPatterns,
         });
-        expect(publicAPI.getTableSpec()).toEqual([]);
+        expect(publicAPI.getTableSpec()).toEqual([
+          {
+            columnId: 'col1',
+            fields: ['Test 1'],
+          },
+        ]);
       });
     });
 
