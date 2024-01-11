@@ -127,6 +127,10 @@ export interface UnifiedDataTableProps {
    */
   showColumnTokens?: boolean;
   /**
+   * Determines number of rows of a column header
+   */
+  headerRowHeight?: number;
+  /**
    * If set, the given document is displayed in a flyout
    */
   expandedDoc?: DataTableRecord;
@@ -352,6 +356,7 @@ export const UnifiedDataTable = ({
   columns,
   columnTypes,
   showColumnTokens,
+  headerRowHeight,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
   loadingState,
@@ -662,6 +667,7 @@ export const UnifiedDataTable = ({
         visibleCellActions,
         columnTypes,
         showColumnTokens,
+        headerRowHeight,
       }),
     [
       onFilter,
@@ -681,6 +687,7 @@ export const UnifiedDataTable = ({
       visibleCellActions,
       columnTypes,
       showColumnTokens,
+      headerRowHeight,
     ]
   );
 
