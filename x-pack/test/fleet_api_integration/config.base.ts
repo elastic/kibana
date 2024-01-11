@@ -20,6 +20,8 @@ const getFullPath = (relativePath: string) => path.join(path.dirname(__filename)
 // It should be updated any time there is a new package published.
 export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite';
 
+export const BUNDLED_PACKAGE_DIR = 'x-pack/plugins/fleet/target/bundled_packages';
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
