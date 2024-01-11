@@ -1,0 +1,6 @@
+{
+  "name": "@kbn/test-eui-helpers",
+  "version": "1.0.0",
+  "private": true,
+  "license": "SSPL-1.0 OR Elastic License 2.0"
+}

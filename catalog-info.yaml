@@ -10,6 +10,7 @@ metadata:
     github.com/project-slug: elastic/kibana
     github.com/team-slug: elastic/kibana-tech-leads
     buildkite.com/project-slug: elastic/kibana
+    sonarqube.org/project-key: elastic_kibana_AYvOkAHeQZlFqhqWIr9
 
   tags:
     - typescript
@@ -200,11 +201,15 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana-bot / sonarqube
+      name: kibana / sonarqube
     spec:
       repository: elastic/kibana
       provider_settings:
         trigger_mode: none
+      schedules:
+        daily:
+          branch: main
+          cronline: "@daily"
       pipeline_file: ".buildkite/pipelines/sonarqube.yml"
       teams:
         kibana-operations:

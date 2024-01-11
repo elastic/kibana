@@ -91,6 +91,9 @@ disabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
+  # Failing: See https://github.com/elastic/kibana/issues/174020
+  - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -185,7 +188,6 @@ enabled:
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
   - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
-  - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
@@ -421,6 +423,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
@@ -494,6 +497,8 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/rule_management/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/rule_management/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/exception_lists_items/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/exception_lists_items/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/lists_items/configs/serverless.config.ts

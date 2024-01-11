@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import { DebugState } from '@elastic/charts';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -922,15 +922,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /** Counts the visible warnings in the config panel */
     async getWorkspaceErrorCount() {
-      const moreButton = await testSubjects.exists('workspace-more-errors-button');
-      if (moreButton) {
-        await retry.try(async () => {
-          await testSubjects.click('workspace-more-errors-button');
-          await testSubjects.missingOrFail('workspace-more-errors-button');
-        });
+      const workspaceErrorsExists = await testSubjects.exists('lnsWorkspaceErrors');
+      if (!workspaceErrorsExists) {
+        return 0;
       }
-      const errors = await testSubjects.findAll('workspace-error-message');
-      return errors?.length ?? 0;
+
+      const paginationControlExists = await testSubjects.exists(
+        'lnsWorkspaceErrorsPaginationControl'
+      );
+      if (!paginationControlExists) {
+        // pagination control only displayed when there are multiple errors
+        return 1;
+      }
+
+      const paginationControl = await testSubjects.find('lnsWorkspaceErrorsPaginationControl');
+      const paginationItems = await paginationControl.findAllByCssSelector('.euiPagination__item');
+      return paginationItems.length;
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
@@ -1180,6 +1187,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
+      await el.moveMouseTo({ xOffset: 0, yOffset: -20 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
       await el.click();
       let buttonEl;
       if (direction !== 'none') {

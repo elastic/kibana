@@ -29,6 +29,7 @@ import {
 import { parseUrlState } from '@kbn/ml-url-state';
 
 import { useMlKibana } from '../../../contexts/kibana';
+import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
@@ -68,10 +69,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   const {
     services: {
       http,
-      notifications,
       data: { dataViews },
     },
   } = useMlKibana();
+  const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
@@ -161,11 +162,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
         const testUrl = await getTestUrl(job, customUrl, timefieldName, undefined, isPartialDFAJob);
         openCustomUrlWindow(testUrl, customUrl, http.basePath.get());
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error obtaining URL for test:', error);
-
-        const { toasts } = notifications;
-        toasts.addDanger(
+        displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.customUrlEditorList.obtainingUrlToTestConfigurationErrorMessage',
             {

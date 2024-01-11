@@ -11,15 +11,15 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiText } from '@elastic/eui';
+import { EuiSelectableOption, EuiText } from '@elastic/eui';
 
-import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
+import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
 
 import { LicenseBadge } from './license_badge';
-import { ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
+import { ModelSelectOption } from './model_select_option';
 
-const DEFAULT_PROPS: ModelSelectOptionProps = {
+const DEFAULT_PROPS: EuiSelectableOption<MlModel> = {
   modelId: 'model_1',
   type: 'ner',
   label: 'Model 1',
