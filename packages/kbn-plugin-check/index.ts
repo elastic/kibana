@@ -26,12 +26,6 @@ export const runPluginCheckCli = () => {
       }
 
       if (flags.dependencies) {
-        if ((!flags.plugin && !flags.team) || (flags.plugin && flags.team)) {
-          throw new Error(
-            'Either --plugin or --team must or may be specified when checking dependencies.'
-          );
-        }
-
         checkDependencies(flags, log);
       }
 
@@ -48,14 +42,13 @@ export const runPluginCheckCli = () => {
         defaultLevel: 'info',
       },
       flags: {
-        boolean: ['dependencies', 'rank'],
-        string: ['plugin', 'team', 'dependents'],
+        boolean: ['rank'],
+        string: ['dependencies', 'dependents'],
         help: `
-          --rank                  Display plugins as a ranked list of usage.
-          --dependents [plugin]   Display plugins that depend on a given plugin.
-          --dependencies          Check plugin dependencies.
-            --plugin [plugin]       The plugin to check.
-            --team [team]           Check all plugins owned by a given team.
+          --rank                   Display plugins as a ranked list of usage.
+          --dependents [plugin]    Display plugins that depend on a given plugin.
+          --dependencies [plugin]  Check plugin dependencies for a single plugin.
+          --dependencies [team]    Check dependencies for all plugins owned by a team.
         `,
       },
     }

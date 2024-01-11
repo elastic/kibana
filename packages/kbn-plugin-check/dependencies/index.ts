@@ -29,23 +29,19 @@ export const checkDependencies = (flags: Flags, log: ToolingLog) => {
     displayDependencyCheck(project, plugin, log);
   };
 
-  const pluginName = flags.plugin && typeof flags.plugin === 'string' ? flags.plugin : null;
-  const teamName = flags.team && typeof flags.team === 'string' ? flags.team : null;
+  const pluginOrTeam = typeof flags.dependencies === 'string' ? flags.dependencies : undefined;
 
-  if ((!pluginName && !teamName) || (pluginName && teamName)) {
-    log.error(`Must specify plugin or team name.`);
+  if (!pluginOrTeam) {
     return;
   }
 
-  if (pluginName) {
-    checkPlugin(pluginName);
-  }
-
-  if (teamName) {
-    const plugins = findTeamPlugins(teamName);
+  if (pluginOrTeam.startsWith('@elastic/')) {
+    const plugins = findTeamPlugins(pluginOrTeam);
 
     plugins.forEach((plugin) => {
       checkPlugin(plugin.manifest.id);
     });
+  } else {
+    checkPlugin(pluginOrTeam);
   }
 };
