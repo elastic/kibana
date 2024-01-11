@@ -27,7 +27,6 @@ import {
   resetFields,
   toggleCategory,
   activateViewSelected,
-  activateViewAll,
 } from '../../../tasks/fields_browser';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
@@ -48,14 +47,14 @@ const defaultHeaders = [
 ];
 
 describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
-  describe('Fields Browser rendering', () => {
-    beforeEach(() => {
-      login();
-      visitWithTimeRange(hostsUrl('allHosts'));
-      openTimelineUsingToggle();
-      openTimelineFieldsBrowser();
-    });
+  beforeEach(() => {
+    login();
+    visitWithTimeRange(hostsUrl('allHosts'));
+    openTimelineUsingToggle();
+    openTimelineFieldsBrowser();
+  });
 
+  describe('Fields Browser rendering', () => {
     it('displays the expected count of categories and fields that match the filter input', () => {
       const filterInput = 'host.mac';
 
@@ -71,7 +70,6 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
       defaultHeaders.forEach((header) => {
         cy.get(`[data-test-subj="field-${header.id}-checkbox"]`).should('be.checked');
       });
-      activateViewAll();
     });
 
     it('should create the category badge when it is selected', () => {
@@ -94,34 +92,21 @@ describe('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('Editing the timeline', () => {
-    beforeEach(() => {
-      login();
-      visitWithTimeRange(hostsUrl('allHosts'));
-      openTimelineUsingToggle();
-      openTimelineFieldsBrowser();
-    });
-
-    it('should remove the message field from the timeline when the user un-checks the field', () => {
-      cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('exist');
-
-      removesMessageField();
-      closeFieldsBrowser();
-
-      cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('not.exist');
-    });
-
-    it('should add a field to the timeline when the user clicks the checkbox', () => {
+    it('should add/remove columns from the alerts table when the user checks/un-checks them', () => {
       const filterInput = 'host.geo.c';
 
+      cy.log('removing the message column');
+      cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('exist');
+      removesMessageField();
       closeFieldsBrowser();
+      cy.get(FIELDS_BROWSER_MESSAGE_HEADER).should('not.exist');
+
+      cy.log('add host.geo.city_name column');
       cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('not.exist');
-
       openTimelineFieldsBrowser();
-
       filterFieldsBrowser(filterInput);
       addsHostGeoCityNameToTimeline();
       closeFieldsBrowser();
-
       cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('exist');
     });
 
