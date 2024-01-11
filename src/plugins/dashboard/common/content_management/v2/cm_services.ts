@@ -18,14 +18,20 @@ import {
   serviceDefinition as serviceDefinitionV1,
 } from '../v1';
 
-export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends({
-  controlGroupInput: schema.maybe(
-    controlGroupInputSchemaV1.extends({
-      showSelectionReset: schema.maybe(schema.boolean()),
-      showApplySelections: schema.maybe(schema.boolean()),
-    })
-  ),
-});
+export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
+  {
+    controlGroupInput: schema.maybe(
+      controlGroupInputSchemaV1.extends(
+        {
+          showSelectionReset: schema.maybe(schema.boolean()),
+          showApplySelections: schema.maybe(schema.boolean()),
+        },
+        { unknowns: 'ignore' }
+      )
+    ),
+  },
+  { unknowns: 'ignore' }
+);
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 
