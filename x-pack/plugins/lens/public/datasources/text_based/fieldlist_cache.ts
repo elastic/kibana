@@ -11,17 +11,19 @@ import type { TextBasedLayerColumn } from './types';
 
 const cachedColumns = new Map<string, DatatableColumn[]>();
 
-export const addColumnsToCache = (query: AggregateQuery, list: DatatableColumn[]) => {
+const getKey = (query: AggregateQuery) => {
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language];
-  const trimmedQuery = queryString.replaceAll('\n', '').trim();
+  return queryString.replaceAll('\n', '').trim();
+};
+
+export const addColumnsToCache = (query: AggregateQuery, list: DatatableColumn[]) => {
+  const trimmedQuery = getKey(query);
   cachedColumns.set(trimmedQuery, list);
 };
 
 export const getColumnsFromCache = (query: AggregateQuery) => {
-  const language = getAggregateQueryMode(query);
-  const queryString: string = query[language];
-  const trimmedQuery = queryString.replaceAll('\n', '').trim();
+  const trimmedQuery = getKey(query);
   return cachedColumns.get(trimmedQuery) ?? [];
 };
 
