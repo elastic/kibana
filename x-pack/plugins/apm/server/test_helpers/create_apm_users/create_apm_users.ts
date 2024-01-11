@@ -110,7 +110,9 @@ async function getIsCredentialsValid({
   } catch (err) {
     const { username, password } = elasticsearch;
     throw new Error(
-      `callKibana failed with username: ${username}, password: ${password}, message: ${err.message}`
+      `callKibana failed with username: ${username}, password: ${password}, error: ${JSON.stringify(
+        err
+      )}`
     );
   }
 }
