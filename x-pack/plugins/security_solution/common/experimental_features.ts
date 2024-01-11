@@ -169,6 +169,12 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
+
+  /*
+   * Enables Automated Endpoint Process actions
+   *
+   */
+  automatedProcessActionsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

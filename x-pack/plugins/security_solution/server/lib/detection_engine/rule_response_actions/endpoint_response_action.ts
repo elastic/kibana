@@ -7,15 +7,11 @@
 
 import { each, flatMap, flatten, map } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import type {
-  RuleResponseEndpointAction,
-  EndpointParams,
-} from '../../../../common/api/detection_engine';
+import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import { getUniqueAlerts } from './utils';
 
 import type {
-  Alert,
-  AlertAgent,
   EndpointResponseActionAlerts,
   ResponseActionAlerts,
   AlertsFoundFields,
@@ -27,34 +23,8 @@ export const endpointResponseAction = (
   { alerts }: ResponseActionAlerts
 ) => {
   const { comment, command } = responseAction.params;
-  const uniqueAlerts = alerts.reduce((acc: EndpointResponseActionAlerts, alert) => {
-    const { id: agentId, name: agentName } = alert.agent || {};
-    const existingAgent = acc[agentId];
 
-    const foundFields = getProcessAlerts(acc, alert, responseAction.params.config, false);
-    const notFoundFields = getProcessAlerts(acc, alert, responseAction.params.config, true);
-
-    return {
-      ...acc,
-      [agentId]: {
-        ...existingAgent,
-        agent: {
-          ...existingAgent?.agent,
-          id: agentId,
-          name: agentName,
-        },
-        foundFields: { ...(existingAgent?.foundFields || {}), ...foundFields },
-        notFoundFields: { ...(existingAgent?.notFoundFields || {}), ...notFoundFields },
-        hosts: {
-          ...(existingAgent?.hosts || {}),
-          [agentId]: {
-            name: agentName || existingAgent?.hosts?.[agentId]?.name || '',
-          },
-        },
-        alertIds: [...(existingAgent?.alertIds || []), alert._id],
-      },
-    };
-  }, {});
+  const uniqueAlerts = getUniqueAlerts(alerts, responseAction);
 
   const commonData = {
     comment,
@@ -64,8 +34,8 @@ export const endpointResponseAction = (
   };
 
   if (command === 'isolate') {
-    const actions = map(uniqueAlerts, async (alertPerAgent) =>
-      endpointAppContextService.getActionCreateService().createActionFromAlert(
+    const actions = map(uniqueAlerts, async (alertPerAgent) => {
+      return endpointAppContextService.getActionCreateService().createActionFromAlert(
         {
           hosts: alertPerAgent.hosts,
           endpoint_ids: [alertPerAgent.agent.id],
@@ -73,8 +43,9 @@ export const endpointResponseAction = (
           ...commonData,
         },
         [alertPerAgent.agent.id]
-      )
-    );
+      );
+    });
+
     return Promise.all(actions);
   }
 
@@ -109,43 +80,4 @@ export const endpointResponseAction = (
 
     return Promise.all([processActions, processActionsWithError]);
   }
-};
-
-const getProcessAlerts = (
-  acc: EndpointResponseActionAlerts,
-  alert: Alert,
-  config?: EndpointParams['config'],
-  checkErrors?: boolean
-) => {
-  if (!config) {
-    return {};
-  }
-  const { overwrite, field } = config;
-  const valueFromAlert = overwrite ? alert.process?.pid : alert[field];
-  const isEntityId = !overwrite && field.includes('entity_id');
-  const key = isEntityId ? 'entity_id' : 'pid';
-  const { _id, agent } = alert;
-  const { id: agentId, name } = agent as AlertAgent;
-
-  const baseFields = {
-    alertIds: [
-      ...(acc?.[agentId]?.[checkErrors ? 'notFoundFields' : 'foundFields']?.[field]?.alertIds ||
-        []),
-      _id,
-    ],
-    parameters: { [key]: valueFromAlert || `${field} not found` },
-    agentId,
-    hosts: { [agentId]: { name: name || '' } },
-  };
-  if (valueFromAlert && !checkErrors) {
-    return {
-      [valueFromAlert]: baseFields,
-    };
-  } else if (!valueFromAlert && checkErrors) {
-    const errorField = overwrite ? 'process.pid' : field;
-    return {
-      [errorField]: { ...baseFields, error: errorField },
-    };
-  }
-  return {};
 };

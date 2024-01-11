@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { allowedExperimentalValues } from '../../..';
 import type { EndpointAuthzKeyList } from '../../types/authz';
 
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
@@ -33,9 +34,11 @@ export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
   'isolate',
-  'kill-process',
-  'suspend-process',
 ];
+
+if (allowedExperimentalValues.automatedProcessActionsEnabled) {
+  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.push('kill-process', 'suspend-process');
+}
 
 export type EnabledAutomatedResponseActionsCommands =
   typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS[number];
