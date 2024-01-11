@@ -8,16 +8,8 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { euiStyled } from '@kbn/react-kibana-context-styled';
 import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
-
-const IconContainer = euiStyled.div`
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
 
 interface HeaderAgentInfoProps {
   platform: Platform;
@@ -31,9 +23,9 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
-          <IconContainer>
+          <EuiFlexGroup alignItems="center" justifyContent="center">
             <PlatformIcon data-test-subj="responderHeaderHostPlatformIcon" platform={platform} />
-          </IconContainer>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column" gutterSize="none">
