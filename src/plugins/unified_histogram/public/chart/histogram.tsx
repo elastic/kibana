@@ -72,7 +72,7 @@ const computeTotalHits = (
     // ES|QL histogram case
     let rowsCount = 0;
     Object.values(adapterTables ?? {})?.[0]?.rows.forEach((r) => {
-      rowsCount += r.rows;
+      rowsCount += r.results;
     });
     return rowsCount;
   } else {
