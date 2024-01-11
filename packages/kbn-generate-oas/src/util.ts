@@ -8,10 +8,14 @@
 
 import { VersionedRouterRoute } from '@kbn/core-http-router-server-internal/src/versioned_router/types';
 import { RouterRoute, RouteValidatorConfig } from '@kbn/core-http-server';
+import { KnownParameters } from './type';
 
-// https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/path.ts#L5
-export const getPathParameters = (path: string): string[] => {
-  return Array.from(path.matchAll(/\{(.+?)\}/g)).map(([_, key]) => key!);
+export const getPathParameters = (path: string): KnownParameters => {
+  return Array.from(path.matchAll(/\{(.+?)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
+    const optional = key.endsWith('?');
+    acc[optional ? key.slice(0, key.length - 1) : key] = { optional };
+    return acc;
+  }, {});
 };
 
 export const extractValidationSchemaFromVersionedHandler = (

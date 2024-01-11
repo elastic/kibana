@@ -11,7 +11,7 @@ import joi from 'joi';
 import { isConfigSchema, Type } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { OpenAPIConverter } from '../../type';
+import type { KnownParameters, OpenAPIConverter } from '../../type';
 import { isReferenceObject } from '../common';
 import * as mutations from './post_process_mutations';
 
@@ -115,6 +115,7 @@ const convert = (kbnConfigSchema: unknown): OpenAPIV3.BaseSchemaObject => {
 
 const convertObjectMembersToParameterObjects = (
   schema: joi.Schema,
+  knownParameters: KnownParameters = {},
   isPathParameter = false
 ): OpenAPIV3.ParameterObject[] => {
   let properties: Exclude<OpenAPIV3.SchemaObject['properties'], undefined>;
@@ -129,7 +130,6 @@ const convertObjectMembersToParameterObjects = (
     throw createError(`Expected record, object or nullable object type, but got '${schema.type}'`);
   }
 
-  const isRequired = isSchemaRequired(schema);
   return Object.entries(properties).map(([schemaKey, schemaObject]) => {
     const isSubSchemaRequired = isSchemaRequired(schemaObject);
     if (isReferenceObject(schemaObject)) {
@@ -141,7 +141,7 @@ const convertObjectMembersToParameterObjects = (
     return {
       name: schemaKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter || (isRequired && isSubSchemaRequired),
+      required: isPathParameter ? !knownParameters[schemaKey].optional : isSubSchemaRequired,
       schema: openApiSchemaObject,
       description,
     };
@@ -150,12 +150,12 @@ const convertObjectMembersToParameterObjects = (
 
 const convertQuery = (kbnConfigSchema: unknown): OpenAPIV3.ParameterObject[] => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  return convertObjectMembersToParameterObjects(schema, false);
+  return convertObjectMembersToParameterObjects(schema, {}, false);
 };
 
 const convertPathParameters = (
   kbnConfigSchema: unknown,
-  pathParameters: string[]
+  knownParameters: { [paramName: string]: { optional: boolean } }
 ): OpenAPIV3.ParameterObject[] => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
 
@@ -170,7 +170,7 @@ const convertPathParameters = (
     throw createError('Input parser for path params expected to be an object schema');
   }
 
-  return convertObjectMembersToParameterObjects(schema, true);
+  return convertObjectMembersToParameterObjects(schema, knownParameters, true);
 };
 
 const is = (schema: unknown): boolean => {

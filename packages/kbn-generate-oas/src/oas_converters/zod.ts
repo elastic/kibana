@@ -9,7 +9,7 @@
 import { z } from '@kbn/zod';
 import type { OpenAPIV3 } from 'openapi-types';
 import zodToJsonSchema from 'zod-to-json-schema';
-import { OpenAPIConverter } from '../type';
+import { KnownParameters, OpenAPIConverter } from '../type';
 import { validatePathParameters } from './common';
 
 // Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
@@ -142,7 +142,8 @@ const instanceofZodTypeCoercible = (_type: z.ZodTypeAny): _type is ZodTypeCoerci
 const convertObjectMembersToParameterObjects = (
   shape: z.ZodRawShape,
   isRequired: boolean,
-  isPathParameter = false
+  isPathParameter = false,
+  knownParameters: KnownParameters = {}
 ): OpenAPIV3.ParameterObject[] => {
   return Object.entries(shape).map(([shapeKey, subShape]) => {
     const isSubShapeRequired = !subShape.isOptional();
@@ -164,7 +165,7 @@ const convertObjectMembersToParameterObjects = (
     return {
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter || (isRequired && isSubShapeRequired),
+      required: isPathParameter ? !knownParameters[shapeKey]?.optional : isSubShapeRequired,
       schema: openApiSchemaObject,
       description,
     };
@@ -184,11 +185,13 @@ const convertQuery = (schema: unknown): OpenAPIV3.ParameterObject[] => {
 
 const convertPathParameters = (
   schema: unknown,
-  pathParameters: string[]
+  knownParameters: KnownParameters
 ): OpenAPIV3.ParameterObject[] => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
-  if (pathParameters.length === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
+  const paramKeys = Object.keys(knownParameters);
+  const paramsCount = paramKeys.length;
+  if (paramsCount === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
     return [];
   }
   if (!instanceofZodTypeObject(unwrappedSchema)) {
@@ -196,7 +199,7 @@ const convertPathParameters = (
   }
   const shape = unwrappedSchema.shape;
   const schemaKeys = Object.keys(shape);
-  validatePathParameters(pathParameters, schemaKeys);
+  validatePathParameters(paramKeys, schemaKeys);
   const isRequired = !schema.isOptional();
   return convertObjectMembersToParameterObjects(shape, isRequired, true);
 };

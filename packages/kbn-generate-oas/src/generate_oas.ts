@@ -128,12 +128,8 @@ const prepareRoutes = <R extends { path: string; options: { access?: 'public' | 
     routes
       // TODO: Make this smarter?
       .filter(pathStartsWith ? (route) => route.path.startsWith(pathStartsWith) : () => true)
-      // TODO: Figure out how we can scope which routes we generate OAS for
-      // .filter((route) => route.options.access === 'public')
-      .map((route) => ({
-        ...route,
-        path: route.path.replace('?', ''),
-      }))
+    // TODO: Figure out how we can scope which routes we generate OAS for
+    // .filter((route) => route.options.access === 'public')
   );
 };
 
@@ -186,7 +182,7 @@ const processVersionedRouter = (
         },
       };
 
-      paths[route.path] = { ...paths[route.path], ...path };
+      assignToPathsObject(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}' using version '${version}': ${e.message}`;
@@ -259,8 +255,7 @@ const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.Pa
           operationId: getOperationId(route.path),
         },
       };
-
-      paths[route.path] = { ...paths[route.path], ...path };
+      assignToPathsObject(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}': ${e.message}`;
@@ -268,6 +263,15 @@ const processRouter = (appRouter: Router, pathStartsWith?: string): OpenAPIV3.Pa
     }
   }
   return paths;
+};
+
+const assignToPathsObject = (
+  paths: OpenAPIV3.PathsObject,
+  path: string,
+  pathObject: OpenAPIV3.PathItemObject
+): void => {
+  const pathName = path.replace('?', '');
+  paths[pathName] = { ...paths[pathName], ...pathObject };
 };
 
 const getOpenApiPathsObject = (

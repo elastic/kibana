@@ -7,7 +7,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { OpenAPIConverter } from '../type';
+import { KnownParameters, OpenAPIConverter } from '../type';
 
 import { zodConverter } from './zod';
 import { kbnConfigSchemaConverter } from './kbn_config_schema/kbn_config_schema';
@@ -24,7 +24,7 @@ export const convert = (schema: unknown): OpenAPIV3.SchemaObject => {
 
 export const convertPathParameters = (
   schema: unknown,
-  pathParameters: string[]
+  pathParameters: KnownParameters
 ): OpenAPIV3.ParameterObject[] => {
   return getConverter(schema).convertPathParameters(schema, pathParameters);
 };

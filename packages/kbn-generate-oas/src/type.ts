@@ -8,8 +8,15 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 
+export interface KnownParameters {
+  [paramName: string]: { optional: boolean };
+}
+
 export interface OpenAPIConverter {
-  convertPathParameters(schema: unknown, pathParameters: string[]): OpenAPIV3.ParameterObject[];
+  convertPathParameters(
+    schema: unknown,
+    knownPathParameters: KnownParameters
+  ): OpenAPIV3.ParameterObject[];
 
   convertQuery(schema: unknown): OpenAPIV3.ParameterObject[];
 
