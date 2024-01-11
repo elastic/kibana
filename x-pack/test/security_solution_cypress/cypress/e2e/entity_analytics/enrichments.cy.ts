@@ -12,7 +12,6 @@ import {
   HOST_RISK_COLUMN,
   USER_RISK_COLUMN,
   ACTION_COLUMN,
-  ALERTS_COUNT,
 } from '../../screens/alerts';
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
