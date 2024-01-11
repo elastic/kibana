@@ -36,6 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esClient = getService('es');
   const supertest = getService('supertest');
   const find = getService('find');
+  const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
 
@@ -244,7 +245,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               checkResult.value
             );
           }
-          await pageObjects.common.closeToast();
+          await toasts.closeToast();
 
           // Title is shown after adding an item
           expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
@@ -278,7 +279,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             );
           }
 
-          await pageObjects.common.closeToast();
+          await toasts.closeToast();
 
           // Title still shown after editing an item
           expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
@@ -336,7 +337,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           policyId: firstPolicy.packagePolicy.id,
           suffix: firstSuffix,
         });
-        await pageObjects.common.closeToast();
+        await toasts.closeToast();
 
         // Create second trusted app
         await createArtifact(testData, {
@@ -344,11 +345,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           suffix: secondSuffix,
           createButton: 'pageAddButton',
         });
-        await pageObjects.common.closeToast();
+        await toasts.closeToast();
 
         // Create third trusted app
         await createArtifact(testData, { suffix: thirdSuffix, createButton: 'pageAddButton' });
-        await pageObjects.common.closeToast();
+        await toasts.closeToast();
 
         // Checks if fleet artifact has been updated correctly
         await checkFleetArtifacts(

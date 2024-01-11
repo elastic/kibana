@@ -25,6 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const comboBox = getService('comboBox');
   const objectRemover = new ObjectRemover(supertest);
+  const toasts = getService('toasts');
 
   async function createConnectorManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdConnector } = await supertest
@@ -379,7 +380,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.closeToast();
         expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
 
         await retry.tryForTime(30 * 1000, async () => {
@@ -466,7 +467,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // Wait to ensure the table is finished loading
@@ -543,7 +544,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.closeToast();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // Wait to ensure the table is finished loading
@@ -653,7 +654,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
-        const toastTitle = await pageObjects.common.closeToast();
+        const toastTitle = await toasts.closeToast();
         expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
       });
     });
