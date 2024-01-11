@@ -151,6 +151,7 @@ export const ResponseFields = z.object({
   id: RuleObjectId,
   rule_id: RuleSignatureId,
   immutable: IsRuleImmutable,
+  // this only for security-rule assets but need to answer here because the _review install endpoint responds with RuleResponse
   updated_date: z.string().datetime().optional(),
   updated_at: z.string().datetime(),
   updated_by: z.string(),
