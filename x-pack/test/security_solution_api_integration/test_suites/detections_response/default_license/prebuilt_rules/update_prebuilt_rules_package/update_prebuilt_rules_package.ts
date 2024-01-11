@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     it('should allow user to install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package', async () => {

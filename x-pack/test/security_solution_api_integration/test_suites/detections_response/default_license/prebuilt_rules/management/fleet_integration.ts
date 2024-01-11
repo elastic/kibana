@@ -25,8 +25,8 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       await deletePrebuiltRulesFleetPackage(supertest);
       await deleteAllRules(supertest, log);
-      await deleteAllTimelines(es);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllTimelines(es, log);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     /**
