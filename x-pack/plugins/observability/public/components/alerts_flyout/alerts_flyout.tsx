@@ -50,7 +50,7 @@ export function AlertsFlyout({
       <EuiFlyoutHeader hasBorder>
         <AlertsFlyoutHeader alert={alertData} />
       </EuiFlyoutHeader>
-      <AlertsFlyoutBody alert={alertData} />
+      <AlertsFlyoutBody alert={alertData} rawAlert={alert} />
       <AlertsFlyoutFooter alert={alertData} isInApp={isInApp} />
     </EuiFlyout>
   );
