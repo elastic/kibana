@@ -8,6 +8,7 @@
 
 import expect from '@kbn/expect';
 import { FtrService } from './ftr_provider_context';
+import { WebElementWrapper } from './web_element_wrapper';
 
 export class ToastsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -134,7 +135,7 @@ export class ToastsService extends FtrService {
 
     return isToastPresent;
   }
-  public async getToastElementByIndex(index: number) {
+  public async getToastElementByIndex(index: number): Promise<WebElementWrapper> {
     const list = await this.getGlobalToastList();
     return await list.findByCssSelector(`.euiToast:nth-child(${index})`);
   }
