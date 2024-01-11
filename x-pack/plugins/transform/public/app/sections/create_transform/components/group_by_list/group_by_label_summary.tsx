@@ -13,10 +13,9 @@ import { isGroupByDateHistogram, isGroupByHistogram, PivotGroupByConfig } from '
 
 interface Props {
   item: PivotGroupByConfig;
-  optionsDataId: string;
 }
 
-export const GroupByLabelSummary: React.FC<Props> = ({ item, optionsDataId }) => {
+export const GroupByLabelSummary: React.FC<Props> = ({ item }) => {
   let interval: string | undefined;
 
   if (isGroupByDateHistogram(item)) {
@@ -28,7 +27,7 @@ export const GroupByLabelSummary: React.FC<Props> = ({ item, optionsDataId }) =>
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem className="transform__GroupByLabel--text">
-        <span className="eui-textTruncate">{optionsDataId}</span>
+        <span className="eui-textTruncate">{item.aggName}</span>
       </EuiFlexItem>
       {interval !== undefined && (
         <EuiFlexItem

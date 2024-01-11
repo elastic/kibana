@@ -18,15 +18,15 @@ export interface AggListSummaryProps {
 }
 
 export const AggListSummary: React.FC<AggListSummaryProps> = ({ list }) => {
-  const aggNames = Object.keys(list);
+  const aggIds = Object.keys(list);
   return (
     <EuiForm>
-      {aggNames.map((aggName: AggName) => (
-        <Fragment key={aggName}>
+      {aggIds.map((aggId: AggName) => (
+        <Fragment key={aggId}>
           <EuiPanel paddingSize="s">
-            <div className="eui-textTruncate">{aggName}</div>
+            <div className="eui-textTruncate">{list[aggId].aggName}</div>
           </EuiPanel>
-          {aggNames.length > 0 && <EuiSpacer size="s" />}
+          {aggIds.length > 0 && <EuiSpacer size="s" />}
         </Fragment>
       ))}
     </EuiForm>

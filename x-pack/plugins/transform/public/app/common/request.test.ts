@@ -241,15 +241,8 @@ describe('Transform: Common', () => {
       searchLanguage: 'kuery',
       searchString: 'the-query',
       searchQuery: 'the-search-query',
-      valid: true,
       transformFunction: 'pivot',
       latestConfig: {} as LatestFunctionConfigUI,
-      previewRequest: {
-        pivot: {
-          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
-          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
-        },
-      },
       validationStatus: {
         isValid: true,
       },
@@ -273,12 +266,7 @@ describe('Transform: Common', () => {
       valid: true,
     };
 
-    const request = getCreateTransformRequestBody(
-      { getIndexPattern: () => 'the-data-view-title' } as DataView,
-      transformConfigState,
-      transformDetailsState,
-      {}
-    );
+    const request = getCreateTransformRequestBody(transformConfigState, transformDetailsState);
 
     expect(request).toEqual({
       description: 'the-transform-description',
@@ -316,15 +304,8 @@ describe('Transform: Common', () => {
       searchLanguage: 'kuery',
       searchString: 'the-query',
       searchQuery: 'the-search-query',
-      valid: true,
       transformFunction: 'pivot',
       latestConfig: {} as LatestFunctionConfigUI,
-      previewRequest: {
-        pivot: {
-          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
-          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
-        },
-      },
       validationStatus: {
         isValid: true,
       },
@@ -349,12 +330,7 @@ describe('Transform: Common', () => {
       valid: true,
     };
 
-    const request = getCreateTransformRequestBody(
-      { getIndexPattern: () => 'the-data-view-title' } as DataView,
-      pivotState,
-      transformDetailsState,
-      {}
-    );
+    const request = getCreateTransformRequestBody(pivotState, transformDetailsState, {});
 
     expect(request).toEqual({
       description: 'the-transform-description',

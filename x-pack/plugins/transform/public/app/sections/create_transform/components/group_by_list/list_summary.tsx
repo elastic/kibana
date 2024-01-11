@@ -25,7 +25,7 @@ export const GroupByListSummary: React.FC<ListProps> = ({ list }) => {
         return (
           <Fragment key={optionsDataId}>
             <EuiPanel paddingSize="s">
-              <GroupByLabelSummary item={list[optionsDataId]} optionsDataId={optionsDataId} />
+              <GroupByLabelSummary item={list[optionsDataId]} />
             </EuiPanel>
             {listKeys.length > 0 && <EuiSpacer size="s" />}
           </Fragment>

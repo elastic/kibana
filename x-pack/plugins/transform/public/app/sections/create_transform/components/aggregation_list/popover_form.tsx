@@ -42,6 +42,8 @@ import {
   type AggFormComponent,
 } from '../step_define/common/agg_utils';
 
+import { FilterAggConfigBase } from '../step_define/common/filter_agg/types';
+
 interface Props {
   defaultData: PivotAggsConfig;
   otherAggNames: AggName[];
@@ -256,10 +258,10 @@ export const PopoverForm: FC<Props> = ({ defaultData, otherAggNames, onChange, o
         <AggFormComponent
           aggConfig={aggConfigDef.aggConfig}
           selectedField={field as string}
-          onChange={(update: typeof aggConfigDef.aggConfig) => {
+          onChange={(update) => {
             setAggConfigDef({
               ...aggConfigDef,
-              aggConfig: update,
+              aggConfig: update as FilterAggConfigBase,
             });
           }}
           isValid={formValid}
