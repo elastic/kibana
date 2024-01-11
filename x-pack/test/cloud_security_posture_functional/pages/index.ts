@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Cloud Security Posture', function () {
     loadTestFile(require.resolve('./findings_onboarding'));
+    loadTestFile(require.resolve('./rules'));
     loadTestFile(require.resolve('./findings'));
     loadTestFile(require.resolve('./findings_grouping'));
     loadTestFile(require.resolve('./findings_alerts'));

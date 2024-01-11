@@ -17,10 +17,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-// import { CspBenchmarkRule } from '../../../common/types/latest';
 import type { CspBenchmarkRulesWithStatus, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleStatus } from './change_csp_rule_status';
+
+export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 
 type RulesTableProps = Pick<
   RulesState,
@@ -263,7 +264,7 @@ const getColumns = ({
           className="eui-textTruncate"
           checked={rule?.status === 'muted' ? true : false}
           onChange={useChangeCspRuleStatusFn}
-          data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
+          data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
           label=""
         />
       );

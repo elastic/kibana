@@ -139,7 +139,7 @@ export const RulesContainer = () => {
     () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
     [allRules.data]
   );
-  const cleanedSectionList = [...new Set(sectionList)];
+  const cleanedSectionList = [...new Set(sectionList?.sort())];
   const cleanedRuleNumberList = [...new Set(ruleNumberList)];
 
   const rulesPageData = useMemo(

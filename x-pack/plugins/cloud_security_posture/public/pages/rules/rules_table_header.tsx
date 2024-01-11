@@ -29,6 +29,12 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { useChangeCspRuleStatus } from './change_csp_rule_status';
 import { CspBenchmarkRulesWithStatus } from './rules_container';
 
+export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
+export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
+export const RULES_BULK_ACTION_OPTION_DISABLE = 'bulk-action-option-disable';
+export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
+export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
+
 interface RulesTableToolbarProps {
   search: (value: string) => void;
   onSectionChange: (value: string | undefined) => void;
@@ -169,7 +175,7 @@ export const RulesTableHeader = ({
           </EuiFlexItem>
           <EuiFlexItem
             css={css`
-              min-width: 160px;
+              min-width: 220px;
             `}
           >
             <EuiFilterGroup>
@@ -180,7 +186,7 @@ export const RulesTableHeader = ({
               >
                 <FormattedMessage
                   id="xpack.csp.rules.rulesTable.enabledRuleFilterButton"
-                  defaultMessage="Enabled rule"
+                  defaultMessage="Enabled rules"
                 />
               </EuiFilterButton>
               <EuiFilterButton
@@ -189,7 +195,7 @@ export const RulesTableHeader = ({
               >
                 <FormattedMessage
                   id="xpack.csp.rules.rulesTable.disabledRuleFilterButton"
-                  defaultMessage="Disabled rule"
+                  defaultMessage="Disabled rules"
                 />
               </EuiFilterButton>
             </EuiFilterGroup>
@@ -282,11 +288,12 @@ const CurrentPageOfTotal = ({
   };
   const changeCspRuleStatusMute = async () => {
     changeRulesStatus('mute');
-    // setSelectedRules([]);
   };
   const changeCspRuleStatusUnmute = async () => {
     changeRulesStatus('unmute');
-    // setSelectedRules([]);
+  };
+  const clearSelectionFn = async () => {
+    setSelectedRules([]);
   };
   const areAllSelectedRulesMuted = selectedRules.find((e) => e?.status === 'muted');
   const areAllSelectedRulesUnmuted = selectedRules.find((e) => e?.status === 'unmuted');
@@ -300,6 +307,7 @@ const CurrentPageOfTotal = ({
       css={css`
         padding-bottom: ${euiThemeVars.euiSizeS};
       `}
+      data-test-subj={RULES_BULK_ACTION_BUTTON}
     >
       Bulk actions
     </EuiButtonEmpty>
@@ -308,6 +316,7 @@ const CurrentPageOfTotal = ({
     <EuiContextMenuItem
       disabled={selectedRules.length === 0 || !areAllSelectedRulesUnmuted ? true : false}
       onClick={changeCspRuleStatusMute}
+      data-test-subj={RULES_BULK_ACTION_OPTION_ENABLE}
     >
       <EuiText>
         <FormattedMessage id="xpack.csp.rules.rulesTable.optionEnable" defaultMessage="Enable" />
@@ -316,12 +325,14 @@ const CurrentPageOfTotal = ({
     <EuiContextMenuItem
       disabled={selectedRules.length === 0 || !areAllSelectedRulesMuted ? true : false}
       onClick={changeCspRuleStatusUnmute}
+      data-test-subj={RULES_BULK_ACTION_OPTION_DISABLE}
     >
       <EuiText key="disabled">
         <FormattedMessage id="xpack.csp.rules.rulesTable.optionDisable" defaultMessage="Disable" />
       </EuiText>
     </EuiContextMenuItem>,
   ];
+
   return (
     <EuiFlexItem grow={false}>
       <EuiSpacer size="xl" />
@@ -336,20 +347,38 @@ const CurrentPageOfTotal = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            onClick={setSelectAllRules}
-            size="xs"
-            iconType="pagesSelect"
-            css={css`
-              padding-bottom: ${euiThemeVars.euiSizeS};
-            `}
-          >
-            <FormattedMessage
-              id="xpack.csp.rules.rulesTable.selectAllRulesOption"
-              defaultMessage="Select All {total, plural, one {# rule} other {# rules}}"
-              values={{ total }}
-            />
-          </EuiButtonEmpty>
+          {selectedRules.length !== total ? (
+            <EuiButtonEmpty
+              onClick={setSelectAllRules}
+              size="xs"
+              iconType="pagesSelect"
+              css={css`
+                padding-bottom: ${euiThemeVars.euiSizeS};
+              `}
+              data-test-subj={RULES_SELECT_ALL_RULES}
+            >
+              <FormattedMessage
+                id="xpack.csp.rules.rulesTable.selectAllRulesOption"
+                defaultMessage="Select All {total, plural, one {# rule} other {# rules}}"
+                values={{ total }}
+              />
+            </EuiButtonEmpty>
+          ) : (
+            <EuiButtonEmpty
+              onClick={clearSelectionFn}
+              size="xs"
+              iconType="cross"
+              css={css`
+                padding-bottom: ${euiThemeVars.euiSizeS};
+              `}
+              data-test-subj={RULES_CLEAR_ALL_RULES_SELECTION}
+            >
+              <FormattedMessage
+                id="xpack.csp.rules.rulesTable.clearSelectionOption"
+                defaultMessage="Clear selection"
+              />
+            </EuiButtonEmpty>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
