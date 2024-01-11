@@ -9,6 +9,14 @@ import dateMath from '@kbn/datemath';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
+/**
+ * Returns the start and end time range in epoch milliseconds for a given set of documents
+ * @param client IScopedClusterClient
+ * @param timeField Time field name
+ * @param pipeline ingest pipeline config
+ * @param docs array of documents
+ * @returns start and end time range in epoch milliseconds
+ */
 export async function previewIndexTimeRange(
   client: IScopedClusterClient,
   timeField: string,

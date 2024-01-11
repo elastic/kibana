@@ -30,10 +30,6 @@ export interface GetTimeFieldRangeResponse {
   end: { epoch: number; string: string };
 }
 
-export interface GetTimeFromDocResponse {
-  time: { epoch: number; string: string };
-}
-
 export const FileUploadComponent = GeoUploadWizardAsyncWrapper;
 export const IndexNameFormComponent = IndexNameFormAsyncWrapper;
 
