@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiIconTip } from '@elastic/eui';
 
 const i18nTexts = {
-  title: i18n.translate('xpack.reporting.panelContent.unsavedStateErrorTitle', {
+  title: i18n.translate('xpack.reporting.modalContent.unsavedStateErrorTitle', {
     defaultMessage: 'Save your work before copying this URL.',
   }),
 };

@@ -401,10 +401,8 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
+        {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
         <EuiFlexGroup>
-          <EuiFlexItem>
-            {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
-          </EuiFlexItem>
           <EuiFlexItem grow={0}>
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem>
