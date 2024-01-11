@@ -68,17 +68,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Rules Page - Bulk Action buttons', () => {
-      //   it('It should disable both option when there are no rules selected', async () => {
-      //     await rule.rulePage.toggleBulkActionButton();
-      //     expect(
-      //       (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-      //         'true'
-      //     ).to.be(true);
-      //     expect(
-      //       (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-      //         'true'
-      //     ).to.be(true);
-      //   });
+      it('It should disable both option when there are no rules selected', async () => {
+        await rule.rulePage.toggleBulkActionButton();
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
+            'true'
+        ).to.be(true);
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
+            'true'
+        ).to.be(true);
+      });
 
       it('It should disable Disable option when there are all rules selected are already disabled', async () => {
         await rule.rulePage.clickSelectAllRules();
@@ -97,7 +97,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
         await rule.rulePage.clickBulkActionOption(RULES_BULK_ACTION_OPTION_ENABLE);
-        // await rule.navigateToRulePage('cis_k8s', '1.0.1');
         await pageObjects.header.waitUntilLoadingHasFinished();
         await rule.rulePage.clickClearAllRulesSelection();
         await pageObjects.header.waitUntilLoadingHasFinished();
