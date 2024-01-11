@@ -181,7 +181,6 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
@@ -270,29 +269,6 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: '4',
@@ -309,7 +285,6 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
@@ -403,29 +378,6 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: 'adHoc-id',
