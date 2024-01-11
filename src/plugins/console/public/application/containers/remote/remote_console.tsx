@@ -9,6 +9,7 @@
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import {
+  EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
   EuiThemeProvider,
@@ -56,35 +57,37 @@ export const RemoteConsole = ({
 
   return (
     <EuiPortal>
-      <section aria-label={landmarkHeading} className={classes}>
+      <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isConsoleOpen}>
+        <section aria-label={landmarkHeading} className={classes}>
+          <EuiScreenReaderOnly>
+            <h2>{landmarkHeading}</h2>
+          </EuiScreenReaderOnly>
+          <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
+            <div className="remoteConsole__controls">
+              <ConsoleHeader
+                isConsoleOpen={isConsoleOpen}
+                rightSideItem={headerRightSideItem}
+                onClick={toggleConsole}
+              />
+            </div>
+          </EuiThemeProvider>
+          {isConsoleOpen ? (
+            <div className="remoteConsole__content">
+              <EuiWindowEvent event="keydown" handler={onKeyDown} />
+              <ConsoleWrapper core={core} usageCollection={usageCollection} />
+            </div>
+          ) : null}
+        </section>
         <EuiScreenReaderOnly>
-          <h2>{landmarkHeading}</h2>
+          <p aria-live="assertive">
+            {i18n.translate('console.remoteConsole.customScreenReaderAnnouncement', {
+              defaultMessage:
+                'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
+              values: { landmarkHeading },
+            })}
+          </p>
         </EuiScreenReaderOnly>
-        <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
-          <div className="remoteConsole__controls">
-            <ConsoleHeader
-              isConsoleOpen={isConsoleOpen}
-              rightSideItem={headerRightSideItem}
-              onClick={toggleConsole}
-            />
-          </div>
-        </EuiThemeProvider>
-        {isConsoleOpen ? (
-          <div className="remoteConsole__content">
-            <EuiWindowEvent event="keydown" handler={onKeyDown} />
-            <ConsoleWrapper core={core} usageCollection={usageCollection} />
-          </div>
-        ) : null}
-      </section>
-      <EuiScreenReaderOnly>
-        <p aria-live="assertive">
-          {i18n.translate('console.remoteConsole.customScreenReaderAnnouncement', {
-            defaultMessage:
-              'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
-            values: { landmarkHeading },
-          })}
-        </p>
-      </EuiScreenReaderOnly>
+      </EuiFocusTrap>
     </EuiPortal>
   );
 };
