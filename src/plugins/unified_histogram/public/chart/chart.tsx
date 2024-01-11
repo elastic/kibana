@@ -236,6 +236,12 @@ export function Chart({
     ]
   );
 
+  console.log(
+    'lens attributes',
+    lensAttributesContext.attributes,
+    lensAttributesContext.requestData
+  );
+
   const onSuggestionSelectorChange = useCallback(
     (s: Suggestion | undefined) => {
       onSuggestionChange?.(s);

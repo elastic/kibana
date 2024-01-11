@@ -149,5 +149,8 @@ export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
  */
 export interface ExternalCustomVisualization {
   visualizationId: Suggestion['visualizationId'];
-  visualizationState: Suggestion['visualizationState'];
+  visualizationState: Suggestion<{
+    layerId?: string;
+    layers?: Array<{ layerId?: string }>;
+  }>['visualizationState'];
 }

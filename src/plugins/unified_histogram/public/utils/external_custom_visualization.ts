@@ -6,36 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
+import { isEqual, pick } from 'lodash';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { ExternalCustomVisualization } from '../types';
 
 export const extractExternalCustomVisualizationFromSuggestion = (
   currentSuggestion: Suggestion | undefined
 ): ExternalCustomVisualization | undefined => {
-  if (!currentSuggestion) {
+  if (!currentSuggestion?.visualizationId || !currentSuggestion?.visualizationState) {
     return undefined;
   }
 
   const customVisualization: ExternalCustomVisualization = {
     visualizationId: currentSuggestion.visualizationId,
-    visualizationState: currentSuggestion.visualizationState || {},
+    visualizationState:
+      currentSuggestion.visualizationState as ExternalCustomVisualization['visualizationState'],
   };
 
   // TODO: is there a Lens util function we could use for serialization?
 
-  if (
-    typeof customVisualization.visualizationState === 'object' &&
-    customVisualization.visualizationState &&
-    'layers' in customVisualization.visualizationState &&
-    Array.isArray(customVisualization.visualizationState.layers)
-  ) {
-    customVisualization.visualizationState = {
-      ...customVisualization.visualizationState,
-      layers: customVisualization.visualizationState.layers.map((layer) => omit(layer, 'layerId')),
-      layerId: undefined,
-    };
-  }
+  customVisualization.visualizationState = replaceLayerIdInVisualizationState(
+    customVisualization.visualizationState,
+    undefined
+  );
 
   console.log('extracted custom vis', customVisualization);
 
@@ -53,37 +46,82 @@ export const mergeCurrentSuggestionWithExternalCustomVisualization = ({
 }): Suggestion | undefined => {
   let currentSuggestion = selectedSuggestion || allSuggestions?.[0];
 
-  if (customVisualization && typeof customVisualization.visualizationState === 'object') {
-    const matchingSuggestion = allSuggestions.find(
-      (suggestion) => suggestion.visualizationId === customVisualization.visualizationId
+  if (!customVisualization?.visualizationId || !customVisualization?.visualizationState) {
+    return currentSuggestion;
+  }
+
+  const matchingSuggestion = allSuggestions.find(
+    (suggestion) => suggestion.visualizationId === customVisualization.visualizationId
+  );
+
+  if (
+    matchingSuggestion?.visualizationState &&
+    typeof matchingSuggestion?.visualizationState === 'object'
+  ) {
+    const matchingVisualizationState: ExternalCustomVisualization['visualizationState'] =
+      matchingSuggestion.visualizationState as ExternalCustomVisualization['visualizationState'];
+
+    const layerId =
+      'layerId' in matchingVisualizationState
+        ? matchingVisualizationState.layerId
+        : matchingSuggestion.keptLayerIds[0];
+
+    const customVisualizationState = replaceLayerIdInVisualizationState(
+      {
+        ...matchingVisualizationState,
+        ...customVisualization.visualizationState,
+      },
+      layerId
     );
 
-    console.log(matchingSuggestion, customVisualization);
-
-    if (typeof matchingSuggestion === 'object') {
-      const layerId = matchingSuggestion.keptLayerIds[0];
-
-      currentSuggestion = {
-        ...matchingSuggestion,
-        visualizationState: {
-          ...(matchingSuggestion.visualizationState || {}),
-          ...(customVisualization.visualizationState || {}),
-          layers: customVisualization.visualizationState.layers
-            ? customVisualization.visualizationState.layers.map((layer) => ({
-                ...layer,
-                layerId,
-              }))
-            : matchingSuggestion.visualizationState.layers,
-          layerId: matchingSuggestion.visualizationState.layerId,
-        },
-      };
-
-      console.log('merged suggestion', currentSuggestion.visualizationState);
+    if (!areVisCompatible(matchingVisualizationState, customVisualizationState)) {
+      console.log('custom vis was incompatible with current suggest');
+      return currentSuggestion;
     }
+
+    currentSuggestion = {
+      ...matchingSuggestion,
+      visualizationState: customVisualizationState,
+    };
+
+    console.log('merged suggestion', currentSuggestion.visualizationState);
   }
 
   return currentSuggestion;
 };
+
+function replaceLayerIdInVisualizationState(
+  visualizationState: ExternalCustomVisualization['visualizationState'],
+  newLayerId: string | undefined
+): ExternalCustomVisualization['visualizationState'] {
+  return {
+    ...visualizationState,
+    layerId: newLayerId,
+    layers: visualizationState.layers?.map((layer) => ({ ...layer, layerId: newLayerId })),
+  };
+}
+
+function areVisCompatible(
+  matchingVisualizationState: ExternalCustomVisualization['visualizationState'],
+  customVisualizationState: ExternalCustomVisualization['visualizationState']
+): boolean {
+  if (!matchingVisualizationState.layers?.length && !customVisualizationState.layers?.length) {
+    return true;
+  }
+  if (matchingVisualizationState.layers?.length !== customVisualizationState.layers?.length) {
+    return false;
+  }
+  const layerProps = ['layerType', 'seriesType', 'xAccessor'];
+  return (matchingVisualizationState.layers || []).every((matchingVisLayer, index) => {
+    const customVisLayer = customVisualizationState.layers?.[index];
+
+    if (!customVisLayer) {
+      return false;
+    }
+
+    return isEqual(pick(matchingVisLayer, layerProps), pick(customVisLayer, layerProps));
+  });
+}
 
 export const toExternalCustomVisualizationJSONString = (
   customVisualization: ExternalCustomVisualization | undefined
