@@ -12,7 +12,7 @@ import {
 } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
-const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
+export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
 export const RULES_BULK_ACTION_OPTION_DISABLE = 'bulk-action-option-disable';
 export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
@@ -49,7 +49,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
 
     clickBulkActionOption: async (optionTestId: string) => {
       const bulkActionOption = await testSubjects.find(optionTestId);
-      return await bulkActionOption.click();
+      await bulkActionOption.click();
     },
 
     isBulkActionOptionDisabled: async (optionTestId: string) => {
@@ -59,17 +59,17 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
 
     clickSelectAllRules: async () => {
       const selectAllRulesButton = await testSubjects.find(RULES_SELECT_ALL_RULES);
-      return selectAllRulesButton.click();
+      await selectAllRulesButton.click();
     },
 
     clickClearAllRulesSelection: async () => {
       const clearAllRulesSelectionButton = await testSubjects.find(RULES_CLEAR_ALL_RULES_SELECTION);
-      return clearAllRulesSelectionButton.click();
+      await clearAllRulesSelectionButton.click();
     },
 
     clickEnableRulesRowSwitchButton: async (index: number) => {
       const enableRulesRowSwitch = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
-      return enableRulesRowSwitch[index].click();
+      await enableRulesRowSwitch[index].click();
     },
   };
 
