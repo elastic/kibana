@@ -84,9 +84,8 @@ export class ToastsService extends FtrService {
     }
   }
 
-  public async dismissAllToasts() {
-    const list = await this.getGlobalToastList();
-    const toasts = await list.findAllByCssSelector(`.euiToast`);
+  public async dismissAllToasts(): Promise<void> {
+    const toasts = await (await this.getGlobalToastList()).findAllByCssSelector(`.euiToast`);
 
     if (toasts.length === 0) return;
 
@@ -129,25 +128,22 @@ export class ToastsService extends FtrService {
       timeout: 90000,
     });
     // Close toast so it doesn't obscure the UI.
-    if (isToastPresent) {
-      await this.testSubjects.click('completeReportSuccess > toastCloseButton');
-    }
+    if (isToastPresent) await this.testSubjects.click('completeReportSuccess > toastCloseButton');
 
     return isToastPresent;
   }
   public async getToastElementByIndex(index: number): Promise<WebElementWrapper> {
-    const list = await this.getGlobalToastList();
-    return await list.findByCssSelector(`.euiToast:nth-child(${index})`);
+    return await (
+      await this.getGlobalToastList()
+    ).findByCssSelector(`.euiToast:nth-child(${index})`);
   }
 
-  public async getToastContent(index: number) {
-    const elem = await this.getToastElementByIndex(index);
-    return await elem.getVisibleText();
+  public async getToastContent(index: number): Promise<string> {
+    return await (await this.getToastElementByIndex(index)).getVisibleText();
   }
 
-  public async getAllToastElements() {
-    const list = await this.getGlobalToastList();
-    return await list.findAllByCssSelector(`.euiToast`);
+  public async getAllToastElements(): Promise<WebElementWrapper[]> {
+    return await (await this.getGlobalToastList()).findAllByCssSelector(`.euiToast`);
   }
 
   private async getGlobalToastList(options?: { timeout?: number }) {
