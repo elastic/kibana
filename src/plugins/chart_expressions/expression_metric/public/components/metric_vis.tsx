@@ -315,8 +315,6 @@ export const MetricVis = ({
       css={css`
         height: 100%;
         width: 100%;
-        max-height: 100%;
-        max-width: 100%;
         overflow-y: auto;
         ${useEuiScrollBar()}
       `}
