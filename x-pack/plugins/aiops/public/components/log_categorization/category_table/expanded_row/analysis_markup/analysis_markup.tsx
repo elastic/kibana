@@ -296,6 +296,7 @@ export const AnalysisMarkup: FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="aiopsAnalysisMarkupUpdateButton"
             size="s"
             onClick={() => update()}
             disabled={originalGrokPattern! === results2.grok_pattern!}
@@ -361,7 +362,10 @@ export const AnalysisMarkup: FC<Props> = ({
 
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => createRuntimeField(tempGrokPattern)}>
+              <EuiButton
+                data-test-subj="aiopsAnalysisMarkupCreateRuntimeFieldsButton"
+                onClick={() => createRuntimeField(tempGrokPattern)}
+              >
                 Create runtime fields
               </EuiButton>
             </EuiFlexItem>
@@ -402,6 +406,7 @@ export const AnalysisMarkup: FC<Props> = ({
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="aiopsAnalysisMarkupUpdateIngestButton"
                 onClick={() =>
                   updateIngest(
                     processPipeline(results2.ingest_pipeline, results2.grok_pattern!),

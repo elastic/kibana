@@ -114,12 +114,14 @@ export const FieldPopover: FC<Props> = ({
       anchorPosition="downCenter"
       button={
         <EuiButtonEmpty
+          data-test-subj="aiopsFieldPopoverButton"
           onClick={() => togglePopover(index)}
           flush="both"
           css={{
             height: 'auto',
             fontSize: '12px',
             '.euiButtonEmpty__content': { height: 'auto' },
+            '.eui-textTruncate': { overflow: 'visible !important' },
           }}
         >
           {children}
@@ -138,6 +140,7 @@ export const FieldPopover: FC<Props> = ({
           <EuiFlexItem grow={false}>
             {isNewField ? null : (
               <EuiButtonIcon
+                data-test-subj="aiopsFieldPopoverButton"
                 aria-label="Delete field"
                 size="xs"
                 iconType="trash"
@@ -151,6 +154,7 @@ export const FieldPopover: FC<Props> = ({
       <EuiForm component="form" onSubmit={() => closePopover()}>
         <EuiFormRow label="Field name">
           <EuiFieldText
+            data-test-subj="aiopsFieldPopoverFieldText"
             compressed={true}
             value={field.name}
             onChange={(e) => onChange(e.target.value)}
