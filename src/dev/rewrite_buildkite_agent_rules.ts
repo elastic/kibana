@@ -24,6 +24,44 @@ interface BuildkiteStepPartial {
   agents?: { queue?: string };
 }
 
+interface KBAgentDef {
+  queue: string;
+  name: string;
+  machineType: string;
+  minimumAgents?: number;
+  maximumAgents?: number;
+  idleTimeoutMins?: number;
+  // exitAfterOneJob?: boolean;
+  disableExternalIp?: boolean;
+  localSsds?: number;
+  buildPath?: string;
+  diskType?: string;
+  diskSizeGb?: number;
+  spot?: boolean;
+  zones?: string[];
+  nestedVirtualization?: boolean;
+}
+type KibanaBuildkiteAgentLookup = Record<string, KBAgentDef>;
+
+interface GobldGCPConfig {
+  assignExternalIP?: boolean;
+  diskSizeGb?: number;
+  diskType?: string;
+  enableSecureBoot?: boolean;
+  enableNestedVirtualization?: boolean;
+  image: string;
+  localSsds?: number;
+  localSsdInterface?: string;
+  machineType: string;
+  minCpuPlatform?: string;
+  imageProject: string;
+  networkTags?: string[];
+  preemptible?: boolean;
+  schedulingNodeAffinity?: Record<string, string>;
+  serviceAccount?: string;
+  zones?: string[];
+}
+
 const DRY_RUN = process.argv.includes('--dry-run');
 
 if (!fs.existsSync('data/agents.json')) {
@@ -133,26 +171,33 @@ function editYmlInPlace(
   return lines.join('\n');
 }
 
-let agentNameUpdateMap: Record<string, { machineType: string; buildPath?: string }>;
-function getFullAgentTargetingRule(queue: string) {
+let agentNameUpdateMap: KibanaBuildkiteAgentLookup;
+function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
   if (!agentNameUpdateMap) {
     const agents = JSON.parse(fs.readFileSync('data/agents.json', 'utf8'));
-    agentNameUpdateMap = agents.gcp.agents.reduce((acc: typeof agentNameUpdateMap, agent: any) => {
-      acc[agent.queue] = { machineType: agent.machineType };
-      if (agent.buildPath) {
-        acc[agent.queue].buildPath = agent.buildPath;
-      }
-      return acc;
-    }, {});
+    agentNameUpdateMap = agents.gcp.agents.reduce(
+      (acc: KibanaBuildkiteAgentLookup, agent: KBAgentDef) => {
+        acc[agent.queue] = agent;
+        return acc;
+      },
+      {}
+    );
   }
 
-  return {
-    provider: 'gcp',
-    preemptible: true,
+  const agent = agentNameUpdateMap[queue];
+
+  // Mapping based on expected fields in https://github.com/elastic/ci/blob/0df8430357109a19957dcfb1d867db9cfdd27937/docs/gobld/providers.mdx#L96
+  return removeNullish({
     image: 'family/kibana-ubuntu-2004',
     imageProject: 'elastic-images-qa',
-    ...agentNameUpdateMap[queue],
-  };
+    assignExternalIP: !agent.disableExternalIp,
+    diskSizeGb: agent.diskSizeGb,
+    diskType: agent.diskType,
+    enableNestedVirtualization: agent.nestedVirtualization,
+    localSsds: agent.localSsds,
+    machineType: agent.machineType,
+    preemptible: agent.spot,
+  });
 }
 
 function isOldStyleAgentTargetingRule(
@@ -163,4 +208,13 @@ function isOldStyleAgentTargetingRule(
     Object.keys(step.agents).length === 1 &&
     Object.keys(step.agents)[0] === 'queue'
   );
+}
+
+function removeNullish<T extends object>(obj: T): T {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value != null && typeof value !== 'undefined') {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as any);
 }
