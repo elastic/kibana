@@ -24,7 +24,7 @@ import {
   MOCK_IDP_SECURITY_ROLE_NAMES,
   MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
   MOCK_IDP_SEARCH_ROLE_NAMES,
-} from '@kbn/mock-idp-utils/src/constants';
+} from '@kbn/mock-idp-utils';
 import { useAuthenticator } from './role_switcher';
 
 export interface LoginPageProps {

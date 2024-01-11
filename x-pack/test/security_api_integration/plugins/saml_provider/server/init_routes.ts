@@ -10,8 +10,13 @@ import {
   getSAMLResponse,
   getSAMLRequestId,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
+import { PluginSetupDependencies } from '.';
 
-export function initRoutes(pluginContext: PluginInitializerContext, core: CoreSetup) {
+export function initRoutes(
+  pluginContext: PluginInitializerContext,
+  core: CoreSetup,
+  plugins: PluginSetupDependencies
+) {
   const serverInfo = core.http.getServerInfo();
   core.http.resources.register(
     {
@@ -59,7 +64,11 @@ export function initRoutes(pluginContext: PluginInitializerContext, core: CoreSe
     }
   );
 
-  // [HACK]: Incredible hack to workaround absence of the Mock IDP plugin in production build used for testing.
+  // [HACK]: On CI, Kibana runs Serverless functional tests against the production Kibana build but still relies on Mock
+  // IdP for SAML authentication in tests. The Mock IdP SAML realm, in turn, is linked to a Mock IDP plugin in Kibana
+  // that's only included in development mode and not available in the production Kibana build. Until our testing
+  // framework can properly support all SAML flows, we should forward all relevant Mock IDP plugin endpoints to a logout
+  // destination normally used in the Serverless setup.
   if (pluginContext.env.mode.prod) {
     core.http.resources.register(
       {
@@ -68,7 +77,9 @@ export function initRoutes(pluginContext: PluginInitializerContext, core: CoreSe
         options: { authRequired: false },
       },
       async (context, request, response) => {
-        return response.redirected({ headers: { location: 'https://cloud.elastic.co/projects' } });
+        return response.redirected({
+          headers: { location: plugins.cloud?.projectsUrl ?? '/login' },
+        });
       }
     );
   }

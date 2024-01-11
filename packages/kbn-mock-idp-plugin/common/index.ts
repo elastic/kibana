@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from '@kbn/mock-idp-utils';
+export { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
