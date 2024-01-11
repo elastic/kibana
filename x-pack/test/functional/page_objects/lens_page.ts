@@ -1960,18 +1960,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getWorkspaceVisContainerStyles() {
       const visContainer = await testSubjects.find('lnsWorkspacePanelWrapper__innerContent');
-      const [width, height, maxWidth, maxHeight, minWidth, minHeight, aspectRatio] =
-        await Promise.all([
-          visContainer.getComputedStyle('width'),
-          visContainer.getComputedStyle('height'),
-          visContainer.getComputedStyle('max-width'),
-          visContainer.getComputedStyle('max-height'),
-          visContainer.getComputedStyle('min-width'),
-          visContainer.getComputedStyle('min-height'),
-          visContainer.getComputedStyle('aspect-ratio'),
-        ]);
+      const [maxWidth, maxHeight, minWidth, minHeight, aspectRatio] = await Promise.all([
+        visContainer.getComputedStyle('max-width'),
+        visContainer.getComputedStyle('max-height'),
+        visContainer.getComputedStyle('min-width'),
+        visContainer.getComputedStyle('min-height'),
+        visContainer.getComputedStyle('aspect-ratio'),
+      ]);
 
-      return { width, height, maxWidth, maxHeight, minWidth, minHeight, aspectRatio };
+      return { maxWidth, maxHeight, minWidth, minHeight, aspectRatio };
     },
   });
 }
