@@ -5206,6 +5206,70 @@
     "objects": [
       {
         "parentPluginId": "alerting",
+        "id": "def-server.DEFAULT_AAD_CONFIG",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_AAD_CONFIG",
+        "description": [],
+        "path": "x-pack/plugins/alerting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.DEFAULT_AAD_CONFIG.context",
+            "type": "string",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.DEFAULT_AAD_CONFIG.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.DEFAULT_AAD_CONFIG.mappings.fieldMap",
+                "type": "Object",
+                "tags": [],
+                "label": "fieldMap",
+                "description": [],
+                "path": "x-pack/plugins/alerting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": []
+              }
+            ]
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.DEFAULT_AAD_CONFIG.shouldWrite",
+            "type": "boolean",
+            "tags": [],
+            "label": "shouldWrite",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.DEFAULT_ALERTS_ILM_POLICY",
         "type": "Object",
         "tags": [],
