@@ -104,6 +104,7 @@ export const RulesCounters = () => {
       integrationName: string;
       resourceName: string;
       integrationLink: string;
+      learnMoreLink: string;
     }
   > = {
     cis_aws: {
@@ -111,30 +112,35 @@ export const RulesCounters = () => {
       integrationName: 'AWS',
       resourceName: 'Accounts',
       integrationLink: cspmIntegrationLink,
+      learnMoreLink: 'https://ela.st/cspm-get-started',
     },
     cis_gcp: {
       integrationType: 'CSPM',
       integrationName: 'GCP',
       resourceName: 'Projects',
       integrationLink: cspmIntegrationLink,
+      learnMoreLink: 'https://ela.st/cspm-get-started',
     },
     cis_azure: {
       integrationType: 'CSPM',
       integrationName: 'Azure',
       resourceName: 'Subscriptions',
       integrationLink: cspmIntegrationLink,
+      learnMoreLink: 'https://ela.st/cspm-get-started',
     },
     cis_k8s: {
       integrationType: 'KSPM',
       integrationName: 'Kubernetes',
       resourceName: 'Clusters',
       integrationLink: kspmIntegrationLink,
+      learnMoreLink: 'https://ela.st/kspm-get-started',
     },
     cis_eks: {
       integrationType: 'KSPM',
       integrationName: 'EKS',
       resourceName: 'Clusters',
       integrationLink: kspmIntegrationLink,
+      learnMoreLink: 'https://ela.st/kspm-get-started',
     },
   };
 
@@ -143,7 +149,6 @@ export const RulesCounters = () => {
       <EuiEmptyPrompt
         color="plain"
         icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no_data_illustration" />}
-        // title={<h2>Add Kubernetes Clusters to get started</h2>}
         title={
           <h2>
             <FormattedMessage
@@ -151,9 +156,9 @@ export const RulesCounters = () => {
               defaultMessage="Add {integrationResourceName} to get started"
               values={{
                 integrationResourceName: `${
-                  benchmarkDynamicValues[benchmarkRulesStats?.id].integrationName
+                  benchmarkDynamicValues[benchmarkRulesStats.id].integrationName
                 }
-                  ${benchmarkDynamicValues[benchmarkRulesStats?.id].resourceName}`,
+                  ${benchmarkDynamicValues[benchmarkRulesStats.id].resourceName}`,
               }}
             />
           </h2>
@@ -165,23 +170,37 @@ export const RulesCounters = () => {
               defaultMessage="Add your {resourceName} in {integrationType} to begin detecing misconfigurations"
               values={{
                 resourceName:
-                  benchmarkDynamicValues[benchmarkRulesStats?.id].resourceName.toLowerCase(),
-                integrationType: benchmarkDynamicValues[benchmarkRulesStats?.id].integrationType,
+                  benchmarkDynamicValues[benchmarkRulesStats.id].resourceName.toLowerCase(),
+                integrationType: benchmarkDynamicValues[benchmarkRulesStats.id].integrationType,
               }}
             />
           </p>
         }
         actions={[
-          <EuiButton color="primary" fill>
+          <EuiButton
+            color="primary"
+            fill
+            href={benchmarkDynamicValues[benchmarkRulesStats.id].integrationLink}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.csp.rulesPage.rulesCounterEmptyState.emptyPrimapryButtonTitle"
               defaultMessage="Add {integrationType} integration"
               values={{
-                integrationType: benchmarkDynamicValues[benchmarkRulesStats?.id].integrationType,
+                integrationType: benchmarkDynamicValues[benchmarkRulesStats.id].integrationType,
               }}
             />
           </EuiButton>,
-          <EuiButtonEmpty color="primary">Learn more</EuiButtonEmpty>,
+          <EuiButtonEmpty
+            color="primary"
+            href={benchmarkDynamicValues[benchmarkRulesStats.id].learnMoreLink}
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.csp.rulesPage.rulesCounterEmptyState.emptyLearnMoreButtonTitle"
+              defaultMessage="Learn more"
+            />
+          </EuiButtonEmpty>,
         ]}
         layout="horizontal"
         paddingSize="m"
