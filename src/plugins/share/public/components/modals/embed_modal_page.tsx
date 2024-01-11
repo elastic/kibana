@@ -493,6 +493,14 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
       { id: 'snapshot', label: 'Snapshot' },
     ];
 
+    const generateLinkAsHelp = this.isNotSaved() ? (
+      <FormattedMessage
+        id="share.urlModal.canNotShareAsSavedObjectHelpText"
+        defaultMessage="To share as a saved object, save the {objectType}."
+        values={{ objectType: this.props.objectType }}
+      />
+    ) : undefined;
+
     return (
       <EuiModal maxWidth={false} onClose={this.props.onClose}>
         <I18nProvider>
@@ -513,7 +521,7 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
                     data-test-subj="embedUrlParamExtension"
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={0}>
+                <EuiFormRow helpText={generateLinkAsHelp}>
                   <EuiRadioGroup
                     options={radioOptions}
                     onChange={this.handleExportUrlAs}
@@ -523,7 +531,7 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
                       children: <span>Generate as</span>,
                     }}
                   />
-                </EuiFlexItem>
+                </EuiFormRow>
               </EuiFlexGroup>
             </EuiForm>
           </EuiModalBody>

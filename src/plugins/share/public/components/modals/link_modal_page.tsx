@@ -407,6 +407,10 @@ export class LinkModal extends Component<LinkModalProps, State> {
     );
   };
 
+  snapshotLabel = (
+    <FormattedMessage id="share.urlModal.snapshotLabel" defaultMessage="Snapshot" />
+  );
+
   public render() {
     return (
       <EuiModal onClose={this.props.onClose}>
@@ -417,8 +421,39 @@ export class LinkModal extends Component<LinkModalProps, State> {
           <EuiForm className="kbnShareContextMenu__finalPanel">
             <EuiRadioGroup
               options={[
-                { id: 'savedObject', label: 'Saved object' },
-                { id: 'snapshot', label: 'Snapshot' },
+                {
+                  id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
+                  label: (
+                    <>
+                      {this.renderWithIconTip(
+                        this.snapshotLabel,
+                        <FormattedMessage
+                          id="share.urlModal.snapshotDescription"
+                          defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+                      Edits to the saved {objectType} won't be visible via this URL."
+                          values={{ objectType: this.props.objectType }}
+                        />
+                      )}
+                    </>
+                  ),
+                  ['data-test-subj']: 'exportAsSnapshot',
+                },
+                {
+                  id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
+                  disabled: this.isNotSaved(),
+                  label: this.renderWithIconTip(
+                    <FormattedMessage
+                      id="share.urlModal.savedObjectLabel"
+                      defaultMessage="Saved object"
+                    />,
+                    <FormattedMessage
+                      id="share.urlModal.savedObjectDescription"
+                      defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
+                      values={{ objectType: this.props.objectType }}
+                    />
+                  ),
+                  ['data-test-subj']: 'exportAsSavedObject',
+                },
               ]}
               onChange={this.handleExportUrlAs}
               name="embed radio group"
