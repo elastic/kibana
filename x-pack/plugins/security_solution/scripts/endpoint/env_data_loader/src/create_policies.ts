@@ -28,7 +28,9 @@ export const createPolicies = async ({
 
   // Create first policy with endpoint
 
-  // THEN: use teh copy API to clone it
+  // THEN: use the copy API to clone it?
+  //        -- or --
+  //       Maybe use ES bulk create and bypass fleet? (for speed)
 
   return endpointIntegrationPolicyIds;
 };
