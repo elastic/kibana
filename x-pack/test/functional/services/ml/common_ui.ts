@@ -389,7 +389,7 @@ export function MachineLearningCommonUIProvider({
 
     async assertLastToastHeader(expectedHeader: string, timeout: number = 5000) {
       await retry.tryForTime(timeout, async () => {
-        const resultToast = await toasts.getToastElement(1);
+        const resultToast = await toasts.getToastElementByIndex(1);
         const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
         const title: string = await titleElement.getVisibleText();
         expect(title).to.eql(

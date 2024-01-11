@@ -180,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const toastCount = await toasts.getToastCount();
             return toastCount >= 1;
           });
-          const successToast = await toasts.getToastElement(1);
+          const successToast = await toasts.getToastElementByIndex(1);
           expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
 
@@ -199,7 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const toastCount = await toasts.getToastCount();
             return toastCount >= 1;
           });
-          const successToast = await toasts.getToastElement(1);
+          const successToast = await toasts.getToastElementByIndex(1);
           expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
       });

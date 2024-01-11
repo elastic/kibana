@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const toastCount = await toasts.getToastCount();
           return toastCount > 1;
         });
-        const warningToast = await toasts.getToastElement(2);
+        const warningToast = await toasts.getToastElementByIndex(2);
         const textEl = await warningToast.findByTestSubject('euiToastBody');
         const text: string = await textEl.getVisibleText();
         expect(text).to.contain('Watch out!');
