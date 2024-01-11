@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { TaskInstanceFields } from '@kbn/screenshotting-plugin/common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import { lastValueFrom } from 'rxjs';
 import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../common';
 
 interface StartDeps {
@@ -28,11 +29,12 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
           }),
         },
       },
-      async (context, request, response) => {
+      async (_context, request, response) => {
         const [, { screenshotting }] = await getStartServices();
         const { metrics, results } = await lastValueFrom(
           screenshotting.getScreenshots({
             request,
+            taskInstanceFields: {} as TaskInstanceFields,
             expression: request.query.expression,
           })
         );

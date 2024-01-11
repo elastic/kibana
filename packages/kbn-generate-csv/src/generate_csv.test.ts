@@ -25,8 +25,9 @@ import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
-import type { ReportingConfigType } from '@kbn/reporting-server';
+import { TaskInstanceFields } from '@kbn/reporting-common/types';
 import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
@@ -37,6 +38,7 @@ import { CsvGenerator } from './generate_csv';
 const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
   ...baseObj,
 });
+const mockTaskInstanceFields = {} as TaskInstanceFields;
 
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;
@@ -145,6 +147,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -180,6 +183,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -219,6 +223,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -269,6 +274,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -328,6 +334,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -400,6 +407,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ searchSource: {}, columns: [] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -440,6 +448,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ searchSource: {}, columns: ['_id', 'sku'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -487,6 +496,7 @@ describe('CsvGenerator', () => {
           columns: ['_id', '_index', 'date', 'message'],
         }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -541,6 +551,7 @@ describe('CsvGenerator', () => {
           },
         }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -583,6 +594,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ searchSource: {}, columns: ['product', 'category'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -621,6 +633,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ searchSource: {}, columns: ['_id', '_index', 'product', 'category'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -659,6 +672,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ searchSource: {}, columns: [] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -699,6 +713,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', 'message'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -737,6 +752,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', TEST_FORMULA] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -784,6 +800,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', 'message'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -817,6 +834,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({}),
       mockConfig,
+      mockTaskInstanceFields,
       { es: mockEsClient, data: mockDataClient, uiSettings: uiSettingsClient },
       {
         searchSourceStart: mockSearchSourceService,
@@ -872,6 +890,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -923,6 +942,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', 'message'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -960,6 +980,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', 'message'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -992,6 +1013,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -1041,6 +1063,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -1100,6 +1123,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', 'message'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
