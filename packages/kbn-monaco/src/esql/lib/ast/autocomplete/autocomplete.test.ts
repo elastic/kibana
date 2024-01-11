@@ -50,6 +50,13 @@ const policies = [
     matchField: 'otherStringField',
     enrichFields: ['otherField', 'yetAnotherField', 'yet-special-field'],
   },
+  {
+    name: 'my-policy',
+    sourceIndices: ['enrichIndex1'],
+    matchField: 'otherStringField',
+    enrichFields: ['otherField', 'yetAnotherField', 'yet-special-field'],
+    suggestedAs: '`my-policy`',
+  },
 ];
 
 /**
@@ -474,7 +481,10 @@ describe('autocomplete', () => {
       '| enrich other-policy on b ',
       '| enrich other-policy with c ',
     ]) {
-      testSuggestions(`from a ${prevCommand}| enrich `, ['policy']);
+      testSuggestions(
+        `from a ${prevCommand}| enrich `,
+        policies.map(({ name, suggestedAs }) => suggestedAs || name)
+      );
       testSuggestions(`from a ${prevCommand}| enrich policy `, ['on', 'with', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
         'stringField',
