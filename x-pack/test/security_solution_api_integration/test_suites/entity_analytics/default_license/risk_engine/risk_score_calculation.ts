@@ -110,7 +110,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
 
         await cleanRiskEngine({ kibanaServer, es, log });
-        await riskEngineRoutes.init();
       });
 
       it('calculates and persists risk score', async () => {
