@@ -108,6 +108,10 @@ async function getIsCredentialsValid({
     });
     return true;
   } catch (err) {
+    const { username, password } = elasticsearch;
+    console.error(
+      `***** Error in callKibana with username: ${username}, password: ${password}, message: ${err.message}`
+    );
     return false;
   }
 }
