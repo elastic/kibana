@@ -15,6 +15,7 @@ import { openRiskInformationFlyout, mockRiskEngineEnabled } from '../../../tasks
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../screens/alerts';
 import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytics';
 import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   // FLAKY: https://github.com/elastic/kibana/issues/169033
@@ -70,7 +71,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
 
     after(() => {
       cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
-      cy.task('esArchiverUnload', 'query_alert');
+      deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
       deleteRiskEngineConfiguration();
     });
 
