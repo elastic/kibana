@@ -169,12 +169,11 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             policyInfo !== undefined &&
             !endpointPolicyCache.has(policyInfo)
           ) {
-            tlog(logger, `policy info exists as ${policyInfo}`);
             let agentPolicy: Nullable<AgentPolicy>;
             try {
               agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
             } catch (err) {
-              tlog(logger, `error fetching policy config for ${policyInfo} due to ${err?.message}`);
+              tlog(logger, `error fetching policy config due to ${err?.message}`);
             }
             const packagePolicies = agentPolicy?.package_policies;
 
