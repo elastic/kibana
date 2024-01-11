@@ -7,14 +7,16 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +32,7 @@ export function DownloadPanelContent({
   isDisabled,
   onClick,
   warnings = [],
+  onClose,
 }: DownloadPanelContentProps) {
   return (
     <>
@@ -45,32 +48,30 @@ export function DownloadPanelContent({
           />
         </EuiForm>
         <EuiSpacer size="m" />
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.lens.application.csvPanelContent.generationDescription"
-              defaultMessage="Download the data displayed in the visualization."
-            />
-          </p>
-          {warnings.map((warning, i) => (
-            <p key={i}>{warning}</p>
-          ))}
-        </EuiText>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton
-          disabled={isDisabled}
-          fullWidth
-          fill
-          onClick={onClick}
-          data-test-subj="lnsApp_downloadCSVButton"
-          size="s"
-        >
-          <FormattedMessage
-            id="xpack.lens.application.csvPanelContent.downloadButtonLabel"
-            defaultMessage="Export as CSV"
-          />
-        </EuiButton>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiButtonEmpty onClick={onClose}>
+              <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButton
+              disabled={isDisabled}
+              fullWidth
+              fill
+              onClick={onClick}
+              data-test-subj="lnsApp_downloadCSVButton"
+              size="s"
+            >
+              <FormattedMessage
+                id="xpack.lens.application.csvPanelContent.downloadButtonLabel"
+                defaultMessage="Export as CSV"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalFooter>
     </>
   );
