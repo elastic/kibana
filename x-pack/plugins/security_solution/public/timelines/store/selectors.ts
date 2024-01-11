@@ -6,10 +6,22 @@
  */
 
 import { createSelector } from 'reselect';
+import { timelineSelectors } from '.';
+import { TimelineTabs } from '../../../common/types';
 import type { State } from '../../common/store/types';
 
 import type { TimelineModel } from './model';
 import type { InsertTimeline, TimelineById } from './types';
+import { TimelineStatus } from '../../../common/api/timeline';
+
+export const getTimelineShowStatusByIdSelector = () =>
+  createSelector(timelineSelectors.selectTimeline, (timeline) => ({
+    activeTab: timeline?.activeTab ?? TimelineTabs.query,
+    status: timeline?.status ?? TimelineStatus.draft,
+    show: timeline?.show ?? false,
+    updated: timeline?.updated ?? undefined,
+    changed: timeline?.changed ?? false,
+  }));
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
 

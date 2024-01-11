@@ -37,7 +37,6 @@ export const suggestionsApi = ({
       isLoading: false,
       state: {
         layers: {},
-        fieldList: [],
         indexPatternRefs: [],
         initialContext: context,
       },
