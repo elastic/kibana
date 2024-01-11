@@ -28,20 +28,26 @@ export const getTimelineShowStatusByIdSelector = () =>
     changed: timeline?.changed ?? false,
   }));
 
-// deprecated
+/**
+ * @deprecated
+ */
 const timelineByIdState = (state: State): TimelineById => state.timeline.timelineById;
 
 const selectCallOutUnauthorizedMsg = (state: State): boolean =>
   state.timeline.showCallOutUnauthorizedMsg;
 
-// deprecated, prefer using selectTimelineById below
+/**
+ * @deprecated prefer using selectTimelineById below
+ */
 export const selectTimeline = (state: State, timelineId: string): TimelineModel =>
   state.timeline.timelineById[timelineId];
 
 export const selectInsertTimeline = (state: State): InsertTimeline | null =>
   state.timeline.insertTimeline;
 
-// deprecated, prefer using selectTimelineById below
+/**
+ * @deprecated prefer using selectTimelineById below
+ */
 export const timelineByIdSelector = createSelector(
   timelineByIdState,
   (timelineById) => timelineById
