@@ -131,7 +131,7 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
   }
 
   for (const step of doc.steps as BuildkiteStepPartial[]) {
-    if (isOldStyleAgentTargetingRule(step)) {
+    if (isQueueTargetingRule(step) && !step.agents.queue.startsWith('kb-static')) {
       log.info('Rewriting: ' + ymlPath, step);
       file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
         return yaml.safeDump({ agents: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
@@ -156,7 +156,7 @@ function editYmlInPlace(
 
   for (let i = 0; i < lines.length; i++) {
     const inspectedLines = lines.slice(i, i + matchLength);
-    if (inspectedLines.every((l, j) => l.match(matchLines[j]))) {
+    if (inspectedLines.every((l, j) => l.match(matchLines[j]) && !l.trim().startsWith('#'))) {
       const indent = inspectedLines[0]?.match(/^\s+/)?.[0] || '';
       const editedLines = editFn(lines);
       if (editedLines.at(-1) === '') {
@@ -185,12 +185,15 @@ function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
   }
 
   const agent = agentNameUpdateMap[queue];
+  if (!agent) {
+    throw new Error(`Unknown agent: ${queue}`);
+  }
 
   // Mapping based on expected fields in https://github.com/elastic/ci/blob/0df8430357109a19957dcfb1d867db9cfdd27937/docs/gobld/providers.mdx#L96
   return removeNullish({
     image: 'family/kibana-ubuntu-2004',
     imageProject: 'elastic-images-qa',
-    assignExternalIP: !agent.disableExternalIp,
+    assignExternalIP: agent.disableExternalIp === true ? false : undefined,
     diskSizeGb: agent.diskSizeGb,
     diskType: agent.diskType,
     enableNestedVirtualization: agent.nestedVirtualization,
@@ -200,9 +203,7 @@ function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
   });
 }
 
-function isOldStyleAgentTargetingRule(
-  step: BuildkiteStepPartial
-): step is BuildkiteStepFull & boolean {
+function isQueueTargetingRule(step: BuildkiteStepPartial): step is BuildkiteStepFull & boolean {
   return !!(
     step.agents &&
     Object.keys(step.agents).length === 1 &&
