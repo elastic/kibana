@@ -51,6 +51,7 @@ import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_cr
 import { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
+import { estypes } from '@elastic/elasticsearch';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -3419,6 +3420,10 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         executionUuidCardinality: { doc_count: 5, executionUuidCardinality: { value: 5 } },
       },
     },
+    hits: {
+      total: { value: 5, relation: 'eq' },
+      hits: [],
+    } as estypes.SearchHitsMetadata<unknown>,
   };
   describe('authorization', () => {
     test('ensures user is authorised to access logs', async () => {
@@ -3474,6 +3479,10 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         },
       },
     },
+    hits: {
+      total: { value: 5, relation: 'eq' },
+      hits: [],
+    } as estypes.SearchHitsMetadata<unknown>,
   };
   describe('authorization', () => {
     test('ensures user is authorised to access kpi', async () => {

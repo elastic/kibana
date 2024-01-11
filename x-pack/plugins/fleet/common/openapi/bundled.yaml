@@ -925,6 +925,11 @@ paths:
         name: format
         description: Format of response - json or yaml
         in: query
+      - schema:
+          type: boolean
+        name: prerelease
+        description: Specify if version is prerelease
+        in: query
   /agents/setup:
     get:
       summary: Get agent setup info
