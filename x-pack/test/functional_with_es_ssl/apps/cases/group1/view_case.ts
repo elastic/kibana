@@ -1018,8 +1018,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
-      // there are no alerts in stack management yet
-      it.skip("shows the 'alerts' tab when clicked", async () => {
+      it("shows the 'alerts' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-content-alerts');
       });
