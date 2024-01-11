@@ -31,14 +31,37 @@ interface KBAgentDef {
   minimumAgents?: number;
   maximumAgents?: number;
   idleTimeoutMins?: number;
-  exitAfterOneJob?: boolean;
+  // exitAfterOneJob?: boolean;
+  disableExternalIp?: boolean;
   localSsds?: number;
   buildPath?: string;
+  diskType?: string;
   diskSizeGb?: number;
   spot?: boolean;
   zones?: string[];
+  nestedVirtualization?: boolean;
 }
 type KibanaBuildkiteAgentLookup = Record<string, KBAgentDef>;
+
+interface GobldGCPConfig {
+  assignExternalIP?: boolean;
+  buildDirectory?: string;
+  diskSizeGb?: number;
+  diskType?: string;
+  enableSecureBoot?: boolean;
+  enableNestedVirtualization?: boolean;
+  image: string;
+  localSsds?: number;
+  localSsdInterface?: string;
+  machineType: string;
+  minCpuPlatform?: string;
+  imageProject: string;
+  networkTags?: string[];
+  preemptible?: boolean;
+  schedulingNodeAffinity?: Record<string, string>;
+  serviceAccount?: string;
+  zones?: string[];
+}
 
 const DRY_RUN = process.argv.includes('--dry-run');
 
@@ -109,7 +132,7 @@ async function rewriteFile(ymlPath: string, log: ToolingLog) {
   }
 
   for (const step of doc.steps as BuildkiteStepPartial[]) {
-    if (isOldStyleAgentTargetingRule(step)) {
+    if (isQueueTargetingRule(step) && !step.agents.queue.startsWith('kb-static')) {
       log.info('Rewriting: ' + ymlPath, step);
       file = editYmlInPlace(file, ['agents:', `queue: ${step.agents.queue}`], () => {
         return yaml.safeDump({ agents: getFullAgentTargetingRule(step.agents.queue) }).split('\n');
@@ -134,7 +157,7 @@ function editYmlInPlace(
 
   for (let i = 0; i < lines.length; i++) {
     const inspectedLines = lines.slice(i, i + matchLength);
-    if (inspectedLines.every((l, j) => l.match(matchLines[j]))) {
+    if (inspectedLines.every((l, j) => l.match(matchLines[j]) && !l.trim().startsWith('#'))) {
       const indent = inspectedLines[0]?.match(/^\s+/)?.[0] || '';
       const editedLines = editFn(lines);
       if (editedLines.at(-1) === '') {
@@ -150,7 +173,7 @@ function editYmlInPlace(
 }
 
 let agentNameUpdateMap: KibanaBuildkiteAgentLookup;
-function getFullAgentTargetingRule(queue: string) {
+function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
   if (!agentNameUpdateMap) {
     const agents = JSON.parse(fs.readFileSync('data/agents.json', 'utf8'));
     agentNameUpdateMap = agents.gcp.agents.reduce(
@@ -163,27 +186,27 @@ function getFullAgentTargetingRule(queue: string) {
   }
 
   const agent = agentNameUpdateMap[queue];
+  if (!agent) {
+    throw new Error(`Unknown agent: ${queue}`);
+  }
 
-  return removeNullish({
-    provider: 'gcp',
-    preemptible: agent.spot,
+  // Mapping based on expected fields in:
+  // https://github.com/elastic/ci/blob/main/docs/gobld/providers.mdx#L96
+  return removeMissing({
     image: 'family/kibana-ubuntu-2004',
     imageProject: 'elastic-images-qa',
+    diskSizeGb: agent.diskSizeGb,
+    diskType: agent.diskType,
+    enableNestedVirtualization: agent.nestedVirtualization,
+    localSsds: agent.localSsds,
     machineType: agent.machineType,
-    buildPath: agent.buildPath,
-    // diskSizeGb: agent.diskSizeGb,
-    // localSsds: agent.localSsds,
-    // zones: agent.zones,
-    // minimumAgents: agent.minimumAgents,
-    // maximumAgents: agent.maximumAgents,
-    // idleTimeoutMins: agent.idleTimeoutMins,
-    // exitAfterOneJob: agent.exitAfterOneJob,
+    preemptible: agent.spot,
+    buildDirectory: agent.buildPath,
+    assignExternalIP: getAssignExternalIP(agent),
   });
 }
 
-function isOldStyleAgentTargetingRule(
-  step: BuildkiteStepPartial
-): step is BuildkiteStepFull & boolean {
+function isQueueTargetingRule(step: BuildkiteStepPartial): step is BuildkiteStepFull & boolean {
   return !!(
     step.agents &&
     Object.keys(step.agents).length === 1 &&
@@ -191,9 +214,30 @@ function isOldStyleAgentTargetingRule(
   );
 }
 
-function removeNullish(obj: any) {
+function getAssignExternalIP(agent: KBAgentDef) {
+  // This is true by default for GCP, but false for Kibana-buildkite (assignExternalIp=false).
+  let assignExternalIp = true;
+
+  if (agent.disableExternalIp === true) {
+    assignExternalIp = false;
+  } else if (agent.disableExternalIp === false) {
+    assignExternalIp = true;
+  } else {
+    // Omitted agent.disableExternalIp means disableExternalIp=true => assignExternalIp=false
+    assignExternalIp = false;
+  }
+
+  // And when the resulting value is true, we can omit it, to rely on the default, and keep the config clean.
+  if (assignExternalIp) {
+    return undefined;
+  } else {
+    return false;
+  }
+}
+
+function removeMissing<T extends object>(obj: T): T {
   return Object.entries(obj).reduce((acc, [key, value]) => {
-    if (value != null && typeof value !== 'undefined') {
+    if (value !== null && typeof value !== 'undefined') {
       acc[key] = value;
     }
     return acc;
