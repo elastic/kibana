@@ -30,7 +30,7 @@ export const getOrphanedJobsCountQuery = (ids: string[], isCrawler?: boolean) =>
         must: [
           {
             term: {
-              service_type: CRAWLER_SERVICE_TYPE,
+              'connector.service_type': CRAWLER_SERVICE_TYPE,
             },
           },
         ],
@@ -55,7 +55,7 @@ export const getOrphanedJobsCountQuery = (ids: string[], isCrawler?: boolean) =>
         },
         {
           term: {
-            service_type: CRAWLER_SERVICE_TYPE,
+            'connector.service_type': CRAWLER_SERVICE_TYPE,
           },
         },
       ],
@@ -93,7 +93,7 @@ export const getInProgressJobsCountQuery = (isCrawler?: boolean) => {
             bool: {
               must: {
                 term: {
-                  service_type: CRAWLER_SERVICE_TYPE,
+                  'connector.service_type': CRAWLER_SERVICE_TYPE,
                 },
               },
             },
@@ -116,7 +116,7 @@ export const getInProgressJobsCountQuery = (isCrawler?: boolean) => {
           bool: {
             must_not: {
               term: {
-                service_type: CRAWLER_SERVICE_TYPE,
+                'connector.service_type': CRAWLER_SERVICE_TYPE,
               },
             },
           },
@@ -159,7 +159,7 @@ export const getIdleJobsCountQuery = (isCrawler?: boolean) => {
           },
           {
             term: {
-              service_type: CRAWLER_SERVICE_TYPE,
+              'connector.service_type': CRAWLER_SERVICE_TYPE,
             },
           },
           {
@@ -186,7 +186,7 @@ export const getIdleJobsCountQuery = (isCrawler?: boolean) => {
           bool: {
             must_not: {
               term: {
-                service_type: CRAWLER_SERVICE_TYPE,
+                'connector.service_type': CRAWLER_SERVICE_TYPE,
               },
             },
           },
