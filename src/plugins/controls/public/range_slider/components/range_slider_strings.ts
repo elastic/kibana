@@ -9,6 +9,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const RangeSliderStrings = {
+  editor: {
+    getStepTitle: () =>
+      i18n.translate('controls.rangeSlider.editor.stepSizeTitle', {
+        defaultMessage: 'Step size',
+      }),
+  },
   popover: {
     getNoAvailableDataHelpText: () =>
       i18n.translate('controls.rangeSlider.popover.noAvailableDataHelpText', {
