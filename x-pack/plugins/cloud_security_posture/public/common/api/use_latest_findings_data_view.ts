@@ -15,6 +15,9 @@ import {
 } from '../../../common/constants';
 import { CspClientPluginStartDeps } from '../../types';
 
+/**
+ * TODO: Remove this static labels once https://github.com/elastic/kibana/issues/172615 is resolved
+ */
 const cloudSecurityFieldLabels: Record<string, string> = {
   'result.evaluation': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel',
@@ -88,6 +91,9 @@ export const useLatestFindingsDataView = (dataView: string) => {
       throw new Error(`Data view not found [Name: {${dataView}}]`);
     }
 
+    /**
+     * TODO: Remove this update logic once https://github.com/elastic/kibana/issues/172615 is resolved
+     */
     if (
       dataView === LATEST_FINDINGS_INDEX_PATTERN ||
       dataView === LATEST_VULNERABILITIES_INDEX_PATTERN

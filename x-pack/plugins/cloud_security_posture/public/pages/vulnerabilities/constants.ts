@@ -10,8 +10,6 @@ import { FindingsBaseURLQuery } from '../../common/types';
 import { CloudSecurityDefaultColumn } from '../../components/cloud_security_data_table';
 import { GROUPING_LABELS } from './translations';
 
-export const DEFAULT_TABLE_HEIGHT = 512;
-
 export const VULNERABILITY_FIELDS = {
   VULNERABILITY_ID: 'vulnerability.id',
   SCORE_BASE: 'vulnerability.score.base',

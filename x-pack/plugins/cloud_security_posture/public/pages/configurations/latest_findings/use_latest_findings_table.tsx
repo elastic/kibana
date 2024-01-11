@@ -35,7 +35,8 @@ export const useLatestFindingsTable = ({
     nonPersistedFilters,
   });
 
-  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages } = cloudPostureDataTable;
+  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages, pageSize } =
+    cloudPostureDataTable;
 
   const {
     data,
@@ -46,6 +47,7 @@ export const useLatestFindingsTable = ({
     query,
     sort,
     enabled: !queryError,
+    pageSize,
   });
 
   const rows = useMemo(() => getRowsFromPages(data?.pages), [data?.pages, getRowsFromPages]);

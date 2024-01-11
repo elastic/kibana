@@ -26,6 +26,7 @@ import { showErrorToast } from '../../../common/utils/show_error_toast';
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
   enabled: boolean;
+  pageSize: number;
 }
 
 export interface FindingsGroupByNoneQuery {
@@ -65,7 +66,7 @@ export const getFindingsQuery = ({ query, sort }: UseFindingsOptions, pageParam:
       ],
     },
   },
-  ...(pageParam ? { search_after: pageParam } : {}),
+  ...(pageParam ? { from: pageParam } : {}),
 });
 
 const getMultiFieldsSort = (sort: string[][]) => {
@@ -111,6 +112,12 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
     data,
     notifications: { toasts },
   } = useKibana().services;
+  /**
+   * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
+   * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array
+   * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
+   * the last loaded record to be used as a from parameter to fetch the next chunk of data.
+   */
   return useInfiniteQuery(
     ['csp_findings', { params: options }],
     async ({ pageParam }) => {
@@ -135,9 +142,11 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       enabled: options.enabled,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
-      getNextPageParam: (lastPage) => {
-        if (lastPage.page.length === 0) return undefined;
-        return lastPage.page[lastPage.page.length - 1].raw.sort;
+      getNextPageParam: (lastPage, allPages) => {
+        if (lastPage.page.length < options.pageSize) {
+          return undefined;
+        }
+        return allPages.length * options.pageSize;
       },
     }
   );
