@@ -2,8 +2,5 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/trigger.sh
     label: Trigger artifacts build
     agents:
-      provider: gcp
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
+      queue: kibana-default
     timeout_in_minutes: 10
