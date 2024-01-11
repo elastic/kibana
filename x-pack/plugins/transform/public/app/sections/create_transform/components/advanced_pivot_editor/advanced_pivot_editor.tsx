@@ -14,8 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
-import { useWizardActions } from '../../state_management/create_transform_store';
-import { useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
 import { useWizardContext } from '../wizard/wizard';
@@ -33,9 +32,6 @@ export const AdvancedPivotEditor: FC = () => {
     setAdvancedEditorConfigLastApplied,
     setAdvancedPivotEditorApplyButtonEnabled,
   } = useWizardActions();
-  const isAdvancedPivotEditorEnabled = useWizardSelector(
-    (s) => s.advancedPivotEditor.isAdvancedPivotEditorEnabled
-  );
   const advancedEditorConfigLastApplied = useWizardSelector(
     (s) => s.advancedPivotEditor.advancedEditorConfigLastApplied
   );
@@ -58,16 +54,14 @@ export const AdvancedPivotEditor: FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [advancedEditorConfig]);
 
+  // Apply the current preview request config once the editor mounts
   const previewRequest = useWizardSelector((s) => selectPreviewRequest(s, dataView));
-
   useEffect(() => {
-    if (!isAdvancedPivotEditorEnabled) {
-      const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
-      setAdvancedEditorConfigLastApplied(stringifiedPivotConfig);
-      setAdvancedEditorConfig(stringifiedPivotConfig);
-    }
+    const stringifiedPivotConfig = JSON.stringify(previewRequest.pivot, null, 2);
+    setAdvancedEditorConfigLastApplied(stringifiedPivotConfig);
+    setAdvancedEditorConfig(stringifiedPivotConfig);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdvancedPivotEditorEnabled, previewRequest]);
+  }, []);
 
   return (
     <EuiFormRow

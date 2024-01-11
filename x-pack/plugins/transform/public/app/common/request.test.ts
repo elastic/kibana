@@ -40,6 +40,7 @@ const groupByTerms: PivotGroupByConfig = {
   field: 'the-group-by-field',
   aggName: 'the-group-by-agg-name',
   dropDownName: 'the-group-by-drop-down-name',
+  groupById: 'the-group-by-id',
 };
 
 const aggsAvg: PivotAggsConfig = {
@@ -47,6 +48,7 @@ const aggsAvg: PivotAggsConfig = {
   field: 'the-agg-field',
   aggName: 'the-agg-agg-name',
   dropDownName: 'the-agg-drop-down-name',
+  aggId: 'the-agg-id',
 };
 
 describe('Transform: Common', () => {

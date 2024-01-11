@@ -9,6 +9,7 @@ import { cloneDeep } from 'lodash';
 import { useMemo } from 'react';
 import type { Action } from 'redux';
 import type { ThunkAction } from 'redux-thunk';
+import { nanoid } from '@reduxjs/toolkit';
 
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
@@ -103,6 +104,7 @@ export const getPivotConfigActions = (
       const { aggList, groupByList } = getState().stepDefine;
       const label: AggName = d[0].label;
       const config: PivotGroupByConfig = groupByOptionsData[label];
+      config.groupById = nanoid();
       const aggName: AggName = config.aggName;
 
       const aggNameConflictMessages = getAggNameConflictToastMessages(
@@ -120,13 +122,11 @@ export const getPivotConfigActions = (
 
   const updateGroupBy =
     (
-      previousAggName: AggName,
       item: PivotGroupByConfig
     ): ThunkAction<void, StoreState, unknown, ReturnType<typeof rAddGroupBy>> =>
     (dispatch, getState) => {
       const { aggList, groupByList } = getState().stepDefine;
       const groupByListWithoutPrevious = { ...groupByList };
-      delete groupByListWithoutPrevious[previousAggName];
 
       const aggNameConflictMessages = getAggNameConflictToastMessages(
         item.aggName,
@@ -154,6 +154,7 @@ export const getPivotConfigActions = (
       const { aggList, groupByList } = getState().stepDefine;
       const label: AggName = d[0].label;
       const config: PivotAggsConfig = aggOptionsData[label];
+      config.aggId = nanoid();
 
       let aggName: AggName = config.aggName;
 
@@ -184,7 +185,7 @@ export const getPivotConfigActions = (
         }
       }
 
-      if (aggList[aggName] && aggName === PIVOT_SUPPORTED_AGGS.TOP_METRICS) {
+      if (aggName === PIVOT_SUPPORTED_AGGS.TOP_METRICS) {
         // handle special case for naming top_metric aggs
         const regExp = new RegExp(`^${PIVOT_SUPPORTED_AGGS.TOP_METRICS}(\\d)*$`);
         const increment: number = Object.keys(aggList).reduce((acc, curr) => {
@@ -250,6 +251,8 @@ export const getPivotConfigActions = (
       }
       const label: AggName = d[0].label;
       const config: PivotAggsConfig = aggOptionsData[label];
+      config.aggId = nanoid();
+      config.parentAggId = parentAggId;
 
       parentItem.subAggs = parentItem.subAggs ?? [];
       const subAggsItemsDict = Object.values(fullState.stepDefine.aggList)

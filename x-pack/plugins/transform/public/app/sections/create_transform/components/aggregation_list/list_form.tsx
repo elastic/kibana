@@ -23,7 +23,7 @@ export const AggListForm: FC<AggListFormProps> = ({ parentAggId }) => {
     () =>
       parentAggId
         ? Object.values(aggList).filter((d) => d.parentAggId === parentAggId)
-        : Object.values(aggList),
+        : Object.values(aggList).filter((d) => d.parentAggId === undefined),
     [aggList, parentAggId]
   );
   const aggNames = useMemo(() => filteredList.map((d) => d.aggName), [filteredList]);

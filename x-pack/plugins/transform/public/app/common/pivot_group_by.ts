@@ -112,7 +112,7 @@ export function isPivotGroupByConfigWithUiSupport(arg: unknown): arg is GroupByC
 }
 
 export function getEsAggFromGroupByConfig(groupByConfig: GroupByConfigBase): GenericAgg {
-  const { agg, aggName, dropDownName, ...esAgg } = groupByConfig;
+  const { agg, aggName, dropDownName, groupById, ...esAgg } = groupByConfig;
 
   return {
     [agg]: esAgg,

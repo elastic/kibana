@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -13,34 +13,27 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } fr
 
 import { AggName } from '../../../../../../common/types/aggregations';
 
-import {
-  isGroupByDateHistogram,
-  isGroupByHistogram,
-  PivotGroupByConfig,
-  PivotGroupByConfigWithUiSupportDict,
-} from '../../../../common';
+import { isGroupByDateHistogram, isGroupByHistogram, PivotGroupByConfig } from '../../../../common';
+
+import { usePivotConfigOptions } from '../step_define/hooks/use_pivot_config';
+import { useWizardActions } from '../../state_management/create_transform_store';
 
 import { PopoverForm } from './popover_form';
 
 interface Props {
   item: PivotGroupByConfig;
   otherAggNames: AggName[];
-  options: PivotGroupByConfigWithUiSupportDict;
-  deleteHandler(l: string): void;
-  onChange(item: PivotGroupByConfig): void;
 }
 
-export const GroupByLabelForm: React.FC<Props> = ({
-  deleteHandler,
-  item,
-  otherAggNames,
-  onChange,
-  options,
-}) => {
+export const GroupByLabelForm: FC<Props> = ({ item, otherAggNames }) => {
+  const { groupByOptionsData } = usePivotConfigOptions();
+  const { pivotConfig: actions } = useWizardActions();
+  const { deleteGroupBy, updateGroupBy } = actions;
+
   const [isPopoverVisible, setPopoverVisibility] = useState(false);
 
   function update(updateItem: PivotGroupByConfig) {
-    onChange({ ...updateItem });
+    updateGroupBy(updateItem);
     setPopoverVisibility(false);
   }
 
@@ -95,7 +88,7 @@ export const GroupByLabelForm: React.FC<Props> = ({
             defaultData={item}
             onChange={update}
             otherAggNames={otherAggNames}
-            options={options}
+            options={groupByOptionsData}
           />
         </EuiPopover>
       </EuiFlexItem>
@@ -106,7 +99,7 @@ export const GroupByLabelForm: React.FC<Props> = ({
           })}
           size="s"
           iconType="cross"
-          onClick={() => deleteHandler(item.aggName)}
+          onClick={() => deleteGroupBy(item.groupById)}
           data-test-subj="transformGroupByEntryDeleteButton"
         />
       </EuiFlexItem>

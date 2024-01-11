@@ -175,7 +175,7 @@ export interface PivotAggsConfigBase {
  */
 export function getAggConfigFromEsAgg(
   esAggDefinition: Record<string, any>,
-  aggName: string,
+  aggName: AggName,
   nestingLevel?: number,
   parentAggId?: string
 ) {
