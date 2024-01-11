@@ -156,6 +156,12 @@
     "detection_engine_basicessentionals:qa:serverless": "npm run run-tests:dr:basicEssentials detection_engine serverless qaEnv",
     "detection_engine_basicessentionals:server:ess": "npm run initialize-server:dr:basicEssentials detection_engine ess",
     "detection_engine_basicessentionals:runner:ess": "npm run run-tests:dr:basicEssentials detection_engine ess essEnv",
+
+    "rule_management_basicessentionals:server:serverless": "npm run initialize-server:dr:basicEssentials rule_management serverless",
+    "rule_management_basicessentionals:runner:serverless": "npm run run-tests:dr:basicEssentials rule_management serverless serverlessEnv",
+    "rule_management_basicessentionals:qa:serverless": "npm run run-tests:dr:basicEssentials rule_management serverless qaEnv",
+    "rule_management_basicessentionals:server:ess": "npm run initialize-server:dr:basicEssentials rule_management ess",
+    "rule_management_basicessentionals:runner:ess": "npm run run-tests:dr:basicEssentials rule_management ess essEnv",
     
     "exception_lists_items:server:serverless": "npm run initialize-server:lists:default exception_lists_items serverless",
     "exception_lists_items:runner:serverless": "npm run run-tests:lists:default exception_lists_items serverless serverlessEnv",
