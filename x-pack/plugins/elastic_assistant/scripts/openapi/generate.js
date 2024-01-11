@@ -10,9 +10,13 @@ const { generate } = require('@kbn/openapi-generator');
 const { resolve } = require('path');
 
 const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
+const ELASTIC_ASSISTANT_COMMON_OUTPUT = resolve(
+  `${ELASTIC_ASSISTANT_ROOT}/../../packages/kbn-elastic-assistant-common/impl`
+);
 
 generate({
   rootDir: ELASTIC_ASSISTANT_ROOT,
   sourceGlob: './server/schemas/**/*.schema.yaml',
   templateName: 'zod_operation_schema',
+  outputDirTypes: ELASTIC_ASSISTANT_COMMON_OUTPUT,
 });
