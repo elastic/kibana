@@ -38,6 +38,6 @@ export const PrebuiltRuleAsset = BaseCreateProps.and(TypeSpecificCreateProps).an
     related_integrations: RelatedIntegrationArray.optional(),
     required_fields: RequiredFieldArray.optional(),
     setup: SetupGuide.optional(),
-    updated_date: z.string().datetime().optional(),
+    elastic_last_update: z.string().datetime().optional(),
   })
 );
