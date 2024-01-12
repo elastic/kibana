@@ -376,7 +376,10 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 fill
                 type={'submit'}
                 fullWidth
-                onClick={setDashboardAttachmentReady.bind(null, true)}
+                onClick={() => {
+                  setIsActionMenuOpen(false);
+                  setDashboardAttachmentReady(true);
+                }}
                 disabled={!isDashboardFormValid}
               >
                 <FormattedMessage
@@ -415,6 +418,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 type={'submit'}
                 fullWidth
                 onClick={() => {
+                  setIsActionMenuOpen(false);
                   openCasesModalCallback({
                     timeRange,
                     viewType: caseAttachment.viewType,
