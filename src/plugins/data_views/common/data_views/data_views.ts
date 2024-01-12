@@ -536,7 +536,9 @@ export class DataViewsService {
       ...options,
       pattern: indexPattern.title as string,
       allowHidden:
-        (indexPattern as DataViewSpec).allowHidden || (indexPattern as DataView)?.getAllowHidden(),
+        (indexPattern as DataViewSpec).allowHidden ||
+        (indexPattern as DataView)?.getAllowHidden() ||
+        undefined,
     });
 
   private getFieldsAndIndicesForDataView = async (
@@ -544,14 +546,14 @@ export class DataViewsService {
     forceRefresh: boolean = false
   ) => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
-    return await this.apiClient.getFieldsForWildcard({
+    return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
       allowNoIndex: true,
       pattern: dataView.getIndexPattern(),
       metaFields,
       forceRefresh,
-      allowHidden: dataView.getAllowHidden(),
+      allowHidden: dataView.getAllowHidden() || undefined,
     });
   };
 
@@ -577,7 +579,7 @@ export class DataViewsService {
     if (indexPattern.getEtag() && etag === indexPattern.getEtag()) {
       return;
     } else {
-      indexPattern.setEtag(etag!);
+      indexPattern.setEtag(etag);
     }
 
     fields.forEach((field) => (field.isMapped = true));
@@ -862,7 +864,7 @@ export class DataViewsService {
       : {};
 
     const indexPattern = await this.createFromSpec(spec, true, displayErrors);
-    indexPattern.setEtag(etag!);
+    indexPattern.setEtag(etag);
     indexPattern.matchedIndices = indices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;

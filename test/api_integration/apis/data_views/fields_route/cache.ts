@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -15,6 +14,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('cache headers', () => {
     before(() =>
@@ -24,43 +24,70 @@ export default function ({ getService }: FtrProviderContext) {
       esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
 
-    // disabled since caching is disabled. Try to load uiSettings so this test can be enabled
-    it.skip('are present', async () => {
-      const response = await supertest
-        .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({
-          pattern: '*',
-          include_unmapped: true,
-        });
+    it('are present', async () => {
+      const response = await supertest.get(FIELDS_PATH).query({
+        pattern: '*',
+        include_unmapped: true,
+        apiVersion: INITIAL_REST_VERSION_INTERNAL,
+      });
 
       const cacheControlHeader = response.get('cache-control');
 
+      expect(cacheControlHeader).to.contain('private');
       expect(cacheControlHeader).to.contain('max-age');
       expect(cacheControlHeader).to.contain('stale-while-revalidate');
       expect(response.get('vary')).to.equal('accept-encoding, user-hash');
       expect(response.get('etag')).to.not.be.empty();
-      expect(response.get('user-hash')).to.equal('');
+    });
+
+    it('no-cache when data_views:cache_max_age set to zero', async () => {
+      await kibanaServer.uiSettings.update({ 'data_views:cache_max_age': 0 });
+
+      const response = await supertest.get(FIELDS_PATH).query({
+        pattern: 'b*',
+        include_unmapped: true,
+        apiVersion: INITIAL_REST_VERSION_INTERNAL,
+      });
+
+      const cacheControlHeader = response.get('cache-control');
+
+      expect(cacheControlHeader).to.contain('private');
+      expect(cacheControlHeader).to.contain('no-cache');
+      expect(cacheControlHeader).to.not.contain('max-age');
+      expect(cacheControlHeader).to.not.contain('stale-while-revalidate');
+      expect(response.get('vary')).to.equal('accept-encoding, user-hash');
+      expect(response.get('etag')).to.not.be.empty();
+
+      kibanaServer.uiSettings.replace({ 'data_views:cache_max_age': 5 });
     });
 
     it('returns 304 on matching etag', async () => {
-      const response = await supertest
-        .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({
-          pattern: '*',
-          include_unmapped: true,
-        });
+      const response = await supertest.get(FIELDS_PATH).query({
+        pattern: '*',
+        include_unmapped: true,
+        apiVersion: INITIAL_REST_VERSION_INTERNAL,
+      });
 
       await supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .set('If-None-Match', response.get('etag'))
         .query({
           pattern: '*',
           include_unmapped: true,
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(304);
+    });
+
+    it('handles empty field lists', async () => {
+      const response = await supertest.get(FIELDS_PATH).query({
+        pattern: 'xyz',
+        include_unmapped: true,
+        apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        allow_no_index: true,
+      });
+
+      expect(response.body.fields).to.be.empty();
     });
   });
 }

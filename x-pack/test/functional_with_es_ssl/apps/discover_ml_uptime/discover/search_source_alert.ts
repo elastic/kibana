@@ -211,7 +211,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.discover.clickNewSearchButton(); // reset params
 
     await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
-    await PageObjects.discover.refreshFieldList();
 
     let ruleId: string;
     if (type === 'name') {
@@ -400,6 +399,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate to alert results via link provided in notification', async () => {
+      await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
       await openAlertResults(RULE_NAME);
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });

@@ -7,7 +7,7 @@
  */
 
 import { createHash } from 'crypto';
-import { IRouter, RequestHandler, StartServicesAccessor, KibanaRequest } from '@kbn/core/server';
+import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
 import { unwrapEtag } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -16,7 +16,8 @@ import type {
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
-import { parseFields, IBody, IQuery, querySchema } from './fields_for';
+import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for';
+import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 
 export function calculateHash(srcBuffer: Buffer) {
   const hash = createHash('sha1');
@@ -24,11 +25,8 @@ export function calculateHash(srcBuffer: Buffer) {
   return hash.digest('hex');
 }
 
-const handler: (
-  isRollupsEnabled: () => boolean,
-  getUserId: () => (kibanaRequest: KibanaRequest) => Promise<string | undefined>
-) => RequestHandler<{}, IQuery, IBody> =
-  (isRollupsEnabled, getUserIdGetter) => async (context, request, response) => {
+const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
+  (isRollupsEnabled) => async (context, request, response) => {
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
     const { asCurrentUser } = core.elasticsearch.client;
@@ -69,20 +67,24 @@ const handler: (
         indices,
       };
 
-      const etag = calculateHash(Buffer.from(JSON.stringify(body)));
+      const bodyAsString = JSON.stringify(body);
 
-      const getUserId = getUserIdGetter();
-      const userId = await getUserId(request);
-      const userHash = userId ? calculateHash(Buffer.from(userId)) : '';
+      const etag = calculateHash(Buffer.from(bodyAsString));
 
       const headers: Record<string, string> = {
         'content-type': 'application/json',
         etag,
         vary: 'accept-encoding, user-hash',
-        'user-hash': userHash,
       };
 
-      const cacheMaxAge = await uiSettings.get<number>('data_views:cache_max_age');
+      // field cache is configurable in classic environment but not on serverless
+      let cacheMaxAge = DEFAULT_FIELD_CACHE_FRESHNESS;
+      const cacheMaxAgeSetting = await uiSettings.get<number | undefined>(
+        'data_views:cache_max_age'
+      );
+      if (cacheMaxAgeSetting !== undefined) {
+        cacheMaxAge = cacheMaxAgeSetting;
+      }
 
       if (cacheMaxAge && fields.length) {
         const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
@@ -104,7 +106,7 @@ const handler: (
       }
 
       return response.ok({
-        body,
+        body: bodyAsString,
         headers,
       });
     } catch (error) {
@@ -133,8 +135,12 @@ export const registerFields = async (
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
   >,
-  isRollupsEnabled: () => boolean,
-  getUserId: () => (request: KibanaRequest) => Promise<string | undefined>
+  isRollupsEnabled: () => boolean
 ) => {
-  router.get({ path, validate: { query: querySchema } }, handler(isRollupsEnabled, getUserId));
+  router.versioned
+    .get({ path, access: 'internal', enableQueryVersion: true })
+    .addVersion(
+      { version: '1', validate: { request: { query: querySchema }, response: validate.response } },
+      handler(isRollupsEnabled)
+    );
 };

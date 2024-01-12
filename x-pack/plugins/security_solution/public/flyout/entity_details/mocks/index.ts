@@ -81,6 +81,7 @@ export const mockUserRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
   isAuthorized: true,
   isDeprecated: false,
   loading: false,
+  error: undefined,
 };
 
 export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
@@ -96,6 +97,7 @@ export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
   isAuthorized: true,
   isDeprecated: false,
   loading: false,
+  error: undefined,
 };
 
 const hostMetadata: HostMetadataInterface = {

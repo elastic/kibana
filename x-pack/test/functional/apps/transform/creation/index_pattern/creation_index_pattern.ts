@@ -271,7 +271,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '7 categories',
               colorStats: [
                 { color: '#000000', percentage: 20 },
-                { color: '#54B399', percentage: 75 },
+                { color: '#54B399', percentage: 80 },
               ],
             },
             {
@@ -842,7 +842,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.testExecution.logTestStep('should navigate to discover');
           await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
           await pageObjects.discover.waitUntilSearchingHasFinished();
-          await pageObjects.discover.refreshFieldList();
 
           if (testData.discoverAdjustSuperDatePicker) {
             await transform.testExecution.logTestStep(

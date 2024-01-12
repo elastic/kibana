@@ -13,7 +13,6 @@ export type Start = jest.Mocked<ReturnType<DataViewsPlugin['start']>>;
 
 const createSetupContract = (): Setup => ({
   enableRollups: jest.fn(),
-  setUserIdGetter: jest.fn(),
 });
 
 const createStartContract = (): Start => {

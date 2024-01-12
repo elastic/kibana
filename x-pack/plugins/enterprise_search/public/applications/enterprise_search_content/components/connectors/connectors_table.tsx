@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector } from '@kbn/search-connectors';
+import { Connector, ConnectorStatus } from '@kbn/search-connectors';
 
 import { Meta } from '../../../../../common/types/pagination';
 
@@ -114,9 +114,9 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           defaultMessage: 'Ingestion status',
         }
       ),
-      render: (connector: Connector) => {
-        const label = connectorStatusToText(connector.status);
-        return <EuiBadge color={connectorStatusToColor(connector.status)}>{label}</EuiBadge>;
+      render: (connectorStatus: ConnectorStatus) => {
+        const label = connectorStatusToText(connectorStatus);
+        return <EuiBadge color={connectorStatusToColor(connectorStatus)}>{label}</EuiBadge>;
       },
       truncateText: true,
     },

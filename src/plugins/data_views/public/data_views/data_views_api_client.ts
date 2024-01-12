@@ -46,7 +46,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     forceRefresh?: boolean
   ): Promise<HttpResponse<T> | undefined> {
     const asResponse = true;
-    const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
+    const cacheOptions: { cache?: RequestCache } = forceRefresh ? { cache: 'no-cache' } : {};
     const userId = await this.getCurrentUserId();
 
     const userHash = userId ? await sha1(userId) : '';
@@ -92,6 +92,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       allowHidden,
     } = options;
     const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
+    const versionQueryParam = indexFilter ? {} : { apiVersion: version };
 
     return this._request<FieldsForWildcardResponse>(
       path,
@@ -104,6 +105,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         include_unmapped: includeUnmapped,
         fields,
         allow_hidden: allowHidden,
+        ...versionQueryParam,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
       forceRefresh

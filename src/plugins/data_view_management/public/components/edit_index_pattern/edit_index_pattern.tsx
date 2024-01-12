@@ -249,16 +249,8 @@ export const EditIndexPattern = withRouter(
           deleteIndexPatternClick={() =>
             removeHandler([indexPattern as RemoveDataViewProps], <div>{warning}</div>)
           }
-          refreshIndexPatternClick={async () => {
-            setIsRefreshing(true);
-            await dataViews.refreshFields(indexPattern, false, true);
-            setFields(indexPattern.getNonScriptedFields());
-            setRefreshCount(refreshCount + 1); // rerender field list
-            setIsRefreshing(false);
-          }}
           defaultIndex={defaultIndex}
           canSave={userEditPermission}
-          isRefreshing={isRefreshing}
         >
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
@@ -343,6 +335,13 @@ export const EditIndexPattern = withRouter(
             setFields(indexPattern.getNonScriptedFields());
             setCompositeRuntimeFields(getCompositeRuntimeFields(indexPattern));
           }}
+          refreshIndexPatternClick={async () => {
+            setIsRefreshing(true);
+            await dataViews.refreshFields(indexPattern, false, true);
+            setRefreshCount(refreshCount + 1); // rerender field list
+            setIsRefreshing(false);
+          }}
+          isRefreshing={isRefreshing}
         />
         {displayIndexPatternEditor}
       </div>

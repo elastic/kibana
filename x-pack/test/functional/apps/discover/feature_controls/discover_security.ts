@@ -31,6 +31,7 @@ export default function (ctx: FtrProviderContext) {
     'spaceSelector',
     'header',
     'unifiedFieldList',
+    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');

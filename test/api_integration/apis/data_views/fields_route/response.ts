@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
@@ -86,8 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns a flattened version of the fields in es', async () => {
       await supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({ pattern: 'basic_index' })
+        .query({ pattern: 'basic_index', apiVersion: INITIAL_REST_VERSION_INTERNAL })
         .expect(200, {
           fields: testFields,
           indices: ['basic_index'],
@@ -98,8 +96,11 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns a single field as requested', async () => {
       await supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({ pattern: 'basic_index', fields: JSON.stringify(['bar']) })
+        .query({
+          pattern: 'basic_index',
+          fields: JSON.stringify(['bar']),
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
+        })
         .expect(200, {
           fields: [testFields[0]],
           indices: ['basic_index'],
@@ -109,10 +110,10 @@ export default function ({ getService }: FtrProviderContext) {
     it('always returns a field for all passed meta fields', async () => {
       await supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: 'basic_index',
           meta_fields: JSON.stringify(['_id', '_source', 'crazy_meta_field']),
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(200, {
           fields: [
@@ -202,8 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns fields when one pattern exists and the other does not', async () => {
       await supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({ pattern: 'bad_index,basic_index' })
+        .query({ pattern: 'bad_index,basic_index', apiVersion: INITIAL_REST_VERSION_INTERNAL })
         .expect(200, {
           fields: testFields,
           indices: ['basic_index'],
@@ -213,17 +213,16 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns 404 when neither exists', async () => {
       await supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        .query({ pattern: 'bad_index,bad_index_2' })
+        .query({ pattern: 'bad_index,bad_index_2', apiVersion: INITIAL_REST_VERSION_INTERNAL })
         .expect(404);
     });
 
     it('returns 404 when no patterns exist', async () => {
       await supertest
         .get(FIELDS_PATH)
-        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({
           pattern: 'bad_index',
+          apiVersion: INITIAL_REST_VERSION_INTERNAL,
         })
         .expect(404);
     });
