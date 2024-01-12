@@ -11,7 +11,7 @@ import Path from 'path';
 import { v4 as uuidV4 } from 'uuid';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { FtrConfigProviderContext, FtrConfigProvider } from '@kbn/test';
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { services } from '../services';
 
 import { AnyStep } from './journey';
 import { JourneyConfig } from './journey_config';
@@ -66,7 +66,7 @@ export function makeFtrConfigProvider(
         bail: true,
       },
 
-      services: commonFunctionalServices,
+      services,
       pageObjects: {},
 
       servicesRequiredForTestAnalysis: ['performance', 'journeyConfig'],

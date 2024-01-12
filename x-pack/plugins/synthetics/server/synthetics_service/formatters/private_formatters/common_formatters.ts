@@ -36,6 +36,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.CONFIG_HASH]: null,
   [ConfigKey.MONITOR_QUERY_ID]: stringToJsonFormatter,
   [ConfigKey.PARAMS]: null,
+  [ConfigKey.MAX_ATTEMPTS]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(
       `@every ${fields[ConfigKey.SCHEDULE]?.number}${fields[ConfigKey.SCHEDULE]?.unit}`

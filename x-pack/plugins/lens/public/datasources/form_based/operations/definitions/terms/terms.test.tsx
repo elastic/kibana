@@ -33,7 +33,7 @@ import {
   operationDefinitionMap,
 } from '..';
 import { FormBasedLayer, FormBasedPrivateState } from '../../../types';
-import { FrameDatasourceAPI } from '../../../../../types';
+import { FramePublicAPI } from '../../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
@@ -1177,10 +1177,32 @@ describe('terms', () => {
             },
             sourceField: 'source',
           } as TermsIndexPatternColumn,
-          createMockedIndexPattern(),
-          {}
+          {},
+          createMockedIndexPattern()
         )
       ).toBe('Top 3 values of source');
+    });
+
+    it('should not fail if dataview is not given', () => {
+      expect(
+        termsOperation.getDefaultLabel(
+          {
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'alphabetical', fallback: true },
+              size: 3,
+              orderDirection: 'asc',
+            },
+            sourceField: 'source',
+          } as TermsIndexPatternColumn,
+          {},
+          undefined
+        )
+      ).toBe('Top 3 values of Missing field');
     });
 
     it('should return main value with single counter for two fields', () => {
@@ -1200,8 +1222,8 @@ describe('terms', () => {
             },
             sourceField: 'source',
           } as TermsIndexPatternColumn,
-          createMockedIndexPattern(),
-          {}
+          {},
+          createMockedIndexPattern()
         )
       ).toBe('Top values of source + 1 other');
     });
@@ -1223,8 +1245,8 @@ describe('terms', () => {
             },
             sourceField: 'source',
           } as TermsIndexPatternColumn,
-          createMockedIndexPattern(),
-          {}
+          {},
+          createMockedIndexPattern()
         )
       ).toBe('Top values of source + 2 others');
     });
@@ -2680,6 +2702,7 @@ describe('terms', () => {
             params: {
               ...(layer.columns.col1 as TermsIndexPatternColumn).params,
               size: 7,
+              otherBucket: true,
             },
           },
         },
@@ -2844,7 +2867,7 @@ describe('terms', () => {
               fromDate: '2020',
               toDate: '2021',
             },
-          } as unknown as FrameDatasourceAPI,
+          } as unknown as FramePublicAPI,
           'first'
         );
         expect(newLayer.columns.col1).toEqual(

@@ -114,7 +114,6 @@ export const findActiveNodes = (
 
   const activeNodeFromKey = (key: string): ChromeProjectNavigationNode => ({
     ...navTree[key],
-    isActive: true,
   });
 
   Object.entries(navTree).forEach(([key, node]) => {
@@ -138,6 +137,9 @@ export const findActiveNodes = (
           matches[length] = [];
         }
         matches[length].push(key);
+        // If there are multiple node matches of the same URL path length, we want to order them by
+        // tree depth, so that the longest match (deepest node) comes first.
+        matches[length].sort((a, b) => b.length - a.length);
       }
     }
   });

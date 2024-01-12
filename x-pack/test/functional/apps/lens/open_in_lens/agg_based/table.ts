@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
 
   describe('Table', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
@@ -55,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -75,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -85,8 +86,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
-      const summaryRowFunction = await testSubjects.find('lnsDatatable_summaryrow_function');
-      expect(await summaryRowFunction.getVisibleText()).to.be('Sum');
+      expect(await comboBox.getComboBoxSelectedOptions('lnsDatatable_summaryrow_function')).to.eql([
+        'Sum',
+      ]);
     });
 
     it('should convert sibling pipeline aggregation', async () => {
@@ -95,7 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -117,7 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -140,7 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -162,7 +164,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -171,8 +173,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const percentageColumnText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 1);
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger', 0, 1);
-      const format = await testSubjects.find('indexPattern-dimension-format');
-      expect(await format.getVisibleText()).to.be('Percent');
+      expect(await comboBox.getComboBoxSelectedOptions('indexPattern-dimension-format')).to.eql([
+        'Percent',
+      ]);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);

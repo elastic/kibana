@@ -22,7 +22,6 @@ import {
   EuiIconTip,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiPopover,
   EuiSpacer,
   EuiText,
@@ -39,6 +38,7 @@ import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
@@ -138,7 +138,7 @@ const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) 
         labelAppend={<OptionalText />}
         fullWidth
       >
-        <FormField name="user.full_name" fullWidth />
+        <FormField name="user.full_name" data-test-subj={'userProfileFullName'} fullWidth />
       </FormRow>
 
       <FormRow
@@ -153,7 +153,7 @@ const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) 
         labelAppend={<OptionalText />}
         fullWidth
       >
-        <FormField type="email" name="user.email" fullWidth />
+        <FormField type="email" name="user.email" data-test-subj={'userProfileEmail'} fullWidth />
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -189,6 +189,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       <EuiKeyPadMenuItem
         name={id}
         label={label}
+        data-test-subj={`themeKeyPadItem${label}`}
         checkable="single"
         isSelected={idSelected === id}
         isDisabled={isThemeOverridden}
@@ -750,17 +751,16 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               />
             ) : null}
 
-            <EuiPageTemplate
-              className="eui-fullHeight"
-              pageHeader={{
-                pageTitle: (
+            <KibanaPageTemplate className="eui-fullHeight" restrictWidth={1000}>
+              <KibanaPageTemplate.Header
+                pageTitle={
                   <FormattedMessage
                     id="xpack.security.accountManagement.userProfile.title"
                     defaultMessage="Profile"
                   />
-                ),
-                pageTitleProps: { id: titleId },
-                rightSideItems: rightSideItems.reverse().map((item) => (
+                }
+                id={titleId}
+                rightSideItems={rightSideItems.reverse().map((item) => (
                   <EuiDescriptionList
                     textStyle="reverse"
                     listItems={[
@@ -791,28 +791,35 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                     ]}
                     compressed
                   />
-                )),
-              }}
-              bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
-              bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
-              restrictWidth={1000}
-            >
-              <Form aria-labelledby={titleId}>
-                <UserDetailsEditor user={user} />
-                {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
-                <UserPasswordEditor
-                  user={user}
-                  onShowPasswordForm={() => setShowChangePasswordForm(true)}
-                />
-                {isCloudUser ? null : (
-                  <UserSettingsEditor
-                    formik={formik}
-                    isThemeOverridden={isThemeOverridden}
-                    isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
+                ))}
+              />
+              <KibanaPageTemplate.Section>
+                <Form aria-labelledby={titleId}>
+                  <UserDetailsEditor user={user} />
+                  {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
+                  <UserPasswordEditor
+                    user={user}
+                    onShowPasswordForm={() => setShowChangePasswordForm(true)}
                   />
-                )}
-              </Form>
-            </EuiPageTemplate>
+                  {isCloudUser ? null : (
+                    <UserSettingsEditor
+                      formik={formik}
+                      isThemeOverridden={isThemeOverridden}
+                      isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
+                    />
+                  )}
+                </Form>
+              </KibanaPageTemplate.Section>
+              {formChanges.count > 0 ? (
+                <KibanaPageTemplate.BottomBar
+                  paddingSize="m"
+                  position="fixed"
+                  data-test-subj={'userProfileBottomBar'}
+                >
+                  <SaveChangesBottomBar />
+                </KibanaPageTemplate.BottomBar>
+              ) : null}
+            </KibanaPageTemplate>
           </Breadcrumb>
         </FormChangesProvider>
       </FormikProvider>
@@ -962,7 +969,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={formik.handleReset} color="ghost">
+        <EuiButtonEmpty onClick={formik.handleReset} color="text">
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.discardChangesButton"
             defaultMessage="Discard"
@@ -972,6 +979,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={formik.submitForm}
+          data-test-subj="saveProfileChangesButton"
           isLoading={formik.isSubmitting}
           isDisabled={formik.submitCount > 0 && !formik.isValid}
           color="success"

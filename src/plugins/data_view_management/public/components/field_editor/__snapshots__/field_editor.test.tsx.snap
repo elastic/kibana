@@ -31,6 +31,8 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}
@@ -285,6 +287,8 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}
@@ -538,6 +542,8 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}
@@ -821,6 +827,8 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}
@@ -1167,6 +1175,8 @@ exports[`FieldEditor should show multiple type field warning with a table contai
           },
           "getFormatterForField": [Function],
           "getFormatterForFieldNoDefault": [Function],
+          "setFieldCustomLabel": [Function],
+          "upsertScriptedField": [Function],
         }
       }
       isVisible={false}

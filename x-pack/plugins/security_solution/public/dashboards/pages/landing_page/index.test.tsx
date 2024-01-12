@@ -23,19 +23,14 @@ import { DASHBOARDS_PAGE_SECTION_CUSTOM } from './translations';
 jest.mock('../../../common/containers/tags/api');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
-jest.mock('@kbn/dashboard-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/dashboard-plugin/public');
-  return {
-    ...actual,
-    DashboardListingTable: jest.fn().mockReturnValue(<span data-test-subj="dashboardsTable" />),
-  };
-});
+jest.mock('@kbn/dashboard-plugin/public', () => ({
+  DashboardListingTable: jest.fn().mockReturnValue(<span data-test-subj="dashboardsTable" />),
+  DashboardTopNav: jest.fn().mockReturnValue(<span data-test-subj="dashboardTopNav" />),
+}));
 
-const mockUseObservable = jest.fn();
-
-jest.mock('react-use', () => ({
-  ...jest.requireActual('react-use'),
-  useObservable: () => mockUseObservable(),
+const mockUseContractComponents = jest.fn(() => ({}));
+jest.mock('../../../common/hooks/use_contract_component', () => ({
+  useContractComponents: () => mockUseContractComponents(),
 }));
 
 const DEFAULT_DASHBOARD_CAPABILITIES = { show: true, createNew: true };
@@ -219,11 +214,11 @@ describe('Dashboards landing', () => {
   });
 
   it('should render callout when available', async () => {
-    const DummyComponent = () => <span data-test-subj="test" />;
-    mockUseObservable.mockReturnValue(<DummyComponent />);
+    const DashboardsLandingCallout = () => <span data-test-subj="callout-test" />;
+    mockUseContractComponents.mockReturnValue({ DashboardsLandingCallout });
 
     await renderDashboardLanding();
 
-    expect(screen.queryByTestId('test')).toBeInTheDocument();
+    expect(screen.queryByTestId('callout-test')).toBeInTheDocument();
   });
 });

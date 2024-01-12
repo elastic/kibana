@@ -15,12 +15,26 @@ export async function searchStackTraces({
   rangeFrom,
   rangeTo,
   kuery,
+  durationSeconds,
+  co2PerKWH,
+  datacenterPUE,
+  pervCPUWattX86,
+  pervCPUWattArm64,
+  awsCostDiscountRate,
+  costPervCPUPerHour,
 }: {
   client: ProfilingESClient;
   sampleSize: number;
   rangeFrom: number;
   rangeTo: number;
   kuery: string;
+  durationSeconds: number;
+  co2PerKWH: number;
+  datacenterPUE: number;
+  pervCPUWattX86: number;
+  pervCPUWattArm64: number;
+  awsCostDiscountRate: number;
+  costPervCPUPerHour: number;
 }) {
   const response = await client.profilingStacktraces({
     query: {
@@ -41,6 +55,13 @@ export async function searchStackTraces({
       },
     },
     sampleSize,
+    durationSeconds,
+    co2PerKWH,
+    datacenterPUE,
+    pervCPUWattX86,
+    pervCPUWattArm64,
+    awsCostDiscountRate,
+    costPervCPUPerHour,
   });
 
   return decodeStackTraceResponse(response);

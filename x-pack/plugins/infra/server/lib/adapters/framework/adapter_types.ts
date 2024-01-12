@@ -27,6 +27,10 @@ import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { LogsSharedPluginSetup, LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
 import { VersionedRouteConfig } from '@kbn/core-http-server';
 import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
+import {
+  ProfilingDataAccessPluginSetup,
+  ProfilingDataAccessPluginStart,
+} from '@kbn/profiling-data-access-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
@@ -42,12 +46,14 @@ export interface InfraServerPluginSetupDeps {
   ml?: MlPluginSetup;
   logsShared: LogsSharedPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
+  profilingDataAccess?: ProfilingDataAccessPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   logsShared: LogsSharedPluginStart;
+  profilingDataAccess?: ProfilingDataAccessPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {

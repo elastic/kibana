@@ -19,6 +19,9 @@ export const useStyles = () => {
   `;
 
   const gridStyle = css`
+    & .euiDataGrid__content {
+      background: transparent;
+    }
     & .euiDataGridHeaderCell__icon {
       display: none;
     }
@@ -42,18 +45,22 @@ export const useStyles = () => {
     }
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
+
+      // Vertically center content
+      .euiDataGridRowCell__content {
+        display: flex;
+        align-items: center;
+      }
     }
-    & .euiDataGridRowCell__expandActions > [data-test-subj='euiDataGridCellExpandButton'] {
+    /* EUI QUESTION: Why is this being done via CSS instead of setting isExpandable: false in the columns API? */
+    & .euiDataGridRowCell__actions > .euiDataGridRowCell__expandCell {
       display: none;
     }
-    & .euiDataGridRowCell__contentByHeight + .euiDataGridRowCell__expandActions {
-      padding: 0;
-    }
-
-    & .euiDataGridRowCell__expandFlex {
-      align-items: center;
-    }
     & .euiDataGridRowCell.euiDataGridRowCell--numeric {
+      text-align: left;
+    }
+    & .euiDataGridHeaderCell--numeric .euiDataGridHeaderCell__content {
+      flex-grow: 0;
       text-align: left;
     }
   `;
@@ -67,6 +74,8 @@ export const useStyles = () => {
 
   const groupBySelector = css`
     width: 188px;
+    display: inline-block;
+    margin-left: 8px;
   `;
 
   return {

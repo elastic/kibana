@@ -43,7 +43,6 @@ export const ControlError = ({ error }: ControlErrorProps) => {
         button={popoverButton}
         isOpen={isPopoverOpen}
         className="errorEmbeddableCompact__popover"
-        anchorClassName="errorEmbeddableCompact__popoverAnchor"
         closePopover={() => setPopoverOpen(false)}
       >
         <Markdown

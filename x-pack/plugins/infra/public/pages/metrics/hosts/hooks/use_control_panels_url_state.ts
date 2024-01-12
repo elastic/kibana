@@ -16,9 +16,10 @@ import { useUrlState } from '../../../../utils/use_url_state';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
-const availableControlsPanels = {
+export const availableControlsPanels = {
   HOST_OS_NAME: 'host.os.name',
   CLOUD_PROVIDER: 'cloud.provider',
+  SERVICE_NAME: 'service.name',
 };
 
 const controlPanelConfigs: ControlPanels = {
@@ -42,6 +43,17 @@ const controlPanelConfigs: ControlPanels = {
       id: availableControlsPanels.CLOUD_PROVIDER,
       fieldName: availableControlsPanels.CLOUD_PROVIDER,
       title: 'Cloud Provider',
+    },
+  },
+  [availableControlsPanels.SERVICE_NAME]: {
+    order: 2,
+    width: 'medium',
+    grow: false,
+    type: 'optionsListControl',
+    explicitInput: {
+      id: availableControlsPanels.SERVICE_NAME,
+      fieldName: availableControlsPanels.SERVICE_NAME,
+      title: 'Service Name',
     },
   },
 };

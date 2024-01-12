@@ -1,0 +1,88 @@
+openapi: 3.0.0
+info:
+  title: Threshold Rule Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ThresholdCardinality:
+      type: array
+      items:
+        type: object
+        properties:
+          field:
+            type: string
+          value:
+            type: integer
+            minimum: 0
+        required:
+          - field
+          - value
+
+    ThresholdValue:
+      type: integer
+      minimum: 1
+      description: Threshold value
+
+    ThresholdField:
+      oneOf:
+        - type: string
+        - type: array
+          items:
+            type: string
+      description: Field to aggregate on
+
+    ThresholdFieldNormalized:
+      type: array
+      items:
+        type: string
+      description: Field to aggregate on
+
+    Threshold:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/ThresholdField'
+        value:
+          $ref: '#/components/schemas/ThresholdValue'
+        cardinality:
+          $ref: '#/components/schemas/ThresholdCardinality'
+      required:
+        - field
+        - value
+
+    ThresholdNormalized:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/ThresholdFieldNormalized'
+        value:
+          $ref: '#/components/schemas/ThresholdValue'
+        cardinality:
+          $ref: '#/components/schemas/ThresholdCardinality'
+      required:
+        - field
+        - value
+
+    ThresholdWithCardinality:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/ThresholdFieldNormalized'
+        value:
+          $ref: '#/components/schemas/ThresholdValue'
+        cardinality:
+          $ref: '#/components/schemas/ThresholdCardinality'
+      required:
+        - field
+        - value
+        - cardinality
+
+    ThresholdAlertSuppression:
+      type: object
+      properties:
+        duration: 
+          $ref: '../common_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
+      required:
+        - duration

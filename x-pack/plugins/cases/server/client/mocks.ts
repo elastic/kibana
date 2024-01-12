@@ -15,7 +15,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 
-import type { CasesFindRequest } from '../../common/types/api';
+import type { CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
@@ -47,7 +47,8 @@ type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 const createCasesSubClientMock = (): CasesSubClientMock => {
   return {
     create: jest.fn(),
-    find: jest.fn(),
+    bulkCreate: jest.fn(),
+    search: jest.fn(),
     resolve: jest.fn(),
     get: jest.fn(),
     bulkGet: jest.fn(),
@@ -212,9 +213,9 @@ export const createCasesClientMockArgs = () => {
   };
 };
 
-export const createCasesClientMockFindRequest = (
-  overwrites?: CasesFindRequest
-): CasesFindRequest => ({
+export const createCasesClientMockSearchRequest = (
+  overwrites?: CasesSearchRequest
+): CasesSearchRequest => ({
   search: '',
   searchFields: ['title', 'description'],
   severity: CaseSeverity.LOW,
@@ -225,5 +226,6 @@ export const createCasesClientMockFindRequest = (
   owner: [],
   sortField: SortFieldCase.createdAt,
   sortOrder: 'desc',
+  customFields: {},
   ...overwrites,
 });

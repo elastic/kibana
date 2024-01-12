@@ -354,6 +354,47 @@ describe('ruleType Params validate()', () => {
     expect(onValidate()).not.toThrow();
   });
 
+  it('fails for invalid sourceFields', async () => {
+    // no array that has more than 5 elements
+    const sourceField = { label: 'test', searchPath: 'test' };
+    params.sourceFields = [
+      sourceField,
+      sourceField,
+      sourceField,
+      sourceField,
+      sourceField,
+      sourceField,
+    ];
+    expect(onValidate()).toThrow(
+      '[sourceFields]: array size is [6], but cannot be greater than [5]'
+    );
+  });
+
+  describe('esqlQuery search type', () => {
+    beforeEach(() => {
+      params = { ...DefaultParams, searchType: 'esqlQuery', esqlQuery: { esql: 'from test' } };
+      delete params.esQuery;
+      delete params.index;
+    });
+
+    it('fails for invalid thresholdComparator', async () => {
+      params.thresholdComparator = Comparator.LT;
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+        `"[thresholdComparator]: is required to be greater than"`
+      );
+    });
+
+    it('fails for invalid threshold', async () => {
+      params.threshold = [7];
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`"[threshold]: is required to be 0"`);
+    });
+
+    it('fails for undefined timeField', async () => {
+      params.timeField = undefined;
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`"[timeField]: is required"`);
+    });
+  });
+
   function onValidate(): () => void {
     return () => validate();
   }

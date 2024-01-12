@@ -10,7 +10,6 @@ import {
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ObservabilityOnboardingPlugin } from './plugin';
 
 const configSchema = schema.object({
   ui: schema.object({
@@ -35,7 +34,8 @@ export const config: PluginConfigDescriptor<ObservabilityOnboardingConfig> = {
   schema: configSchema,
 };
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ObservabilityOnboardingPlugin } = await import('./plugin');
   return new ObservabilityOnboardingPlugin(initializerContext);
 }
 

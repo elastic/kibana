@@ -59,9 +59,7 @@ journey('Step Duration series', async ({ page, params }) => {
     await page.click(byTestId('seriesBreakdown'));
     await page.click('button[role="option"]:has-text("Step name")');
     await page.click('.euiComboBox__inputWrap');
-    await page.click(
-      'text=Search Monitor nameCombo box. Selected. Combo box input. Search Monitor name. Ty'
-    );
+    await page.click('[role="combobox"][placeholder="Search Monitor name"]');
     await page.click('button[role="option"]:has-text("test-monitor - inline")');
     await page.click('button:has-text("Apply changes")');
   });

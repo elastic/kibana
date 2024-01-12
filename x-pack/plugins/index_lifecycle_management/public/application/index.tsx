@@ -42,24 +42,30 @@ export const renderApp = (
 ): UnmountCallback => {
   const { getUrlForApp } = application;
   render(
-    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider
-            services={{
-              cloud,
-              breadcrumbService,
-              license,
-              getUrlForApp,
-              docLinks,
-              executionContext,
-            }}
-          >
-            <App history={history} />
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </RedirectAppLinks>,
+    <div className={APP_WRAPPER_CLASS}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
+        <I18nContext>
+          <KibanaThemeProvider theme$={theme$}>
+            <KibanaContextProvider
+              services={{
+                cloud,
+                breadcrumbService,
+                license,
+                getUrlForApp,
+                docLinks,
+                executionContext,
+              }}
+            >
+              <App history={history} />
+            </KibanaContextProvider>
+          </KibanaThemeProvider>
+        </I18nContext>
+      </RedirectAppLinks>
+    </div>,
     element
   );
 

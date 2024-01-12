@@ -10,6 +10,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
+import type { GetAgentsResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent } from '../helpers';
 import { setupFleetAndAgents } from './agents/services';
@@ -126,7 +127,11 @@ export default function (providerContext: FtrProviderContext) {
       );
     });
 
-    async function waitForAgents(expectedAgentCount: number, attempts: number, _attemptsMade = 0) {
+    async function waitForAgents(
+      expectedAgentCount: number,
+      attempts: number,
+      _attemptsMade = 0
+    ): Promise<GetAgentsResponse> {
       const { body: apiResponse } = await supertest
         .get(`/api/fleet/agents?showInactive=true`)
         .set('kbn-xsrf', 'xxxx')

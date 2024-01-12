@@ -19,7 +19,7 @@ import { nodeBuilder } from '@kbn/es-query';
 
 import type { AlertService, CasesService, CaseUserActionService } from '../../services';
 import type { UpdateAlertStatusRequest } from '../alerts/types';
-import type { CasesClientArgs } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import type { OwnerEntity } from '../../authorization';
 import type { PatchCasesArgs } from '../../services/cases/types';
 import type { UserActionEvent, UserActionsDict } from '../../services/user_actions/types';
@@ -38,7 +38,12 @@ import {
   isCommentRequestTypeAlert,
 } from '../../common/utils';
 import { arraysDifference, getCaseToUpdate } from '../utils';
-import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './utils';
+import {
+  dedupAssignees,
+  fillMissingCustomFields,
+  getClosedInfoForUpdate,
+  getDurationForUpdate,
+} from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
@@ -50,10 +55,12 @@ import type {
   User,
   CaseAssignees,
   AttachmentAttributes,
+  CustomFieldsConfiguration,
 } from '../../../common/types/domain';
 import { CasesPatchRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import { validateCustomFields } from './validators';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -63,7 +70,7 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
 
   if (requestsUpdatingOwner.length > 0) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
+    throw Boom.badRequest(`Updating the owner of a case is not allowed ids: [${ids.join(', ')}]`);
   }
 }
 
@@ -93,6 +100,26 @@ async function throwIfMaxUserActionsReached({
       throw Boom.badRequest(
         `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
       );
+    }
+  });
+}
+
+async function validateCustomFieldsInRequest({
+  casesToUpdate,
+  customFieldsConfigurationMap,
+}: {
+  casesToUpdate: UpdateRequestWithOriginalCase[];
+  customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+}) {
+  casesToUpdate.forEach(({ updateReq, originalCase }) => {
+    if (updateReq.customFields) {
+      const owner = originalCase.attributes.owner;
+      const customFieldsConfiguration = customFieldsConfigurationMap.get(owner);
+
+      validateCustomFields({
+        requestCustomFields: updateReq.customFields,
+        customFieldsConfiguration,
+      });
     }
   });
 }
@@ -272,7 +299,7 @@ function partitionPatchRequest(
   };
 }
 
-interface UpdateRequestWithOriginalCase {
+export interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
 }
@@ -284,7 +311,8 @@ interface UpdateRequestWithOriginalCase {
  */
 export const update = async (
   cases: CasesPatchRequest,
-  clientArgs: CasesClientArgs
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
 ): Promise<Cases> => {
   const {
     services: {
@@ -293,6 +321,7 @@ export const update = async (
       alertsService,
       licensingService,
       notificationService,
+      attachmentService,
     },
     user,
     logger,
@@ -301,9 +330,9 @@ export const update = async (
 
   try {
     const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
-
+    const caseIds = query.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
-      caseIds: query.cases.map((q) => q.id),
+      caseIds,
     });
 
     /**
@@ -342,6 +371,11 @@ export const update = async (
       );
     }
 
+    const configurations = await casesClient.configure.get();
+    const customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration> = new Map(
+      configurations.map((conf) => [conf.owner, conf.customFields])
+    );
+
     const casesToUpdate: UpdateRequestWithOriginalCase[] = query.cases.reduce(
       (acc: UpdateRequestWithOriginalCase[], updateCase) => {
         const originalCase = casesMap.get(updateCase.id);
@@ -372,7 +406,13 @@ export const update = async (
     throwIfUpdateOwner(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
 
-    const patchCasesPayload = createPatchCasesPayload({ user, casesToUpdate });
+    await validateCustomFieldsInRequest({ casesToUpdate, customFieldsConfigurationMap });
+
+    const patchCasesPayload = createPatchCasesPayload({
+      user,
+      casesToUpdate,
+      customFieldsConfigurationMap,
+    });
     const userActionsDict = userActionService.creator.buildUserActions({
       updatedCases: patchCasesPayload,
       user,
@@ -413,6 +453,10 @@ export const update = async (
       alertsService,
     });
 
+    const commentsMap = await attachmentService.getter.getCaseCommentStats({
+      caseIds,
+    });
+
     const returnUpdatedCase = updatedCases.saved_objects.reduce((flattenCases, updatedCase) => {
       const originalCase = casesMap.get(updatedCase.id);
 
@@ -420,9 +464,18 @@ export const update = async (
         return flattenCases;
       }
 
+      const { userComments: totalComment, alerts: totalAlerts } = commentsMap.get(
+        updatedCase.id
+      ) ?? {
+        userComments: 0,
+        alerts: 0,
+      };
+
       flattenCases.push(
         flattenCaseSavedObject({
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
+          totalComment,
+          totalAlerts,
         })
       );
       return flattenCases;
@@ -462,8 +515,9 @@ export const update = async (
   }
 };
 
-const trimCaseAttributes = (
-  updateCaseAttributes: Omit<CasePatchRequest, 'id' | 'version' | 'owner' | 'assignees'>
+const normalizeCaseAttributes = (
+  updateCaseAttributes: Omit<CasePatchRequest, 'id' | 'version' | 'owner' | 'assignees'>,
+  customFieldsConfiguration?: CustomFieldsConfiguration
 ) => {
   let trimmedAttributes = { ...updateCaseAttributes };
 
@@ -489,15 +543,27 @@ const trimCaseAttributes = (
     };
   }
 
+  if (updateCaseAttributes.customFields) {
+    trimmedAttributes = {
+      ...trimmedAttributes,
+      customFields: fillMissingCustomFields({
+        customFields: updateCaseAttributes.customFields,
+        customFieldsConfiguration,
+      }),
+    };
+  }
+
   return trimmedAttributes;
 };
 
 const createPatchCasesPayload = ({
   casesToUpdate,
   user,
+  customFieldsConfigurationMap,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
+  customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
 }): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
@@ -508,7 +574,10 @@ const createPatchCasesPayload = ({
 
       const dedupedAssignees = dedupAssignees(assignees);
 
-      const trimmedCaseAttributes = trimCaseAttributes(updateCaseAttributes);
+      const trimmedCaseAttributes = normalizeCaseAttributes(
+        updateCaseAttributes,
+        customFieldsConfigurationMap.get(originalCase.attributes.owner)
+      );
 
       return {
         caseId,

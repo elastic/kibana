@@ -21,7 +21,7 @@ import {
   ControlGroupContainerFactory,
 } from '@kbn/controls-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { EmbeddablePackageState, ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { createDashboard } from './create_dashboard';
@@ -31,15 +31,17 @@ import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
 test('throws error when no data views are available', async () => {
-  pluginServices.getServices().data.dataViews.getDefaultDataView = jest
+  pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
     .fn()
-    .mockReturnValue(undefined);
+    .mockReturnValue(false);
   await expect(async () => {
     await createDashboard();
   }).rejects.toThrow('Dashboard requires at least one data view before it can be initialized.');
 
   // reset get default data view
-  pluginServices.getServices().data.dataViews.getDefaultDataView = jest.fn().mockResolvedValue({});
+  pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
+    .fn()
+    .mockResolvedValue(true);
 });
 
 test('throws error when provided validation function returns invalid', async () => {
@@ -109,7 +111,55 @@ test('passes managed state from the saved object into the Dashboard component st
   expect(dashboard!.getState().componentState.managed).toBe(true);
 });
 
-test('pulls state from session storage which overrides state from saved object', async () => {
+test('pulls view mode from dashboard backup', async () => {
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      dashboardInput: DEFAULT_DASHBOARD_INPUT,
+    });
+  pluginServices.getServices().dashboardBackup.getViewMode = jest
+    .fn()
+    .mockReturnValue(ViewMode.EDIT);
+  const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'what-an-id');
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.EDIT);
+});
+
+test('new dashboards start in edit mode', async () => {
+  pluginServices.getServices().dashboardBackup.getViewMode = jest
+    .fn()
+    .mockReturnValue(ViewMode.VIEW);
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      newDashboardCreated: true,
+      dashboardInput: {
+        ...DEFAULT_DASHBOARD_INPUT,
+        description: 'wow this description is okay',
+      },
+    });
+  const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.EDIT);
+});
+
+test('managed dashboards start in view mode', async () => {
+  pluginServices.getServices().dashboardBackup.getViewMode = jest
+    .fn()
+    .mockReturnValue(ViewMode.EDIT);
+  pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
+    .fn()
+    .mockResolvedValue({
+      dashboardInput: DEFAULT_DASHBOARD_INPUT,
+      managed: true,
+    });
+  const dashboard = await createDashboard({}, 0, 'what-an-id');
+  expect(dashboard).toBeDefined();
+  expect(dashboard!.getState().componentState.managed).toBe(true);
+  expect(dashboard!.getState().explicitInput.viewMode).toBe(ViewMode.VIEW);
+});
+
+test('pulls state from backup which overrides state from saved object', async () => {
   pluginServices.getServices().dashboardContentManagement.loadDashboardState = jest
     .fn()
     .mockResolvedValue({
@@ -118,7 +168,7 @@ test('pulls state from session storage which overrides state from saved object',
         description: 'wow this description is okay',
       },
     });
-  pluginServices.getServices().dashboardSessionStorage.getState = jest
+  pluginServices.getServices().dashboardBackup.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
   const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
@@ -137,7 +187,7 @@ test('pulls state from creation options initial input which overrides all other 
         description: 'wow this description is okay',
       },
     });
-  pluginServices.getServices().dashboardSessionStorage.getState = jest
+  pluginServices.getServices().dashboardBackup.getState = jest
     .fn()
     .mockReturnValue({ description: 'wow this description marginally better' });
   const dashboard = await createDashboard(

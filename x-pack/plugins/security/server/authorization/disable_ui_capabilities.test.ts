@@ -7,12 +7,12 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ElasticsearchFeature, KibanaFeature } from '@kbn/features-plugin/server';
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 
 import { Actions } from './actions';
 import { disableUICapabilitiesFactory } from './disable_ui_capabilities';
 import { authorizationMock } from './index.mock';
-import type { CheckPrivilegesResponse } from './types';
-import type { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common';
 
 type MockAuthzOptions =
   | { rejectCheckPrivileges: any }

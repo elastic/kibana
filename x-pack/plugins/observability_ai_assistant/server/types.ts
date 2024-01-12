@@ -17,19 +17,43 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type {
+  DataViewsServerPluginSetup,
+  DataViewsServerPluginStart,
+} from '@kbn/data-views-plugin/server';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { ObservabilityAIAssistantService } from './service';
 
-/* eslint-disable @typescript-eslint/no-empty-interface*/
-export interface ObservabilityAIAssistantPluginStart {}
-export interface ObservabilityAIAssistantPluginSetup {}
+export interface ObservabilityAIAssistantPluginSetup {
+  /**
+   * Returns a Observability AI Assistant service instance
+   */
+  service: ObservabilityAIAssistantService;
+}
+
+export interface ObservabilityAIAssistantPluginStart {
+  /**
+   * Returns a Observability AI Assistant service instance
+   */
+  service: ObservabilityAIAssistantService;
+}
+
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
+  dataViews: DataViewsServerPluginSetup;
+  ml: MlPluginSetup;
+  licensing: LicensingPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   security: SecurityPluginStart;
   features: FeaturesPluginStart;
   taskManager: TaskManagerStartContract;
+  dataViews: DataViewsServerPluginStart;
+  ml: MlPluginStart;
+  licensing: LicensingPluginStart;
 }

@@ -20,6 +20,8 @@ export interface MlServerDefaults {
 export interface MlServerLimits {
   max_model_memory_limit?: string;
   effective_max_model_memory_limit?: string;
+  max_single_ml_node_processors?: number;
+  total_ml_processors?: number;
 }
 
 export interface MlInfoResponse {

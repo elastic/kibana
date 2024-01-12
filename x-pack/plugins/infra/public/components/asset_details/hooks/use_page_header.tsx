@@ -5,23 +5,23 @@
  * 2.0.
  */
 import {
-  useEuiTheme,
-  EuiIcon,
-  type EuiPageHeaderProps,
-  type EuiBreadcrumbsProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  type EuiBreadcrumbsProps,
+  type EuiPageHeaderProps,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback, useMemo } from 'react';
-import { capitalize } from 'lodash';
-import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { capitalize } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails } from '../links';
-import { ContentTabIds, type RouteState, type LinkOptions, type Tab, type TabIds } from '../types';
+import { ContentTabIds, type LinkOptions, type RouteState, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
 
@@ -63,7 +63,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
       ? [
           {
             text: (
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <EuiIcon size="s" type="arrowLeft" />
                 </EuiFlexItem>
@@ -88,15 +88,17 @@ export const useTemplateHeaderBreadcrumbs = () => {
 };
 
 const useRightSideItems = (links?: LinkOptions[]) => {
-  const { asset, assetType, overrides } = useAssetDetailsRenderPropsContext();
+  const { asset } = useAssetDetailsRenderPropsContext();
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = useMemo(
     () => ({
-      nodeDetails: <LinkToNodeDetails asset={asset} assetType={assetType} />,
-      alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
+      nodeDetails: (
+        <LinkToNodeDetails assetId={asset.id} assetName={asset.name} assetType={asset.type} />
+      ),
+      alertRule: <LinkToAlertsRule />,
       apmServices: <LinkToApmServices assetName={asset.name} apmField={APM_HOST_FILTER_FIELD} />,
     }),
-    [asset, assetType, overrides?.alertRule?.onCreateRuleClick]
+    [asset.id, asset.name, asset.type]
   );
 
   const rightSideItems = useMemo(
@@ -107,10 +109,34 @@ const useRightSideItems = (links?: LinkOptions[]) => {
   return { rightSideItems };
 };
 
+const useFeatureFlagTabs = () => {
+  const { featureFlags } = usePluginConfig();
+  const isProfilingEnabled = useProfilingIntegrationSetting();
+
+  const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
+    () => ({
+      [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
+      [ContentTabIds.PROFILING]: isProfilingEnabled,
+    }),
+    [featureFlags.osqueryEnabled, isProfilingEnabled]
+  );
+
+  const isTabEnabled = useCallback(
+    (tabItem: Tab) => {
+      return featureFlagControlledTabs[tabItem.id] ?? true;
+    },
+    [featureFlagControlledTabs]
+  );
+
+  return {
+    isTabEnabled,
+  };
+};
+
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { euiTheme } = useEuiTheme();
+  const { isTabEnabled } = useFeatureFlagTabs();
 
   const onTabClick = useCallback(
     (tabId: TabIds) => {
@@ -132,23 +158,20 @@ const useTabs = (tabs: Tab[]) => {
       ...apmTracesMenuItemLinkProps,
       'data-test-subj': 'infraAssetDetailsApmServicesLinkTab',
       label: (
-        <>
-          <EuiIcon
-            type="popout"
-            css={css`
-              margin-right: ${euiTheme.size.xs};
-            `}
-          />
-          {name}
-        </>
+        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="popout" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+        </EuiFlexGroup>
       ),
     }),
-    [apmTracesMenuItemLinkProps, euiTheme.size.xs]
+    [apmTracesMenuItemLinkProps]
   );
 
   const tabEntries: TabItem[] = useMemo(
     () =>
-      tabs.map(({ name, ...tab }) => {
+      tabs.filter(isTabEnabled).map(({ name, ...tab }) => {
         if (tab.id === ContentTabIds.LINK_TO_APM) {
           return getTabToApmTraces(name);
         }
@@ -161,7 +184,7 @@ const useTabs = (tabs: Tab[]) => {
           label: name,
         };
       }),
-    [activeTabId, getTabToApmTraces, onTabClick, tabs]
+    [activeTabId, isTabEnabled, getTabToApmTraces, onTabClick, tabs]
   );
 
   return { tabEntries };

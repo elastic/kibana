@@ -30,7 +30,7 @@ Array [
           class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children"
         >
           <span
-            class="euiThemeProvider emotion-euiColorMode-dark-colorClassName"
+            class="euiThemeProvider emotion-euiColorMode-dark"
           >
             <ul
               class="euiListGroup emotion-euiListGroup-none"
@@ -157,7 +157,7 @@ Array [
         aria-labelledby="generated-id"
         class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
         id="generated-id"
-        role="region"
+        role="group"
         style="block-size: 0;"
         tabindex="-1"
       >
@@ -281,7 +281,7 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
           style="block-size: 0;"
           tabindex="-1"
         >
@@ -412,7 +412,7 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
           style="block-size: 0;"
           tabindex="-1"
         >
@@ -526,7 +526,7 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
           style="block-size: 0;"
           tabindex="-1"
         >
@@ -623,7 +623,7 @@ Array [
           aria-labelledby="generated-id"
           class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
           id="generated-id"
-          role="region"
+          role="group"
           style="block-size: 0;"
           tabindex="-1"
         >
@@ -733,6 +733,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   }
   basePath={
     BasePath {
+      "assetsHrefBase": "/test",
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
@@ -918,6 +919,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   }
   basePath={
     BasePath {
+      "assetsHrefBase": "/test",
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],

@@ -5,97 +5,43 @@
  * 2.0.
  */
 
+import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
-import { ScopedHistory } from '@kbn/core-application-browser';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DiscoverAppState, DiscoverStart } from '@kbn/discover-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
-import {
-  createLogExplorerProfileCustomizations,
-  CreateLogExplorerProfileCustomizationsDeps,
-} from '../../customizations/log_explorer_profile';
-import { createPropertyGetProxy } from '../../utils/proxies';
-import { LogExplorerProfileContext } from '../../state_machines/log_explorer_profile';
+import type { LogExplorerController } from '../../controller';
+import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
+import { LogExplorerStartDeps } from '../../types';
 
-export interface CreateLogExplorerArgs extends CreateLogExplorerProfileCustomizationsDeps {
-  discover: DiscoverStart;
-}
-
-export interface LogExplorerStateContainer {
-  appState?: DiscoverAppState;
-  logExplorerState?: Partial<LogExplorerProfileContext>;
+export interface CreateLogExplorerArgs {
+  core: CoreStart;
+  plugins: LogExplorerStartDeps;
 }
 
 export interface LogExplorerProps {
   scopedHistory: ScopedHistory;
-  state$?: BehaviorSubject<LogExplorerStateContainer>;
+  controller: LogExplorerController;
 }
 
-export const createLogExplorer = ({
-  core,
-  data,
-  discover: { DiscoverContainer },
-}: CreateLogExplorerArgs) => {
-  const overrideServices = {
-    data: createDataServiceProxy(data),
-    uiSettings: createUiSettingsServiceProxy(core.uiSettings),
-  };
+export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
+  const {
+    discover: { DiscoverContainer },
+  } = plugins;
 
-  return ({ scopedHistory, state$ }: LogExplorerProps) => {
+  return ({ scopedHistory, controller }: LogExplorerProps) => {
     const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ core, data, state$ })],
-      [state$]
+      () => [createLogExplorerProfileCustomizations({ controller, core, plugins })],
+      [controller]
     );
+
+    const { urlStateStorage, ...overrideServices } = controller.discoverServices;
 
     return (
       <DiscoverContainer
         customizationCallbacks={logExplorerCustomizations}
         overrideServices={overrideServices}
         scopedHistory={scopedHistory}
+        stateStorageContainer={urlStateStorage}
       />
     );
   };
-};
-
-/**
- * Create proxy for the data service, in which session service enablement calls
- * are no-ops.
- */
-const createDataServiceProxy = (data: DataPublicPluginStart) => {
-  const noOpEnableStorage = () => {};
-
-  const sessionServiceProxy = createPropertyGetProxy(data.search.session, {
-    enableStorage: () => noOpEnableStorage,
-  });
-
-  const searchServiceProxy = createPropertyGetProxy(data.search, {
-    session: () => sessionServiceProxy,
-  });
-
-  return createPropertyGetProxy(data, {
-    search: () => searchServiceProxy,
-  });
-};
-/**
- * Create proxy for the uiSettings service, in which settings preferences are overwritten
- * with custom values
- */
-const createUiSettingsServiceProxy = (uiSettings: IUiSettingsClient) => {
-  const overrides: Record<string, any> = {
-    [HIDE_ANNOUNCEMENTS]: true,
-  };
-
-  return createPropertyGetProxy(uiSettings, {
-    get:
-      () =>
-      (key, ...args) => {
-        if (key in overrides) {
-          return overrides[key];
-        }
-
-        return uiSettings.get(key, ...args);
-      },
-  });
 };

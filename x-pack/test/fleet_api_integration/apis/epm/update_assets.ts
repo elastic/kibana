@@ -217,13 +217,11 @@ export default function (providerContext: FtrProviderContext) {
       expect(resPackage.statusCode).equal(200);
       expect(resPackage.body.component_templates[0].component_template.template.settings).eql({
         index: {
-          codec: 'best_compression',
           default_pipeline: 'logs-all_assets.test_logs-0.2.0',
           lifecycle: {
             name: 'reference2',
           },
           mapping: {
-            ignore_malformed: `true`,
             total_fields: {
               limit: '10000',
             },
@@ -518,6 +516,7 @@ export default function (providerContext: FtrProviderContext) {
         install_started_at: res.attributes.install_started_at,
         install_source: 'registry',
         install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
+        latest_install_failed_attempts: [],
         verification_status: 'unknown',
         verification_key_id: null,
       });

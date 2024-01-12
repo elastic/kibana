@@ -75,6 +75,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       delete_cases: true,
       push_cases: true,
       cases_connectors: true,
+      cases_settings: true,
     },
     visualize: { save: true, show: true },
     dashboard: { show: true, createNew: true },

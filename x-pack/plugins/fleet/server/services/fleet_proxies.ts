@@ -24,6 +24,8 @@ import type {
   Output,
 } from '../types';
 
+import { appContextService } from './app_context';
+
 import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
@@ -70,6 +72,9 @@ export async function createFleetProxy(
   data: NewFleetProxy,
   options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
 ): Promise<FleetProxy> {
+  const logger = appContextService.getLogger();
+  logger.debug(`Creating fleet proxy ${data}`);
+
   const res = await soClient.create<FleetProxySOAttributes>(
     FLEET_PROXY_SAVED_OBJECT_TYPE,
     fleetProxyDataToSOAttribute(data),
@@ -78,7 +83,7 @@ export async function createFleetProxy(
       overwrite: options?.overwrite,
     }
   );
-
+  logger.debug(`Created fleet proxy ${options?.id}`);
   return savedObjectToFleetProxy(res);
 }
 
@@ -97,6 +102,9 @@ export async function deleteFleetProxy(
   id: string,
   options?: { fromPreconfiguration?: boolean }
 ) {
+  const logger = appContextService.getLogger();
+  logger.debug(`Deleting fleet proxy ${id}`);
+
   const fleetProxy = await getFleetProxy(soClient, id);
 
   if (fleetProxy.is_preconfigured && !options?.fromPreconfiguration) {
@@ -120,6 +128,7 @@ export async function deleteFleetProxy(
   }
 
   await updateRelatedSavedObject(soClient, esClient, fleetServerHosts, outputs, downloadSources);
+  logger.debug(`Deleted fleet proxy ${id}`);
 
   return await soClient.delete(FLEET_PROXY_SAVED_OBJECT_TYPE, id);
 }
@@ -130,6 +139,8 @@ export async function updateFleetProxy(
   data: Partial<FleetProxy>,
   options?: { fromPreconfiguration?: boolean }
 ) {
+  const logger = appContextService.getLogger();
+  logger.debug(`Updating fleet proxy ${id}`);
   const originalItem = await getFleetProxy(soClient, id);
 
   if (data.is_preconfigured && !options?.fromPreconfiguration) {
@@ -141,7 +152,7 @@ export async function updateFleetProxy(
     id,
     fleetProxyDataToSOAttribute(data)
   );
-
+  logger.debug(`Updated fleet proxy ${id}`);
   return {
     ...originalItem,
     ...data,
@@ -205,7 +216,7 @@ async function updateRelatedSavedObject(
       outputService.update(soClient, esClient, output.id, {
         ...omit(output, 'id'),
         proxy_id: null,
-      });
+      } as Partial<Output>);
     },
     { concurrency: 20 }
   );

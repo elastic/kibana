@@ -12,6 +12,7 @@ import type { ManifestSchema } from '../schema/manifest';
 export * from './actions';
 export * from './os';
 export * from './trusted_apps';
+export * from './utility_types';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
 
 /**
@@ -942,7 +943,7 @@ export interface PolicyConfig {
   meta: {
     license: string;
     cloud: boolean;
-    license_uid: string;
+    license_uuid: string;
     cluster_uuid: string;
     cluster_name: string;
     serverless: boolean;

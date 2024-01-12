@@ -6,34 +6,19 @@
  */
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
-import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
-import type { TimeRange } from '../time';
+import { INFRA_LOGS_LOCATOR_ID, LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import type { InfraClientCoreSetup } from '../../public/types';
 
-export const LOGS_LOCATOR_ID = 'LOGS_LOCATOR';
+export type InfraLogsLocator = LocatorPublic<LogsLocatorParams>;
 
-export interface LogsLocatorParams extends SerializableRecord {
-  /** Defines log position */
-  time?: number;
-  /**
-   * Optionally set the time range in the time picker.
-   */
-  timeRange?: TimeRange;
-  filter?: string;
-  logView?: LogViewReference;
-}
-
-export type LogsLocator = LocatorPublic<LogsLocatorParams>;
-
-export interface LogsLocatorDependencies {
+export interface InfraLogsLocatorDependencies {
   core: InfraClientCoreSetup;
 }
 
-export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
-  public readonly id = LOGS_LOCATOR_ID;
+export class InfraLogsLocatorDefinition implements LocatorDefinition<LogsLocatorParams> {
+  public readonly id = INFRA_LOGS_LOCATOR_ID;
 
-  constructor(protected readonly deps: LogsLocatorDependencies) {}
+  constructor(protected readonly deps: InfraLogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
     const { createSearchString } = await import('./helpers');

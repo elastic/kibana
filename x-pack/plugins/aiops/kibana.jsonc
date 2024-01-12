@@ -20,7 +20,8 @@
       "unifiedSearch"
     ],
     "optionalPlugins": [
-      "cases"
+      "cases",
+      "usageCollection"
     ],
     "requiredBundles": [
       "fieldFormats",

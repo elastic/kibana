@@ -109,6 +109,20 @@ const hostViewTotalHostCountRetrieved: InfraTelemetryEvent = {
         optional: false,
       },
     },
+    with_query: {
+      type: 'boolean',
+      _meta: {
+        description: 'Has KQL query',
+        optional: false,
+      },
+    },
+    with_filters: {
+      type: 'boolean',
+      _meta: {
+        description: 'Has filters',
+        optional: false,
+      },
+    },
   },
 };
 

@@ -8,6 +8,7 @@
 import { EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+
 import type { AppFeatureKeyType } from '@kbn/security-solution-features';
 import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 

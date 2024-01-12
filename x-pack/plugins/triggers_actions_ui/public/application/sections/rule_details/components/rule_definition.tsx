@@ -18,10 +18,15 @@ import {
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
+import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { RuleDefinitionProps } from '../../../../types';
-import { RuleType, useLoadRuleTypes } from '../../../..';
+import { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
-import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
+import {
+  hasAllPrivilege,
+  hasExecuteActionsCapability,
+  hasShowActionsCapability,
+} from '../../../lib/capabilities';
 import { RuleActions } from './rule_actions';
 import { RuleEdit } from '../../rule_form';
 
@@ -31,7 +36,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   ruleTypeRegistry,
   onEditRule,
   hideEditButton = false,
-  filteredRuleTypes,
+  filteredRuleTypes = [],
 }) => {
   const {
     application: { capabilities },
@@ -39,9 +44,12 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
-  const { ruleTypes, ruleTypeIndex, ruleTypesIsLoading } = useLoadRuleTypes({
+  const {
+    ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesIsLoading },
+  } = useLoadRuleTypesQuery({
     filteredRuleTypes,
   });
+  const ruleTypes = useMemo(() => [...ruleTypeIndex.values()], [ruleTypeIndex]);
 
   const getRuleType = useMemo(() => {
     if (ruleTypes.length && rule) {
@@ -60,6 +68,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
       values: { numberOfConditions },
     });
   };
+  const canReadActions = hasShowActionsCapability(capabilities);
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
     rule &&
@@ -209,11 +218,21 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 })}
               </ItemTitleRuleSummary>
               <EuiFlexItem grow={3}>
-                <RuleActions
-                  ruleActions={rule.actions}
-                  actionTypeRegistry={actionTypeRegistry}
-                  legacyNotifyWhen={rule.notifyWhen}
-                />
+                {canReadActions ? (
+                  <RuleActions
+                    ruleActions={rule.actions}
+                    actionTypeRegistry={actionTypeRegistry}
+                    legacyNotifyWhen={rule.notifyWhen}
+                  />
+                ) : (
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      {i18n.translate('xpack.triggersActionsUI.ruleDetails.cannotReadActions', {
+                        defaultMessage: 'Connector feature privileges are required to view actions',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

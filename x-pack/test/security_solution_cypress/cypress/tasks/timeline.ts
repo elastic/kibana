@@ -11,6 +11,7 @@ import type { Timeline, TimelineFilter } from '../objects/timeline';
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
 import { LOADING_INDICATOR } from '../screens/security_header';
+import { EQL_QUERY_VALIDATION_SPINNER } from '../screens/create_new_rule';
 
 import {
   ADD_FILTER,
@@ -19,11 +20,8 @@ import {
   ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
   ATTACH_TIMELINE_TO_NEW_CASE_ICON,
   CLOSE_TIMELINE_BTN,
-  COMBO_BOX,
   COMBO_BOX_INPUT,
   CREATE_NEW_TIMELINE,
-  DELETE_TIMELINE_BTN,
-  DELETION_CONFIRMATION,
   FIELD_BROWSER,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -38,7 +36,6 @@ import {
   SELECT_CASE,
   SERVER_SIDE_EVENT_COUNT,
   STAR_ICON,
-  TIMELINE_CHANGES_IN_PROGRESS,
   TIMELINE_DESCRIPTION_INPUT,
   TIMELINE_FIELDS_BUTTON,
   TIMELINE_FILTER_FIELD,
@@ -51,17 +48,16 @@ import {
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
   CREATE_NEW_TIMELINE_TEMPLATE,
-  OPEN_TIMELINE_TEMPLATE_ICON,
-  TIMELINE_EDIT_MODAL_OPEN_BUTTON,
+  TIMELINE_SAVE_MODAL,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
+  TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH,
+  TIMELINE_PROGRESS_BAR,
   QUERY_TAB_BUTTON,
-  CLOSE_OPEN_TIMELINE_MODAL_BTN,
   TIMELINE_ADD_FIELD_BUTTON,
   TIMELINE_DATA_PROVIDER_FIELD,
   TIMELINE_DATA_PROVIDER_OPERATOR,
   TIMELINE_DATA_PROVIDER_VALUE,
   SAVE_DATA_PROVIDER_BTN,
-  EVENT_NOTE,
   TIMELINE_CORRELATION_INPUT,
   TIMELINE_CORRELATION_TAB,
   TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
@@ -80,12 +76,19 @@ import {
   TIMELINE_LUCENELANGUAGE_BUTTON,
   TIMELINE_KQLLANGUAGE_BUTTON,
   TIMELINE_QUERY,
-  PROVIDER_BADGE,
-  PROVIDER_BADGE_DELETE,
-  DISCOVER_TAB,
+  ESQL_TAB,
+  NEW_TIMELINE_ACTION,
+  SAVE_TIMELINE_ACTION,
+  TOGGLE_DATA_PROVIDER_BTN,
+  SAVE_TIMELINE_ACTION_BTN,
+  TIMELINE_SEARCH_OR_FILTER,
+  TIMELINE_KQLMODE_FILTER,
+  TIMELINE_KQLMODE_SEARCH,
+  TIMELINE_PANEL,
 } from '../screens/timeline';
-import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
-import { drag, drop } from './common';
+
+import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
+import { drag, drop, waitForTabToBeLoaded } from './common';
 
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
@@ -96,20 +99,30 @@ export const addDescriptionToTimeline = (
   modalAlreadyOpen: boolean = false
 ) => {
   if (!modalAlreadyOpen) {
-    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+    cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
   }
-  cy.get(TIMELINE_DESCRIPTION_INPUT).type(description);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled').type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
-export const addNameToTimeline = (name: string, modalAlreadyOpen: boolean = false) => {
-  if (!modalAlreadyOpen) {
-    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
-  }
+export const addNameToTimelineAndSave = (name: string) => {
+  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
+};
+
+export const addNameToTimelineAndSaveAsNew = (name: string) => {
+  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
+  cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
+  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
+  cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).click();
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
@@ -119,7 +132,7 @@ export const addNameAndDescriptionToTimeline = (
   modalAlreadyOpen: boolean = false
 ) => {
   if (!modalAlreadyOpen) {
-    cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
+    cy.get(SAVE_TIMELINE_ACTION).click();
   }
   cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
@@ -136,10 +149,7 @@ export const goToNotesTab = (): Cypress.Chainable<JQuery<HTMLElement>> => {
   return cy.get(NOTES_TAB_BUTTON);
 };
 
-export const gotToDiscoverTab = () => {
-  cy.get(DISCOVER_TAB).click();
-  cy.get(DISCOVER_TAB).should('have.class', 'euiTab-isSelected');
-};
+export const goToEsqlTab = () => waitForTabToBeLoaded(ESQL_TAB);
 
 export const goToCorrelationTab = () => {
   cy.get(TIMELINE_CORRELATION_TAB).click();
@@ -171,22 +181,25 @@ export const addNotesToTimeline = (notes: string) => {
 
       cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
     });
-
-  goToQueryTab();
-  goToNotesTab();
 };
 
 export const addEqlToTimeline = (eql: string) => {
   goToCorrelationTab().then(() => {
     cy.get(TIMELINE_CORRELATION_INPUT).type(eql);
+    cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   });
+};
+
+export const clearEqlInTimeline = () => {
+  cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
+  cy.get(TIMELINE_CORRELATION_INPUT).clear();
+  cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
 };
 
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
   cy.get(ADD_FILTER).click();
   cy.get(TIMELINE_FILTER_FIELD).type(`${filter.field}{downarrow}{enter}`);
-  cy.get(TIMELINE_FILTER_OPERATOR).type(filter.operator);
-  cy.get(COMBO_BOX).contains(filter.operator).click();
+  cy.get(TIMELINE_FILTER_OPERATOR).type(`${filter.operator}{downarrow}{enter}`);
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_FILTER_VALUE).type(`${filter.value}{enter}`);
   }
@@ -287,34 +300,30 @@ export const clickIdToggleField = () => {
   });
 };
 
-export const closeOpenTimelineModal = () => {
-  cy.get(CLOSE_OPEN_TIMELINE_MODAL_BTN).click({ force: true });
-};
-
 export const closeTimeline = () => {
-  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click();
+  cy.get(CLOSE_TIMELINE_BTN).click();
   cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
 };
 
-export const removeDataProvider = () => {
-  cy.get(PROVIDER_BADGE).click();
-  cy.get(PROVIDER_BADGE_DELETE).click();
-};
-
 export const createNewTimeline = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
-  cy.get(TIMELINE_SETTINGS_ICON).should('be.visible');
-  // eslint-disable-next-line cypress/no-unnecessary-waiting
-  cy.wait(300);
-  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
+  cy.get(NEW_TIMELINE_ACTION).click();
+  cy.get(CREATE_NEW_TIMELINE).first().click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
+  cy.get(NEW_TIMELINE_ACTION).filter(':visible').should('be.visible').click();
 };
 
-export const closeCreateTimelineOptionsPopover = () => {
-  cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').type('{esc}');
+export const createTimelineTemplateOptionsPopoverBottomBar = () => {
+  recurse(
+    () => {
+      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
+      return cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
+    },
+    (sub) => sub.is(':visible')
+  );
+
+  cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0).should('be.visible').click();
 };
 
 export const createNewTimelineTemplate = () => {
@@ -328,27 +337,40 @@ export const executeTimelineKQL = (query: string) => {
 };
 
 export const executeTimelineSearch = (query: string) => {
-  cy.get(TIMELINE_QUERY).type(`${query} {enter}`, { force: true });
+  cy.get(TIMELINE_QUERY).type(`${query} {enter}`);
 };
 
 export const expandFirstTimelineEventDetails = () => {
   cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click({ force: true });
 };
 
-export const deleteTimeline = () => {
-  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).click();
-  cy.get(DELETE_TIMELINE_BTN).click();
-  cy.get(DELETION_CONFIRMATION).click();
+/**
+ * Saves the timeline. Make sure that the timeline has a title set
+ * before you're using this task. Otherwise it will fail to save.
+ */
+export const saveTimeline = () => {
+  cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
+
+  cy.get(TIMELINE_SAVE_MODAL).within(() => {
+    cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
+    cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled');
+
+    cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).should('not.be.disabled');
+    cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+
+    cy.get(TIMELINE_PROGRESS_BAR).should('exist');
+    cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
+  });
 };
 
 export const markAsFavorite = () => {
   cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
-  cy.get(STAR_ICON).click({ force: true });
+  cy.get(TIMELINE_PANEL).within(() => cy.get(STAR_ICON).click());
   cy.wait('@markedAsFavourite');
 };
 
 export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).first().click({ force: true });
+  cy.get(TIMELINE_FIELDS_BUTTON).first().click();
 };
 
 export const openTimelineInspectButton = () => {
@@ -357,15 +379,15 @@ export const openTimelineInspectButton = () => {
 };
 
 export const openTimelineFromSettings = () => {
-  openCreateTimelineOptionsPopover();
-  cy.get(OPEN_TIMELINE_ICON).should('be.visible');
   cy.get(OPEN_TIMELINE_ICON).click();
 };
 
-export const openTimelineTemplateFromSettings = (id: string) => {
-  openTimelineFromSettings();
-  cy.get(OPEN_TIMELINE_TEMPLATE_ICON).click({ force: true });
-  cy.get(TIMELINE_TITLE_BY_ID(id)).click({ force: true });
+export const openTimelineTemplate = (id: string) => {
+  cy.get(TIMELINE_TITLE_BY_ID(id)).click();
+};
+
+export const openTimelineTemplatesTab = () => {
+  cy.get(TIMELINES_TAB_TEMPLATE).click();
 };
 
 export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -376,22 +398,15 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
   }
   // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
   // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
-  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).should('be.visible').click({ force: true });
+  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).click();
 };
 
 export const openActiveTimeline = () => {
-  cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click({ force: true });
+  cy.get(ACTIVE_TIMELINE_BOTTOM_BAR).click();
 };
 
 export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return cy.get(PIN_EVENT).first().click({ force: true });
-};
-
-export const persistNoteToFirstEvent = (notes: string) => {
-  cy.get(EVENT_NOTE).first().click({ force: true });
-  cy.get(NOTES_TEXT_AREA).type(notes);
-  cy.get(ADD_NOTE_BUTTON).click();
-  cy.get(NOTES_TAB_BUTTON).find('.euiBadge');
+  return cy.get(PIN_EVENT).first().click();
 };
 
 export const populateTimeline = () => {
@@ -428,11 +443,6 @@ export const selectCase = (caseId: string) => {
   cy.get(SELECT_CASE(caseId)).click();
 };
 
-export const waitForTimelineChanges = () => {
-  cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('exist');
-  cy.get(TIMELINE_CHANGES_IN_PROGRESS).should('not.exist');
-};
-
 /**
  * We keep clicking on the refresh button until we have the timeline we are looking
  * for. NOTE: That because refresh happens so fast, the click handler in most cases
@@ -457,33 +467,36 @@ export const refreshTimelinesUntilTimeLinePresent = (
 };
 
 export const clickingOnCreateTimelineFormTemplateBtn = () => {
-  cy.get(TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN).click({ force: true });
+  cy.get(TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN).click();
 };
 
 export const clickingOnCreateTemplateFromTimelineBtn = () => {
-  cy.get(TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN).click({ force: true });
+  cy.get(TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN).click();
 };
 
 export const expandEventAction = () => {
   cy.waitUntil(() => {
     cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).should('exist');
     cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).should('be.visible');
-    return cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).then(($el) => $el.length === 1);
+    return cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).then(($el) => $el.length >= 1);
   });
-  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).click();
+  cy.get(TIMELINE_COLLAPSED_ITEMS_BTN).first().click();
 };
 
-export const setKibanaTimezoneToUTC = () =>
-  cy
-    .request({
-      method: 'POST',
-      url: 'internal/kibana/settings',
-      body: { changes: { 'dateFormat:tz': 'UTC' } },
-      headers: {
-        'kbn-xsrf': 'set-kibana-timezone-utc',
-        'x-elastic-internal-origin': 'security-solution',
-      },
-    })
-    .then(() => {
-      cy.reload();
-    });
+const showDataProviderQueryBuilder = () => {
+  cy.get(TOGGLE_DATA_PROVIDER_BTN).should('have.attr', 'aria-pressed', 'false');
+  cy.get(TOGGLE_DATA_PROVIDER_BTN).click();
+  cy.get(TOGGLE_DATA_PROVIDER_BTN).should('have.attr', 'aria-pressed', 'true');
+};
+
+export const selectKqlFilterMode = () => {
+  showDataProviderQueryBuilder();
+  cy.get(TIMELINE_SEARCH_OR_FILTER).click();
+  cy.get(TIMELINE_KQLMODE_FILTER).click();
+};
+
+export const selectKqlSearchMode = () => {
+  showDataProviderQueryBuilder();
+  cy.get(TIMELINE_SEARCH_OR_FILTER).click();
+  cy.get(TIMELINE_KQLMODE_SEARCH).click();
+};

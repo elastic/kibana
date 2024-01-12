@@ -16,7 +16,7 @@ export const MESSAGE_REQUIRED = i18n.translate(
 export const CHANNEL_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.slack_api.error.requiredSlackChannel',
   {
-    defaultMessage: 'Channel is required.',
+    defaultMessage: 'Channel ID is required.',
   }
 );
 export const TOKEN_LABEL = i18n.translate(
@@ -37,13 +37,13 @@ export const SELECT_MESSAGE = i18n.translate(
 export const ACTION_TYPE_TITLE = i18n.translate(
   'xpack.stackConnectors.components.slack_api.connectorTypeTitle',
   {
-    defaultMessage: 'Send to Slack',
+    defaultMessage: 'Slack',
   }
 );
 export const ALLOWED_CHANNELS = i18n.translate(
   'xpack.stackConnectors.components.slack_api.allowedChannelsLabel',
   {
-    defaultMessage: 'Channels',
+    defaultMessage: 'Channel IDs',
   }
 );
 export const SUCCESS_FETCH_CHANNELS = i18n.translate(
@@ -53,9 +53,33 @@ export const SUCCESS_FETCH_CHANNELS = i18n.translate(
   }
 );
 
-export const ERROR_FETCH_CHANNELS = i18n.translate(
-  'xpack.stackConnectors.components.slack_api.errorFetchChannelsText',
+export const ERROR_VALID_CHANNELS = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.errorValidChannelsText',
   {
-    defaultMessage: 'Cannot fetch channels, please check the validity of your token',
+    defaultMessage:
+      'Cannot valid channels, please check the validity of your token or your channel',
+  }
+);
+
+export const ERROR_INVALID_CHANNELS = (invalidChannels: string[]) =>
+  i18n.translate('xpack.stackConnectors.components.slack_api.errorInvalidChannelsText', {
+    defaultMessage:
+      'Cannot validate channel ID "{channels}", please check the validity of your token and/or the channel ID',
+    values: {
+      channels: invalidChannels.join(', '),
+    },
+  });
+
+export const JSON_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.error.slackBlockkitJsonRequired',
+  {
+    defaultMessage: 'Block kit must be valid JSON.',
+  }
+);
+
+export const BLOCKS_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.error.slackBlockkitBlockRequired',
+  {
+    defaultMessage: `JSON must contain field "blocks".`,
   }
 );

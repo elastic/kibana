@@ -14,6 +14,7 @@ import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
+import { i18n } from '@kbn/i18n';
 import {
   GaugeRenderProps,
   GaugeLabelMajorMode,
@@ -246,10 +247,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const onRenderChange = useCallback(
       (isRendered: boolean = true) => {
         if (isRendered) {
-          // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
-          window.requestAnimationFrame(() => {
-            renderComplete();
-          });
+          renderComplete();
         }
       },
       [renderComplete]
@@ -262,8 +260,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       // Chart is not ready
       return null;
     }
-
-    const chartTheme = chartsThemeService.useChartsTheme();
 
     const metricColumn = table.columns.find((col) => col.id === accessors.metric);
 
@@ -368,11 +364,12 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
           <Settings
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
-            theme={[{ background: { color: 'transparent' } }, chartTheme]}
+            theme={[{ background: { color: 'transparent' } }]}
             baseTheme={chartBaseTheme}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             onRenderChange={onRenderChange}
+            locale={i18n.getLocale()}
             {...getOverridesFor(overrides, 'settings')}
           />
           <Goal

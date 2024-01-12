@@ -8,15 +8,14 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { of } from 'rxjs';
 
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';
 import { DataQuality } from './data_quality';
 import { HOT, WARM, UNMANAGED } from './translations';
+import { useKibana } from '../../common/lib/kibana';
 
 const mockedUseKibana = mockUseKibana();
-const mockIsILMAvailable = of(true);
 
 jest.mock('../../common/components/landing_page');
 jest.mock('../../common/lib/kibana', () => {
@@ -31,29 +30,7 @@ jest.mock('../../common/lib/kibana', () => {
   return {
     ...original,
     KibanaServices: mockKibanaServices,
-    useGetUserCasesPermissions: () => ({
-      all: false,
-      create: false,
-      read: true,
-      update: false,
-      delete: false,
-      push: false,
-    }),
-    useKibana: () => ({
-      ...mockedUseKibana,
-      services: {
-        ...mockedUseKibana.services,
-        cases: {
-          api: {
-            getRelatedCases: jest.fn(),
-          },
-          hooks: {
-            useCasesAddToNewCaseFlyout: jest.fn(),
-          },
-        },
-        isILMAvailable$: mockIsILMAvailable,
-      },
-    }),
+    useKibana: jest.fn(),
     useUiSetting$: () => ['0,0.[000]'],
   };
 });
@@ -82,7 +59,33 @@ describe('DataQuality', () => {
   const defaultIlmPhases = `${HOT}${WARM}${UNMANAGED}`;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        cases: {
+          api: {
+            getRelatedCases: jest.fn(),
+          },
+          hooks: {
+            useCasesAddToNewCaseFlyout: jest.fn(),
+          },
+          helpers: {
+            canUseCases: jest.fn().mockReturnValue({
+              all: false,
+              create: false,
+              read: true,
+              update: false,
+              delete: false,
+              push: false,
+            }),
+          },
+        },
+        configSettings: { ILMEnabled: true },
+      },
+    });
 
     mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
@@ -290,6 +293,54 @@ describe('DataQuality', () => {
 
     test('it does NOT render the landing page', () => {
       expect(screen.queryByTestId('siem-landing-page')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when ILMEnabled is false', () => {
+    beforeEach(async () => {
+      (useKibana as jest.Mock).mockReturnValue({
+        ...mockedUseKibana,
+        services: {
+          ...mockedUseKibana.services,
+          cases: {
+            api: {
+              getRelatedCases: jest.fn(),
+            },
+            hooks: {
+              useCasesAddToNewCaseFlyout: jest.fn(),
+            },
+            helpers: {
+              canUseCases: jest.fn().mockReturnValue({
+                all: false,
+                create: false,
+                read: true,
+                update: false,
+                delete: false,
+                push: false,
+              }),
+            },
+          },
+          configSettings: { ILMEnabled: false },
+        },
+      });
+
+      render(
+        <TestProviders>
+          <MemoryRouter>
+            <DataQuality />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+      await waitFor(() => {});
+    });
+
+    test('it should not render default ILM phases', () => {
+      expect(screen.queryByTestId('selectIlmPhases')).not.toBeInTheDocument();
+    });
+
+    test('it should render a date picker', () => {
+      expect(screen.getByTestId('dataQualityDatePicker')).toBeInTheDocument();
     });
   });
 });

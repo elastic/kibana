@@ -54,7 +54,6 @@ import {
   getTelemetryFunction,
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
-import { setTheme } from './services';
 import { setKibanaServices } from './kibana_services';
 import { CustomTimeRangeBadge, EditPanelAction } from './embeddable_panel/panel_actions';
 
@@ -120,7 +119,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
-    setTheme(core.theme);
     bootstrap(uiActions);
 
     return {
@@ -148,10 +146,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     });
 
     const { uiActions } = deps;
-    const { overlays, theme, uiSettings } = core;
+    const { uiSettings } = core;
 
     const dateFormat = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
-    const commonlyUsedRanges = uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
 
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
@@ -170,13 +167,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       this.stateTransferService
     );
 
-    const timeRangeBadge = new CustomTimeRangeBadge(
-      overlays,
-      theme,
-      editPanel,
-      commonlyUsedRanges,
-      dateFormat
-    );
+    const timeRangeBadge = new CustomTimeRangeBadge(editPanel, dateFormat);
 
     uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 

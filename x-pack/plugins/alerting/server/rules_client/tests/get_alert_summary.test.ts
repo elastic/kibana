@@ -25,6 +25,7 @@ import { SavedObject } from '@kbn/core/server';
 import { EventsFactory } from '../../lib/alert_summary_from_event_log.test';
 import { RawRule } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -57,6 +58,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 beforeEach(() => {
@@ -76,7 +79,7 @@ const RuleIntervalSeconds = 1;
 
 const BaseRuleSavedObject: SavedObject<RawRule> = {
   id: '1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     enabled: true,
     name: 'rule-name',
@@ -170,6 +173,7 @@ describe('getAlertSummary()', () => {
             "flapping": true,
             "muted": false,
             "status": "Active",
+            "tracked": true,
             "uuid": "uuid-1",
           },
           "alert-muted-no-activity": Object {
@@ -178,6 +182,7 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": true,
             "status": "OK",
+            "tracked": true,
             "uuid": undefined,
           },
           "alert-previously-active": Object {
@@ -186,6 +191,7 @@ describe('getAlertSummary()', () => {
             "flapping": false,
             "muted": false,
             "status": "OK",
+            "tracked": true,
             "uuid": "uuid-2",
           },
         },

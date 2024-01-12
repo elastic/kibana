@@ -7,7 +7,7 @@
 
 import type { RuleResponse } from '../../../model';
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { RuleExecutionStats, StatsHistory } from './health_stats';
+import type { HealthOverviewStats, HealthHistory } from './health_stats';
 
 /**
  * Health calculation parameters for a given rule.
@@ -24,25 +24,25 @@ export interface RuleHealthParameters extends HealthParameters {
  */
 export interface RuleHealthSnapshot extends HealthSnapshot {
   /**
-   * Health stats at the moment of the calculation request.
+   * Health state at the moment of the calculation request.
    */
-  stats_at_the_moment: RuleHealthStatsAtTheMoment;
+  state_at_the_moment: RuleHealthState;
 
   /**
    * Health stats calculated over the interval specified in the health parameters.
    */
-  stats_over_interval: RuleHealthStatsOverInterval;
+  stats_over_interval: RuleHealthStats;
 
   /**
    * History of change of the same health stats during the interval.
    */
-  history_over_interval: StatsHistory<RuleHealthStatsOverInterval>;
+  history_over_interval: HealthHistory<RuleHealthStats>;
 }
 
 /**
- * Health stats at the moment of the calculation request.
+ * Health state at the moment of the calculation request.
  */
-export interface RuleHealthStatsAtTheMoment {
+export interface RuleHealthState {
   /**
    * Rule object including its current execution summary.
    */
@@ -52,4 +52,4 @@ export interface RuleHealthStatsAtTheMoment {
 /**
  * Health stats calculated over a given interval.
  */
-export type RuleHealthStatsOverInterval = RuleExecutionStats;
+export type RuleHealthStats = HealthOverviewStats;

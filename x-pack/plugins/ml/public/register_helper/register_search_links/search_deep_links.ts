@@ -263,7 +263,7 @@ function createDeepLinks(
       };
     },
 
-    getDataComparisonDeepLink: (): AppDeepLink<LinkId> => {
+    getDataDriftDeepLink: (): AppDeepLink<LinkId> => {
       return {
         id: 'dataDrift',
         title: i18n.translate('xpack.ml.deepLink.dataDrift', {

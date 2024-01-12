@@ -373,6 +373,13 @@ const apmPerAgentSchema: Pick<
           'Total number of services utilizing the opentelemetry/swift agent within the last day',
       },
     },
+    'opentelemetry/android': {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of services utilizing the opentelemetry/android agent within the last day',
+      },
+    },
     'opentelemetry/webjs': {
       type: 'long',
       _meta: {
@@ -567,11 +574,18 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
 
 export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   ...apmPerAgentSchema,
+  has_any_services_per_official_agent: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Indicates whether any service is being monitored. This is determined by checking all officially supported agents within the last day',
+    },
+  },
   has_any_services: {
     type: 'boolean',
     _meta: {
       description:
-        'Indicates whether any service is being monitored. This is determined by checking all agents within the last day',
+        'Indicates whether any service is being monitored within the last day.',
     },
   },
   version: {
@@ -755,6 +769,15 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         _meta: {
           description:
             'Total number of apm-agent-configuration documents overall',
+        },
+      },
+    },
+    global_labels: {
+      '1d': {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of global labels used for creating aggregation keys for internal metrics computed from indices which received data in the last 24 hours',
         },
       },
     },
@@ -1074,6 +1097,25 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       },
     },
   },
+  custom_dashboards: {
+    kuery_fields: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'An array of up to 500 unique fields used to create the custom dashboards across all spaces. Example  [service.language.name, service.name] ',
+        },
+      },
+    },
+    total: {
+      type: 'long',
+      _meta: {
+        description:
+          'Total number of custom dashboards retrived from the saved object across all spaces',
+      },
+    },
+  },
   per_service: { type: 'array', items: { ...apmPerServiceSchema } },
   top_traces: {
     max: {
@@ -1141,6 +1183,17 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           _meta: {
             description:
               'Execution time in milliseconds for the "agent_configuration" task',
+          },
+        },
+      },
+    },
+    global_labels: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "global_labels" task',
           },
         },
       },
@@ -1239,6 +1292,17 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           _meta: {
             description:
               'Execution time in milliseconds for the "service_groups" task',
+          },
+        },
+      },
+    },
+    custom_dashboards: {
+      took: {
+        ms: {
+          type: 'long',
+          _meta: {
+            description:
+              'Execution time in milliseconds for the "custom_dashboards" task',
           },
         },
       },

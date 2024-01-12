@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getRiskEntityTranslation } from '../../../../explore/components/risk_score/translations';
+import { getRiskEntityTranslation } from '../../../../entity_analytics/components/risk_score/translations';
 import type { RiskScoreEntity } from '../../../../../common/search_strategy';
-export * from '../../../../explore/components/risk_score/translations';
+export * from '../../../../entity_analytics/components/risk_score/translations';
 
 export const FEED_NAME_PREPOSITION = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.feedNamePreposition',
@@ -35,13 +35,6 @@ export const INDICATOR_TOOLTIP_CONTENT = i18n.translate(
   'xpack.securitySolution.eventDetails.ctiSummary.indicatorEnrichmentTooltipContent',
   {
     defaultMessage: 'Shows available threat indicator matches.',
-  }
-);
-
-export const INFORMATION_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.eventDetails.ctiSummary.informationAriaLabel',
-  {
-    defaultMessage: 'Information',
   }
 );
 
@@ -99,17 +92,17 @@ export const ENRICHED_DATA = i18n.translate(
   }
 );
 
-export const CURRENT_RISK_CLASSIFICATION = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskClassification', {
-    defaultMessage: 'Current {riskEntity} risk classification',
+export const CURRENT_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
+  i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskLevel', {
+    defaultMessage: 'Current {riskEntity} risk level',
     values: {
       riskEntity: getRiskEntityTranslation(riskEntity, true),
     },
   });
 
-export const ORIGINAL_RISK_CLASSIFICATION = (riskEntity: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.alertDetails.overview.originalHostRiskClassification', {
-    defaultMessage: 'Original {riskEntity} risk classification',
+export const ORIGINAL_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
+  i18n.translate('xpack.securitySolution.alertDetails.overview.originalHostRiskLevel', {
+    defaultMessage: 'Original {riskEntity} risk level',
     values: {
       riskEntity: getRiskEntityTranslation(riskEntity, true),
     },

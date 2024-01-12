@@ -7,4 +7,4 @@
  */
 
 import { UsageCollectionTestPlugin } from './plugin';
-export const plugin = () => new UsageCollectionTestPlugin();
+export const plugin = async () => new UsageCollectionTestPlugin();

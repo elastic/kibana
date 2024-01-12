@@ -46,6 +46,7 @@ const dataViewAttributesSchema = schema.object(
     allowNoIndex: schema.maybe(schema.boolean()),
     runtimeFieldMap: schema.maybe(schema.any()),
     name: schema.maybe(schema.string()),
+    allowHidden: schema.maybe(schema.boolean()),
   },
   { unknowns: 'forbid' }
 );

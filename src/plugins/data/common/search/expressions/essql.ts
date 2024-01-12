@@ -203,10 +203,10 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
             { abortSignal, strategy: SQL_SEARCH_STRATEGY }
           ).pipe(
             catchError((error) => {
-              if (!error.err) {
+              if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
               } else {
-                const { type, reason } = error.err.attributes;
+                const { type, reason } = error.attributes;
                 if (type === 'parsing_exception') {
                   error.message = `Couldn't parse Elasticsearch SQL query. You may need to add double quotes to names containing special characters. Check your query and try again. Error: ${reason}`;
                 } else {
@@ -217,14 +217,14 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next(finalResponse) {
+              next({ rawResponse, requestParams, took }) {
                 logInspectorRequest()
                   .stats({
                     hits: {
                       label: i18n.translate('data.search.es_search.hitsLabel', {
                         defaultMessage: 'Hits',
                       }),
-                      value: `${finalResponse.rawResponse.rows.length}`,
+                      value: `${rawResponse.rows.length}`,
                       description: i18n.translate('data.search.es_search.hitsDescription', {
                         defaultMessage: 'The number of documents returned by the query.',
                       }),
@@ -235,7 +235,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
                       }),
                       value: i18n.translate('data.search.es_search.queryTimeValue', {
                         defaultMessage: '{queryTime}ms',
-                        values: { queryTime: finalResponse.took },
+                        values: { queryTime: took },
                       }),
                       description: i18n.translate('data.search.es_search.queryTimeDescription', {
                         defaultMessage:
@@ -245,10 +245,12 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
                     },
                   })
                   .json(params)
-                  .ok({ json: finalResponse });
+                  .ok({ json: rawResponse, requestParams });
               },
               error(error) {
-                logInspectorRequest().json(params).error({ json: error });
+                logInspectorRequest().error({
+                  json: 'attributes' in error ? error.attributes : { message: error.message },
+                });
               },
             })
           );

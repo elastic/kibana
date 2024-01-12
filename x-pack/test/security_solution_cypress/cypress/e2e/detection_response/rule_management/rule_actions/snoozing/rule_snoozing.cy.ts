@@ -9,7 +9,7 @@ import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/comm
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { createRule, snoozeRule as snoozeRuleViaAPI } from '../../../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import { getNewRule } from '../../../../../objects/rule';
@@ -43,13 +43,7 @@ import { TOOLTIP } from '../../../../../screens/common';
 
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-// Flaky in serverless tests
-describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe('rule snoozing', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
@@ -183,7 +177,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerless'] }
       deleteConnectors();
     });
 
-    it('adds an action to a snoozed rule', () => {
+    it('adds an action to a snoozed rule', { tags: ['@brokenInServerlessQA'] }, () => {
       createSnoozedRule(getNewRule({ name: 'Snoozed rule' })).then(({ body: rule }) => {
         visitEditRulePage(rule.id);
         goToActionsStepTab();

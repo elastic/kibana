@@ -18,6 +18,7 @@ import {
   EmbeddableInput,
   EmbeddableEditorState,
   EmbeddableStateTransfer,
+  isExplicitInputWithAttributes,
 } from '../../../lib';
 import { ViewMode } from '../../../lib/types';
 import { EmbeddableStart } from '../../../plugin';
@@ -44,8 +45,7 @@ export class EditPanelAction implements Action<ActionContext> {
   constructor(
     private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
     private readonly application: ApplicationStart,
-    private readonly stateTransfer?: EmbeddableStateTransfer,
-    private readonly getOriginatingPath?: () => string
+    private readonly stateTransfer?: EmbeddableStateTransfer
   ) {
     if (this.application?.currentAppId$) {
       this.application.currentAppId$
@@ -95,7 +95,19 @@ export class EditPanelAction implements Action<ActionContext> {
       }
 
       const oldExplicitInput = embeddable.getExplicitInput();
-      const newExplicitInput = await factory.getExplicitInput(oldExplicitInput);
+      let newExplicitInput: Partial<EmbeddableInput>;
+      try {
+        const explicitInputReturn = await factory.getExplicitInput(
+          oldExplicitInput,
+          embeddable.parent
+        );
+        newExplicitInput = isExplicitInputWithAttributes(explicitInputReturn)
+          ? explicitInputReturn.newInput
+          : explicitInputReturn;
+      } catch (e) {
+        // error likely means user canceled editing
+        return;
+      }
       embeddable.parent?.replaceEmbeddable(embeddable.id, newExplicitInput);
       return;
     }
@@ -126,7 +138,7 @@ export class EditPanelAction implements Action<ActionContext> {
 
     if (app && path) {
       if (this.currentAppId) {
-        const originatingPath = this.getOriginatingPath?.();
+        const originatingPath = embeddable.getAppContext()?.getCurrentPath?.();
 
         const state: EmbeddableEditorState = {
           originatingApp: this.currentAppId,

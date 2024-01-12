@@ -8,14 +8,10 @@
 
 import {
   EuiHeader,
-  EuiHeaderLink,
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  EuiHeaderSectionItemButton,
-  EuiIcon,
   EuiLoadingSpinner,
-  htmlIdGenerator,
   useEuiTheme,
   EuiThemeComputed,
 } from '@elastic/eui';
@@ -35,12 +31,11 @@ import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
-import React, { createRef, useCallback, useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
+import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime, Observable, of } from 'rxjs';
 import { useHeaderActionMenuMounter } from '../header/header_action_menu';
-import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
+import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
@@ -55,6 +50,7 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
       min-width: 56px; /* 56 = 40 + 8 + 8 */
       padding: 0 ${size.s};
       cursor: pointer;
+      margin-left: -${size.s}; // to get equal spacing between .euiCollapsibleNavButtonWrapper, logo and breadcrumbs
     `,
     logo: css`
       min-width: 0; /* overrides min-width: 40px */
@@ -66,19 +62,17 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
       top: 2px;
     `,
   },
-  nav: {
-    toggleNavButton: css`
-      border-right: 1px solid #d3dae6;
-      margin-left: -1px;
-      padding-right: ${size.xs};
-    `,
-  },
-  projectName: {
-    link: css`
-      /* TODO: make header layout more flexible? */
-      max-width: 320px;
-    `,
-  },
+  leftHeaderSection: css`
+    // needed to enable breadcrumbs truncation
+    min-width: 0;
+    flex-shrink: 1;
+  `,
+  breadcrumbsSectionItem: css`
+    min-width: 0; // needed to enable breadcrumbs truncation
+  `,
+  redirectAppLinksContainer: css`
+    min-width: 0; // needed to enable breadcrumbs truncation
+  `,
 });
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
@@ -87,11 +81,6 @@ const headerStrings = {
   logo: {
     ariaLabel: i18n.translate('core.ui.primaryNav.goToHome.ariaLabel', {
       defaultMessage: 'Go to home page',
-    }),
-  },
-  cloud: {
-    linkToProjects: i18n.translate('core.ui.primaryNav.cloud.linkToProjects', {
-      defaultMessage: 'Projects',
     }),
   },
   nav: {
@@ -112,8 +101,6 @@ export interface Props {
   helpSupportUrl$: Observable<string>;
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
-  projectsUrl$: Observable<string | undefined>;
-  projectName$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -121,9 +108,9 @@ export interface Props {
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
+  toggleSideNav: (isCollapsed: boolean) => void;
 }
 
-const LOCAL_STORAGE_IS_OPEN_KEY = 'PROJECT_NAVIGATION_OPEN' as const;
 const LOADING_DEBOUNCE_TIME = 80;
 
 type LogoProps = Pick<Props, 'application' | 'homeHref$' | 'loadingCount$' | 'prependBasePath'> & {
@@ -184,14 +171,10 @@ export const ProjectHeader = ({
   children,
   prependBasePath,
   docLinks,
+  toggleSideNav,
   ...observables
 }: Props) => {
-  const [navId] = useState(htmlIdGenerator()());
-  const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
-  const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
-  const projectsUrl = useObservable(observables.projectsUrl$);
-  const projectName = useObservable(observables.projectName$);
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
@@ -209,35 +192,10 @@ export const ProjectHeader = ({
       <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position="fixed" className="header__firstBar">
-            <EuiHeaderSection grow={false}>
-              <EuiHeaderSectionItem css={headerCss.nav.toggleNavButton}>
-                <Router history={application.history}>
-                  <ProjectNavigation
-                    isOpen={isOpen!}
-                    closeNav={() => {
-                      setIsOpen(false);
-                      if (toggleCollapsibleNavRef.current) {
-                        toggleCollapsibleNavRef.current.focus();
-                      }
-                    }}
-                    button={
-                      <EuiHeaderSectionItemButton
-                        data-test-subj="toggleNavButton"
-                        aria-label={headerStrings.nav.closeNavAriaLabel}
-                        onClick={() => setIsOpen(!isOpen)}
-                        aria-expanded={isOpen!}
-                        aria-pressed={isOpen!}
-                        aria-controls={navId}
-                        ref={toggleCollapsibleNavRef}
-                      >
-                        <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
-                      </EuiHeaderSectionItemButton>
-                    }
-                  >
-                    {children}
-                  </ProjectNavigation>
-                </Router>
-              </EuiHeaderSectionItem>
+            <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
+              <Router history={application.history}>
+                <ProjectNavigation toggleSideNav={toggleSideNav}>{children}</ProjectNavigation>
+              </Router>
 
               <EuiHeaderSectionItem>
                 <Logo
@@ -249,23 +207,12 @@ export const ProjectHeader = ({
                 />
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={observables.navControlsLeft$} />
-              </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem>
-                <EuiHeaderLink
-                  href={projectsUrl}
-                  data-test-subj={'projectsLink'}
-                  css={headerCss.projectName.link}
+              <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
+                <RedirectAppLinks
+                  coreStart={{ application }}
+                  css={headerCss.redirectAppLinksContainer}
                 >
-                  {projectName ?? headerStrings.cloud.linkToProjects}
-                </EuiHeaderLink>
-              </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem>
-                <RedirectAppLinks coreStart={{ application }}>
-                  <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                  <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
                 </RedirectAppLinks>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
@@ -297,7 +244,7 @@ export const ProjectHeader = ({
       </header>
 
       {headerActionMenuMounter.mount && (
-        <AppMenuBar isOpen={isOpen ?? false} headerActionMenuMounter={headerActionMenuMounter} />
+        <AppMenuBar headerActionMenuMounter={headerActionMenuMounter} />
       )}
     </>
   );

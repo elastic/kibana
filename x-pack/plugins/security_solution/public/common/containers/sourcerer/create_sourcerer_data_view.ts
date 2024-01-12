@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  DataViewListItem,
-  DataViewsContract,
-  DataView as DataViewType,
-} from '@kbn/data-views-plugin/common';
+import type { DataViewListItem, DataView as DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 import type { KibanaDataView } from '../../store/sourcerer/model';
@@ -21,7 +18,7 @@ export interface GetSourcererDataView {
   body: {
     patternList: string[];
   };
-  dataViewService: DataViewsContract;
+  dataViewService: DataViewsServicePublic;
   dataViewId: string | null;
 }
 

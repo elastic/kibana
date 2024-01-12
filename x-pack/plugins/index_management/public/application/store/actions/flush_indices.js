@@ -26,8 +26,8 @@ export const flushIndices =
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.flushIndicesAction.successfullyFlushedIndicesMessage', {
-        defaultMessage: 'Successfully flushed: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Successfully flushed {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
   };

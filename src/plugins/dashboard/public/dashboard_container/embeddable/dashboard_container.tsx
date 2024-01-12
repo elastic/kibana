@@ -31,6 +31,7 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 
@@ -49,13 +50,13 @@ import {
   DashboardReduxState,
   DashboardRenderPerformanceStats,
 } from '../types';
-import { DASHBOARD_CONTAINER_TYPE } from '../..';
-import { createPanelState } from '../component/panel';
+import { placePanel } from '../component/panel_placement';
 import { pluginServices } from '../../services/plugin_services';
 import { initializeDashboard } from './create/create_dashboard';
-import { DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
+import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
 import { DashboardCreationOptions } from './dashboard_container_factory';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
+import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardPanelState, DashboardContainerInput } from '../../../common';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
@@ -107,6 +108,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public controlGroup?: ControlGroupContainer;
 
   public searchSessionId?: string;
+  public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -185,6 +187,16 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.select = reduxTools.select;
   }
 
+  public getAppContext() {
+    const embeddableAppContext = this.creationOptions?.getEmbeddableAppContext?.(
+      this.getDashboardSavedObjectId()
+    );
+    return {
+      ...embeddableAppContext,
+      currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
+    };
+  }
+
   public getDashboardSavedObjectId() {
     return this.getState().componentState.lastSavedId;
   }
@@ -213,11 +225,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     TEmbeddable extends IEmbeddable<TEmbeddableInput, any>
   >(
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
-    partial: Partial<TEmbeddableInput> = {}
-  ): DashboardPanelState<TEmbeddableInput> {
-    const panelState = super.createNewPanelState(factory, partial);
-    const { newPanel } = createPanelState(panelState, this.input.panels);
-    return newPanel;
+    partial: Partial<TEmbeddableInput> = {},
+    attributes?: unknown
+  ): {
+    newPanel: DashboardPanelState<TEmbeddableInput>;
+    otherPanels: DashboardContainerInput['panels'];
+  } {
+    const { newPanel } = super.createNewPanelState(factory, partial, attributes);
+    return placePanel(factory, newPanel, this.input.panels, attributes);
   }
 
   public render(dom: HTMLElement) {
@@ -399,13 +414,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     this.searchSessionId = searchSessionId;
 
-    this.updateInput(newInput);
     batch(() => {
       this.dispatch.setLastSavedInput(loadDashboardReturn?.dashboardInput);
       this.dispatch.setManaged(loadDashboardReturn?.managed);
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
     });
+    this.updateInput(newInput);
     dashboardContainerReady$.next(this);
   };
 

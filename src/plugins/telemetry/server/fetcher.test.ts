@@ -196,6 +196,61 @@ describe('FetcherTask', () => {
     );
 
     test(
+      'Retries when `getCurrentConfigs` rejects',
+      fakeSchedulers(async (advance) => {
+        expect(fetcherTask['isOnline$'].value).toBe(false);
+        getCurrentConfigs.mockRejectedValueOnce(new Error('SomeError')).mockResolvedValue({
+          telemetryOptIn: true,
+          telemetrySendUsageFrom: 'server',
+          failureCount: 0,
+          telemetryUrl: 'test-url',
+        });
+        fetchMock.mockResolvedValue({});
+
+        const subscription = fetcherTask['validateConnectivity']();
+
+        // need to advance / await twice for retry
+        advance(5 * 60 * 1000);
+        await new Promise((resolve) => process.nextTick(resolve)); // Wait for the initial promise to fulfill
+        advance(1 * 60 * 1000);
+        await new Promise((resolve) => process.nextTick(resolve)); // Wait for the retry promise to fulfill
+
+        expect(getCurrentConfigs).toHaveBeenCalledTimes(2);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(updateReportFailure).toHaveBeenCalledTimes(0);
+        expect(fetcherTask['isOnline$'].value).toBe(true);
+
+        subscription.unsubscribe();
+      })
+    );
+
+    test(
+      'logs a message when retries are exceeded',
+      fakeSchedulers(async (advance) => {
+        expect(fetcherTask['isOnline$'].value).toBe(false);
+        getCurrentConfigs.mockRejectedValue(new Error('SomeError'));
+
+        const subscription = fetcherTask['validateConnectivity']();
+
+        const wait = async () => {
+          advance(5 * 60 * 1000);
+          await new Promise((resolve) => process.nextTick(resolve)); // Wait for the initial promise to fulfill
+        };
+
+        for (let i = 0; i < 7; i++) {
+          await wait();
+        }
+
+        expect(fetcherTask['logger'].error).toBeCalledTimes(1);
+        expect(fetcherTask['logger'].error).toHaveBeenCalledWith(
+          `Cannot get the current config: SomeError`
+        );
+
+        subscription.unsubscribe();
+      })
+    );
+
+    test(
       'Should not retry if it hit the max number of failures for this version',
       fakeSchedulers(async (advance) => {
         expect(fetcherTask['isOnline$'].value).toBe(false);

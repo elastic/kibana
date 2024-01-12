@@ -10,11 +10,11 @@ import type {
   LinkItem,
 } from '@kbn/security-solution-plugin/public/common/links/types';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { cloneDeep, remove } from 'lodash';
+import { cloneDeep, find, remove } from 'lodash';
 import { createInvestigationsLinkFromTimeline } from './sections/investigations_links';
 import { mlAppLink } from './sections/ml_links';
 import { createAssetsLinkFromManage } from './sections/assets_links';
-import { createProjectSettingsLinkFromManage } from './sections/project_settings_links';
+import { createProjectSettingsLinksFromManage } from './sections/project_settings_links';
 
 // This function is called by the security_solution plugin to alter the app links
 // that will be registered to the Security Solution application on Serverless projects.
@@ -29,21 +29,24 @@ export const projectAppLinksSwitcher: AppLinksSwitcher = (appLinks) => {
     projectAppLinks.push(createInvestigationsLinkFromTimeline(timelineLinkItem));
   }
 
+  // Remove data quality dashboard link
+  const dashboardLinkItem = find(projectAppLinks, { id: SecurityPageName.dashboards });
+  if (dashboardLinkItem && dashboardLinkItem.links) {
+    remove(dashboardLinkItem.links, { id: SecurityPageName.dataQuality });
+  }
+
   // Remove manage link
   const [manageLinkItem] = remove(projectAppLinks, { id: SecurityPageName.administration });
 
   if (manageLinkItem) {
     // Add assets link
     projectAppLinks.push(createAssetsLinkFromManage(manageLinkItem));
+    // Add entity analytics link if exists
+    projectAppLinks.push(...createProjectSettingsLinksFromManage(manageLinkItem));
   }
 
   // Add ML link
   projectAppLinks.push(mlAppLink);
-
-  if (manageLinkItem) {
-    // Add project settings link
-    projectAppLinks.push(createProjectSettingsLinkFromManage(manageLinkItem));
-  }
 
   return projectAppLinks;
 };

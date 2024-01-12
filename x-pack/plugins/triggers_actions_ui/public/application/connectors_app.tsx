@@ -11,7 +11,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -74,8 +73,8 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { dataViews, uiSettings, theme$ } = deps;
-  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+  const { dataViews, theme } = deps;
+  const isDarkMode = theme.getTheme().darkMode;
   const sections: Section[] = ['connectors', 'logs'];
   const sectionsRegex = sections.join('|');
 
@@ -83,7 +82,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={isDarkMode}>
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider theme$={theme.theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
               <AppWithoutRouter sectionsRegex={sectionsRegex} />

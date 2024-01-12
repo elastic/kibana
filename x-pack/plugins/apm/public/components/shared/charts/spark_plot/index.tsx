@@ -23,7 +23,8 @@ import {
   EuiLoadingChart,
 } from '@elastic/eui';
 import React from 'react';
-import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
@@ -102,7 +103,7 @@ function SparkPlotItem({
   comparisonSeriesColor?: string;
 }) {
   const theme = useTheme();
-  const defaultChartTheme = useChartTheme();
+  const defaultChartThemes = useChartThemes();
   const comparisonChartTheme = getComparisonChartTheme();
   const hasComparisonSeries = !!comparisonSeries?.length;
 
@@ -141,8 +142,10 @@ function SparkPlotItem({
     return (
       <Chart size={chartSize}>
         <Settings
-          theme={[sparkplotChartTheme, ...defaultChartTheme]}
+          theme={[sparkplotChartTheme, ...defaultChartThemes.theme]}
+          baseTheme={defaultChartThemes.baseTheme}
           showLegend={false}
+          locale={i18n.getLocale()}
         />
         <Tooltip type="none" />
         {type && type === 'bar' ? (

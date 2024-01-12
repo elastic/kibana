@@ -35,7 +35,7 @@ type StatusReducerAction =
       jobSummaries: FetchJobStatusResponsePayload;
       datafeedSetupResults: SetupMlModuleResponsePayload['datafeeds'];
     }
-  | { type: 'failedSetup' }
+  | { type: 'failedSetup'; reason?: string }
   | { type: 'fetchingJobStatuses' }
   | {
       type: 'fetchedJobStatuses';
@@ -131,7 +131,7 @@ const createStatusReducer =
             }),
             {} as Record<JobType, JobStatus>
           ),
-          setupStatus: { type: 'failed', reasons: ['unknown'] },
+          setupStatus: { type: 'failed', reasons: action.reason ? [action.reason] : ['unknown'] },
         };
       }
       case 'fetchingJobStatuses': {

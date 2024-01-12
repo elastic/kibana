@@ -7,7 +7,7 @@
 
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField } from '@kbn/code-editor';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
 
@@ -23,8 +23,12 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({
   error,
 }) => {
   return (
-    <>
-      <EuiLink href={docLinks.metadata} target="_blank">
+    <div data-test-subj="create-api-metadata-code-editor-container">
+      <EuiLink
+        data-test-subj="serverlessSearchMetadataFormLearnHowToStructureRoleMetadataLink"
+        href={docLinks.metadata}
+        target="_blank"
+      >
         {i18n.translate('xpack.serverlessSearch.apiKey.metadataLinkLabel', {
           defaultMessage: 'Learn how to structure role metadata',
         })}
@@ -44,6 +48,6 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({
         onChange={(e) => onChangeMetadata(e)}
         value={metadata}
       />
-    </>
+    </div>
   );
 };

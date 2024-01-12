@@ -25,7 +25,7 @@ export interface AlertSummaryTimeRange {
 }
 
 export interface ChartProps {
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
   onBrushEnd?: BrushEndListener;
 }
@@ -38,4 +38,5 @@ export interface AlertSummaryWidgetProps {
   timeRange: AlertSummaryTimeRange;
   chartProps: ChartProps;
   hideChart?: boolean;
+  onLoaded?: () => void;
 }

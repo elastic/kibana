@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/locator-examples-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/appex-sharedux",
   "description": "Example app that registers custom URL locators",
   "plugin": {
     "id": "locatorExamples",

@@ -1,0 +1,9 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+FROM nyc_taxis
+| WHERE DATE_EXTRACT(drop_off_time, "hour") >= 6 AND DATE_EXTRACT(drop_off_time, "hour") < 10
+| LIMIT 10
+```

@@ -86,7 +86,7 @@ export const sampleAttributeCoreWebVital = {
                 filter: {
                   language: 'kuery',
                   query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.marks.agent.largestContentfulPaint < 2500',
+                    'transaction.type: (page-load or page-exit) and processor.event: transaction and transaction.marks.agent.largestContentfulPaint < 2500',
                 },
                 isBucketed: false,
                 label: 'Good',
@@ -104,7 +104,7 @@ export const sampleAttributeCoreWebVital = {
     query: {
       language: 'kuery',
       query:
-        'transaction.type: page-load and processor.event: transaction and transaction.type: "page-load"',
+        'transaction.type: (page-load or page-exit) and processor.event: transaction and transaction.type: ("page-load" or "page-exit")',
     },
     visualization: {
       axisTitlesVisibilitySettings: {

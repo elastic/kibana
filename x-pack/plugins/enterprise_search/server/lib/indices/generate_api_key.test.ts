@@ -94,7 +94,7 @@ describe('generateApiKey lib function', () => {
           cluster: ['monitor'],
           index: [
             {
-              names: ['search-test', '.search-acl-filter-test', `${CONNECTORS_INDEX}*`],
+              names: ['search-test', '.search-acl-filter-search-test', `${CONNECTORS_INDEX}*`],
               privileges: ['all'],
             },
           ],

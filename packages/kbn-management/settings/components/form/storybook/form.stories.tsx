@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { EuiPanel } from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 import { ComponentMeta } from '@storybook/react';
-import { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import { FieldDefinition } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
-import { getSettingsMock, uiSettingsClientMock } from '../mocks';
+import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
+
+import { categorizeFields } from '@kbn/management-settings-utilities';
+import { uiSettingsClientMock } from '../mocks';
 import { Form as Component } from '../form';
 import { FormProvider } from '../services';
 
@@ -36,13 +38,23 @@ export default {
         saveChanges={action('saveChanges')}
         showError={action('showError')}
         showReloadPagePrompt={action('showReloadPagePrompt')}
+        validateChange={async (key, value) => {
+          action(`validateChange`)({
+            key,
+            value,
+          });
+          return { successfulValidation: true, valid: true };
+        }}
       >
-        <EuiPanel>
-          <Story />
-        </EuiPanel>
+        <Story />
       </FormProvider>
     ),
   ],
+  parameters: {
+    backgrounds: {
+      default: 'ghost',
+    },
+  },
 } as ComponentMeta<typeof Component>;
 
 interface FormStoryProps {
@@ -53,12 +65,24 @@ interface FormStoryProps {
 }
 
 export const Form = ({ isSavingEnabled, requirePageReload }: FormStoryProps) => {
-  const fields: Array<FieldDefinition<SettingType>> = getFieldDefinitions(
+  const fields: FieldDefinition[] = getFieldDefinitions(
     getSettingsMock(requirePageReload),
     uiSettingsClientMock
   );
 
-  return <Component {...{ fields, isSavingEnabled }} />;
+  const categorizedFields = categorizeFields(fields);
+
+  const categoryCounts = Object.keys(categorizedFields).reduce(
+    (acc, category) => ({
+      ...acc,
+      [category]: categorizedFields[category].count,
+    }),
+    {}
+  );
+
+  const onClearQuery = () => {};
+
+  return <Component {...{ fields, isSavingEnabled, categoryCounts, onClearQuery }} />;
 };
 
 Form.args = {

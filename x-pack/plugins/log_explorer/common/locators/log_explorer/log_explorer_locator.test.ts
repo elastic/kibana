@@ -10,16 +10,14 @@ import { LogExplorerLocatorDefinition } from './log_explorer_locator';
 import { LogExplorerLocatorDependencies } from './types';
 
 const setup = async () => {
-  const discoverSetupContract: LogExplorerLocatorDependencies = {
-    discover: {
-      locator: sharePluginMock.createLocator(),
-    },
+  const logExplorerLocatorDependencies: LogExplorerLocatorDependencies = {
+    discoverAppLocator: sharePluginMock.createLocator(),
   };
-  const logExplorerLocator = new LogExplorerLocatorDefinition(discoverSetupContract);
+  const logExplorerLocator = new LogExplorerLocatorDefinition(logExplorerLocatorDependencies);
 
   return {
     logExplorerLocator,
-    discoverGetLocation: discoverSetupContract.discover.locator?.getLocation,
+    discoverGetLocation: logExplorerLocatorDependencies.discoverAppLocator?.getLocation,
   };
 };
 

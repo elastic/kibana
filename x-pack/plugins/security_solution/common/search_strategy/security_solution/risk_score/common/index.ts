@@ -7,7 +7,11 @@
 
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
-import { RiskScoreEntity, getRiskScoreLatestIndex } from '../../../../risk_engine';
+import {
+  RiskScoreEntity,
+  getRiskScoreLatestIndex,
+  getRiskScoreTimeSeriesIndex,
+} from '../../../../entity_analytics/risk_engine';
 export { RiskQueries } from '../../../../api/search_strategy';
 
 /**
@@ -17,21 +21,25 @@ export { RiskQueries } from '../../../../api/search_strategy';
 export const getHostRiskIndex = (
   spaceId: string,
   onlyLatest: boolean = true,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): string => {
-  return isNewRiskScoreModuleAvailable
-    ? getRiskScoreLatestIndex(spaceId)
-    : `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  if (isNewRiskScoreModuleInstalled) {
+    return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
+  } else {
+    return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  }
 };
 
 export const getUserRiskIndex = (
   spaceId: string,
   onlyLatest: boolean = true,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): string => {
-  return isNewRiskScoreModuleAvailable
-    ? getRiskScoreLatestIndex(spaceId)
-    : `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  if (isNewRiskScoreModuleInstalled) {
+    return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
+  } else {
+    return `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  }
 };
 
 export const buildHostNamesFilter = (hostNames: string[]) => {

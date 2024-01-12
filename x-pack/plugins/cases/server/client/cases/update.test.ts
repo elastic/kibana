@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   MAX_CATEGORY_LENGTH,
   MAX_DESCRIPTION_LENGTH,
@@ -14,9 +15,10 @@ import {
   MAX_CASES_TO_UPDATE,
   MAX_USER_ACTIONS_PER_CASE,
   MAX_ASSIGNEES_PER_CASE,
+  MAX_CUSTOM_FIELDS_PER_CASE,
 } from '../../../common/constants';
 import { mockCases } from '../../mocks';
-import { createCasesClientMockArgs } from '../mocks';
+import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { update } from './update';
 
 describe('update', () => {
@@ -29,6 +31,8 @@ describe('update', () => {
       },
     ],
   };
+  const casesClientMock = createCasesClientMock();
+  casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
   describe('Assignees', () => {
     const clientArgs = createCasesClientMockArgs();
@@ -46,10 +50,12 @@ describe('update', () => {
       clientArgs.services.caseService.patchCases.mockResolvedValue({
         saved_objects: [{ ...mockCases[0], attributes: { assignees: cases.cases[0].assignees } }],
       });
+
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it('notifies an assignee', async () => {
-      await update(cases, clientArgs);
+      await update(cases, clientArgs, casesClientMock);
 
       expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([
         {
@@ -76,7 +82,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"not-exists","version":"123"}]: Error: These cases not-exists do not exist. Please check you have the correct ids.'
@@ -97,7 +104,7 @@ describe('update', () => {
         ],
       });
 
-      await expect(update(cases, clientArgs)).rejects.toThrow(
+      await expect(update(cases, clientArgs, casesClientMock)).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: All update fields are identical to current version.'
       );
 
@@ -133,7 +140,8 @@ describe('update', () => {
             },
           ],
         },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([
@@ -174,7 +182,8 @@ describe('update', () => {
             },
           ],
         },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([]);
@@ -212,7 +221,8 @@ describe('update', () => {
             },
           ],
         },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledWith([
@@ -249,7 +259,8 @@ describe('update', () => {
             },
           ],
         },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       /**
@@ -274,7 +285,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: invalid keys \\"foo\\""`
@@ -295,7 +307,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field assignees is too long. Array must be of length <= 10.'
@@ -315,6 +328,7 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it(`does not throw error when category is non empty string less than ${MAX_CATEGORY_LENGTH} characters`, async () => {
@@ -333,7 +347,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).resolves.not.toThrow();
     });
@@ -350,7 +365,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.,Invalid value \"A very long category with more than fifty characters!\" supplied to \"cases,category\"`
@@ -369,7 +385,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "" supplied to "cases,category"'
@@ -388,7 +405,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "cases,category"'
@@ -406,7 +424,8 @@ describe('update', () => {
             },
           ],
         },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
@@ -443,6 +462,7 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it(`does not throw error when title is non empty string less than ${MAX_TITLE_LENGTH} characters`, async () => {
@@ -461,7 +481,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).resolves.not.toThrow();
     });
@@ -479,7 +500,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
@@ -498,7 +520,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
@@ -517,7 +540,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
@@ -535,7 +559,8 @@ describe('update', () => {
             },
           ],
         },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
@@ -572,6 +597,7 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it(`does not throw error when description is non empty string less than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
@@ -590,7 +616,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).resolves.not.toThrow();
     });
@@ -611,7 +638,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
@@ -630,7 +658,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
@@ -649,7 +678,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
@@ -667,7 +697,8 @@ describe('update', () => {
             },
           ],
         },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
@@ -692,6 +723,150 @@ describe('update', () => {
     });
   });
 
+  describe('Total comments and alerts', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+
+      const caseCommentsStats = new Map();
+      caseCommentsStats.set(mockCases[0].id, { userComments: 1, alerts: 2 });
+      caseCommentsStats.set(mockCases[1].id, { userComments: 3, alerts: 4 });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+        caseCommentsStats
+      );
+    });
+
+    it('calls the attachment service with the right params and returns the expected comments and alerts', async () => {
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }, { ...mockCases[1] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                description: 'New updated description!!',
+              },
+              {
+                id: mockCases[1].id,
+                version: mockCases[1].version ?? '',
+                description: 'New updated description!!',
+              },
+            ],
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).resolves.toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "assignees": Array [],
+            "category": null,
+            "closed_at": null,
+            "closed_by": null,
+            "comments": Array [],
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+            "created_at": "2019-11-25T21:54:48.952Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "customFields": Array [],
+            "description": "This is a brand new case of a bad meanie defacing data",
+            "duration": null,
+            "external_service": null,
+            "id": "mock-id-1",
+            "owner": "securitySolution",
+            "settings": Object {
+              "syncAlerts": true,
+            },
+            "severity": "low",
+            "status": "open",
+            "tags": Array [
+              "defacement",
+            ],
+            "title": "Super Bad Security Issue",
+            "totalAlerts": 2,
+            "totalComment": 1,
+            "updated_at": "2019-11-25T21:54:48.952Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "version": "WzAsMV0=",
+          },
+          Object {
+            "assignees": Array [],
+            "category": null,
+            "closed_at": null,
+            "closed_by": null,
+            "comments": Array [],
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+            "created_at": "2019-11-25T22:32:00.900Z",
+            "created_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "customFields": Array [],
+            "description": "Oh no, a bad meanie destroying data!",
+            "duration": null,
+            "external_service": null,
+            "id": "mock-id-2",
+            "owner": "securitySolution",
+            "settings": Object {
+              "syncAlerts": true,
+            },
+            "severity": "low",
+            "status": "open",
+            "tags": Array [
+              "Data Destruction",
+            ],
+            "title": "Damaging Data Destruction Detected",
+            "totalAlerts": 4,
+            "totalComment": 3,
+            "updated_at": "2019-11-25T22:32:00.900Z",
+            "updated_by": Object {
+              "email": "testemail@elastic.co",
+              "full_name": "elastic",
+              "username": "elastic",
+            },
+            "version": "WzQsMV0=",
+          },
+        ]
+      `);
+
+      expect(clientArgs.services.attachmentService.getter.getCaseCommentStats).toHaveBeenCalledWith(
+        expect.objectContaining({
+          caseIds: [mockCases[0].id, mockCases[1].id],
+        })
+      );
+    });
+  });
+
   describe('Tags', () => {
     const clientArgs = createCasesClientMockArgs();
 
@@ -704,6 +879,7 @@ describe('update', () => {
         per_page: 10,
         page: 1,
       });
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
     });
 
     it('does not throw error when tags array is empty', async () => {
@@ -722,7 +898,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).resolves.not.toThrow();
     });
@@ -743,7 +920,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).resolves.not.toThrow();
     });
@@ -762,7 +940,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
@@ -785,7 +964,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
@@ -804,7 +984,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
@@ -823,7 +1004,8 @@ describe('update', () => {
               },
             ],
           },
-          clientArgs
+          clientArgs,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
@@ -841,7 +1023,8 @@ describe('update', () => {
             },
           ],
         },
-        clientArgs
+        clientArgs,
+        casesClientMock
       );
 
       expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
@@ -866,9 +1049,308 @@ describe('update', () => {
     });
   });
 
-  describe('Validation', () => {
+  describe('Custom Fields', () => {
+    const clientArgs = createCasesClientMockArgs();
+    const casesClient = createCasesClientMock();
+
     beforeEach(() => {
       jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: mockCases[0].attributes.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'missing field 1',
+              required: true,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'foo',
+              required: false,
+            },
+          ],
+        },
+      ]);
+      clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
+    });
+
+    it('can update customFields', async () => {
+      const customFields = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT as const,
+          value: 'this is a text field value',
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE as const,
+          value: null,
+        },
+      ];
+
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields,
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                customFields,
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
+      );
+    });
+
+    it('fills out missing custom fields', async () => {
+      const customFields = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT as const,
+          value: 'this is a text field value',
+        },
+      ];
+
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields,
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                customFields: [
+                  ...customFields,
+                  {
+                    key: 'second_key',
+                    type: CustomFieldTypes.TOGGLE as const,
+                    value: null,
+                  },
+                ],
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
+      );
+    });
+
+    it('throws error when the customFields array is too long', async () => {
+      const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+        key: 'first_custom_field_key',
+        type: 'text',
+        value: 'this is a text field value',
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields,
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The length of the field customFields is too long. Array must be of length <= 10."`
+      );
+    });
+
+    it('throws with duplicated customFields keys', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  {
+                    key: 'duplicated_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                  {
+                    key: 'duplicated_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                ],
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Invalid duplicated custom field keys in request: duplicated_key"`
+      );
+    });
+
+    it('throws when customFields keys are not present in configuration', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'this is a text field value',
+                  },
+                  {
+                    key: 'missing_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: null,
+                  },
+                ],
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Invalid custom field keys: missing_key"`
+      );
+    });
+
+    it('throws error when custom fields are missing', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  {
+                    key: 'second_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: null,
+                  },
+                ],
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields: \\"missing field 1\\""`
+      );
+    });
+
+    it('throws when the customField types dont match the configuration', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [
+                  {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TOGGLE,
+                    value: true,
+                  },
+                  {
+                    key: 'second_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'foobar',
+                  },
+                ],
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: The following custom fields have the wrong type in the request: first_key,second_key"`
+      );
+    });
+  });
+
+  describe('Validation', () => {
+    const clientArgsMock = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgsMock.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(
+        new Map()
+      );
     });
 
     it(`throws an error when trying to update more than ${MAX_CASES_TO_UPDATE} cases`, async () => {
@@ -881,7 +1363,8 @@ describe('update', () => {
               title: 'This is a test case!!',
             }),
           },
-          createCasesClientMockArgs()
+          clientArgsMock,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Error: The length of the field cases is too long. Array must be of length <= 100.'
@@ -894,7 +1377,8 @@ describe('update', () => {
           {
             cases: [],
           },
-          createCasesClientMockArgs()
+          clientArgsMock,
+          casesClientMock
         )
       ).rejects.toThrow(
         'Error: The length of the field cases is too short. Array must be of length >= 1.'
@@ -902,14 +1386,12 @@ describe('update', () => {
     });
 
     describe('Validate max user actions per page', () => {
-      const casesClient = createCasesClientMockArgs();
-
       beforeEach(() => {
         jest.clearAllMocks();
-        casesClient.services.caseService.getCases.mockResolvedValue({
+        clientArgsMock.services.caseService.getCases.mockResolvedValue({
           saved_objects: [{ ...mockCases[0] }, { ...mockCases[1] }],
         });
-        casesClient.services.caseService.getAllCaseComments.mockResolvedValue({
+        clientArgsMock.services.caseService.getAllCaseComments.mockResolvedValue({
           saved_objects: [],
           total: 0,
           per_page: 10,
@@ -918,16 +1400,18 @@ describe('update', () => {
       });
 
       it('passes validation if max user actions per case is not reached', async () => {
-        casesClient.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-          [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE - 1,
-        });
+        clientArgsMock.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+          {
+            [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE - 1,
+          }
+        );
 
         // @ts-ignore: only the array length matters here
-        casesClient.services.userActionService.creator.buildUserActions.mockReturnValue({
+        clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
           [mockCases[0].id]: [1],
         });
 
-        casesClient.services.caseService.patchCases.mockResolvedValue({
+        clientArgsMock.services.caseService.patchCases.mockResolvedValue({
           saved_objects: [{ ...mockCases[0] }],
         });
 
@@ -942,18 +1426,21 @@ describe('update', () => {
                 },
               ],
             },
-            casesClient
+            clientArgsMock,
+            casesClientMock
           )
         ).resolves.not.toThrow();
       });
 
       it(`throws an error when the user actions to be created will reach ${MAX_USER_ACTIONS_PER_CASE}`, async () => {
-        casesClient.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-          [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE,
-        });
+        clientArgsMock.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+          {
+            [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE,
+          }
+        );
 
         // @ts-ignore: only the array length matters here
-        casesClient.services.userActionService.creator.buildUserActions.mockReturnValue({
+        clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
           [mockCases[0].id]: [1, 2, 3],
         });
 
@@ -968,7 +1455,8 @@ describe('update', () => {
                 },
               ],
             },
-            casesClient
+            clientArgsMock,
+            casesClientMock
           )
         ).rejects.toThrow(
           `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
@@ -976,13 +1464,15 @@ describe('update', () => {
       });
 
       it('throws an error when trying to update multiple cases and one of them is expected to fail', async () => {
-        casesClient.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-          [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE,
-          [mockCases[1].id]: 0,
-        });
+        clientArgsMock.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue(
+          {
+            [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE,
+            [mockCases[1].id]: 0,
+          }
+        );
 
         // @ts-ignore: only the array length matters here
-        casesClient.services.userActionService.creator.buildUserActions.mockReturnValue({
+        clientArgsMock.services.userActionService.creator.buildUserActions.mockReturnValue({
           [mockCases[0].id]: [1, 2, 3],
           [mockCases[1].id]: [1],
         });
@@ -1004,7 +1494,8 @@ describe('update', () => {
                 },
               ],
             },
-            casesClient
+            clientArgsMock,
+            casesClientMock
           )
         ).rejects.toThrow(
           `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`

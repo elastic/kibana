@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { FieldDefinition, SettingType } from '@kbn/management-settings-types';
+import type { FieldDefinition } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UnsavedFieldChange } from '@kbn/management-settings-types';
@@ -14,7 +14,7 @@ import { useServices } from './services';
 
 export interface UseSaveParameters {
   /** All {@link FieldDefinition} in the form. */
-  fields: Array<FieldDefinition<SettingType>>;
+  fields: FieldDefinition[];
   /** The function to invoke for clearing all unsaved changes. */
   clearChanges: () => void;
 }
@@ -28,7 +28,7 @@ export interface UseSaveParameters {
 export const useSave = (params: UseSaveParameters) => {
   const { saveChanges, showError, showReloadPagePrompt } = useServices();
 
-  return async (changes: Record<string, UnsavedFieldChange<SettingType>>) => {
+  return async (changes: Record<string, UnsavedFieldChange>) => {
     if (isEmpty(changes)) {
       return;
     }

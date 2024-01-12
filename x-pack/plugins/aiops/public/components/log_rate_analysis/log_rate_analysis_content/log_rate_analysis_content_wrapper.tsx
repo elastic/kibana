@@ -59,6 +59,8 @@ export interface LogRateAnalysisContentWrapperProps {
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Optional flag to indicate whether kibana is running in serverless */
   showFrozenDataTierChoice?: boolean;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
@@ -73,6 +75,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   barHighlightColorOverride,
   onAnalysisCompleted,
   showFrozenDataTierChoice = true,
+  embeddingOrigin,
 }) => {
   if (!dataView) return null;
 
@@ -105,6 +108,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}
                   onAnalysisCompleted={onAnalysisCompleted}
+                  embeddingOrigin={embeddingOrigin}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>

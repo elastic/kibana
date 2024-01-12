@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ReportApiJSON } from '../types';
+import { JOB_STATUS } from '@kbn/reporting-common';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportMock } from './types';
 
 const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({
@@ -43,7 +44,7 @@ export const mockJobs: ReportApiJSON[] = [
         },
       ],
     } as any,
-    status: 'pending',
+    status: JOB_STATUS.PENDING,
   }),
   buildMockReport({
     id: 'k90e51pk1ieucbae0c3t8wo1',
@@ -56,7 +57,7 @@ export const mockJobs: ReportApiJSON[] = [
       title: 'My Canvas Workpad',
     },
     started_at: '2020-04-14T21:01:14.526Z',
-    status: 'processing',
+    status: JOB_STATUS.PROCESSING,
   }),
   buildMockReport({
     id: 'k90cmthd1gv8cbae0c2le8bo',
@@ -71,7 +72,7 @@ export const mockJobs: ReportApiJSON[] = [
       title: 'My Canvas Workpad',
     },
     started_at: '2020-04-14T20:19:04.073Z',
-    status: 'completed',
+    status: JOB_STATUS.COMPLETED,
   }),
   buildMockReport({
     id: 'k906958e1d4wcbae0c9hip1a',
@@ -92,7 +93,7 @@ export const mockJobs: ReportApiJSON[] = [
       title: 'My Canvas Workpad',
     },
     started_at: '2020-04-14T17:20:29.444Z',
-    status: 'completed_with_warnings',
+    status: JOB_STATUS.WARNINGS,
   }),
   buildMockReport({
     id: 'k9067y2a1d4wcbae0cad38n0',
@@ -107,7 +108,7 @@ export const mockJobs: ReportApiJSON[] = [
       title: 'My Canvas Workpad',
     },
     started_at: '2020-04-14T17:19:39.883Z',
-    status: 'completed',
+    status: JOB_STATUS.COMPLETED,
   }),
   buildMockReport({
     id: 'k9067s1m1d4wcbae0cdnvcms',
@@ -122,7 +123,7 @@ export const mockJobs: ReportApiJSON[] = [
       title: 'My Canvas Workpad',
     },
     started_at: '2020-04-14T17:19:25.247Z',
-    status: 'completed',
+    status: JOB_STATUS.COMPLETED,
   }),
   buildMockReport({
     id: 'k9065q3s1d4wcbae0c00fxlh',
@@ -137,7 +138,7 @@ export const mockJobs: ReportApiJSON[] = [
       title: 'My Canvas Workpad',
     },
     started_at: '2020-04-14T17:17:50.379Z',
-    status: 'completed',
+    status: JOB_STATUS.COMPLETED,
   }),
   buildMockReport({
     id: 'k905zdw11d34cbae0c3y6tzh',
@@ -153,7 +154,7 @@ export const mockJobs: ReportApiJSON[] = [
       isDeprecated: true,
     },
     started_at: '2020-04-14T17:12:52.431Z',
-    status: 'completed',
+    status: JOB_STATUS.COMPLETED,
   }),
   buildMockReport({
     id: 'k8t4ylcb07mi9d006214ifyg',
@@ -169,6 +170,6 @@ export const mockJobs: ReportApiJSON[] = [
       isDeprecated: true,
     },
     started_at: '2020-04-09T19:09:54.570Z',
-    status: 'completed',
+    status: JOB_STATUS.COMPLETED,
   }),
 ];

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import Url from 'url';
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
@@ -160,22 +161,47 @@ async function startEsNode({
   return cluster;
 }
 
-function getESServerlessOptions(esServerlessImageFromArg: string | undefined, config: Config) {
+interface EsServerlessOptions {
+  host?: string;
+  resources: string[];
+  kibanaUrl: string;
+  tag?: string;
+  image?: string;
+}
+
+function getESServerlessOptions(
+  esServerlessImageFromArg: string | undefined,
+  config: Config
+): EsServerlessOptions {
   const esServerlessImageUrlOrTag =
     esServerlessImageFromArg ||
     esTestConfig.getESServerlessImage() ||
     (config.has('esTestCluster.esServerlessImage') &&
       config.get('esTestCluster.esServerlessImage'));
+  const serverlessResources: string[] =
+    (config.has('esServerlessOptions.resources') && config.get('esServerlessOptions.resources')) ||
+    [];
+  const serverlessHost: string | undefined =
+    config.has('esServerlessOptions.host') && config.get('esServerlessOptions.host');
+
+  const commonOptions = {
+    host: serverlessHost,
+    resources: serverlessResources,
+    kibanaUrl: Url.format({
+      protocol: config.get('servers.kibana.protocol'),
+      hostname: config.get('servers.kibana.hostname'),
+      port: config.get('servers.kibana.port'),
+    }),
+  };
 
   if (esServerlessImageUrlOrTag) {
-    if (esServerlessImageUrlOrTag.includes(':')) {
-      return {
-        image: esServerlessImageUrlOrTag,
-      };
-    } else {
-      return {
-        tag: esServerlessImageUrlOrTag,
-      };
-    }
+    return {
+      ...commonOptions,
+      ...(esServerlessImageUrlOrTag.includes(':')
+        ? { image: esServerlessImageUrlOrTag }
+        : { tag: esServerlessImageUrlOrTag }),
+    };
   }
+
+  return commonOptions;
 }

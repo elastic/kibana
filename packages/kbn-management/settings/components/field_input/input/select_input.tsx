@@ -30,7 +30,7 @@ export interface SelectInputProps extends InputProps<'select'> {
 export const SelectInput = ({
   field,
   unsavedChange,
-  onChange: onChangeProp,
+  onInputChange,
   optionLabels = {},
   optionValues: optionsProp,
   isSavingEnabled,
@@ -53,7 +53,7 @@ export const SelectInput = ({
     onUpdate({ type: field.type, unsavedValue: inputValue });
   };
 
-  const onUpdate = useUpdate({ onChange: onChangeProp, field });
+  const onUpdate = useUpdate({ onInputChange, field });
 
   const { id, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;

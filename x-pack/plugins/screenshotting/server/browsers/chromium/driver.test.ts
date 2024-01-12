@@ -26,6 +26,7 @@ describe('chromium driver', () => {
     mockLogger.get = () => mockLogger;
 
     mockConfig = {
+      enabled: true,
       networkPolicy: {
         enabled: false,
         rules: [],

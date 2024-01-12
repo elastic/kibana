@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -17,6 +17,7 @@ import {
   EuiCallOut,
   EuiCode,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,14 +29,18 @@ import {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type * as CSS from 'csstype';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
+import { APP_STATE_STORAGE_KEY } from './edit_index_pattern_state_container';
 
-const codeStyle = {
+const codeStyle: CSS.Properties = {
   marginLeft: '8px',
+  overflowWrap: 'anywhere',
 };
 
 export interface EditIndexPatternProps extends RouteComponentProps {
@@ -67,8 +72,15 @@ const getCompositeRuntimeFields = (dataView: DataView) =>
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor, savedObjectsManagement } =
-      useKibana<IndexPatternManagmentContext>().services;
+    const {
+      uiSettings,
+      overlays,
+      chrome,
+      dataViews,
+      IndexPatternEditor,
+      savedObjectsManagement,
+      application,
+    } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
       Record<string, RuntimeField>
@@ -83,6 +95,31 @@ export const EditIndexPattern = withRouter(
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
     const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
     const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
+    const conflictFieldsUrl = useMemo(() => {
+      return setStateToKbnUrl(
+        APP_STATE_STORAGE_KEY,
+        {
+          fieldTypes: ['conflict'],
+          tab: 'indexedFields',
+        },
+        { useHash: uiSettings.get('state:storeInSessionStorage') },
+        application.getUrlForApp('management', {
+          path: `/kibana/dataViews/dataView/${encodeURIComponent(indexPattern.id!)}`,
+        })
+      );
+    }, [application, indexPattern.id, uiSettings]);
+
+    useEffect(() => {
+      // dispatch synthetic hash change event to update hash history objects
+      // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+      const unlistenParentHistory = history.listen(() => {
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      });
+
+      return () => {
+        unlistenParentHistory();
+      };
+    }, [history]);
 
     useEffect(() => {
       savedObjectsManagement.getAllowedTypes().then((resp) => {
@@ -259,8 +296,24 @@ export const EditIndexPattern = withRouter(
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />
-              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="warning">
+              <EuiCallOut
+                title={mappingConflictHeader}
+                color="warning"
+                iconType="warning"
+                data-test-subj="dataViewMappingConflict"
+              >
                 <p>{mappingConflictLabel}</p>
+                <EuiLink
+                  data-test-subj="viewDataViewMappingConflictsButton"
+                  href={conflictFieldsUrl}
+                >
+                  {i18n.translate(
+                    'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
+                    {
+                      defaultMessage: 'View conflicts',
+                    }
+                  )}
+                </EuiLink>
               </EuiCallOut>
             </>
           )}

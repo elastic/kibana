@@ -70,9 +70,13 @@ const computeTotalHits = (
     return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
   } else if (isPlainRecord && !hasLensSuggestions) {
     // ES|QL histogram case
+    const rows = Object.values(adapterTables ?? {})?.[0]?.rows;
+    if (!rows) {
+      return undefined;
+    }
     let rowsCount = 0;
-    Object.values(adapterTables ?? {})?.[0]?.rows.forEach((r) => {
-      rowsCount += r.rows;
+    rows.forEach((r) => {
+      rowsCount += r.results;
     });
     return rowsCount;
   } else {
@@ -107,6 +111,7 @@ export function Histogram({
     timeRange: getTimeRange(),
     timeInterval,
     isPlainRecord,
+    timeField: dataView.timeFieldName,
   });
   const chartRef = useRef<HTMLDivElement | null>(null);
   const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);

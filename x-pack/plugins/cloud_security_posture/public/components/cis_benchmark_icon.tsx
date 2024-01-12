@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiIcon, EuiToolTip, IconSize } from '@elastic/eui';
 import { CSSInterpolation } from '@emotion/serialize';
-import type { BenchmarkId } from '../../common/types';
+import type { BenchmarkId } from '../../common/types_old';
 import cisEksIcon from '../assets/icons/cis_eks_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
@@ -23,6 +23,8 @@ const getBenchmarkIdIconType = (props: Props): string => {
   switch (props.type) {
     case 'cis_eks':
       return cisEksIcon;
+    case 'cis_azure':
+      return 'logoAzure';
     case 'cis_aws':
       return 'logoAWS';
     case 'cis_gcp':

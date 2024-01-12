@@ -8,7 +8,6 @@
 import * as t from 'io-ts';
 
 import { PositiveInteger, PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
-import { IndexPatternArray } from '../../model';
 
 export const signalsReindexOptions = t.partial({
   requests_per_second: t.number,
@@ -21,7 +20,7 @@ export type SignalsReindexOptions = t.TypeOf<typeof signalsReindexOptions>;
 export const createSignalsMigrationSchema = t.intersection([
   t.exact(
     t.type({
-      index: IndexPatternArray,
+      index: t.array(t.string),
     })
   ),
   t.exact(signalsReindexOptions),

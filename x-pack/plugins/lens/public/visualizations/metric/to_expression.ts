@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LayoutDirection } from '@elastic/charts';
 import { CustomPaletteParams, CUSTOM_PALETTE, PaletteRegistry } from '@kbn/coloring';
 import type {
   TrendlineExpressionFunctionDefinition,
@@ -13,6 +12,7 @@ import type {
 } from '@kbn/expression-metric-vis-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { Ast } from '@kbn/interpreter';
+import { LayoutDirection } from '@elastic/charts';
 import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
 import { DatasourceLayers } from '../../types';
@@ -90,6 +90,10 @@ export const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
+  const isMetricNumeric = Boolean(
+    state.metricAccessor &&
+      datasource?.getOperationForColumnId(state.metricAccessor)?.dataType === 'number'
+  );
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
@@ -136,21 +140,24 @@ export const toExpression = (
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
     secondaryPrefix: state.secondaryPrefix,
-    max: showingBar(state) ? state.maxAccessor : undefined,
+    max: state.maxAccessor,
     breakdownBy:
       state.breakdownByAccessor && !state.collapseFn ? state.breakdownByAccessor : undefined,
     trendline: trendlineExpression ? [trendlineExpression] : [],
     subtitle: state.subtitle ?? undefined,
-    progressDirection: state.progressDirection as LayoutDirection,
-    color: state.color || getDefaultColor(state),
+    progressDirection: showingBar(state)
+      ? state.progressDirection || LayoutDirection.Vertical
+      : undefined,
+    color: state.color || getDefaultColor(state, isMetricNumeric),
     icon: state.icon,
-    palette: state.palette?.params
-      ? [
-          paletteService
-            .get(CUSTOM_PALETTE)
-            .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
-        ]
-      : [],
+    palette:
+      isMetricNumeric && state.palette?.params
+        ? [
+            paletteService
+              .get(CUSTOM_PALETTE)
+              .toExpression(computePaletteParams(state.palette.params as CustomPaletteParams)),
+          ]
+        : [],
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,

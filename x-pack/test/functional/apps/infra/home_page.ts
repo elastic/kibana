@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { parse } from 'url';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, INVENTORY_PATH } from './constants';
@@ -18,7 +19,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'header', 'infraHome', 'infraSavedViews']);
+  const pageObjects = getPageObjects([
+    'common',
+    'header',
+    'infraHome',
+    'timePicker',
+    'assetDetails',
+    'infraSavedViews',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
 
@@ -30,8 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  // Failing: See https://github.com/elastic/kibana/issues/167071
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -107,7 +114,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.infraHome.clickDismissKubernetesTourButton();
 
-        await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        await retry.try(async () => {
+          await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        });
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
@@ -119,6 +128,101 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.getWaffleMap();
         // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
+
+      describe('Asset Details flyout', () => {
+        before(async () => {
+          await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
+          await pageObjects.infraHome.getWaffleMap();
+          await pageObjects.infraHome.inputAddHostNameFilter('demo-stack-nginx-01');
+          await pageObjects.infraHome.clickOnNode();
+        });
+
+        describe('Overview Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickOverviewTab();
+          });
+
+          [
+            { metric: 'cpuUsage', value: '0.8%' },
+            { metric: 'normalizedLoad1m', value: '1.4%' },
+            { metric: 'memoryUsage', value: '18.0%' },
+            { metric: 'diskUsage', value: '17.5%' },
+          ].forEach(({ metric, value }) => {
+            it(`${metric} tile should show ${value}`, async () => {
+              await retry.tryForTime(3 * 1000, async () => {
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
+                  metric
+                );
+                expect(tileValue).to.eql(value);
+              });
+            });
+          });
+
+          it('should render 9 charts in the Metrics section', async () => {
+            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
+            expect(hosts.length).to.equal(9);
+          });
+
+          it('should show alerts', async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await pageObjects.assetDetails.overviewAlertsTitleExists();
+          });
+        });
+
+        describe('Metadata Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetadataTab();
+          });
+
+          it('should show metadata table', async () => {
+            await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
+
+          after(async () => {
+            await retry.try(async () => {
+              await pageObjects.infraHome.closeFlyout();
+            });
+          });
+
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
+          });
+        });
+
+        describe('APM Link Tab', () => {
+          before(async () => {
+            await pageObjects.infraHome.clickOnNode();
+            await pageObjects.assetDetails.clickApmTabLink();
+            await pageObjects.infraHome.waitForLoading();
+          });
+
+          it('should navigate to APM traces', async () => {
+            const url = parse(await browser.getCurrentUrl());
+            const query = decodeURIComponent(url.query ?? '');
+            const kuery = 'kuery=host.hostname:"demo-stack-nginx-01"';
+
+            await retry.try(async () => {
+              expect(url.pathname).to.eql('/app/apm/traces');
+              expect(query).to.contain(kuery);
+            });
+            await returnTo(INVENTORY_PATH);
+          });
+        });
+
+        it('Should show auto-refresh option', async () => {
+          const kibanaRefreshConfig = await pageObjects.timePicker.getRefreshConfig();
+          expect(kibanaRefreshConfig.interval).to.equal('5');
+          expect(kibanaRefreshConfig.units).to.equal('Seconds');
+          expect(kibanaRefreshConfig.isPaused).to.equal(true);
+        });
+      });
+
       it('shows query suggestions', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.clickQueryBar();
@@ -134,12 +238,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
-            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
-            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
-            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
+            { name: 'demo-stack-mysql-01', value: 1, color: '#93b1d3' },
+            { name: 'demo-stack-nginx-01', value: 0.9, color: '#b2c7df' },
+            { name: 'demo-stack-redis-01', value: 0.8, color: '#b2c7df' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+            { name: 'demo-stack-client-01', value: 0.5, color: '#f0f4f9' },
           ]);
         });
       });
@@ -152,12 +256,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
+            { name: 'demo-stack-client-01', value: 0.5, color: '#f0f4f9' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
-            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
-            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+            { name: 'demo-stack-redis-01', value: 0.8, color: '#b2c7df' },
+            { name: 'demo-stack-nginx-01', value: 0.9, color: '#b2c7df' },
+            { name: 'demo-stack-mysql-01', value: 1, color: '#93b1d3' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
           ]);
         });
       });
@@ -178,7 +282,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
           ]);
         });
         await pageObjects.infraHome.clearSearchTerm();
@@ -191,12 +295,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-client-01', value: 0.6, color: '#6092c0' },
+            { name: 'demo-stack-client-01', value: 0.5, color: '#6092c0' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#b5c9df' },
-            { name: 'demo-stack-redis-01', value: 1, color: '#f1d9b9' },
-            { name: 'demo-stack-nginx-01', value: 1.1, color: '#eec096' },
-            { name: 'demo-stack-mysql-01', value: 1.2, color: '#eba47a' },
-            { name: 'demo-stack-apache-01', value: 1.4, color: '#e7664c' },
+            { name: 'demo-stack-redis-01', value: 0.8, color: '#d0dcea' },
+            { name: 'demo-stack-nginx-01', value: 0.9, color: '#d0dcea' },
+            { name: 'demo-stack-mysql-01', value: 1, color: '#eec096' },
+            { name: 'demo-stack-apache-01', value: 1.2, color: '#e7664c' },
           ]);
         });
       });
@@ -224,10 +328,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.clickOnFirstNode();
           await pageObjects.infraHome.clickOnNodeDetailsFlyoutOpenAsPage();
 
-          await retry.tryForTime(3 * 1000, async () => {
+          await retry.try(async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain(
-              'demo-stack-redis-01 - Infrastructure - Observability - Elastic'
+              'demo-stack-redis-01 - Inventory - Infrastructure - Observability - Elastic'
             );
           });
 
@@ -240,9 +344,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.infraHome.clickOnFirstNode();
           await pageObjects.infraHome.clickOnGoToNodeDetails();
 
-          await retry.tryForTime(3 * 1000, async () => {
+          await retry.try(async () => {
             const documentTitle = await browser.getTitle();
-            expect(documentTitle).to.contain('pod-0 - Infrastructure - Observability - Elastic');
+            expect(documentTitle).to.contain(
+              'pod-0 - Inventory - Infrastructure - Observability - Elastic'
+            );
           });
 
           await returnTo(INVENTORY_PATH);
@@ -279,6 +385,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           await pageObjects.infraHome.ensurePopoverClosed();
         });
+      });
+
+      it('should not have an option to create custom threshold alert', async () => {
+        await pageObjects.infraHome.clickAlertsAndRules();
+        await pageObjects.infraHome.ensurePopoverOpened();
+        await pageObjects.infraHome.ensureCustomThresholdAlertMenuItemIsMissing();
+        await pageObjects.infraHome.clickAlertsAndRules();
       });
     });
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 
@@ -17,21 +17,16 @@ describe('ExpressionRow', () => {
   async function setup(expression: MetricExpression) {
     const wrapper = mountWithIntl(
       <ExpressionRow
+        title={<>Condition</>}
         canDelete={false}
         fields={[
           {
             name: 'system.cpu.user.pct',
             type: 'test',
-            searchable: true,
-            aggregatable: true,
-            displayable: true,
           },
           {
             name: 'system.load.1',
             type: 'test',
-            searchable: true,
-            aggregatable: true,
-            displayable: true,
           },
         ]}
         remove={() => {}}
@@ -61,33 +56,43 @@ describe('ExpressionRow', () => {
   }
 
   it('should display thresholds as a percentage for pct metrics', async () => {
-    const expression = {
-      metric: 'system.cpu.user.pct',
+    const expression: MetricExpression = {
       comparator: Comparator.GT,
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          field: 'system.cpu.user.pct',
+        },
+      ],
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',
-      aggType: 'custom',
     };
-    const { wrapper, update } = await setup(expression as MetricExpression);
+    const { wrapper, update } = await setup(expression);
     await update();
     const [valueMatch] =
       wrapper
         .html()
         .match(
-          '<span class="euiExpression__value css-uocz3u-euiExpression__value-columns">50</span>'
+          '<span class="euiExpression__value css-uocz3u-euiExpression__value-columns">50%</span>'
         ) ?? [];
     expect(valueMatch).toBeTruthy();
   });
 
   it('should display thresholds as a decimal for all other metrics', async () => {
     const expression = {
-      metric: 'system.load.1',
       comparator: Comparator.GT,
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          field: 'system.load.1',
+        },
+      ],
       threshold: [0.5],
       timeSize: 1,
       timeUnit: 'm',
-      aggType: 'custom',
     };
     const { wrapper } = await setup(expression as MetricExpression);
     const [valueMatch] =

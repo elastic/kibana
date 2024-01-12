@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ALERT_RULE_CATEGORY } from '@kbn/rule-data-utils';
+import { ALERT_RULE_CATEGORY, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { PageTitle, PageTitleProps } from './page_title';
 import { alert } from '../mock/alert';
 
@@ -66,16 +66,40 @@ describe('Page Title', () => {
     expect(getByTestId('ruleTypeId').textContent).toContain('Inventory threshold breached');
   });
 
-  it('should display an active badge when active is true', async () => {
+  it('should display an active badge when alert is active', async () => {
     const { getByText } = renderComp(defaultProps);
     expect(getByText('Active')).toBeTruthy();
   });
 
-  it('should display an inactive badge when active is false', async () => {
-    const updatedProps = { alert, dataTestSubj: defaultProps.dataTestSubj };
-    updatedProps.alert.active = false;
+  it('should display a recovered badge when alert is recovered', async () => {
+    const updatedProps = {
+      alert: {
+        ...defaultProps.alert,
+        fields: {
+          ...defaultProps.alert.fields,
+          [ALERT_STATUS]: 'recovered',
+        },
+      },
+      dataTestSubj: defaultProps.dataTestSubj,
+    };
 
     const { getByText } = renderComp({ ...updatedProps });
     expect(getByText('Recovered')).toBeTruthy();
+  });
+
+  it('should display an untracked badge when alert is untracked', async () => {
+    const updatedProps = {
+      alert: {
+        ...defaultProps.alert,
+        fields: {
+          ...defaultProps.alert.fields,
+          [ALERT_STATUS]: 'untracked',
+        },
+      },
+      dataTestSubj: defaultProps.dataTestSubj,
+    };
+
+    const { getByText } = renderComp({ ...updatedProps });
+    expect(getByText('Untracked')).toBeTruthy();
   });
 });

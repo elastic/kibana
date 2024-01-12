@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { BaseActionSchema } from '../model/schema/common.gen';
 
 export type GetFileActionRequestBody = z.infer<typeof GetFileActionRequestBody>;
-export const GetFileActionRequestBody = BaseActionSchema.and(
+export const GetFileActionRequestBody = BaseActionSchema.merge(
   z.object({
     parameters: z.object({
       path: z.string(),

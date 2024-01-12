@@ -154,7 +154,7 @@ function TimelineTabContent({
 }
 
 function MetadataTabContent({ transaction }: { transaction: Transaction }) {
-  return <TransactionMetadata transactionId={transaction.transaction.id} />;
+  return <TransactionMetadata transaction={transaction} />;
 }
 
 function LogsTabContent({

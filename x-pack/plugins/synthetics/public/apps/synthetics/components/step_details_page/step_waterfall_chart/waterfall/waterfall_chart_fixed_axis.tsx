@@ -20,7 +20,8 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { useChartTheme } from '../../../../../../hooks/use_chart_theme';
+import { i18n } from '@kbn/i18n';
+import { useBaseChartTheme } from '../../../../../../hooks/use_base_chart_theme';
 import { WaterfallChartFixedAxisContainer } from './styles';
 import { WaterfallChartMarkers } from './waterfall_marker/waterfall_markers';
 
@@ -31,7 +32,7 @@ interface Props {
 }
 
 export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }: Props) => {
-  const theme = useChartTheme();
+  const baseChartTheme = useBaseChartTheme();
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -47,8 +48,10 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
                 color: 'transparent',
               },
             },
-            theme,
           ]}
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={baseChartTheme}
+          locale={i18n.getLocale()}
         />
 
         <Axis

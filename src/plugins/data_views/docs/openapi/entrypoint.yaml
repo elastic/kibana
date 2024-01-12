@@ -12,8 +12,7 @@ tags:
   - name: data views
     description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
 servers:
-  - url: 'http://localhost:5601'
-    description: local
+  - url: /
 paths:
 # Default space
   '/api/data_views':
@@ -53,7 +52,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
 security:
   - basicAuth: []
   - apiKeyAuth: []

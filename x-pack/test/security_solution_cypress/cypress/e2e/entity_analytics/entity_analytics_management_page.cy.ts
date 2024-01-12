@@ -21,12 +21,11 @@ import { deleteRiskScore, installRiskScoreModule } from '../../tasks/api_calls/r
 import { RiskScoreEntity } from '../../tasks/risk_scores/common';
 import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
-import { cleanKibana } from '../../tasks/common';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
-  deleteConfiguration,
+  deleteRiskEngineConfiguration,
   interceptRiskPreviewError,
   interceptRiskPreviewSuccess,
   interceptRiskInitError,
@@ -35,30 +34,24 @@ import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 import {
   riskEngineStatusChange,
-  updateRiskEngine,
-  updateRiskEngineConfirm,
+  upgradeRiskEngine,
   previewErrorButtonClick,
 } from '../../tasks/entity_analytics';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
 describe(
   'Entity analytics management page',
   {
-    env: {
-      ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled', 'riskScoringPersistence'] },
-    },
-    tags: ['@ess', '@serverless', '@brokenInServerless'],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     before(() => {
-      cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'all_users' });
     });
 
     beforeEach(() => {
       login();
       createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
-      deleteConfiguration();
+      deleteRiskEngineConfiguration();
       visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
     });
 
@@ -138,7 +131,7 @@ describe(
         // init
         riskEngineStatusChange();
 
-        cy.get(RISK_SCORE_ERROR_PANEL).contains('Sorry, there was an error');
+        cy.get(RISK_SCORE_ERROR_PANEL).contains('There was an error');
       });
 
       it('should update if there legacy risk score installed', () => {
@@ -147,10 +140,7 @@ describe(
 
         cy.get(RISK_SCORE_STATUS).should('not.exist');
 
-        updateRiskEngine();
-        updateRiskEngineConfirm();
-
-        cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+        upgradeRiskEngine();
 
         deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId: 'default' });
       });

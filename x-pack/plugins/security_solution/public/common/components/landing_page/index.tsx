@@ -6,13 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '../../lib/kibana';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { useContractComponents } from '../../hooks/use_contract_component';
 
 export const LandingPageComponent = memo(() => {
-  const { getStartedComponent$ } = useKibana().services;
-  const GetStartedComponent = useObservable(getStartedComponent$);
-  return <>{GetStartedComponent}</>;
+  const { GetStarted } = useContractComponents();
+  const { indicesExist } = useSourcererDataView();
+  return GetStarted ? <GetStarted indicesExist={indicesExist} /> : null;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

@@ -5,53 +5,15 @@
  * 2.0.
  */
 
+import { type Protocol } from 'devtools-protocol';
 import type { Metrics as PuppeteerMetrics } from 'puppeteer';
 import { cpus } from 'os';
+import { PerformanceMetrics } from '../../../../common/types';
 
-declare module 'puppeteer' {
-  interface CDPSession {
-    send(command: 'Performance.getMetrics'): Promise<RawMetrics>;
-  }
-}
-
-type RawMetrics = Metrics;
-
-export interface Metrics {
-  metrics: Metric[];
-}
-
-interface Metric {
-  name: keyof NormalizedMetrics;
-  value: unknown;
-}
+export type Metrics = Protocol.Performance.GetMetricsResponse;
 
 interface NormalizedMetrics extends Required<PuppeteerMetrics> {
   ProcessTime: number;
-}
-
-/**
- * Collected performance metrics during a screenshotting session.
- */
-export interface PerformanceMetrics {
-  /**
-   * The percentage of CPU time spent by the browser divided by number or cores.
-   */
-  cpu: number;
-
-  /**
-   * The percentage of CPU in percent untis.
-   */
-  cpuInPercentage: number;
-
-  /**
-   * The total amount of memory used by the browser.
-   */
-  memory: number;
-
-  /**
-   * The total amount of memory used by the browser in megabytes.
-   */
-  memoryInMegabytes: number;
 }
 
 function normalizeMetrics({ metrics }: Metrics) {

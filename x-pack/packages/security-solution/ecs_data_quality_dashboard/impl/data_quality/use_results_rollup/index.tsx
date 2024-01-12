@@ -13,18 +13,20 @@ import {
   getTotalIncompatible,
   getTotalIndices,
   getTotalIndicesChecked,
+  getTotalSameFamily,
   getTotalSizeInBytes,
   onPatternRollupUpdated,
   updateResultOnCheckCompleted,
 } from './helpers';
 
 import type { OnCheckCompleted, PatternRollup } from '../types';
-import { getDocsCount, getIndexId, getSizeInBytes } from '../helpers';
+import { getDocsCount, getIndexId, getSizeInBytes, getTotalPatternSameFamily } from '../helpers';
 import { getIlmPhase, getIndexIncompatible } from '../data_quality_panel/pattern/helpers';
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import {
   getIncompatibleMappingsFields,
   getIncompatibleValuesFields,
+  getSameFamilyFields,
 } from '../data_quality_panel/tabs/incompatible_tab/helpers';
 
 interface Props {
@@ -39,6 +41,7 @@ interface UseResultsRollup {
   totalIncompatible: number | undefined;
   totalIndices: number | undefined;
   totalIndicesChecked: number | undefined;
+  totalSameFamily: number | undefined;
   totalSizeInBytes: number | undefined;
   updatePatternIndexNames: ({
     indexNames,
@@ -67,6 +70,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
     () => getTotalIndicesChecked(patternRollups),
     [patternRollups]
   );
+  const totalSameFamily = useMemo(() => getTotalSameFamily(patternRollups), [patternRollups]);
   const totalSizeInBytes = useMemo(() => getTotalSizeInBytes(patternRollups), [patternRollups]);
 
   const updatePatternIndexNames = useCallback(
@@ -131,6 +135,8 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
             }),
             numberOfIndices: 1,
             numberOfIndicesChecked: 1,
+            numberOfSameFamily: getTotalPatternSameFamily(updated[pattern].results),
+            sameFamilyFields: getSameFamilyFields(partitionedFieldMetadata.sameFamily),
             sizeInBytes: getSizeInBytes({ stats: updated[pattern].stats, indexName }),
             timeConsumedMs: requestTime,
             unallowedMappingFields: getIncompatibleMappingsFields(
@@ -151,6 +157,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
             numberOfIncompatibleFields: getTotalIncompatible(updated),
             numberOfIndices: getTotalIndices(updated),
             numberOfIndicesChecked: getTotalIndicesChecked(updated),
+            numberOfSameFamily: getTotalSameFamily(updated),
             sizeInBytes: getTotalSizeInBytes(updated),
             timeConsumedMs: Date.now() - checkAllStartTime,
           });
@@ -175,6 +182,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
     totalIncompatible,
     totalIndices,
     totalIndicesChecked,
+    totalSameFamily,
     totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,

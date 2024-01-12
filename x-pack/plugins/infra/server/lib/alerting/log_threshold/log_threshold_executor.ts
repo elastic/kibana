@@ -7,11 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import {
-  AlertsLocatorParams,
-  getAlertDetailsUrl,
-  getAlertUrl,
-} from '@kbn/observability-plugin/common';
+import { AlertsLocatorParams, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
@@ -63,7 +59,6 @@ import { InfraBackendLibs } from '../../infra_types';
 import {
   AdditionalContext,
   flattenAdditionalContext,
-  getAlertDetailsPageEnabledForApp,
   getContextForRecoveredAlerts,
   getGroupByObject,
   unflattenObject,
@@ -138,7 +133,6 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       getAlertByAlertUuid,
     } = services;
     const { basePath, alertsLocator } = libs;
-    const config = libs.getAlertDetailsConfig();
 
     const alertFactory: LogThresholdAlertFactory = (
       id,
@@ -189,15 +183,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           alert.scheduleActions(actionGroup, {
             ...sharedContext,
             ...context,
-            alertDetailsUrl: getAlertDetailsPageEnabledForApp(config, 'logs')
-              ? getAlertDetailsUrl(libs.basePath, spaceId, alertUuid)
-              : await getAlertUrl(
-                  alertUuid,
-                  spaceId,
-                  indexedStartedAt,
-                  libs.alertsLocator,
-                  libs.basePath.publicBaseUrl
-                ),
+            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           });
         });
       }
@@ -254,7 +240,6 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         validatedParams,
         getAlertByAlertUuid,
         alertsLocator,
-        isAlertDetailsPageEnabled: getAlertDetailsPageEnabledForApp(config, 'logs'),
       });
     } catch (e) {
       throw new Error(e);
@@ -868,7 +853,6 @@ const processRecoveredAlerts = async ({
   validatedParams,
   getAlertByAlertUuid,
   alertsLocator,
-  isAlertDetailsPageEnabled = false,
 }: {
   basePath: IBasePath;
   getAlertStartedDate: (alertId: string) => string | null;
@@ -881,7 +865,6 @@ const processRecoveredAlerts = async ({
     alertUuid: string
   ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  isAlertDetailsPageEnabled?: boolean;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
@@ -898,15 +881,7 @@ const processRecoveredAlerts = async ({
     const viewInAppUrl = addSpaceIdToPath(basePath.publicBaseUrl, spaceId, relativeViewInAppUrl);
 
     const baseContext = {
-      alertDetailsUrl: isAlertDetailsPageEnabled
-        ? getAlertDetailsUrl(basePath, spaceId, alertUuid)
-        : await getAlertUrl(
-            alertUuid,
-            spaceId,
-            indexedStartedAt,
-            alertsLocator,
-            basePath.publicBaseUrl
-          ),
+      alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
       group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),

@@ -12,6 +12,7 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DiscoverAppLocatorDefinition } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -19,10 +20,17 @@ import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
 import { registerSampleData } from './sample_data';
 import { getUiSettings } from './ui_settings';
+import { ConfigSchema } from './config';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
 {
+  private readonly config: ConfigSchema;
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this.config = initializerContext.config.get();
+  }
+
   public setup(
     core: CoreSetup,
     plugins: {
@@ -33,7 +41,7 @@ export class DiscoverServerPlugin
     }
   ) {
     core.capabilities.registerProvider(capabilitiesProvider);
-    core.uiSettings.register(getUiSettings(core.docLinks));
+    core.uiSettings.register(getUiSettings(core.docLinks, this.config.enableUiSettingsValidations));
 
     if (plugins.home) {
       registerSampleData(plugins.home.sampleData);

@@ -60,9 +60,9 @@ export function MachineLearningTestResourcesProvider(
       objectType: SavedObjectType,
       space?: string
     ): Promise<boolean> {
-      const response = await supertest.get(
-        `${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`
-      );
+      const response = await supertest
+        .get(`${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`)
+        .set(getCommonRequestHeader('1'));
       return response.status === 200;
     },
 
@@ -120,7 +120,7 @@ export function MachineLearningTestResourcesProvider(
       return savedObjectIds;
     },
 
-    async getIndexPatternId(title: string, space?: string): Promise<string | undefined> {
+    async getDataViewId(title: string, space?: string): Promise<string | undefined> {
       return this.getSavedObjectIdByTitle(title, SavedObjectType.INDEX_PATTERN, space);
     },
 
@@ -136,11 +136,7 @@ export function MachineLearningTestResourcesProvider(
       return this.getSavedObjectIdByTitle(title, SavedObjectType.DASHBOARD);
     },
 
-    async createIndexPattern(
-      title: string,
-      timeFieldName?: string,
-      space?: string
-    ): Promise<string> {
+    async createDataView(title: string, timeFieldName?: string, space?: string): Promise<string> {
       log.debug(
         `Creating index pattern with title '${title}'${
           timeFieldName !== undefined ? ` and time field '${timeFieldName}'` : ''
@@ -153,7 +149,7 @@ export function MachineLearningTestResourcesProvider(
         .send({ attributes: { title, timeFieldName } });
       mlApi.assertResponseStatusCode(200, status, createResponse);
 
-      await this.assertIndexPatternExistByTitle(title, space);
+      await this.assertDataViewExistByTitle(title, space);
 
       log.debug(` > Created with id '${createResponse.id}'`);
       return createResponse.id;
@@ -172,21 +168,21 @@ export function MachineLearningTestResourcesProvider(
       return createResponse;
     },
 
-    async createIndexPatternIfNeeded(
+    async createDataViewIfNeeded(
       title: string,
       timeFieldName?: string,
       space?: string
     ): Promise<string> {
-      const indexPatternId = await this.getIndexPatternId(title, space);
-      if (indexPatternId !== undefined) {
+      const dataViewId = await this.getDataViewId(title, space);
+      if (dataViewId !== undefined) {
         log.debug(`Index pattern with title '${title}' already exists. Nothing to create.`);
-        return indexPatternId;
+        return dataViewId;
       } else {
-        return await this.createIndexPattern(title, timeFieldName, space);
+        return await this.createDataView(title, timeFieldName, space);
       }
     },
 
-    async assertIndexPatternNotExist(title: string) {
+    async assertDataViewNotExist(title: string) {
       await this.assertSavedObjectNotExistsByTitle(title, SavedObjectType.INDEX_PATTERN);
     },
 
@@ -218,7 +214,7 @@ export function MachineLearningTestResourcesProvider(
       return createResponse.id;
     },
 
-    async createSavedSearchIfNeeded(savedSearch: any, indexPatternTitle: string): Promise<string> {
+    async createSavedSearchIfNeeded(savedSearch: any, dataViewTitle: string): Promise<string> {
       const title = savedSearch.requestBody.attributes.title;
       const savedSearchId = await this.getSavedSearchId(title);
       if (savedSearchId !== undefined) {
@@ -227,24 +223,24 @@ export function MachineLearningTestResourcesProvider(
       } else {
         const body = await this.updateSavedSearchRequestBody(
           savedSearch.requestBody,
-          indexPatternTitle
+          dataViewTitle
         );
         return await this.createSavedSearch(title, body);
       }
     },
 
-    async updateSavedSearchRequestBody(body: object, indexPatternTitle: string): Promise<object> {
-      const indexPatternId = await this.getIndexPatternId(indexPatternTitle);
-      if (indexPatternId === undefined) {
+    async updateSavedSearchRequestBody(body: object, dataViewTitle: string): Promise<object> {
+      const dataViewId = await this.getDataViewId(dataViewTitle);
+      if (dataViewId === undefined) {
         throw new Error(
-          `Index pattern '${indexPatternTitle}' to base saved search on does not exist. `
+          `Index pattern '${dataViewTitle}' to base saved search on does not exist. `
         );
       }
 
       // inject index pattern id
       const updatedBody = JSON.parse(JSON.stringify(body), (_key, value) => {
         if (value === 'INDEX_PATTERN_ID_PLACEHOLDER') {
-          return indexPatternId;
+          return dataViewId;
         } else {
           return value;
         }
@@ -258,8 +254,8 @@ export function MachineLearningTestResourcesProvider(
       return updatedBody;
     },
 
-    async createSavedSearchFarequoteFilterIfNeeded(indexPatternTitle: string = 'ft_farequote') {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, indexPatternTitle);
+    async createSavedSearchFarequoteFilterIfNeeded(dataViewTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilter, dataViewTitle);
     },
 
     async createMLTestDashboardIfNeeded(): Promise<string> {
@@ -281,48 +277,37 @@ export function MachineLearningTestResourcesProvider(
       }
     },
 
-    async createSavedSearchFarequoteLuceneIfNeeded(indexPatternTitle: string = 'ft_farequote') {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteLucene, indexPatternTitle);
+    async createSavedSearchFarequoteLuceneIfNeeded(dataViewTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteLucene, dataViewTitle);
     },
 
-    async createSavedSearchFarequoteKueryIfNeeded(indexPatternTitle: string = 'ft_farequote') {
-      await this.createSavedSearchIfNeeded(savedSearches.farequoteKuery, indexPatternTitle);
+    async createSavedSearchFarequoteKueryIfNeeded(dataViewTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteKuery, dataViewTitle);
     },
 
     async createSavedSearchFarequoteFilterAndLuceneIfNeeded(
-      indexPatternTitle: string = 'ft_farequote'
+      dataViewTitle: string = 'ft_farequote'
     ) {
-      await this.createSavedSearchIfNeeded(
-        savedSearches.farequoteFilterAndLucene,
-        indexPatternTitle
-      );
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilterAndLucene, dataViewTitle);
     },
 
-    async createSavedSearchFarequoteFilterAndKueryIfNeeded(
-      indexPatternTitle: string = 'ft_farequote'
-    ) {
-      await this.createSavedSearchIfNeeded(
-        savedSearches.farequoteFilterAndKuery,
-        indexPatternTitle
-      );
+    async createSavedSearchFarequoteFilterAndKueryIfNeeded(dataViewTitle: string = 'ft_farequote') {
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilterAndKuery, dataViewTitle);
     },
 
     async createSavedSearchFarequoteFilterTwoAndLuceneIfNeeded(
-      indexPatternTitle: string = 'ft_farequote'
+      dataViewTitle: string = 'ft_farequote'
     ) {
       await this.createSavedSearchIfNeeded(
         savedSearches.farequoteFilterTwoAndLucene,
-        indexPatternTitle
+        dataViewTitle
       );
     },
 
     async createSavedSearchFarequoteFilterTwoAndKueryIfNeeded(
-      indexPatternTitle: string = 'ft_farequote'
+      dataViewTitle: string = 'ft_farequote'
     ) {
-      await this.createSavedSearchIfNeeded(
-        savedSearches.farequoteFilterTwoAndKuery,
-        indexPatternTitle
-      );
+      await this.createSavedSearchIfNeeded(savedSearches.farequoteFilterTwoAndKuery, dataViewTitle);
     },
 
     async deleteSavedObjectById(
@@ -349,19 +334,19 @@ export function MachineLearningTestResourcesProvider(
       }
     },
 
-    async deleteIndexPatternByTitle(title: string, space?: string) {
+    async deleteDataViewByTitle(title: string, space?: string) {
       log.debug(`Deleting index pattern with title '${title}'...`);
 
-      const indexPatternId = await this.getIndexPatternId(title, space);
-      if (indexPatternId === undefined) {
+      const dataViewId = await this.getDataViewId(title, space);
+      if (dataViewId === undefined) {
         log.debug(`Index pattern with title '${title}' does not exists. Nothing to delete.`);
         return;
       } else {
-        await this.deleteIndexPatternById(indexPatternId, space);
+        await this.deleteDataViewById(dataViewId, space);
       }
     },
 
-    async deleteIndexPatternById(id: string, space?: string) {
+    async deleteDataViewById(id: string, space?: string) {
       await this.deleteSavedObjectById(id, SavedObjectType.INDEX_PATTERN, false, space);
     },
 
@@ -485,11 +470,11 @@ export function MachineLearningTestResourcesProvider(
       );
     },
 
-    async assertIndexPatternExistByTitle(title: string, space?: string) {
+    async assertDataViewExistByTitle(title: string, space?: string) {
       await this.assertSavedObjectExistsByTitle(title, SavedObjectType.INDEX_PATTERN, space);
     },
 
-    async assertIndexPatternExistById(id: string) {
+    async assertDataViewExistById(id: string) {
       await this.assertSavedObjectExistsById(id, SavedObjectType.INDEX_PATTERN);
     },
 
@@ -640,6 +625,12 @@ export function MachineLearningTestResourcesProvider(
 
     async clearAdvancedSettingProperty(propertyName: string) {
       await kibanaServer.uiSettings.unset(propertyName);
+    },
+
+    async assertModuleExists(moduleId: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await mlApi.getModule(moduleId);
+      });
     },
   };
 }

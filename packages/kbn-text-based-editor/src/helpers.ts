@@ -11,15 +11,9 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { MapCache } from 'lodash';
 
-export interface MonacoError {
-  message: string;
-  startColumn: number;
-  startLineNumber: number;
-  endColumn: number;
-  endLineNumber: number;
-  severity: monaco.MarkerSeverity;
-}
+export type MonacoMessage = monaco.editor.IMarkerData;
 
 export const useDebounceWithOptions = (
   fn: Function,
@@ -43,46 +37,69 @@ export const useDebounceWithOptions = (
   );
 };
 
-export const parseWarning = (warning: string): MonacoError[] => {
-  if (warning.includes('Line')) {
-    const splitByLine = warning.split('Line');
-    splitByLine.shift();
-    return splitByLine.map((item) => {
-      const [lineNumber, startPosition, warningMessage] = item.split(':');
-      const [trimmedMessage] = warningMessage.split('"');
-      // initialize the length to 10 in case no error word found
-      let errorLength = 10;
-      const [_, wordWithError] = trimmedMessage.split('[');
-      if (wordWithError) {
-        errorLength = wordWithError.length - 1;
-      }
-      return {
-        message: trimmedMessage.trimStart(),
-        startColumn: Number(startPosition),
-        startLineNumber: Number(lineNumber),
-        endColumn: Number(startPosition) + errorLength,
-        endLineNumber: Number(lineNumber),
-        severity: monaco.MarkerSeverity.Error,
-      };
-    });
-  } else {
-    // unknown warning message
-    return [
-      {
-        message: warning,
-        startColumn: 1,
-        startLineNumber: 1,
-        endColumn: 10,
-        endLineNumber: 1,
-        severity: monaco.MarkerSeverity.Error,
-      },
-    ];
+const quotedWarningMessageRegexp = /"(.*?)"/g;
+
+export const parseWarning = (warning: string): MonacoMessage[] => {
+  if (quotedWarningMessageRegexp.test(warning)) {
+    const matches = warning.match(quotedWarningMessageRegexp);
+    if (matches) {
+      return matches.map((message) => {
+        // start extracting the quoted message and with few default positioning
+        let warningMessage = message.replace(/"/g, '');
+        let startColumn = 1;
+        let startLineNumber = 1;
+        // initialize the length to 10 in case no error word found
+        let errorLength = 10;
+        // if there's line number encoded in the message use it as new positioning
+        // and replace the actual message without it
+        if (/Line (\d+):(\d+):/.test(warningMessage)) {
+          const [encodedLine, encodedColumn, innerMessage] = warningMessage.split(':');
+          warningMessage = innerMessage;
+          if (!Number.isNaN(Number(encodedColumn))) {
+            startColumn = Number(encodedColumn);
+            startLineNumber = Number(encodedLine.replace('Line ', ''));
+          }
+          // extract the length of the "expression" within the message
+          // and try to guess the correct size for the editor marker to highlight
+          if (/\[.*\]/.test(warningMessage)) {
+            const [_, wordWithError] = warningMessage.split('[');
+            if (wordWithError) {
+              errorLength = wordWithError.length;
+            }
+          }
+        }
+
+        return {
+          message: warningMessage.trimStart(),
+          startColumn,
+          startLineNumber,
+          endColumn: startColumn + errorLength - 1,
+          endLineNumber: startLineNumber,
+          severity: monaco.MarkerSeverity.Warning,
+        };
+      });
+    }
   }
+  // unknown warning message
+  return [
+    {
+      message: warning,
+      startColumn: 1,
+      startLineNumber: 1,
+      endColumn: 10,
+      endLineNumber: 1,
+      severity: monaco.MarkerSeverity.Warning,
+    },
+  ];
 };
 
-export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
+export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
   return errors.map((error) => {
-    if (error.message.includes('line')) {
+    if (
+      // Found while testing random commands (as inlinestats)
+      !error.message.includes('esql_illegal_argument_exception') &&
+      error.message.includes('line')
+    ) {
       const text = error.message.split('line')[1];
       const [lineNumber, startPosition, errorMessage] = text.split(':');
       // initialize the length to 10 in case no error word found
@@ -95,7 +112,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoError[] => {
         message: errorMessage,
         startColumn: Number(startPosition),
         startLineNumber: Number(lineNumber),
-        endColumn: Number(startPosition) + errorLength,
+        endColumn: Number(startPosition) + errorLength + 1,
         endLineNumber: Number(lineNumber),
         severity: monaco.MarkerSeverity.Error,
       };
@@ -174,11 +191,23 @@ export const getWrappedInPipesCode = (code: string, isWrapped: boolean): string 
   return codeNoLines.join(isWrapped ? ' | ' : '\n| ');
 };
 
-export const getIndicesForAutocomplete = async (dataViews: DataViewsPublicPluginStart) => {
+export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   const indices = await dataViews.getIndices({
     showAllIndices: false,
     pattern: '*',
     isRollupIndex: () => false,
   });
-  return indices.filter((index) => !index.name.startsWith('.')).map((i) => i.name);
+  return indices.map((index) => ({ name: index.name, hidden: index.name.startsWith('.') }));
+};
+
+// refresh the esql cache entry after 10 minutes
+const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
+
+export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
+  if (cache.has(esqlQuery)) {
+    const cacheEntry = cache.get(esqlQuery);
+    if (Date.now() - cacheEntry.timestamp > CACHE_INVALIDATE_DELAY) {
+      cache.delete(esqlQuery);
+    }
+  }
 };

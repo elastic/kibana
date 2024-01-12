@@ -5,56 +5,19 @@
  * 2.0.
  */
 
-import {
-  Aggregators,
-  Comparator,
-  MetricExpressionParams,
-} from '../../../../../common/custom_threshold_rule/types';
+import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import { createConditionScript } from './create_condition_script';
 import { createLastPeriod } from './wrap_in_period';
 
-const EMPTY_SHOULD_WARN = {
-  bucket_script: {
-    buckets_path: {},
-    script: '0',
-  },
-};
-
 export const createBucketSelector = (
-  condition: MetricExpressionParams,
+  condition: CustomMetricExpressionParams,
   alertOnGroupDisappear: boolean = false,
   timeFieldName: string,
   groupBy?: string | string[],
   lastPeriodEnd?: number
 ) => {
-  const hasGroupBy = groupBy != null;
-  const hasWarn = condition.warningThreshold != null && condition.warningComparator != null;
-  const isPercentile = [Aggregators.P95, Aggregators.P99].includes(condition.aggType);
-  const isCount = condition.aggType === Aggregators.COUNT;
-  const isRate = condition.aggType === Aggregators.RATE;
-  const bucketPath = isCount
-    ? "currentPeriod['all']>_count"
-    : isRate
-    ? `aggregatedValue`
-    : isPercentile
-    ? `currentPeriod[\'all\']>aggregatedValue[${
-        condition.aggType === Aggregators.P95 ? '95' : '99'
-      }]`
-    : "currentPeriod['all']>aggregatedValue";
-
-  const shouldWarn = hasWarn
-    ? {
-        bucket_script: {
-          buckets_path: {
-            value: bucketPath,
-          },
-          script: createConditionScript(
-            condition.warningThreshold as number[],
-            condition.warningComparator as Comparator
-          ),
-        },
-      }
-    : EMPTY_SHOULD_WARN;
+  const hasGroupBy = !!groupBy;
+  const bucketPath = "currentPeriod['all']>aggregatedValue";
 
   const shouldTrigger = {
     bucket_script: {
@@ -66,7 +29,6 @@ export const createBucketSelector = (
   };
 
   const aggs: any = {
-    shouldWarn,
     shouldTrigger,
   };
 
@@ -97,17 +59,16 @@ export const createBucketSelector = (
     const evalutionBucketPath =
       alertOnGroupDisappear && lastPeriodEnd
         ? {
-            shouldWarn: 'shouldWarn',
             shouldTrigger: 'shouldTrigger',
             missingGroup: 'missingGroup',
             newOrRecoveredGroup: 'newOrRecoveredGroup',
           }
-        : { shouldWarn: 'shouldWarn', shouldTrigger: 'shouldTrigger' };
+        : { shouldTrigger: 'shouldTrigger' };
 
     const evaluationScript =
       alertOnGroupDisappear && lastPeriodEnd
-        ? '(params.missingGroup != null && params.missingGroup > 0) || (params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0) || (params.newOrRecoveredGroup != null && params.newOrRecoveredGroup > 0)'
-        : '(params.shouldWarn != null && params.shouldWarn > 0) || (params.shouldTrigger != null && params.shouldTrigger > 0)';
+        ? '(params.missingGroup != null && params.missingGroup > 0)  || (params.shouldTrigger != null && params.shouldTrigger > 0) || (params.newOrRecoveredGroup != null && params.newOrRecoveredGroup > 0)'
+        : '(params.shouldTrigger != null && params.shouldTrigger > 0)';
 
     aggs.evaluation = {
       bucket_selector: {

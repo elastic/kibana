@@ -15,6 +15,7 @@ import { ILicenseState } from './license_state';
 import { licenseStateMock } from './license_state.mock';
 import { schema } from '@kbn/config-schema';
 import { createGetAlertIndicesAliasFn } from './create_get_alert_indices_alias';
+import { AlertingConfig } from '../config';
 
 describe('createGetAlertIndicesAliasFn', () => {
   const logger = loggingSystemMock.create().get();
@@ -23,6 +24,7 @@ describe('createGetAlertIndicesAliasFn', () => {
   const inMemoryMetrics = inMemoryMetricsMock.create();
 
   const ruleTypeRegistryParams: ConstructorOptions = {
+    config: {} as AlertingConfig,
     logger,
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
@@ -31,6 +33,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
+    latestRuleVersion: 1,
   };
   const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
   registry.register({
@@ -46,6 +49,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: jest.fn(),
+    category: 'test',
     producer: 'alerts',
     alerts: {
       context: 'test',
@@ -68,6 +72,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: jest.fn(),
+    category: 'test',
     producer: 'alerts',
     alerts: {
       context: 'spaceAware',
@@ -91,6 +96,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: jest.fn(),
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: schema.any(),

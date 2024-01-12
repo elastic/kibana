@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import {
+  BrowserCouldNotLaunchError,
+  BrowserScreenshotError,
+  BrowserUnexpectedlyClosedError,
+  InvalidLayoutParametersError,
+  UnknownError,
+} from '@kbn/reporting-common';
 import { mapToReportingError } from './map_to_reporting_error';
 import { errors } from '@kbn/screenshotting-plugin/common';
-import {
-  UnknownError,
-  BrowserCouldNotLaunchError,
-  BrowserUnexpectedlyClosedError,
-  BrowserScreenshotError,
-  InvalidLayoutParametersError,
-} from '@kbn/reporting-common';
 
 describe('mapToReportingError', () => {
   test('Non-Error values', () => {
@@ -35,5 +35,11 @@ describe('mapToReportingError', () => {
     expect(mapToReportingError(new errors.FailedToSpawnBrowserError())).toBeInstanceOf(
       BrowserCouldNotLaunchError
     );
+  });
+
+  test('unknown error', () => {
+    const error = mapToReportingError(new Error('Test error msg'));
+    expect(error).toBeInstanceOf(UnknownError);
+    expect(error.message).toBe('ReportingError(code: unknown_error) "Test error msg"');
   });
 });

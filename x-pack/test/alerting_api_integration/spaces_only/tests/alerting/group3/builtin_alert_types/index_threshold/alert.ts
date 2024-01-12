@@ -10,6 +10,7 @@ import expect from '@kbn/expect';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 import { STACK_AAD_INDEX_NAME } from '@kbn/stack-alerts-plugin/server/rule_types';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
@@ -111,12 +112,17 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
       const aadDocs = await esTestIndexToolAAD.getAll(1);
 
+      const alertDoc = aadDocs.body.hits.hits[0]._source;
       // @ts-ignore
-      const alertDoc = aadDocs.body.hits.hits[0]._source.kibana.alert;
-      expect(alertDoc.reason).to.match(messagePattern);
-      expect(alertDoc.title).to.be('alert always fire group all documents met threshold');
-      expect(alertDoc.evaluation.conditions).to.be('count is greater than -1');
-      expect(alertDoc.evaluation.value).greaterThan(0);
+      expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+      // @ts-ignore
+      expect(alertDoc['kibana.alert.title']).to.be(
+        'alert always fire group all documents met threshold'
+      );
+      // @ts-ignore
+      expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('count is greater than -1');
+      // @ts-ignore
+      expect(alertDoc['kibana.alert.evaluation.value']).greaterThan(0);
     });
 
     it('runs correctly: count grouped <= =>', async () => {

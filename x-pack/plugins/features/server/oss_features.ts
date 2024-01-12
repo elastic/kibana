@@ -203,6 +203,7 @@ export const buildOSSFeatures = ({
               'visualization',
               'canvas-workpad',
               'lens',
+              'links',
               'map',
               'tag',
             ],
@@ -220,6 +221,7 @@ export const buildOSSFeatures = ({
               'visualization',
               'canvas-workpad',
               'lens',
+              'links',
               'map',
               'dashboard',
               'query',
@@ -516,6 +518,31 @@ export const buildOSSFeatures = ({
           },
           ui: ['read'],
         },
+      },
+    },
+    {
+      id: 'savedQueryManagement',
+      name: i18n.translate('xpack.features.savedQueryManagementFeatureName', {
+        defaultMessage: 'Saved Query Management',
+      }),
+      order: 1750,
+      category: DEFAULT_APP_CATEGORIES.management,
+      app: ['kibana'],
+      catalogue: [],
+      privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
+        defaultMessage:
+          'If set to "All", saved queries can be managed across Kibana in all applications that support them. If set to "None", saved query privileges will be determined independently by each application.',
+      }),
+      privileges: {
+        all: {
+          app: ['kibana'],
+          catalogue: [],
+          savedObject: {
+            all: ['query'],
+            read: [],
+          },
+          ui: ['saveQuery'],
+        }, // No read-only mode supported
       },
     },
   ] as KibanaFeatureConfig[];

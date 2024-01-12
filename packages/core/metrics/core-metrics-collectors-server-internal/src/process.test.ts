@@ -61,12 +61,15 @@ describe('ProcessMetricsCollector', () => {
       const heapUsed = 4688;
       const heapSizeLimit = 5788;
       const rss = 5865;
+      const external = 9001;
+      const arrayBuffers = 42;
+
       jest.spyOn(process, 'memoryUsage').mockImplementation(() => ({
         rss,
         heapTotal,
         heapUsed,
-        external: 0,
-        arrayBuffers: 0,
+        external,
+        arrayBuffers,
       }));
 
       jest.spyOn(v8, 'getHeapStatistics').mockImplementation(
@@ -83,6 +86,8 @@ describe('ProcessMetricsCollector', () => {
       expect(metrics[0].memory.heap.used_in_bytes).toEqual(heapUsed);
       expect(metrics[0].memory.heap.size_limit).toEqual(heapSizeLimit);
       expect(metrics[0].memory.resident_set_size_in_bytes).toEqual(rss);
+      expect(metrics[0].memory.external_in_bytes).toEqual(external);
+      expect(metrics[0].memory.array_buffers_in_bytes).toEqual(arrayBuffers);
     });
   });
 

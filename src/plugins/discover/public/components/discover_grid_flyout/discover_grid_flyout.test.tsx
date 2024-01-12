@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { EuiButtonIcon, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
@@ -24,7 +25,6 @@ import { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import { FlyoutCustomization, useDiscoverCustomization } from '../../customizations';
-import { EuiFlexItem } from '@elastic/eui';
 
 const mockFlyoutCustomization: FlyoutCustomization = {
   id: 'flyout',
@@ -35,6 +35,22 @@ jest.mock('../../customizations', () => ({
   ...jest.requireActual('../../customizations'),
   useDiscoverCustomization: jest.fn(),
 }));
+
+let mockBreakpointSize: string | null = null;
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useIsWithinBreakpoints: jest.fn((breakpoints: string[]) => {
+      if (mockBreakpointSize && breakpoints.includes(mockBreakpointSize)) {
+        return true;
+      }
+
+      return original.useIsWithinBreakpoints(breakpoints);
+    }),
+  };
+});
 
 const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -69,6 +85,9 @@ describe('Discover flyout', function () {
       },
       contextLocator: { getRedirectUrl: jest.fn(() => 'mock-context-redirect-url') },
       singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url') },
+      toastNotifications: {
+        addSuccess: jest.fn(),
+      },
     } as unknown as DiscoverServices;
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -103,11 +122,12 @@ describe('Discover flyout', function () {
     const component = mountWithIntl(<Proxy {...props} />);
     await waitNextUpdate(component);
 
-    return { component, props };
+    return { component, props, services };
   };
 
   beforeEach(() => {
     mockFlyoutCustomization.actions.defaultActions = undefined;
+    mockFlyoutCustomization.Content = undefined;
     jest.clearAllMocks();
 
     (useDiscoverCustomization as jest.Mock).mockImplementation(() => mockFlyoutCustomization);
@@ -223,47 +243,214 @@ describe('Discover flyout', function () {
     const singleDocumentView = findTestSubject(component, 'docTableRowAction');
     expect(singleDocumentView.length).toBeFalsy();
     const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
-    expect(flyoutTitle.text()).toBe('Expanded row');
+    expect(flyoutTitle.text()).toBe('Row');
   });
 
-  describe('when customizations actions exists', () => {
-    it('should display actions added by getActionItems', async () => {
-      mockFlyoutCustomization.actions = {
-        getActionItems: jest.fn(() => [
-          {
-            id: 'action-item-1',
-            enabled: true,
-            Content: () => <EuiFlexItem data-test-subj="customActionItem1">Action 1</EuiFlexItem>,
-          },
-          {
-            id: 'action-item-2',
-            enabled: true,
-            Content: () => <EuiFlexItem data-test-subj="customActionItem2">Action 2</EuiFlexItem>,
-          },
-        ]),
-      };
+  describe('with applied customizations', () => {
+    describe('when title is customized', () => {
+      it('should display the passed string as title', async () => {
+        const customTitle = 'Custom flyout title';
+        mockFlyoutCustomization.title = customTitle;
 
-      const { component } = await mountComponent({});
+        const { component } = await mountComponent({});
 
-      const action1 = findTestSubject(component, 'customActionItem1');
-      const action2 = findTestSubject(component, 'customActionItem2');
+        const titleNode = findTestSubject(component, 'docTableRowDetailsTitle');
 
-      expect(action1.text()).toBe('Action 1');
-      expect(action2.text()).toBe('Action 2');
+        expect(titleNode.text()).toBe(customTitle);
+      });
     });
 
-    it('should allow disabling default actions', async () => {
-      mockFlyoutCustomization.actions = {
-        defaultActions: {
-          viewSingleDocument: { disabled: true },
-          viewSurroundingDocument: { disabled: true },
-        },
-      };
+    describe('when actions are customized', () => {
+      it('should display actions added by getActionItems', async () => {
+        mockBreakpointSize = 'xl';
+        mockFlyoutCustomization.actions = {
+          getActionItems: jest.fn(() => [
+            {
+              id: 'action-item-1',
+              enabled: true,
+              label: 'Action 1',
+              iconType: 'document',
+              dataTestSubj: 'customActionItem1',
+              onClick: jest.fn(),
+            },
+            {
+              id: 'action-item-2',
+              enabled: true,
+              label: 'Action 2',
+              iconType: 'document',
+              dataTestSubj: 'customActionItem2',
+              onClick: jest.fn(),
+            },
+            {
+              id: 'action-item-3',
+              enabled: false,
+              label: 'Action 3',
+              iconType: 'document',
+              dataTestSubj: 'customActionItem3',
+              onClick: jest.fn(),
+            },
+          ]),
+        };
 
-      const { component } = await mountComponent({});
+        const { component } = await mountComponent({});
 
-      const singleDocumentView = findTestSubject(component, 'docTableRowAction');
-      expect(singleDocumentView.length).toBeFalsy();
+        const action1 = findTestSubject(component, 'customActionItem1');
+        const action2 = findTestSubject(component, 'customActionItem2');
+
+        expect(action1.text()).toBe('Action 1');
+        expect(action2.text()).toBe('Action 2');
+        expect(findTestSubject(component, 'customActionItem3').exists()).toBe(false);
+        mockBreakpointSize = null;
+      });
+
+      it('should display multiple actions added by getActionItems', async () => {
+        mockFlyoutCustomization.actions = {
+          getActionItems: jest.fn(() =>
+            Array.from({ length: 5 }, (_, i) => ({
+              id: `action-item-${i}`,
+              enabled: true,
+              label: `Action ${i}`,
+              iconType: 'document',
+              dataTestSubj: `customActionItem${i}`,
+              onClick: jest.fn(),
+            }))
+          ),
+        };
+
+        const { component } = await mountComponent({});
+        expect(
+          findTestSubject(component, 'docViewerFlyoutActions')
+            .find(EuiButtonIcon)
+            .map((button) => button.prop('data-test-subj'))
+        ).toEqual([
+          'docTableRowAction',
+          'customActionItem0',
+          'customActionItem1',
+          'docViewerMoreFlyoutActionsButton',
+        ]);
+
+        act(() => {
+          findTestSubject(component, 'docViewerMoreFlyoutActionsButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(
+          component
+            .find(EuiPopover)
+            .find(EuiContextMenuItem)
+            .map((button) => button.prop('data-test-subj'))
+        ).toEqual(['customActionItem2', 'customActionItem3', 'customActionItem4']);
+      });
+
+      it('should display multiple actions added by getActionItems in mobile view', async () => {
+        mockBreakpointSize = 's';
+
+        mockFlyoutCustomization.actions = {
+          getActionItems: jest.fn(() =>
+            Array.from({ length: 3 }, (_, i) => ({
+              id: `action-item-${i}`,
+              enabled: true,
+              label: `Action ${i}`,
+              iconType: 'document',
+              dataTestSubj: `customActionItem${i}`,
+              onClick: jest.fn(),
+            }))
+          ),
+        };
+
+        const { component } = await mountComponent({});
+        expect(findTestSubject(component, 'docViewerFlyoutActions').length).toBe(0);
+
+        act(() => {
+          findTestSubject(component, 'docViewerMobileActionsButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(
+          component
+            .find(EuiPopover)
+            .find(EuiContextMenuItem)
+            .map((button) => button.prop('data-test-subj'))
+        ).toEqual([
+          'docTableRowAction',
+          'customActionItem0',
+          'customActionItem1',
+          'customActionItem2',
+        ]);
+
+        mockBreakpointSize = null;
+      });
+
+      it('should allow disabling default actions', async () => {
+        mockFlyoutCustomization.actions = {
+          defaultActions: {
+            viewSingleDocument: { disabled: true },
+            viewSurroundingDocument: { disabled: true },
+          },
+        };
+
+        const { component } = await mountComponent({});
+
+        const singleDocumentView = findTestSubject(component, 'docTableRowAction');
+        expect(singleDocumentView.length).toBeFalsy();
+      });
+    });
+
+    describe('when content is customized', () => {
+      it('should display the component passed to the Content customization', async () => {
+        mockFlyoutCustomization.Content = () => (
+          <span data-test-subj="flyoutCustomContent">Custom content</span>
+        );
+
+        const { component } = await mountComponent({});
+
+        const customContent = findTestSubject(component, 'flyoutCustomContent');
+
+        expect(customContent.text()).toBe('Custom content');
+      });
+
+      it('should provide a doc property to display details about the current document overview', async () => {
+        mockFlyoutCustomization.Content = ({ doc }) => {
+          return (
+            <span data-test-subj="flyoutCustomContent">{doc.flattened.message as string}</span>
+          );
+        };
+
+        const { component } = await mountComponent({});
+
+        const customContent = findTestSubject(component, 'flyoutCustomContent');
+
+        expect(customContent.text()).toBe('test1');
+      });
+
+      it('should provide an actions prop collection to optionally update the grid content', async () => {
+        mockFlyoutCustomization.Content = ({ actions }) => (
+          <>
+            <button data-test-subj="addColumn" onClick={() => actions.onAddColumn?.('message')} />
+            <button
+              data-test-subj="removeColumn"
+              onClick={() => actions.onRemoveColumn?.('message')}
+            />
+            <button
+              data-test-subj="addFilter"
+              onClick={() => actions.filter?.('_exists_', 'message', '+')}
+            />
+          </>
+        );
+
+        const { component, props, services } = await mountComponent({});
+
+        findTestSubject(component, 'addColumn').simulate('click');
+        findTestSubject(component, 'removeColumn').simulate('click');
+        findTestSubject(component, 'addFilter').simulate('click');
+
+        expect(props.onAddColumn).toHaveBeenCalled();
+        expect(props.onRemoveColumn).toHaveBeenCalled();
+        expect(services.toastNotifications.addSuccess).toHaveBeenCalledTimes(2);
+        expect(props.onFilter).toHaveBeenCalled();
+      });
     });
   });
 });

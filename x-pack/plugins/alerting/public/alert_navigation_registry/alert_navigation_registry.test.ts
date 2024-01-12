@@ -22,6 +22,7 @@ const mockRuleType = (id: string): RuleType => ({
     params: [],
   },
   defaultActionGroupId: 'default',
+  category: 'test',
   producer: 'alerts',
   minimumLicenseRequired: 'basic',
   isExportable: true,

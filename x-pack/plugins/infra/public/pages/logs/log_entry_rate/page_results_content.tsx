@@ -15,7 +15,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext, LogEntryFlyout } from '@kbn/logs-shared-plugin/public';
-import { isJobStatusWithResults } from '../../../../common/log_analysis';
+import { IdFormatByJobType } from '../../../../common/http_api/latest';
+import {
+  isJobStatusWithResults,
+  logEntryCategoriesJobType,
+  logEntryRateJobType,
+} from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {
   CategoryJobNoticesSection,
@@ -45,7 +50,8 @@ export const PAGINATION_DEFAULTS = {
 
 export const LogEntryRateResultsContent: React.FunctionComponent<{
   pageTitle: string;
-}> = ({ pageTitle }) => {
+  idFormats: IdFormatByJobType | null;
+}> = ({ pageTitle, idFormats }) => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_results', delay: 15000 });
 
@@ -82,11 +88,11 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   const jobIds = useMemo(() => {
     return [
-      ...(isJobStatusWithResults(logEntryRateJobStatus['log-entry-rate'])
-        ? [logEntryRateJobIds['log-entry-rate']]
+      ...(isJobStatusWithResults(logEntryRateJobStatus[logEntryRateJobType])
+        ? [logEntryRateJobIds[logEntryRateJobType]]
         : []),
-      ...(isJobStatusWithResults(logEntryCategoriesJobStatus['log-entry-categories-count'])
-        ? [logEntryCategoriesJobIds['log-entry-categories-count']]
+      ...(isJobStatusWithResults(logEntryCategoriesJobStatus[logEntryCategoriesJobType])
+        ? [logEntryCategoriesJobIds[logEntryCategoriesJobType]]
         : []),
     ];
   }, [
@@ -146,6 +152,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     isLoadingDatasets,
   } = useLogEntryAnomaliesResults({
     logViewReference,
+    idFormats,
     startTime: timeRange.value.startTime,
     endTime: timeRange.value.endTime,
     defaultSortOptions: SORT_DEFAULTS,
@@ -199,6 +206,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   return (
     <LogsPageTemplate
+      data-test-subj="logEntryRateResultsPage"
       hasData={logViewStatus?.index !== 'missing'}
       pageHeader={{
         pageTitle,

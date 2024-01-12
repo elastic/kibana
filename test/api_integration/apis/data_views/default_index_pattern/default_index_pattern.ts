@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response5.status).to.be(200);
 
           const response6 = await supertest.get(defaultPath);
-          expect(response6.body[serviceKeyId]).to.be(null);
+          expect(response6.body[serviceKeyId]).to.be('');
         });
       });
     });

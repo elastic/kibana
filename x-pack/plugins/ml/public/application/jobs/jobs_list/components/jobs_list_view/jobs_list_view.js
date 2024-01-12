@@ -350,7 +350,10 @@ export class JobsListView extends Component {
       });
 
       this.isDoneRefreshing();
-      if (jobsSummaryList.some((j) => j.blocked !== undefined)) {
+      if (
+        blockingJobsRefreshTimeout === null &&
+        jobsSummaryList.some((j) => j.blocked !== undefined)
+      ) {
         // if there are some jobs in a deleting state, start polling for
         // deleting jobs so we can update the jobs list once the
         // deleting tasks are over

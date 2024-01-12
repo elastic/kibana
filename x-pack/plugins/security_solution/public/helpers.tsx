@@ -21,6 +21,7 @@ import {
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
+  DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
   RULES_PATH,
   SERVER_APP_ID,
@@ -35,7 +36,7 @@ import { NoPrivilegesPage } from './common/components/no_privileges';
 import { SecurityPageName } from './app/types';
 import type { InspectResponse, StartedSubPlugins, StartServices } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
-import { timelineActions } from './timelines/store/timeline';
+import { timelineActions } from './timelines/store';
 import { TimelineId } from '../common/types';
 import { SourcererScopeName } from './common/store/sourcerer/model';
 
@@ -172,6 +173,13 @@ export const isDetectionsPath = (pathname: string): boolean => {
     strict: false,
   });
 };
+
+export const isDashboardViewPath = (pathname: string): boolean =>
+  matchPath(pathname, {
+    path: `/${DASHBOARDS_PATH}/:id`,
+    exact: false,
+    strict: false,
+  }) != null;
 
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {

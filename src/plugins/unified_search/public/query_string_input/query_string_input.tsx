@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
 import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
@@ -801,7 +802,11 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
-            style={{ position: 'relative', width: '100%' }}
+            style={{
+              position: 'relative',
+              width: '100%',
+              zIndex: euiThemeVars.euiZLevel1,
+            }}
             aria-label={strings.getQueryBarComboboxAriaLabel(this.props.appName)}
             aria-haspopup="true"
             aria-expanded={this.state.isSuggestionsVisible}

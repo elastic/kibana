@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import {
+  RISK_ENGINE_STATUS_URL,
+  RISK_SCORE_INDEX_STATUS_API_URL,
+} from '@kbn/security-solution-plugin/common/constants';
 import { BASIC_TABLE_LOADING } from '../screens/common';
 import {
   ANOMALIES_TABLE_ROWS,
   ANOMALIES_TABLE_ENABLE_JOB_BUTTON,
   ANOMALIES_TABLE_NEXT_PAGE_BUTTON,
+  OPEN_RISK_INFORMATION_FLYOUT_BUTTON,
 } from '../screens/entity_analytics';
-import { ENTITY_ANALYTICS_URL } from '../urls/navigation';
+import { RISK_SCORE_STATUS } from '../screens/entity_analytics_management';
+import { ENTITY_ANALYTICS_URL, ENTITY_ANALYTICS_MANAGEMENT_URL } from '../urls/navigation';
 import {
   RISK_SCORE_UPDATE_CONFIRM,
-  RISK_SCORE_UDATE_BUTTON,
+  RISK_SCORE_UPDATE_BUTTON,
   RISK_SCORE_SWITCH,
   RISK_PREVIEW_ERROR_BUTTON,
 } from '../screens/entity_analytics_management';
@@ -42,8 +48,36 @@ export const riskEngineStatusChange = () => {
   cy.get(RISK_SCORE_SWITCH).click();
 };
 
+export const mockRiskEngineEnabled = () => {
+  // mock the risk engine status
+  cy.intercept('GET', RISK_ENGINE_STATUS_URL, {
+    statusCode: 200,
+    body: {
+      risk_engine_status: 'ENABLED',
+      legacy_risk_engine_status: 'INSTALLED',
+      is_max_amount_of_risk_engines_reached: false,
+    },
+  }).as('riskEngineStatus');
+
+  // mock the risk index status
+  cy.intercept('GET', `${RISK_SCORE_INDEX_STATUS_API_URL}?indexName=*&entity=*`, {
+    statusCode: 200,
+    body: {
+      isDeprecated: false,
+      isEnabled: true,
+    },
+  }).as('riskIndexStatus');
+};
+
+export const enableRiskEngine = () => {
+  cy.visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+  cy.get(RISK_SCORE_STATUS).should('have.text', 'Off');
+  riskEngineStatusChange();
+  cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
+};
+
 export const updateRiskEngine = () => {
-  cy.get(RISK_SCORE_UDATE_BUTTON).click();
+  cy.get(RISK_SCORE_UPDATE_BUTTON).click();
 };
 
 export const updateRiskEngineConfirm = () => {
@@ -52,4 +86,13 @@ export const updateRiskEngineConfirm = () => {
 
 export const previewErrorButtonClick = () => {
   cy.get(RISK_PREVIEW_ERROR_BUTTON).click();
+};
+
+export const openRiskInformationFlyout = () => cy.get(OPEN_RISK_INFORMATION_FLYOUT_BUTTON).click();
+
+export const upgradeRiskEngine = () => {
+  visitWithTimeRange(ENTITY_ANALYTICS_MANAGEMENT_URL);
+  updateRiskEngine();
+  updateRiskEngineConfirm();
+  cy.get(RISK_SCORE_STATUS).should('have.text', 'On');
 };

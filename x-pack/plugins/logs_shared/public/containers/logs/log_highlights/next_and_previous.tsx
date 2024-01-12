@@ -7,8 +7,7 @@
 
 import { isNumber } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-
-import { TimeKey, UniqueTimeKey } from '../../../../common/time';
+import { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
 import {
   getLogEntryIndexAtTime,
   getLogEntryIndexBeforeTime,

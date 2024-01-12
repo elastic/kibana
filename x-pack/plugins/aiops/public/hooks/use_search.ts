@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
-import type { AiOpsIndexBasedAppState } from '../application/utils/url_state';
+import type { AiOpsIndexBasedAppState } from '../application/url_state/common';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const useSearch = (

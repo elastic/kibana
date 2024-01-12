@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SearchResponseWarning } from '@kbn/data-plugin/public';
+import type { SearchResponseWarning } from '../types';
 
 export const searchResponseIncompleteWarningLocalCluster: SearchResponseWarning = {
   type: 'incomplete',
-  message: 'The data might be incomplete or wrong.',
+  requestName: 'My request',
   clusters: {
     '(local)': {
       status: 'partial',
@@ -37,4 +37,5 @@ export const searchResponseIncompleteWarningLocalCluster: SearchResponseWarning 
       ],
     },
   },
+  openInInspector: () => {},
 };

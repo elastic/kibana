@@ -28,6 +28,7 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
   initialTags: string[];
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   onSave: (props: DashboardSaveProps) => void;
+  getOriginatingPath?: (dashboardId: string) => string;
 };
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);

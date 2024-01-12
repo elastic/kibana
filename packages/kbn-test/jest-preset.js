@@ -105,7 +105,7 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|vscode-languageserver-types|react-monaco-editor|d3-interpolate|d3-color|langchain|langsmith|@cfworker))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|vscode-languageserver-types|react-monaco-editor|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/util/[/\\\\].+\\.js$',
@@ -124,4 +124,10 @@ module.exports = {
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 
   resolver: '<rootDir>/packages/kbn-test/src/jest/resolver.js',
+
+  // Workaround to "TypeError: Cannot assign to read only property 'structuredClone' of object '[object global]'"
+  // This happens when we run jest tests with --watch after node20+
+  globals: {
+    structuredClone: {},
+  },
 };

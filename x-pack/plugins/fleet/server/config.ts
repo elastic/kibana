@@ -11,11 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-import {
-  getExperimentalAllowedValues,
-  isValidExperimentalValue,
-} from '../common/experimental_features';
-const allowedExperimentalValues = getExperimentalAllowedValues();
+import { isValidExperimentalValue } from '../common/experimental_features';
 
 import {
   PreconfiguredPackagesSchema,
@@ -110,9 +106,27 @@ export const config: PluginConfigDescriptor = {
 
       return fullConfig;
     },
+    // Log invalid experimental values
+    (fullConfig, fromPath, addDeprecation) => {
+      for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
+        if (!isValidExperimentalValue(key)) {
+          addDeprecation({
+            configPath: 'xpack.fleet.fleet.enableExperimental',
+            message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].`,
+            correctiveActions: {
+              manualSteps: [
+                `Use [xpack.fleet.fleet.enableExperimental] with an array of valid experimental features.`,
+              ],
+            },
+            level: 'warning',
+          });
+        }
+      }
+    },
   ],
   schema: schema.object(
     {
+      isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       agents: schema.object({
@@ -120,6 +134,7 @@ export const config: PluginConfigDescriptor = {
         elasticsearch: schema.object({
           hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
           ca_sha256: schema.maybe(schema.string()),
+          ca_trusted_fingerprint: schema.maybe(schema.string()),
         }),
         fleet_server: schema.maybe(
           schema.object({
@@ -143,6 +158,9 @@ export const config: PluginConfigDescriptor = {
         disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
         allowAgentUpgradeSourceUri: schema.boolean({ defaultValue: false }),
         bundledPackageLocation: schema.string({ defaultValue: DEFAULT_BUNDLED_PACKAGE_LOCATION }),
+        disableBundledPackagesCache: schema.boolean({
+          defaultValue: false,
+        }),
       }),
       packageVerification: schema.object({
         gpgKeyPath: schema.string({ defaultValue: DEFAULT_GPG_KEY_PATH }),
@@ -158,15 +176,6 @@ export const config: PluginConfigDescriptor = {
        */
       enableExperimental: schema.arrayOf(schema.string(), {
         defaultValue: () => [],
-        validate(list) {
-          for (const key of list) {
-            if (!isValidExperimentalValue(key)) {
-              return `[${key}] is not allowed. Allowed values are: ${allowedExperimentalValues.join(
-                ', '
-              )}`;
-            }
-          }
-        },
       }),
 
       internal: schema.maybe(
@@ -188,9 +197,11 @@ export const config: PluginConfigDescriptor = {
               min: 0,
             })
           ),
+          retrySetupOnBoot: schema.boolean({ defaultValue: false }),
           registry: schema.object(
             {
               kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
+              excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
               spec: schema.object(
                 {
                   min: schema.maybe(schema.string()),
@@ -219,6 +230,7 @@ export const config: PluginConfigDescriptor = {
               defaultValue: {
                 kibanaVersionCheckEnabled: true,
                 capabilities: [],
+                excludePackages: [],
                 spec: {
                   max: REGISTRY_SPEC_MAX_VERSION,
                 },

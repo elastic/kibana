@@ -383,7 +383,7 @@ export const createLifecycleExecutor =
               },
           event,
         ]),
-        refresh: 'wait_for',
+        refresh: true,
       });
     } else {
       logger.debug(
