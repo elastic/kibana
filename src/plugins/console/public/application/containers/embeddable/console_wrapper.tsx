@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Observable } from 'rxjs';
 import {
   HttpSetup,
@@ -106,6 +106,11 @@ const loadDependencies = ({
 
 export const ConsoleWrapper = (props: EmbeddableConsoleDependencies): React.ReactElement => {
   const dependencies = useMemo(() => loadDependencies(props), [props]);
+  useEffect(() => {
+    return () => {
+      dependencies.autocompleteInfo.clearSubscriptions();
+    };
+  }, [dependencies]);
 
   const {
     I18nContext,
