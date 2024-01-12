@@ -67,7 +67,7 @@ export const createAnnotationActions = ({
           core.application.navigateToApp(VISUALIZE_APP_NAME, {
             path: `#/${ANNOTATIONS_LISTING_VIEW_ID}`,
           }),
-        kibanaTheme,
+        coreStart: core,
       })
     );
   }

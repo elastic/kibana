@@ -17,7 +17,7 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ShapeRendererConfig } from '../../common/types';
 
@@ -51,7 +51,7 @@ export const getShapeRenderer =
 
       render(
         <EuiErrorBoundary>
-          <KibanaThemeProvider theme$={theme$}>
+          <KibanaThemeProvider theme={{ theme$ }}>
             <I18nProvider>
               <ShapeComponent onLoaded={handlers.done} {...config} parentNode={domNode} />
             </I18nProvider>

@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
@@ -17,11 +17,11 @@ import {
   OnSaveProps as SavedObjectOnSaveProps,
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
   LayerAction,
   RegisterLibraryAnnotationGroupFunction,
@@ -300,7 +300,7 @@ export const getSaveLayerAction = ({
   savedObjectsTagging,
   dataViews,
   goToAnnotationLibrary,
-  kibanaTheme,
+  coreStart,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -311,7 +311,7 @@ export const getSaveLayerAction = ({
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   dataViews: DataViewsContract;
   goToAnnotationLibrary: () => Promise<void>;
-  kibanaTheme: ThemeServiceStart;
+  coreStart: CoreStart;
 }): LayerAction => {
   const neverSaved = !isByReferenceAnnotationsLayer(layer);
 
@@ -333,29 +333,27 @@ export const getSaveLayerAction = ({
         const metadata = getGroupMetadataFromAnnotationLayer(layer);
 
         render(
-          <KibanaThemeProvider theme$={kibanaTheme.theme$}>
-            <I18nProvider>
-              <SaveModal
-                domElement={domElement}
-                savedObjectsTagging={savedObjectsTagging}
-                onSave={async (props) => {
-                  await onSave({
-                    state,
-                    layer,
-                    setState,
-                    registerLibraryAnnotationGroup,
-                    eventAnnotationService,
-                    toasts,
-                    modalOnSaveProps: props,
-                    dataViews,
-                    goToAnnotationLibrary,
-                  });
-                }}
-                {...metadata}
-                showCopyOnSave={!neverSaved}
-              />
-            </I18nProvider>
-          </KibanaThemeProvider>,
+          <KibanaRenderContextProvider {...coreStart}>
+            <SaveModal
+              domElement={domElement}
+              savedObjectsTagging={savedObjectsTagging}
+              onSave={async (props) => {
+                await onSave({
+                  state,
+                  layer,
+                  setState,
+                  registerLibraryAnnotationGroup,
+                  eventAnnotationService,
+                  toasts,
+                  modalOnSaveProps: props,
+                  dataViews,
+                  goToAnnotationLibrary,
+                });
+              }}
+              {...metadata}
+              showCopyOnSave={!neverSaved}
+            />
+          </KibanaRenderContextProvider>,
           domElement
         );
       }

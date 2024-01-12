@@ -39,7 +39,6 @@ import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expression
 import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -78,8 +77,9 @@ import {
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -1100,7 +1100,7 @@ export class Embeddable
     if (this.expression && !blockingErrors.length) {
       render(
         <>
-          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <KibanaRenderContextProvider {...this.deps.coreStart}>
             <ExpressionWrapper
               ExpressionRenderer={this.expressionRenderer}
               expression={this.expression || null}
@@ -1132,7 +1132,7 @@ export class Embeddable
               }}
               noPadding={this.visDisplayOptions.noPadding}
             />
-          </KibanaThemeProvider>
+          </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
               this.badgeDomNode = el;
@@ -1155,14 +1155,12 @@ export class Embeddable
     if (errors.length && this.domNode) {
       render(
         <>
-          <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-            <I18nProvider>
-              <VisualizationErrorPanel
-                errors={errors}
-                canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
-              />
-            </I18nProvider>
-          </KibanaThemeProvider>
+          <KibanaRenderContextProvider {...this.deps.coreStart}>
+            <VisualizationErrorPanel
+              errors={errors}
+              canEdit={this.getIsEditable() && this.input.viewMode === 'edit'}
+            />
+          </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
               this.badgeDomNode = el;
@@ -1194,10 +1192,10 @@ export class Embeddable
 
     if (this.badgeDomNode) {
       render(
-        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+        <KibanaRenderContextProvider {...this.deps.coreStart}>
           <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
           <EmbeddableFeatureBadge messages={infoMessages} />
-        </KibanaThemeProvider>,
+        </KibanaRenderContextProvider>,
         this.badgeDomNode
       );
     }

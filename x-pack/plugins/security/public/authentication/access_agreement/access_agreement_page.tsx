@@ -30,7 +30,7 @@ import type {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
@@ -133,11 +133,9 @@ export function renderAccessAgreementPage(
   props: Props
 ) {
   ReactDOM.render(
-    <i18nStart.Context>
-      <KibanaThemeProvider theme$={theme$}>
-        <AccessAgreementPage {...props} />
-      </KibanaThemeProvider>
-    </i18nStart.Context>,
+    <KibanaRenderContextProvider i18n={i18nStart} theme={{ theme$ }}>
+      <AccessAgreementPage {...props} />
+    </KibanaRenderContextProvider>,
     element
   );
 

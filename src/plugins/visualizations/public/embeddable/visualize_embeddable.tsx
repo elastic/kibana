@@ -15,7 +15,7 @@ import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
@@ -456,7 +456,7 @@ export class VisualizeEmbeddable
     super.render(this.domNode);
 
     render(
-      <KibanaThemeProvider theme$={getTheme().theme$}>
+      <KibanaThemeProvider theme={getTheme()}>
         <div className="visChart__spinner">
           <EuiLoadingChart mono size="l" />
         </div>

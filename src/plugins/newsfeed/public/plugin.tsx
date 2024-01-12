@@ -11,15 +11,15 @@ import { catchError, takeUntil } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import moment from 'moment';
-import { I18nProvider } from '@kbn/i18n-react';
 import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   CoreTheme,
   Plugin,
+  I18nStart,
 } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
@@ -56,7 +56,13 @@ export class NewsfeedPublicPlugin
     core.chrome.navControls.registerRight({
       order: 1000,
       mount: (target) =>
-        this.mount(api, target, core.theme.theme$, core.customBranding.hasCustomBranding$),
+        this.mount(
+          api,
+          target,
+          core.theme.theme$,
+          core.i18n,
+          core.customBranding.hasCustomBranding$
+        ),
     });
 
     return {
@@ -96,14 +102,13 @@ export class NewsfeedPublicPlugin
     api: NewsfeedApi,
     targetDomElement: HTMLElement,
     theme$: Rx.Observable<CoreTheme>,
+    i18n: I18nStart,
     hasCustomBranding$: Rx.Observable<boolean>
   ) {
     ReactDOM.render(
-      <KibanaThemeProvider theme$={theme$}>
-        <I18nProvider>
-          <NewsfeedNavButton newsfeedApi={api} hasCustomBranding$={hasCustomBranding$} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
+      <KibanaRenderContextProvider theme={{ theme$ }} i18n={i18n}>
+        <NewsfeedNavButton newsfeedApi={api} hasCustomBranding$={hasCustomBranding$} />
+      </KibanaRenderContextProvider>,
       targetDomElement
     );
     return () => ReactDOM.unmountComponentAtNode(targetDomElement);

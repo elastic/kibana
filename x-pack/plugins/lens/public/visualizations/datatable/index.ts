@@ -32,6 +32,10 @@ export class DatatableVisualization {
         '../../async_services'
       );
       const palettes = await charts.palettes.getPalettes();
+      const {} = core.getStartServices().then(([coreStart, { data: dataStart }]) => ({
+        getType: dataStart.search.aggs.types.get,
+        i18n: coreStart.i18n,
+      }));
       expressions.registerRenderer(() =>
         getDatatableRenderer({
           formatFactory,
@@ -41,6 +45,7 @@ export class DatatableVisualization {
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
           paletteService: palettes,
           uiSettings: core.uiSettings,
+          getI18n: () => core.getStartServices().then(([coreStart]) => coreStart.i18n),
         })
       );
 

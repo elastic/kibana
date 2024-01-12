@@ -10,7 +10,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { VegaVisualizationDependencies } from './plugin';
@@ -63,7 +63,7 @@ export const getVegaVisRenderer: (
     };
 
     render(
-      <KibanaThemeProvider theme$={deps.core.theme.theme$}>
+      <KibanaThemeProvider theme={deps.core.theme}>
         <VisualizationContainer handlers={handlers}>
           <LazyVegaVisComponent
             deps={deps}

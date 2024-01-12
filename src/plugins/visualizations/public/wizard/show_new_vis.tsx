@@ -10,7 +10,7 @@ import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiPortal, EuiProgress } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
   getHttp,
   getTypes,
@@ -62,7 +62,7 @@ export function showNewVisModal({
 
   document.body.appendChild(container);
   const element = (
-    <KibanaThemeProvider theme$={getTheme().theme$}>
+    <KibanaThemeProvider theme={getTheme()}>
       <I18nProvider>
         <Suspense
           fallback={

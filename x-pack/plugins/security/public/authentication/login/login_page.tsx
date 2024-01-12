@@ -34,7 +34,7 @@ import type {
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import type { LoginFormProps } from './components';
 import { DisabledLoginForm, LoginForm, LoginFormMessageType } from './components';
@@ -373,11 +373,9 @@ export function renderLoginPage(
   props: Props
 ) {
   ReactDOM.render(
-    <i18nStart.Context>
-      <KibanaThemeProvider theme$={theme$}>
-        <LoginPage {...props} />
-      </KibanaThemeProvider>
-    </i18nStart.Context>,
+    <KibanaRenderContextProvider {...{ i18n: i18nStart, theme: { theme$ } }}>
+      <LoginPage {...props} />
+    </KibanaRenderContextProvider>,
     element
   );
 
