@@ -15,6 +15,7 @@ import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
+import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 export const createCspSettingObject = async (soClient: SavedObjectsClientContract) => {
   return soClient.create<CspSettings>(
@@ -48,26 +49,10 @@ export const getCspBenchmarkRulesStatesHandler = async (
   }
 };
 
-export const buildMutedRulesFilter = async (
-  encryptedSoClient: ISavedObjectsRepository
+export const getMutedRulesFilterQuery = async (
+  encryptedSoClient: ISavedObjectsRepository | SavedObjectsClientContract
 ): Promise<QueryDslQueryContainer[]> => {
   const rulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
-  const mutedRules = Object.fromEntries(
-    Object.entries(rulesStates).filter(([key, value]) => value.muted === true)
-  );
-
-  const mutedRulesFilterQuery = Object.keys(mutedRules).map((key) => {
-    const rule = mutedRules[key];
-    return {
-      bool: {
-        must: [
-          { term: { 'rule.benchmark.id': rule.benchmark_id } },
-          { term: { 'rule.benchmark.version': rule.benchmark_version } },
-          { term: { 'rule.benchmark.rule_number': rule.rule_number } },
-        ],
-      },
-    };
-  });
-
+  const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
   return mutedRulesFilterQuery;
 };
