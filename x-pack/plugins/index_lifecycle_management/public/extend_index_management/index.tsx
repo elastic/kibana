@@ -226,4 +226,11 @@ export const addAllExtensions = (
   extensionsService.addFilter(ilmFilterExtension);
 
   extensionsService.addIndexDetailsTab(indexLifecycleTab);
+
+  extensionsService.addColumn({
+    label: 'ILM phase',
+    fieldName: 'ilm.phase',
+    order: 90,
+    render: (index: Index) => (index.ilm?.managed ? index.ilm.phase : ''),
+  });
 };
