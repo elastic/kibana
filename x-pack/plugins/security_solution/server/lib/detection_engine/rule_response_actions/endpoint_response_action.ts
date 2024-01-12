@@ -9,7 +9,7 @@ import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { each } from 'lodash';
 import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { getProcessAlerts, getIsolateActionPayload } from './utils';
+import { getProcessAlerts, getIsolateAlerts } from './utils';
 
 import type { ResponseActionAlerts, AlertsAction } from './types';
 
@@ -28,7 +28,7 @@ export const endpointResponseAction = (
   };
 
   if (command === 'isolate') {
-    const actionPayload = getIsolateActionPayload(alerts);
+    const actionPayload = getIsolateAlerts(alerts);
     return Promise.all([
       endpointAppContextService.getActionCreateService().createActionFromAlert(
         {

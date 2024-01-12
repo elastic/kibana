@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
@@ -152,16 +153,14 @@ describe(
         visitRuleActions(ruleId);
         cy.getByTestSubj('edit-rule-actions-tab').click();
 
-        cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
-          cy.getByTestSubj('input').should('have.value', 'Isolate host');
-          cy.getByTestSubj('input').should('have.value', 'Isolate host');
+        cy.getByTestSubj(`response-actions-list-item-1`).within(() => {
+          cy.getByTestSubj('input').should('have.value', 'suspend-process');
           cy.getByTestSubj('input').type(`{selectall}{backspace}${newDescription}`);
           cy.getByTestSubj('commandTypeField').click();
         });
         validateAvailableCommands();
 
-        cy.getByTestSubj(`command-type-${secondTestedCommand}`).click();
-        cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
+        cy.getByTestSubj(`response-actions-list-item-1`).within(() => {
           cy.getByTestSubj('config-custom-field-name').should('have.value', '');
           cy.getByTestSubj('config-overwrite-toggle').click();
 
@@ -183,7 +182,7 @@ describe(
               },
             },
           };
-          expect(request.body.response_actions[0]).to.deep.equal(query);
+          expect(request.body.response_actions[1]).to.deep.equal(query);
         });
         cy.contains(`${ruleName} was saved`).should('exist');
       });

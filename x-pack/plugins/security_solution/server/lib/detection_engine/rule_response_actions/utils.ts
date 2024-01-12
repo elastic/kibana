@@ -53,7 +53,7 @@ export const getProcessAlerts = (
   }, {});
 };
 
-export const getIsolateActionPayload = (alerts: AlertWithAgent[]) =>
+export const getIsolateAlerts = (alerts: AlertWithAgent[]) =>
   alerts.reduce((acc, alert) => {
     const { id: agentId, name: agentName } = alert.agent || {};
 
