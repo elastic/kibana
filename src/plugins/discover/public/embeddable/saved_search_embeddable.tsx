@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, lastValueFrom, Subscription } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import {
   onlyDisabledFiltersChanged,
   Filter,
   Query,
   TimeRange,
   FilterStateStore,
-  AggregateQuery,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
@@ -161,12 +160,7 @@ export class SavedSearchEmbeddable
 
     this.initializeSavedSearch(initialInput).then(() => {
       this.initializeSearchEmbeddableProps();
-      this.localQuery.next(this.getQuery());
-      this.localFilters.next(this.getFilters());
     });
-
-    this.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getQuery());
-    this.localFilters = new BehaviorSubject<Filter[] | undefined>(this.getFilters());
   }
 
   private getCurrentTitle() {
@@ -769,7 +763,6 @@ export class SavedSearchEmbeddable
       (this.savedSearch?.searchSource.getFields().filter as Filter[]) ?? []
     );
   }
-  public localFilters;
 
   /**
    * @returns Local/panel-level query for Saved Search embeddable
@@ -777,7 +770,6 @@ export class SavedSearchEmbeddable
   public getQuery() {
     return this.savedSearch?.searchSource.getFields().query;
   }
-  public localQuery;
 
   public destroy() {
     super.destroy();

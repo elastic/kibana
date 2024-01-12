@@ -64,6 +64,8 @@ export abstract class Embeddable<
   private readonly input$ = this.inputSubject.asObservable();
   private readonly output$ = this.outputSubject.asObservable();
 
+  private readonly initializationFinished = new Rx.Subject<void>();
+
   protected renderComplete = new RenderCompleteDispatcher();
 
   // Listener to parent changes, if this embeddable exists in a parent, in order
@@ -120,7 +122,9 @@ export abstract class Embeddable<
       dataViews: this.dataViews,
       parentApi: this.parentApi,
       panelTitle: this.panelTitle,
+      localQuery: this.localQuery,
       dataLoading: this.dataLoading,
+      localFilters: this.localFilters,
       blockingError: this.blockingError,
       setPanelTitle: this.setPanelTitle,
       linkToLibrary: this.linkToLibrary,
@@ -140,6 +144,11 @@ export abstract class Embeddable<
       canUnlinkFromLibrary: this.canUnlinkFromLibrary,
       isCompatibleWithLocalUnifiedSearch: this.isCompatibleWithLocalUnifiedSearch,
     } = api);
+
+    setTimeout(() => {
+      // after the constructor has finished, we initialize this embeddable if it isn't delayed
+      if (!this.deferEmbeddableLoad) this.initializationFinished.complete();
+    }, 0);
   }
 
   /**
@@ -151,8 +160,10 @@ export abstract class Embeddable<
   public viewMode: LegacyEmbeddableAPI['viewMode'];
   public parentApi: LegacyEmbeddableAPI['parentApi'];
   public dataViews: LegacyEmbeddableAPI['dataViews'];
+  public localQuery: LegacyEmbeddableAPI['localQuery'];
   public panelTitle: LegacyEmbeddableAPI['panelTitle'];
   public dataLoading: LegacyEmbeddableAPI['dataLoading'];
+  public localFilters: LegacyEmbeddableAPI['localFilters'];
   public linkToLibrary: LegacyEmbeddableAPI['linkToLibrary'];
   public blockingError: LegacyEmbeddableAPI['blockingError'];
   public setPanelTitle: LegacyEmbeddableAPI['setPanelTitle'];
@@ -334,14 +345,26 @@ export abstract class Embeddable<
     return;
   }
 
+  public async untilInitializationFinished(): Promise<void> {
+    return new Promise((resolve) => {
+      this.initializationFinished.subscribe({
+        complete: () => {
+          resolve();
+        },
+      });
+    });
+  }
+
   /**
    * communicate to the parent embeddable that this embeddable's initialization is finished.
    * This only applies to embeddables which defer their loading state with deferEmbeddableLoad.
    */
   protected setInitializationFinished() {
+    if (!this.deferEmbeddableLoad) return;
     if (this.deferEmbeddableLoad && this.parent?.isContainer) {
       this.parent.setChildLoaded(this);
     }
+    this.initializationFinished.complete();
   }
 
   public updateOutput(outputChanges: Partial<TEmbeddableOutput>): void {

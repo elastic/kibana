@@ -67,7 +67,7 @@ describe('Add to library action', () => {
     await action.execute(context);
     expect(pluginServices.getServices().notifications.toasts.addDanger).toHaveBeenCalledWith({
       'data-test-subj': 'addPanelToLibraryError',
-      title: 'An error was encountered adding this panel to the library',
+      title: 'An error was encountered adding panel A very compatible API to the library',
     });
   });
 });

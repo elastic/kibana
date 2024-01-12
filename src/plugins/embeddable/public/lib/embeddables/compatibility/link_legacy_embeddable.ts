@@ -31,7 +31,7 @@ export const canLinkLegacyEmbeddable = async (embeddable: CommonLegacyEmbeddable
   const canSave = embeddable.type === 'map' ? maps.save : visualize.save;
 
   const { isOfAggregateQueryType } = await import('@kbn/es-query');
-  const query = isFilterableEmbeddable(embeddable) && embeddable.localQuery.value;
+  const query = isFilterableEmbeddable(embeddable) && embeddable.getQuery();
 
   // Textbased panels (i.e. ES|QL, SQL) should not save to library
   const isTextBasedEmbeddable = isOfAggregateQueryType(query as AggregateQuery);

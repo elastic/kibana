@@ -65,10 +65,10 @@ test('Cannot link an Error Embeddable to the library', async () => {
 test('Cannot link an ES|QL Embeddable to the library', async () => {
   assignDefaultCapabilities();
   const filterableEmbeddable = embeddablePluginMock.mockFilterableEmbeddable(embeddable, {
-    initialFilters: [],
-    initialQuery: {
+    getFilters: () => [],
+    getQuery: () => ({
       esql: 'from logstash-* | limit 10',
-    },
+    }),
   });
   expect(
     await canLinkLegacyEmbeddable(filterableEmbeddable as unknown as CommonLegacyEmbeddable)

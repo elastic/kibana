@@ -7,7 +7,7 @@
 
 import { partition, uniqBy } from 'lodash';
 import React from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -468,8 +468,6 @@ export class Embeddable
     this.expressionRenderer = deps.expressionRenderer;
     this.initializeSavedVis(initialInput)
       .then(() => {
-        this.localQuery.next(this.getQuery());
-        this.localFilters.next(this.getFilters());
         this.reload();
       })
       .catch((e) => this.onFatalError(e));
@@ -563,9 +561,6 @@ export class Embeddable
         )
         .subscribe()
     );
-
-    this.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getQuery());
-    this.localFilters = new BehaviorSubject<Filter[] | undefined>(this.getFilters());
   }
 
   private get activeDatasourceId() {
@@ -1558,7 +1553,6 @@ export class Embeddable
       return [];
     }
   }
-  public localFilters;
 
   /**
    * Gets the Lens embeddable's local query
@@ -1567,7 +1561,6 @@ export class Embeddable
   public getQuery() {
     return this.savedVis?.state.query;
   }
-  public localQuery;
 
   public getSavedVis(): Readonly<Document | undefined> {
     return this.savedVis;

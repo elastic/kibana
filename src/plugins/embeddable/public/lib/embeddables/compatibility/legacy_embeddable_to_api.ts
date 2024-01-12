@@ -7,13 +7,13 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import { AggregateQuery, compareFilters, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import deepEqual from 'fast-deep-equal';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { embeddableStart } from '../../../kibana_services';
-import { canLinkLegacyEmbeddable, linkLegacyEmbeddable } from './link_legacy_embeddable';
-
+import { isFilterableEmbeddable } from '../../filterable_embeddable';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -26,6 +26,7 @@ import {
   embeddableOutputToSubject,
   viewModeToSubject,
 } from './embeddable_compatibility_utils';
+import { canLinkLegacyEmbeddable, linkLegacyEmbeddable } from './link_legacy_embeddable';
 import { canUnlinkLegacyEmbeddable, unlinkLegacyEmbeddable } from './unlink_legacy_embeddable';
 
 export type CommonLegacyInput = EmbeddableInput & { timeRange: TimeRange };
@@ -97,7 +98,7 @@ export const legacyEmbeddableToApi = (
   const parentApi = new BehaviorSubject<unknown>(embeddable.parent ?? undefined);
 
   /**
-   * We treat all legacy embeddable types as if they can time ranges, because there is no programmatic way
+   * We treat all legacy embeddable types as if they can support local unified search state, because there is no programmatic way
    * to tell when given a legacy embeddable what it's input could contain. All existing actions treat these as optional
    * so if the Embeddable is incapable of publishing unified search state (i.e. markdown) then it will just be ignored.
    */
@@ -105,6 +106,31 @@ export const legacyEmbeddableToApi = (
   const setLocalTimeRange = (timeRange?: TimeRange) => embeddable.updateInput({ timeRange });
   const getFallbackTimeRange = () =>
     (embeddable.parent?.getInput() as unknown as CommonLegacyInput)?.timeRange;
+
+  const localFilters: BehaviorSubject<Filter[] | undefined> = new BehaviorSubject<
+    Filter[] | undefined
+  >(undefined);
+  const localQuery: BehaviorSubject<Query | AggregateQuery | undefined> = new BehaviorSubject<
+    Query | AggregateQuery | undefined
+  >(undefined);
+  // if this embeddable is a legacy filterable embeddable, publish changes to those filters to the panelFilters subject.
+  if (isFilterableEmbeddable(embeddable)) {
+    embeddable.untilInitializationFinished().then(() => {
+      localFilters.next(embeddable.getFilters());
+      localQuery.next(embeddable.getQuery());
+
+      subscriptions.add(
+        embeddable.getInput$().subscribe(() => {
+          if (!compareFilters(embeddable.localFilters.getValue() ?? [], embeddable.getFilters())) {
+            localFilters.next(embeddable.getFilters());
+          }
+          if (!deepEqual(embeddable.localQuery.getValue() ?? [], embeddable.getQuery())) {
+            localQuery.next(embeddable.getQuery());
+          }
+        })
+      );
+    });
+  }
 
   const dataViews = outputKeyToSubject<DataView[]>('indexPatterns');
   const isCompatibleWithLocalUnifiedSearch = () => {
@@ -136,6 +162,8 @@ export const legacyEmbeddableToApi = (
 
       localTimeRange,
       setLocalTimeRange,
+      localFilters,
+      localQuery,
       getFallbackTimeRange,
       isCompatibleWithLocalUnifiedSearch,
 

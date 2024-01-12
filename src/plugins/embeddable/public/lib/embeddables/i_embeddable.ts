@@ -15,6 +15,7 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDisabledActionIds,
+  PublishesLocalUnifiedSearch,
   PublishesParentApi,
   PublishesUniqueId,
   PublishesViewMode,
@@ -43,6 +44,7 @@ export type LegacyEmbeddableAPI = HasType &
   PublishesDataLoading &
   HasInspectorAdapters &
   PublishesBlockingError &
+  PublishesLocalUnifiedSearch &
   PublishesDisabledActionIds &
   PublishesWritablePanelTitle &
   PublishesWritablePanelDescription &
@@ -272,4 +274,6 @@ export interface IEmbeddable<
   getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
 
   refreshInputFromParent(): void;
+
+  untilInitializationFinished(): Promise<void>;
 }

@@ -98,22 +98,22 @@ describe('filters notification action', () => {
     const onChange = jest.fn();
     updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
     updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
-    updateViewMode('view');
     action.subscribeToCompatibilityChanges(context, onChange);
+    updateViewMode('view');
     expect(onChange).toHaveBeenCalledWith(false, action);
   });
 
   it('calls onChange when filters change', async () => {
     const onChange = jest.fn();
-    updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
     action.subscribeToCompatibilityChanges(context, onChange);
+    updateFilters([getMockPhraseFilter('SuperField', 'SuperValue')]);
     expect(onChange).toHaveBeenCalledWith(true, action);
   });
 
   it('calls onChange when query changes', async () => {
     const onChange = jest.fn();
-    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
     action.subscribeToCompatibilityChanges(context, onChange);
+    updateQuery({ sql: 'SELECT * FROM test_dataview' } as AggregateQuery);
     expect(onChange).toHaveBeenCalledWith(true, action);
   });
 });

@@ -11,7 +11,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -24,7 +24,7 @@ import { Unsubscribe } from 'redux';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { AggregateQuery, Query, type Filter } from '@kbn/es-query';
+import { Query, type Filter } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
@@ -174,10 +174,7 @@ export class MapEmbeddable
 
     this._isActive = true;
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
-    this._initializeSaveMap().then(() => {
-      this.localFilters.next(this.getFilters());
-      this.localQuery.next(this.getQuery());
-    });
+    this._initializeSaveMap();
     this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
     this._controlledBy = getControlledBy(this.id);
 
@@ -194,8 +191,6 @@ export class MapEmbeddable
         return;
       })
     );
-    this.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(this.getQuery());
-    this.localFilters = new BehaviorSubject<Filter[] | undefined>(this.getFilters());
   }
 
   public getOnRenderComplete$() {
@@ -355,7 +350,6 @@ export class MapEmbeddable
     );
     return embeddableSearchContext ? embeddableSearchContext.filters : [];
   }
-  public localFilters;
 
   public getQuery(): Query | undefined {
     const embeddableSearchContext = getEmbeddableSearchContext(
@@ -363,7 +357,6 @@ export class MapEmbeddable
     );
     return embeddableSearchContext?.query;
   }
-  public localQuery;
 
   public supportedTriggers(): string[] {
     return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];

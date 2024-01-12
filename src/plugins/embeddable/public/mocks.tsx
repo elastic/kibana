@@ -18,7 +18,6 @@ import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { BehaviorSubject } from 'rxjs';
 import {
   EmbeddableInput,
   EmbeddableSetup,
@@ -82,15 +81,13 @@ export function mockSelfStyledEmbeddable<OriginalEmbeddableType>(
 export function mockFilterableEmbeddable<OriginalEmbeddableType>(
   embeddable: OriginalEmbeddableType,
   options: {
-    initialFilters: Filter[];
-    initialQuery: Query | AggregateQuery | undefined;
+    getFilters: () => Filter[];
+    getQuery: () => Query | AggregateQuery | undefined;
   }
 ): OriginalEmbeddableType & FilterableEmbeddable {
   const newEmbeddable: FilterableEmbeddable = embeddable as unknown as FilterableEmbeddable;
-  newEmbeddable.localFilters = new BehaviorSubject<Filter[] | undefined>(options.initialFilters);
-  newEmbeddable.localQuery = new BehaviorSubject<Query | AggregateQuery | undefined>(
-    options.initialQuery
-  );
+  newEmbeddable.getFilters = () => options.getFilters();
+  newEmbeddable.getQuery = () => options.getQuery();
   return newEmbeddable as OriginalEmbeddableType & FilterableEmbeddable;
 }
 
