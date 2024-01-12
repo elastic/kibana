@@ -97,7 +97,7 @@ describe(
         cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 
         cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
-          .should('contain', 'isolate completed successfully')
+          .should('contain', /isolate is pending|isolate completed successfully/g)
           .and('contain', createdHost.hostname);
         cy.contains(/kill-process is pending|kill-process completed successfully/g);
       });

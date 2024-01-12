@@ -7,7 +7,6 @@
  */
 
 import { navigateToAlertsList } from '../../screens/alerts';
-import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { closeAllToasts } from '../../tasks/toasts';
 import { fillUpNewRule } from '../../tasks/response_actions';
 import { login, ROLE } from '../../tasks/login';
@@ -40,7 +39,6 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
     beforeEach(() => {
       login();
-      disableExpandableFlyoutAdvancedSettings();
       indexEndpointRuleAlerts({
         endpointAgentId,
         endpointHostname,
