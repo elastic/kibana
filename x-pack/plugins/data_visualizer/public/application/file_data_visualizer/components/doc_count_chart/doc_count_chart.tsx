@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IImporter } from '@kbn/file-upload-plugin/public';
 import React, { FC, useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { lastValueFrom } from 'rxjs';
-import moment, { Moment } from 'moment';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IImporter } from '@kbn/file-upload-plugin/public';
+import moment, { type Moment } from 'moment';
 import { useTimeBuckets } from '../../../common/hooks/use_time_buckets';
-import { IMPORT_STATUS, Statuses } from '../import_progress';
-import { EventRateChart, LineChartPoint } from './event_rate_chart';
+import { IMPORT_STATUS, type Statuses } from '../import_progress';
+import { EventRateChart, type LineChartPoint } from './event_rate_chart';
+import { runDocCountSearch } from './doc_count_search';
 
 const BAR_TARGET = 150;
 const PROGRESS_INCREMENT = 5;
@@ -75,68 +75,25 @@ export const DocCountChart: FC<{
         timeBuckets.setBarTarget(BAR_TARGET);
       }
 
-      const intervalMs = timeBuckets.getInterval().asMilliseconds();
-
-      const resp = await lastValueFrom(
-        dataStart.search.search({
-          params: {
-            index,
-            body: {
-              size: 0,
-              query: {
-                bool: {
-                  must: [
-                    {
-                      range: {
-                        [timeField]: {
-                          gte: startMs,
-                          lte: endMs,
-                          format: 'epoch_millis',
-                        },
-                      },
-                    },
-                    {
-                      match_all: {},
-                    },
-                  ],
-                },
-              },
-              aggs: {
-                eventRate: {
-                  date_histogram: {
-                    field: timeField,
-                    fixed_interval: `${intervalMs}ms`,
-                    min_doc_count: 0,
-                    extended_bounds: {
-                      min: startMs,
-                      max: endMs,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        })
+      const data = await runDocCountSearch(
+        dataStart,
+        index,
+        timeField,
+        startMs,
+        endMs,
+        timeBuckets
       );
-      // @ts-expect-error
-      if (resp?.rawResponse?.aggregations?.eventRate?.buckets !== undefined) {
-        // @ts-expect-error
-        const data: LineChartPoint[] = resp.rawResponse.aggregations.eventRate.buckets.map((b) => ({
-          time: b.key,
-          value: b.doc_count,
-        }));
 
-        // eslint-disable-next-line no-console
-        console.log('data', data);
+      // eslint-disable-next-line no-console
+      console.log('data', data);
 
-        const newData =
-          fullData === true
-            ? data
-            : [...eventRateChartData].splice(0, lastNonZeroTimeMs?.index ?? 0).concat(data);
+      const newData =
+        fullData === true
+          ? data
+          : [...eventRateChartData].splice(0, lastNonZeroTimeMs?.index ?? 0).concat(data);
 
-        setEventRateChartData(newData);
-        setLastNonZeroTimeMs(findLastTimestamp(newData, BACK_FILL_BUCKETS));
-      }
+      setEventRateChartData(newData);
+      setLastNonZeroTimeMs(findLastTimestamp(newData, BACK_FILL_BUCKETS));
     } catch (error) {
       recordFailure();
     }
@@ -147,16 +104,13 @@ export const DocCountChart: FC<{
     timeRange,
     timeBuckets,
     lastNonZeroTimeMs,
-    dataStart.search,
+    dataStart,
     eventRateChartData,
     recordFailure,
   ]);
 
   const finishedChecks = useCallback(
     async (counter: number) => {
-      // eslint-disable-next-line no-console
-      console.log('finishedChecks', counter);
-
       loadData();
       if (counter !== 0) {
         setTimeout(() => {
