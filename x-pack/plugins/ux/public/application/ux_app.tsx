@@ -22,7 +22,6 @@ import {
 
 import {
   KibanaContextProvider,
-  KibanaThemeProvider,
   useDarkMode,
 } from '@kbn/kibana-react-plugin/public';
 
@@ -33,6 +32,7 @@ import {
   InspectorContextProvider,
   useBreadcrumbs,
 } from '@kbn/observability-shared-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import {
   DASHBOARD_LABEL,
@@ -126,40 +126,39 @@ export function UXAppRoot({
   isDev: boolean;
 }) {
   const { history } = appMountParameters;
-  const i18nCore = core.i18n;
   const plugins = { ...deps, maps };
 
   createCallApmApi(core);
 
   return (
-    <div className={APP_WRAPPER_CLASS}>
-      <RedirectAppLinks
-        coreStart={{
-          application: core.application,
-        }}
-      >
-        <KibanaContextProvider
-          services={{
-            ...core,
-            ...plugins,
-            inspector,
-            observability,
-            observabilityShared,
-            observabilityAIAssistant,
-            embeddable,
-            exploratoryView,
-            data,
-            dataViews,
-            lens,
+    <KibanaRenderContextProvider
+      {...core}
+      modify={{
+        breakpoint: {
+          xxl: 1600,
+          xxxl: 2000,
+        },
+      }}
+    >
+      <div className={APP_WRAPPER_CLASS}>
+        <RedirectAppLinks
+          coreStart={{
+            application: core.application,
           }}
         >
-          <KibanaThemeProvider
-            theme$={appMountParameters.theme$}
-            modify={{
-              breakpoint: {
-                xxl: 1600,
-                xxxl: 2000,
-              },
+          <KibanaContextProvider
+            services={{
+              ...core,
+              ...plugins,
+              inspector,
+              observability,
+              observabilityShared,
+              observabilityAIAssistant,
+              embeddable,
+              exploratoryView,
+              data,
+              dataViews,
+              lens,
             }}
           >
             <PluginContext.Provider
@@ -169,30 +168,28 @@ export function UXAppRoot({
                 observabilityShared,
               }}
             >
-              <i18nCore.Context>
-                <RouterProvider history={history} router={uxRouter}>
-                  <DatePickerContextProvider>
-                    <InspectorContextProvider>
-                      <UrlParamsProvider>
-                        <EuiErrorBoundary>
-                          <CsmSharedContextProvider>
-                            <UxApp />
-                          </CsmSharedContextProvider>
-                        </EuiErrorBoundary>
-                        <UXActionMenu
-                          appMountParameters={appMountParameters}
-                          isDev={isDev}
-                        />
-                      </UrlParamsProvider>
-                    </InspectorContextProvider>
-                  </DatePickerContextProvider>
-                </RouterProvider>
-              </i18nCore.Context>
+              <RouterProvider history={history} router={uxRouter}>
+                <DatePickerContextProvider>
+                  <InspectorContextProvider>
+                    <UrlParamsProvider>
+                      <EuiErrorBoundary>
+                        <CsmSharedContextProvider>
+                          <UxApp />
+                        </CsmSharedContextProvider>
+                      </EuiErrorBoundary>
+                      <UXActionMenu
+                        appMountParameters={appMountParameters}
+                        isDev={isDev}
+                      />
+                    </UrlParamsProvider>
+                  </InspectorContextProvider>
+                </DatePickerContextProvider>
+              </RouterProvider>
             </PluginContext.Provider>
-          </KibanaThemeProvider>
-        </KibanaContextProvider>
-      </RedirectAppLinks>
-    </div>
+          </KibanaContextProvider>
+        </RedirectAppLinks>
+      </div>
+    </KibanaRenderContextProvider>
   );
 }
 

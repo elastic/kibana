@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { API_BASE_PATH } from '../../common/constants';
 import { ClusterUpgradeState } from '../../common/types';
 import {
@@ -21,7 +22,6 @@ import {
   GlobalFlyout,
   AuthorizationProvider,
   RedirectAppLinks,
-  KibanaThemeProvider,
   NotAuthorizedSection,
 } from '../shared_imports';
 import { AppDependencies } from '../types';
@@ -157,30 +157,31 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 export const RootComponent = (dependencies: AppDependencies) => {
   const {
     history,
-    core: { i18n, application, http, executionContext },
+    core: { i18n, application, http, executionContext, theme },
   } = dependencies.services;
 
   executionContext.set({ type: 'application', page: 'upgradeAssistant' });
 
   return (
-    <div className={APP_WRAPPER_CLASS}>
-      <RedirectAppLinks
-        coreStart={{
-          application,
-        }}
-      >
-        <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}/privileges`}>
-          <i18n.Context>
-            <KibanaThemeProvider theme$={dependencies.theme$}>
-              <AppContextProvider value={dependencies}>
-                <GlobalFlyoutProvider>
-                  <App history={history} />
-                </GlobalFlyoutProvider>
-              </AppContextProvider>
-            </KibanaThemeProvider>
-          </i18n.Context>
-        </AuthorizationProvider>
-      </RedirectAppLinks>
-    </div>
+    <KibanaRenderContextProvider {...{ i18n, theme }}>
+      <div className={APP_WRAPPER_CLASS}>
+        <RedirectAppLinks
+          coreStart={{
+            application,
+          }}
+        >
+          <AuthorizationProvider
+            httpClient={http}
+            privilegesEndpoint={`${API_BASE_PATH}/privileges`}
+          >
+            <AppContextProvider value={dependencies}>
+              <GlobalFlyoutProvider>
+                <App history={history} />
+              </GlobalFlyoutProvider>
+            </AppContextProvider>
+          </AuthorizationProvider>
+        </RedirectAppLinks>
+      </div>
+    </KibanaRenderContextProvider>
   );
 };

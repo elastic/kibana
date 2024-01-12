@@ -35,7 +35,7 @@ export const renderApp = (bootDeps: BootDeps) => {
           theme: bootDeps.theme,
         }}
       >
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider theme={{ theme$ }}>
           <App {...appDeps} />
         </KibanaThemeProvider>
       </KibanaContextProvider>

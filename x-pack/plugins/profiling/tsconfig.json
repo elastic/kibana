@@ -51,7 +51,8 @@
     "@kbn/embeddable-plugin",
     "@kbn/profiling-utils",
     "@kbn/advanced-settings-plugin",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/react-kibana-context-render"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

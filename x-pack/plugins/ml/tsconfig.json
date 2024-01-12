@@ -115,5 +115,7 @@
     "@kbn/ml-creation-wizard-utils",
     "@kbn/deeplinks-management",
     "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
   ],
 }

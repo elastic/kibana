@@ -7,7 +7,10 @@
     "id": "guidedOnboarding",
     "server": true,
     "browser": true,
-    "optionalPlugins": ["cloud", "features"],
-    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": [
+      "cloud",
+      "features"
+    ],
+    "requiredBundles": [],
   }
 }

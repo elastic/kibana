@@ -10,8 +10,9 @@ import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject } from 'rxjs';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { IContainer } from '@kbn/embeddable-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EmbeddableSwimLaneContainer } from './embeddable_swim_lane_container_lazy';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
@@ -75,30 +76,25 @@ export class AnomalySwimlaneEmbeddable extends AnomalyDetectionEmbeddable<
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
-    const I18nContext = this.services[0].i18n.Context;
-    const theme$ = this.services[0].theme.theme$;
-
     ReactDOM.render(
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ ...this.services[0] }}>
-            <Suspense fallback={<EmbeddableLoading />}>
-              <EmbeddableSwimLaneContainer
-                id={this.input.id}
-                embeddableContext={this}
-                embeddableInput$={this.getInput$()}
-                services={this.services}
-                refresh={this.reload$.asObservable()}
-                onInputChange={this.updateInput.bind(this)}
-                onOutputChange={this.updateOutput.bind(this)}
-                onRenderComplete={this.onRenderComplete.bind(this)}
-                onLoading={this.onLoading.bind(this)}
-                onError={this.onError.bind(this)}
-              />
-            </Suspense>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>,
+      <KibanaRenderContextProvider {...this.services[0]}>
+        <KibanaContextProvider services={{ ...this.services[0] }}>
+          <Suspense fallback={<EmbeddableLoading />}>
+            <EmbeddableSwimLaneContainer
+              id={this.input.id}
+              embeddableContext={this}
+              embeddableInput$={this.getInput$()}
+              services={this.services}
+              refresh={this.reload$.asObservable()}
+              onInputChange={this.updateInput.bind(this)}
+              onOutputChange={this.updateOutput.bind(this)}
+              onRenderComplete={this.onRenderComplete.bind(this)}
+              onLoading={this.onLoading.bind(this)}
+              onError={this.onError.bind(this)}
+            />
+          </Suspense>
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>,
       node
     );
   }

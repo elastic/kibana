@@ -8,11 +8,12 @@
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
   type KibanaEnvContext,
   useKibanaContextForPluginProvider,
@@ -82,7 +83,7 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
     <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
       <KibanaEnvContextForPluginProvider kibanaEnv={kibanaEnvironment}>
         <core.i18n.Context>
-          <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+          <KibanaThemeProvider theme={core.theme}>{children}</KibanaThemeProvider>
         </core.i18n.Context>
       </KibanaEnvContextForPluginProvider>
     </KibanaContextProviderForPlugin>

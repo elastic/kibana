@@ -22,11 +22,12 @@ import {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
 import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
 
@@ -73,7 +74,6 @@ export const JobsListPage: FC<Props> = ({
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
   const I18nContext = coreStart.i18n.Context;
-  const theme$ = coreStart.theme.theme$;
 
   const mlServices = useMemo(
     () => getMlGlobalServices(coreStart.http, usageCollection),
@@ -127,7 +127,7 @@ export const JobsListPage: FC<Props> = ({
       }}
     >
       <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider {...coreStart}>
           <KibanaContextProvider
             services={{
               ...coreStart,

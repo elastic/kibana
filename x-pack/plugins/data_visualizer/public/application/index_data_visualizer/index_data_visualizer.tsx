@@ -13,7 +13,7 @@ import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getNestedProperty } from '@kbn/ml-nested-property';
@@ -28,6 +28,7 @@ import {
   type SetUrlState,
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -310,7 +311,7 @@ export const IndexDataVisualizer: FC<Props> = ({
 
   return (
     <KibanaThemeProvider
-      theme$={coreStart.theme.theme$}
+      theme={coreStart.theme}
       modify={{
         breakpoint: {
           xxl: XXL_BREAKPOINT,

@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import { EuiIcon } from '@elastic/eui';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { getTheme } from '../../services';
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
 
 export const touchdownTemplate = ({ wholeBucket }: Props) => {
   return ReactDOM.renderToStaticMarkup(
-    <KibanaThemeProvider theme$={getTheme().theme$}>
+    <KibanaThemeProvider theme={getTheme()}>
       <p className="visTooltip__header">
         <EuiIcon type="iInCircle" className="visTooltip__headerIcon" />
         <span className="visTooltip__headerText">

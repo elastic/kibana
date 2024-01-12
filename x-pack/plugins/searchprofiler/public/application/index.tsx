@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
-import { HttpStart as Http, ToastsSetup, CoreTheme } from '@kbn/core/public';
+import { HttpStart as Http, ToastsSetup, I18nStart } from '@kbn/core/public';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { LicenseStatus } from '../../common';
-import { KibanaThemeProvider } from '../shared_imports';
+import { KibanaRenderContextProvider } from '../shared_imports';
 import { App } from './app';
 import { AppContextProvider } from './contexts/app_context';
 import { ProfileContextProvider } from './contexts/profiler_context';
@@ -20,32 +20,30 @@ import { ProfileContextProvider } from './contexts/profiler_context';
 interface AppDependencies {
   el: HTMLElement;
   http: Http;
-  I18nContext: any;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
   notifications: ToastsSetup;
   initialLicenseStatus: LicenseStatus;
-  theme$: Observable<CoreTheme>;
   location: RouteComponentProps['location'];
 }
 
 export const renderApp = ({
   el,
   http,
-  I18nContext,
+  i18n,
   notifications,
   initialLicenseStatus,
-  theme$,
+  theme,
   location,
 }: AppDependencies) => {
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <AppContextProvider args={{ initialLicenseStatus, notifications, http, location }}>
-          <ProfileContextProvider>
-            <App />
-          </ProfileContextProvider>
-        </AppContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <KibanaRenderContextProvider {...{ theme, i18n }}>
+      <AppContextProvider args={{ initialLicenseStatus, notifications, http, location }}>
+        <ProfileContextProvider>
+          <App />
+        </ProfileContextProvider>
+      </AppContextProvider>
+    </KibanaRenderContextProvider>,
     el
   );
 

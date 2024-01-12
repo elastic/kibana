@@ -7,7 +7,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/home-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
@@ -15,7 +14,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/serverless",
-    "@kbn/translations-plugin"
+    "@kbn/translations-plugin",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": ["target/**/*"]
 }

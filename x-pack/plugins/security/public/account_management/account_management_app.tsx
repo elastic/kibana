@@ -21,11 +21,8 @@ import type {
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
@@ -99,7 +96,7 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
     <AuthenticationProvider authc={authc}>
       <SecurityApiClientsProvider {...securityApiClients}>
         <I18nProvider>
-          <KibanaThemeProvider theme$={theme$}>
+          <KibanaThemeProvider theme={{ theme$ }}>
             <Router history={history}>
               <BreadcrumbsProvider onChange={onChange}>
                 <UserProfilesKibanaProvider

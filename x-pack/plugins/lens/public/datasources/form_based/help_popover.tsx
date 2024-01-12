@@ -18,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import './help_popover.scss';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ThemeServiceStart } from '@kbn/core/public';
 
@@ -93,7 +93,7 @@ export const WrappingHelpPopover = ({
   theme: ThemeServiceStart;
 }) => {
   return (
-    <KibanaThemeProvider theme$={theme.theme$}>
+    <KibanaThemeProvider theme={theme}>
       <I18nProvider>
         <EuiWrappingPopover
           anchorPosition={anchorPosition}

@@ -21,7 +21,7 @@ export interface ServicesWrapperProps {
 }
 
 const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, children }) => (
-  <KibanaThemeProvider theme$={services.theme.theme$}>
+  <KibanaThemeProvider theme={services.theme}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

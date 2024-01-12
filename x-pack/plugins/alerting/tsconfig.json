@@ -48,7 +48,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/i18n-react",
     "@kbn/ui-theme",
     "@kbn/core-doc-links-server-mocks",
     "@kbn/doc-links",
@@ -63,7 +62,8 @@
     "@kbn/core-application-common",
     "@kbn/core-saved-objects-api-server",
     "@kbn/alerts-ui-shared",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": ["target/**/*"]
 }

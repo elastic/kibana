@@ -18,7 +18,7 @@ import {
 } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { KibanaThemeProvider } from '../shared_imports';
+import { KibanaRenderContextProvider } from '../shared_imports';
 import {
   createStorage,
   createHistory,
@@ -35,7 +35,7 @@ import { createApi, createEsHostService } from './lib';
 export interface BootDependencies {
   http: HttpSetup;
   docLinkVersion: string;
-  I18nContext: I18nStart['Context'];
+  i18n: I18nStart;
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
@@ -45,7 +45,7 @@ export interface BootDependencies {
 }
 
 export function renderApp({
-  I18nContext,
+  i18n,
   notifications,
   docLinkVersion,
   usageCollection,
@@ -72,34 +72,32 @@ export function renderApp({
   autocompleteInfo.mapping.setup(http, settings);
 
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <ServicesContextProvider
-          value={{
-            docLinkVersion,
-            docLinks,
-            services: {
-              esHostService,
-              storage,
-              history,
-              settings,
-              notifications,
-              trackUiMetric,
-              objectStorageClient,
-              http,
-              autocompleteInfo,
-            },
-            theme$,
-          }}
-        >
-          <RequestContextProvider>
-            <EditorContextProvider settings={settings.toJSON()}>
-              <Main />
-            </EditorContextProvider>
-          </RequestContextProvider>
-        </ServicesContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <KibanaRenderContextProvider {...{ i18n, theme: { theme$ } }}>
+      <ServicesContextProvider
+        value={{
+          docLinkVersion,
+          docLinks,
+          services: {
+            esHostService,
+            storage,
+            history,
+            settings,
+            notifications,
+            trackUiMetric,
+            objectStorageClient,
+            http,
+            autocompleteInfo,
+          },
+          theme$,
+        }}
+      >
+        <RequestContextProvider>
+          <EditorContextProvider settings={settings.toJSON()}>
+            <Main />
+          </EditorContextProvider>
+        </RequestContextProvider>
+      </ServicesContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

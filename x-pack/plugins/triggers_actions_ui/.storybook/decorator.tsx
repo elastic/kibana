@@ -11,10 +11,11 @@ import { action } from '@storybook/addon-actions';
 import { DecoratorFn } from '@storybook/react';
 import { EMPTY, of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaServices } from '@kbn/kibana-react-plugin/public';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
 import { getHttp } from './context/http';
@@ -70,8 +71,8 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
   });
   return (
     <I18nProvider>
-      <EuiThemeProvider darkMode={darkMode}>
-        <KibanaThemeProvider theme$={EMPTY}>
+      <KibanaStyledComponentsThemeProvider darkMode={darkMode}>
+        <KibanaThemeProvider theme={{ theme$: EMPTY }}>
           <KibanaContextProvider
             services={{
               notifications,
@@ -97,7 +98,7 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
             <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
-      </EuiThemeProvider>
+      </KibanaStyledComponentsThemeProvider>
     </I18nProvider>
   );
 };

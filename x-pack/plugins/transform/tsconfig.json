@@ -72,7 +72,8 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/ml-data-view-utils",
     "@kbn/ml-creation-wizard-utils",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": [
     "target/**/*",

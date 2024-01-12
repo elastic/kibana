@@ -34,8 +34,6 @@ export {
 
 export { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
-export {
-  reactRouterNavigate,
-  KibanaThemeProvider,
-  useExecutionContext,
-} from '@kbn/kibana-react-plugin/public';
+export { reactRouterNavigate, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+
+export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';

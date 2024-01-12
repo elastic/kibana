@@ -82,10 +82,6 @@ export {
 
 export { isJSON, isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 
-export {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  useExecutionContext,
-} from '@kbn/kibana-react-plugin/public';
+export { KibanaContextProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
 export const useKibana = () => _useKibana<AppServices>();

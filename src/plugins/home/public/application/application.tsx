@@ -10,13 +10,14 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
 
 // @ts-ignore
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';
 
@@ -40,19 +41,19 @@ export const renderApp = async (
       .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
 
     render(
-      <RedirectAppLinks
-        coreStart={{
-          application: coreStart.application,
-        }}
-      >
-        <KibanaThemeProvider theme$={theme$}>
+      <KibanaRenderContextProvider {...coreStart}>
+        <RedirectAppLinks
+          coreStart={{
+            application: coreStart.application,
+          }}
+        >
           <KibanaContextProvider services={{ ...coreStart }}>
             <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric }}>
               <HomeApp directories={directories} solutions={solutions} />
             </SampleDataTabKibanaProvider>
           </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </RedirectAppLinks>,
+        </RedirectAppLinks>
+      </KibanaRenderContextProvider>,
       element
     );
   });

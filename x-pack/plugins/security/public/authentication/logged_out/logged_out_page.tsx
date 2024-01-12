@@ -17,7 +17,7 @@ import type {
   IBasePath,
 } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
@@ -52,11 +52,9 @@ export function renderLoggedOutPage(
   props: Props
 ) {
   ReactDOM.render(
-    <i18nStart.Context>
-      <KibanaThemeProvider theme$={theme$}>
-        <LoggedOutPage {...props} />
-      </KibanaThemeProvider>
-    </i18nStart.Context>,
+    <KibanaRenderContextProvider {...{ i18n: i18nStart, theme: { theme$ } }}>
+      <LoggedOutPage {...props} />
+    </KibanaRenderContextProvider>,
     element
   );
 

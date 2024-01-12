@@ -9,8 +9,8 @@ import type { DecoratorFn } from '@storybook/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '@kbn/core/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
 type StoryContext = Parameters<DecoratorFn>[1];
 
@@ -34,8 +34,10 @@ export const GlobalStorybookThemeProviders: React.FC<{ storyContext: StoryContex
 }) => {
   const { theme, theme$ } = useGlobalStorybookTheme(storyContext);
   return (
-    <KibanaThemeProvider theme$={theme$}>
-      <EuiThemeProvider darkMode={theme.darkMode}>{children}</EuiThemeProvider>
+    <KibanaThemeProvider theme={{ theme$ }}>
+      <KibanaStyledComponentsThemeProvider darkMode={theme.darkMode}>
+        {children}
+      </KibanaStyledComponentsThemeProvider>
     </KibanaThemeProvider>
   );
 };

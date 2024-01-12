@@ -70,6 +70,8 @@
     "@kbn/core-http-server",
     "@kbn/alerting-plugin",
     "@kbn/content-management-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-styled",
   ],
   "exclude": [
     "target/**/*",

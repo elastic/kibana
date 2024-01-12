@@ -61,7 +61,7 @@ const OsqueryActionResultsWrapperComponent: React.FC<OsqueryActionResultsWrapper
   services,
   ...restProps
 }) => (
-  <KibanaThemeProvider theme$={services.theme.theme$}>
+  <KibanaThemeProvider theme={services.theme}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>

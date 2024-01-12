@@ -9,11 +9,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
-import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StartDependencies, AiAssistantManagementSelectionPluginStart } from '../plugin';
 import { aIAssistantManagementSelectionRouter } from '../routes/config';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
@@ -27,7 +26,6 @@ interface MountParams {
 export const mountManagementSection = async ({ core, mountParams }: MountParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
-  const { theme$ } = core.theme;
 
   coreStart.chrome.docTitle.change(
     i18n.translate('aiAssistantManagementSelection.app.titleBar', {
@@ -36,25 +34,22 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
   );
 
   ReactDOM.render(
-    wrapWithTheme(
+    <KibanaRenderContextProvider {...coreStart}>
       <RedirectToHomeIfUnauthorized coreStart={coreStart}>
-        <I18nProvider>
-          <AppContextProvider
-            value={{
-              ...startDeps,
-              capabilities: coreStart.application.capabilities,
-              navigateToApp: coreStart.application.navigateToApp,
-              setBreadcrumbs,
-            }}
-          >
-            <RouterProvider history={history} router={aIAssistantManagementSelectionRouter as any}>
-              <RouteRenderer />
-            </RouterProvider>
-          </AppContextProvider>
-        </I18nProvider>
-      </RedirectToHomeIfUnauthorized>,
-      theme$
-    ),
+        <AppContextProvider
+          value={{
+            ...startDeps,
+            capabilities: coreStart.application.capabilities,
+            navigateToApp: coreStart.application.navigateToApp,
+            setBreadcrumbs,
+          }}
+        >
+          <RouterProvider history={history} router={aIAssistantManagementSelectionRouter as any}>
+            <RouteRenderer />
+          </RouterProvider>
+        </AppContextProvider>
+      </RedirectToHomeIfUnauthorized>
+    </KibanaRenderContextProvider>,
     element
   );
 

@@ -26,9 +26,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DocLinksStart, ThemeServiceStart, ToastsStart } from '@kbn/core/public';
 
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { getCategoryName } from '../../lib';
 import { Field, getEditableValue } from '../field';
 import { FieldSetting, SettingsChanges, FieldState } from '../../types';
@@ -193,7 +194,7 @@ export class Form extends PureComponent<FormProps> {
       }),
       toastLifeTimeMs: 15000,
       text: toMountPoint(
-        <KibanaThemeProvider theme$={this.props.theme}>
+        <KibanaThemeProvider theme={{ theme$: this.props.theme }}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton

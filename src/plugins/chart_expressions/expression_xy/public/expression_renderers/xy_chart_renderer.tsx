@@ -23,7 +23,7 @@ import type {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
@@ -251,7 +251,7 @@ export const getXyChartRenderer = ({
     });
 
     ReactDOM.render(
-      <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
+      <KibanaThemeProvider theme={deps.kibanaTheme}>
         <I18nProvider>
           <div css={chartContainerStyle} data-test-subj="xyVisChart">
             <XYChartReportable

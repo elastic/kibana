@@ -70,7 +70,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/logging",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": ["target/**/*"]
 }

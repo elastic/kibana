@@ -17,7 +17,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
     "@kbn/react-kibana-context-common",

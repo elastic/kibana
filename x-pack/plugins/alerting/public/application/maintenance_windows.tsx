@@ -11,10 +11,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { AlertingPluginStart } from '../plugin';
 import { MAINTENANCE_WINDOW_PATHS } from '../../common';
 import { useLicense } from '../hooks/use_license';
@@ -76,14 +77,14 @@ export const renderApp = ({
   mountParams: ManagementAppMountParams;
   kibanaVersion: string;
 }) => {
-  const { element, history, theme$ } = mountParams;
+  const { element, history } = mountParams;
   const i18nCore = core.i18n;
   const isDarkMode = core.theme.getTheme().darkMode;
 
   const queryClient = new QueryClient();
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider
         services={{
           ...core,
@@ -102,7 +103,7 @@ export const renderApp = ({
           </EuiThemeProvider>
         </Router>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaRenderContextProvider>,
     element
   );
   return () => {

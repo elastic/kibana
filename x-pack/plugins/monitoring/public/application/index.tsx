@@ -6,13 +6,14 @@
  */
 
 import { AppMountParameters, CoreStart, CoreTheme, MountPoint } from '@kbn/core/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Observable } from 'rxjs';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 import {
   CODE_PATH_APM,
   CODE_PATH_BEATS,
@@ -102,9 +103,9 @@ const MonitoringApp: React.FC<{
   const darkMode = core.theme.getTheme().darkMode;
 
   return (
-    <KibanaContextProvider services={{ ...core, ...plugins }}>
-      <EuiThemeProvider darkMode={darkMode}>
-        <KibanaThemeProvider theme$={core.theme.theme$}>
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProvider services={{ ...core, ...plugins }}>
+        <KibanaStyledComponentsThemeProvider darkMode={darkMode}>
           <ExternalConfigContext.Provider value={externalConfig}>
             <GlobalStateProvider
               query={plugins.data.query}
@@ -346,8 +347,8 @@ const MonitoringApp: React.FC<{
               </HeaderActionMenuContext.Provider>
             </GlobalStateProvider>
           </ExternalConfigContext.Provider>
-        </KibanaThemeProvider>
-      </EuiThemeProvider>
-    </KibanaContextProvider>
+        </KibanaStyledComponentsThemeProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>
   );
 };

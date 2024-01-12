@@ -26,7 +26,7 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
   return (
     <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}privileges`}>
       <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider theme={{ theme$ }}>
           <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
         </KibanaThemeProvider>
       </I18nContext>

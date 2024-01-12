@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import React, { ReactNode } from 'react';
+import { HttpSetup, I18nStart, ThemeServiceStart } from '@kbn/core/public';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
 
@@ -17,7 +17,8 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-import { KibanaContextProvider, KibanaThemeProvider } from '../shared_imports';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '../shared_imports';
 import { ILicense } from '../types';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -51,28 +52,27 @@ export interface AppServices {
 
 export interface CoreServices {
   http: HttpSetup;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
 }
 
 export const renderApp = (
   element: HTMLElement,
-  I18nContext: ({ children }: { children: ReactNode }) => JSX.Element,
   services: AppServices,
   coreServices: CoreServices,
   { theme$ }: { theme$: Observable<CoreTheme> }
 ) => {
   render(
-    <AuthorizationProvider
-      privilegesEndpoint={`${API_BASE_PATH}/privileges`}
-      httpClient={coreServices.http}
-    >
-      <I18nContext>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ ...services, theme: { theme$ } }}>
-            <App />
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </AuthorizationProvider>,
+    <KibanaRenderContextProvider {...coreServices}>
+      <AuthorizationProvider
+        privilegesEndpoint={`${API_BASE_PATH}/privileges`}
+        httpClient={coreServices.http}
+      >
+        <KibanaContextProvider services={{ ...services, theme: { theme$ } }}>
+          <App />
+        </KibanaContextProvider>
+      </AuthorizationProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

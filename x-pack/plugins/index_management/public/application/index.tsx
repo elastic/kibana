@@ -12,12 +12,12 @@ import SemVer from 'semver/classes/semver';
 
 import { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { API_BASE_PATH } from '../../common';
 import {
   createKibanaReactContext,
   GlobalFlyout,
   useKibana as useKibanaReactPlugin,
-  KibanaThemeProvider,
 } from '../shared_imports';
 
 import { AppContextProvider, AppDependencies } from './app_context';
@@ -35,10 +35,8 @@ export const renderApp = (
     return () => undefined;
   }
 
-  const { i18n, docLinks, notifications, application, executionContext, overlays, theme } = core;
-  const { Context: I18nContext } = i18n;
-  const { services, history, setBreadcrumbs, uiSettings, settings, kibanaVersion, theme$ } =
-    dependencies;
+  const { docLinks, notifications, application, executionContext, overlays, theme } = core;
+  const { services, history, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
 
   // theme is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
@@ -65,23 +63,21 @@ export const renderApp = (
   };
 
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaReactContextProvider>
-          <Provider store={indexManagementStore(services)}>
-            <AppContextProvider value={dependencies}>
-              <MappingsEditorProvider>
-                <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-                  <GlobalFlyoutProvider>
-                    <App history={history} />
-                  </GlobalFlyoutProvider>
-                </ComponentTemplatesProvider>
-              </MappingsEditorProvider>
-            </AppContextProvider>
-          </Provider>
-        </KibanaReactContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <KibanaRenderContextProvider {...core}>
+      <KibanaReactContextProvider>
+        <Provider store={indexManagementStore(services)}>
+          <AppContextProvider value={dependencies}>
+            <MappingsEditorProvider>
+              <ComponentTemplatesProvider value={componentTemplateProviderValues}>
+                <GlobalFlyoutProvider>
+                  <App history={history} />
+                </GlobalFlyoutProvider>
+              </ComponentTemplatesProvider>
+            </MappingsEditorProvider>
+          </AppContextProvider>
+        </Provider>
+      </KibanaReactContextProvider>
+    </KibanaRenderContextProvider>,
     elem
   );
 

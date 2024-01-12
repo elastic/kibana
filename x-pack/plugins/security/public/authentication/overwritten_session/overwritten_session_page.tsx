@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 
 import type { AppMountParameters, CoreStart, IBasePath } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 
 import { parseNext } from '../../../common/parse_next';
@@ -58,11 +58,9 @@ export function renderOverwrittenSessionPage(
   props: Props
 ) {
   ReactDOM.render(
-    <i18nStart.Context>
-      <KibanaThemeProvider theme$={theme$}>
-        <OverwrittenSessionPage {...props} />
-      </KibanaThemeProvider>
-    </i18nStart.Context>,
+    <KibanaRenderContextProvider {...{ i18n: i18nStart, theme: { theme$ } }}>
+      <OverwrittenSessionPage {...props} />
+    </KibanaRenderContextProvider>,
     element
   );
 

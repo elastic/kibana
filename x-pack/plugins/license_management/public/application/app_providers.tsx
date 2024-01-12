@@ -48,7 +48,7 @@ export const AppProviders = ({ appDependencies, children }: Props) => {
 
   return (
     <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme={{ theme$ }}>
         <Provider store={store}>
           <AppContextProvider value={appDependencies}>{children}</AppContextProvider>
         </Provider>

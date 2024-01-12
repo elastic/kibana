@@ -11,13 +11,10 @@ import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 
 import { AppMountParameters } from '@kbn/core/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  toMountPoint,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
@@ -34,7 +31,7 @@ export const renderApp = (
   }
 
   const app = (
-    <KibanaThemeProvider theme$={services.theme.theme$}>
+    <KibanaRenderContextProvider {...services.core}>
       <Router history={services.history}>
         <KibanaContextProvider services={services}>
           <services.presentationUtil.ContextProvider>
@@ -53,7 +50,7 @@ export const renderApp = (
           </services.presentationUtil.ContextProvider>
         </KibanaContextProvider>
       </Router>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 
   ReactDOM.render(app, element);

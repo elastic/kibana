@@ -12,4 +12,8 @@ const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
 export { sendRequest, collapseLiteralStrings, expandLiteralStrings };
 
-export { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+export { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
+export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

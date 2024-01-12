@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { Observable } from 'rxjs';
 
 import {
   UnmountCallback,
@@ -16,10 +15,10 @@ import {
   ScopedHistory,
   ApplicationStart,
   DocLinksStart,
-  CoreTheme,
   ExecutionContextStart,
+  ThemeServiceStart,
 } from '@kbn/core/public';
-import { KibanaThemeProvider, useExecutionContext } from '../shared_imports';
+import { KibanaRenderContextProvider, useExecutionContext } from '../shared_imports';
 import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
 import { init as initDocumentation } from './services/documentation_links';
 import { App } from './app';
@@ -44,24 +43,22 @@ const AppWithExecutionContext = ({
 
 const renderApp = (
   element: Element,
-  I18nContext: I18nStart['Context'],
+  i18n: I18nStart,
   history: ScopedHistory,
   getUrlForApp: ApplicationStart['getUrlForApp'],
-  theme$: Observable<CoreTheme>,
+  theme: ThemeServiceStart,
   executionContext: ExecutionContextStart
 ): UnmountCallback => {
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
-        <Provider store={ccrStore}>
-          <AppWithExecutionContext
-            history={history}
-            getUrlForApp={getUrlForApp}
-            executionContext={executionContext}
-          />
-        </Provider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <KibanaRenderContextProvider {...{ i18n, theme }}>
+      <Provider store={ccrStore}>
+        <AppWithExecutionContext
+          history={history}
+          getUrlForApp={getUrlForApp}
+          executionContext={executionContext}
+        />
+      </Provider>
+    </KibanaRenderContextProvider>,
     element
   );
 
@@ -71,20 +68,20 @@ const renderApp = (
 export async function mountApp({
   element,
   setBreadcrumbs,
-  I18nContext,
+  i18n,
   docLinks,
   history,
   getUrlForApp,
-  theme$,
+  theme,
   executionContext,
 }: {
   element: Element;
   setBreadcrumbs: SetBreadcrumbs;
-  I18nContext: I18nStart['Context'];
+  i18n: I18nStart;
   docLinks: DocLinksStart;
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
-  theme$: Observable<CoreTheme>;
+  theme: ThemeServiceStart;
   executionContext: ExecutionContextStart;
 }): Promise<UnmountCallback> {
   // Import and initialize additional services here instead of in plugin.ts to reduce the size of the
@@ -92,5 +89,5 @@ export async function mountApp({
   initBreadcrumbs(setBreadcrumbs);
   initDocumentation(docLinks);
 
-  return renderApp(element, I18nContext, history, getUrlForApp, theme$, executionContext);
+  return renderApp(element, i18n, history, getUrlForApp, theme, executionContext);
 }

@@ -11,10 +11,11 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { RangeFilterParams } from '@kbn/es-query';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaExecutionContext } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
 import { getUsageCollection } from './helpers/plugin_services';
@@ -83,13 +84,16 @@ export const getTimelionVisRenderer: (
       handlers.done();
     };
 
+    const i18n = deps.i18n!;
+    const theme = deps.theme!;
+
     render(
-      <VisualizationContainer
-        renderComplete={renderComplete}
-        handlers={handlers}
-        showNoResult={showNoResult}
-      >
-        <KibanaThemeProvider theme$={deps.theme.theme$}>
+      <KibanaRenderContextProvider {...{ theme, i18n }}>
+        <VisualizationContainer
+          renderComplete={renderComplete}
+          handlers={handlers}
+          showNoResult={showNoResult}
+        >
           <KibanaContextProvider services={{ ...deps }}>
             {seriesList && (
               <LazyTimelionVisComponent
@@ -103,8 +107,8 @@ export const getTimelionVisRenderer: (
               />
             )}
           </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </VisualizationContainer>,
+        </VisualizationContainer>
+      </KibanaRenderContextProvider>,
       domNode
     );
   },

@@ -13,8 +13,8 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { TableVisRenderValue } from './table_vis_fn';
 
 const TableVisualizationComponent = lazy(() => import('./components/table_visualization'));
@@ -65,7 +65,7 @@ export const getTableVisRenderer: (
     };
 
     render(
-      <KibanaThemeProvider theme$={core.theme.theme$}>
+      <KibanaRenderContextProvider {...core}>
         <VisualizationContainer
           data-test-subj="tbvChartContainer"
           handlers={handlers}
@@ -80,7 +80,7 @@ export const getTableVisRenderer: (
             renderComplete={renderCompete}
           />
         </VisualizationContainer>
-      </KibanaThemeProvider>,
+      </KibanaRenderContextProvider>,
       domNode
     );
   },

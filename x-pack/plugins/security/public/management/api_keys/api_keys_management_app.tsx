@@ -13,9 +13,9 @@ import type { Observable } from 'rxjs';
 
 import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
 
@@ -87,27 +87,24 @@ export interface ProvidersProps {
 
 export const Providers: FunctionComponent<ProvidersProps> = ({
   services,
-  theme$,
   history,
   authc,
   onChange,
   children,
 }) => (
-  <KibanaContextProvider services={services}>
-    <AuthenticationProvider authc={authc}>
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <Router history={history}>
-            <ReadonlyBadge
-              featureId="api_keys"
-              tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
-                defaultMessage: 'Unable to create or edit API keys',
-              })}
-            />
-            <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-          </Router>
-        </KibanaThemeProvider>
-      </I18nProvider>
-    </AuthenticationProvider>
-  </KibanaContextProvider>
+  <KibanaRenderContextProvider {...services}>
+    <KibanaContextProvider services={services}>
+      <AuthenticationProvider authc={authc}>
+        <Router history={history}>
+          <ReadonlyBadge
+            featureId="api_keys"
+            tooltip={i18n.translate('xpack.security.management.api_keys.readonlyTooltip', {
+              defaultMessage: 'Unable to create or edit API keys',
+            })}
+          />
+          <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+        </Router>
+      </AuthenticationProvider>
+    </KibanaContextProvider>
+  </KibanaRenderContextProvider>
 );

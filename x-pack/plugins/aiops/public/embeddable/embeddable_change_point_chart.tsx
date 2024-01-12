@@ -13,7 +13,6 @@ import {
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { type CoreStart, IUiSettingsClient } from '@kbn/core/public';
@@ -23,6 +22,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { Subject } from 'rxjs';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EmbeddableInputTracker } from './embeddable_chart_component_wrapper';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE, EMBEDDABLE_ORIGIN } from '../../common/constants';
 import { AiopsAppContext, type AiopsAppDependencies } from '../hooks/use_aiops_app_context';
@@ -116,8 +116,6 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     // test subject selector for functional tests
     this.node.setAttribute('data-test-subj', 'aiopsEmbeddableChangePointChart');
 
-    const I18nContext = this.deps.i18n.Context;
-
     const datePickerDeps = {
       ...pick(this.deps, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
       uiSettingsKeys: UI_SETTINGS,
@@ -132,25 +130,23 @@ export class EmbeddableChangePointChart extends AbstractEmbeddable<
     } as unknown as AiopsAppDependencies;
 
     ReactDOM.render(
-      <I18nContext>
-        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <AiopsAppContext.Provider value={aiopsAppContextValue}>
-            <DatePickerContextProvider {...datePickerDeps}>
-              <Suspense fallback={null}>
-                <EmbeddableInputTracker
-                  input$={input$}
-                  initialInput={input}
-                  reload$={this.reload$}
-                  onOutputChange={this.updateOutput.bind(this)}
-                  onRenderComplete={this.onRenderComplete.bind(this)}
-                  onLoading={this.onLoading.bind(this)}
-                  onError={this.onError.bind(this)}
-                />
-              </Suspense>
-            </DatePickerContextProvider>
-          </AiopsAppContext.Provider>
-        </KibanaThemeProvider>
-      </I18nContext>,
+      <KibanaRenderContextProvider {...this.deps}>
+        <AiopsAppContext.Provider value={aiopsAppContextValue}>
+          <DatePickerContextProvider {...datePickerDeps}>
+            <Suspense fallback={null}>
+              <EmbeddableInputTracker
+                input$={input$}
+                initialInput={input}
+                reload$={this.reload$}
+                onOutputChange={this.updateOutput.bind(this)}
+                onRenderComplete={this.onRenderComplete.bind(this)}
+                onLoading={this.onLoading.bind(this)}
+                onError={this.onError.bind(this)}
+              />
+            </Suspense>
+          </DatePickerContextProvider>
+        </AiopsAppContext.Provider>
+      </KibanaRenderContextProvider>,
       el
     );
   }

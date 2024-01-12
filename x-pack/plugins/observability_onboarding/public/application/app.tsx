@@ -15,7 +15,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   KibanaContextProvider,
-  KibanaThemeProvider,
   useDarkMode,
 } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -24,6 +23,7 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConfigSchema } from '..';
 import { customLogsRoutes } from '../components/app/custom_logs';
 import { systemLogsRoutes } from '../components/app/system_logs';
@@ -164,7 +164,7 @@ export function ObservabilityOnboardingAppRoot({
           }}
         >
           <KibanaThemeProvider
-            theme$={theme$}
+            theme={{ theme$ }}
             modify={{
               breakpoint: {
                 xxl: 1600,

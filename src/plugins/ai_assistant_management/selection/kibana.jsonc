@@ -6,8 +6,13 @@
     "id": "aiAssistantManagementSelection",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["management"],
-    "optionalPlugins": ["home", "serverless"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredPlugins": [
+      "management"
+    ],
+    "optionalPlugins": [
+      "home",
+      "serverless"
+    ],
+    "requiredBundles": []
   }
 }

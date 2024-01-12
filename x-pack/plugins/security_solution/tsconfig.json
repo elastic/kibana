@@ -180,13 +180,13 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-styled",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/shared-ux-error-boundary",
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
     "@kbn/search-errors",
     "@kbn/stack-connectors-plugin",
     "@kbn/elastic-assistant-common",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/lens-embeddable-utils",
+    "@kbn/react-kibana-context-render"
   ]
 }

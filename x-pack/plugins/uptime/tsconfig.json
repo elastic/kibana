@@ -72,7 +72,9 @@
     "@kbn/actions-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-styled"
   ],
   "exclude": [
     "target/**/*",

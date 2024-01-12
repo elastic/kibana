@@ -13,7 +13,7 @@ import {
   CoreStart,
   APP_WRAPPER_CLASS,
 } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ConfigSchema } from '..';
 import { ApmPluginSetupDeps, ApmPluginStartDeps, ApmServices } from '../plugin';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
@@ -74,7 +74,7 @@ export const renderApp = ({
 
   ReactDOM.render(
     <KibanaThemeProvider
-      theme$={theme$}
+      theme={{ theme$ }}
       modify={{
         breakpoint: {
           xxl: 1600,

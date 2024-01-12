@@ -10,11 +10,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
-import { wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StartDependencies, AiAssistantManagementObservabilityPluginStart } from './plugin';
 import { aIAssistantManagementObservabilityRouter } from './routes/config';
 import { RedirectToHomeIfUnauthorized } from './routes/components/redirect_to_home_if_unauthorized';
@@ -31,7 +30,6 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
   if (!startDeps.observabilityAIAssistant) return () => {};
 
   const { element, history, setBreadcrumbs } = mountParams;
-  const { theme$ } = core.theme;
 
   coreStart.chrome.docTitle.change(
     i18n.translate('aiAssistantManagementObservability.app.titleBar', {
@@ -42,33 +40,30 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
   const queryClient = new QueryClient();
 
   ReactDOM.render(
-    wrapWithTheme(
+    <KibanaRenderContextProvider {...coreStart}>
       <RedirectToHomeIfUnauthorized coreStart={coreStart}>
-        <I18nProvider>
-          <AppContextProvider
-            value={{
-              application: coreStart.application,
-              http: coreStart.http,
-              notifications: coreStart.notifications,
-              observabilityAIAssistant: startDeps.observabilityAIAssistant,
-              uiSettings: coreStart.uiSettings,
-              serverless: startDeps.serverless,
-              setBreadcrumbs,
-            }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <RouterProvider
-                history={history}
-                router={aIAssistantManagementObservabilityRouter as any}
-              >
-                <RouteRenderer />
-              </RouterProvider>
-            </QueryClientProvider>
-          </AppContextProvider>
-        </I18nProvider>
-      </RedirectToHomeIfUnauthorized>,
-      theme$
-    ),
+        <AppContextProvider
+          value={{
+            application: coreStart.application,
+            http: coreStart.http,
+            notifications: coreStart.notifications,
+            observabilityAIAssistant: startDeps.observabilityAIAssistant,
+            uiSettings: coreStart.uiSettings,
+            serverless: startDeps.serverless,
+            setBreadcrumbs,
+          }}
+        >
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider
+              history={history}
+              router={aIAssistantManagementObservabilityRouter as any}
+            >
+              <RouteRenderer />
+            </RouterProvider>
+          </QueryClientProvider>
+        </AppContextProvider>
+      </RedirectToHomeIfUnauthorized>
+    </KibanaRenderContextProvider>,
     element
   );
 

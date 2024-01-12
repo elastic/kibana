@@ -52,10 +52,11 @@ export class IndexLifecycleManagementPlugin
           const [coreStart, { licensing }] = await getStartServices();
           const {
             chrome: { docTitle },
-            i18n: { Context: I18nContext },
+            i18n: i18nStart,
             application,
             docLinks,
             executionContext,
+            theme,
           } = coreStart;
 
           const license = await firstValueFrom(licensing.license$);
@@ -67,12 +68,12 @@ export class IndexLifecycleManagementPlugin
 
           const unmountAppCallback = renderApp(
             element,
-            I18nContext,
+            i18nStart,
             history,
             application,
             this.breadcrumbService,
             license,
-            theme$,
+            theme,
             docLinks,
             executionContext,
             cloud

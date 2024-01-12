@@ -15,7 +15,7 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 
-import { createKibanaReactContext, KibanaThemeProvider } from '../shared_imports';
+import { createKibanaReactContext, KibanaRenderContextProvider } from '../shared_imports';
 
 import { Links } from '../links';
 import { AppContextProvider } from './context';
@@ -23,7 +23,7 @@ import { Main } from './components/main';
 
 interface AppDependencies {
   http: HttpSetup;
-  I18nContext: CoreStart['i18n']['Context'];
+  i18n: CoreStart['i18n'];
   uiSettings: CoreSetup['uiSettings'];
   settings: CoreStart['settings'];
   links: Links;
@@ -33,7 +33,7 @@ interface AppDependencies {
 
 export function renderApp(
   element: HTMLElement | null,
-  { http, I18nContext, uiSettings, links, chrome, theme, settings }: AppDependencies
+  { http, i18n, uiSettings, links, chrome, theme, settings }: AppDependencies
 ) {
   if (!element) {
     return () => undefined;
@@ -44,15 +44,13 @@ export function renderApp(
     theme,
   });
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <KibanaReactContextProvider>
-          <AppContextProvider value={{ http, links, chrome }}>
-            <Main />
-          </AppContextProvider>
-        </KibanaReactContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <KibanaRenderContextProvider {...{ theme, i18n }}>
+      <KibanaReactContextProvider>
+        <AppContextProvider value={{ http, links, chrome }}>
+          <Main />
+        </AppContextProvider>
+      </KibanaReactContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
   return () => unmountComponentAtNode(element);

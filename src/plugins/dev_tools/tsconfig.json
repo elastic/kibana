@@ -11,11 +11,11 @@
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/ui-theme",
-    "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-router",
     "@kbn/deeplinks-devtools",
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",

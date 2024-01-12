@@ -13,7 +13,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';
 import { KibanaFeature } from '@kbn/features-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -82,7 +82,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={isDarkMode}>
-        <KibanaThemeProvider theme$={theme.theme$}>
+        <KibanaThemeProvider theme={theme}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
               <AppWithoutRouter sectionsRegex={sectionsRegex} />

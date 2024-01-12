@@ -7,8 +7,6 @@
 
 export { extractQueryParams, indices, SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
-export {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  useExecutionContext,
-} from '@kbn/kibana-react-plugin/public';
+export { KibanaContextProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+
+export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';

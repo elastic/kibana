@@ -9,17 +9,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { NewsfeedApiEndpoint } from '@kbn/newsfeed-plugin/public';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { AppPluginStartDependencies } from './types';
 import { KibanaOverviewApp } from './components/app';
 
 export const renderApp = (
   core: CoreStart,
   deps: AppPluginStartDependencies,
-  { appBasePath, element, theme$ }: AppMountParameters
+  { appBasePath, element }: AppMountParameters
 ) => {
   const { notifications, http } = core;
   const { newsfeed, home, navigation } = deps;
@@ -37,16 +37,14 @@ export const renderApp = (
       .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
 
     ReactDOM.render(
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ ...core, ...deps }}>
-            <KibanaOverviewApp
-              basename={appBasePath}
-              {...{ notifications, http, navigation, newsfeed$, solutions, features$ }}
-            />
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nProvider>,
+      <KibanaRenderContextProvider {...core}>
+        <KibanaContextProvider services={{ ...core, ...deps }}>
+          <KibanaOverviewApp
+            basename={appBasePath}
+            {...{ notifications, http, navigation, newsfeed$, solutions, features$ }}
+          />
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>,
       element
     );
   });

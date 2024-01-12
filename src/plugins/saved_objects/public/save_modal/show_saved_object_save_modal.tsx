@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getI18n, getTheme } from '../kibana_services';
 
 /**
@@ -57,11 +57,10 @@ export function showSaveModal(
     onClose: closeModal,
   });
 
-  const I18nContext = getI18n().Context;
   ReactDOM.render(
-    <KibanaThemeProvider theme$={getTheme().theme$}>
-      <I18nContext>{Wrapper ? <Wrapper>{element}</Wrapper> : element}</I18nContext>
-    </KibanaThemeProvider>,
+    <KibanaRenderContextProvider theme={getTheme()} i18n={getI18n()}>
+      {Wrapper ? <Wrapper>{element}</Wrapper> : element}
+    </KibanaRenderContextProvider>,
     container
   );
 }

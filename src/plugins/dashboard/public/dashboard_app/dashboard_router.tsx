@@ -16,7 +16,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -147,7 +147,7 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
   const app = (
     <I18nProvider>
       <DashboardMountContext.Provider value={mountContext}>
-        <KibanaThemeProvider theme$={core.theme.theme$}>
+        <KibanaThemeProvider theme={core.theme}>
           <HashRouter>
             <Routes>
               <Route

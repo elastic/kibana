@@ -20,6 +20,8 @@
     "@kbn/i18n-react",
     "@kbn/config-schema",
     "@kbn/code-editor",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

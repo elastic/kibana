@@ -82,6 +82,7 @@
     "@kbn/es-types",
     "@kbn/data-service",
     "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

@@ -6,7 +6,8 @@
  */
 import '../_index.scss';
 import React, { FC } from 'react';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore
@@ -37,7 +38,7 @@ export const FileDataVisualizer: FC<Props> = ({ getAdditionalLinks }) => {
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
   return (
-    <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+    <KibanaThemeProvider theme={coreStart.theme}>
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileDataVisualizerView

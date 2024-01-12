@@ -70,7 +70,9 @@
     "@kbn/ml-chi2test",
     "@kbn/field-utils",
     "@kbn/visualization-utils",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*",

@@ -31,9 +31,10 @@ import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-
 
 import './index.scss';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
-import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
@@ -78,7 +79,6 @@ export type GraphServices = Omit<GraphDependencies, 'element' | 'history'>;
 
 export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
   const { chrome, capabilities, core } = deps;
-  const { theme$ } = core.theme;
 
   if (!capabilities.graph.save) {
     chrome.setBadge({
@@ -117,7 +117,7 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
   });
 
   const app = (
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaRenderContextProvider {...core}>
       <TableListViewKibanaProvider
         {...{
           core,
@@ -127,7 +127,7 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
       >
         {graphRouter(deps)}
       </TableListViewKibanaProvider>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
   ReactDOM.render(app, element);
   element.setAttribute('class', 'gphAppWrapper');

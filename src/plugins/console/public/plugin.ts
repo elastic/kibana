@@ -60,7 +60,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           const [core] = await getStartServices();
 
           const {
-            i18n: { Context: I18nContext },
+            i18n: i18nStart,
             docLinks: { DOC_LINK_VERSION, links },
           } = core;
 
@@ -70,7 +70,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
             http,
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
-            I18nContext,
+            i18n: i18nStart,
             notifications,
             usageCollection,
             element,

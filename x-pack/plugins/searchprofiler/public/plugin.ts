@@ -57,9 +57,9 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
           http,
           initialLicenseStatus,
           el: params.element,
-          I18nContext: i18nDep.Context,
+          i18n: i18nDep,
+          theme: coreStart.theme,
           notifications: notifications.toasts,
-          theme$: params.theme$,
           location: params.location,
         });
       },

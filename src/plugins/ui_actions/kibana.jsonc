@@ -9,8 +9,7 @@
     "browser": true,
     "requiredPlugins": [],
     "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact"
+      "kibanaUtils"
     ]
   }
 }

@@ -15,10 +15,11 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { MlFeatures } from '../../common/constants/app';
 import { MlLicense } from '../../common/license';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
@@ -135,26 +136,23 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
     showFrozenDataTierChoice: !isServerless,
   };
 
-  const I18nContext = coreStart.i18n.Context;
   const ApplicationUsageTrackingProvider =
     deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
   return (
-    <ApplicationUsageTrackingProvider>
-      <I18nContext>
-        <KibanaThemeProvider theme$={appMountParams.theme$}>
-          <KibanaContextProvider services={services}>
-            <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
-              <DatePickerContextProvider {...datePickerDeps}>
-                <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
-                  <MlRouter pageDeps={pageDeps} />
-                </EnabledFeaturesContextProvider>
-              </DatePickerContextProvider>
-            </StorageContextProvider>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </I18nContext>
-    </ApplicationUsageTrackingProvider>
+    <KibanaRenderContextProvider {...services}>
+      <ApplicationUsageTrackingProvider>
+        <KibanaContextProvider services={services}>
+          <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
+            <DatePickerContextProvider {...datePickerDeps}>
+              <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+                <MlRouter pageDeps={pageDeps} />
+              </EnabledFeaturesContextProvider>
+            </DatePickerContextProvider>
+          </StorageContextProvider>
+        </KibanaContextProvider>
+      </ApplicationUsageTrackingProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

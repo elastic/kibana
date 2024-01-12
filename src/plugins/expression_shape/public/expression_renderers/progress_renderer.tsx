@@ -16,7 +16,7 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { CoreSetup } from '@kbn/core/public';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ProgressRendererConfig } from '../../common/types';
@@ -51,7 +51,7 @@ export const getProgressRenderer =
 
       render(
         <EuiErrorBoundary>
-          <KibanaThemeProvider theme$={theme$}>
+          <KibanaThemeProvider theme={{ theme$ }}>
             <I18nProvider>
               <ProgressComponent {...config} parentNode={domNode} onLoaded={handlers.done} />
             </I18nProvider>

@@ -25,7 +25,6 @@ import type { PaletteRegistry } from '@kbn/coloring';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { type Filter } from '@kbn/es-query';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
   IContainer,
@@ -39,6 +38,7 @@ import {
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import {
   replaceLayerList,
@@ -576,13 +576,10 @@ export class MapEmbeddable
         />
       );
 
-    const I18nContext = getCoreI18n().Context;
     render(
-      <Provider store={this._savedMap.getStore()}>
-        <I18nContext>
-          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>
-        </I18nContext>
-      </Provider>,
+      <KibanaRenderContextProvider i18n={getCoreI18n()} theme={getTheme()}>
+        <Provider store={this._savedMap.getStore()}>{content}</Provider>
+      </KibanaRenderContextProvider>,
       this._domNode
     );
   }

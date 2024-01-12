@@ -10,14 +10,13 @@ import React, { lazy } from 'react';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { I18nProvider } from '@kbn/i18n-react';
 import { IUiSettingsClient, KibanaExecutionContext, ThemeServiceStart } from '@kbn/core/public';
 
 import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plugin/public';
 
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { getUsageCollectionStart } from './services';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { getCoreStart, getUsageCollectionStart } from './services';
 import { TIME_RANGE_DATA_MODES } from '../common/enums';
 import type { TimeseriesVisData } from '../common/types';
 import { isVisTableData } from '../common/vis_data_utils';
@@ -96,30 +95,28 @@ export const getTimeseriesVisRenderer: (deps: {
     };
 
     render(
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <VisualizationContainer
-            data-test-subj="timeseriesVis"
+      <KibanaRenderContextProvider {...getCoreStart()}>
+        <VisualizationContainer
+          data-test-subj="timeseriesVis"
+          handlers={handlers}
+          renderComplete={renderComplete}
+          showNoResult={showNoResult}
+          error={get(visData, [model.id, 'error'])}
+        >
+          <TimeseriesVisualization
+            // it is mandatory to bind uiSettings because of "this" usage inside "get" method
+            getConfig={uiSettings.get.bind(uiSettings)}
             handlers={handlers}
-            renderComplete={renderComplete}
-            showNoResult={showNoResult}
-            error={get(visData, [model.id, 'error'])}
-          >
-            <TimeseriesVisualization
-              // it is mandatory to bind uiSettings because of "this" usage inside "get" method
-              getConfig={uiSettings.get.bind(uiSettings)}
-              handlers={handlers}
-              model={model}
-              visData={visData as TimeseriesVisData}
-              syncColors={syncColors}
-              syncTooltips={syncTooltips}
-              syncCursor={syncCursor}
-              uiState={handlers.uiState! as PersistedState}
-              initialRender={renderComplete}
-            />
-          </VisualizationContainer>
-        </KibanaThemeProvider>
-      </I18nProvider>,
+            model={model}
+            visData={visData as TimeseriesVisData}
+            syncColors={syncColors}
+            syncTooltips={syncTooltips}
+            syncCursor={syncCursor}
+            uiState={handlers.uiState! as PersistedState}
+            initialRender={renderComplete}
+          />
+        </VisualizationContainer>
+      </KibanaRenderContextProvider>,
       domNode
     );
   },

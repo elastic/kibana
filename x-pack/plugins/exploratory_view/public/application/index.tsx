@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 import { PluginContext } from '../context/plugin_context';
 import { routes } from '../routes';
 import { ExploratoryViewPublicPluginsStart } from '../plugin';
@@ -50,8 +50,7 @@ export const renderApp = ({
   usageCollection: UsageCollectionSetup;
   isDev?: boolean;
 }) => {
-  const { element, history, theme$ } = appMountParameters;
-  const i18nCore = core.i18n;
+  const { element, history } = appMountParameters;
   const isDarkMode = core.theme.getTheme().darkMode;
 
   core.chrome.setHelpExtension({
@@ -68,45 +67,38 @@ export const renderApp = ({
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
   ReactDOM.render(
-    <EuiErrorBoundary>
+    <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              storage: new Storage(localStorage),
-              isDev,
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+            storage: new Storage(localStorage),
+            isDev,
+          }}
+        >
+          <PluginContext.Provider
+            value={{
+              appMountParameters,
             }}
           >
-            <PluginContext.Provider
-              value={{
-                appMountParameters,
-              }}
-            >
-              <Router history={history}>
-                <EuiThemeProvider darkMode={isDarkMode}>
-                  <i18nCore.Context>
-                    <div
-                      className={APP_WRAPPER_CLASS}
-                      data-test-subj="exploratoryViewMainContainer"
-                    >
-                      <RedirectAppLinks
-                        coreStart={{
-                          application: core.application,
-                        }}
-                      >
-                        <App />
-                      </RedirectAppLinks>
-                    </div>
-                  </i18nCore.Context>
-                </EuiThemeProvider>
-              </Router>
-            </PluginContext.Provider>
-          </KibanaContextProvider>
-        </KibanaThemeProvider>
+            <Router history={history}>
+              <KibanaStyledComponentsThemeProvider darkMode={isDarkMode}>
+                <div className={APP_WRAPPER_CLASS} data-test-subj="exploratoryViewMainContainer">
+                  <RedirectAppLinks
+                    coreStart={{
+                      application: core.application,
+                    }}
+                  >
+                    <App />
+                  </RedirectAppLinks>
+                </div>
+              </KibanaStyledComponentsThemeProvider>
+            </Router>
+          </PluginContext.Provider>
+        </KibanaContextProvider>
       </ApplicationUsageTrackingProvider>
-    </EuiErrorBoundary>,
+    </KibanaRenderContextProvider>,
     element
   );
   return () => {

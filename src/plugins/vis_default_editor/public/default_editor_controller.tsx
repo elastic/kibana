@@ -13,7 +13,7 @@ import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
 import { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
 import { IEditorController, EditorRenderProps } from '@kbn/visualizations-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { getTheme } from './services';
 
 // @ts-ignore
@@ -29,7 +29,7 @@ class DefaultEditorController implements IEditorController {
 
   render(props: EditorRenderProps) {
     render(
-      <KibanaThemeProvider theme$={getTheme().theme$}>
+      <KibanaThemeProvider theme={getTheme()}>
         <EuiErrorBoundary>
           <Suspense
             fallback={

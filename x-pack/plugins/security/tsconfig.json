@@ -68,6 +68,8 @@
     "@kbn/security-plugin-types-server",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": [
     "target/**/*",

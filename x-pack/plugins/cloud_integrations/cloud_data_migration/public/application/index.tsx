@@ -9,17 +9,18 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { BreadcrumbService } from './services/breadcrumbs';
 import { CloudDataMigrationApp } from './components/app';
 
 export const renderApp = (
-  { http }: CoreStart,
+  { http, i18n, theme }: CoreStart,
   breadcrumbService: BreadcrumbService,
   { element, theme$ }: ManagementAppMountParams
 ) => {
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaRenderContextProvider {...{ theme, i18n }}>
       <KibanaContextProvider
         services={{
           breadcrumbService,
@@ -27,7 +28,7 @@ export const renderApp = (
       >
         <CloudDataMigrationApp http={http} theme$={theme$} breadcrumbService={breadcrumbService} />
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaRenderContextProvider>,
     element
   );
 

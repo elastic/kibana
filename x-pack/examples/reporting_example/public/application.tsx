@@ -9,7 +9,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {} from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { CaptureTest } from './containers/capture_test';
 import { Main } from './containers/main';
 import { ApplicationContextProvider } from './application_context';
@@ -23,16 +24,16 @@ export const renderApp = (
   forwardedParams: MyForwardableState
 ) => {
   ReactDOM.render(
-    <ApplicationContextProvider forwardedState={forwardedParams}>
-      <KibanaThemeProvider theme$={coreStart.theme.theme$}>
+    <KibanaRenderContextProvider {...coreStart}>
+      <ApplicationContextProvider forwardedState={forwardedParams}>
         <Router history={history}>
           <Routes>
             <Route path={ROUTES.captureTest} exact render={() => <CaptureTest />} />
             <Route render={() => <Main basename={appBasePath} {...coreStart} {...deps} />} />
           </Routes>
         </Router>
-      </KibanaThemeProvider>
-    </ApplicationContextProvider>,
+      </ApplicationContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

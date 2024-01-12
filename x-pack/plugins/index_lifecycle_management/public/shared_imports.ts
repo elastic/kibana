@@ -44,11 +44,9 @@ export {
 
 export { attemptToURIDecode } from '@kbn/es-ui-shared-plugin/public';
 
-export {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  useExecutionContext,
-} from '@kbn/kibana-react-plugin/public';
+export { KibanaContextProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+
+export { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 export { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
@@ -59,3 +57,5 @@ export const useKibana = () => _useKibana<AppServicesContext>();
 export type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 export type { ILicense } from '@kbn/licensing-plugin/public';
+
+export { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

@@ -7,13 +7,13 @@
 import React, { useEffect } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from '@kbn/shared-ux-router';
-import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 import { SyntheticsDataViewContextProvider } from './contexts/synthetics_data_view_context';
 import { SyntheticsAppProps } from './contexts';
 
@@ -36,7 +36,6 @@ const Application = (props: SyntheticsAppProps) => {
     canSave,
     core,
     darkMode,
-    i18n: i18nCore,
     plugins,
     renderGlobalHelpControls,
     setBadge,
@@ -68,67 +67,63 @@ const Application = (props: SyntheticsAppProps) => {
   store.dispatch(setBasePath(basePath));
 
   return (
-    <EuiErrorBoundary>
-      <i18nCore.Context>
-        <KibanaThemeProvider
-          theme$={props.appMountParameters.theme$}
-          modify={{
-            breakpoint: {
-              xxl: 1600,
-              xxxl: 2000,
-            },
+    <KibanaRenderContextProvider
+      {...core}
+      modify={{
+        breakpoint: {
+          xxl: 1600,
+          xxxl: 2000,
+        },
+      }}
+    >
+      <ReduxProvider store={store}>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+            storage,
+            data: startPlugins.data,
+            inspector: startPlugins.inspector,
+            triggersActionsUi: startPlugins.triggersActionsUi,
+            observability: startPlugins.observability,
+            observabilityShared: startPlugins.observabilityShared,
+            observabilityAIAssistant: startPlugins.observabilityAIAssistant,
+            exploratoryView: startPlugins.exploratoryView,
+            cases: startPlugins.cases,
+            spaces: startPlugins.spaces,
+            fleet: startPlugins.fleet,
           }}
         >
-          <ReduxProvider store={store}>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                ...plugins,
-                storage,
-                data: startPlugins.data,
-                inspector: startPlugins.inspector,
-                triggersActionsUi: startPlugins.triggersActionsUi,
-                observability: startPlugins.observability,
-                observabilityShared: startPlugins.observabilityShared,
-                observabilityAIAssistant: startPlugins.observabilityAIAssistant,
-                exploratoryView: startPlugins.exploratoryView,
-                cases: startPlugins.cases,
-                spaces: startPlugins.spaces,
-                fleet: startPlugins.fleet,
-              }}
-            >
-              <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
-                <Router history={appMountParameters.history}>
-                  <EuiThemeProvider darkMode={darkMode}>
-                    <SyntheticsRefreshContextProvider>
-                      <SyntheticsSettingsContextProvider {...props}>
-                        <SyntheticsThemeContextProvider darkMode={darkMode}>
-                          <SyntheticsStartupPluginsContextProvider {...startPlugins}>
-                            <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                              <RedirectAppLinks
-                                coreStart={{
-                                  application: core.application,
-                                }}
-                              >
-                                <InspectorContextProvider>
-                                  <PageRouter />
-                                  <ActionMenu appMountParameters={appMountParameters} />
-                                  <TestNowModeFlyoutContainer />
-                                </InspectorContextProvider>
-                              </RedirectAppLinks>
-                            </div>
-                          </SyntheticsStartupPluginsContextProvider>
-                        </SyntheticsThemeContextProvider>
-                      </SyntheticsSettingsContextProvider>
-                    </SyntheticsRefreshContextProvider>
-                  </EuiThemeProvider>
-                </Router>
-              </SyntheticsDataViewContextProvider>
-            </KibanaContextProvider>
-          </ReduxProvider>
-        </KibanaThemeProvider>
-      </i18nCore.Context>
-    </EuiErrorBoundary>
+          <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
+            <Router history={appMountParameters.history}>
+              <KibanaStyledComponentsThemeProvider darkMode={darkMode}>
+                <SyntheticsRefreshContextProvider>
+                  <SyntheticsSettingsContextProvider {...props}>
+                    <SyntheticsThemeContextProvider darkMode={darkMode}>
+                      <SyntheticsStartupPluginsContextProvider {...startPlugins}>
+                        <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                          <RedirectAppLinks
+                            coreStart={{
+                              application: core.application,
+                            }}
+                          >
+                            <InspectorContextProvider>
+                              <PageRouter />
+                              <ActionMenu appMountParameters={appMountParameters} />
+                              <TestNowModeFlyoutContainer />
+                            </InspectorContextProvider>
+                          </RedirectAppLinks>
+                        </div>
+                      </SyntheticsStartupPluginsContextProvider>
+                    </SyntheticsThemeContextProvider>
+                  </SyntheticsSettingsContextProvider>
+                </SyntheticsRefreshContextProvider>
+              </KibanaStyledComponentsThemeProvider>
+            </Router>
+          </SyntheticsDataViewContextProvider>
+        </KibanaContextProvider>
+      </ReduxProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

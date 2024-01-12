@@ -16,8 +16,6 @@
       "cloud"
     ],
     "optionalPlugins": [],
-    "requiredBundles": [
-      "kibanaReact",
-    ]
+    "requiredBundles": []
   }
 }

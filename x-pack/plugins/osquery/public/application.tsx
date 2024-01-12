@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
@@ -20,17 +19,17 @@ import { OsqueryApp } from './components/app';
 import { PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';
 import { queryClient } from './query_client';
-import { KibanaThemeProvider } from './shared_imports';
+import { KibanaRenderContextProvider } from './shared_imports';
 
 export const renderApp = (
   core: CoreStart,
   services: AppPluginStartDependencies,
-  { element, history, theme$ }: AppMountParameters,
+  { element, history }: AppMountParameters,
   storage: Storage,
   kibanaVersion: string
 ) => {
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         services={{
@@ -41,18 +40,16 @@ export const renderApp = (
           storage,
         }}
       >
-        <EuiErrorBoundary>
-          <Router history={history}>
-            <I18nProvider>
-              <QueryClientProvider client={queryClient}>
-                <OsqueryApp />
-                <ReactQueryDevtools initialIsOpen={false} />
-              </QueryClientProvider>
-            </I18nProvider>
-          </Router>
-        </EuiErrorBoundary>
+        <Router history={history}>
+          <I18nProvider>
+            <QueryClientProvider client={queryClient}>
+              <OsqueryApp />
+              <ReactQueryDevtools initialIsOpen={false} />
+            </QueryClientProvider>
+          </I18nProvider>
+        </Router>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaRenderContextProvider>,
     element
   );
 

@@ -9,7 +9,7 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -44,7 +44,7 @@ export const getVislibVisRenderer: (
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
 
     render(
-      <KibanaThemeProvider theme$={core.theme.theme$}>
+      <KibanaThemeProvider theme={core.theme}>
         <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
           <VislibWrapper {...config} core={core} charts={charts} handlers={handlers} />
         </VisualizationContainer>
