@@ -23,6 +23,5 @@
     "@kbn/dev-utils",
     "@kbn/cypress-config",
     "@kbn/observability-plugin",
-    "@kbn/management-settings-components-field-input",
   ]
 }
