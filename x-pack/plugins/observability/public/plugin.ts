@@ -69,6 +69,7 @@ import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/publ
 import { firstValueFrom } from 'rxjs';
 
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -159,6 +160,7 @@ export interface ObservabilityPublicPluginsStart {
   uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;
   presentationUtil?: PresentationUtilPluginStart;
+  dashboard: DashboardStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

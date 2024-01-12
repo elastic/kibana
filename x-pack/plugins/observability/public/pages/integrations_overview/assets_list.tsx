@@ -13,7 +13,6 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import React, { useEffect, useState } from 'react';
 import {
   Asset,
@@ -35,13 +34,9 @@ export function AssetsList({
   const {
     services: {
       http,
-      share: {
-        url: { locators },
-      },
+      dashboard: { locator: dashboardAppLocator },
     },
   } = useKibana();
-
-  const dashboardAppLocator = locators.get<DashboardLocatorParams>('DASHBOARD_APP_LOCATOR');
 
   useEffect(() => {
     async function fetchInstalledIntegrations() {
