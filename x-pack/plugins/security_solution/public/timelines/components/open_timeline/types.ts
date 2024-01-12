@@ -6,7 +6,6 @@
  */
 
 import type React from 'react';
-import type { AllTimelinesVariables } from '../../containers/all';
 import type { TimelineModel } from '../../store/timeline/model';
 import type {
   RowRendererId,
