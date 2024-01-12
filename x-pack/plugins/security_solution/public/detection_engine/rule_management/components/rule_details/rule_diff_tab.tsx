@@ -23,6 +23,14 @@ import * as i18n from './json_diff/translations';
 const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
   stringify(jsObject, { space: 2 });
 
+const HIDDEN_PROPERTIES = [
+  'revision',
+  'output_index',
+  'enabled',
+  'exceptions_list',
+  'execution_summary',
+];
+
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
@@ -30,8 +38,8 @@ interface RuleDiffTabProps {
 
 export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
   const [oldSource, newSource] = useMemo(() => {
-    const visibleOldRuleProperties = omit(oldRule, 'revision');
-    const visibleNewRuleProperties = omit(newRule, 'revision');
+    const visibleOldRuleProperties = omit(oldRule, ...HIDDEN_PROPERTIES);
+    const visibleNewRuleProperties = omit(newRule, ...HIDDEN_PROPERTIES);
 
     return [
       sortAndStringifyJson(visibleOldRuleProperties),
