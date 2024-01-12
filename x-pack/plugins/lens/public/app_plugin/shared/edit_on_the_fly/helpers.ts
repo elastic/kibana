@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
-import { getESQLAdHocDataview } from '@kbn/text-based-editor';
+import { getESQLAdHocDataview } from '@kbn/es-query';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';

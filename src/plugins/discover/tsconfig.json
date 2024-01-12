@@ -79,8 +79,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-plugins-server",
     "@kbn/serverless",
-    "@kbn/deeplinks-observability",
-    "@kbn/text-based-editor"
+    "@kbn/deeplinks-observability"
   ],
   "exclude": ["target/**/*"]
 }

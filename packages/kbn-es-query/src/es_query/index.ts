@@ -22,6 +22,7 @@ export {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   cleanupESQLQueryForLensSuggestions,
+  getESQLAdHocDataview,
 } from './es_aggregate_query';
 export { fromCombinedFilter } from './from_combined_filter';
 export type {

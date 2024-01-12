@@ -8,7 +8,6 @@
 
 export type { TextBasedLanguagesEditorProps } from './src/text_based_languages_editor';
 export { fetchFieldsFromESQL } from './src/fetch_fields_from_esql';
-export { getESQLAdHocDataview } from './src/helpers';
 import { TextBasedLanguagesEditor } from './src/text_based_languages_editor';
 
 // React.lazy support

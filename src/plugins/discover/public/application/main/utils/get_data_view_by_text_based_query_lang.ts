@@ -10,7 +10,7 @@ import {
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
 } from '@kbn/es-query';
-import { getESQLAdHocDataview } from '@kbn/text-based-editor';
+import { getESQLAdHocDataview } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../build_services';
 
