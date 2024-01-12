@@ -123,6 +123,9 @@ image::images/cases-files.png[A list of files attached to a case]
 
 The acceptable file types and sizes are affected by your <<cases-settings,case settings>>.
 
+To download or delete the file or copy the file hash to your clipboard, open the action menu (…).
+The available hash functions are MD5, SHA-1, and SHA-256.
+
 When you upload a file, a comment is added to the case activity log.
 To view images, click their name in the activity or file list.
 
