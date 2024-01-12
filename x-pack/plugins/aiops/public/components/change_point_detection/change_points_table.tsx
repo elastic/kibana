@@ -320,7 +320,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
       items={annotations}
       columns={columns}
-      pagination={pageSizeOptions[0] > pagination!.totalItemCount ? undefined : pagination}
+      pagination={
+        pagination.pageSizeOptions![0] > pagination!.totalItemCount ? undefined : pagination
+      }
       sorting={sorting}
       onTableChange={onTableChange}
       hasActions={hasActions}
