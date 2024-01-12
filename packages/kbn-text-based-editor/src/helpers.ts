@@ -10,7 +10,12 @@ import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type {
+  DataViewsPublicPluginStart,
+  DataView,
+  DataViewSpec,
+} from '@kbn/data-views-plugin/public';
+
 import type { MapCache } from 'lodash';
 
 export type MonacoMessage = monaco.editor.IMarkerData;
@@ -211,3 +216,18 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
     }
   }
 };
+
+// Some applications need to have a dataview to work properly with ES|QL queries
+// This is a helper to create one. The id is constructed from the indexpattern.
+// As there are no runtime fields or field formatters or default time fields
+// the same adhoc dataview can be constructed/used. This comes with great advantages such
+// as solving the problem descibed here https://github.com/elastic/kibana/issues/168131
+export async function getESQLAdHocDataview(
+  indexPattern: string,
+  createDataView: (config: DataViewSpec) => Promise<DataView>
+) {
+  return await createDataView({
+    title: indexPattern,
+    id: `esql-${indexPattern}`,
+  });
+}
