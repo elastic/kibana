@@ -7,7 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useState } from 'react';
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -269,11 +269,6 @@ export const UnifiedHistogramLayout = ({
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const chartMemoized = useMemo(() => chart, [chart?.title, chart?.timeInterval, chart?.hidden]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const hitsMemoized = useMemo(() => hits, [hits?.status, hits?.total]);
-
   return (
     <>
       <InPortal node={topPanelNode}>
@@ -287,12 +282,12 @@ export const UnifiedHistogramLayout = ({
           timeRange={timeRange}
           relativeTimeRange={relativeTimeRange}
           request={request}
-          hits={hitsMemoized}
+          hits={hits}
           currentSuggestion={currentSuggestion}
           isChartLoading={isChartLoading}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
-          chart={chartMemoized}
+          chart={chart}
           breakdown={breakdown}
           renderCustomChartToggleActions={renderCustomChartToggleActions}
           appendHistogram={chartSpacer}
