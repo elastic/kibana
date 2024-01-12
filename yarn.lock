@@ -1628,29 +1628,29 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.20.0":
-  version "5.20.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.20.0.tgz#2a249df44caba0c8b6b5ce473b2a1c7b6158bfb8"
-  integrity sha512-vOUCczY7jOyXyaeduQud8ZBC3JpluZAzfwgGjJl3AgkUOU+v00aAmekwKscAFwdC1li4+03rM9hyc+hOgYuLPA==
+"@elastic/apm-rum-core@^5.21.0":
+  version "5.21.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.21.0.tgz#0dc214b2c829c80a2cd07d37a250c89761fe8386"
+  integrity sha512-O2Sq1CPq2baG3z2RGtgyG+Hybli3rwq4oMOCMvUSiTiMKBPY1dRCfuebs6KpZsk3euoqykN+oTp0DPKeOI+XIg==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-2.0.1.tgz#6fae27ba708b1d2550668eea36e7669736fded6e"
-  integrity sha512-UxoRhYctnxhX0f8eHxZtQonv/4Nq8wm+kl/LOrxecP+AcGwzeDfWWgzNiZNaKtVg0/3pp5NKSDIYBU5Fx27HCw==
+"@elastic/apm-rum-react@^2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-2.0.2.tgz#5f73d41d462941f4d073ffaa118723987379548b"
+  integrity sha512-m0l982fLiImSxtuy8kKVXTnNl5wSMG3/TD3QokFQiYnVap+wjEULVm1HbS+dE4hjh9eVqCkuBiPu450a8lUs8g==
   dependencies:
-    "@elastic/apm-rum" "^5.15.0"
+    "@elastic/apm-rum" "^5.16.0"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.15.0":
-  version "5.15.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.15.0.tgz#1c38d5868ed2d8787e57a15d18d678851e936658"
-  integrity sha512-5YEvt8MpWKL8fPh87NvSKt9RAejKhlTyFtEWREp037h5yOEjZ/YnnGUG8aqXcwtEBRzBbkbtQKacNgFdeWnBmg==
+"@elastic/apm-rum@^5.16.0":
+  version "5.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.16.0.tgz#bb9b00a866a48ec40c07ea742d241f835e8b5f9d"
+  integrity sha512-vNwRWDIccdu6iPDpCyrC3myRnpBzRH6wlAoOZjgSFJilQJMsymb8NzR1rkQmNEBca+frRuDCZabd+ylEZ47YBA==
   dependencies:
-    "@elastic/apm-rum-core" "^5.20.0"
+    "@elastic/apm-rum-core" "^5.21.0"
 
 "@elastic/app-search-javascript@^8.1.2":
   version "8.1.2"
@@ -1740,10 +1740,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@91.3.1":
-  version "91.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-91.3.1.tgz#2289b1683f0409c043150c39f5fb7233aa7beb16"
-  integrity sha512-zxnhBaAsykmDqjbZ3i++CFTyv2dKZSe3UUZKSgYj5MaMnbE86uzeWGjhp3gh1b+LxJZP2672MbNZ6qxVOh1vcQ==
+"@elastic/eui@92.0.0-backport.0":
+  version "92.0.0-backport.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-92.0.0-backport.0.tgz#201757bef89141dad6f8f719976fa2a0b52be86a"
+  integrity sha512-ZliSke0YehCbCuHvYkY0BIMg32QeqTMZy+qgGYsh+Bp0UZ4CZn9j5e7LWavfal3+t8HMFCHTk0RUFFXrcepplA==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -3200,10 +3200,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-shippers-gainsight@link:packages/analytics/shippers/gainsight":
-  version "0.0.0"
-  uid ""
-
 "@kbn/analytics@link:packages/kbn-analytics":
   version "0.0.0"
   uid ""
@@ -3365,10 +3361,6 @@
   uid ""
 
 "@kbn/cloud-full-story-plugin@link:x-pack/plugins/cloud_integrations/cloud_full_story":
-  version "0.0.0"
-  uid ""
-
-"@kbn/cloud-gainsight-plugin@link:x-pack/plugins/cloud_integrations/cloud_gain_sight":
   version "0.0.0"
   uid ""
 
@@ -5001,7 +4993,8 @@
   uid ""
 
 "@kbn/lens-inline-editing-example-plugin@link:x-pack/examples/lens_embeddable_inline_editing_example":
-  
+  version "0.0.0"
+  uid ""
 
 "@kbn/lens-plugin@link:x-pack/plugins/lens":
   version "0.0.0"
@@ -6196,6 +6189,10 @@
   uid ""
 
 "@kbn/telemetry-tools@link:packages/kbn-telemetry-tools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-eui-helpers@link:packages/kbn-test-eui-helpers":
   version "0.0.0"
   uid ""
 
@@ -11871,12 +11868,12 @@ axe-core@^4.8.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.8.2.tgz#2f6f3cde40935825cf4465e3c1c9e77b240ff6ae"
   integrity sha512-/dlp0fxyM3R8YW7MFzaHWXrf4zzbr0vaYb23VBFCl83R7nWNPg/yaQw2Dc8jzCMmDVLhSdzH8MjrsuIUuvX+6g==
 
-axios@^1.3.4, axios@^1.6.0, axios@^1.6.3:
-  version "1.6.3"
-  resolved "https://registry.npmjs.org/axios/-/axios-1.6.3.tgz#7f50f23b3aa246eff43c54834272346c396613f4"
-  integrity sha512-fWyNdeawGam70jXSVlKl+SUNVcL6j6W79CuSIPfi6HnDUmSCH6gyUys/HrqHeA/wU0Az41rRgean494d0Jb+ww==
+axios@^1.3.4, axios@^1.6.0, axios@^1.6.5:
+  version "1.6.5"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.5.tgz#2c090da14aeeab3770ad30c3a1461bc970fb0cd8"
+  integrity sha512-Ii012v05KEVuUoFWmMW/UQv9aRIc3ZwkWDcM+h5Il8izZCtRVpDUfwpoFf7eOtajT3QiGR4yDUx7lPqHJULgbg==
   dependencies:
-    follow-redirects "^1.15.0"
+    follow-redirects "^1.15.4"
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
@@ -17254,7 +17251,7 @@ folktale@2.3.2:
   resolved "https://registry.yarnpkg.com/folktale/-/folktale-2.3.2.tgz#38231b039e5ef36989920cbf805bf6b227bf4fd4"
   integrity sha512-+8GbtQBwEqutP0v3uajDDoN64K2ehmHd0cjlghhxh0WpcfPzAIjPA03e1VvHlxL02FVGR0A6lwXsNQKn3H1RNQ==
 
-follow-redirects@^1.0.0, follow-redirects@^1.15.0:
+follow-redirects@^1.0.0, follow-redirects@^1.15.4:
   version "1.15.4"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.4.tgz#cdc7d308bf6493126b17ea2191ea0ccf3e535adf"
   integrity sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==
@@ -27633,7 +27630,7 @@ sharp@0.32.1:
     tar-fs "^2.1.1"
     tunnel-agent "^0.6.0"
 
-sharp@^0.32.6:
+sharp@0.32.6, sharp@^0.32.6:
   version "0.32.6"
   resolved "https://registry.yarnpkg.com/sharp/-/sharp-0.32.6.tgz#6ad30c0b7cd910df65d5f355f774aa4fce45732a"
   integrity sha512-KyLTWwgcR9Oe4d9HwCwNM2l7+J0dUQwn/yf7S0EnTtb0eVS4RxO0eUSvxPtzT4F3SY+C4K6fqdv/DO27sJ/v/w==
