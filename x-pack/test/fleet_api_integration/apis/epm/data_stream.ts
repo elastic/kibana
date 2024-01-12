@@ -41,43 +41,46 @@ export default function (providerContext: FtrProviderContext) {
       skipIfNoDockerRegistry(providerContext);
       setupFleetAndAgents(providerContext);
 
+      const writeMetricsDoc = (namespace: string) =>
+        es.transport.request(
+          {
+            method: 'POST',
+            path: `/${metricsTemplateName}-${namespace}/_doc?refresh=true`,
+            body: {
+              '@timestamp': '2015-01-01',
+              logs_test_name: 'test',
+              data_stream: {
+                dataset: `${pkgName}.test_metrics`,
+                namespace,
+                type: 'metrics',
+              },
+            },
+          },
+          { meta: true }
+        );
+
+      const writeLogsDoc = (namespace: string) =>
+        es.transport.request(
+          {
+            method: 'POST',
+            path: `/${logsTemplateName}-${namespace}/_doc?refresh=true`,
+            body: {
+              '@timestamp': '2015-01-01',
+              logs_test_name: 'test',
+              data_stream: {
+                dataset: `${pkgName}.test_logs`,
+                namespace,
+                type: 'logs',
+              },
+            },
+          },
+          { meta: true }
+        );
       beforeEach(async () => {
         await installPackage(pkgName, pkgVersion);
         await Promise.all(
           namespaces.map(async (namespace) => {
-            const createLogsRequest = es.transport.request(
-              {
-                method: 'POST',
-                path: `/${logsTemplateName}-${namespace}/_doc`,
-                body: {
-                  '@timestamp': '2015-01-01',
-                  logs_test_name: 'test',
-                  data_stream: {
-                    dataset: `${pkgName}.test_logs`,
-                    namespace,
-                    type: 'logs',
-                  },
-                },
-              },
-              { meta: true }
-            );
-            const createMetricsRequest = es.transport.request(
-              {
-                method: 'POST',
-                path: `/${metricsTemplateName}-${namespace}/_doc`,
-                body: {
-                  '@timestamp': '2015-01-01',
-                  logs_test_name: 'test',
-                  data_stream: {
-                    dataset: `${pkgName}.test_metrics`,
-                    namespace,
-                    type: 'metrics',
-                  },
-                },
-              },
-              { meta: true }
-            );
-            return Promise.all([createLogsRequest, createMetricsRequest]);
+            return Promise.all([writeLogsDoc(namespace), writeMetricsDoc(namespace)]);
           })
         );
       });
@@ -267,6 +270,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           // Datastream should have been rolled over
+          await writeLogsDoc('default');
           expect(await getLogsDefaultBackingIndicesLength()).to.be(2);
         });
 
