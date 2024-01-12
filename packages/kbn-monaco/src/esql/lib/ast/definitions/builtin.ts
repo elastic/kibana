@@ -184,6 +184,13 @@ export const builtinFunctions: FunctionDefinition[] = [
     },
   ].map((op) => createComparisonDefinition(op)),
   ...[
+    // new special comparison operator for strings only
+    {
+      name: '=~',
+      description: i18n.translate('monaco.esql.definition.equalToCaseInsensitiveDoc', {
+        defaultMessage: 'Case insensitive equality',
+      }),
+    },
     {
       name: 'like',
       description: i18n.translate('monaco.esql.definition.likeDoc', {
