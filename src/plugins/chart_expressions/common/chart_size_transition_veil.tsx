@@ -24,7 +24,9 @@ import type { ChartSizeSpec } from './types';
  */
 export function useSizeTransitionVeil(
   chartSizeSpec: ChartSizeSpec,
-  setChartSize: (d: ChartSizeSpec) => void
+  setChartSize: (d: ChartSizeSpec) => void,
+  // should be retrieved from handlers.shouldUseSizeTransitionVeil function
+  shouldUseVeil: boolean
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const containerSize = useResizeObserver(containerRef.current);
@@ -82,7 +84,7 @@ export function useSizeTransitionVeil(
           backgroundColor: euiThemeVars.euiColorEmptyShade,
           position: 'absolute',
           zIndex: 1,
-          display: showVeil ? 'block' : 'none',
+          display: shouldUseVeil && showVeil ? 'block' : 'none',
         }}
       />
     ),

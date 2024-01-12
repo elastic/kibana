@@ -182,6 +182,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     chartsThemeService,
     renderComplete,
     overrides,
+    shouldUseVeil,
     setChartSize,
   }) => {
     const {
@@ -272,7 +273,11 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       },
     };
 
-    const { veil, onResize, containerRef } = useSizeTransitionVeil(chartSizeSpec, setChartSize);
+    const { veil, onResize, containerRef } = useSizeTransitionVeil(
+      chartSizeSpec,
+      setChartSize,
+      shouldUseVeil
+    );
 
     const table = data;
     const accessors = getAccessorsFromArgs(args, table.columns);

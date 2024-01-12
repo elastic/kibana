@@ -23,5 +23,6 @@ export type GaugeRenderProps = GaugeExpressionProps & {
   renderComplete: () => void;
   uiState: PersistedState;
   overrides?: AllowedGaugeOverrides & AllowedSettingsOverrides & AllowedChartOverrides;
+  shouldUseVeil: boolean;
   setChartSize: (d: ChartSizeSpec) => void;
 };

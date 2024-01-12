@@ -90,6 +90,7 @@ export const gaugeRenderer: (
             chartsThemeService={plugins.charts.theme}
             paletteService={getPaletteService()}
             renderComplete={renderComplete}
+            shouldUseVeil={handlers.shouldUseSizeTransitionVeil()}
             uiState={handlers.uiState as PersistedState}
           />
         </div>

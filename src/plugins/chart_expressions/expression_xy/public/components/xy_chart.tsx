@@ -148,6 +148,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   syncCursor: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
+  shouldUseVeil: boolean;
   uiState?: PersistedState;
   timeFormat: string;
   setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
@@ -210,8 +211,11 @@ export function XYChart({
   syncColors,
   syncTooltips,
   syncCursor,
+  shouldUseVeil,
+
   useLegacyTimeAxis,
   renderComplete,
+
   uiState,
   timeFormat,
   overrides,
@@ -322,7 +326,11 @@ export function XYChart({
           },
         };
 
-  const { veil, onResize, containerRef } = useSizeTransitionVeil(chartSizeSpec, setChartSize);
+  const { veil, onResize, containerRef } = useSizeTransitionVeil(
+    chartSizeSpec,
+    setChartSize,
+    shouldUseVeil
+  );
 
   const formattedDatatables = useMemo(
     () =>

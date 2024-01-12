@@ -103,6 +103,7 @@ describe('GaugeComponent', function () {
       uiState,
       renderComplete: jest.fn(),
       setChartSize: jest.fn(),
+      shouldUseVeil: false,
     };
   });
 
