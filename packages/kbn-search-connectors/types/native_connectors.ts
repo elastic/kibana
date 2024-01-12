@@ -733,7 +733,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 4,
         required: true,
         sensitive: false,
-        tooltip: null,
+        tooltip: i18n.translate('searchConnectors.nativeConnectors.github.repo_type', {
+          defaultMessage: 'The Document Level Security feature is not available for the Other Repository Type',
+        }),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
@@ -854,7 +856,13 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 11,
         required: true,
         sensitive: false,
-        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.github.configuration.useDocumentLevelSecurityTooltip',
+          {
+            defaultMessage:
+              'Document level security ensures identities and permissions set in GitHub are maintained in Elasticsearch. This enables you to restrict and personalize read-access users and groups have to documents in this index. Access control syncs ensure this metadata is kept up to date in your Elasticsearch documents.',
+          }
+        ),
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
