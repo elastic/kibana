@@ -27,7 +27,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    */
   constructor(http: HttpSetup) {
     this.http = http;
-    }
+  }
 
   private _request<T = unknown>(url: string, query?: {}, body?: string): Promise<T | undefined> {
     const request = body
