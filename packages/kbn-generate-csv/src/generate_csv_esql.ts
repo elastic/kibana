@@ -101,12 +101,18 @@ export class CsvESQLGenerator {
     };
 
     try {
+      const abortController = new AbortController();
+      this.cancellationToken.on(() => abortController.abort());
       const { rawResponse, warning } = await lastValueFrom(
         this.clients.data.search<
           IKibanaSearchRequest<ESQLSearchParams>,
           IKibanaSearchResponse<ESQLSearchReponse>
         >(searchParams, {
           strategy: ESQL_SEARCH_STRATEGY,
+          abortSignal: abortController.signal,
+          transport: {
+            requestTimeout: settings.scroll.duration,
+          },
         })
       );
 

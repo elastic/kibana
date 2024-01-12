@@ -294,7 +294,13 @@ describe('CsvESQLGenerator', () => {
             query: '',
           },
         },
-        { strategy: 'esql' }
+        {
+          strategy: 'esql',
+          transport: {
+            requestTimeout: '30s',
+          },
+          abortSignal: expect.any(AbortSignal),
+        }
       );
     });
   });
