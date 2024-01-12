@@ -530,7 +530,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should not include a migration on SO.
          */
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           { field_names: ['client.address', 'agent.name'] },
           es,
@@ -633,7 +633,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         } = await getRuleSOById(es, ruleWithLegacyField.id);
 
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(ruleSO, {
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(ruleSO, {
           field_names: ['client.address', 'agent.name'],
         });
 
@@ -697,7 +697,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * happening just on the response. In this case, change should not include a migration on SO.
          */
         const isInvestigationFieldForRuleWithLegacyFieldMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             {
               field_names: ['client.address', 'agent.name'],
@@ -708,7 +708,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(isInvestigationFieldForRuleWithLegacyFieldMigratedInSo).to.eql(false);
 
         const isInvestigationFieldForRuleWithEmptyArraydMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             {
               field_names: [],
@@ -719,7 +719,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(isInvestigationFieldForRuleWithEmptyArraydMigratedInSo).to.eql(false);
 
         const isInvestigationFieldForRuleWithIntendedTypeMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             { field_names: ['host.name'] },
             es,
@@ -777,7 +777,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * rules should NOT have migrated value on write.
          */
         const isInvestigationFieldForRuleWithLegacyFieldMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             { field_names: ['client.address', 'agent.name'] },
             es,
@@ -786,11 +786,16 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(isInvestigationFieldForRuleWithLegacyFieldMigratedInSo).to.eql(false);
 
         const isInvestigationFieldForRuleWithEmptyArrayMigratedInSo =
-          checkInvestigationFieldSoValue(undefined, { field_names: [] }, es, ruleWithEmptyArray.id);
+          await checkInvestigationFieldSoValue(
+            undefined,
+            { field_names: [] },
+            es,
+            ruleWithEmptyArray.id
+          );
         expect(isInvestigationFieldForRuleWithEmptyArrayMigratedInSo).to.eql(false);
 
         const isInvestigationFieldForRuleWithIntendedTypeMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             { field_names: ['host.name'] },
             es,
@@ -808,7 +813,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * rules selected to be duplicated should not be migrated.
          */
         const isInvestigationFieldForOriginalRuleWithLegacyFieldMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             { field_names: ['client.address', 'agent.name'] },
             es,
@@ -817,7 +822,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(isInvestigationFieldForOriginalRuleWithLegacyFieldMigratedInSo).to.eql(false);
 
         const isInvestigationFieldForOriginalRuleWithEmptyArrayMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             { field_names: [] },
             es,
@@ -826,7 +831,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(isInvestigationFieldForOriginalRuleWithEmptyArrayMigratedInSo).to.eql(false);
 
         const isInvestigationFieldForOriginalRuleWithIntendedTypeMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             { field_names: ['host.name'] },
             es,
@@ -885,7 +890,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * happening just on the response. In this case, change should not include a migration on SO.
          */
         const isInvestigationFieldForRuleWithLegacyFieldMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             { field_names: ['client.address', 'agent.name'] },
             es,
@@ -894,7 +899,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(isInvestigationFieldForRuleWithLegacyFieldMigratedInSo).to.eql(false);
 
         const isInvestigationFieldForRuleWithEmptyArrayFieldMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             { field_names: [] },
             es,
@@ -903,7 +908,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(isInvestigationFieldForRuleWithEmptyArrayFieldMigratedInSo).to.eql(false);
 
         const isInvestigationFieldForRuleWithIntendedTypeMigratedInSo =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             { field_names: ['host.name'] },
             es,

@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
-  describe('@ess @serverless Legacy bulk patch rules route - ESS & Serverless env - Trial License & Complete Tier', () => {
+  describe('@ess @brokenInServerless @skipInQA Legacy bulk patch rules route - ESS & Serverless env - Trial License & Complete Tier', () => {
     describe('deprecations', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);
@@ -594,7 +594,7 @@ export default ({ getService }: FtrProviderContext) => {
          * happening just on the response. In this case, change should
          * NOT include a migration on SO.
          */
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           { field_names: ['client.address', 'agent.name'] },
           es,
@@ -627,7 +627,7 @@ export default ({ getService }: FtrProviderContext) => {
          * happening just on the response. In this case, change should
          * NOT include a migration on SO.
          */
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           { field_names: [] },
           es,

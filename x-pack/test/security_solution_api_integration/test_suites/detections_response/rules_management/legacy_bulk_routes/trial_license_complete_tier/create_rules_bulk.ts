@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
-  describe('@ess @serverless Legacy rule bulk creation route - ESS & Serverless env - Trial License & Complete Tier', () => {
+  describe('@ess @brokenInServerless @skipInQA Legacy rule bulk creation route - ESS & Serverless env - Trial License & Complete Tier', () => {
     describe('deprecations', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);

@@ -164,7 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
          * happening just on the response. In this case, change should
          * just be a transform on read, not a migration on SO.
          */
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           {
             field_names: ['client.address', 'agent.name'],
@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
          * happening just on the response. In this case, change should
          * just be a transform on read, not a migration on SO.
          */
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           {
             field_names: [],
@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext) => {
          * happening just on the response. In this case, change should
          * just be a transform on read, not a migration on SO.
          */
-        const isInvestigationFieldIntendedTypeInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldIntendedTypeInSo = await checkInvestigationFieldSoValue(
           undefined,
           { field_names: ['host.name'] },
           es,

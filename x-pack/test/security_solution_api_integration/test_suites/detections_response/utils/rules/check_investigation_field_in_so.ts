@@ -6,15 +6,23 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { SavedObjectReference } from '@kbn/core/server';
 import { InvestigationFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { getRuleSOById } from './get_rule_so_by_id';
+
+interface RuleSO {
+  alert: Rule<BaseRuleParams>;
+  references: SavedObjectReference[];
+}
 
 export const checkInvestigationFieldSoValue = async (
   ruleSO: RuleSO | undefined,
   expectedSoValue: undefined | InvestigationFields,
   es?: Client,
   ruleId?: string
-) => {
+): Promise<boolean> => {
   if (!ruleSO && es && ruleId) {
     const {
       hits: {

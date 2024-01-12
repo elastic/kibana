@@ -315,7 +315,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * happening just on the response. In this case, change should
          * include a migration on SO.
          */
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           { field_names: ['foo', 'bar'] },
           es,
@@ -351,7 +351,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * happening just on the response. In this case, change should
          * include a migration on SO.
          */
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           undefined,
           es,
@@ -385,7 +385,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * happening just on the response. In this case, change should
          * include a migration on SO.
          */
-        const isInvestigationFieldIntendedTypeInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldIntendedTypeInSo = await checkInvestigationFieldSoValue(
           undefined,
           { field_names: ['foo'] },
           es,
