@@ -181,7 +181,6 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
@@ -190,7 +189,7 @@ describe('Text based languages utils', () => {
         indexPatternRefs: [],
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'from foo' },
           fieldName: '',
           dataViewSpec: {
             title: 'foo',
@@ -204,7 +203,7 @@ describe('Text based languages utils', () => {
       const expressionsMock = expressionsPluginMock.createStartContract();
       const updatedState = await getStateFromAggregateQuery(
         state,
-        { sql: 'SELECT * FROM my-fake-index-pattern' },
+        { esql: 'FROM my-fake-index-pattern' },
         {
           ...dataViewsMock,
           getIdsWithTitle: jest.fn().mockReturnValue(
@@ -238,7 +237,7 @@ describe('Text based languages utils', () => {
       expect(updatedState).toStrictEqual({
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'from foo' },
           fieldName: '',
           dataViewSpec: {
             title: 'foo',
@@ -270,34 +269,11 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: '4',
             query: {
-              sql: 'SELECT * FROM my-fake-index-pattern',
+              esql: 'FROM my-fake-index-pattern',
             },
             timeField: 'timeField',
           },
@@ -309,7 +285,6 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
-            allColumns: [],
             columns: [],
             query: undefined,
             index: '',
@@ -318,7 +293,7 @@ describe('Text based languages utils', () => {
         indexPatternRefs: [],
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'from foo' },
           fieldName: '',
           dataViewSpec: {
             title: 'foo',
@@ -332,7 +307,7 @@ describe('Text based languages utils', () => {
       const expressionsMock = expressionsPluginMock.createStartContract();
       const updatedState = await getStateFromAggregateQuery(
         state,
-        { sql: 'SELECT * FROM my-fake-index-*' },
+        { esql: 'FROM my-fake-index-*' },
         {
           ...dataViewsMock,
           getIdsWithTitle: jest.fn().mockReturnValue(
@@ -371,7 +346,7 @@ describe('Text based languages utils', () => {
       expect(updatedState).toStrictEqual({
         initialContext: {
           textBasedColumns: textBasedQueryColumns,
-          query: { sql: 'SELECT * FROM "foo"' },
+          query: { esql: 'from foo' },
           fieldName: '',
           dataViewSpec: {
             title: 'foo',
@@ -403,34 +378,11 @@ describe('Text based languages utils', () => {
         ],
         layers: {
           first: {
-            allColumns: [
-              {
-                fieldName: 'timestamp',
-                columnId: 'timestamp',
-                meta: {
-                  type: 'date',
-                },
-              },
-              {
-                fieldName: 'bytes',
-                columnId: 'bytes',
-                meta: {
-                  type: 'number',
-                },
-              },
-              {
-                fieldName: 'memory',
-                columnId: 'memory',
-                meta: {
-                  type: 'number',
-                },
-              },
-            ],
             columns: [],
             errors: [],
             index: 'adHoc-id',
             query: {
-              sql: 'SELECT * FROM my-fake-index-*',
+              esql: 'FROM my-fake-index-*',
             },
             timeField: '@timestamp',
           },
