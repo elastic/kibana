@@ -290,7 +290,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.apmEnableTableSearchBar', {
       defaultMessage: 'Instant table search',
     }),
-    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
+    description: i18n.translate('xpack.observability.apmEnableTableSearchBarDescription', {
       defaultMessage:
         '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions and Errors',
       values: {
