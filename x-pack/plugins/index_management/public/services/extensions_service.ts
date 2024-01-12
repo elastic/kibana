@@ -44,6 +44,8 @@ export interface ExtensionsSetup {
   addBadge(badge: IndexBadge): void;
   // adds a toggle to the indices list
   addToggle(toggle: any): void;
+  // column to display additional data added via a data enricher
+  addColumn(column: any): void;
   // set the content to render when the indices list is empty
   setEmptyListContent(content: EmptyListContent): void;
   // adds a tab to the index details page
@@ -71,6 +73,7 @@ export class ExtensionsService {
     },
   ];
   private _toggles: any[] = [];
+  private _columns: any[] = [];
   private _emptyListContent: EmptyListContent | null = null;
   private _indexDetailsTabs: IndexDetailsTab[] = [];
   private _indexOverviewContent: IndexContent | null = null;
@@ -84,6 +87,7 @@ export class ExtensionsService {
       addBanner: this.addBanner.bind(this),
       addFilter: this.addFilter.bind(this),
       addToggle: this.addToggle.bind(this),
+      addColumn: this.addColumn.bind(this),
       setEmptyListContent: this.setEmptyListContent.bind(this),
       addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
       setIndexOverviewContent: this.setIndexOverviewContent.bind(this),
@@ -111,6 +115,10 @@ export class ExtensionsService {
 
   private addToggle(toggle: any) {
     this._toggles.push(toggle);
+  }
+
+  private addColumn(column: any) {
+    this._columns.push(column);
   }
 
   private setEmptyListContent(content: EmptyListContent) {
@@ -159,6 +167,10 @@ export class ExtensionsService {
 
   public get toggles() {
     return this._toggles;
+  }
+
+  public get columns() {
+    return this._columns;
   }
 
   public get emptyListContent() {
