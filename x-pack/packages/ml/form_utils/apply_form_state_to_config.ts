@@ -7,12 +7,9 @@
 
 import { merge } from 'lodash';
 
-import type { PostTransformsUpdateRequestSchema } from '../../../../../common/api_schemas/update_transforms';
-import type { TransformConfigUnion } from '../../../../../common/types/transform';
-
 import { getUpdateValue } from './get_update_value';
 
-import type { FormFields, FormFieldsState } from './form_field';
+import type { FormFieldsState } from './form_field';
 import type { FormSectionsState } from './form_section';
 
 // Takes in the form configuration and returns a request object suitable to be sent to the
@@ -23,15 +20,21 @@ import type { FormSectionsState } from './form_section';
 // The code is also able to identify relationships/dependencies between form fields.
 // For example, if the `pipeline` field was changed, it's necessary to make the `index`
 // field part of the request, otherwise the update would fail.
-export const applyFormStateToTransformConfig = (
-  config: TransformConfigUnion,
-  formFields: FormFieldsState,
-  formSections: FormSectionsState
-): PostTransformsUpdateRequestSchema =>
+export const applyFormStateToConfig = <
+  FF extends string,
+  FS extends string,
+  VN extends string,
+  C,
+  RC extends any
+>(
+  config: C,
+  formFields: FormFieldsState<FF, FS, VN>,
+  formSections: FormSectionsState<FS>
+) =>
   // Iterates over all form fields and only if necessary applies them to
   // the request object used for updating the transform.
-  (Object.keys(formFields) as FormFields[]).reduce(
+  (Object.keys(formFields) as FF[]).reduce(
     (updateConfig, field) =>
       merge({ ...updateConfig }, getUpdateValue(field, config, formFields, formSections)),
     {}
-  );
+  ) as RC;

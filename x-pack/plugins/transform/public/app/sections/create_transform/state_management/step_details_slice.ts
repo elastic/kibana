@@ -7,21 +7,36 @@
 
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import type { TransformId } from '../../../../../common/types/transform';
-import type { EsIndexName } from '../components/step_details/common';
+import { getFormActions } from '@kbn/ml-form-utils/redux_actions';
 
-import { getDefaultStepDetailsState, type StepDetailsState } from '../components/step_details';
+import type { TransformId } from '../../../../../common/types/transform';
+
+import { validators, type ValidatorName } from '../../edit_transform/state_management/validators';
+
+import type { EsIndexName } from '../components/step_details/common';
+import {
+  getDefaultStepDetailsState,
+  type StepDetailsState,
+  type StepDetailsFormFields,
+  type StepDetailsFormSections,
+} from '../components/step_details';
+
+const { setFormField, setFormSection } = getFormActions<
+  StepDetailsFormFields,
+  StepDetailsFormSections,
+  ValidatorName,
+  StepDetailsState
+>(validators);
 
 export const stepDetailsSlice = createSlice({
   name: 'stepDetails',
   initialState: getDefaultStepDetailsState(),
   reducers: {
     setStepDetailsState: (_, action: PayloadAction<StepDetailsState>) => action.payload,
+    setFormField,
+    setFormSection,
     setTransformId: (state, action: PayloadAction<TransformId>) => {
       state.transformId = action.payload;
-    },
-    setTransformDescription: (state, action: PayloadAction<string>) => {
-      state.transformDescription = action.payload;
     },
     setDestinationIndex: (state, action: PayloadAction<EsIndexName>) => {
       state.destinationIndex = action.payload;

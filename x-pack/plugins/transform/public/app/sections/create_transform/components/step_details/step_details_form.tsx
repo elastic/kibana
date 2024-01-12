@@ -70,7 +70,7 @@ export const StepDetailsForm: FC = () => {
   const { esIndicesCreateIndex } = useDocumentationLinks();
 
   const transformId = useWizardSelector((s) => s.stepDetails.transformId);
-  const transformDescription = useWizardSelector((s) => s.stepDetails.transformDescription);
+  const transformDescription = useWizardSelector((s) => s.stepDetails.formFields.description.value);
   const destinationIndex = useWizardSelector((s) => s.stepDetails.destinationIndex);
   const destinationIngestPipeline = useWizardSelector(
     (s) => s.stepDetails.destinationIngestPipeline
@@ -91,8 +91,8 @@ export const StepDetailsForm: FC = () => {
     (s) => s.stepDetails.transformSettingsNumFailureRetries
   );
   const {
+    setFormField,
     setTransformId,
-    setTransformDescription,
     setDataViewTimeField,
     setDestinationIndex,
     setDestinationIngestPipeline,
@@ -400,7 +400,7 @@ export const StepDetailsForm: FC = () => {
               { defaultMessage: 'Description (optional)' }
             )}
             value={transformDescription}
-            onChange={(e) => setTransformDescription(e.target.value)}
+            onChange={(e) => setFormField({ field: 'description', value: e.target.value })}
             aria-label={i18n.translate(
               'xpack.transform.stepDetailsForm.transformDescriptionInputAriaLabel',
               {

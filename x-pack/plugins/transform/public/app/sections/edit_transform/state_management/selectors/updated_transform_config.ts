@@ -9,17 +9,17 @@ import { useMemo } from 'react';
 import { createSelector } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 
-import { TransformConfigUnion } from '../../../../../../common/types/transform';
+import { applyFormStateToConfig } from '@kbn/ml-form-utils/apply_form_state_to_config';
+import { selectFormFields } from '@kbn/ml-form-utils/form_field';
+import { selectFormSections } from '@kbn/ml-form-utils/form_section';
 
-import { applyFormStateToTransformConfig } from '../apply_form_state_to_transform_config';
+import type { TransformConfigUnion } from '../../../../../../common/types/transform';
+
 import { useEditTransformFlyoutContext } from '../edit_transform_flyout_state';
-
-import { selectFormFields } from './form_field';
-import { selectFormSections } from './form_sections';
 
 const createSelectTransformConfig = (originalConfig: TransformConfigUnion) =>
   createSelector(selectFormFields, selectFormSections, (formFields, formSections) =>
-    applyFormStateToTransformConfig(originalConfig, formFields, formSections)
+    applyFormStateToConfig(originalConfig, formFields, formSections)
   );
 
 export const useUpdatedTransformConfig = () => {

@@ -6,17 +6,27 @@
  */
 
 import { useMemo } from 'react';
-
 import { useSelector } from 'react-redux';
 
-import type { State } from '../edit_transform_flyout_state';
+import type { State } from './redux_actions';
 
-import type { FormFields } from '../form_field';
+export const selectFormFields = <
+  FF extends string,
+  FS extends string,
+  VN extends string,
+  S extends State<FF, FS, VN>
+>(
+  s: S
+) => s.formFields;
 
-export const selectFormFields = (s: State) => s.formFields;
+const createSelectFormField =
+  <FF extends string, FS extends string, VN extends string, S extends State<FF, FS, VN>>(
+    field: FF
+  ) =>
+  (s: S) =>
+    s.formFields[field];
 
-const createSelectFormField = (field: FormFields) => (s: State) => s.formFields[field];
-export const useFormField = (field: FormFields) => {
+export const useFormField = <FF extends string>(field: FF) => {
   const selectFormField = useMemo(() => createSelectFormField(field), [field]);
   return useSelector(selectFormField);
 };

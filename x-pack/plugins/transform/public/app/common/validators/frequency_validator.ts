@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { frequencyNotValidErrorMessage } from './messages';
+import type { Validator } from '@kbn/ml-form-utils/validator';
 
+import { frequencyNotValidErrorMessage } from './messages';
 import { parseDurationAboveZero } from './parse_duration_above_zero';
 import { isValidFrequency } from './is_valid_frequency';
-import type { Validator } from './types';
 
 // Only allow frequencies in the form of 1s/1h etc.
 export const frequencyValidator: Validator = (arg) => {

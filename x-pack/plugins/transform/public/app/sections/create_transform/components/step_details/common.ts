@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { initializeFormField, type FormFieldsState } from '@kbn/ml-form-utils/form_field';
+import { initializeFormSection, type FormSectionsState } from '@kbn/ml-form-utils/form_section';
+
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
   DEFAULT_TRANSFORM_FREQUENCY,
@@ -13,9 +16,14 @@ import {
 } from '../../../../../../common/constants';
 import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
 
+import type { ValidatorName } from '../../../edit_transform/state_management/validators';
+
 export type EsIndexName = string;
 export type EsIngestPipelineName = string;
 export type DataViewTitle = string;
+
+export type StepDetailsFormFields = 'description';
+export type StepDetailsFormSections = 'n/a';
 
 export interface StepDetailsState {
   continuousModeDateField: string;
@@ -28,7 +36,6 @@ export interface StepDetailsState {
   retentionPolicyDateField: string;
   retentionPolicyMaxAge: string;
   transformId: TransformId;
-  transformDescription: string;
   transformFrequency: string;
   transformSettingsMaxPageSearchSize?: number;
   transformSettingsDocsPerSecond: number | null;
@@ -36,6 +43,9 @@ export interface StepDetailsState {
   valid: boolean;
   dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;
+  apiErrorMessage?: string;
+  formFields: FormFieldsState<StepDetailsFormFields, StepDetailsFormSections, ValidatorName>;
+  formSections: FormSectionsState<StepDetailsFormSections>;
 }
 
 export function getDefaultStepDetailsState(): StepDetailsState {
@@ -48,7 +58,6 @@ export function getDefaultStepDetailsState(): StepDetailsState {
     retentionPolicyDateField: '',
     retentionPolicyMaxAge: '',
     transformId: '',
-    transformDescription: '',
     transformFrequency: DEFAULT_TRANSFORM_FREQUENCY,
     transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
@@ -57,6 +66,10 @@ export function getDefaultStepDetailsState(): StepDetailsState {
     destinationIngestPipeline: '',
     valid: false,
     dataViewTimeField: undefined,
+    formFields: { description: initializeFormField('description', 'description') },
+    formSections: {
+      'n/a': initializeFormSection('n/a', 'n/a'),
+    },
   };
 }
 
@@ -76,7 +89,7 @@ export function applyTransformConfigToDetailsState(
 
     // Description
     if (transformConfig.description !== undefined) {
-      state.transformDescription = transformConfig.description;
+      state.formFields.description.value = transformConfig.description;
     }
 
     // Ingest Pipeline
