@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const TIMELINE = i18n.translate('xpack.securitySolution.flyout.button.timeline', {
-  defaultMessage: 'timeline',
-});
+export const HOST_PANEL_HEADER = getDataTestSubjectSelector('host-panel-header');

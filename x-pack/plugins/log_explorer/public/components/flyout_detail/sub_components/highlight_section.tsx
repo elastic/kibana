@@ -15,7 +15,7 @@ import {
   useGeneratedHtmlId,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { flyoutAccordionShowMoreText } from '../translations';
+import { flyoutAccordionShowMoreText } from '../../common/translations';
 
 interface HighlightSectionProps {
   title: string;
