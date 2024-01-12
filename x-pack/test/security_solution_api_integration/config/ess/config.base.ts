@@ -51,7 +51,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
       servers,
       services,
       junit: {
-        reportName: 'X-Pack Detection Engine API Integration Tests',
+        reportName: 'X-Pack Security Solution API Integration Tests',
       },
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
