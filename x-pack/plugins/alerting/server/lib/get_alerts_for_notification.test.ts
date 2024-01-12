@@ -35,6 +35,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "1": Object {
           "meta": Object {
+            "activeCount": 1,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -49,6 +50,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "1": Object {
           "meta": Object {
+            "activeCount": 1,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -59,6 +61,7 @@ describe('getAlertsForNotification', () => {
         },
         "2": Object {
           "meta": Object {
+            "activeCount": 1,
             "flapping": false,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -105,6 +108,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "3": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -129,6 +133,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "3": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -141,18 +146,19 @@ describe('getAlertsForNotification', () => {
     `);
     expect(Object.values(currentActiveAlerts).map((a) => a.getScheduledActionOptions()))
       .toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "actionGroup": "default",
-              "context": Object {},
-              "state": Object {},
-            },
-          ]
-      `);
+      Array [
+        Object {
+          "actionGroup": "default",
+          "context": Object {},
+          "state": Object {},
+        },
+      ]
+  `);
     expect(alertsWithAnyUUID(recoveredAlerts)).toMatchInlineSnapshot(`
       Object {
         "1": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -163,6 +169,7 @@ describe('getAlertsForNotification', () => {
         },
         "2": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": false,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -176,6 +183,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "1": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -186,6 +194,7 @@ describe('getAlertsForNotification', () => {
         },
         "2": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": false,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -233,6 +242,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "1": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [
               true,
@@ -247,6 +257,7 @@ describe('getAlertsForNotification', () => {
         },
         "2": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": false,
             "flappingHistory": Array [
               true,
@@ -261,6 +272,7 @@ describe('getAlertsForNotification', () => {
         },
         "3": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [
               true,
@@ -279,6 +291,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "1": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [
               true,
@@ -293,6 +306,7 @@ describe('getAlertsForNotification', () => {
         },
         "2": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": false,
             "flappingHistory": Array [
               true,
@@ -307,6 +321,7 @@ describe('getAlertsForNotification', () => {
         },
         "3": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [
               true,
@@ -357,6 +372,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "3": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -385,6 +401,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "1": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -395,6 +412,7 @@ describe('getAlertsForNotification', () => {
         },
         "2": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": false,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -408,6 +426,7 @@ describe('getAlertsForNotification', () => {
       Object {
         "1": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": true,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],
@@ -418,6 +437,7 @@ describe('getAlertsForNotification', () => {
         },
         "2": Object {
           "meta": Object {
+            "activeCount": 0,
             "flapping": false,
             "flappingHistory": Array [],
             "maintenanceWindowIds": Array [],

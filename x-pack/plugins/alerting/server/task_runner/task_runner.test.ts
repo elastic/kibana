@@ -2954,6 +2954,7 @@ describe('Task Runner', () => {
               maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 0,
             },
             state: {
               duration: '0',
@@ -3124,6 +3125,7 @@ describe('Task Runner', () => {
               maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 0,
             },
             state: {
               duration: '0',
@@ -3141,6 +3143,7 @@ describe('Task Runner', () => {
               maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 0,
             },
             state: {
               duration: '0',

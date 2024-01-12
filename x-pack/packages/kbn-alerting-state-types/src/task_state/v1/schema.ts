@@ -33,11 +33,11 @@ export const metaSchema = schema.object({
   flapping: schema.maybe(schema.boolean()),
   maintenanceWindowIds: schema.maybe(schema.arrayOf(schema.string())),
   // count of consecutive recovered alerts for flapping
-  // will reset if the alert is active or if equal to the alert status change threshold
+  // will reset if the alert is active or if equal to the statusChangeThreshold stored in the rule settings
   pendingRecoveredCount: schema.maybe(schema.number()),
   uuid: schema.maybe(schema.string()),
   // count of consecutive active alerts
-  // will reset if the alert is recovered
+  // will reset if the alert is recovered or if equal to notificationDelay.active stored in the rule
   activeCount: schema.maybe(schema.number()),
 });
 
