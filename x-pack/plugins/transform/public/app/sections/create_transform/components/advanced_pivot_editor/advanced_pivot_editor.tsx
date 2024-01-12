@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, type FC } from 'react';
+import React, { useEffect, type FC } from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
 

@@ -21,7 +21,6 @@ import { useToastNotifications } from '../../../../app_dependencies';
 import { useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
-import { useLatestFunctionOptions } from '../step_define/hooks/use_latest_function_config';
 import { useWizardContext } from '../wizard/wizard';
 
 export const TransformConfigPreviewFormRow: FC = () => {
@@ -29,7 +28,6 @@ export const TransformConfigPreviewFormRow: FC = () => {
   const { dataView } = searchItems;
 
   const toastNotifications = useToastNotifications();
-  const latestFunctionOptions = useLatestFunctionOptions();
 
   const transformFunction = useWizardSelector((s) => s.stepDefine.transformFunction);
 

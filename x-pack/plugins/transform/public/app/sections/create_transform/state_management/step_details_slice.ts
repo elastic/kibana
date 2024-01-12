@@ -41,6 +41,9 @@ export const stepDetailsSlice = createSlice({
     setContinuousModeDelay: (state, action: PayloadAction<string>) => {
       state.continuousModeDelay = action.payload;
     },
+    setContinuousModeDateField: (state, action: PayloadAction<string>) => {
+      state.continuousModeDateField = action.payload;
+    },
     setRetentionPolicyEnabled: (state, action: PayloadAction<boolean>) => {
       state.isRetentionPolicyEnabled = action.payload;
     },

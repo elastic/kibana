@@ -80,6 +80,7 @@ export const StepDetailsForm: FC = () => {
   const dataViewTimeField = useWizardSelector((s) => s.stepDetails.dataViewTimeField);
   const isContinuousModeEnabled = useWizardSelector((s) => s.stepDetails.isContinuousModeEnabled);
   const continuousModeDelay = useWizardSelector((s) => s.stepDetails.continuousModeDelay);
+  const continuousModeDateField = useWizardSelector((s) => s.stepDetails.continuousModeDateField);
   const isRetentionPolicyEnabled = useWizardSelector((s) => s.stepDetails.isRetentionPolicyEnabled);
   const retentionPolicyDateField = useWizardSelector((s) => s.stepDetails.retentionPolicyDateField);
   const retentionPolicyMaxAge = useWizardSelector((s) => s.stepDetails.retentionPolicyMaxAge);
@@ -99,6 +100,7 @@ export const StepDetailsForm: FC = () => {
     setCreateDataView,
     setContinuousModeEnabled,
     setContinuousModeDelay,
+    setContinuousModeDateField,
     setRetentionPolicyEnabled,
     setRetentionPolicyDateField,
     setRetentionPolicyMaxAge,
@@ -264,10 +266,12 @@ export const StepDetailsForm: FC = () => {
 
   // Continuous Mode
   const isContinuousModeAvailable = sourceIndexDateFieldNames.length > 0;
-  const [continuousModeDateField, setContinuousModeDateField] = useState(
-    isContinuousModeAvailable ? sourceIndexDateFieldNames[0] : ''
-  );
   const isContinuousModeDelayValid = isContinuousModeDelay(continuousModeDelay);
+  useEffect(() => {
+    if (isContinuousModeAvailable) {
+      setContinuousModeDateField(sourceIndexDateFieldNames[0]);
+    }
+  }, []);
 
   // Retention Policy
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
