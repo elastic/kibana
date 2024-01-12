@@ -70,12 +70,20 @@ export const mergeCurrentSuggestionWithExternalCustomVisualization = ({
       {
         ...matchingVisualizationState,
         ...customVisualization.visualizationState,
+        layers: matchingVisualizationState.layers?.map((matchingVisLayer, index) => ({
+          ...matchingVisLayer,
+          ...(customVisualization.visualizationState?.layers?.[index] || {}),
+        })),
       },
       layerId
     );
 
     if (!areVisCompatible(matchingVisualizationState, customVisualizationState)) {
-      console.log('custom vis was incompatible with current suggest');
+      console.log(
+        'custom vis was incompatible with current suggestion',
+        matchingVisualizationState,
+        customVisualizationState
+      );
       return currentSuggestion;
     }
 
