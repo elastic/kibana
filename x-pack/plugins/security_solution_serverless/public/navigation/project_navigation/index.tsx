@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-
-const SecuritySideNavComponentLazy = React.lazy(() => import('./project_navigation'));
-
-export const SecuritySideNavComponent = () => (
-  <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-    <SecuritySideNavComponentLazy />
-  </Suspense>
-);
+export { init as initProjectNavigation } from './project_navigation';
