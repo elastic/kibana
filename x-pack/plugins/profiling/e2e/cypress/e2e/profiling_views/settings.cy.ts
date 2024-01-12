@@ -15,7 +15,6 @@ import {
   profilingDatacenterPUE,
   profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
-import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
 
 describe('Settings page', () => {
   beforeEach(() => {
@@ -46,13 +45,13 @@ describe('Settings page', () => {
     cy.visitKibana('/app/profiling/settings');
     cy.contains('Advanced Settings');
     cy.get('[data-test-subj="profilingBottomBarActions"]').should('not.exist');
-    cy.get(`[data-test-subj="${TEST_SUBJ_PREFIX_FIELD}-${profilingCo2PerKWH}"]`)
+    cy.get(`[data-test-subj="management-settings-editField-${profilingCo2PerKWH}"]`)
       .clear()
       .type('0.12345');
-    cy.get(`[data-test-subj="${TEST_SUBJ_PREFIX_FIELD}-${profilingDatacenterPUE}"]`)
+    cy.get(`[data-test-subj="management-settings-editField-${profilingDatacenterPUE}"]`)
       .clear()
       .type('2.4');
-    cy.get(`[data-test-subj="${TEST_SUBJ_PREFIX_FIELD}-${profilingPervCPUWattX86}"]`)
+    cy.get(`[data-test-subj="management-settings-editField-${profilingPervCPUWattX86}"]`)
       .clear()
       .type('20');
     cy.get('[data-test-subj="profilingBottomBarActions"]').should('exist');
