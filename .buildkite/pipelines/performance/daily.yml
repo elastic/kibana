@@ -2,21 +2,14 @@ steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
-      assignExternalIP: false
+      queue: kibana-default
 
   - wait
 
   - label: '🧑‍🏭 Build Kibana Distribution and Plugins'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: c2-standard-16
-      buildDirectory: /dev/shm/builds
-      assignExternalIP: false
+      queue: c2-16
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
@@ -39,11 +32,7 @@ steps:
   - label: '📈 Report performance metrics to ci-stats'
     command: .buildkite/scripts/steps/functional/report_performance_metrics.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      localSsds: 1
-      machineType: n2-standard-2
-      assignExternalIP: false
+      queue: n2-2
     depends_on: tests
 
   - wait: ~
@@ -52,7 +41,4 @@ steps:
   - label: '🦸 Post-Build'
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
-      assignExternalIP: false
+      queue: kibana-default

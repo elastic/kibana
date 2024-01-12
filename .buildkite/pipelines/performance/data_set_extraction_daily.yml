@@ -2,10 +2,7 @@ steps:
   - label: ':male-mechanic::skin-tone-2: Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
-      assignExternalIP: false
+      queue: kibana-default
     timeout_in_minutes: 10
 
   - wait
@@ -13,22 +10,14 @@ steps:
   - label: ':building_construction: Build Kibana Distribution and Plugins'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: c2-standard-16
-      buildDirectory: /dev/shm/builds
-      assignExternalIP: false
+      queue: c2-16
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
   - label: ':kibana: Performance Tests with Playwright config'
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
-      preemptible: true
-      assignExternalIP: false
+      queue: n2-2-spot
     depends_on: build
     key: tests
     timeout_in_minutes: 60
@@ -42,11 +31,7 @@ steps:
   - label: ':ship: Single user journeys dataset extraction for scalability benchmarking'
     command: .buildkite/scripts/steps/functional/scalability_dataset_extraction.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      localSsds: 1
-      machineType: n2-standard-2
-      assignExternalIP: false
+      queue: n2-2
     depends_on: tests
 
   - wait: ~
@@ -55,7 +40,4 @@ steps:
   - label: ':male_superhero::skin-tone-2: Post-Build'
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
-      assignExternalIP: false
+      queue: kibana-default

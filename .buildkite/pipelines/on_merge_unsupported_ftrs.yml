@@ -3,10 +3,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-2
-      assignExternalIP: false
+      queue: kibana-default
     retry:
       automatic:
         - exit_status: '*'
@@ -15,11 +12,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-16
-      preemptible: true
-      buildDirectory: /dev/shm/builds
+      queue: n2-16-spot
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
@@ -31,10 +24,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     label: 'APM Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
-      preemptible: true
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -47,10 +37,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/profiling_cypress.sh
     label: 'Profling Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
-      preemptible: true
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     retry:
@@ -63,10 +50,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      machineType: n2-standard-4
-      preemptible: true
+      queue: n2-4-spot
     depends_on: build
     timeout_in_minutes: 120
     artifact_paths:
@@ -81,12 +65,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      enableNestedVirtualization: true
-      localSsds: 1
-      machineType: n2-standard-4
-      assignExternalIP: false
+      queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 10
@@ -98,12 +77,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
-      enableNestedVirtualization: true
-      localSsds: 1
-      machineType: n2-standard-4
-      assignExternalIP: false
+      queue: n2-4-virt
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
