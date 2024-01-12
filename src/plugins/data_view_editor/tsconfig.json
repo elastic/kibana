@@ -19,6 +19,7 @@
     "@kbn/ui-theme",
     "@kbn/kibana-utils-plugin",
     "@kbn/react-kibana-mount",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",
