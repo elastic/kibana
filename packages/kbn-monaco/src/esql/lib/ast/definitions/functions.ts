@@ -483,45 +483,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    name: 'is_finite',
-    description: i18n.translate('monaco.esql.definitions.isFiniteDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is a finite number.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['from index | eval s = is_finite(field/0)'],
-      },
-    ],
-  },
-  {
-    name: 'is_infinite',
-    description: i18n.translate('monaco.esql.definitions.isInfiniteDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is infinite.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['from index | eval s = is_infinite(field/0)'],
-      },
-    ],
-  },
-  {
-    name: 'is_nan',
-    description: i18n.translate('monaco.esql.definitions.isNanDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is not a number.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['row a = 1 | eval is_nan(a)'],
-      },
-    ],
-  },
-  {
     name: 'case',
     description: i18n.translate('monaco.esql.definitions.caseDoc', {
       defaultMessage:
