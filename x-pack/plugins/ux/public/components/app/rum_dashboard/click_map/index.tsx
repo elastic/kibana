@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
+import { EmbeddedMap } from './map/image_map';
 import { useFetchClickData } from './use_fetch_click_data';
 import { MonitorSelector } from './monitor_selector';
 
@@ -66,6 +67,8 @@ export function ClickMap() {
           src={imageState.url}
           alt={'screenshot'}
         />
+
+        <EmbeddedMap />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
