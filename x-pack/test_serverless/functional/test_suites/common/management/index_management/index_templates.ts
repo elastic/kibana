@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
@@ -75,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Create index template', () => {
-      const TEST_TEMPLATE_NAME = `test_template_${Math.random()}`;
+      const TEST_TEMPLATE_NAME = `test_template_${Date.now()}`;
 
       after(async () => {
         await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE_NAME }, { ignore: [404] });

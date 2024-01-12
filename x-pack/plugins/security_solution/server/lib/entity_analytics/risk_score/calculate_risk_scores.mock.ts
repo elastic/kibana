@@ -23,7 +23,6 @@ const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): Ris
     value: {
       score: 20,
       normalized_score: 30.0,
-      level: 'Unknown',
       notes: [],
       category_1_score: 30,
       category_1_count: 1,
@@ -88,11 +87,15 @@ const buildResponseMock = (
         '@timestamp': '2021-08-19T20:55:59.000Z',
         id_field: 'host.name',
         id_value: 'hostname',
+        criticality_level: 'important',
+        criticality_modifier: 1.5,
         calculated_level: 'Unknown',
         calculated_score: 20,
         calculated_score_norm: 30,
         category_1_score: 30,
         category_1_count: 12,
+        category_2_score: 0,
+        category_2_count: 0,
         notes: [],
         inputs: [
           {
