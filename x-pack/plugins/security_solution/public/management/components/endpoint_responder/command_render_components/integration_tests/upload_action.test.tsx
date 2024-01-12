@@ -203,7 +203,7 @@ describe('When using `upload` response action', () => {
 
     await waitFor(() => {
       expect(getByTestId('test-validationError-message').textContent).toEqual(
-        UPGRADE_AGENT_FOR_RESPONDER('endpoint')
+        UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'upload')
       );
     });
   });

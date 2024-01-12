@@ -95,11 +95,11 @@ const capabilitiesAndPrivilegesValidator = (
       RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
     let errorMessage = '';
     if (!responderCapability) {
-      errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType));
+      errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
     }
     if (responderCapability) {
       if (!agentCapabilities.includes(responderCapability)) {
-        errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType));
+        errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
       }
     }
     if (!getRbacControl({ commandName, privileges })) {
