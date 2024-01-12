@@ -11,13 +11,13 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { AgentPolicy } from '../../../../common';
+import type { AgentPolicy } from '../../../common';
 
-import { AzureArmTemplateInstructions } from '../azure_arm_template_instructions';
+import type { GetOneEnrollmentAPIKeyResponse } from '../../../common/types';
 
-import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
+import type { CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
 
-import type { CloudSecurityIntegration } from '../types';
+import { AzureArmTemplateInstructions } from './azure_arm_template_instructions';
 
 export const InstallAzureArmTemplateManagedAgentStep = ({
   selectedApiKeyId,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../types';
+import type { AgentPolicy } from '../../../types';
 
 /**
  * Get the project id, organization id and account type of gcp integration from an agent policy

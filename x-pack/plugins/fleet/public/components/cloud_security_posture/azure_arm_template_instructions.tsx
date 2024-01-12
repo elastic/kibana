@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy } from '../../../common';
 
-import { AzureArmTemplateGuide } from '../azure_arm_template_guide';
+import { useCreateAzureArmTemplateUrl } from './hooks';
 
-import { useCreateAzureArmTemplateUrl } from '../../hooks/use_create_azure_arm_template_url';
+import type { CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
 
-import type { CloudSecurityIntegration } from './types';
+import { AzureArmTemplateGuide } from './azure_arm_template_guide';
 
 interface Props {
   enrollmentAPIKey?: string;

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { GoogleCloudShellGuide } from '../google_cloud_shell_guide';
+import { GoogleCloudShellGuide } from './google_cloud_shell_guide';
 
 interface Props {
   cloudShellUrl: string;

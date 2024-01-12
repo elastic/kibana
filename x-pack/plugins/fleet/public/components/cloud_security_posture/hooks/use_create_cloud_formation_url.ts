@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import type {
   CloudFormationProps,
   CloudSecurityIntegrationAwsAccountType,
-} from '../components/agent_enrollment_flyout/types';
+} from '../../agent_enrollment_flyout/types';
 
-import { useAgentVersion } from './use_agent_version';
+import { useAgentVersion } from '../../../hooks';
 
 const CLOUD_FORMATION_DEFAULT_ACCOUNT_TYPE = 'single-account';
 

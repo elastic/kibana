@@ -21,16 +21,17 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
 
-import type { AgentPolicy, PackagePolicy } from '../../../../../types';
+import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
 import {
   sendGetEnrollmentAPIKeys,
-  useCreateCloudShellUrl,
   useFleetServerHostsForPolicy,
   useAgentVersion,
-} from '../../../../../hooks';
-import { GoogleCloudShellGuide } from '../../../../../components';
-import { ManualInstructions } from '../../../../../../../components/enrollment_instructions';
-import { getGcpIntegrationDetailsFromPackagePolicy } from '../../../../../../../services';
+} from '../../../../../../hooks';
+import { ManualInstructions } from '../../../../../../../../components/enrollment_instructions';
+
+import { GoogleCloudShellGuide } from '../../../../../../../../components/cloud_security_posture';
+import { useCreateCloudShellUrl } from '../../../../../../../../components/cloud_security_posture/hooks';
+import { getGcpIntegrationDetailsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
 
 export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
   onConfirm: () => void;

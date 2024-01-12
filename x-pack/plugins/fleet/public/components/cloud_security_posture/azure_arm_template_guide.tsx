@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AgentPolicy } from '../../common';
-import { useFleetServerHostsForPolicy } from '../hooks';
+import type { AgentPolicy } from '../../../common';
+import { useFleetServerHostsForPolicy } from '../../hooks';
 
-import { useAgentPolicyWithPackagePolicies } from './agent_enrollment_flyout/hooks';
-import type { CloudSecurityIntegrationAzureAccountType } from './agent_enrollment_flyout/types';
+import { useAgentPolicyWithPackagePolicies } from '../agent_enrollment_flyout/hooks';
+import type { CloudSecurityIntegrationAzureAccountType } from '../agent_enrollment_flyout/types';
 
 const azureResourceManagerLink =
   'https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager';

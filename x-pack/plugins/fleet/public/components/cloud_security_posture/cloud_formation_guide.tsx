@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { CloudSecurityIntegrationAwsAccountType } from './agent_enrollment_flyout/types';
+import type { CloudSecurityIntegrationAwsAccountType } from '../agent_enrollment_flyout/types';
 
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';

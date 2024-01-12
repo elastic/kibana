@@ -8,8 +8,8 @@
 import type {
   CloudFormationProps,
   CloudSecurityIntegrationAwsAccountType,
-} from '../components/agent_enrollment_flyout/types';
-import type { PackagePolicy } from '../types';
+} from '../../agent_enrollment_flyout/types';
+import type { PackagePolicy } from '../../../types';
 
 const AWS_ACCOUNT_TYPE = 'aws.account_type';
 

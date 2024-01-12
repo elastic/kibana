@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../types';
+import type { AgentPolicy } from '../../../types';
 
 export const SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG = {
   CLOUD_FORMATION: 'cloud_formation_template_url',

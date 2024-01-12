@@ -20,16 +20,14 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
 
-import { useAgentPolicyWithPackagePolicies } from '../../../../../../../components/agent_enrollment_flyout/hooks';
+import { useAgentPolicyWithPackagePolicies } from '../../../../../../../../components/agent_enrollment_flyout/hooks';
 
-import type { AgentPolicy, PackagePolicy } from '../../../../../types';
-import {
-  sendGetEnrollmentAPIKeys,
-  useCreateCloudFormationUrl,
-  useFleetServerHostsForPolicy,
-} from '../../../../../hooks';
-import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
-import { CloudFormationGuide } from '../../../../../components';
+import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
+import { sendGetEnrollmentAPIKeys, useFleetServerHostsForPolicy } from '../../../../../../hooks';
+
+import { CloudFormationGuide } from '../../../../../../../../components/cloud_security_posture';
+import { getCloudFormationPropsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
+import { useCreateCloudFormationUrl } from '../../../../../../../../components/cloud_security_posture/hooks';
 
 export const PostInstallCloudFormationModal: React.FunctionComponent<{
   onConfirm: () => void;

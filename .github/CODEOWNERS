@@ -1522,30 +1522,9 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 /x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/components/agent_enrollment_flyout/steps/install_cloud_formation_managed_agent_step.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/components/agent_enrollment_flyout/steps/install_google_cloud_shell_managed_agent_step.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/components/agent_enrollment_flyout/steps/install_azure_arm_template_managed_agent_step.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/components/agent_enrollment_flyout/azure_arm_template_instructions.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/components/agent_enrollment_flyout/cloud_formation_instructions.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/components/agent_enrollment_flyout/google_cloud_shell_instructions.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/components/azure_arm_template_guide.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/components/cloud_formation_guide.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/components/google_cloud_shell_guide.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/hooks/use_create_azure_arm_template_url.ts @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/hooks/use_create_cloud_formation_url.ts @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/hooks/use_create_cloud_shell_url.ts @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/services/get_azure_arm_props_from_package_policy.* @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/services/get_cloud_formation_props_from_package_policy.* @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/services/get_cloud_shell_url_from_agent_policy.* @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/services/get_azure_arm_props_from_package_policy.* @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/services/get_gcp_integration_details_from_agent_policy.* @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/services/get_gcp_integration_details_from_package_policy.* @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/services/get_gcp_integration_details_from_package_policy.* @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/services/get_template_url_from_package_info.* @elastic/fleet @elastic/kibana-cloud-security-posture
+/x-pack/plugins/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
+/x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
 /x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology.* @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/post_install_azure_arm_template_modal.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/post_install_cloud_formation_modal.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
-/x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/post_install_google_cloud_shell_modal.tsx @elastic/fleet @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore

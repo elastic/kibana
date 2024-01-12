@@ -11,39 +11,41 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
+import type { GetOneEnrollmentAPIKeyResponse } from '../../../common/types';
 
-import { GoogleCloudShellInstructions } from '../google_cloud_shell_instructions';
+import type { CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
 
-export const InstallGoogleCloudShellManagedAgentStep = ({
+import { CloudFormationInstructions } from './cloud_formation_instructions';
+
+export const InstallCloudFormationManagedAgentStep = ({
   selectedApiKeyId,
   apiKeyData,
+  enrollToken,
   isComplete,
-  cloudShellUrl,
-  cloudShellCommand,
-  projectId,
+  cloudSecurityIntegration,
+  fleetServerHost,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
+  enrollToken?: string;
   isComplete?: boolean;
-  cloudShellUrl?: string | undefined;
-  cloudShellCommand?: string;
-  projectId?: string;
+  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
+  fleetServerHost: string;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
 
   return {
     status,
-    title: i18n.translate('xpack.fleet.agentEnrollment.cloudShell.stepEnrollAndRunAgentTitle', {
+    title: i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your cloud',
     }),
     children:
-      selectedApiKeyId && apiKeyData && cloudShellUrl ? (
-        <GoogleCloudShellInstructions
-          cloudShellUrl={cloudShellUrl || ''}
-          cloudShellCommand={cloudShellCommand || ''}
-          projectId={projectId || ''}
+      selectedApiKeyId && apiKeyData && cloudSecurityIntegration ? (
+        <CloudFormationInstructions
+          cloudSecurityIntegration={cloudSecurityIntegration}
+          enrollmentAPIKey={enrollToken}
+          fleetServerHost={fleetServerHost}
         />
       ) : (
         <React.Fragment />

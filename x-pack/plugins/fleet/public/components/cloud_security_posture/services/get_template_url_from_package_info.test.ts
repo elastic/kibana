@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '../types';
+import type { PackageInfo } from '../../../types';
 
 import {
   getTemplateUrlFromPackageInfo,

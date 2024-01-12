@@ -14,11 +14,9 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 import { API_VERSIONS } from '../../../../common/constants';
-import {
-  fullAgentPolicyToYaml,
-  agentPolicyRouteService,
-  getGcpIntegrationDetailsFromAgentPolicy,
-} from '../../../services';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+
+import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_posture/services';
 
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 

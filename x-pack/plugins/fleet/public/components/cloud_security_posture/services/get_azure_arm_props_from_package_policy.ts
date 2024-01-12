@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CloudSecurityIntegrationAzureAccountType } from '../components/agent_enrollment_flyout/types';
-import type { PackagePolicy } from '../types';
-import type { AzureArmTemplateProps } from '../components/agent_enrollment_flyout/types';
+import type { CloudSecurityIntegrationAzureAccountType } from '../../agent_enrollment_flyout/types';
+import type { PackagePolicy } from '../../../types';
+import type { AzureArmTemplateProps } from '../../agent_enrollment_flyout/types';
 
 const AZURE_ACCOUNT_TYPE = 'azure.account_type';
 
