@@ -10,22 +10,26 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect, useState } from 'react';
 import { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import {
+  EuiCard,
   EuiEmptyPrompt,
   EuiErrorBoundary,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPageHeader,
+  EuiSpacer,
 } from '@elastic/eui';
-import { Integration } from '../../../common/integrations';
+import { IntegrationSummary } from '../../../common/integrations';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
-import { IntegrationPanel } from './integration_panel';
 
 export function IntegrationsOverviewPage() {
   const [integrationsLoading, setIntegrationsLoading] = useState(true);
-  const [integrations, setIntegrations] = useState<Integration[]>([]);
+  const [integrations, setIntegrations] = useState<IntegrationSummary[]>([]);
+  const [searchValue, setSearchValue] = useState('');
 
   const { ObservabilityPageTemplate } = usePluginContext();
 
@@ -46,7 +50,7 @@ export function IntegrationsOverviewPage() {
 
   useEffect(() => {
     async function fetchInstalledIntegrations() {
-      const response = await http.get<{ integrations: Integration[] }>(
+      const response = await http.get<{ integrations: IntegrationSummary[] }>(
         '/api/observability/integrations/installed'
       );
       setIntegrations(response.integrations);
@@ -79,6 +83,8 @@ export function IntegrationsOverviewPage() {
           docsLink: docLinks.links.observability.guide,
         };
 
+  const integrationDetailsUrl = http.basePath.prepend('/app/observability/integrations');
+
   return (
     <EuiErrorBoundary>
       <ObservabilityPageTemplate
@@ -105,7 +111,7 @@ export function IntegrationsOverviewPage() {
             }
           />
         ) : (
-          <EuiFlexGroup direction="column">
+          <>
             <EuiPageHeader
               pageTitle={i18n.translate(
                 'xpack.observability.integrationsOverviewPage.pageHeaderLabel',
@@ -115,13 +121,35 @@ export function IntegrationsOverviewPage() {
               )}
               bottomBorder={true}
               iconType="logoObservability"
+              rightSideItems={[
+                <EuiFieldSearch
+                  data-test-subj="o11yIntegrationsOverviewPageFieldSearch"
+                  placeholder="Find an Integration"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  isClearable={true}
+                />,
+              ]}
             />
-            {integrations.map((integration) => (
-              <EuiFlexItem key={integration.metadata.integration_name}>
-                <IntegrationPanel integration={integration} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
+            <EuiSpacer />
+            <EuiFlexGroup>
+              {integrations
+                .filter((integration) =>
+                  integration.name.toLowerCase().includes(searchValue.toLowerCase())
+                )
+                .map((integration) => (
+                  <EuiFlexItem key={integration.name} grow={false} css={{ minWidth: '200px' }}>
+                    {/* Would be great to use the Integration icon here and maybe have some good descriptive text */}
+                    <EuiCard
+                      icon={<EuiIcon size="xxl" type="database" color="success" />}
+                      title={integration.display_name}
+                      href={`${integrationDetailsUrl}/${integration.name}`}
+                      hasBorder={true}
+                    />
+                  </EuiFlexItem>
+                ))}
+            </EuiFlexGroup>
+          </>
         )}
       </ObservabilityPageTemplate>
     </EuiErrorBoundary>

@@ -41,6 +41,7 @@ import {
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 import { IntegrationsOverviewPage } from '../pages/integrations_overview/integrations_overview';
+import { IntegrationDetailsPage } from '../pages/integration_details/integration_details';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -185,6 +186,13 @@ export const routes = {
   '/integrations': {
     handler: () => {
       return <IntegrationsOverviewPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/integrations/:integrationName': {
+    handler: () => {
+      return <IntegrationDetailsPage />;
     },
     params: {},
     exact: true,

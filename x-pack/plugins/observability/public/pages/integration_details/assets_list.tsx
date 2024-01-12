@@ -4,15 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFlexItem,
-  EuiListGroup,
-  EuiListGroupItemProps,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItemProps, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import {
   Asset,
@@ -24,9 +18,16 @@ import { useKibana } from '../../utils/kibana_react';
 export function AssetsList({
   asset: assetSpecification,
   integrationName,
+  filter,
+  timeRange,
 }: {
   asset: AssetSpecification;
   integrationName: string;
+  filter: string;
+  timeRange: {
+    from: string;
+    to: string;
+  };
 }) {
   const [assetsLoading, setAssetsLoading] = useState(true);
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -43,11 +44,17 @@ export function AssetsList({
       const query = {
         indexPattern: `metrics-${integrationName}*`,
         identifierField: assetSpecification.identifier_field,
+        from: timeRange.from,
+        to: timeRange.to,
       };
 
       if (assetSpecification.display_name_field) {
         (query as GetResolveAssetsQueryParams).displayNameField =
           assetSpecification.display_name_field;
+      }
+
+      if (filter.length !== 0) {
+        (query as GetResolveAssetsQueryParams).filter = filter;
       }
 
       const response = await http.get<{ assets: Asset[] }>(
@@ -61,9 +68,24 @@ export function AssetsList({
     }
 
     fetchInstalledIntegrations();
-  }, [http, assetSpecification, integrationName]);
+  }, [http, assetSpecification, integrationName, filter, timeRange]);
+
+  if (assetsLoading) {
+    return <EuiLoadingSpinner size="s" />;
+  }
+
+  if (assets.length === 0) {
+    return (
+      <span>
+        {i18n.translate('xpack.observability.assetsList.span.noAssetsFoundLabel', {
+          defaultMessage: 'No assets found',
+        })}
+      </span>
+    );
+  }
 
   const listItems: EuiListGroupItemProps[] = assets.map((asset) => ({
+    iconType: 'dashboardApp',
     label: asset.display_name ? asset.display_name : asset.id,
     href: dashboardAppLocator?.getRedirectUrl({
       dashboardId: assetSpecification.details_dashboard_id,
@@ -74,19 +96,5 @@ export function AssetsList({
     }),
   }));
 
-  if (assetsLoading) {
-    return <EuiLoadingSpinner size="s" />;
-  }
-
-  return (
-    <EuiFlexItem>
-      <EuiPanel color="transparent" paddingSize="none">
-        <EuiTitle size="s" css={{ marginBottom: '8px' }}>
-          <h3>{assetSpecification.display_name}</h3>
-        </EuiTitle>
-        {/* Maybe here I should have a link (fake?) to an overview dashboard for this asset type */}
-        <EuiListGroup color="primary" listItems={listItems} />
-      </EuiPanel>
-    </EuiFlexItem>
-  );
+  return <EuiListGroup color="primary" listItems={listItems} />;
 }

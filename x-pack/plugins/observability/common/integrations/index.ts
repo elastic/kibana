@@ -26,6 +26,11 @@ export interface ObsIntegrationMetadata {
   assets: AssetSpecification[];
 }
 
+export interface IntegrationSummary {
+  name: string;
+  display_name: string;
+}
+
 export interface Integration {
   metadata: ObsIntegrationMetadata;
   package: {
@@ -42,5 +47,8 @@ export interface Asset {
 export interface GetResolveAssetsQueryParams {
   indexPattern: string;
   identifierField: string;
+  from: string;
+  to: string;
   displayNameField?: string;
+  filter?: string;
 }

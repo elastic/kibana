@@ -38,26 +38,70 @@ const getInstalledIntegrationsRoute = createObservabilityServerRoute({
         pkg.savedObject?.attributes.installed_kibana_space_id === spaceId &&
         integrationsWithMetadata.includes(pkg.name)
     );
-    const packagesInfo = await Promise.all(
-      installedPackages.map((pkg) => packageService.getPackage(pkg.name, pkg.version))
-    );
 
-    const integrations = packagesInfo
-      .map((pkg) => {
-        const metadata = metadataList.find(
-          (item) => item.integration_name === pkg.packageInfo.name
-        );
-        return {
-          package: {
-            icons: pkg.packageInfo.icons,
-            data_streams: pkg.packageInfo.data_streams,
-          },
-          metadata,
-        };
-      })
-      .filter((integration) => integration.metadata !== undefined);
+    const integrations = installedPackages.map((pkg) => {
+      const metadata = metadataList.find((item) => item.integration_name === pkg.name);
+      return {
+        name: metadata!.integration_name,
+        display_name: metadata!.display_name,
+      };
+    });
 
     return { integrations };
+  },
+});
+
+const getIntegrationRoute = createObservabilityServerRoute({
+  endpoint: 'GET /api/observability/integrations/{integrationName} 2023-10-31',
+  options: {
+    tags: [],
+  },
+  params: t.type({
+    path: t.type({
+      integrationName: t.string,
+    }),
+  }),
+  handler: async ({ context, dependencies, request, params }) => {
+    const { integrationName } = params.path;
+
+    const spaceId = dependencies.spaces?.spacesService.getSpaceId(request);
+
+    const soClient = (await context.core).savedObjects.getClient({
+      includedHiddenTypes: [OBS_INTEGRATION_METADATA_SO_TYPE],
+    });
+    const metadata = await soClient.get<ObsIntegrationMetadata>(
+      OBS_INTEGRATION_METADATA_SO_TYPE,
+      `obs_integration_metadata:${integrationName}`
+    );
+
+    if (!metadata) {
+      throw new Error(`Could not find metadata for the ${integrationName} integration.`);
+    }
+
+    const packageService = dependencies.fleet.packageService.asScoped(request);
+    const packages = await packageService.getPackages();
+    const thePackage = packages.find(
+      (pkg) =>
+        pkg.status === 'installed' &&
+        pkg.savedObject?.attributes.installed_kibana_space_id === spaceId &&
+        pkg.name === integrationName
+    );
+
+    if (!thePackage) {
+      throw new Error(`Could not find package info for the ${integrationName} integration.`);
+    }
+
+    const packageInfo = await packageService.getPackage(thePackage.name, thePackage.version);
+
+    return {
+      integration: {
+        package: {
+          icons: packageInfo.packageInfo.icons,
+          data_streams: packageInfo.packageInfo.data_streams,
+        },
+        metadata: metadata.attributes,
+      },
+    };
   },
 });
 
@@ -71,19 +115,59 @@ const getResolveAssetsRoute = createObservabilityServerRoute({
       t.type({
         indexPattern: t.string,
         identifierField: t.string,
+        from: t.string,
+        to: t.string,
       }),
       t.partial({
         displayNameField: t.string,
+        filter: t.string,
       }),
     ]),
   }),
   handler: async ({ context, params }) => {
-    const { indexPattern, identifierField, displayNameField } = params.query;
+    const { indexPattern, identifierField, displayNameField, from, to, filter } = params.query;
     const core = await context.core;
 
     const searchParams = {
       index: indexPattern,
       size: 0,
+      query: {
+        bool: {
+          must: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: to,
+                },
+              },
+            },
+          ],
+          ...(filter
+            ? {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    wildcard: {
+                      [identifierField]: {
+                        value: `*${filter}*`,
+                      },
+                    },
+                  },
+                  displayNameField
+                    ? {
+                        wildcard: {
+                          [displayNameField]: {
+                            value: `*${filter}*`,
+                          },
+                        },
+                      }
+                    : null,
+                ].filter((should) => should !== null),
+              }
+            : {}),
+        },
+      },
       aggs: {
         assets: {
           terms: {
@@ -129,5 +213,6 @@ const getResolveAssetsRoute = createObservabilityServerRoute({
 
 export const integrationsRouteRepository = {
   ...getInstalledIntegrationsRoute,
+  ...getIntegrationRoute,
   ...getResolveAssetsRoute,
 };
