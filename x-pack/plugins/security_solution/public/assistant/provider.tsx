@@ -68,14 +68,8 @@ export const AssistantProvider: React.FC = ({ children }) => {
       baseConversations={baseConversations}
       getComments={getComments}
       http={http}
-      assistantStreamingEnabled={assistantStreamingEnabled}
-      modelEvaluatorEnabled={isModelEvaluationEnabled}
       setDefaultAllow={setDefaultAllow} // remove
       setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
-      nameSpace={nameSpace}
-      setConversations={setConversations}
-      setDefaultAllow={setDefaultAllow}
-      setDefaultAllowReplacement={setDefaultAllowReplacement}
       title={ASSISTANT_TITLE}
       toasts={toasts}
     >

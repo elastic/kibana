@@ -40,7 +40,6 @@ export const useConversationStore = (): Record<string, Conversation> => {
         (baseId) => (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
       );
 
-      console.log(notUsedBaseConversations)
       setConversations(
         merge(
           userConversations,

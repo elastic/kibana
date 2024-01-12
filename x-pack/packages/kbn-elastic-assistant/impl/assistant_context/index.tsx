@@ -88,7 +88,6 @@ export interface AssistantProviderProps {
   }) => EuiCommentProps[];
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
-  getInitialConversations: () => Record<string, Conversation>;
   nameSpace?: string;
   // setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
@@ -176,7 +175,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getComments,
   http,
   baseConversations,
-  getInitialConversations,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   setDefaultAllow,
   setDefaultAllowReplacement,
