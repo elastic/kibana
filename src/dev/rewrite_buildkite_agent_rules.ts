@@ -44,6 +44,7 @@ interface KBAgentDef {
 type KibanaBuildkiteAgentLookup = Record<string, KBAgentDef>;
 
 interface GobldGCPConfig {
+  provider: 'gcp';
   assignExternalIP?: boolean;
   buildDirectory?: string;
   diskSizeGb?: number;
@@ -193,6 +194,7 @@ function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
   // Mapping based on expected fields in:
   // https://github.com/elastic/ci/blob/main/docs/gobld/providers.mdx#L96
   return removeMissing({
+    provider: 'gcp',
     image: 'family/kibana-ubuntu-2004',
     imageProject: 'elastic-images-qa',
     diskSizeGb: agent.diskSizeGb,
