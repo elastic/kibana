@@ -38,13 +38,13 @@ exports[`RevertToBasic component should display when license is about to expire 
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>
@@ -112,13 +112,13 @@ exports[`RevertToBasic component should display when license is expired 1`] = `
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>
@@ -186,13 +186,13 @@ exports[`RevertToBasic component should display when trial is active 1`] = `
               >
                 subscription features
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>
