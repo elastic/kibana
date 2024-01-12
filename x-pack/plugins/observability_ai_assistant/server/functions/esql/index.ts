@@ -290,8 +290,6 @@ export function registerEsqlFunction({
       return esqlResponse$.pipe((source) => {
         return new Observable<CreateChatCompletionResponseChunk>((subscriber) => {
           let cachedContent: string = '';
-          let functionCallName: string = '';
-          let functionCallArgs: string = '';
 
           function includesDivider() {
             const firstDividerIndex = cachedContent.indexOf('--');
@@ -304,8 +302,6 @@ export function registerEsqlFunction({
                 subscriber.next(message);
               }
               cachedContent += message.choices[0].delta.content || '';
-              functionCallName += message.choices[0].delta.function_call?.name || '';
-              functionCallArgs += message.choices[0].delta.function_call?.arguments || '';
             },
             complete: () => {
               if (!includesDivider()) {
@@ -342,6 +338,8 @@ export function registerEsqlFunction({
                           arguments: JSON.stringify({ query: esqlQuery }),
                         },
                       },
+                      index: 0,
+                      finish_reason: null,
                     },
                   ],
                 });
