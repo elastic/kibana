@@ -104,7 +104,8 @@
     "@kbn/visualization-utils",
     "@kbn/react-kibana-mount",
     "@kbn/test-eui-helpers",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/text-based-editor"
   ],
   "exclude": [
     "target/**/*"

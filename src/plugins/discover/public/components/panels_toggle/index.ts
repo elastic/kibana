@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { HitsCounter } from './hits_counter';
+export { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
