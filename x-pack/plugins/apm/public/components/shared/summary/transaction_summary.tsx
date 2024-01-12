@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '@kbn/apm-es-schemas';
 import { Summary } from '.';
 import { TimestampTooltip } from '../timestamp_tooltip';
 import { DurationSummaryItem } from './duration_summary_item';

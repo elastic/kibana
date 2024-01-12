@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { AgentName } from '@kbn/apm-es-schemas';
 import { isOpenTelemetryAgentName } from '../../../common/agent_name';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const agentsDocPageName: Partial<Record<AgentName, string>> = {
   go: 'go',

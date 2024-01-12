@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { Stackframe } from '@kbn/apm-es-schemas';
 import { getGroupedStackframes } from '.';
 import stacktracesMock from './__fixtures__/stacktraces.json';
 

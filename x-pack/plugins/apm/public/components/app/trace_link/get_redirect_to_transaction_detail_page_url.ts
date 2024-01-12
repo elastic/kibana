@@ -6,7 +6,7 @@
  */
 
 import { format } from 'url';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '@kbn/apm-es-schemas';
 
 export const getRedirectToTransactionDetailPageUrl = ({
   transaction,

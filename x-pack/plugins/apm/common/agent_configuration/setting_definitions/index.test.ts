@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import { filterByAgent, settingDefinitions } from '.';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { SettingDefinition } from './types';
 
 describe('filterByAgent', () => {

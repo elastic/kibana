@@ -11,6 +11,7 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server/utils/queries';
+import { AgentName } from '@kbn/apm-es-schemas';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -21,7 +22,6 @@ import {
   SERVICE_NODE_NAME,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { MAX_NUMBER_OF_SERVICES } from '../services/get_services/get_services_items';

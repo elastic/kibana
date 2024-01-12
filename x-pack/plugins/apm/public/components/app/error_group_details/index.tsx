@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { AgentName } from '@kbn/apm-es-schemas';
 import {
   isOpenTelemetryAgentName,
   isRumAgentName,
@@ -35,7 +36,6 @@ import { ErrorDistribution } from './distribution';
 import { TopErroneousTransactions } from './top_erroneous_transactions';
 import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;

@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import React from 'react';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -28,7 +29,6 @@ import {
   isOpenTelemetryAgentName,
   isRumAgentName,
 } from '../../../../../common/agent_name';
-import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 
 export function TransactionCharts({
   kuery,

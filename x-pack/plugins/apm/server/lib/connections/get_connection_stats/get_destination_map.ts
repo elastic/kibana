@@ -9,10 +9,10 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import objectHash from 'object-hash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,

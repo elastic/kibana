@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentName } from '../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { Environment } from './environment_rt';
 
 export interface SpanLinkDetails {

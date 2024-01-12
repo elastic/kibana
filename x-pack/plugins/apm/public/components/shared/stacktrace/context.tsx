@@ -14,7 +14,7 @@ import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
 import xcode from 'react-syntax-highlighter/dist/cjs/styles/hljs/xcode';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { StackframeWithLineContext } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { StackframeWithLineContext } from '@kbn/apm-es-schemas';
 
 SyntaxHighlighter.registerLanguage('javascript', javascript);
 SyntaxHighlighter.registerLanguage('python', python);

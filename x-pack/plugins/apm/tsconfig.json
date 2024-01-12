@@ -110,6 +110,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/code-editor",
     "@kbn/shared-svg",
+    "@kbn/apm-es-schemas"
   ],
   "exclude": ["target/**/*"]
 }

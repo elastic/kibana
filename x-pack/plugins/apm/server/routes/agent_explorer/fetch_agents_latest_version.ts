@@ -9,11 +9,11 @@ import { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import fetch from 'node-fetch';
+import { AgentName } from '@kbn/apm-es-schemas';
 import {
   ElasticApmAgentLatestVersion,
   OtelAgentLatestVersion,
 } from '../../../common/agent_explorer';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ErrorWithStatusCode } from './error_with_status_code';
 
 const MISSING_CONFIGURATION = i18n.translate(

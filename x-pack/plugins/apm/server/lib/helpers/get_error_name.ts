@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { APMError } from '@kbn/apm-es-schemas';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { Maybe } from '../../../typings/common';
-import { APMError } from '../../../typings/es_schemas/ui/apm_error';
 
 export function getErrorName({
   error,

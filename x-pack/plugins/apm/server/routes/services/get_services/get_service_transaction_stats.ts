@@ -6,6 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,
@@ -18,7 +19,6 @@ import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';

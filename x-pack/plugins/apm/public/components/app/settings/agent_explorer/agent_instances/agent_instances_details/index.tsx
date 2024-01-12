@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { ValuesType } from 'utility-types';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { MetricOverviewLink } from '../../../../../shared/links/apm/metric_overview_link';
 import { AgentExplorerFieldName } from '../../../../../../../common/agent_explorer';
 import { isOpenTelemetryAgentName } from '../../../../../../../common/agent_name';
@@ -22,7 +23,6 @@ import {
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../../../../common/service_nodes';
-import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../../shared/environment_badge';

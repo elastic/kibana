@@ -25,8 +25,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { downloadJson } from '../../../../utils/download_json';
-import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import {
   asPercent,

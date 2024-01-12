@@ -7,7 +7,7 @@
 
 import React, { ComponentType } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
+import { Stackframe } from '@kbn/apm-es-schemas';
 import {
   CSharpFrameHeadingRenderer,
   DefaultFrameHeadingRenderer,

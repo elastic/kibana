@@ -7,9 +7,9 @@
 
 import { get } from 'lodash';
 import { AllowUnknownProperties } from '../../typings/common';
-import { APMError } from '../../typings/es_schemas/ui/apm_error';
-import { Span } from '../../typings/es_schemas/ui/span';
-import { Transaction } from '../../typings/es_schemas/ui/transaction';
+import { APMError } from '@kbn/apm-es-schemas';
+import { Span } from '@kbn/apm-es-schemas';
+import { Transaction } from '@kbn/apm-es-schemas';
 import * as apmFieldnames from './apm';
 import * as infraMetricsFieldnames from './infra_metrics';
 

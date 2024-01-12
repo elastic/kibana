@@ -9,8 +9,8 @@ import { EuiAccordion, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { Stackframe } from '@kbn/apm-es-schemas';
 import { Stacktrace } from '.';
-import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 
 const Accordion = euiStyled(EuiAccordion)`
   border-top: ${({ theme }) => theme.eui.euiBorderThin};

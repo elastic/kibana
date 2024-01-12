@@ -6,12 +6,12 @@
  */
 
 import React, { ReactNode } from 'react';
+import { Transaction } from '@kbn/apm-es-schemas';
 import {
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../../common/es_fields/apm';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverLink } from './discover_link';
 
 export function getDiscoverQuery(transaction: Transaction) {

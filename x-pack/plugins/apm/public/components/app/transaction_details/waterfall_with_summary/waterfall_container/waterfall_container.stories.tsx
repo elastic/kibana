@@ -10,13 +10,13 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Meta, Story } from '@storybook/react';
 import { noop } from 'lodash';
 import React, { ComponentProps, useState } from 'react';
+import { Transaction } from '@kbn/apm-es-schemas';
 import { WaterfallContainer } from '.';
 import {
   WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../common/waterfall/typings';
-import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';

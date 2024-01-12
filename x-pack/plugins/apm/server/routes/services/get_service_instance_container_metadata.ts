@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { Kubernetes } from '@kbn/apm-es-schemas';
 import {
   CONTAINER_ID,
   CONTAINER_IMAGE,
@@ -19,7 +20,6 @@ import {
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
 } from '../../../common/es_fields/infra_metrics';
-import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
 import { maybe } from '../../../common/utils/maybe';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 

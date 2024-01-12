@@ -9,7 +9,7 @@ import { sum } from 'lodash';
 import objectHash from 'object-hash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';

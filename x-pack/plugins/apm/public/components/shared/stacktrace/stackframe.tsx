@@ -11,7 +11,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   Stackframe as StackframeType,
   StackframeWithLineContext,
-} from '../../../../typings/es_schemas/raw/fields/stackframe';
+} from '@kbn/apm-es-schemas';
 import { Context } from './context';
 import { FrameHeading } from './frame_heading';
 import { Variables } from './variables';

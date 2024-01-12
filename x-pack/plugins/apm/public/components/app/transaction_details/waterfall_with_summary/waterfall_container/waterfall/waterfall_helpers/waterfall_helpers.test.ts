@@ -6,8 +6,8 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import { Span } from '@kbn/apm-es-schemas';
+import { Transaction } from '@kbn/apm-es-schemas';
 import {
   getClockSkew,
   getOrderedWaterfallItems,
@@ -18,7 +18,7 @@ import {
   IWaterfallSpanOrTransaction,
   getOrphanTraceItemsCount,
 } from './waterfall_helpers';
-import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
+import { APMError } from '@kbn/apm-es-schemas';
 import {
   WaterfallSpan,
   WaterfallTransaction,

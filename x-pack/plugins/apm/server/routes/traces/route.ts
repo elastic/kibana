@@ -7,6 +7,8 @@
 
 import * as t from 'io-ts';
 import { nonEmptyStringRt, toNumberRt } from '@kbn/io-ts-utils';
+import { Transaction } from '@kbn/apm-es-schemas';
+import { Span } from '@kbn/apm-es-schemas';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -34,8 +36,6 @@ import {
   getAggregatedCriticalPath,
 } from './get_aggregated_critical_path';
 import { getSpan } from '../transactions/get_span';
-import { Transaction } from '../../../typings/es_schemas/ui/transaction';
-import { Span } from '../../../typings/es_schemas/ui/span';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',

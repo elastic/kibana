@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { sortBy } from 'lodash';
 import { isRight } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { booleanRt } from '../runtime_types/boolean_rt';
 import { getIntegerRt } from '../runtime_types/integer_rt';
 import { isRumOrMobileAgentName } from '../../agent_name';

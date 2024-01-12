@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { uniq } from 'lodash';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceHealthStatusesResponse } from './get_health_statuses';
 import { ServicesWithoutTransactionsResponse } from './get_services_without_transactions';
 import { ServiceAlertsResponse } from './get_service_alerts';
 import { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
 
 export interface MergedServiceStat {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Exception } from '../../../../../typings/es_schemas/raw/error_raw';
+import { Exception } from '@kbn/apm-es-schemas';
 import { Stacktrace } from '../../../shared/stacktrace';
 import { CauseStacktrace } from '../../../shared/stacktrace/cause_stacktrace';
 import { ExceptionStacktraceTitle } from './exception_stacktrace_title';

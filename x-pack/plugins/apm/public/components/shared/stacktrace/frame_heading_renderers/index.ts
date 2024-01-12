@@ -6,7 +6,7 @@
  */
 
 import { ComponentType } from 'react';
-import { Stackframe } from '../../../../../typings/es_schemas/raw/fields/stackframe';
+import { Stackframe } from '@kbn/apm-es-schemas';
 
 export interface FrameHeadingRendererProps {
   fileDetailComponent: ComponentType;
