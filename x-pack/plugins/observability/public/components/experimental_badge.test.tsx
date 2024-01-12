@@ -10,6 +10,6 @@ import { ExperimentalBadge } from './experimental_badge';
 
 describe('ExperimentalBadge', () => {
   it('renders', () => {
-    expect(<ExperimentalBadge />).not.toBeDefined();
+    expect(<ExperimentalBadge />).toBeDefined();
   });
 });
