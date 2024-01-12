@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
-import { EmbeddedMap } from './map/image_map';
+import { ImageMap } from './map/image_map';
 import { useFetchClickData } from './use_fetch_click_data';
 import { MonitorSelector } from './monitor_selector';
 
@@ -60,15 +60,17 @@ export function ClickMap() {
         <MonitorSelector onScreenshotCapture={handleScreenshotCapture} />
       </EuiFlexItem>
       <EuiFlexItem
-        css={{ alignItems: 'center', justifyContent: 'center', minHeight: 600 }}
+        css={{ alignItems: 'center', justifyContent: 'center', minHeight: 520 }}
       >
-        <img
-          style={{ width: '600px', objectFit: 'contain' }}
-          src={imageState.url}
-          alt={'screenshot'}
+        <ImageMap
+          height={520}
+          imageUrl={imageState.url}
+          clickCoordinates={clickData.clickCoordinates}
+          captureWidth={clickData.innerWidth}
+          captureHeight={clickData.innerHeight}
+          viewportWidth={imageState.width}
+          viewportHeight={imageState.height}
         />
-
-        <EmbeddedMap />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

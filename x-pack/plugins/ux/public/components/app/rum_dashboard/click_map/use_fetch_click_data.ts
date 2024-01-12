@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+const dummyInnerWidth = 1024;
+const dummyInnerHeight = 1033;
+
+import { projectPixelCoordsToViewportSize } from './map/helpers';
+
+// Dummy data
+import { clickCoordinates as dummryCoordinates } from './data/coords_1024_1033';
+
 interface FetchClickDataParams {
   serviceName?: string;
   environment?: string;
@@ -16,6 +24,8 @@ interface FetchClickDataParams {
   referenceHeight: number; // Height of the reference screenshot
 }
 export function useFetchClickData(params: FetchClickDataParams) {
+  const { referenceWidth, referenceHeight } = params;
+
   // Query coordinates while respecting serviceName, environment, rangeFrom, rangeTo
   // AND where coordinate.x respects minWidth and maxWidth
 
@@ -24,5 +34,20 @@ export function useFetchClickData(params: FetchClickDataParams) {
 
   // Project the coordinates according to referenceWidth and referenceHeight before returning
 
-  return {};
+  const innerWidth = dummyInnerWidth;
+  const innerHeight = dummyInnerHeight;
+  const clickCoordinates: Array<{ x: number; y: number }> = dummryCoordinates;
+  const viewportTranslatedCoordinates = projectPixelCoordsToViewportSize(
+    innerWidth,
+    innerHeight,
+    referenceWidth,
+    referenceHeight,
+    clickCoordinates
+  );
+
+  return {
+    innerWidth,
+    innerHeight,
+    clickCoordinates: viewportTranslatedCoordinates,
+  };
 }

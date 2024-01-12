@@ -176,7 +176,7 @@ function MonitorScreenshotSelectorEmbeddable({
   return (
     <>
       <DisabledCallout total={syntheticsMonitors.length} />
-      <EuiFlexGroup gutterSize="l" wrap>
+      <EuiFlexGroup gutterSize="l" wrap alignItems="center">
         <EuiFlexGroup gutterSize="m" wrap>
           <EuiFlexItem css={{ minWidth: 300 }}>
             <MonitorSelect

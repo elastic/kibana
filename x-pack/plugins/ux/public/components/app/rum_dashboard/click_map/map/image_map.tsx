@@ -8,17 +8,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
-import {
-  Map as MLMap,
-  Marker as MLMarker,
-  ImageSourceSpecification,
-} from 'maplibre-gl';
 
 import { MapEmbeddable, MapEmbeddableInput } from '@kbn/maps-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
 import { ErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
+import { addSyntheticsScreenshotRasterLayer } from './synthetics_raster_layer';
+import { addClicksFeatureLayer } from './clicks_feature_layer';
+import { MLMap, paintMapWithBackgroundColor } from './helpers';
 import { useKibanaServices } from '../../../../../hooks/use_kibana_services';
+
+import { MAX_BOUNDS_MIN, MAX_BOUNDS_MAX } from './constants';
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -38,17 +37,38 @@ const EmbeddedPanel = styled.div`
   }
 `;
 
-export function EmbeddedMapComponent() {
-  const { rangeId: _rangeId, urlParams } = useLegacyUrlParams();
+interface ImageMapProps {
+  width?: number | string;
+  height?: number | string;
+  imageUrl: string;
+  viewportWidth: number;
+  viewportHeight: number;
 
-  const { start, end, serviceName } = urlParams;
+  /**
+   * Untransformed coordinates captured w.r.t captureWidth (innerWidth) and captureHeight (innerHeight).
+   */
+  clickCoordinates: Array<{ x: number; y: number }>;
+  captureWidth: number;
+  captureHeight: number;
+}
 
+export function EmbeddedMapComponent({
+  width = '100%',
+  height = 400,
+  imageUrl,
+  viewportWidth,
+  viewportHeight,
+  clickCoordinates,
+  captureWidth,
+  captureHeight,
+}: ImageMapProps) {
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
 
   const embeddableRoot: React.RefObject<HTMLDivElement> =
     useRef<HTMLDivElement>(null);
+  const mapRef = useRef<MLMap>(null);
 
   const { embeddable: embeddablePlugin, maps: _maps } = useKibanaServices();
 
@@ -67,12 +87,6 @@ export function EmbeddedMapComponent() {
       query: 'transaction.type : "page-load"',
       language: 'kuery',
     },
-    ...(start && {
-      timeRange: {
-        from: new Date(start!).toISOString(),
-        to: new Date(end!).toISOString(),
-      },
-    }),
     hideFilterActions: true,
   };
 
@@ -97,143 +111,68 @@ export function EmbeddedMapComponent() {
 
   // We can only render after embeddable has already initialized
   useEffect(() => {
-    if (embeddableRoot.current && embeddable && serviceName) {
+    if (
+      embeddableRoot.current &&
+      embeddable &&
+      captureHeight &&
+      captureWidth &&
+      clickCoordinates &&
+      viewportHeight &&
+      viewportWidth &&
+      imageUrl
+    ) {
       const map = new MLMap({
         container: embeddableRoot.current,
         style:
-          'https://api.maptiler.com/maps/basic/style.json?key=w2OlpIMnFnat92FgB2aI',
+          'https://openmaptiles.github.io/osm-bright-gl-style/style-cdn.json',
         center: [0, 0], // Initial center in pixels
         zoom: 2, // Initial zoom level
+        // maxBounds: [MAX_BOUNDS_MIN, MAX_BOUNDS_MAX],
       });
+      // @ts-ignore
+      mapRef.current = map;
 
-      const imageSource = {
-        type: 'image',
-        url: 'path/to/your/image.jpg', // Replace with the path to your image
-        coordinates: [
-          [-100, 90], // Top-left coordinate
-          [100, -90], // Bottom-right coordinate
-        ],
-      };
+      map.fitBounds([MAX_BOUNDS_MIN, MAX_BOUNDS_MAX]);
 
       map.on('load', () => {
-        const marker = new MLMarker({
-          color: '#FFFFFF',
-          draggable: true,
-        })
-          .setLngLat(pixelsToLatLng([50, 50], map))
-          .addTo(map);
-
-        const marker2 = new MLMarker({
-          color: '#FFFFFF',
-          draggable: true,
-        })
-          .setLngLat([-151.5129, 63.1016])
-          .addTo(map);
-
-        map.addSource('syntheticsScreenshot', {
-          type: 'image',
-          url: 'https://static-www.elastic.co/v3/assets/bltefdd0b53724fa2ce/blt939dd55d89917037/618ac5794f03d1667573981e/screenshot-log-monitoring-integrations.png',
-          coordinates: [
-            [50, 50],
-            [200, 50],
-            [200, 200],
-            [50, 200],
-          ].map((coord) =>
-            pixelsToLatLng(coord, map)
-          ) as ImageSourceSpecification['coordinates'],
-        });
-
-        map.addLayer({
-          id: 'syntheticsLayer',
-          source: 'syntheticsScreenshot',
-          type: 'raster',
-          paint: {
-            'raster-opacity': 1,
-          },
-        });
-
-        map.addSource('earthquakes', {
-          type: 'geojson',
-          data: 'https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson',
-        });
-
-        map.addLayer(
-          {
-            id: 'earthquakes-heat',
-            type: 'heatmap',
-            source: 'earthquakes',
-            maxzoom: 9,
-            paint: {
-              // Increase the heatmap weight based on frequency and property magnitude
-              'heatmap-weight': [
-                'interpolate',
-                ['linear'],
-                ['get', 'mag'],
-                0,
-                0,
-                6,
-                1,
-              ],
-              // Increase the heatmap color weight weight by zoom level
-              // heatmap-intensity is a multiplier on top of heatmap-weight
-              'heatmap-intensity': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                0,
-                1,
-                9,
-                3,
-              ],
-              // Color ramp for heatmap.  Domain is 0 (low) to 1 (high).
-              // Begin color ramp at 0-stop with a 0-transparancy color
-              // to create a blur-like effect.
-              'heatmap-color': [
-                'interpolate',
-                ['linear'],
-                ['heatmap-density'],
-                0,
-                'rgba(33,102,172,0)',
-                0.2,
-                'rgb(103,169,207)',
-                0.4,
-                'rgb(209,229,240)',
-                0.6,
-                'rgb(253,219,199)',
-                0.8,
-                'rgb(239,138,98)',
-                1,
-                'rgb(178,24,43)',
-              ],
-              // Adjust the heatmap radius by zoom level
-              'heatmap-radius': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                0,
-                2,
-                9,
-                20,
-              ],
-              // Transition from heatmap to circle layer by zoom level
-              'heatmap-opacity': [
-                'interpolate',
-                ['linear'],
-                ['zoom'],
-                7,
-                1,
-                9,
-                0,
-              ],
-            },
-          },
-          'waterway'
+        addClicksFeatureLayer(
+          map,
+          captureWidth,
+          captureHeight,
+          viewportWidth,
+          viewportHeight,
+          clickCoordinates
         );
+        addSyntheticsScreenshotRasterLayer(
+          map,
+          viewportWidth,
+          viewportHeight,
+          imageUrl
+        );
+        paintMapWithBackgroundColor(map, 'white');
       });
-
-      console.log(map);
     }
-  }, [embeddable, embeddableRoot, serviceName]);
+  }, [
+    embeddable,
+    embeddableRoot,
+    captureHeight,
+    captureWidth,
+    clickCoordinates,
+    viewportHeight,
+    viewportWidth,
+    imageUrl,
+  ]);
+
+  useEffect(() => {
+    // Destroy map if component get removed from DOM
+    return () => {
+      if (mapRef.current) {
+        mapRef.current?.remove();
+        // @ts-ignore
+        mapRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div style={{ height: 400, width: '100%' }}>
@@ -250,10 +189,4 @@ export function EmbeddedMapComponent() {
 
 EmbeddedMapComponent.displayName = 'EmbeddedMap';
 
-export const EmbeddedMap = React.memo(EmbeddedMapComponent);
-
-function pixelsToLatLng(pixel: number[], map: MLMap) {
-  const lngLat = map.unproject([pixel[0], pixel[1]]);
-
-  return [lngLat.lng, lngLat.lat] as [number, number];
-}
+export const ImageMap = React.memo(EmbeddedMapComponent);
