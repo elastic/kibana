@@ -600,7 +600,6 @@ const CreateRulePageComponent: React.FC = () => {
             dataViewId={defineStepData.dataViewId}
             timestampOverride={aboutStepData.timestampOverride}
             isLoading={isCreateRuleLoading || loading}
-            isActive={activeStep === RuleStep.aboutRule}
             form={aboutStepForm}
             esqlQuery={esqlQueryForAboutStep}
           />
