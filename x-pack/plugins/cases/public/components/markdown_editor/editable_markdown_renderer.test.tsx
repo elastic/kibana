@@ -65,6 +65,7 @@ const defaultProps = {
 // FLAKY: https://github.com/elastic/kibana/issues/171179
 // FLAKY: https://github.com/elastic/kibana/issues/171180
 // FLAKY: https://github.com/elastic/kibana/issues/171181
+// FLAKY: https://github.com/elastic/kibana/issues/171182
 describe.skip('EditableMarkdown', () => {
   const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
     children,
