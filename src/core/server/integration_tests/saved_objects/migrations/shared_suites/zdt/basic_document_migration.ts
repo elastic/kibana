@@ -5,9 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+/* eslint-disable no-console */
 
 import fs from 'fs/promises';
 import { range, sortBy } from 'lodash';
+import * as cp from 'child_process';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../../jest_matchers';
 import { getKibanaMigratorTestKit } from '../../kibana_migrator_test_kit';
@@ -29,6 +31,20 @@ export function createBasicDocumentsMigrationTest({
   let esServer: EsServer;
 
   beforeAll(async () => {
+    console.log('--- In beforeAll');
+    cp.execSync('ls -la .es', { stdio: 'inherit' });
+    await fs.readdir('.es').then((files) => {
+      console.log('--- In beforeAll readdir');
+      console.log(files);
+      files.forEach((file) => {
+        console.log(file);
+        cp.execSync(`ls -la .es/${file}`, { stdio: 'inherit' });
+      });
+    });
+
+    console.log('--- In beforeAll, trying to ls the cluster state');
+    cp.execSync('ls -la .es/es_test_serverless/stateless/cluster_state/', { stdio: 'inherit' });
+
     await fs.unlink(logFilePath).catch(() => {});
     esServer = await startES();
   });
