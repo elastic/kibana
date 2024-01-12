@@ -7,13 +7,10 @@
  */
 
 import { from } from 'rxjs';
-import { ensureDuration } from '@kbn/config-schema/src/duration';
 import type { Logger } from '@kbn/core/server';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
-
-const ES_TIMEOUT_IN_MS = 120000;
 
 export const esqlSearchStrategyProvider = (
   logger: Logger,
@@ -27,19 +24,6 @@ export const esqlSearchStrategyProvider = (
    * @returns `Observable<IEsSearchResponse<any>>`
    */
   search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
-    const abortController = new AbortController();
-
-    // We found out that there are cases where we are not aborting correctly
-    // For this reason we want to manually abort after 2 minute or after the custom options.transport?.requestTimeout
-    const forceAbortTimeout = options.transport?.requestTimeout
-      ? ensureDuration(options.transport?.requestTimeout).asMilliseconds()
-      : ES_TIMEOUT_IN_MS;
-    abortSignal?.addEventListener('abort', () => {
-      abortController.abort();
-    });
-    // Also abort after two mins or after the custom options.transport?.requestTimeout
-    setTimeout(() => abortController.abort(), forceAbortTimeout);
-
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
@@ -58,7 +42,7 @@ export const esqlSearchStrategyProvider = (
             },
           },
           {
-            signal: abortController.signal,
+            signal: abortSignal,
             meta: true,
             // we don't want the ES client to retry (default value is 3)
             maxRetries: 0,
