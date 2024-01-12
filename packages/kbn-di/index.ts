@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Service, type ServiceOptions } from './src/decorators/service';
+export { InjectionContainerImpl } from './src/container';

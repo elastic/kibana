@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import 'reflect-metadata';
-
-export interface InjectOptions<T> {
-
-}
-
-export function Inject<T = unknown>(options: InjectOptions<T> = {}): Function {
-  return function (target: Object, propertyName: string | symbol, index?: number): void {
-    console.log('*** Inject', arguments)
-  }
-}
+/**
+ * Represent a unique identifier for a registered service.
+ *
+ * The `ServiceType` generic type can be used to specify and then infer the type of the service associated with the Id.
+ */
+export type ServiceIdentifier<ServiceType = unknown> = string | symbol;

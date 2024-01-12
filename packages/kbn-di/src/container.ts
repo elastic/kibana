@@ -7,36 +7,20 @@
  */
 
 import {
-  ServiceIdentifier,
   ServiceScope,
   InjectionParameter,
   isServiceIdParam,
   isServiceMarkerParam,
 } from './service';
-import type { ServiceFactory } from './types/service_factory';
-import type { ServiceConstructor } from './types/service_contructor';
-import type { ServiceRegistration } from './types/service_registration';
-import { isConstructorRegistration, isFactoryRegistration } from './helpers';
-
-export interface InjectionContainer<Ctx = unknown> {
-  getId(): string;
-
-  isRoot(): boolean;
-
-  getParent(): InjectionContainer | undefined;
-
-  getContext(): Ctx;
-
-  getServiceMetadata(): ServiceMetadataRegistry;
-
-  createChild<ChildCtx = unknown>(
-    options: CreateChildOptions<ChildCtx>
-  ): InjectionContainer<ChildCtx>;
-
-  get<T = unknown>(identifier: ServiceIdentifier<T>): T;
-
-  register<T = unknown>(registration: ServiceRegistration<T>): void;
-}
+import type {
+  InjectionContainer,
+  CreateChildOptions,
+  ServiceIdentifier,
+  ServiceFactory,
+  ServiceConstructor,
+  ServiceRegistration,
+} from './types';
+import { isConstructorRegistration, isFactoryRegistration, getContainerRoot } from './helpers';
 
 interface ServiceMetadata<T = unknown> {
   /**
@@ -74,11 +58,6 @@ export interface InjectionContainerConstructorOptions<Ctx = unknown> {
   parent?: InjectionContainerImpl;
 }
 
-export interface CreateChildOptions<Ctx = unknown> {
-  id: string;
-  context: Ctx;
-}
-
 type ServiceMetadataRegistry = Map<ServiceIdentifier, ServiceMetadata<unknown>>;
 
 export const CONTEXT_SERVICE_KEY = Symbol('InjectionContainerContext');
@@ -98,13 +77,8 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
     this.containerId = containerId;
     this.parent = parent;
     this.context = context;
-    this.root = getRoot(this);
-    this.serviceMap.set(CONTEXT_SERVICE_KEY, this.context);
-    this.serviceMetadata.set(CONTEXT_SERVICE_KEY, {
-      id: CONTEXT_SERVICE_KEY,
-      scope: 'container',
-      providerType: 'factory', // TODO: need to change to instance
-    });
+    this.root = getContainerRoot(this);
+    this._registerBuiltInService();
   }
 
   getId() {
@@ -247,14 +221,16 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
 
     return instance;
   }
-}
 
-function getRoot(container: InjectionContainerImpl) {
-  let current = container;
-  while (!current.isRoot()) {
-    current = current.getParent()!;
+  private _registerBuiltInService() {
+    // register the container's context
+    this.serviceMap.set(CONTEXT_SERVICE_KEY, this.context);
+    this.serviceMetadata.set(CONTEXT_SERVICE_KEY, {
+      id: CONTEXT_SERVICE_KEY,
+      scope: 'container',
+      providerType: 'factory', // TODO: need to change to instance
+    });
   }
-  return current;
 }
 
 function getCycle(

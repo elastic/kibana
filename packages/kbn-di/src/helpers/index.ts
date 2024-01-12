@@ -7,3 +7,4 @@
  */
 
 export { isFactoryRegistration, isConstructorRegistration } from './registration';
+export { getContainerRoot } from './container';

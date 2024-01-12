@@ -6,5 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { Service, type ServiceOptions } from './service';
-export { Inject, type InjectOptions } from './inject';
+import type { InjectionContainer } from '../types';
+
+export function getContainerRoot<Container extends InjectionContainer>(container: Container) {
+  let current = container;
+  while (!current.isRoot()) {
+    current = current.getParent()! as Container;
+  }
+  return current;
+}

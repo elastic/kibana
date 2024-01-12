@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-/**
- * Only string for now.
- */
-export type ServiceIdentifier<T = unknown> = string | symbol;
+import type { ServiceIdentifier } from './types';
 
 export type ServiceScope = 'global' | 'container';
 
@@ -17,9 +14,9 @@ export type ServiceScope = 'global' | 'container';
  *
  * Use the `serviceId` helper function to build
  */
-interface ServiceIdParameter {
+interface ServiceIdParameter<T = unknown> {
   type: 'serviceId';
-  serviceId: ServiceIdentifier;
+  serviceId: ServiceIdentifier<T>;
 }
 
 /**
@@ -33,7 +30,7 @@ interface ServiceMarkerParameter {
 
 export type InjectionParameter = ServiceIdParameter | ServiceMarkerParameter;
 
-export function serviceId(id: ServiceIdentifier): ServiceIdParameter {
+export function serviceId<T = unknown>(id: ServiceIdentifier<T>): ServiceIdParameter<T> {
   return {
     type: 'serviceId',
     serviceId: id,
