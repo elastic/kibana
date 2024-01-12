@@ -333,17 +333,6 @@ describe('configure', () => {
       ).toContain('Invalid value false supplied');
     });
 
-    it('limits the defaultValue to ', () => {
-      expect(
-        PathReporter.report(
-          TextCustomFieldConfigurationRt.decode({
-            ...defaultRequest,
-            defaultValue: false,
-          })
-        )[0]
-      ).toContain('Invalid value false supplied');
-    });
-
     it(`throws an error if the default value is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
       expect(
         PathReporter.report(

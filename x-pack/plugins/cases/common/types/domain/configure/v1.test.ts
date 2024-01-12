@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
 import { ConnectorTypes } from '../connector/v1';
 import { CustomFieldTypes } from '../custom_field/v1';
 import {
@@ -193,6 +194,7 @@ describe('configure', () => {
       label: 'Text Custom Field',
       type: CustomFieldTypes.TEXT,
       required: true,
+      defaultValue: 'foobar',
     };
 
     it('has expected attributes in request', () => {
@@ -202,6 +204,17 @@ describe('configure', () => {
         _tag: 'Right',
         right: { ...defaultRequest },
       });
+    });
+
+    it('defaultValue fails if the type is not string', () => {
+      expect(
+        PathReporter.report(
+          TextCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: false,
+          })
+        )[0]
+      ).toContain('Invalid value false supplied');
     });
 
     it('removes foo:bar attributes from request', () => {
@@ -219,7 +232,8 @@ describe('configure', () => {
       key: 'my_toggle_custom_field',
       label: 'Toggle Custom Field',
       type: CustomFieldTypes.TOGGLE,
-      required: false,
+      required: true,
+      defaultValue: false,
     };
 
     it('has expected attributes in request', () => {
@@ -238,6 +252,17 @@ describe('configure', () => {
         _tag: 'Right',
         right: { ...defaultRequest },
       });
+    });
+
+    it('defaultValue fails if the type is not boolean', () => {
+      expect(
+        PathReporter.report(
+          ToggleCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: 'foobar',
+          })
+        )[0]
+      ).toContain('Invalid value "foobar" supplied');
     });
   });
 });
