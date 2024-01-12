@@ -48,7 +48,7 @@ export const useDiscoverInTimelineActions = (
   const timeline = useShallowEqualSelector(
     (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
   );
-  const { savedSearchId } = timeline;
+  const { savedSearchId, version } = timeline;
 
   // We're using a ref here to prevent a cyclic hook-dependency chain of updateSavedSearch
   const timelineRef = useRef(timeline);
@@ -56,7 +56,7 @@ export const useDiscoverInTimelineActions = (
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync: saveSavedSearch } = useMutation({
+  const { mutateAsync: saveSavedSearch, status } = useMutation({
     mutationFn: ({
       savedSearch,
       savedSearchOptions,
@@ -75,6 +75,7 @@ export const useDiscoverInTimelineActions = (
       }
       queryClient.invalidateQueries({ queryKey: ['savedSearchById', savedSearchId] });
     },
+    mutationKey: [version],
   });
 
   const getDefaultDiscoverAppState: () => Promise<DiscoverAppState> = useCallback(async () => {
@@ -217,7 +218,7 @@ export const useDiscoverInTimelineActions = (
           const responseIsEmpty = !response || !response?.id;
           if (responseIsEmpty) {
             throw new Error('Response is empty');
-          } else if (!savedSearchId && !responseIsEmpty) {
+          } else if (!savedSearchId && !responseIsEmpty && status !== 'loading') {
             dispatch(
               timelineActions.updateSavedSearchId({
                 id: TimelineId.active,
@@ -236,7 +237,7 @@ export const useDiscoverInTimelineActions = (
         }
       }
     },
-    [persistSavedSearch, savedSearchId, dispatch, discoverDataService]
+    [persistSavedSearch, savedSearchId, dispatch, discoverDataService, status]
   );
 
   const initializeLocalSavedSearch = useCallback(
