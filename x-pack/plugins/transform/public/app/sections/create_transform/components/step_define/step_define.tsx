@@ -19,7 +19,7 @@ import { selectCreateTransformRequestBody } from '../../state_management/step_cr
 import { WIZARD_STEPS } from '../../state_management/wizard_slice';
 
 import { WizardNav } from '../wizard_nav';
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView } from '../wizard/wizard';
 
 import { StepDefineForm } from './step_define_form';
 import { StepDefineSummary } from './step_define_summary';
@@ -33,8 +33,7 @@ export const StepDefineFormWrapper: FC = () => {
     fieldFormats,
     charts,
   } = appDependencies;
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const stepDefineState = useWizardSelector((s) => s.stepDefine);
   const transformConfigValid = useSelector(selectTransformConfigValid);

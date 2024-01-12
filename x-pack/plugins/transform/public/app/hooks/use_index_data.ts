@@ -39,7 +39,7 @@ import { isDefaultQuery, matchAllQuery } from '../common';
 import { useToastNotifications, useAppDependencies } from '../app_dependencies';
 import { useWizardSelector } from '../sections/create_transform/state_management/create_transform_store';
 import { selectTransformConfigQuery } from '../sections/create_transform/state_management/step_define_selectors';
-import { useWizardContext } from '../sections/create_transform/components/wizard/wizard';
+import { useDataView } from '../sections/create_transform/components/wizard/wizard';
 
 import { useGetHistogramsForFields } from './use_get_histograms_for_fields';
 import { useDataSearch } from './use_data_search';
@@ -52,8 +52,7 @@ export const useIndexData = (): UseIndexDataReturnType => {
   const { useFieldStatsFlyoutContext } = ml;
   const fieldStatsContext = useFieldStatsFlyoutContext();
 
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const timeRangeMs = useWizardSelector((s) => s.stepDefine.timeRangeMs);
   const combinedRuntimeMappings = useWizardSelector(

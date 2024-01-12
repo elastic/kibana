@@ -33,7 +33,7 @@ import {
 } from '../../../state_management/create_transform_store';
 import { stepDefineSlice } from '../../../state_management/step_define_slice';
 import { getAggNameConflictToastMessages, getPivotDropdownOptions } from '../common';
-import { useWizardContext } from '../../wizard/wizard';
+import { useDataView } from '../../wizard/wizard';
 import {
   isPivotAggConfigTopMetric,
   isPivotAggsWithExtendedForm,
@@ -50,10 +50,7 @@ function isConfigInvalid(aggsArray: PivotAggsConfig[]): boolean {
   return aggsArray.some((agg) => {
     if (!isPivotAggsWithExtendedForm(agg)) return false;
     const utils = getAggConfigUtils(agg);
-    return (
-      (isPivotAggsWithExtendedForm(agg) && !utils?.isValid()) ||
-      (agg.subAggs && isConfigInvalid(Object.values(agg.subAggs)))
-    );
+    return isPivotAggsWithExtendedForm(agg) && !utils?.isValid();
   });
 }
 
@@ -77,9 +74,8 @@ export function validatePivotConfig(config: TransformPivotConfig['pivot']) {
 }
 
 export const usePivotConfigOptions = () => {
+  const dataView = useDataView();
   const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
 
   return useMemo(
     () => getPivotDropdownOptions(dataView, runtimeMappings),

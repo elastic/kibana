@@ -17,7 +17,7 @@ import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
 import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, FilterAggConfigBase } from '../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
-import { useWizardContext } from '../../../../wizard/wizard';
+import { useDataView } from '../../../../wizard/wizard';
 import { useWizardSelector } from '../../../../../state_management/create_transform_store';
 import { getFilterAggTypeUtils, getFilterAggTypeComponent } from '../config';
 
@@ -59,8 +59,7 @@ export const FilterAggForm: AggFormComponent<FilterAggConfigBase> = ({
   onChange,
   selectedField,
 }) => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
   const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
 
   const filterAggsOptions = useMemo(

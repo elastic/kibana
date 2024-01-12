@@ -13,7 +13,7 @@ import { PLUGIN } from '../../../../../../common/constants';
 
 import { useAppDependencies } from '../../../../app_dependencies';
 
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView } from '../wizard/wizard';
 import { useSearchBar } from '../step_define/hooks/use_search_bar';
 import { QUERY_LANGUAGE_KUERY } from '../step_define';
 
@@ -23,8 +23,7 @@ export const SourceSearchBar: FC = () => {
     state: { queryErrorMessage, searchInput },
   } = useSearchBar();
 
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const {
     unifiedSearch: {

@@ -21,11 +21,10 @@ import { useToastNotifications } from '../../../../app_dependencies';
 import { useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView } from '../wizard/wizard';
 
 export const TransformConfigPreviewFormRow: FC = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const toastNotifications = useToastNotifications();
 

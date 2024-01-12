@@ -16,7 +16,7 @@ import { getTransformPreviewDevConsoleStatement } from '../../../../common/data_
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 import { useWizardSelector } from '../../state_management/create_transform_store';
 
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView } from '../wizard/wizard';
 
 const copyToClipboardDescription = i18n.translate(
   'xpack.transform.pivotPreview.copyClipboardTooltip',
@@ -26,8 +26,7 @@ const copyToClipboardDescription = i18n.translate(
 );
 
 export const CopyConfigToClipboard: FC = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const copyToClipboardPreviewRequest = useWizardSelector((state) =>
     selectPreviewRequest(state, dataView)

@@ -31,14 +31,14 @@ import { advancedEditorsSidebarWidth } from '../../constants';
 
 import { DatePickerApplySwitch } from '../date_picker_apply_switch';
 import { useDatePicker } from '../step_define/hooks/use_date_picker';
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView, useSearchItems } from '../wizard/wizard';
 
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
 export const TimeRangeFormRow: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const searchItems = useSearchItems();
+  const dataView = useDataView();
 
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     TransformStorageKey,

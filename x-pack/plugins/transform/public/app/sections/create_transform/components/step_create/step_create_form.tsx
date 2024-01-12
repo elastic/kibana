@@ -46,15 +46,14 @@ import { isContinuousTransform } from '../../../../../../common/types/transform'
 import { TransformAlertFlyout } from '../../../../../alerting/transform_alerting_flyout';
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectCreateTransformRequestBody } from '../../state_management/step_create_selectors';
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView } from '../wizard/wizard';
 
 export interface StepCreateFormProps {
   transformConfig: PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema;
 }
 
 export const StepCreateForm: FC = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const [redirectToTransformManagement, setRedirectToTransformManagement] = useState(false);
 

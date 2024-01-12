@@ -13,15 +13,14 @@ import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 
 import { QUERY_LANGUAGE_KUERY, QUERY_LANGUAGE_LUCENE, QUERY_LANGUAGE } from '../common';
 
-import { useWizardContext } from '../../wizard/wizard';
+import { useDataView } from '../../wizard/wizard';
 import {
   useWizardActions,
   useWizardSelector,
 } from '../../../state_management/create_transform_store';
 
 export const useSearchBar = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const searchLanguage = useWizardSelector((s) => s.stepDefine.searchLanguage);
   const searchString = useWizardSelector((s) => s.stepDefine.searchString);

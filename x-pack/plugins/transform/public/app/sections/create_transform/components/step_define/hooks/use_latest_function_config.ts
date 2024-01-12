@@ -16,7 +16,7 @@ import { LatestFunctionConfigUI } from '../../../../../../../common/types/transf
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 import { useAppDependencies } from '../../../../../app_dependencies';
 import { useWizardSelector } from '../../../state_management/create_transform_store';
-import { useWizardContext } from '../../wizard/wizard';
+import { useDataView } from '../../wizard/wizard';
 import type { AdvancedRuntimeMappingsEditorState } from '../../../state_management/advanced_runtime_mappings_editor_slice';
 
 /**
@@ -135,8 +135,7 @@ export function useLatestFunctionOptions(): {
   uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>>;
   sortFieldOptions: Array<EuiComboBoxOptionOption<string>>;
 } {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
   const runtimeMappings = useWizardSelector((s) => s.advancedRuntimeMappingsEditor.runtimeMappings);
 
   const { data } = useAppDependencies();

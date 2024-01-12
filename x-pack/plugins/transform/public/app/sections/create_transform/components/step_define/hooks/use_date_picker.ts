@@ -13,12 +13,11 @@ import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
-import { useWizardContext } from '../../wizard/wizard';
+import { useDataView } from '../../wizard/wizard';
 import { useWizardActions } from '../../../state_management/create_transform_store';
 
 export const useDatePicker = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const { setTimeRangeMs } = useWizardActions();
 

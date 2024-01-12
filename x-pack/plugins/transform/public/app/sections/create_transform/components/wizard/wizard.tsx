@@ -45,6 +45,16 @@ export const useWizardContext = () => {
   return value;
 };
 
+export const useDataView = () => {
+  const { searchItems } = useWizardContext();
+  return searchItems.dataView;
+};
+
+export const useSearchItems = () => {
+  const { searchItems } = useWizardContext();
+  return searchItems;
+};
+
 export const Wizard: FC = () => {
   const appDependencies = useAppDependencies();
   const { showNodeInfo } = useEnabledFeatures();

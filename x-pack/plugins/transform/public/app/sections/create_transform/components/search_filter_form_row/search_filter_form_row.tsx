@@ -35,11 +35,11 @@ import { advancedEditorsSidebarWidth } from '../../constants';
 import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
 import { AdvancedSourceEditor } from '../advanced_source_editor';
 import { SourceSearchBar } from '../source_search_bar';
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView, useSearchItems } from '../wizard/wizard';
 
 export const SearchFilterFormRow: FC = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const searchItems = useSearchItems();
+  const dataView = useDataView();
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
 
   const advancedSourceEditorConfig = useWizardSelector(

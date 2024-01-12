@@ -58,11 +58,10 @@ import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView } from '../wizard/wizard';
 
 export const StepDetailsForm: FC = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
   const stepDefineState = useWizardSelector((s) => s.stepDefine);
 
   const { application, i18n: i18nStart, theme } = useAppDependencies();
@@ -259,7 +258,7 @@ export const StepDetailsForm: FC = () => {
     }
   }, [dataViewTitlesError]);
 
-  const sourceIndexDateFieldNames = searchItems.dataView.fields
+  const sourceIndexDateFieldNames = dataView.fields
     .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
     .map((f) => f.name)
     .sort();

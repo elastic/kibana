@@ -11,11 +11,11 @@ import { EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView, useSearchItems } from '../wizard/wizard';
 
 export const DataViewFormRow: FC = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const searchItems = useSearchItems();
+  const dataView = useDataView();
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
 
   if (searchItems.savedSearch === undefined) return null;

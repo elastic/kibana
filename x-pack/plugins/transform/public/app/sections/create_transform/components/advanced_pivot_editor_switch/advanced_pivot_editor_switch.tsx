@@ -16,11 +16,10 @@ import { SwitchModal } from '../switch_modal';
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
-import { useWizardContext } from '../wizard/wizard';
+import { useDataView } from '../wizard/wizard';
 
 export const AdvancedPivotEditorSwitch: FC = () => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const advancedEditorConfig = useWizardSelector((s) => s.advancedPivotEditor.advancedEditorConfig);
   const advancedEditorConfigLastApplied = useWizardSelector(

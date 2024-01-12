@@ -38,7 +38,7 @@ import {
   isLatestPartialRequest,
   isPivotPartialRequest,
 } from '../sections/create_transform/components/step_define/common/types';
-import { useWizardContext } from '../sections/create_transform/components/wizard/wizard';
+import { useDataView } from '../sections/create_transform/components/wizard/wizard';
 import {
   selectTransformConfigQuery,
   selectValidatedRequestPayload,
@@ -105,8 +105,7 @@ export function getCombinedProperties(
 }
 
 export const useTransformConfigData = (): UseIndexDataReturnType => {
-  const { searchItems } = useWizardContext();
-  const { dataView } = searchItems;
+  const dataView = useDataView();
 
   const query = useSelector(selectTransformConfigQuery);
   const { requestPayload, validationStatus } = useSelector(selectValidatedRequestPayload);
