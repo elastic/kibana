@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
+  EuiFlyoutResizable,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -204,7 +204,7 @@ export function DiscoverGridFlyout({
 
   return (
     <EuiPortal>
-      <EuiFlyout
+      <EuiFlyoutResizable
         onClose={onClose}
         type="push"
         size={flyoutSize}
@@ -264,7 +264,7 @@ export function DiscoverGridFlyout({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
-      </EuiFlyout>
+      </EuiFlyoutResizable>
     </EuiPortal>
   );
 }
