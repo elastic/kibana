@@ -1,0 +1,21 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-message-signing-keys:15d50edc-e8aa-4856-a5a3-df0188c4f550",
+    "index": ".kibana_ingest",
+    "source": {
+      "fleet-message-signing-keys": {
+        "private_key": "private_key",
+        "public_key": "public_key",
+        "passphrase": "+gMsqYHYbY62vUhjQbz6zVzTwfDC8n5dTkmFHoq7a6OwOvA8XIFfMYgThcnB/vewKbJWl/OCDrckZwuZCfpWjGGkgxUbUafO0FrkYz7vfxJs4tzHKWVpDhR+xio8YGKwoVofZzlGBMe9duAu6nj3BX7B92Q=",
+        "passphrase_plain": "This is the passphrase"
+      },
+      "type": "fleet-message-signing-keys",
+      "references": [],
+      "updated_at": "2023-12-21T22:10:37.254Z",
+      "namespaces": [
+        "default"
+      ]
+    }
+  }
+}

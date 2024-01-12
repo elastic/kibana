@@ -24,6 +24,7 @@ export function registerHiddenSORoutes(
       const [, { encryptedSavedObjects }] = await core.getStartServices();
       const spaceId = deps.spaces.spacesService.getSpaceId(request);
       const namespace = deps.spaces.spacesService.spaceIdToNamespace(spaceId);
+
       try {
         return response.ok({
           body: await encryptedSavedObjects
@@ -34,7 +35,9 @@ export function registerHiddenSORoutes(
         });
       } catch (err) {
         if (encryptedSavedObjects.isEncryptionError(err)) {
-          return response.badRequest({ body: 'Failed to decrypt attributes' });
+          return response.badRequest({
+            body: `Failed to decrypt attributes: ${err.output.payload.message}`,
+          });
         }
 
         return response.customError({ body: err, statusCode: 500 });
