@@ -81,7 +81,7 @@ describe('When using the suspend-process action from response actions console', 
     enterConsoleCommand(renderResult, 'suspend-process --pid 123');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Endpoint Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+      'The current version of the Endpoint Agent does not support suspend-process. Upgrade your Elastic Agent through Fleet to the latest version to enable this response action.'
     );
   });
 

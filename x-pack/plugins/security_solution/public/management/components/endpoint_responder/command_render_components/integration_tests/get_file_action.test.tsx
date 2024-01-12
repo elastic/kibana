@@ -82,7 +82,7 @@ describe('When using get-file action from response actions console', () => {
     enterConsoleCommand(renderResult, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Endpoint Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+      'The current version of the Endpoint Agent does not support get-file. Upgrade your Elastic Agent through Fleet to the latest version to enable this response action.'
     );
   });
 
