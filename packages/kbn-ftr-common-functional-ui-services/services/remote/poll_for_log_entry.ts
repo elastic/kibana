@@ -9,7 +9,7 @@
 import { WebDriver, logging } from 'selenium-webdriver';
 import * as Rx from 'rxjs';
 import { mergeMap, catchError, delay, repeat } from 'rxjs/operators';
-import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
+import { NoSuchSessionError, NoSuchWindowError } from 'selenium-webdriver/lib/error';
 
 export const FINAL_LOG_ENTRY_PREFIX = 'WEBDRIVER SESSION IS STOPPED';
 
@@ -44,7 +44,11 @@ export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
     delay(ms),
 
     catchError((error, resubscribe) => {
-      if (error instanceof NoSuchSessionError) {
+      if (
+        error instanceof NoSuchSessionError || // session is invalid
+        error instanceof NoSuchWindowError || // browser window crashed
+        error?.message.startsWith('ECONNREFUSED') // webdriver server is not responding, often after one of previous errors
+      ) {
         // WebDriver session is invalid, sending the last log message
         return Rx.concat([
           new logging.Entry('SEVERE', `${FINAL_LOG_ENTRY_PREFIX}: ${error.message}`),
