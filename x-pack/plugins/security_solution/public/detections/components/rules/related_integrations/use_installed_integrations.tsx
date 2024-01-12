@@ -16,9 +16,13 @@ const ONE_MINUTE = 60000;
 
 export interface UseInstalledIntegrationsArgs {
   packages?: string[];
+  skip?: boolean;
 }
 
-export const useInstalledIntegrations = ({ packages }: UseInstalledIntegrationsArgs) => {
+export const useInstalledIntegrations = ({
+  packages,
+  skip = false,
+}: UseInstalledIntegrationsArgs) => {
   // const { addError } = useAppToasts();
 
   return useQuery<InstalledIntegrationArray>(
@@ -29,6 +33,9 @@ export const useInstalledIntegrations = ({ packages }: UseInstalledIntegrationsA
       },
     ],
     async ({ signal }) => {
+      if (skip) {
+        return [];
+      }
       const integrations = await fleetIntegrationsApi.fetchInstalledIntegrations({
         packages,
         signal,
