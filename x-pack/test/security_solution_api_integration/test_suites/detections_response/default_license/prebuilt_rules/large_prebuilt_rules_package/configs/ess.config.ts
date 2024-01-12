@@ -23,7 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('..')],
     junit: {
       reportName:
-        'Detection Engine ESS / Large Prebuilt Rules Package Installation API Integration Tests',
+        'Rules Management - Large Prebuilt Rules Package Integration Tests - ESS Env - Trial License',
     },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
