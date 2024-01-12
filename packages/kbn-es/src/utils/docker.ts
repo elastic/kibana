@@ -59,6 +59,10 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
+const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
+  return value === 'es' || value === 'oblt' || value === 'security';
+};
+
 export type ServerlessProjectType = 'es' | 'oblt' | 'security';
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
@@ -594,7 +598,11 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       }, {} as Record<string, string>)
     : {};
 
-  // read roles for the specified project only, 'es' if not defined
+  // Check if projectType is valid
+  if (projectType && !isServerlessProjectType(projectType)) {
+    throw new Error(`Incorrect serverless project type: ${projectType}`);
+  }
+  // Read roles for the specified projectType, 'es' if it is not defined
   const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType ?? 'es', 'roles.yml');
 
   const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];
