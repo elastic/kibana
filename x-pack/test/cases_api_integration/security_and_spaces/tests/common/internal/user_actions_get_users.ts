@@ -43,6 +43,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
 
+  // Use simple image data URL to match server side validation of image type
+  const IMAGE_URL_TEST =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAIBJREFUeF7t14ERACAMAjG6/9A6yMcROEuOe9tb+J0A/AAnoAPCHTglSAEKUIACFAgngEEMYhCDGAwjYAxhEIMYxCAGMRhOAIMYxCAGMRhGwBrEIAYxiEEMYjCcAAYxiEEMYjCMgDWIQQxiEIMYxGA4AQxiEIMYxGAYAWsQg3UGPw2Yf8EFsz4JAAAAAElFTkSuQmCC';
+
   describe('user_actions_get_users', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
@@ -160,9 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
           req: {
             initials: 'ES',
             color: '#6092C0',
-            // Use simple image to match server side validation of image type
-            imageUrl:
-              'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAIBJREFUeF7t14ERACAMAjG6/9A6yMcROEuOe9tb+J0A/AAnoAPCHTglSAEKUIACFAgngEEMYhCDGAwjYAxhEIMYxCAGMRhOAIMYxCAGMRhGwBrEIAYxiEEMYjCcAAYxiEEMYjCMgDWIQQxiEIMYxGA4AQxiEIMYxGAYAWsQg3UGPw2Yf8EFsz4JAAAAAElFTkSuQmCC',
+            imageUrl: IMAGE_URL_TEST,
           },
           headers: superUserHeaders,
         });
@@ -472,8 +474,7 @@ export default ({ getService }: FtrProviderContext): void => {
               initials: 4,
               // @ts-expect-error: types are not correct
               color: true,
-              // @ts-expect-error: types are not correct
-              imageUrl: [],
+              imageUrl: IMAGE_URL_TEST,
             },
             headers: superUserHeaders,
           });
