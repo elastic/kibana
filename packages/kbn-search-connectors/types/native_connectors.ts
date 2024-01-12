@@ -103,7 +103,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'searchConnectors.nativeConnectors.azureBlobStorage.accountNameLabel',
           {
-            defaultMessage: 'Account name',
+            defaultMessage: 'Azure Blob Storage account name',
           }
         ),
         options: [],
@@ -123,7 +123,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'searchConnectors.nativeConnectors.azureBlobStorage.accountKeyLabel',
           {
-            defaultMessage: 'Account key',
+            defaultMessage: 'Azure Blob Storage account key',
           }
         ),
         options: [],
@@ -143,7 +143,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'searchConnectors.nativeConnectors.azureBlobStorage.blobEndpointLabel',
           {
-            defaultMessage: 'Blob endpoint',
+            defaultMessage: 'Azure Blob Storage blob endpoint',
           }
         ),
         options: [],
@@ -164,7 +164,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'searchConnectors.nativeConnectors.azureBlobStorage.containerNameLabel',
           {
-            defaultMessage: 'List of Containers',
+            defaultMessage: 'Azure Blob Storage containers',
           }
         ),
         options: [],
@@ -810,11 +810,11 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'searchConnectors.nativeConnectors.googleCloudStorage.bucketNameLabel',
           {
-            defaultMessage: 'List of buckets',
+            defaultMessage: 'Google Cloud Storage buckets',
           }
         ),
         options: [],
-        order: 4,
+        order: 1,
         required: true,
         sensitive: false,
         tooltip: null,
