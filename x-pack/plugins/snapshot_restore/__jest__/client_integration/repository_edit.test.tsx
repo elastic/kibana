@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers, TestBed, getRandomString } from './helpers';
@@ -16,23 +15,6 @@ import { REPOSITORY_EDIT, REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.repositoryEdit;
 const { setup: setupRepositoryAdd } = pageHelpers.repositoryAdd;
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
 
 describe('<RepositoryEdit />', () => {
   let testBed: TestBed<RepositoryEditTestSubjects>;

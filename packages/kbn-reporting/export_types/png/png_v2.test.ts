@@ -15,12 +15,9 @@ import type { LocatorParams } from '@kbn/reporting-common/types';
 import type { TaskPayloadPNGV2 } from '@kbn/reporting-export-types-png-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
-import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-
+import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
+import type { CaptureResult } from '@kbn/screenshotting-plugin/server/screenshots';
 import { PngExportType } from '.';
-import { generatePngObservable } from './generate_png';
-
-jest.mock('./generate_png');
 
 let content: string;
 let mockPngExportType: PngExportType;
@@ -34,49 +31,51 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
 };
+let encryptedHeaders: string;
 
+const screenshottingMock = createMockScreenshottingStart();
+const getScreenshotsSpy = jest.spyOn(screenshottingMock, 'getScreenshots');
+const testContent = 'raw string from get_screenhots';
 const getBasePayload = (baseObj: unknown) => baseObj as TaskPayloadPNGV2;
 
 beforeEach(async () => {
   content = '';
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
 
-  const configType = createMockConfigSchema({
-    encryptionKey: mockEncryptionKey,
-    queue: {
-      indexInterval: 'daily',
-      timeout: Infinity,
-    },
-  });
-
+  const configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
   const context = coreMock.createPluginInitializerContext(configType);
 
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
+
+  encryptedHeaders = await encryptHeaders({});
 
   mockPngExportType = new PngExportType(mockCoreSetup, configType, mockLogger, context);
   mockPngExportType.setup({
     basePath: { set: jest.fn() },
   });
   mockPngExportType.start({
+    esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
-    screenshotting: {} as unknown as ScreenshottingStart,
-    esClient: elasticsearchServiceMock.createClusterClient(),
+    screenshotting: screenshottingMock,
+  });
+
+  getScreenshotsSpy.mockImplementation(() => {
+    return Rx.of({
+      metrics: { cpu: 0 },
+      results: [{ screenshots: [{ data: Buffer.from(testContent) }] }] as CaptureResult['results'],
+    });
   });
 });
 
-afterEach(() => (generatePngObservable as jest.Mock).mockReset());
-
 test(`passes browserTimezone to generatePng`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
-  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
-
   const browserTimezone = 'UTC';
   await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({
       forceNow: 'test',
+      layout: { dimensions: {} },
       locatorParams: [],
       browserTimezone,
       headers: encryptedHeaders,
@@ -85,25 +84,24 @@ test(`passes browserTimezone to generatePng`, async () => {
     stream
   );
 
-  expect(generatePngObservable).toHaveBeenCalledWith(
-    expect.anything(),
-    expect.anything(),
-    expect.objectContaining({
-      browserTimezone: 'UTC',
-      headers: {},
-      layout: { id: 'preserve_layout' },
-    })
-  );
+  expect(getScreenshotsSpy).toHaveBeenCalledWith({
+    format: 'png',
+    headers: {},
+    layout: { dimensions: {}, id: 'preserve_layout' },
+    urls: [
+      [
+        'http://localhost:80/mock-server-basepath/app/reportingRedirect?forceNow=test',
+        { __REPORTING_REDIRECT_LOCATOR_STORE_KEY__: undefined },
+      ],
+    ],
+  });
 });
 
 test(`returns content_type of application/png`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
-
-  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('foo') }));
-
   const { content_type: contentType } = await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({
+      layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
@@ -114,13 +112,10 @@ test(`returns content_type of application/png`, async () => {
 });
 
 test(`returns content of generatePng getBuffer base64 encoded`, async () => {
-  const testContent = 'raw string from get_screenhots';
-  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
-
-  const encryptedHeaders = await encryptHeaders({});
   await mockPngExportType.runTask(
     'pngJobId',
     getBasePayload({
+      layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),

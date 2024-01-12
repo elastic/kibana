@@ -47,7 +47,7 @@ interface Props {
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
-    const { http, ragOnAlerts } = useAssistantContext();
+    const { http } = useAssistantContext();
     const {
       data: kbStatus,
       isLoading,
@@ -63,11 +63,11 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
     // Resource availability state
     const isLoadingKb = isLoading || isFetching || isSettingUpKB || isDeletingUpKB;
-    const isKnowledgeBaseAvailable = knowledgeBase.assistantLangChain && kbStatus?.elser_exists;
+    const isKnowledgeBaseAvailable = knowledgeBase.isEnabledKnowledgeBase && kbStatus?.elser_exists;
     const isESQLAvailable =
-      knowledgeBase.assistantLangChain && isKnowledgeBaseAvailable && isKnowledgeBaseEnabled;
+      knowledgeBase.isEnabledKnowledgeBase && isKnowledgeBaseAvailable && isKnowledgeBaseEnabled;
     // Prevent enabling if elser doesn't exist, but always allow to disable
-    const isSwitchDisabled = !kbStatus?.elser_exists && !knowledgeBase.assistantLangChain;
+    const isSwitchDisabled = !kbStatus?.elser_exists && !knowledgeBase.isEnabledKnowledgeBase;
 
     // Calculated health state for EuiHealth component
     const elserHealth = isElserEnabled ? 'success' : 'subdued';
@@ -75,13 +75,13 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const esqlHealth = isESQLEnabled ? 'success' : 'subdued';
 
     //////////////////////////////////////////////////////////////////////////////////////////
-    // Main `Knowledge Base` switch, which toggles the `assistantLangChain` UI feature toggle
+    // Main `Knowledge Base` switch, which toggles the `isEnabledKnowledgeBase` UI feature toggle
     // setting that is saved to localstorage
     const onEnableAssistantLangChainChange = useCallback(
       (event: EuiSwitchEvent) => {
         setUpdatedKnowledgeBaseSettings({
           ...knowledgeBase,
-          assistantLangChain: event.target.checked,
+          isEnabledKnowledgeBase: event.target.checked,
         });
 
         // If enabling and ELSER exists, try to set up automatically
@@ -92,16 +92,16 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
       [kbStatus?.elser_exists, knowledgeBase, setUpdatedKnowledgeBaseSettings, setupKB]
     );
 
-    const assistantLangChainSwitch = useMemo(() => {
+    const isEnabledKnowledgeBaseSwitch = useMemo(() => {
       return isLoadingKb ? (
         <EuiLoadingSpinner size="s" />
       ) : (
         <EuiToolTip content={isSwitchDisabled && i18n.KNOWLEDGE_BASE_TOOLTIP} position={'right'}>
           <EuiSwitch
             showLabel={false}
-            data-test-subj="assistantLangChainSwitch"
+            data-test-subj="isEnabledKnowledgeBaseSwitch"
             disabled={isSwitchDisabled}
-            checked={knowledgeBase.assistantLangChain}
+            checked={knowledgeBase.isEnabledKnowledgeBase}
             onChange={onEnableAssistantLangChainChange}
             label={i18n.KNOWLEDGE_BASE_LABEL}
             compressed
@@ -111,7 +111,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     }, [
       isLoadingKb,
       isSwitchDisabled,
-      knowledgeBase.assistantLangChain,
+      knowledgeBase.isEnabledKnowledgeBase,
       onEnableAssistantLangChainChange,
     ]);
 
@@ -221,7 +221,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
             }
           `}
         >
-          {assistantLangChainSwitch}
+          {isEnabledKnowledgeBaseSwitch}
         </EuiFormRow>
         <EuiSpacer size="s" />
 
@@ -303,12 +303,10 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
 
         <EuiSpacer size="s" />
 
-        {ragOnAlerts && (
-          <AlertsSettings
-            knowledgeBase={knowledgeBase}
-            setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-          />
-        )}
+        <AlertsSettings
+          knowledgeBase={knowledgeBase}
+          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+        />
       </>
     );
   }

@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { timelineSelectors } from '../../../../store/timeline';
+import { timelineSelectors } from '../../../../store';
 
 export const getTimelineSaveModalByIdSelector = () =>
   createSelector(timelineSelectors.selectTimeline, (timeline) => ({

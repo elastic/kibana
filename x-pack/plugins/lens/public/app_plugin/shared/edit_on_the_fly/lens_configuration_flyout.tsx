@@ -27,6 +27,8 @@ import {
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import {
   useLensSelector,
   selectFramePublicAPI,
@@ -34,7 +36,7 @@ import {
   useLensDispatch,
 } from '../../../state_management';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { extractReferencesFromState } from '../../../utils';
+import { EXPRESSION_BUILD_ERROR_ID, extractReferencesFromState } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -61,6 +63,11 @@ export function LensEditConfigurationFlyout({
   navigateToLensEditor,
   displayFlyoutHeader,
   canEditTextBasedQuery,
+  isNewPanel,
+  deletePanel,
+  hidesSuggestions,
+  onApplyCb,
+  onCancelCb,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
@@ -70,17 +77,18 @@ export function LensEditConfigurationFlyout({
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
-  const { datasourceStates, visualization, isLoading, annotationGroups } = useLensSelector(
-    (state) => state.lens
-  );
+
+  const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
+    useLensSelector((state) => state.lens);
   // use the latest activeId, but fallback to attributes
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
+
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
-  const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
 
   const layers = useMemo(
     () => activeDatasource.getLayers(datasourceState),
@@ -94,6 +102,11 @@ export function LensEditConfigurationFlyout({
       const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
       const [table] = Object.values(adaptersTables || {});
       if (table) {
+        // there are cases where a query can return a big amount of columns
+        // at this case we don't suggest all columns in a table but the first
+        // MAX_NUM_OF_COLUMNS
+        const columns = Object.keys(table.rows?.[0]) ?? [];
+        setSuggestsLimitedColumns(columns.length >= MAX_NUM_OF_COLUMNS);
         layers.forEach((layer) => {
           activeData[layer] = table;
         });
@@ -164,18 +177,25 @@ export function LensEditConfigurationFlyout({
         updateByRefInput?.(savedObjectId);
       }
     }
+    // for a newly created chart, I want cancelling to also remove the panel
+    if (isNewPanel && deletePanel) {
+      deletePanel();
+    }
+    onCancelCb?.();
     closeFlyout?.();
   }, [
-    previousAttributes,
     attributesChanged,
+    isNewPanel,
+    deletePanel,
     closeFlyout,
+    visualization.activeId,
+    savedObjectId,
     datasourceMap,
     datasourceId,
     updatePanelState,
     updateSuggestion,
-    savedObjectId,
     updateByRefInput,
-    visualization,
+    onCancelCb,
   ]);
 
   const onApply = useCallback(() => {
@@ -210,10 +230,12 @@ export function LensEditConfigurationFlyout({
       saveByRef?.(attrs);
       updateByRefInput?.(savedObjectId);
     }
+    onApplyCb?.();
     closeFlyout?.();
   }, [
     savedObjectId,
     closeFlyout,
+    onApplyCb,
     datasourceStates,
     visualization.state,
     activeVisualization,
@@ -264,11 +286,53 @@ export function LensEditConfigurationFlyout({
     ]
   );
 
+  const isSaveable = useMemo(() => {
+    if (!attributesChanged) {
+      return false;
+    }
+    if (!visualization.state || !visualization.activeId) {
+      return false;
+    }
+    const visualizationErrors = getUserMessages(['visualization'], {
+      severity: 'error',
+    });
+    // shouldn't build expression if there is any type of error other than an expression build error
+    // (in which case we try again every time because the config might have changed)
+    if (visualizationErrors.every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
+      return Boolean(
+        buildExpression({
+          visualization: activeVisualization,
+          visualizationState: visualization.state,
+          datasourceMap,
+          datasourceStates,
+          datasourceLayers: framePublicAPI.datasourceLayers,
+          indexPatterns: framePublicAPI.dataViews.indexPatterns,
+          dateRange: framePublicAPI.dateRange,
+          nowInstant: startDependencies.data.nowProvider.get(),
+          searchSessionId,
+        })
+      );
+    }
+  }, [
+    attributesChanged,
+    activeVisualization,
+    datasourceMap,
+    datasourceStates,
+    framePublicAPI.dataViews.indexPatterns,
+    framePublicAPI.dateRange,
+    framePublicAPI.datasourceLayers,
+    searchSessionId,
+    startDependencies.data.nowProvider,
+    visualization.activeId,
+    visualization.state,
+    getUserMessages,
+  ]);
+
   const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
 
   if (isLoading) return null;
-  // Example is the Discover editing where we dont want to render the text based editor on the panel
-  if (!canEditTextBasedQuery) {
+  // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
+  if (!canEditTextBasedQuery && hidesSuggestions) {
     return (
       <FlyoutWrapper
         isInlineFlyoutVisible={isInlineFlyoutVisible}
@@ -277,7 +341,8 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         isScrollable={true}
-        attributesChanged={attributesChanged}
+        isNewPanel={isNewPanel}
+        isSaveable={isSaveable}
       >
         <LayerConfiguration
           getUserMessages={getUserMessages}
@@ -303,9 +368,10 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
-        attributesChanged={attributesChanged}
-        language={getLanguageDisplayName(textBasedMode)}
+        language={textBasedMode ? getLanguageDisplayName(textBasedMode) : ''}
+        isSaveable={isSaveable}
         isScrollable={false}
+        isNewPanel={isNewPanel}
       >
         <EuiFlexGroup
           css={css`
@@ -335,7 +401,7 @@ export function LensEditConfigurationFlyout({
           direction="column"
           gutterSize="none"
         >
-          {isOfAggregateQueryType(query) && (
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
             <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
               <TextBasedLangEditor
                 query={query}

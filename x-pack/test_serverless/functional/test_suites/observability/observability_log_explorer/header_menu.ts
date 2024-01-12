@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonNavigation',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/173165
+  // Failing: See https://github.com/elastic/kibana/issues/173165
   describe.skip('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             '@timestamp',
             'service.name',
             'host.name',
-            'message',
+            'content',
           ]);
         });
         await retry.try(async () => {
@@ -143,9 +143,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         expect(await browser.getCurrentUrl()).contain('/app/discover');
 
-        await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
-        await PageObjects.discover.waitForDocTableLoadingComplete();
-
         await retry.try(async () => {
           expect(await PageObjects.discover.getCurrentlySelectedDataView()).not.to.eql('All logs');
         });
@@ -153,9 +150,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).not.to.eql([
             '@timestamp',
+            'content',
             'service.name',
             'host.name',
-            'message',
           ]);
         });
 

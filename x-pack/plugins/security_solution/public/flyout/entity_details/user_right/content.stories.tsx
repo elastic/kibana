@@ -13,10 +13,10 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
   mockManagedUserData,
-  mockObservedUser,
   mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
 import { UserPanelContent } from './content';
+import { mockObservedUser } from './mocks';
 
 const flyoutContextValue = {
   openLeftPanel: () => window.alert('openLeftPanel called'),
@@ -43,6 +43,8 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('integration disabled', () => (
@@ -57,6 +59,8 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('no managed data', () => (
@@ -71,6 +75,8 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('no observed data', () => (
@@ -105,6 +111,8 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('loading', () => (
@@ -143,5 +151,7 @@ storiesOf('Components/UserPanelContent', module)
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ));

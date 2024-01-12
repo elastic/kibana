@@ -10,6 +10,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { VIEW_MODE } from './constants';
@@ -69,6 +70,11 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Columns displayed in the table
    */
   columns?: string[];
+
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
 
   /**
    * Used interval of the histogram
@@ -139,6 +145,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       timeRange,
       searchSessionId,
       columns,
+      grid,
       savedQuery,
       sort,
       interval,
@@ -154,6 +161,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       filters?: Filter[];
       index?: string;
       columns?: string[];
+      grid?: DiscoverGridSettings;
       interval?: string;
       sort?: string[][];
       savedQuery?: string;
@@ -169,6 +177,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (indexPatternId) appState.index = indexPatternId;
     if (dataViewId) appState.index = dataViewId;
     if (columns) appState.columns = columns;
+    if (grid) appState.grid = grid;
     if (savedQuery) appState.savedQuery = savedQuery;
     if (sort) appState.sort = sort;
     if (interval) appState.interval = interval;

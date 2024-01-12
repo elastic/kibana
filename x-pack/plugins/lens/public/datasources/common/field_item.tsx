@@ -186,6 +186,7 @@ export function InnerFieldItem(props: FieldItemProps) {
     isSelected: false, // multiple selections are allowed
     isEmpty: !exists,
     isActive: infoIsOpen,
+    withDragIcon: true,
     fieldSearchHighlight: highlight,
     onClick: togglePopover,
     buttonAddFieldToWorkspaceProps,

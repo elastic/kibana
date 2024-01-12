@@ -51,7 +51,6 @@ export const selectCurrentDiscoverEsqlQuery = (
 ) => {
   goToEsqlTab();
   cy.get(discoverEsqlInput).should('be.visible').click();
-  cy.get(discoverEsqlInput).should('be.focused');
   cy.get(DISCOVER_ESQL_INPUT_EXPAND).click();
   cy.get(discoverEsqlInput).type(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
 };
@@ -64,7 +63,7 @@ export const addDiscoverEsqlQuery = (esqlQuery: string) => {
   cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).click();
 };
 
-export const convertNBSPToSP = (str: string) => {
+export const convertEditorNonBreakingSpaceToSpace = (str: string) => {
   return str.replaceAll(String.fromCharCode(160), ' ');
 };
 

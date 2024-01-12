@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import {
   MapEmbeddable,
@@ -23,7 +24,6 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { useDataViewId } from '../../../../../hooks/use_data_view_id';
 import { ApmPluginStartDeps } from '../../../../../plugin';
 import { getLayerList } from './map_layers/get_layer_list';
 import { MapTypes } from '../../../../../../common/mobile/constants';
@@ -33,15 +33,16 @@ function EmbeddedMapComponent({
   end,
   kuery = '',
   filters,
+  dataView,
 }: {
   selectedMap: MapTypes;
   start: string;
   end: string;
   kuery?: string;
   filters: Filter[];
+  dataView?: DataView;
 }) {
   const [error, setError] = useState<boolean>();
-  const dataViewId = useDataViewId();
 
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
@@ -129,8 +130,12 @@ function EmbeddedMapComponent({
 
   useEffect(() => {
     const setLayerList = async () => {
-      if (embeddable && !isErrorEmbeddable(embeddable) && dataViewId) {
-        const layerList = await getLayerList({ selectedMap, maps, dataViewId });
+      if (embeddable && !isErrorEmbeddable(embeddable)) {
+        const layerList = await getLayerList({
+          selectedMap,
+          maps,
+          dataViewId: dataView?.id ?? '',
+        });
         await Promise.all([
           embeddable.setLayerList(layerList),
           embeddable.reload(),
@@ -139,7 +144,7 @@ function EmbeddedMapComponent({
     };
 
     setLayerList();
-  }, [embeddable, selectedMap, maps, dataViewId]);
+  }, [embeddable, selectedMap, maps, dataView]);
 
   useEffect(() => {
     if (embeddable) {

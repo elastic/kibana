@@ -5,42 +5,41 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiToolTip,
+  EuiButtonIcon,
+  EuiText,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components';
-
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { selectTitleByTimelineById } from '../../../store/selectors';
 import { createHistoryEntry } from '../../../../common/utils/global_query_string/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store';
 import type { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { focusActiveTimelineButton } from '../../timeline/helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
-import { TimelineStatusInfo } from './timeline_status_info';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { TimelineSaveStatus } from '../../save_status';
+import { timelineDefaults } from '../../../store/defaults';
 import { AddTimelineButton } from '../add_timeline_button';
 
 interface FlyoutHeaderPanelProps {
   timelineId: string;
 }
 
-const FlyoutHeaderPanelContentFlexGroupContainer = styled(EuiFlexGroup)`
-  overflow-x: auto;
-`;
-
-const ActiveTimelinesContainer = styled(EuiFlexItem)`
-  overflow: hidden;
-`;
+const whiteSpaceNoWrapCSS = { 'white-space': 'nowrap' };
+const autoOverflowXCSS = { 'overflow-x': 'auto' };
 
 const TimelinePanel = euiStyled(EuiPanel)<{ $isOpen?: boolean }>`
   backgroundColor: ${(props) => props.theme.eui.euiColorEmptyShade};
@@ -54,37 +53,17 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
+
+  const title = useSelector((state: State) => selectTitleByTimelineById(state, timelineId));
+
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const {
-    activeTab,
-    dataProviders,
-    kqlQuery,
-    title,
-    timelineType,
-    status: timelineStatus,
-    updated,
-    show,
-    filters,
-    kqlMode,
-    changed = false,
-  } = useDeepEqualSelector((state) =>
-    pick(
-      [
-        'activeTab',
-        'dataProviders',
-        'kqlQuery',
-        'status',
-        'title',
-        'timelineType',
-        'updated',
-        'show',
-        'filters',
-        'kqlMode',
-        'changed',
-      ],
-      getTimeline(state, timelineId) ?? timelineDefaults
-    )
-  );
+  const { activeTab, dataProviders, kqlQuery, timelineType, show, filters, kqlMode } =
+    useDeepEqualSelector((state) =>
+      pick(
+        ['activeTab', 'dataProviders', 'kqlQuery', 'timelineType', 'show', 'filters', 'kqlMode'],
+        getTimeline(state, timelineId) ?? timelineDefaults
+      )
+    );
   const isDataInTimeline = useMemo(
     () => !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
     [dataProviders, kqlQuery]
@@ -121,7 +100,6 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   const handleClose = useCallback(() => {
     createHistoryEntry();
     dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
-    focusActiveTimelineButton();
   }, [dispatch, timelineId]);
 
   return (
@@ -133,12 +111,13 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
       data-test-subj="timeline-flyout-header-panel"
       data-show={show}
     >
-      <FlyoutHeaderPanelContentFlexGroupContainer
+      <EuiFlexGroup
         className="eui-scrollBar"
         alignItems="center"
         gutterSize="s"
         responsive={false}
         justifyContent="spaceBetween"
+        css={autoOverflowXCSS}
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -151,17 +130,12 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
               <AddToFavoritesButton timelineId={timelineId} compact />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ActiveTimelinesContainer grow={false}>
-                <ActiveTimelines
-                  timelineId={timelineId}
-                  timelineType={timelineType}
-                  timelineTitle={title}
-                  isOpen={show}
-                />
-              </ActiveTimelinesContainer>
+              <EuiText grow={false} data-test-subj="timeline-title" css={whiteSpaceNoWrapCSS}>
+                <h3>{title}</h3>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <TimelineStatusInfo status={timelineStatus} updated={updated} changed={changed} />
+              <TimelineSaveStatus timelineId={timelineId} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -193,7 +167,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-      </FlyoutHeaderPanelContentFlexGroupContainer>
+      </EuiFlexGroup>
     </TimelinePanel>
   );
 };

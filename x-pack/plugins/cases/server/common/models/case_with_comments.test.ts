@@ -6,11 +6,15 @@
  */
 
 import type { AlertAttachmentAttributes } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { createCasesClientMockArgs } from '../../client/mocks';
 import { alertComment, comment, mockCaseComments, mockCases, multipleAlert } from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
-import { MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES } from '../../../common/constants';
+import {
+  MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
 import {
   commentExternalReference,
   commentFileExternalReference,
@@ -25,6 +29,7 @@ describe('CaseCommentModel', () => {
   clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
   clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
   clientArgs.services.attachmentService.create.mockResolvedValue(mockCaseComments[0]);
+  clientArgs.services.attachmentService.update.mockResolvedValue(mockCaseComments[0]);
   clientArgs.services.attachmentService.bulkCreate.mockResolvedValue({
     saved_objects: mockCaseComments,
   });
@@ -272,6 +277,18 @@ describe('CaseCommentModel', () => {
       });
 
       expect(clientArgs.services.attachmentService.create).not.toHaveBeenCalled();
+    });
+
+    it('partial updates the case', async () => {
+      await model.createComment({
+        id: 'comment-1',
+        commentReq: comment,
+        createdDate,
+      });
+
+      const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+      expect(args.version).toBeUndefined();
     });
 
     describe('validation', () => {
@@ -579,6 +596,21 @@ describe('CaseCommentModel', () => {
       expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
     });
 
+    it('partial updates the case', async () => {
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'comment-1',
+            ...comment,
+          },
+        ],
+      });
+
+      const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+      expect(args.version).toBeUndefined();
+    });
+
     describe('validation', () => {
       clientArgs.services.attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
         MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES
@@ -617,6 +649,26 @@ describe('CaseCommentModel', () => {
           })
         ).resolves.not.toThrow();
       });
+    });
+  });
+
+  describe('updateComment', () => {
+    it('partial updates the case', async () => {
+      await model.updateComment({
+        updateRequest: {
+          id: 'comment-id',
+          version: 'comment-version',
+          type: AttachmentType.user,
+          comment: 'my updated comment',
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        updatedAt: createdDate,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
+
+      expect(args.version).toBeUndefined();
     });
   });
 });
