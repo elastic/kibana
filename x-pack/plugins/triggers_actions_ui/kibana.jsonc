@@ -16,7 +16,6 @@
       "data",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjects",
       "unifiedSearch",
       "fieldFormats",
       "dataViews",
