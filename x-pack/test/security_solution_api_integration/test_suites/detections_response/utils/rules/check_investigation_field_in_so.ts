@@ -10,6 +10,7 @@ import { SavedObjectReference } from '@kbn/core/server';
 import { InvestigationFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import { isEqual } from 'lodash/fp';
 import { getRuleSOById } from './get_rule_so_by_id';
 
 interface RuleSO {
@@ -30,8 +31,8 @@ export const checkInvestigationFieldSoValue = async (
       },
     } = await getRuleSOById(es, ruleId);
 
-    return rule?.alert.params.investigationFields === expectedSoValue;
+    return isEqual(rule?.alert.params.investigationFields, expectedSoValue);
   }
 
-  return ruleSO?.alert.params.investigationFields === expectedSoValue;
+  return isEqual(ruleSO?.alert.params.investigationFields, expectedSoValue);
 };
