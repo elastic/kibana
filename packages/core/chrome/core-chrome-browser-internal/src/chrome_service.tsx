@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil } from 'rxjs/operators';
@@ -377,12 +377,12 @@ export class ChromeService {
 
             const currentProjectBreadcrumbs$ = projectBreadcrumbs$;
 
-            let SideNavComponent: ISideNavComponent = () => null;
-
-            if (CustomSideNavComponent.current) {
-              // We have the state from the Observable
-              SideNavComponent = CustomSideNavComponent.current;
-            }
+            const SideNavComponent = useMemo<ISideNavComponent>(() => {
+              if (CustomSideNavComponent.current) {
+                return CustomSideNavComponent.current;
+              }
+              return () => null;
+            }, [CustomSideNavComponent]);
 
             return (
               <ProjectHeader

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
+import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessPluginSetup {}
@@ -24,7 +25,13 @@ export interface ServerlessPluginStart {
     params?: Partial<ChromeSetProjectBreadcrumbsParams>
   ) => void;
   setProjectHome(homeHref: string): void;
-  initNavigation(navigationTree$: Observable<NavigationTreeDefinition>): void;
+  initNavigation(
+    navigationTree$: Observable<NavigationTreeDefinition>,
+    config?: {
+      dataTestSubj?: string;
+      panelContentProvider?: PanelContentProvider;
+    }
+  ): void;
   setSideNavComponentDeprecated: (navigation: SideNavComponent) => void;
   getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
 }

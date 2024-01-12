@@ -208,8 +208,6 @@ export class ProjectNavigationService {
           cloudLinks,
         });
 
-        console.log('parsed!!', { navigationTree, navigationTreeUI });
-
         this.setProjectNavigation(navigationTree);
         this.navigationTreeUi$.next(navigationTreeUI);
       }

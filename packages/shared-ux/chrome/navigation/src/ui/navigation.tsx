@@ -7,14 +7,14 @@
  */
 
 import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type {
   ChromeProjectNavigationNode,
   RootNavigationItemDefinition,
   RecentlyAccessedDefinition,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
-
-import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import {
   RecentlyAccessed,
@@ -40,15 +40,16 @@ const NavigationContext = createContext<Context>({
 });
 
 interface Props {
-  navigationTree: NavigationTreeDefinitionUI;
+  navigationTree$: Observable<NavigationTreeDefinitionUI>;
   dataTestSubj?: string;
   panelContentProvider?: PanelContentProvider;
 }
 
-const NavigationComp: FC<Props> = ({ navigationTree, dataTestSubj, panelContentProvider }) => {
+const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContentProvider }) => {
   const { activeNodes$ } = useNavigationService();
 
   const activeNodes = useObservable(activeNodes$, []);
+  const navigationTree = useObservable(navigationTree$, { body: [] });
 
   const contextValue = useMemo<Context>(
     () => ({

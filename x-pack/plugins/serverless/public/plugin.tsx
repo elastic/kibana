@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
+import { Navigation, NavigationKibanaProvider } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
@@ -63,29 +64,42 @@ export class ServerlessPlugin
 
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = core.chrome as InternalChromeStart;
-    if (dependencies.cloud.projectsUrl) {
-      project.setProjectsUrl(dependencies.cloud.projectsUrl);
+    const { cloud } = dependencies;
+    if (cloud.projectsUrl) {
+      project.setProjectsUrl(cloud.projectsUrl);
     }
-    if (dependencies.cloud.serverless.projectName) {
-      project.setProjectName(dependencies.cloud.serverless.projectName);
+    if (cloud.serverless.projectName) {
+      project.setProjectName(cloud.serverless.projectName);
     }
-    if (dependencies.cloud.deploymentUrl) {
-      project.setProjectUrl(dependencies.cloud.deploymentUrl);
+    if (cloud.deploymentUrl) {
+      project.setProjectUrl(cloud.deploymentUrl);
     }
+
+    const getActiveNavigationNodes$ = () =>
+      (core.chrome as InternalChromeStart).project.getActiveNavigationNodes$();
+    const navigationTreeUi$ = project.getNavigationTreeUi$();
 
     return {
       setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
-      initNavigation: (navigationTree$) => {
-        const deps = {
-        };
+      initNavigation: (navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
+        project.initNavigation(navigationTree$, { cloudUrls: cloud });
 
-        return project.initNavigation(navigationTree$, deps);
+        project.setSideNavComponent(() => {
+          return (
+            <NavigationKibanaProvider core={core} serverless={{ getActiveNavigationNodes$ }}>
+              <Navigation
+                navigationTree$={navigationTreeUi$}
+                dataTestSubj={dataTestSubj}
+                panelContentProvider={panelContentProvider}
+              />
+            </NavigationKibanaProvider>
+          );
+        });
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
-      getActiveNavigationNodes$: () =>
-        (core.chrome as InternalChromeStart).project.getActiveNavigationNodes$(),
+      getActiveNavigationNodes$,
     };
   }
 
