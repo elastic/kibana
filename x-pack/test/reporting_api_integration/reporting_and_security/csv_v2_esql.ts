@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
                   id: 'DISCOVER_APP_LOCATOR',
                   version: '8.13.0',
                   params: {
-                    columns: [],
+                    columns: ['@message'],
                     dataViewSpec: {
                       allowHidden: false,
                       allowNoIndex: false,
@@ -174,7 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
                     filters: [],
                     index: '0ed8b65f-ec8f-4061-9d2e-542cd6ff10a6',
                     interval: 'auto',
-                    query: { esql: 'from logstash-* | limit 10' },
+                    query: { esql: 'from logstash-* | sort @timestamp | limit 5' },
                     refreshInterval: { pause: true, value: 60000 },
                     sort: [['@timestamp', 'desc']],
                     timeRange: { from: '2015-09-18T22:00:00.000Z', to: '2015-09-23T22:00:00.000Z' },
