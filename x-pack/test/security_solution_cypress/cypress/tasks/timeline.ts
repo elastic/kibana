@@ -84,7 +84,6 @@ import {
   TIMELINE_SEARCH_OR_FILTER,
   TIMELINE_KQLMODE_FILTER,
   TIMELINE_KQLMODE_SEARCH,
-  TIMELINE_PANEL,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -365,12 +364,12 @@ export const saveTimeline = () => {
 
 export const markAsFavorite = () => {
   cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
-  cy.get(TIMELINE_PANEL).within(() => cy.get(STAR_ICON).click());
+  cy.get(STAR_ICON).click({ force: true });
   cy.wait('@markedAsFavourite');
 };
 
 export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).first().click();
+  cy.get(TIMELINE_FIELDS_BUTTON).first().click({ force: true });
 };
 
 export const openTimelineInspectButton = () => {
@@ -379,6 +378,7 @@ export const openTimelineInspectButton = () => {
 };
 
 export const openTimelineFromSettings = () => {
+  cy.get(OPEN_TIMELINE_ICON).should('be.visible');
   cy.get(OPEN_TIMELINE_ICON).click();
 };
 
@@ -398,7 +398,7 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
   }
   // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
   // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
-  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).click();
+  return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).should('be.visible').click({ force: true });
 };
 
 export const openActiveTimeline = () => {

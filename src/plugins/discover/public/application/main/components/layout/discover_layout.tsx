@@ -6,8 +6,17 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState, ReactElement } from 'react';
-import { EuiPage, EuiPageBody, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHideFor,
+  EuiPage,
+  EuiPageBody,
+  EuiPanel,
+  useEuiBackgroundColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -22,7 +31,7 @@ import {
 } from '@kbn/discover-utils';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { BehaviorSubject } from 'rxjs';
+import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -36,7 +45,7 @@ import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { getResultState } from '../../utils/get_result_state';
 import { DiscoverUninitialized } from '../uninitialized/uninitialized';
 import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
-import { FetchStatus, SidebarToggleState } from '../../../types';
+import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
@@ -45,7 +54,6 @@ import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
-import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -67,6 +75,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     docLinks,
     serverless,
   } = useDiscoverServices();
+  const { euiTheme } = useEuiTheme();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
@@ -185,21 +194,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return () => onAddColumn(draggingFieldName);
   }, [onAddColumn, draggingFieldName, currentColumns]);
 
-  const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
-    () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
-  );
-
-  const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
-    return (
-      <PanelsToggle
-        stateContainer={stateContainer}
-        sidebarToggleState$={sidebarToggleState$}
-        renderedFor="root"
-        isChartAvailable={undefined}
-      />
-    );
-  }, [stateContainer, sidebarToggleState$]);
-
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -220,7 +214,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           onFieldEdited={onFieldEdited}
           container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
-          panelsToggle={panelsToggle}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -237,8 +230,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     resultState,
     stateContainer,
     viewMode,
-    panelsToggle,
   ]);
+
+  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
+    useState<UnifiedFieldListSidebarContainerApi | null>(null);
 
   return (
     <EuiPage
@@ -287,56 +282,64 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           />
           <DiscoverResizableLayout
             container={sidebarContainer}
-            sidebarToggleState$={sidebarToggleState$}
+            unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
             sidebarPanel={
-              <SidebarMemoized
-                documents$={stateContainer.dataState.data$.documents$}
-                onAddField={onAddColumn}
-                columns={currentColumns}
-                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-                onRemoveField={onRemoveColumn}
-                onChangeDataView={stateContainer.actions.onChangeDataView}
-                selectedDataView={dataView}
-                trackUiMetric={trackUiMetric}
-                onFieldEdited={onFieldEdited}
-                onDataViewCreated={stateContainer.actions.onDataViewCreated}
-                availableFields$={stateContainer.dataState.data$.availableFields$}
-                sidebarToggleState$={sidebarToggleState$}
-              />
+              <EuiFlexGroup
+                gutterSize="none"
+                css={css`
+                  height: 100%;
+                `}
+              >
+                <EuiFlexItem>
+                  <SidebarMemoized
+                    documents$={stateContainer.dataState.data$.documents$}
+                    onAddField={onAddColumn}
+                    columns={currentColumns}
+                    onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                    onRemoveField={onRemoveColumn}
+                    onChangeDataView={stateContainer.actions.onChangeDataView}
+                    selectedDataView={dataView}
+                    trackUiMetric={trackUiMetric}
+                    onFieldEdited={onFieldEdited}
+                    onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                    availableFields$={stateContainer.dataState.data$.availableFields$}
+                    unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
+                    setUnifiedFieldListSidebarContainerApi={setUnifiedFieldListSidebarContainerApi}
+                  />
+                </EuiFlexItem>
+                <EuiHideFor sizes={['xs', 's']}>
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      border-right: ${euiTheme.border.thin};
+                    `}
+                  />
+                </EuiHideFor>
+              </EuiFlexGroup>
             }
             mainPanel={
               <div className="dscPageContent__wrapper">
                 {resultState === 'none' ? (
-                  <>
-                    {React.isValidElement(panelsToggle) ? (
-                      <div className="dscPageContent__panelsToggleWhenNoResults">
-                        {React.cloneElement(panelsToggle, {
-                          renderedFor: 'prompt',
-                          isChartAvailable: false,
-                        })}
-                      </div>
-                    ) : null}
-                    {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
-                          }
-                        )}
-                        error={dataState.error}
-                      />
-                    ) : (
-                      <DiscoverNoResults
-                        stateContainer={stateContainer}
-                        isTimeBased={isTimeBased}
-                        query={globalQueryState.query}
-                        filters={globalQueryState.filters}
-                        dataView={dataView}
-                        onDisableFilters={onDisableFilters}
-                      />
-                    )}
-                  </>
+                  dataState.error ? (
+                    <ErrorCallout
+                      title={i18n.translate(
+                        'discover.noResults.searchExamples.noResultsErrorTitle',
+                        {
+                          defaultMessage: 'Unable to retrieve search results',
+                        }
+                      )}
+                      error={dataState.error}
+                    />
+                  ) : (
+                    <DiscoverNoResults
+                      stateContainer={stateContainer}
+                      isTimeBased={isTimeBased}
+                      query={globalQueryState.query}
+                      filters={globalQueryState.filters}
+                      dataView={dataView}
+                      onDisableFilters={onDisableFilters}
+                    />
+                  )
                 ) : (
                   <EuiPanel
                     role="main"

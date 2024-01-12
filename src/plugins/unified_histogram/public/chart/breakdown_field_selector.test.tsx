@@ -6,132 +6,68 @@
  * Side Public License, v 1.
  */
 
-import { render, act, screen } from '@testing-library/react';
+import { EuiComboBox } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { UnifiedHistogramBreakdownContext } from '../types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
 
 describe('BreakdownFieldSelector', () => {
-  it('should render correctly', () => {
+  it('should pass fields that support breakdown as options to the EuiComboBox', () => {
     const onBreakdownFieldChange = jest.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
-
-    render(
+    const wrapper = mountWithIntl(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={breakdown}
         onBreakdownFieldChange={onBreakdownFieldChange}
       />
     );
-
-    const button = screen.getByTestId('unifiedHistogramBreakdownSelectorButton');
-    expect(button.getAttribute('data-selected-value')).toBe(null);
-
-    act(() => {
-      button.click();
-    });
-
-    const options = screen.getAllByRole('option');
-    expect(
-      options.map((option) => ({
-        label: option.getAttribute('title'),
-        value: option.getAttribute('value'),
-        checked: option.getAttribute('aria-checked'),
-      }))
-    ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "checked": "true",
-          "label": "No breakdown",
-          "value": "__EMPTY_SELECTOR_OPTION__",
-        },
-        Object {
-          "checked": "false",
-          "label": "bytes",
-          "value": "bytes",
-        },
-        Object {
-          "checked": "false",
-          "label": "extension",
-          "value": "extension",
-        },
-      ]
-    `);
+    const comboBox = wrapper.find(EuiComboBox);
+    expect(comboBox.prop('options')).toEqual(
+      dataViewWithTimefieldMock.fields
+        .filter(fieldSupportsBreakdown)
+        .map((field) => ({ label: field.displayName, value: field.name }))
+        .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()))
+    );
   });
 
-  it('should mark the option as checked if breakdown.field is defined', () => {
+  it('should pass selectedOptions to the EuiComboBox if breakdown.field is defined', () => {
     const onBreakdownFieldChange = jest.fn();
     const field = dataViewWithTimefieldMock.fields.find((f) => f.name === 'extension')!;
     const breakdown: UnifiedHistogramBreakdownContext = { field };
-
-    render(
+    const wrapper = mountWithIntl(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={breakdown}
         onBreakdownFieldChange={onBreakdownFieldChange}
       />
     );
-
-    const button = screen.getByTestId('unifiedHistogramBreakdownSelectorButton');
-    expect(button.getAttribute('data-selected-value')).toBe('extension');
-
-    act(() => {
-      button.click();
-    });
-
-    const options = screen.getAllByRole('option');
-    expect(
-      options.map((option) => ({
-        label: option.getAttribute('title'),
-        value: option.getAttribute('value'),
-        checked: option.getAttribute('aria-checked'),
-      }))
-    ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "checked": "false",
-          "label": "No breakdown",
-          "value": "__EMPTY_SELECTOR_OPTION__",
-        },
-        Object {
-          "checked": "false",
-          "label": "bytes",
-          "value": "bytes",
-        },
-        Object {
-          "checked": "true",
-          "label": "extension",
-          "value": "extension",
-        },
-      ]
-    `);
+    const comboBox = wrapper.find(EuiComboBox);
+    expect(comboBox.prop('selectedOptions')).toEqual([
+      { label: field.displayName, value: field.name },
+    ]);
   });
 
   it('should call onBreakdownFieldChange with the selected field when the user selects a field', () => {
     const onBreakdownFieldChange = jest.fn();
-    const selectedField = dataViewWithTimefieldMock.fields.find((f) => f.name === 'bytes')!;
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
-    render(
+    const wrapper = mountWithIntl(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={breakdown}
         onBreakdownFieldChange={onBreakdownFieldChange}
       />
     );
-
-    act(() => {
-      screen.getByTestId('unifiedHistogramBreakdownSelectorButton').click();
-    });
-
-    act(() => {
-      screen.getByTitle('bytes').click();
-    });
-
+    const comboBox = wrapper.find(EuiComboBox);
+    const selectedField = dataViewWithTimefieldMock.fields.find((f) => f.name === 'extension')!;
+    comboBox.prop('onChange')!([{ label: selectedField.displayName, value: selectedField.name }]);
     expect(onBreakdownFieldChange).toHaveBeenCalledWith(selectedField);
   });
 });

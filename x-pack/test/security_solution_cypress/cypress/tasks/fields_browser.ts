@@ -29,11 +29,15 @@ export const addsFields = (fields: string[]) => {
 };
 
 export const addsHostGeoCityNameToTimeline = () => {
-  cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX).check();
+  cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX).check({
+    force: true,
+  });
 };
 
 export const addsHostGeoContinentNameToTimeline = () => {
-  cy.get(FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX).check();
+  cy.get(FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX).check({
+    force: true,
+  });
 };
 
 export const clearFieldsBrowser = () => {
@@ -63,7 +67,7 @@ export const filterFieldsBrowser = (fieldName: string) => {
 };
 
 export const toggleCategoryFilter = () => {
-  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON).click();
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON).click({ force: true });
 };
 
 export const toggleCategory = (category: string) => {
@@ -75,7 +79,9 @@ export const toggleCategory = (category: string) => {
 };
 
 export const removesMessageField = () => {
-  cy.get(FIELDS_BROWSER_MESSAGE_CHECKBOX).uncheck();
+  cy.get(FIELDS_BROWSER_MESSAGE_CHECKBOX).uncheck({
+    force: true,
+  });
 };
 
 export const removeField = (fieldName: string) => {
@@ -83,14 +89,14 @@ export const removeField = (fieldName: string) => {
 };
 
 export const resetFields = () => {
-  cy.get(FIELDS_BROWSER_RESET_FIELDS).click();
+  cy.get(FIELDS_BROWSER_RESET_FIELDS).click({ force: true });
 };
 
 export const activateViewSelected = () => {
-  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click();
-  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click();
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click({ force: true });
 };
 export const activateViewAll = () => {
-  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click();
-  cy.get(FIELDS_BROWSER_VIEW_ALL).click();
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_ALL).click({ force: true });
 };

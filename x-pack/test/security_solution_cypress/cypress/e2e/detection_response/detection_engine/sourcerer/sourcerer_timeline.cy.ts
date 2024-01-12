@@ -109,7 +109,6 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
     });
 
     it('Modifies timeline to alerts only, and switches to different saved timeline without issue', function () {
-      closeTimeline();
       openTimelineById(this.timelineId).then(() => {
         cy.get(SOURCERER.badgeAlerts).should(`not.exist`);
         cy.get(SOURCERER.badgeModified).should(`not.exist`);

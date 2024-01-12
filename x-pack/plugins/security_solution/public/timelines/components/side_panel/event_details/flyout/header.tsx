@@ -6,9 +6,8 @@
  */
 
 import { EuiFlyoutHeader } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
 import type { GetFieldsData } from '../../../../../common/hooks/use_get_fields_data';
 import { ExpandableEventTitle } from '../expandable_event';
 import { BackToAlertDetailsLink } from './back_to_alert_details_link';
@@ -44,19 +43,10 @@ const FlyoutHeaderContentComponent = ({
   refetchFlyoutData,
   getFieldsData,
 }: FlyoutHeaderComponentProps) => {
-  const isSentinelOneAlert = useMemo(
-    () => !!(isAlert && getFieldsData(SENTINEL_ONE_AGENT_ID_FIELD)?.length),
-    [getFieldsData, isAlert]
-  );
-
   return (
     <>
       {isHostIsolationPanelOpen ? (
-        <BackToAlertDetailsLink
-          isolateAction={isolateAction}
-          showAlertDetails={showAlertDetails}
-          showExperimentalBadge={isSentinelOneAlert}
-        />
+        <BackToAlertDetailsLink isolateAction={isolateAction} showAlertDetails={showAlertDetails} />
       ) : (
         <ExpandableEventTitle
           eventId={eventId}

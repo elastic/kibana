@@ -27,19 +27,15 @@ import type { FleetRequestHandlerContext } from '../..';
 
 import type { MockedFleetAppContext } from '../../mocks';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
-import { agentPolicyService, appContextService } from '../../services';
+import { appContextService } from '../../services';
 import type {
   GetUninstallTokenRequestSchema,
   GetUninstallTokensMetadataRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
 
-import { createAgentPolicyMock } from '../../../common/mocks';
-
 import { registerRoutes } from '.';
 
 import { getUninstallTokenHandler, getUninstallTokensMetadataHandler } from './handlers';
-
-jest.mock('../../services/agent_policy');
 
 describe('uninstall token handlers', () => {
   let context: FleetRequestHandlerContext;
@@ -78,17 +74,10 @@ describe('uninstall token handlers', () => {
       unknown,
       TypeOf<typeof GetUninstallTokensMetadataRequestSchema.query>
     >;
-    const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
     beforeEach(() => {
       const uninstallTokenService = appContextService.getUninstallTokenService()!;
       getTokenMetadataMock = uninstallTokenService.getTokenMetadata as jest.Mock;
-      mockAgentPolicyService.list.mockResolvedValue({
-        items: [createAgentPolicyMock()],
-        total: 1,
-        page: 1,
-        perPage: 1,
-      });
 
       request = httpServerMock.createKibanaRequest();
     });

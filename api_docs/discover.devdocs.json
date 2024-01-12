@@ -427,7 +427,7 @@
             "label": "get$",
             "description": [],
             "signature": [
-              "<TCustomizationId extends \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\">(id: TCustomizationId) => ",
+              "<TCustomizationId extends \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\">(id: TCustomizationId) => ",
               "Observable",
               "<Extract<",
               {
@@ -461,8 +461,6 @@
                 "section": "def-public.UnifiedHistogramCustomization",
                 "text": "UnifiedHistogramCustomization"
               },
-              ", { id: TCustomizationId; }> | Extract<",
-              "DataTableCustomization",
               ", { id: TCustomizationId; }> | undefined>"
             ],
             "path": "src/plugins/discover/public/customizations/customization_service.ts",
@@ -495,7 +493,7 @@
             "label": "enable",
             "description": [],
             "signature": [
-              "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\") => void"
+              "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\") => void"
             ],
             "path": "src/plugins/discover/public/customizations/customization_service.ts",
             "deprecated": false,
@@ -509,7 +507,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\""
+                  "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\""
                 ],
                 "path": "src/plugins/discover/public/customizations/customization_service.ts",
                 "deprecated": false,
@@ -527,7 +525,7 @@
             "label": "disable",
             "description": [],
             "signature": [
-              "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\") => void"
+              "(id: \"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\") => void"
             ],
             "path": "src/plugins/discover/public/customizations/customization_service.ts",
             "deprecated": false,
@@ -541,7 +539,7 @@
                 "label": "id",
                 "description": [],
                 "signature": [
-                  "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\" | \"data_table\""
+                  "\"flyout\" | \"search_bar\" | \"top_nav\" | \"unified_histogram\""
                 ],
                 "path": "src/plugins/discover/public/customizations/customization_service.ts",
                 "deprecated": false,
@@ -1521,9 +1519,7 @@
             "docId": "kibDiscoverPluginApi",
             "section": "def-public.UnifiedHistogramCustomization",
             "text": "UnifiedHistogramCustomization"
-          },
-          " | ",
-          "DataTableCustomization"
+          }
         ],
         "path": "src/plugins/discover/public/customizations/customization_service.ts",
         "deprecated": false,

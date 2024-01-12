@@ -70,13 +70,9 @@ const computeTotalHits = (
     return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
   } else if (isPlainRecord && !hasLensSuggestions) {
     // ES|QL histogram case
-    const rows = Object.values(adapterTables ?? {})?.[0]?.rows;
-    if (!rows) {
-      return undefined;
-    }
     let rowsCount = 0;
-    rows.forEach((r) => {
-      rowsCount += r.results;
+    Object.values(adapterTables ?? {})?.[0]?.rows.forEach((r) => {
+      rowsCount += r.rows;
     });
     return rowsCount;
   } else {

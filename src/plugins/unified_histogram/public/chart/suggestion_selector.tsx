@@ -75,8 +75,6 @@ export const SuggestionSelector = ({
       position="top"
       content={suggestionsPopoverDisabled ? undefined : activeSuggestion?.title}
       anchorProps={{ css: suggestionComboCss }}
-      display="block"
-      delay="long"
     >
       <EuiComboBox
         data-test-subj="unifiedHistogramSuggestionSelector"

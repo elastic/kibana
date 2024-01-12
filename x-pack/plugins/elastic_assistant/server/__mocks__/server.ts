@@ -5,59 +5,35 @@
  * 2.0.
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import type {
-  RequestHandler,
-  RouteConfig,
-  KibanaRequest,
-  RequestHandlerContext,
-} from '@kbn/core/server';
+import type { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 
 import { requestMock } from './request';
 import { responseMock as responseFactoryMock } from './response';
 import { requestContextMock } from './request_context';
 import { responseAdapter } from './test_adapters';
-import type { RegisteredVersionedRoute } from '@kbn/core-http-router-server-mocks';
 
 interface Route {
-  validate: RouteConfig<
-    unknown,
-    unknown,
-    unknown,
-    'get' | 'post' | 'delete' | 'patch' | 'put'
-  >['validate'];
+  config: RouteConfig<unknown, unknown, unknown, 'get' | 'post' | 'delete' | 'patch' | 'put'>;
   handler: RequestHandler;
 }
 
-const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const;
+const getRoute = (routerMock: MockServer['router']): Route => {
+  const routeCalls = [
+    ...routerMock.get.mock.calls,
+    ...routerMock.post.mock.calls,
+    ...routerMock.put.mock.calls,
+    ...routerMock.patch.mock.calls,
+    ...routerMock.delete.mock.calls,
+  ];
 
-const getClassicRoute = (routerMock: MockServer['router']): Route | undefined => {
-  const method = HTTP_METHODS.find((m) => routerMock[m].mock.calls.length > 0);
-  if (!method) {
-    return undefined;
-  }
-
-  const [config, handler] = routerMock[method].mock.calls[0];
-  return { validate: config.validate, handler };
-};
-
-const getVersionedRoute = (router: MockServer['router']): Route => {
-  const method = HTTP_METHODS.find((m) => router.versioned[m].mock.calls.length > 0);
-  if (!method) {
+  const [route] = routeCalls;
+  if (!route) {
     throw new Error('No route registered!');
   }
-  const config = router.versioned[method].mock.calls[0][0];
-  const routePath = config.path;
 
-  const route: RegisteredVersionedRoute = router.versioned.getRoute(method, routePath);
-  const firstVersion = Object.values(route.versions)[0];
-
-  return {
-    validate:
-      firstVersion.config.validate === false
-        ? false
-        : firstVersion.config.validate.request || false,
-    handler: firstVersion.handler,
-  };
+  const [config, handler] = route;
+  return { config, handler };
 };
 
 const buildResultMock = () => ({ ok: jest.fn((x) => x), badRequest: jest.fn((x) => x) });
@@ -87,7 +63,7 @@ class MockServer {
   }
 
   private getRoute(): Route {
-    return getClassicRoute(this.router) ?? getVersionedRoute(this.router);
+    return getRoute(this.router);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,7 +72,7 @@ class MockServer {
   }
 
   private validateRequest(request: KibanaRequest): KibanaRequest {
-    const validations = this.getRoute().validate;
+    const validations = this.getRoute().config.validate;
     if (!validations) {
       return request;
     }
@@ -112,7 +88,6 @@ class MockServer {
     return validatedRequest;
   }
 }
-
 const createMockServer = () => new MockServer();
 
 export const serverMock = {

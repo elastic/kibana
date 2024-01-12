@@ -78,7 +78,6 @@
     "@kbn/rule-data-utils",
     "@kbn/core-chrome-browser",
     "@kbn/core-plugins-server",
-    "@kbn/shared-ux-button-toolbar",
     "@kbn/serverless",
     "@kbn/deeplinks-observability"
   ],

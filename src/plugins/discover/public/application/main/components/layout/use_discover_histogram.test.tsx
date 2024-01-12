@@ -261,14 +261,20 @@ describe('useDiscoverHistogram', () => {
         hook.result.current.ref(api);
       });
       stateContainer.appState.update({ hideChart: true, interval: '1m', breakdownField: 'test' });
-      expect(api.setTotalHits).not.toHaveBeenCalled();
+      expect(api.setTotalHits).toHaveBeenCalled();
       expect(api.setChartHidden).toHaveBeenCalled();
       expect(api.setTimeInterval).toHaveBeenCalled();
       expect(api.setBreakdownField).toHaveBeenCalled();
-      expect(Object.keys(params ?? {})).toEqual(['breakdownField', 'timeInterval', 'chartHidden']);
+      expect(Object.keys(params ?? {})).toEqual([
+        'totalHitsStatus',
+        'totalHitsResult',
+        'breakdownField',
+        'timeInterval',
+        'chartHidden',
+      ]);
     });
 
-    it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
+    it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates after the first load', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
@@ -284,13 +290,20 @@ describe('useDiscoverHistogram', () => {
       api.setChartHidden = jest.fn((chartHidden) => {
         params = { ...params, chartHidden };
       });
+      api.setTotalHits = jest.fn((p) => {
+        params = { ...params, ...p };
+      });
       const subject$ = new BehaviorSubject(state);
       api.state$ = subject$;
       act(() => {
         hook.result.current.ref(api);
       });
       stateContainer.appState.update({ hideChart: true });
-      expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
+      expect(Object.keys(params ?? {})).toEqual([
+        'totalHitsStatus',
+        'totalHitsResult',
+        'chartHidden',
+      ]);
       params = {};
       stateContainer.appState.update({ hideChart: false });
       act(() => {
@@ -421,14 +434,14 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.refetch).toHaveBeenCalled();
+      expect(api.refetch).not.toHaveBeenCalled();
       act(() => {
         savedSearchFetch$.next({
           options: { reset: false, fetchMore: false },
           searchSessionId: '1234',
         });
       });
-      expect(api.refetch).toHaveBeenCalledTimes(2);
+      expect(api.refetch).toHaveBeenCalled();
     });
 
     it('should skip the next refetch when hideChart changes from true to false', async () => {
@@ -446,7 +459,6 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.refetch).toHaveBeenCalled();
       act(() => {
         hook.rerender({ ...initialProps, hideChart: true });
       });
@@ -459,7 +471,7 @@ describe('useDiscoverHistogram', () => {
           searchSessionId: '1234',
         });
       });
-      expect(api.refetch).toHaveBeenCalledTimes(1);
+      expect(api.refetch).not.toHaveBeenCalled();
     });
 
     it('should skip the next refetch when fetching more', async () => {
@@ -477,14 +489,13 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.refetch).toHaveBeenCalledTimes(1);
       act(() => {
         savedSearchFetch$.next({
           options: { reset: false, fetchMore: true },
           searchSessionId: '1234',
         });
       });
-      expect(api.refetch).toHaveBeenCalledTimes(1);
+      expect(api.refetch).not.toHaveBeenCalled();
 
       act(() => {
         savedSearchFetch$.next({
@@ -492,7 +503,7 @@ describe('useDiscoverHistogram', () => {
           searchSessionId: '1234',
         });
       });
-      expect(api.refetch).toHaveBeenCalledTimes(2);
+      expect(api.refetch).toHaveBeenCalled();
     });
   });
 

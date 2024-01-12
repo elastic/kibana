@@ -39,12 +39,14 @@ import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mo
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
-import { PanelsToggle } from '../../../../components/panels_toggle';
+import * as localStorageModule from 'react-use/lib/useLocalStorage';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
 }));
+
+jest.spyOn(localStorageModule, 'default');
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -60,7 +62,7 @@ async function mountComponent(
     foundDocuments: true,
   }) as DataMain$
 ) {
-  const searchSourceMock = createSearchSourceMock({ index: dataView });
+  const searchSourceMock = createSearchSourceMock({});
   const services = createDiscoverServicesMock();
   const time = { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   services.data.query.timefilter.timefilter.getTime = () => time;
@@ -76,10 +78,9 @@ async function mountComponent(
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
   );
-
-  if (typeof prevSidebarClosed === 'boolean') {
-    localStorage.setItem('discover:sidebarClosed', String(prevSidebarClosed));
-  }
+  (localStorageModule.default as jest.Mock).mockImplementation(
+    jest.fn(() => [prevSidebarClosed, jest.fn()])
+  );
 
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
@@ -109,7 +110,7 @@ async function mountComponent(
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
-  stateContainer.appState.update({ index: dataView.id, interval: 'auto', query });
+  stateContainer.appState.update({ interval: 'auto', query });
   stateContainer.internalState.transitions.setDataView(dataView);
 
   const props = {
@@ -149,15 +150,17 @@ describe('Discover component', () => {
   test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
     await mountComponent(dataViewMock, undefined, { attachTo: container });
-    expect(container.querySelector('[data-test-subj="dscHideHistogramButton"]')).toBeNull();
-    expect(container.querySelector('[data-test-subj="dscShowHistogramButton"]')).toBeNull();
+    expect(
+      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
+    ).toBeNull();
   }, 10000);
 
   test('selected data view with time field displays chart toggle', async () => {
     const container = document.createElement('div');
     await mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
-    expect(container.querySelector('[data-test-subj="dscHideHistogramButton"]')).not.toBeNull();
-    expect(container.querySelector('[data-test-subj="dscShowHistogramButton"]')).toBeNull();
+    expect(
+      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
+    ).not.toBeNull();
   }, 10000);
 
   describe('sidebar', () => {
@@ -192,7 +195,5 @@ describe('Discover component', () => {
       }) as DataMain$
     );
     expect(component.find(ErrorCallout)).toHaveLength(1);
-    expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
-    expect(component.find(PanelsToggle).prop('renderedFor')).toBe('prompt');
   }, 10000);
 });

@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type { ITelemetryEventsSender } from '../sender';
 import type {
@@ -17,7 +16,6 @@ import type {
   EndpointMetadataDocument,
   ESClusterInfo,
   ESLicense,
-  Nullable,
 } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
@@ -169,12 +167,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
             policyInfo !== undefined &&
             !endpointPolicyCache.has(policyInfo)
           ) {
-            let agentPolicy: Nullable<AgentPolicy>;
-            try {
-              agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
-            } catch (err) {
-              tlog(logger, `error fetching policy config due to ${err?.message}`);
-            }
+            const agentPolicy = await receiver.fetchPolicyConfigs(policyInfo);
             const packagePolicies = agentPolicy?.package_policies;
 
             if (packagePolicies !== undefined && isPackagePolicyList(packagePolicies)) {

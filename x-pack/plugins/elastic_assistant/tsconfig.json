@@ -17,6 +17,7 @@
     "@kbn/core",
     "@kbn/core-http-server",
     "@kbn/licensing-plugin",
+    "@kbn/core-http-request-handler-context-server",
     "@kbn/securitysolution-es-utils",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/actions-plugin",
@@ -33,8 +34,6 @@
     "@kbn/ml-plugin",
     "@kbn/apm-utils",
     "@kbn/core-analytics-server",
-    "@kbn/elastic-assistant-common",
-    "@kbn/core-http-router-server-mocks",
   ],
   "exclude": [
     "target/**/*",

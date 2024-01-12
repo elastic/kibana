@@ -27,13 +27,6 @@ export const TRIGGER_SUGGESTION_COMMAND = {
   id: 'editor.action.triggerSuggest',
 };
 
-function getSafeInsertText(text: string, { dashSupported }: { dashSupported?: boolean } = {}) {
-  if (dashSupported) {
-    return /[^a-zA-Z\d_\.@-]/.test(text) ? `\`${text}\`` : text;
-  }
-  return /[^a-zA-Z\d_\.@]/.test(text) ? `\`${text}\`` : text;
-}
-
 export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
   const fullSignatures = getFunctionSignatures(fn);
   return {
@@ -111,7 +104,7 @@ export function getAutocompleteCommandDefinition(
 export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDefinition[] =>
   fields.map((label) => ({
     label,
-    insertText: getSafeInsertText(label),
+    insertText: label,
     kind: 4,
     detail: i18n.translate('monaco.esql.autocomplete.fieldDefinition', {
       defaultMessage: `Field specified by the input table`,
@@ -122,7 +115,7 @@ export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDef
 export const buildVariablesDefinitions = (variables: string[]): AutocompleteCommandDefinition[] =>
   variables.map((label) => ({
     label,
-    insertText: getSafeInsertText(label),
+    insertText: /[^a-zA-Z\d]/.test(label) ? `\`${label}\`` : label,
     kind: 4,
     detail: i18n.translate('monaco.esql.autocomplete.variableDefinition', {
       defaultMessage: `Variable specified by the user within the ES|QL query`,
@@ -133,7 +126,7 @@ export const buildVariablesDefinitions = (variables: string[]): AutocompleteComm
 export const buildSourcesDefinitions = (sources: string[]): AutocompleteCommandDefinition[] =>
   sources.map((label) => ({
     label,
-    insertText: getSafeInsertText(label, { dashSupported: true }),
+    insertText: label,
     kind: 21,
     detail: i18n.translate('monaco.esql.autocomplete.sourceDefinition', {
       defaultMessage: `Input table`,
@@ -174,7 +167,7 @@ export const buildPoliciesDefinitions = (
 ): AutocompleteCommandDefinition[] =>
   policies.map(({ name: label, sourceIndices }) => ({
     label,
-    insertText: getSafeInsertText(label, { dashSupported: true }),
+    insertText: label,
     kind: 5,
     detail: i18n.translate('monaco.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,

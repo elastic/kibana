@@ -13,6 +13,7 @@
     "@kbn/inspector-plugin",
     "@kbn/expressions-plugin",
     "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/embeddable-plugin",
@@ -25,10 +26,7 @@
     "@kbn/visualizations-plugin",
     "@kbn/discover-utils",
     "@kbn/resizable-layout",
-    "@kbn/shared-ux-button-toolbar",
     "@kbn/calculate-width-from-char-count",
-    "@kbn/i18n-react",
-    "@kbn/field-utils",
   ],
   "exclude": [
     "target/**/*",

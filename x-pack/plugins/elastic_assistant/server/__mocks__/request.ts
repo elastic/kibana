@@ -5,11 +5,7 @@
  * 2.0.
  */
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { CAPABILITIES, EVALUATE, KNOWLEDGE_BASE } from '../../common/constants';
-import {
-  PostEvaluateBodyInputs,
-  PostEvaluatePathQueryInputs,
-} from '../schemas/evaluate/post_evaluate';
+import { KNOWLEDGE_BASE } from '../../common/constants';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
@@ -34,24 +30,4 @@ export const getDeleteKnowledgeBaseRequest = (resource?: string) =>
     method: 'delete',
     path: KNOWLEDGE_BASE,
     query: { resource },
-  });
-
-export const getGetCapabilitiesRequest = () =>
-  requestMock.create({
-    method: 'get',
-    path: CAPABILITIES,
-  });
-
-export const getPostEvaluateRequest = ({
-  body,
-  query,
-}: {
-  body: PostEvaluateBodyInputs;
-  query: PostEvaluatePathQueryInputs;
-}) =>
-  requestMock.create({
-    body,
-    method: 'post',
-    path: EVALUATE,
-    query,
   });

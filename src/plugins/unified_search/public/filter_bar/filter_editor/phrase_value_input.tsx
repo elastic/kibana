@@ -19,7 +19,6 @@ import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/h
 interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;
   onChange: (value: string | number | boolean) => void;
-  onBlur?: (value: string | number | boolean) => void;
   intl: InjectedIntl;
   fullWidth?: boolean;
   compressed?: boolean;
@@ -44,7 +43,6 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
               id: 'unifiedSearch.filter.filterEditor.valueInputPlaceholder',
               defaultMessage: 'Enter a value',
             })}
-            onBlur={this.props.onBlur}
             value={this.props.value}
             onChange={this.props.onChange}
             field={this.props.field}

@@ -22,6 +22,7 @@ import { useAnonymizationStore } from './use_anonymization_store';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { APP_ID } from '../../common/constants';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
@@ -38,6 +39,8 @@ export const AssistantProvider: React.FC = ({ children }) => {
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   } = useKibana().services;
   const basePath = useBasePath();
+  const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
+  const assistantStreamingEnabled = useIsExperimentalFeatureEnabled('assistantStreamingEnabled');
 
   const { conversations, setConversations } = useConversationStore();
   const getInitialConversation = useCallback(() => {
@@ -75,6 +78,8 @@ export const AssistantProvider: React.FC = ({ children }) => {
       getInitialConversations={getInitialConversation}
       getComments={getComments}
       http={http}
+      assistantStreamingEnabled={assistantStreamingEnabled}
+      modelEvaluatorEnabled={isModelEvaluationEnabled}
       nameSpace={nameSpace}
       setConversations={setConversations}
       setDefaultAllow={setDefaultAllow}

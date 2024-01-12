@@ -32,12 +32,6 @@ export interface IconButton {
   title?: string;
   /** Test subject for button */
   'data-test-subj'?: string;
-  /** To disable the action **/
-  isDisabled?: boolean;
-  /** A11y for button */
-  'aria-expanded'?: boolean;
-  /** A11y for button */
-  'aria-controls'?: string;
 }
 
 /**
@@ -50,8 +44,6 @@ export interface Props {
   buttons: IconButton[];
   /** Button size */
   buttonSize?: EuiButtonGroupProps['buttonSize'];
-  /** Test subject for button group */
-  'data-test-subj'?: string;
 }
 
 type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label'>;
@@ -59,12 +51,7 @@ type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label'>;
 /**
  * A group of buttons each performing an action, represented by an icon.
  */
-export const IconButtonGroup = ({
-  buttons,
-  legend,
-  buttonSize = 'm',
-  'data-test-subj': dataTestSubj,
-}: Props) => {
+export const IconButtonGroup = ({ buttons, legend, buttonSize = 'm' }: Props) => {
   const euiTheme = useEuiTheme();
   const iconButtonGroupStyles = IconButtonGroupStyles(euiTheme);
 
@@ -86,7 +73,6 @@ export const IconButtonGroup = ({
 
   return (
     <EuiButtonGroup
-      data-test-subj={dataTestSubj}
       buttonSize={buttonSize}
       legend={legend}
       options={buttonGroupOptions}

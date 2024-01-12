@@ -16,7 +16,6 @@ import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-butto
 export interface SidebarToggleButtonProps {
   'data-test-subj'?: string;
   isSidebarCollapsed: boolean;
-  panelId?: string;
   buttonSize: IconButtonGroupProps['buttonSize'];
   onChange: (isSidebarCollapsed: boolean) => void;
 }
@@ -25,14 +24,12 @@ export interface SidebarToggleButtonProps {
  * A toggle button for the fields sidebar
  * @param data-test-subj
  * @param isSidebarCollapsed
- * @param panelId
  * @param onChange
  * @constructor
  */
 export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
   'data-test-subj': dataTestSubj = 'unifiedFieldListSidebar__toggle',
   isSidebarCollapsed,
-  panelId,
   buttonSize,
   onChange,
 }) => {
@@ -52,8 +49,6 @@ export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
                   }),
                   iconType: 'transitionLeftIn',
                   'data-test-subj': `${dataTestSubj}-expand`,
-                  'aria-expanded': false,
-                  'aria-controls': panelId,
                   onClick: () => onChange(false),
                 },
               ]
@@ -64,8 +59,6 @@ export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
                   }),
                   iconType: 'transitionLeftOut',
                   'data-test-subj': `${dataTestSubj}-collapse`,
-                  'aria-expanded': true,
-                  'aria-controls': panelId,
                   onClick: () => onChange(true),
                 },
               ]),

@@ -133,13 +133,13 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
 
     async assertDiscoverDocCountExists() {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.existOrFail('discoverQueryHits');
+        await testSubjects.existOrFail('unifiedHistogramQueryHits');
       });
     },
 
     async assertDiscoverDocCount(expectedDocCount: number) {
       await retry.tryForTime(5000, async () => {
-        const docCount = await testSubjects.getVisibleText('discoverQueryHits');
+        const docCount = await testSubjects.getVisibleText('unifiedHistogramQueryHits');
         const formattedDocCount = docCount.replaceAll(',', '');
         expect(formattedDocCount).to.eql(
           expectedDocCount,

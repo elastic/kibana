@@ -11,9 +11,8 @@ import { EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import React from 'react';
-import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { CoreStart } from '@kbn/core/public';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -37,22 +36,19 @@ export function isRangeParams(params: any): params is RangeParams {
   return Boolean(params && 'from' in params && 'to' in params);
 }
 
-export const formatDateChange = (
-  value: string | number | boolean,
-  kibana: KibanaReactContextValue<Partial<CoreStart>>
-) => {
-  if (typeof value !== 'string' && typeof value !== 'number') return value;
-
-  const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
-  const tz = !tzConfig || tzConfig === 'Browser' ? moment.tz.guess() : tzConfig;
-  const momentParsedValue = moment(value).tz(tz);
-  if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-
-  return value;
-};
-
 function RangeValueInputUI(props: Props) {
   const kibana = useKibana();
+
+  const formatDateChange = (value: string | number | boolean) => {
+    if (typeof value !== 'string' && typeof value !== 'number') return value;
+
+    const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
+    const tz = !tzConfig || tzConfig === 'Browser' ? moment.tz.guess() : tzConfig;
+    const momentParsedValue = moment(value).tz(tz);
+    if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+
+    return value;
+  };
 
   const onFromChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') {
@@ -85,7 +81,7 @@ function RangeValueInputUI(props: Props) {
             value={props.value ? props.value.from : undefined}
             onChange={onFromChange}
             onBlur={(value) => {
-              onFromChange(formatDateChange(value, kibana));
+              onFromChange(formatDateChange(value));
             }}
             placeholder={props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeStartInputPlaceholder',
@@ -103,7 +99,7 @@ function RangeValueInputUI(props: Props) {
             value={props.value ? props.value.to : undefined}
             onChange={onToChange}
             onBlur={(value) => {
-              onToChange(formatDateChange(value, kibana));
+              onToChange(formatDateChange(value));
             }}
             placeholder={props.intl.formatMessage({
               id: 'unifiedSearch.filter.filterEditor.rangeEndInputPlaceholder',

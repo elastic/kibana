@@ -16,8 +16,7 @@ import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { errors } from '@elastic/elasticsearch';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169106
-describe.skip('getServiceAnnotations', () => {
+describe('getServiceAnnotations', () => {
   const storedAnnotations = [
     {
       type: AnnotationType.VERSION,

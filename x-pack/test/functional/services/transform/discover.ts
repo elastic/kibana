@@ -14,9 +14,11 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
 
   return {
     async assertDiscoverQueryHits(expectedDiscoverQueryHits: string) {
-      await testSubjects.existOrFail('discoverQueryHits');
+      await testSubjects.existOrFail('unifiedHistogramQueryHits');
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
+        'unifiedHistogramQueryHits'
+      );
 
       expect(actualDiscoverQueryHits).to.eql(
         expectedDiscoverQueryHits,
@@ -25,16 +27,18 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
     },
 
     async assertDiscoverQueryHitsMoreThanZero() {
-      await testSubjects.existOrFail('discoverQueryHits');
+      await testSubjects.existOrFail('unifiedHistogramQueryHits');
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
+        'unifiedHistogramQueryHits'
+      );
 
       const hits = parseInt(actualDiscoverQueryHits, 10);
       expect(hits).to.greaterThan(0, `Discover query hits should be more than 0, got ${hits}`);
     },
 
     async assertNoResults(expectedDestinationIndex: string) {
-      await testSubjects.missingOrFail('discoverQueryHits');
+      await testSubjects.missingOrFail('unifiedHistogramQueryHits');
 
       // Discover should use the destination index pattern
       const actualIndexPatternSwitchLinkText = await (

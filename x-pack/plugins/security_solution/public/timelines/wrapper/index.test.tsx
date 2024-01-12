@@ -46,7 +46,7 @@ describe('TimelineWrapper', () => {
       </TestProviders>
     );
     expect(getByTestId('flyout-pane')).toBeInTheDocument();
-    expect(getByTestId('timeline-bottom-bar')).toBeInTheDocument();
+    expect(getByTestId('flyoutBottomBar')).toBeInTheDocument();
   });
 
   it('should render the default timeline state as a bottom bar', () => {
@@ -66,7 +66,7 @@ describe('TimelineWrapper', () => {
       </TestProviders>
     );
 
-    userEvent.click(getByTestId('timeline-bottom-bar-title-button'));
+    userEvent.click(getByTestId('flyoutOverlay'));
 
     expect(mockDispatch).toBeCalledWith(
       timelineActions.showTimeline({ id: TimelineId.test, show: true })

@@ -38,8 +38,3 @@ export interface RecordsFetchResponse {
   textBasedHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
 }
-
-export interface SidebarToggleState {
-  isCollapsed: boolean;
-  toggle: undefined | ((isCollapsed: boolean) => void);
-}

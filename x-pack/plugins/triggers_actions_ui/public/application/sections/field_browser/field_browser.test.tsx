@@ -42,12 +42,7 @@ describe('FieldsBrowser', () => {
 
       result.getByTestId('show-field-browser').click();
       await waitFor(() => {
-        // the container is rendered now
         expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
-        // by default, no categories are selected
-        expect(result.getByTestId('category-badges')).toHaveTextContent('');
-        // the view: all button is shown by default
-        result.getByText('View: all');
       });
     });
   });
