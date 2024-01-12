@@ -104,7 +104,7 @@
     "@kbn/visualization-utils",
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
     "@kbn/text-based-editor"
   ],
   "exclude": [
