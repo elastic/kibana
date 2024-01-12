@@ -118,7 +118,7 @@ describe('Lens Attribute', () => {
       ReportTypes.KPI
     );
 
-    expect(lnsAttrKpi.getJSON().state.datasourceStates.formBased.layers.layer0.columns).toEqual({
+    expect(lnsAttrKpi.getJSON().state.datasourceStates?.formBased?.layers.layer0.columns).toEqual({
       'x-axis-column-layer0': {
         dataType: 'date',
         isBucketed: true,

@@ -68,7 +68,13 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
 
   step('Go to test run page', async () => {
     await page.click(byTestId('superDatePickerToggleQuickMenuButton'));
-    await page.click('text=Last 1 year');
+    await page.getByTestId('superDatePickerQuickMenu').getByLabel('Time value').fill('10');
+    await page
+      .getByTestId('superDatePickerQuickMenu')
+      .getByLabel('Time unit')
+      .selectOption('Years');
+    await page.getByTestId('superDatePickerQuickMenu').getByText('Apply').click();
+    await page.mouse.wheel(0, 1000);
     await page.click(byTestId('row-ab240846-8d22-11ed-8fac-52bb19a2321e'));
 
     await page.waitForSelector('text=Test run details');

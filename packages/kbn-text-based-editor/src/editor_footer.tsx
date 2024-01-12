@@ -200,6 +200,7 @@ interface EditorFooterProps {
   disableSubmitAction?: boolean;
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
+  isLoading?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -214,6 +215,7 @@ export const EditorFooter = memo(function EditorFooter({
   disableSubmitAction,
   editorIsInline,
   isSpaceReduced,
+  isLoading,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
@@ -331,6 +333,7 @@ export const EditorFooter = memo(function EditorFooter({
                   size="s"
                   fill
                   onClick={runQuery}
+                  isLoading={isLoading}
                   isDisabled={Boolean(disableSubmitAction)}
                   data-test-subj="TextBasedLangEditor-run-query-button"
                   minWidth={isSpaceReduced ? false : undefined}

@@ -31,8 +31,6 @@ import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
-import { getNotUpgradeableMessage } from '../../../../../../../common/services/is_agent_upgradeable';
-
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
 import { EmptyPrompt } from './empty_prompt';
@@ -295,17 +293,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AgentUpgradeStatus
-                  isAgentUpgradable={
-                    !!(
-                      isAgentSelectable(agent) &&
-                      latestAgentVersion &&
-                      isAgentUpgradeable(agent, latestAgentVersion)
-                    )
-                  }
-                  agentUpgradeStartedAt={agent.upgrade_started_at}
-                  agentUpgradedAt={agent.upgraded_at}
-                  agentUpgradeDetails={agent.upgrade_details}
-                  notUpgradeableMessage={getNotUpgradeableMessage(agent, latestAgentVersion)}
+                  isAgentUpgradable={!!(isAgentSelectable(agent) && isAgentUpgradeable(agent))}
+                  agent={agent}
+                  latestAgentVersion={latestAgentVersion}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -337,12 +327,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       items={
         totalAgents
           ? showUpgradeable
-            ? agents.filter(
-                (agent) =>
-                  isAgentSelectable(agent) &&
-                  latestAgentVersion &&
-                  isAgentUpgradeable(agent, latestAgentVersion)
-              )
+            ? agents.filter((agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent))
             : agents
           : []
       }
