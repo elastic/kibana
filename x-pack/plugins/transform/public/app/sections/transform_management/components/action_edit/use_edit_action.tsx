@@ -14,7 +14,7 @@ import { useTransformCapabilities } from '../../../../hooks';
 
 import { editActionNameText, EditActionName } from './edit_action_name';
 import { useSearchItems } from '../../../../hooks/use_search_items';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { useToastNotifications } from '../../../../app_dependencies';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 export type EditAction = ReturnType<typeof useEditAction>;
@@ -27,18 +27,15 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
 
   const closeFlyout = () => setIsFlyoutVisible(false);
 
-  const { getDataViewIdByTitle } = useSearchItems(undefined);
+  const { loadDataViewByEsIndexPattern } = useSearchItems(undefined);
   const toastNotifications = useToastNotifications();
-  const appDeps = useAppDependencies();
-  const dataViews = appDeps.data.dataViews;
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        const dataViewTitle = Array.isArray(item.config.source.index)
-          ? item.config.source.index.join(',')
-          : item.config.source.index;
-        const currentDataViewId = getDataViewIdByTitle(dataViewTitle);
+        const { dataViewId: currentDataViewId, dataViewTitle } = await loadDataViewByEsIndexPattern(
+          item.config.source.index
+        );
 
         if (currentDataViewId === undefined) {
           toastNotifications.addWarning(
@@ -60,8 +57,8 @@ export const useEditAction = (forceDisable: boolean, transformNodes: number) => 
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataViews, toastNotifications, getDataViewIdByTitle]
+
+    [toastNotifications, loadDataViewByEsIndexPattern]
   );
 
   const action: TransformListAction = useMemo(

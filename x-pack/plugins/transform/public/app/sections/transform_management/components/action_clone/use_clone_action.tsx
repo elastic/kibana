@@ -12,29 +12,25 @@ import { i18n } from '@kbn/i18n';
 import { TransformListAction, TransformListRow } from '../../../../common';
 import { SECTION_SLUG } from '../../../../common/constants';
 import { useTransformCapabilities, useSearchItems } from '../../../../hooks';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { useToastNotifications } from '../../../../app_dependencies';
 
 import { cloneActionNameText, CloneActionName } from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (forceDisable: boolean, transformNodes: number) => {
   const history = useHistory();
-  const appDeps = useAppDependencies();
-  const dataViewsContract = appDeps.data.dataViews;
   const toastNotifications = useToastNotifications();
 
-  const { getDataViewIdByTitle, loadDataViews } = useSearchItems(undefined);
+  const { loadDataViewByEsIndexPattern } = useSearchItems(undefined);
 
   const { canCreateTransform } = useTransformCapabilities();
 
   const clickHandler = useCallback(
     async (item: TransformListRow) => {
       try {
-        await loadDataViews(dataViewsContract);
-        const dataViewTitle = Array.isArray(item.config.source.index)
-          ? item.config.source.index.join(',')
-          : item.config.source.index;
-        const dataViewId = getDataViewIdByTitle(dataViewTitle);
+        const { dataViewId, dataViewTitle } = await loadDataViewByEsIndexPattern(
+          item.config.source.index
+        );
 
         if (dataViewId === undefined) {
           toastNotifications.addDanger(
@@ -55,7 +51,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
         });
       }
     },
-    [history, dataViewsContract, toastNotifications, loadDataViews, getDataViewIdByTitle]
+    [history, toastNotifications, loadDataViewByEsIndexPattern]
   );
 
   const action: TransformListAction = useMemo(

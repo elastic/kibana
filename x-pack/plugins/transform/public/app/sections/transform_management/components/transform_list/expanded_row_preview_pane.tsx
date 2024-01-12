@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { DataGrid } from '@kbn/ml-data-grid';
 import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { useToastNotifications } from '../../../../app_dependencies';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
 import { useSearchItems } from '../../../../hooks/use_search_items';
 import { TransformListRow } from '../../../../common';
@@ -42,15 +42,10 @@ interface ExpandedRowPreviewPaneProps {
 }
 
 export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ item }) => {
-  const appDeps = useAppDependencies();
-  const dataViewsContract = appDeps.data.dataViews;
-
   const {
     error: searchItemsError,
-    getDataViewIdByTitle,
-    loadDataViews,
+    loadDataViewByEsIndexPattern,
     searchItems,
-    setSavedObjectId,
   } = useSearchItems(undefined);
 
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -58,11 +53,9 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ item }
 
   useEffect(() => {
     async function initializeSearchItems() {
-      await loadDataViews(dataViewsContract);
-      const dataViewTitle = Array.isArray(item.config.source.index)
-        ? item.config.source.index.join(',')
-        : item.config.source.index;
-      const dataViewId = getDataViewIdByTitle(dataViewTitle);
+      const { dataViewId, dataViewTitle } = await loadDataViewByEsIndexPattern(
+        item.config.source.index
+      );
 
       if (dataViewId === undefined) {
         setErrorMessage(
@@ -72,10 +65,7 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ item }
             values: { dataViewTitle, transformId: item.id },
           })
         );
-        return;
       }
-
-      setSavedObjectId(dataViewId);
     }
 
     initializeSearchItems();
