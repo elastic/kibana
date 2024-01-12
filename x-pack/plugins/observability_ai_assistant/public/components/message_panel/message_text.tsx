@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EuiLink,
   EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
@@ -12,6 +13,8 @@ import {
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo, useRef } from 'react';
@@ -23,6 +26,7 @@ interface Props {
   content: string;
   loading: boolean;
   onActionClick: ChatActionClickHandler;
+  coreStart: CoreStart;
 }
 
 const ANIMATION_TIME = 1;
@@ -108,7 +112,7 @@ const esqlLanguagePlugin = () => {
   };
 };
 
-export function MessageText({ loading, content, onActionClick }: Props) {
+export function MessageText({ loading, content, onActionClick, coreStart }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
@@ -126,6 +130,14 @@ export function MessageText({ loading, content, onActionClick }: Props) {
 
     processingPlugins[1][1].components = {
       ...components,
+      a: (props) => {
+        const href = coreStart.http.basePath.prepend(props.href);
+        return (
+          <EuiLink data-test-subj="observabilityAiAssistantLinkToButton" href={href}>
+            {props.children}
+          </EuiLink>
+        );
+      },
       cursor: Cursor,
       esql: (props) => {
         return (
@@ -179,17 +191,19 @@ export function MessageText({ loading, content, onActionClick }: Props) {
       parsingPluginList: [loadingCursorPlugin, esqlLanguagePlugin, ...parsingPlugins],
       processingPluginList: processingPlugins,
     };
-  }, [loading]);
+  }, [loading, coreStart]);
 
   return (
-    <EuiText size="s" className={containerClassName}>
-      <EuiMarkdownFormat
-        textSize="s"
-        parsingPluginList={parsingPluginList}
-        processingPluginList={processingPluginList}
-      >
-        {`${content}${loading ? CURSOR : ''}`}
-      </EuiMarkdownFormat>
-    </EuiText>
+    <RedirectAppLinks coreStart={coreStart}>
+      <EuiText size="s" className={containerClassName}>
+        <EuiMarkdownFormat
+          textSize="s"
+          parsingPluginList={parsingPluginList}
+          processingPluginList={processingPluginList}
+        >
+          {`${content}${loading ? CURSOR : ''}`}
+        </EuiMarkdownFormat>
+      </EuiText>
+    </RedirectAppLinks>
   );
 }

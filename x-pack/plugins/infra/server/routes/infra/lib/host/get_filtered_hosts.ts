@@ -47,6 +47,15 @@ const createQuery = (
         bool: {
           ...params.query.bool,
           filter: createFilters({ params, extraFilter: params.query }),
+          must_not: [
+            {
+              term: {
+                'metricset.name': {
+                  value: 'app',
+                },
+              },
+            },
+          ],
         },
       },
       aggs: {

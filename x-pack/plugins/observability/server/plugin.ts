@@ -40,6 +40,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ObservabilityAIAssistantPluginSetup } from '@kbn/observability-ai-assistant-plugin/server';
 import { SloOrphanSummaryCleanupTask } from './services/slo/tasks/orphan_summary_cleanup_task';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
@@ -63,6 +64,7 @@ import { threshold } from './saved_objects/threshold';
 import { DefaultResourceInstaller, DefaultSLOInstaller } from './services/slo';
 
 import { uiSettings } from './ui_settings';
+import { registerAssistantFunctions } from './assistant_functions';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -70,6 +72,7 @@ interface PluginSetup {
   alerting: PluginSetupContract;
   features: FeaturesSetup;
   guidedOnboarding?: GuidedOnboardingPluginSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
@@ -368,6 +371,13 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
 
       const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
+
+      plugins.observabilityAIAssistant.service.register(
+        registerAssistantFunctions({
+          logger: this.logger,
+          spaces: pluginStart.spaces,
+        })
+      );
 
       const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
       const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);

@@ -23,6 +23,7 @@ import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 import { AlertsSectionTitle } from '../../components/section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import AIAssistant from './ai_assistant';
 
 export const AlertsSummaryContent = ({
   assetName,
@@ -36,6 +37,9 @@ export const AlertsSummaryContent = ({
   const { featureFlags } = usePluginConfig();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
   const { overrides } = useAssetDetailsRenderPropsContext();
+  const {
+    services: { observabilityAIAssistant },
+  } = useKibanaContextForPlugin();
 
   const alertsEsQueryByStatus = useMemo(
     () =>
@@ -67,16 +71,24 @@ export const AlertsSummaryContent = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
+      <AIAssistant
+        assetName={assetName}
+        assetType={'host'}
+        observabilityAIAssistant={observabilityAIAssistant}
+        dateRange={dateRange}
+      />
       <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
 
       {featureFlags.inventoryThresholdAlertRuleEnabled && (
-        <AlertFlyout
-          filter={`${findInventoryFields(assetType).name}: "${assetName}"`}
-          nodeType={assetType}
-          setVisible={toggleAlertFlyout}
-          visible={isAlertFlyoutVisible}
-          options={overrides?.alertRule?.options}
-        />
+        <>
+          <AlertFlyout
+            filter={`${findInventoryFields(assetType).name}: "${assetName}"`}
+            nodeType={assetType}
+            setVisible={toggleAlertFlyout}
+            visible={isAlertFlyoutVisible}
+            options={overrides?.alertRule?.options}
+          />
+        </>
       )}
     </>
   );

@@ -214,7 +214,7 @@ export async function createChatService({
         },
       });
 
-      const contexts = ['core', 'apm'];
+      const contexts = ['core', 'apm', 'infrastructure'];
 
       const functions = getFunctions({ contexts });
 

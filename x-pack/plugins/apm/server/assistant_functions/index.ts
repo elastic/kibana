@@ -22,6 +22,7 @@ import { registerGetApmCorrelationsFunction } from './get_apm_correlations';
 import { registerGetApmDownstreamDependenciesFunction } from './get_apm_downstream_dependencies';
 import { registerGetApmErrorDocumentFunction } from './get_apm_error_document';
 import { registerGetApmServicesListFunction } from './get_apm_services_list';
+import { registerGetApmServiceOverviewInstancesListFunction } from './get_apm_service_overview_main_statistics';
 import { registerGetApmServiceSummaryFunction } from './get_apm_service_summary';
 import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
 
@@ -29,6 +30,7 @@ export interface FunctionRegistrationParameters {
   apmEventClient: APMEventClient;
   registerFunction: RegisterFunction;
   resources: APMRouteHandlerResources;
+  config: APMConfig;
 }
 
 export function registerAssistantFunctions({
@@ -89,6 +91,7 @@ export function registerAssistantFunctions({
       resources: apmRouteHandlerResources,
       apmEventClient,
       registerFunction,
+      config,
     };
 
     registerGetApmServicesListFunction(parameters);
@@ -97,12 +100,13 @@ export function registerAssistantFunctions({
     registerGetApmDownstreamDependenciesFunction(parameters);
     registerGetApmCorrelationsFunction(parameters);
     registerGetApmTimeseriesFunction(parameters);
+    registerGetApmServiceOverviewInstancesListFunction(parameters);
 
     registerContext({
       name: 'apm',
       description: `
       When analyzing APM data, prefer the APM specific functions over the generic Lens,
-      Elasticsearch or Kibana ones, unless those are explicitly requested by the user.
+      Elasticsearch, Infrastructure or Kibana ones, unless those are explicitly requested by the user.
   
       When requesting metrics for a service, make sure you also know what environment
       it is running in. Metrics aggregated over multiple environments are useless.
@@ -110,7 +114,7 @@ export function registerAssistantFunctions({
       There are four important data types in Elastic APM. Each of them have the
       following fields:
       - service.name: the name of the service
-      - service.node.name: the id of the service instance (often the hostname)
+      - service.node.name: the id of the service instance (often the host name)
       - service.environment: the environment (often production, development)
       - agent.name: the name of the agent (go, java, etc)
   

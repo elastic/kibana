@@ -71,7 +71,7 @@ export function registerRecallFunction({
               'Contexts or categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
             items: {
               type: 'string',
-              enum: ['apm', 'lens'],
+              enum: ['apm', 'lens', 'infrastructure'],
             },
           },
         },
@@ -137,7 +137,7 @@ async function retrieveSuggestions({
   userMessage?: Message;
   queries: string[];
   client: ObservabilityAIAssistantClient;
-  contexts: Array<'apm' | 'lens'>;
+  contexts: Array<'apm' | 'lens' | 'infrastructure'>;
   signal: AbortSignal;
 }) {
   const queriesWithUserPrompt =

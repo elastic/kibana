@@ -51,6 +51,7 @@ import {
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { mapSourceToLogView } from './utils/map_source_to_log_view';
+import { registerAssistantFunctions } from './assistant_functions';
 
 export const config: PluginConfigDescriptor<InfraConfig> = {
   schema: schema.object({
@@ -262,6 +263,8 @@ export class InfraServerPlugin
 
     initInfraServer(this.libs);
     registerRuleTypes(plugins.alerting, this.libs, this.config);
+
+    plugins.observabilityAIAssistant.service.register(registerAssistantFunctions(this.libs));
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',

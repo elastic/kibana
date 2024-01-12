@@ -10,7 +10,8 @@
     "scripts/**/*",
     "typings/**/*",
     "public/**/*.json",
-    "server/**/*"
+    "server/**/*",
+    "../observability/server/assistant_functions"
   ],
   "kbn_references": [
     "@kbn/core",

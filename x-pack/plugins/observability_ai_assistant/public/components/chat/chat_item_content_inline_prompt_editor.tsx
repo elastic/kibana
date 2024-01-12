@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { useKibana } from '../../hooks/use_kibana';
 import { MessageText } from '../message_panel/message_text';
 import { ChatPromptEditor } from './chat_prompt_editor';
 import type { Message } from '../../../common';
@@ -43,6 +44,7 @@ export function ChatItemContentInlinePromptEditor({
   onSendTelemetry,
   onSubmit,
 }: Props) {
+  const { services } = useKibana();
   return !editing ? (
     <EuiPanel
       paddingSize="none"
@@ -50,7 +52,12 @@ export function ChatItemContentInlinePromptEditor({
       hasShadow={false}
       className={textContainerClassName}
     >
-      <MessageText content={content || ''} loading={loading} onActionClick={onActionClick} />
+      <MessageText
+        content={content || ''}
+        loading={loading}
+        onActionClick={onActionClick}
+        coreStart={services}
+      />
     </EuiPanel>
   ) : (
     <EuiPanel

@@ -63,6 +63,25 @@ export const registerFunctions: ChatRegistrationFunction = async ({
         even if it has been called before.
 
         If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "esql" function, but be explicit about it potentially being incorrect.
+
+        Format every service as HTML link. The link will open the APM Service Overview page.
+
+        \`\`\`
+        [SERVICE_NAME](RELATIVE_PATH)
+        \`\`\`
+          
+        The RELATIVE_PATH is \`/app/apm/services/SERVICE_NAME/overview?rangeFrom=START&rangeTo=END\`
+        The SERVICE_NAME is the name of the service.
+
+
+        Format every host as HTML link. The link will open the Host Details page.
+
+        \`\`\`
+        [HOST_NAME](RELATIVE_PATH)
+        \`\`\`
+          
+        The RELATIVE_PATH is \`/app/metrics/detail/hosts/HOST_NAME/?assetDetails:(dateRange:(from:START,to=END))\`
+        The HOST_NAME is the name of the host.
         `
     );
 

@@ -31,6 +31,7 @@ import {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import { ObservabilityAIAssistantPluginSetup } from '@kbn/observability-ai-assistant-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
@@ -38,6 +39,7 @@ export interface InfraServerPluginSetupDeps {
   home: HomeServerPluginSetup;
   features: FeaturesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   observability: ObservabilityPluginSetup;
   share: SharePluginSetup;
   spaces: SpacesPluginSetup;

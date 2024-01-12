@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { last } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
@@ -32,10 +33,12 @@ function ChatContent({
   title: defaultTitle,
   initialMessages,
   connectorId,
+  coreStart,
 }: {
   title: string;
   initialMessages: Message[];
   connectorId: string;
+  coreStart: CoreStart;
 }) {
   const chatService = useObservabilityAIAssistantChatService();
 
@@ -66,6 +69,7 @@ function ChatContent({
             content={lastAssistantResponse?.message.content ?? ''}
             loading={state === ChatState.Loading}
             onActionClick={async () => {}}
+            coreStart={coreStart}
           />
         }
         error={state === ChatState.Error}
@@ -142,9 +146,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     [service]
   );
 
-  const {
-    services: { http },
-  } = useKibana();
+  const { services } = useKibana();
 
   let children: React.ReactNode = null;
 
@@ -154,11 +156,14 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
         title={title}
         initialMessages={messages}
         connectorId={connectors.selectedConnector}
+        coreStart={services}
       />
     );
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
-      <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
+      <MissingCredentialsCallout
+        connectorsManagementHref={getConnectorsManagementHref(services.http!)}
+      />
     );
   }
 

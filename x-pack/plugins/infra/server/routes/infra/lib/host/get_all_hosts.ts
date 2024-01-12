@@ -48,6 +48,15 @@ const createQuery = (
             params,
             hostNamesShortList,
           }),
+          must_not: [
+            {
+              term: {
+                'metricset.name': {
+                  value: 'app',
+                },
+              },
+            },
+          ],
         },
       },
       aggs: createAggregations(params, metricAggregations),

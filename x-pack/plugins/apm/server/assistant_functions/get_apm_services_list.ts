@@ -7,6 +7,7 @@
 
 import datemath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
+import { toKueryFilterFormat } from '../../common/utils/kuery_utils';
 import { FunctionRegistrationParameters } from '.';
 import { ApmDocumentType } from '../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
@@ -36,7 +37,7 @@ export function registerGetApmServicesListFunction({
     {
       name: 'get_apm_services_list',
       contexts: ['apm'],
-      description: `Gets a list of services`,
+      description: `Gets a list of services, their health status, and alerts.`,
       descriptionForUser: i18n.translate(
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser',
         {
@@ -51,6 +52,10 @@ export function registerGetApmServicesListFunction({
             ...NON_EMPTY_STRING,
             description:
               'Optionally filter the services by the environments that they are running in',
+          },
+          'host.name': {
+            ...NON_EMPTY_STRING,
+            description: 'Optionally filter the services by the host name',
           },
           start: {
             ...NON_EMPTY_STRING,
@@ -82,7 +87,7 @@ export function registerGetApmServicesListFunction({
       } as const,
     },
     async ({ arguments: args }, signal) => {
-      const { healthStatus } = args;
+      const { healthStatus, 'host.name': hostName } = args;
       const [apmAlertsClient, mlClient, randomSampler] = await Promise.all([
         getApmAlertsClient(resources),
         getMlClient(resources),
@@ -96,6 +101,10 @@ export function registerGetApmServicesListFunction({
       const start = datemath.parse(args.start)?.valueOf()!;
       const end = datemath.parse(args.end)?.valueOf()!;
 
+      const kuery = hostName
+        ? toKueryFilterFormat('host.name', [hostName])
+        : '';
+
       const serviceItems = await getServicesItems({
         apmAlertsClient,
         apmEventClient,
@@ -103,7 +112,7 @@ export function registerGetApmServicesListFunction({
         start,
         end,
         environment: args['service.environment'] || ENVIRONMENT_ALL.value,
-        kuery: '',
+        kuery,
         logger: resources.logger,
         randomSampler,
         rollupInterval: RollupInterval.OneMinute,
