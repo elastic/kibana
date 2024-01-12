@@ -18,7 +18,6 @@ import { MapEmbeddable, MapEmbeddableInput } from '@kbn/maps-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
 import { ErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { useMapFilters } from './use_map_filters';
 import { useKibanaServices } from '../../../../../hooks/use_kibana_services';
 
 const EmbeddedPanel = styled.div`
@@ -44,8 +43,6 @@ export function EmbeddedMapComponent() {
 
   const { start, end, serviceName } = urlParams;
 
-  const mapFilters = useMapFilters();
-
   const [embeddable, setEmbeddable] = useState<
     MapEmbeddable | ErrorEmbeddable | undefined
   >();
@@ -63,7 +60,7 @@ export function EmbeddedMapComponent() {
   const input: MapEmbeddableInput = {
     attributes: { title: '' },
     id: uuidv4(),
-    filters: mapFilters,
+    filters: [],
     viewMode: ViewMode.VIEW,
     isLayerTOCOpen: false,
     query: {
