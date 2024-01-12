@@ -103,6 +103,7 @@ export const reportingScreenshotShareProvider = ({
             isDirty={isDirty}
             onClose={() => {
               session.close();
+              onClose();
             }}
             theme={theme}
           />,

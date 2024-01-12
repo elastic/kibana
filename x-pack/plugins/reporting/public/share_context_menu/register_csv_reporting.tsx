@@ -28,7 +28,7 @@ export const reportingCsvShareProvider = ({
   overlays,
   i18nStart,
 }: ExportModalShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, objectId, sharingData }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -70,6 +70,7 @@ export const reportingCsvShareProvider = ({
           <CsvModalContent
             onClose={() => {
               session.close();
+              onClose();
             }}
             requiresSavedState={false}
             apiClient={apiClient}
@@ -88,7 +89,6 @@ export const reportingCsvShareProvider = ({
         }
       );
     };
-    // TODO: add abstractions in ExportTypeRegistry to use here?
     let capabilityHasCsvReporting = false;
     if (usesUiCapabilities) {
       capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;

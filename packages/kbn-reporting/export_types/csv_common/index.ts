@@ -13,7 +13,6 @@ import type {
   BasePayload,
   BasePayloadV2,
 } from '@kbn/reporting-common/types';
-import { Omit } from 'utility-types';
 
 export * from './constants';
 

@@ -37,7 +37,7 @@ export class ShareMenuManager {
        * the given `anchorElement`. If the context menu is already opened, a call to this method closes it.
        * @param options
        */
-      toggleShareContextMenu: async (options: ShowShareMenuOptions) => {
+      toggleShareContextMenu: (options: ShowShareMenuOptions) => {
         const onClose = () => {
           this.onClose();
           options.onClose?.();

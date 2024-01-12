@@ -107,7 +107,7 @@ export const downloadCsvShareProvider = ({
   theme,
   i18nStart,
 }: DownloadPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, sharingData }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, sharingData, onClose }: ShareContext) => {
     if ('lens' !== objectType) {
       return [];
     }
@@ -133,6 +133,7 @@ export const downloadCsvShareProvider = ({
             warnings={getWarnings(activeData)}
             onClose={() => {
               session.close();
+              onClose();
             }}
             onClick={async () => {
               await downloadCSVs({
