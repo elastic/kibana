@@ -130,7 +130,7 @@ export const GetImage = ({
             }
             onClick={onClick}
             color={!!progressStatus.errorMsg ? 'danger' : undefined}
-            iconType="'download'"
+            iconType="download"
             aria-label={UPDATE_SCREENSHOT_LABEL}
             title={UPDATE_SCREENSHOT_LABEL}
           />
