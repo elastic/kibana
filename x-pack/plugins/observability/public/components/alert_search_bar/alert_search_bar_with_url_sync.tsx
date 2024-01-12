@@ -26,13 +26,14 @@ function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
       },
     },
     triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
+    uiSettings,
   } = useKibana().services;
 
   return (
     <ObservabilityAlertSearchBar
       {...stateProps}
       {...searchBarProps}
-      services={{ timeFilterService, AlertsSearchBar, useToasts }}
+      services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
     />
   );
 }

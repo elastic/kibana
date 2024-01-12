@@ -18,9 +18,15 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'field', type: 'number' }],
+        params: [
+          { name: 'field', type: 'number' },
+          { name: 'decimals', type: 'number', optional: true },
+        ],
         returnType: 'number',
-        examples: [`from index | eval round_value = round(field)`],
+        examples: [
+          `from index | eval round_value = round(field)`,
+          `from index | eval round_value = round(field, 2)`,
+        ],
       },
     ],
   },
