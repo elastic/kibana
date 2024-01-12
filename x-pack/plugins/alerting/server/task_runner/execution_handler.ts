@@ -627,7 +627,7 @@ export class ExecutionHandler<
 
         if (
           this.rule.notificationDelay &&
-          alert.getActiveCount() < this.rule.notificationDelay.activeCount
+          alert.getActiveCount() < this.rule.notificationDelay.active
         ) {
           continue;
         } else {

@@ -142,7 +142,7 @@ export interface MappedParamsProperties {
 export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
 
 export interface NotificationDelay {
-  activeCount: number;
+  active: number;
 }
 
 export interface Rule<Params extends RuleTypeParams = never> {

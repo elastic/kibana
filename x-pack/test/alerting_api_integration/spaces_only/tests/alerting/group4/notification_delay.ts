@@ -187,7 +187,7 @@ export default function createNotificationDelayTests({ getService }: FtrProvider
               params: {},
             },
           ],
-          ...(activeCount ? { notification_delay: { active_count: activeCount } } : {}),
+          ...(activeCount ? { notification_delay: { active: activeCount } } : {}),
         })
       )
       .expect(200);

@@ -1885,7 +1885,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 notification_delay: {
-                  active_count: 3,
+                  active: 3,
                 },
               })
             );
@@ -1961,7 +1961,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 notification_delay: {
-                  active_count: 3,
+                  active: 3,
                 },
               })
             );

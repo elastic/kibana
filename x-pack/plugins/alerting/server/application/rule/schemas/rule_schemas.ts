@@ -133,7 +133,7 @@ export const snoozeScheduleSchema = schema.object({
 });
 
 export const notificationDelaySchema = schema.object({
-  activeCount: schema.number(),
+  active: schema.number(),
 });
 
 /**

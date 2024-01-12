@@ -143,7 +143,7 @@ interface RuleMetaAttributes {
 }
 
 interface NotificationDelayAttributes {
-  activeCount: number;
+  active: number;
 }
 
 export interface RuleAttributes {
