@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { ExperimentalBadge } from './experimental_badge';
-
-describe('ExperimentalBadge', () => {
-  it('renders', () => {
-    expect(<ExperimentalBadge />).not.toBeDefined();
-  });
-});
+export const DEFAULT_INTERVAL = '60s';
+export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
+export const SLO_LONG_REFETCH_INTERVAL = 60 * 1000; // 1 minute
+export const SLO_SHORT_REFETCH_INTERVAL = 5 * 1000; // 5 seconds
