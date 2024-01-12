@@ -97,9 +97,10 @@ describe('addOrReplaceCustomField ', () => {
           "type": "text",
         },
         Object {
+          "defaultValue": true,
           "key": "test_key_2",
           "label": "My test label 2",
-          "required": false,
+          "required": true,
           "type": "toggle",
         },
         Object {
@@ -132,9 +133,10 @@ describe('addOrReplaceCustomField ', () => {
           "type": "text",
         },
         Object {
+          "defaultValue": true,
           "key": "test_key_2",
           "label": "My test label 2",
-          "required": false,
+          "required": true,
           "type": "toggle",
         },
       ]

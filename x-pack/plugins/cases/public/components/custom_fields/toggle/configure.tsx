@@ -33,10 +33,13 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldToggle>['Configure'] = 
         <UseField
           path="defaultValue"
           component={CheckBoxField}
+          config={{ defaultValue: false }}
           componentProps={{
             label: i18n.DEFAULT_VALUE,
+            euiFieldProps: {
+              'data-test-subj': 'toggle-custom-field-default-value',
+            },
           }}
-          defaultValue={false}
         />
       )}
     </>

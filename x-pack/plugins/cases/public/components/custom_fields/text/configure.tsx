@@ -13,7 +13,7 @@ import type { CustomFieldType } from '../types';
 import * as i18n from '../translations';
 
 const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = () => {
-  const [{ required, defaultValue }] = useFormData();
+  const [{ required }] = useFormData();
 
   return (
     <>
@@ -39,7 +39,6 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = ()
               'data-test-subj': 'text-custom-field-default-value',
             },
           }}
-          defaultValue={defaultValue}
         />
       )}
     </>

@@ -7,18 +7,9 @@
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from './translations';
-import type { CustomFieldTypes } from '../../../common/types/domain';
 import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
 
 const { emptyField, maxLengthField } = fieldValidators;
-
-export interface CustomFieldsConfigurationFormProps {
-  key: string;
-  label: string;
-  type: CustomFieldTypes;
-  required?: boolean;
-  defaultValue?: boolean | string;
-}
 
 export const schema = {
   key: {

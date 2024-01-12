@@ -45,7 +45,7 @@ describe('CustomFieldsList', () => {
       )
     ).toBeInTheDocument();
     expect(await screen.findByText('Text')).toBeInTheDocument();
-    expect(await screen.findByText('Required')).toBeInTheDocument();
+    expect((await screen.findAllByText('Required')).length).toBe(2);
     expect(
       await screen.findByTestId(
         `custom-field-${customFieldsConfigurationMock[1].key}-${customFieldsConfigurationMock[1].type}`

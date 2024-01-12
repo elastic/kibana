@@ -34,36 +34,36 @@ describe('CustomFieldsForm ', () => {
   it('renders correctly', async () => {
     appMockRender.render(<CustomFieldsForm {...props} />);
 
-    expect(screen.getByTestId('custom-field-label-input')).toBeInTheDocument();
-    expect(screen.getByTestId('custom-field-type-selector')).toBeInTheDocument();
+    expect(await screen.findByTestId('custom-field-label-input')).toBeInTheDocument();
+    expect(await screen.findByTestId('custom-field-type-selector')).toBeInTheDocument();
   });
 
   it('renders text as default custom field type', async () => {
     appMockRender.render(<CustomFieldsForm {...props} />);
 
-    expect(screen.getByTestId('custom-field-type-selector')).toBeInTheDocument();
-    expect(screen.getByText('Text')).toBeInTheDocument();
+    expect(await screen.findByTestId('custom-field-type-selector')).toBeInTheDocument();
+    expect(await screen.findByText('Text')).toBeInTheDocument();
 
-    expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
+    expect(await screen.findByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
   it('renders custom field type options', async () => {
     appMockRender.render(<CustomFieldsForm {...props} />);
 
-    expect(screen.getByText('Text')).toBeInTheDocument();
-    expect(screen.getByText('Toggle')).toBeInTheDocument();
-    expect(screen.getByTestId('custom-field-type-selector')).not.toHaveAttribute('disabled');
+    expect(await screen.findByText('Text')).toBeInTheDocument();
+    expect(await screen.findByText('Toggle')).toBeInTheDocument();
+    expect(await screen.findByTestId('custom-field-type-selector')).not.toHaveAttribute('disabled');
   });
 
   it('renders toggle custom field type', async () => {
     appMockRender.render(<CustomFieldsForm {...props} />);
 
-    fireEvent.change(screen.getByTestId('custom-field-type-selector'), {
+    fireEvent.change(await screen.findByTestId('custom-field-type-selector'), {
       target: { value: CustomFieldTypes.TOGGLE },
     });
 
-    expect(screen.getByTestId('toggle-custom-field-required')).toBeInTheDocument();
-    expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
+    expect(await screen.findByTestId('toggle-custom-field-required')).toBeInTheDocument();
+    expect(await screen.findByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
   it('serializes the data correctly if required is selected', async () => {
@@ -77,9 +77,9 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
-    userEvent.click(screen.getByTestId('text-custom-field-required'));
-    userEvent.paste(screen.getByTestId('text-custom-field-default-value'), 'Summary');
+    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Summary');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -105,7 +105,7 @@ describe('CustomFieldsForm ', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -170,7 +170,8 @@ describe('CustomFieldsForm ', () => {
       'value',
       customFieldsConfigurationMock[1].label
     );
-    expect(await screen.findByTestId('toggle-custom-field-required')).not.toHaveAttribute(
+    expect(await screen.findByTestId('toggle-custom-field-required')).toHaveAttribute('checked');
+    expect(await screen.findByTestId('toggle-custom-field-default-value')).toHaveAttribute(
       'checked'
     );
 

@@ -38,7 +38,6 @@ describe('Configure ', () => {
     );
 
     userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
-
     userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
