@@ -55,7 +55,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getEnhancement: this.getEnhancement,
     };
 
-    initGetPanelExplanation({ router });
+    initGetPanelExplanation({ router, core });
 
     this.migrateFn = getMigrateFunction(commonContract);
     return {
