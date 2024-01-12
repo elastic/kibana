@@ -49,7 +49,10 @@ export const getSuggestions = async (
       return adHoc.name === indexPattern;
     });
 
-    const dataView = await getESQLAdHocDataview(indexPattern, deps.dataViews.create);
+    const dataView = dataViewSpec
+      ? await deps.dataViews.create(dataViewSpec)
+      : await getESQLAdHocDataview(indexPattern, deps.dataViews);
+
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
     }

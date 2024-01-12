@@ -33,10 +33,7 @@ export async function getDataViewByTextBasedQueryLang(
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
-    const dataViewObj = await getESQLAdHocDataview(
-      indexPatternFromQuery,
-      services.dataViews.create
-    );
+    const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
 
     if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
       dataViewObj.timeFieldName = '@timestamp';

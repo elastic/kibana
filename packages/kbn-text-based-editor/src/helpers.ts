@@ -10,11 +10,7 @@ import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import type {
-  DataViewsPublicPluginStart,
-  DataView,
-  DataViewSpec,
-} from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import type { MapCache } from 'lodash';
 
@@ -224,9 +220,9 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
 // as solving the problem descibed here https://github.com/elastic/kibana/issues/168131
 export async function getESQLAdHocDataview(
   indexPattern: string,
-  createDataView: (config: DataViewSpec) => Promise<DataView>
+  dataViewsService: DataViewsPublicPluginStart
 ) {
-  return await createDataView({
+  return await dataViewsService.create({
     title: indexPattern,
     id: `esql-${indexPattern}`,
   });

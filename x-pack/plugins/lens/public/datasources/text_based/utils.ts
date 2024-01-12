@@ -88,7 +88,7 @@ export async function getStateFromAggregateQuery(
   let columnsFromQuery: DatatableColumn[] = [];
   let timeFieldName;
   try {
-    const dataView = await getESQLAdHocDataview(indexPattern, dataViews.create);
+    const dataView = await getESQLAdHocDataview(indexPattern, dataViews);
 
     if (dataView && dataView.id) {
       if (dataView?.fields?.getByName('@timestamp')?.type === 'date') {
