@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
   // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
-  describe('@ess @serverless delete_rules_bulk', () => {
+  describe('@ess @brokenInServerless @skipInQA delete_rules_bulk', () => {
     describe('deprecations', () => {
       it('should return a warning header', async () => {
         await createRule(supertest, log, getSimpleRule());
