@@ -290,7 +290,7 @@ export const createLifecycleExecutor =
             trackedAlertRecoveredIds
           );
 
-          const { alertUuid, started, flapping, pendingRecoveredCount, activeCount } = !isNew
+          const { alertUuid, started, flapping, pendingRecoveredCount } = !isNew
             ? state.trackedAlerts[alertId]
             : {
                 alertUuid: lifecycleAlertServices.getAlertUuid(alertId),
@@ -299,7 +299,6 @@ export const createLifecycleExecutor =
                   ? state.trackedAlertsRecovered[alertId].flapping
                   : false,
                 pendingRecoveredCount: 0,
-                activeCount: 0,
               };
 
           const event: ParsedTechnicalFields & ParsedExperimentalFields = {
@@ -343,7 +342,6 @@ export const createLifecycleExecutor =
             flappingHistory,
             flapping,
             pendingRecoveredCount,
-            activeCount,
           };
         });
 
@@ -396,32 +394,23 @@ export const createLifecycleExecutor =
     const nextTrackedAlerts = Object.fromEntries(
       allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
-        .map(
-          ({
-            event,
-            flappingHistory,
-            flapping: isCurrentlyFlapping,
-            pendingRecoveredCount,
-            activeCount,
-          }) => {
-            const alertId = event[ALERT_INSTANCE_ID]!;
-            const alertUuid = event[ALERT_UUID]!;
-            const started = new Date(event[ALERT_START]!).toISOString();
-            const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
-            return [
+        .map(({ event, flappingHistory, flapping: isCurrentlyFlapping, pendingRecoveredCount }) => {
+          const alertId = event[ALERT_INSTANCE_ID]!;
+          const alertUuid = event[ALERT_UUID]!;
+          const started = new Date(event[ALERT_START]!).toISOString();
+          const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
+          return [
+            alertId,
+            {
               alertId,
-              {
-                alertId,
-                alertUuid,
-                started,
-                flappingHistory,
-                flapping,
-                pendingRecoveredCount,
-                activeCount,
-              },
-            ];
-          }
-        )
+              alertUuid,
+              started,
+              flappingHistory,
+              flapping,
+              pendingRecoveredCount,
+            },
+          ];
+        })
     );
 
     const nextTrackedAlertsRecovered = Object.fromEntries(
@@ -434,32 +423,23 @@ export const createLifecycleExecutor =
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
             (flapping || flappingHistory.filter((f: boolean) => f).length > 0)
         )
-        .map(
-          ({
-            event,
-            flappingHistory,
-            flapping: isCurrentlyFlapping,
-            pendingRecoveredCount,
-            activeCount,
-          }) => {
-            const alertId = event[ALERT_INSTANCE_ID]!;
-            const alertUuid = event[ALERT_UUID]!;
-            const started = new Date(event[ALERT_START]!).toISOString();
-            const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
-            return [
+        .map(({ event, flappingHistory, flapping: isCurrentlyFlapping, pendingRecoveredCount }) => {
+          const alertId = event[ALERT_INSTANCE_ID]!;
+          const alertUuid = event[ALERT_UUID]!;
+          const started = new Date(event[ALERT_START]!).toISOString();
+          const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
+          return [
+            alertId,
+            {
               alertId,
-              {
-                alertId,
-                alertUuid,
-                started,
-                flappingHistory,
-                flapping,
-                pendingRecoveredCount,
-                activeCount,
-              },
-            ];
-          }
-        )
+              alertUuid,
+              started,
+              flappingHistory,
+              flapping,
+              pendingRecoveredCount,
+            },
+          ];
+        })
     );
 
     return {
