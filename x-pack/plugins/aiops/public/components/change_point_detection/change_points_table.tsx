@@ -70,6 +70,8 @@ function getFilterConfig(
   };
 }
 
+const pageSizeOptions = [5, 10, 15];
+
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   isLoading,
   annotations,
@@ -95,7 +97,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     {
       pageIndex: 0,
       pageSize: 10,
-      pageSizeOptions: [5, 10, 15],
+      pageSizeOptions,
     }
   );
 
@@ -318,7 +320,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
       items={annotations}
       columns={columns}
-      pagination={pagination}
+      pagination={pageSizeOptions[0] > pagination!.totalItemCount ? undefined : pagination}
       sorting={sorting}
       onTableChange={onTableChange}
       hasActions={hasActions}
