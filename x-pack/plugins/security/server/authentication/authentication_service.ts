@@ -182,53 +182,40 @@ export class AuthenticationService {
     });
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {
-      if (
-        preResponse.statusCode === 500 &&
-        request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
-      ) {
-        const customBrandingValue = await customBranding.getBrandingFor(request, {
-          unauthenticated: true,
-        });
-        return toolkit.render({
-          body: renderUnauthenticatedPage({
-            buildNumber,
-            basePath: http.basePath,
-            originalURL: `${http.basePath.get(request)}/`,
-            customBranding: customBrandingValue,
-          }),
-          headers: { 'Content-Security-Policy': http.csp.header },
-        });
-      }
-
-      if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
-        return toolkit.next();
-      }
-
+      console.log({
+        status: preResponse.statusCode,
+      });
       if (!this.authenticator) {
         // Core doesn't allow returning error here.
         this.logger.error('Authentication sub-system is not fully initialized yet.');
         return toolkit.next();
       }
-
       // If users can eventually re-login we want to redirect them directly to the page they tried
       // to access initially, but we only want to do that for routes that aren't part of the various
       // authentication flows that wouldn't make any sense after successful authentication.
-      const originalURL = !request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
-        ? this.authenticator.getRequestOriginalURL(request)
-        : `${http.basePath.get(request)}/`;
-      if (!isLoginPageAvailable) {
-        const customBrandingValue = await customBranding.getBrandingFor(request, {
-          unauthenticated: true,
-        });
-        return toolkit.render({
-          body: renderUnauthenticatedPage({
-            buildNumber,
-            basePath: http.basePath,
-            originalURL,
-            customBranding: customBrandingValue,
-          }),
-          headers: { 'Content-Security-Policy': http.csp.header },
-        });
+      const originalURL = request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
+        ? `${http.basePath.get(request)}/`
+        : this.authenticator.getRequestOriginalURL(request);
+
+      if (preResponse.statusCode >= 400) {
+        if (isLoginPageAvailable) {
+          const customBrandingValue = await customBranding.getBrandingFor(request, {
+            unauthenticated: true,
+          });
+          return toolkit.render({
+            body: renderUnauthenticatedPage({
+              buildNumber,
+              basePath: http.basePath,
+              originalURL,
+              customBranding: customBrandingValue,
+            }),
+            headers: { 'Content-Security-Policy': http.csp.header },
+          });
+        }
+      }
+
+      if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
+        return toolkit.next();
       }
 
       const needsToLogout = (await this.session?.getSID(request)) !== undefined;
