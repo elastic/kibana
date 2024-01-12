@@ -2,7 +2,11 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine.sh
     label: 'Serverless Detection Engine - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-4
+      preemptible: true
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
@@ -14,7 +18,11 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh
     label: 'Serverless Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-4
+      preemptible: true
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
@@ -26,7 +34,11 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine.sh
     label: 'Detection Engine - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-4
+      preemptible: true
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 8
@@ -38,7 +50,11 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh
     label: 'Detection Engine - Exceptions - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-4
+      preemptible: true
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6

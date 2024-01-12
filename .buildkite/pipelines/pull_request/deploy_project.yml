@@ -2,7 +2,12 @@ steps:
   - command: .buildkite/scripts/steps/serverless/build_and_deploy.sh
     label: 'Build and Deploy Project'
     agents:
-      queue: n2-16-spot
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-16
+      preemptible: true
+      buildDirectory: /dev/shm/builds
     timeout_in_minutes: 60
     soft_fail: true
     retry:

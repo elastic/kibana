@@ -2,7 +2,13 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_burn.sh
     label: '[Soft fail] Defend Workflows Cypress Tests, burning changed specs'
     agents:
-      queue: n2-4-virt
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      enableNestedVirtualization: true
+      localSsds: 1
+      machineType: n2-standard-4
+      assignExternalIP: false
     depends_on: build
     timeout_in_minutes: 60
     soft_fail: true
@@ -13,7 +19,13 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh
     label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs'
     agents:
-      queue: n2-4-virt
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      enableNestedVirtualization: true
+      localSsds: 1
+      machineType: n2-standard-4
+      assignExternalIP: false
     depends_on: build
     timeout_in_minutes: 60
     soft_fail: true
@@ -24,7 +36,11 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_burn.sh
     label: '[Soft fail] Security Solution Cypress tests, burning changed specs'
     agents:
-      queue: n2-4-spot
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-4
+      preemptible: true
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 1
@@ -35,7 +51,11 @@ steps:
   - command: .buildkite/scripts/steps/functional/osquery_cypress_burn.sh
     label: '[Soft fail] Osquery Cypress Tests, burning changed specs'
     agents:
-      queue: n2-4-spot
+      provider: gcp
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      machineType: n2-standard-4
+      preemptible: true
     depends_on: build
     timeout_in_minutes: 50
     soft_fail: true
