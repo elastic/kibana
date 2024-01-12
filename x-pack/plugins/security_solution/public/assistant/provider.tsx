@@ -21,7 +21,6 @@ import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 import { useAnonymizationStore } from './use_anonymization_store';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
-import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
@@ -38,8 +37,6 @@ export const AssistantProvider: React.FC = ({ children }) => {
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   } = useKibana().services;
   const basePath = useBasePath();
-  const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
-  const assistantStreamingEnabled = useIsExperimentalFeatureEnabled('assistantStreamingEnabled');
 
   const baseConversations = useBaseConversations();
   const assistantAvailability = useAssistantAvailability();
@@ -75,6 +72,10 @@ export const AssistantProvider: React.FC = ({ children }) => {
       modelEvaluatorEnabled={isModelEvaluationEnabled}
       setDefaultAllow={setDefaultAllow} // remove
       setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
+      nameSpace={nameSpace}
+      setConversations={setConversations}
+      setDefaultAllow={setDefaultAllow}
+      setDefaultAllowReplacement={setDefaultAllowReplacement}
       title={ASSISTANT_TITLE}
       toasts={toasts}
     >

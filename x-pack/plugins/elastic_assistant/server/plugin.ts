@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/server';
 import { once } from 'lodash';
 
+import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -43,6 +44,7 @@ import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerConversationsRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
+import { getCapabilitiesRoute } from './routes/capabilities/get_capabilities_route';
 
 export class ElasticAssistantPlugin
   implements
@@ -118,40 +120,37 @@ export class ElasticAssistantPlugin
     // Conversations
     registerConversationsRoutes(router, this.logger);
 
+    // Capabilities
+    getCapabilitiesRoute(router);
     return {
       actions: plugins.actions,
+      getRegisteredFeatures: (pluginName: string) => {
+        return appContextService.getRegisteredFeatures(pluginName);
+      },
       getRegisteredTools: (pluginName: string) => {
         return appContextService.getRegisteredTools(pluginName);
       },
     };
   }
 
-  public start(core: CoreStart, plugins: ElasticAssistantPluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    plugins: ElasticAssistantPluginStartDependencies
+  ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
 
     return {
-      /**
-       * Actions plugin start contract
-       */
       actions: plugins.actions,
-
-      /**
-       * Get the registered tools for a given plugin name.
-       * @param pluginName
-       */
+      getRegisteredFeatures: (pluginName: string) => {
+        return appContextService.getRegisteredFeatures(pluginName);
+      },
       getRegisteredTools: (pluginName: string) => {
         return appContextService.getRegisteredTools(pluginName);
       },
-
-      /**
-       * Register tools to be used by the Elastic Assistant for a given plugin. Use the plugin name that
-       * corresponds to your application as defined in the `x-kbn-context` header of requests made from your
-       * application.
-       *
-       * @param pluginName
-       * @param tools
-       */
+      registerFeatures: (pluginName: string, features: Partial<AssistantFeatures>) => {
+        return appContextService.registerFeatures(pluginName, features);
+      },
       registerTools: (pluginName: string, tools: AssistantTool[]) => {
         return appContextService.registerTools(pluginName, tools);
       },

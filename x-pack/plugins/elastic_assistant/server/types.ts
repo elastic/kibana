@@ -28,8 +28,9 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AIAssistantDataClient } from './conversations_data_client';
 import { AIAssistantSOClient } from './saved_object/ai_assistant_so_client';
+import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { RequestBody } from './lib/langchain/types';
-import type { GetRegisteredTools } from './services/app_context';
+import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -40,15 +41,37 @@ export interface ElasticAssistantPluginSetup {
 
 /** The plugin start interface */
 export interface ElasticAssistantPluginStart {
+  /**
+   * Actions plugin start contract.
+   */
   actions: ActionsPluginStart;
   /**
-   * Register tools to be used by the elastic assistant
+   * Register features to be used by the elastic assistant.
+   *
+   * Note: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted
+   * and the correct features are available. See {@link getPluginNameFromRequest} for more details.
+   *
+   * @param pluginName Name of the plugin the features should be registered to
+   * @param features Partial<AssistantFeatures> to be registered with for the given plugin
+   */
+  registerFeatures: (pluginName: string, features: Partial<AssistantFeatures>) => void;
+  /**
+   * Get the registered features for a given plugin name.
+   * @param pluginName Name of the plugin to get the features for
+   */
+  getRegisteredFeatures: GetRegisteredFeatures;
+  /**
+   * Register tools to be used by the elastic assistant.
+   *
+   * Note: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted
+   * and the correct tools are selected. See {@link getPluginNameFromRequest} for more details.
+   *
    * @param pluginName Name of the plugin the tool should be registered to
    * @param tools AssistantTools to be registered with for the given plugin
    */
   registerTools: (pluginName: string, tools: AssistantTool[]) => void;
   /**
-   * Get the registered tools
+   * Get the registered tools for a given plugin name.
    * @param pluginName Name of the plugin to get the tools for
    */
   getRegisteredTools: GetRegisteredTools;
@@ -69,6 +92,7 @@ export interface ElasticAssistantPluginStartDependencies {
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
+  getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
   getServerBasePath: () => string;
