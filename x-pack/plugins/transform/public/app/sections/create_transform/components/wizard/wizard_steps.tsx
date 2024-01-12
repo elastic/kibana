@@ -30,7 +30,7 @@ import {
 
 import { useWizardContext } from './wizard';
 
-export const WizardSteps: FC = () => {
+export const useInitializeTransformWizardState = () => {
   const { searchItems, cloneConfig } = useWizardContext();
   const { dataView } = searchItems;
 
@@ -66,8 +66,12 @@ export const WizardSteps: FC = () => {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+};
 
-  const euiStepsConfig = [euiStepDefine, euiStepDetails, euiStepCreate];
+export const WizardSteps: FC = () => {
+  useInitializeTransformWizardState();
 
-  return <EuiSteps className="transform__steps" steps={euiStepsConfig} />;
+  return (
+    <EuiSteps className="transform__steps" steps={[euiStepDefine, euiStepDetails, euiStepCreate]} />
+  );
 };

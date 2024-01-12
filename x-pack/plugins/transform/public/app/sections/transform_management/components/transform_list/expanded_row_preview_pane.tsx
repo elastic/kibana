@@ -12,7 +12,6 @@ import { EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { DataGrid } from '@kbn/ml-data-grid';
-import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { useToastNotifications } from '../../../../app_dependencies';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
@@ -21,21 +20,9 @@ import { TransformListRow } from '../../../../common';
 
 import { WizardContext } from '../../../create_transform/components/wizard';
 
-import {
-  getTransformWizardStore,
-  useWizardActions,
-} from '../../../create_transform/state_management/create_transform_store';
+import { getTransformWizardStore } from '../../../create_transform/state_management/create_transform_store';
 
-import {
-  applyTransformConfigToDefineState,
-  getDefaultStepDefineState,
-} from '../../../create_transform/components/step_define';
-import {
-  applyTransformConfigToDetailsState,
-  getDefaultStepDetailsState,
-} from '../../../create_transform/components/step_details';
-
-import { useWizardContext } from '../../../create_transform/components/wizard/wizard';
+import { useInitializeTransformWizardState } from '../../../create_transform/components/wizard/wizard_steps';
 
 interface ExpandedRowPreviewPaneProps {
   item: TransformListRow;
@@ -115,30 +102,8 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ item }
 };
 
 export const ExpandedRowPreviewPaneDataGrid: FC = () => {
-  const { searchItems, cloneConfig } = useWizardContext();
-  const { dataView } = searchItems;
+  useInitializeTransformWizardState();
   const toastNotifications = useToastNotifications();
-
-  const { setRuntimeMappings, setStepDefineState, setStepDetailsState } = useWizardActions();
-
-  useEffect(() => {
-    const initialStepDefineState = applyTransformConfigToDefineState(
-      getDefaultStepDefineState(searchItems),
-      cloneConfig,
-      dataView
-    );
-
-    setRuntimeMappings(
-      // apply runtime fields from both the index pattern and inline configurations
-      getCombinedRuntimeMappings(dataView, cloneConfig?.source?.runtime_mappings)
-    );
-
-    setStepDefineState(initialStepDefineState);
-    setStepDetailsState(
-      applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   const pivotPreviewProps = useTransformConfigData();
 
   return (
