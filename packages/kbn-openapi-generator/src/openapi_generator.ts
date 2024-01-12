@@ -81,8 +81,8 @@ export const generate = async (config: GeneratorConfig) => {
 
       // Create the directory if it doesn't exist
       const parentDir = path.dirname(destinationPath);
-      console.log('parentDir', parentDir);
       await fs.mkdir(parentDir, { recursive: true });
+
       // Write the generation result to disk
       await fs.writeFile(getGeneratedFilePath(destinationPath), result);
     })

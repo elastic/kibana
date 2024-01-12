@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export function getGeneratedFilePath(sourcePath: string) {
-  // Remove any double extension like `.schema.yaml` or `.schema.yml` and replace with `.gen.ts`
-  const secondToLastDot = sourcePath.lastIndexOf('.', sourcePath.lastIndexOf('.') - 1);
-  return `${sourcePath.substring(0, secondToLastDot)}.gen.ts`;
+import type { OpenApiDocument } from '../openapi_types';
+
+export function getInfo(parsedSchema: OpenApiDocument) {
+  return parsedSchema.info;
 }
