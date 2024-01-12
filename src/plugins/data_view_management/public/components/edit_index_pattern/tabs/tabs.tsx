@@ -461,6 +461,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     isDisabled={isRefreshing}
                     size="m"
                     color="success"
+                    className="eui-fullWidth"
                   >
                     {refreshAriaLabel}
                   </EuiButton>
