@@ -45,7 +45,7 @@ import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { Gradient } from '../palette_selector/gradient';
 import { NeutralPalette } from '../../palettes/neutral';
 
-export const MAX_ASSIGNABLE_COLORS = 10;
+export const MAX_ASSIGNABLE_COLORS = Infinity;
 
 function selectComputedAssignments(
   data: ColorMappingInputData,
@@ -73,8 +73,6 @@ export function Container(props: {
   const autoAssignmentMode = useSelector(selectIsAutoAssignmentMode);
   const assignments = useSelector(selectComputedAssignments(props.data, palette, colorMode));
   const specialAssignments = useSelector(selectSpecialAssignments);
-
-  const canAddNewAssignment = !autoAssignmentMode && assignments.length < MAX_ASSIGNABLE_COLORS;
 
   const assignmentValuesCounter = assignments.reduce<Map<string | string[], number>>(
     (acc, assignment) => {
@@ -177,26 +175,29 @@ export function Container(props: {
               );
             })}
           </div>
-
-          <EuiHorizontalRule margin="xs" />
-          <EuiFlexGroup direction="row" gutterSize="s">
-            <EuiFlexItem data-test-subj="lns-colorMapping-specialAssignmentsList">
-              {props.data.type === 'categories' &&
-                specialAssignments.map((assignment, i) => {
-                  return (
-                    <SpecialAssignment
-                      key={i}
-                      index={i}
-                      palette={palette}
-                      isDarkMode={props.isDarkMode}
-                      getPaletteFn={getPaletteFn}
-                      assignment={assignment}
-                      total={specialAssignments.length}
-                    />
-                  );
-                })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {!autoAssignmentMode && (
+            <>
+              <EuiHorizontalRule margin="xs" />
+              <EuiFlexGroup direction="row" gutterSize="s">
+                <EuiFlexItem data-test-subj="lns-colorMapping-specialAssignmentsList">
+                  {props.data.type === 'categories' &&
+                    specialAssignments.map((assignment, i) => {
+                      return (
+                        <SpecialAssignment
+                          key={i}
+                          index={i}
+                          palette={palette}
+                          isDarkMode={props.isDarkMode}
+                          getPaletteFn={getPaletteFn}
+                          assignment={assignment}
+                          total={specialAssignments.length}
+                        />
+                      );
+                    })}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </>
+          )}
         </EuiPanel>
         <EuiFlexGroup direction="row">
           <EuiFlexItem style={{ display: 'block' }}>
@@ -206,6 +207,7 @@ export function Container(props: {
               size="xs"
               flush="both"
               onClick={() => {
+                dispatch(assignStatically(assignments));
                 dispatch(
                   addNewAssignment({
                     rule:
@@ -220,7 +222,6 @@ export function Container(props: {
                   })
                 );
               }}
-              disabled={!canAddNewAssignment}
               css={css`
                 margin-right: 8px;
               `}

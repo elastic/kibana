@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -61,18 +61,17 @@ export function SpecialAssignment({
           marginRight: 32,
         }}
       >
-        <EuiFieldText
-          compressed
-          fullWidth
-          disabled={true}
-          placeholder={i18n.translate('coloring.colorMapping.assignments.unassignedPlaceholder', {
-            defaultMessage: 'Unassigned terms',
-          })}
+        <EuiText
+          size="s"
           aria-label={i18n.translate('coloring.colorMapping.assignments.unassignedAriaLabel', {
             defaultMessage:
               'Assign this color to every unassigned not described in the assignment list',
           })}
-        />
+        >
+          {i18n.translate('coloring.colorMapping.assignments.unassignedPlaceholder', {
+            defaultMessage: 'Unassigned terms',
+          })}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
