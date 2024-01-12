@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SLO } from '../../domain/models';
 import { SecurityException } from '../../errors';
 import { retryTransientEsErrors } from '../../utils/retry';
@@ -38,6 +39,10 @@ export class DefaultSummaryTransformManager implements TransformManager {
     }
 
     return transformParams.transform_id;
+  }
+
+  inspect(slo: SLO): TransformPutTransformRequest {
+    return this.generator.generate(slo);
   }
 
   async preview(transformId: string): Promise<void> {

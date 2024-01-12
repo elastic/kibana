@@ -271,7 +271,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     name: i18n.translate('searchConnectors.content.nativeConnectors.teams.name', {
       defaultMessage: 'Teams',
     }),
-    serviceType: 'teams',
+    serviceType: 'microsoft_teams',
   },
   {
     iconPath: 'zoom.svg',

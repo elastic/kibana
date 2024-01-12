@@ -14,18 +14,18 @@ import {
   mockAllSuggestions,
 } from '../../../mocks';
 import { suggestionsApi } from '../../../lens_suggestions_api';
-import { fetchDataFromAggregateQuery } from '../../../datasources/text_based/fetch_data_from_aggregate_query';
+import { fetchFieldsFromESQL } from '../../../datasources/text_based/fetch_fields_from_esql';
 import { getSuggestions } from './helpers';
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;
-const mockFetchData = fetchDataFromAggregateQuery as jest.Mock;
+const mockFetchData = fetchFieldsFromESQL as jest.Mock;
 
 jest.mock('../../../lens_suggestions_api', () => ({
   suggestionsApi: jest.fn(() => mockAllSuggestions),
 }));
 
-jest.mock('../../../datasources/text_based/fetch_data_from_aggregate_query', () => ({
-  fetchDataFromAggregateQuery: jest.fn(() => {
+jest.mock('../../../datasources/text_based/fetch_fields_from_esql', () => ({
+  fetchFieldsFromESQL: jest.fn(() => {
     return {
       columns: [
         {
