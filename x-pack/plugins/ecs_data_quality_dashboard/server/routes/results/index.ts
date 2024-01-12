@@ -8,6 +8,7 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 
 import { postResultsRoute } from './post_results';
+import { getResultsRoute } from './get_results';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 
 export const resultsRoutes = (
@@ -15,5 +16,5 @@ export const resultsRoutes = (
   logger: Logger
 ) => {
   postResultsRoute(router, logger);
-  // TODO: getResultsRoute(router, logger);
+  getResultsRoute(router, logger);
 };

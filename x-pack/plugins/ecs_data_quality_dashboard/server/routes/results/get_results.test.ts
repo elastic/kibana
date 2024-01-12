@@ -9,17 +9,39 @@ import { RESULTS_ROUTE_PATH } from '../../../common/constants';
 import { serverMock } from '../../__mocks__/server';
 import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
-import { postResultsRoute } from './post_results';
+import type { LatestAggResponseBucket } from './get_results';
+import { getResultsRoute } from './get_results';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { resultBody, resultDocument } from './results.mock';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ResultDocument } from '../../schemas/result';
 
-describe('postResultsRoute route', () => {
+const searchResponse = {
+  aggregations: {
+    latest: {
+      buckets: [
+        {
+          key: 'logs-*',
+          latest_doc: { hits: { hits: [{ _source: resultDocument }] } },
+        },
+      ],
+    },
+  },
+} as unknown as SearchResponse<
+  ResultDocument,
+  Record<string, { buckets: LatestAggResponseBucket[] }>
+>;
+
+describe('getResultsRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
   let logger: MockedLogger;
 
-  const req = requestMock.create({ method: 'post', path: RESULTS_ROUTE_PATH, body: resultBody });
+  const req = requestMock.create({
+    method: 'get',
+    path: RESULTS_ROUTE_PATH,
+    query: { mode: 'patterns_latest' },
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,27 +51,24 @@ describe('postResultsRoute route', () => {
 
     ({ context } = requestContextMock.createTools());
 
-    postResultsRoute(server.router, logger);
+    getResultsRoute(server.router, logger);
   });
 
-  it('indexes result', async () => {
-    const mockIndex = context.core.elasticsearch.client.asInternalUser.index;
-    mockIndex.mockResolvedValueOnce({ result: 'created' } as WriteResponseBase);
+  it('gets result', async () => {
+    const mockSearch = context.core.elasticsearch.client.asInternalUser.search;
+    mockSearch.mockResolvedValueOnce(searchResponse);
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
-    expect(mockIndex).toHaveBeenCalledWith({
-      body: { ...resultDocument, '@timestamp': expect.any(Number) },
-      index: await context.dataQualityDashboard.getResultsIndexName(),
-    });
+    expect(mockSearch).toHaveBeenCalled();
 
     expect(response.status).toEqual(200);
-    expect(response.body).toEqual({ result: 'created' });
+    expect(response.body).toEqual([{ '@timestamp': expect.any(Number), ...resultBody }]);
   });
 
   it('handles error', async () => {
     const errorMessage = 'Error!';
-    const mockIndex = context.core.elasticsearch.client.asInternalUser.index;
-    mockIndex.mockRejectedValueOnce({ message: errorMessage });
+    const mockSearch = context.core.elasticsearch.client.asInternalUser.search;
+    mockSearch.mockRejectedValueOnce({ message: errorMessage });
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(500);
@@ -63,14 +82,14 @@ describe('request validation', () => {
   beforeEach(() => {
     server = serverMock.create();
     logger = loggerMock.create();
-    postResultsRoute(server.router, logger);
+    getResultsRoute(server.router, logger);
   });
 
-  test('disallows invalid pattern', () => {
+  test('disallows invalid query param', () => {
     const req = requestMock.create({
-      method: 'post',
+      method: 'get',
       path: RESULTS_ROUTE_PATH,
-      body: { rollup: resultBody.rollup },
+      query: { mode: 'invalid-value' },
     });
     const result = server.validate(req);
 

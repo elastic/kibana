@@ -1,16 +1,15 @@
 # @kbn/data-stream-adapter
 
-Utility library to for Elasticsearch data stream creation
+Utility library to for Elasticsearch data stream management.
 
 ## DataStreamAdapter
 
 It creates a single data stream. Example:
 
 ```
-// Instantiate
+// Setup
 const dataStream = new DataStreamAdapter('my-awesome-datastream', { kibanaVersion: '8.12.1' });
 
-// Define component and index templates
 dataStream.setComponentTemplate({
     name: 'awesome-component-template',
     fieldMap: {
@@ -30,20 +29,19 @@ dataStream.setIndexTemplate({
     },
 });
 
-// Installs templates and data stream, or updates existing.
-await dataStream.install({ logger, esClient, pluginStop$ }); 
+// Start
+await dataStream.install({ logger, esClient, pluginStop$ }); // Installs templates and the data stream, or updates existing.
 ```
 
 
 ## DataStreamSpacesAdapter
 
-It creates space aware data streams. Example:
+It creates data stream per space. Example:
 
 ```
-// Instantiate
+// Setup
 const spacesDataStream = new DataStreamSpacesAdapter('my-awesome-datastream', { kibanaVersion: '8.12.1' });
 
-// Define component and index templates
 spacesDataStream.setComponentTemplate({
     name: 'awesome-component-template',
     fieldMap: {
@@ -63,9 +61,9 @@ spacesDataStream.setIndexTemplate({
     },
 });
 
-// Installs templates and updates existing data streams.
-await spacesDataStream.install({ logger, esClient, pluginStop$ }); 
+// Start
+await spacesDataStream.install({ logger, esClient, pluginStop$ }); // Installs templates and updates existing data streams.
 
-// After installation we can create space-aware data streams on runtime.
-await spacesDataStream.installSpace('space2'); // creates `my-awesome-datastream-space2` if it does not exist
+// Create a space data stream on the fly
+await spacesDataStream.installSpace('space2'); // creates 'my-awesome-datastream-space2' data stream if it does not exist.
 ```

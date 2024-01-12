@@ -29,13 +29,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const retryTransientEsErrors = async <T>(
   esCall: () => Promise<T>,
-  {
-    logger,
-    attempt = 0,
-  }: {
-    logger: Logger;
-    attempt?: number;
-  }
+  { logger, attempt = 0 }: { logger: Logger; attempt?: number }
 ): Promise<T> => {
   try {
     return await esCall();

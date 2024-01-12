@@ -41,16 +41,16 @@ export const ResultRollup = t.type({
 });
 export type ResultRollup = t.TypeOf<typeof ResultRollup>;
 
-export const ResultBody = t.type({
+export const Result = t.type({
   meta: ResultMeta,
   rollup: ResultRollup,
 });
-export type ResultBody = t.TypeOf<typeof ResultBody>;
+export type Result = t.TypeOf<typeof Result>;
 
 export type IndexArray = Array<{ _indexName: string } & Record<string, unknown>>;
 export type IndexObject = Record<string, Record<string, unknown>>;
 
-export type ResultDocument = Omit<ResultBody, 'rollup'> & {
+export type ResultDocument = Omit<Result, 'rollup'> & {
   '@timestamp': number;
   rollup: Omit<ResultRollup, 'stats' | 'results' | 'ilmExplain'> & {
     stats: IndexArray;
@@ -58,3 +58,13 @@ export type ResultDocument = Omit<ResultBody, 'rollup'> & {
     ilmExplain: IndexArray;
   };
 };
+
+// Routes validation schemas
+
+export const GetResultMode = t.union([t.literal('patterns_latest'), t.literal('indices_latest')]);
+export const GetResultQuery = t.type({ mode: GetResultMode });
+
+export type GetResultQuery = t.TypeOf<typeof GetResultQuery>;
+export type GetResultMode = t.TypeOf<typeof GetResultMode>;
+
+export const PostResultBody = Result;
