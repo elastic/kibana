@@ -346,7 +346,7 @@ export class IndexTable extends Component {
     if (columnConfig.render) {
       return columnConfig.render(index);
     }
-    console.log({value: index[columnConfig.fieldName]});
+    console.log({ value: index[columnConfig.fieldName] });
     return index[columnConfig.fieldName];
   }
 
