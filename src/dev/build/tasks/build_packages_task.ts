@@ -255,7 +255,7 @@ export const BuildPackages: Task = {
               Path.resolve(pkgDistPath, 'package-map.json'),
               JSON.stringify(
                 packages
-                  .filter((p) => p.isPlugin() && !p.isDevOnly())
+                  .filter((p) => p.isPlugin())
                   .map((p) => [p.manifest.id, `node_modules/${p.manifest.id}`])
               )
             );
