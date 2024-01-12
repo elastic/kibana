@@ -29,6 +29,7 @@ import {
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   getRuleSavedObjectWithLegacyInvestigationFields,
+  checkInvestigationFieldSoValue,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -36,13 +37,11 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
+  // TODO: add a new service for pulling kibana username, similar to getService('es')
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  // Marking as ESS and brokenInServerless as it's currently exposed in both, but if this is already
-  // deprecated, it should cease being exposed in Serverless prior to GA, in which case this
-  // test would be run for ESS only.
+  // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
   describe('@ess @brokenInServerless @skipInQA patch_rules_bulk', () => {
     describe('deprecations', () => {
       afterEach(async () => {
@@ -588,18 +587,20 @@ export default ({ getService }: FtrProviderContext) => {
           field_names: ['client.address', 'agent.name'],
         });
         expect(bodyToCompareLegacyField.name).to.eql('some other name');
+
         /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
          * NOT include a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, body[0].id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          { field_names: ['client.address', 'agent.name'] },
+          es,
+          body[0].id
+        );
+        expect(isInvestigationFieldMigratedInSo).to.eql(false);
       });
 
       it('should patch a rule with a legacy investigation field - empty array - and transform field in response', async () => {
@@ -619,18 +620,20 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompareLegacyFieldEmptyArray = removeServerGeneratedProperties(body[0]);
         expect(bodyToCompareLegacyFieldEmptyArray.investigation_fields).to.eql(undefined);
         expect(bodyToCompareLegacyFieldEmptyArray.name).to.eql('some other name 2');
+
         /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
          * NOT include a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, body[0].id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql([]);
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          { field_names: [] },
+          es,
+          body[0].id
+        );
+        expect(isInvestigationFieldMigratedInSo).to.eql(false);
       });
 
       it('should patch a rule with an investigation field', async () => {
