@@ -734,7 +734,8 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         required: true,
         sensitive: false,
         tooltip: i18n.translate('searchConnectors.nativeConnectors.github.repo_type', {
-          defaultMessage: 'The Document Level Security feature is not available for the Other Repository Type',
+          defaultMessage:
+            'The Document Level Security feature is not available for the Other Repository Type',
         }),
         type: FieldType.STRING,
         ui_restrictions: [],
@@ -746,7 +747,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [
           {
             field: 'repo_type',
-            value: "organization",
+            value: 'organization',
           },
         ],
         display: DisplayType.TEXTBOX,
