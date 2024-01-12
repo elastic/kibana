@@ -54,6 +54,8 @@ interface AutocompleteFieldMatchProps {
   autocompleteService: AutocompleteStart;
   onChange: (arg: string) => void;
   onError?: (arg: boolean) => void;
+  onWarning: (arg: boolean) => void;
+  warning?: Warning;
 }
 
 export const AutocompleteFieldMatchComponent: React.FC<AutocompleteFieldMatchProps> = ({
