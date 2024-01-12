@@ -468,6 +468,7 @@
   "ingest_manager_settings": [
     "fleet_server_hosts",
     "has_seen_add_data_notice",
+    "output_secret_storage_requirements_met",
     "prerelease_integrations_enabled",
     "secret_storage_requirements_met"
   ],
