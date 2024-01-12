@@ -19,6 +19,7 @@ import { LinkEditor } from '../components/editor/link_editor';
 export interface LinksEditorProps {
   link?: Link;
   parentDashboard?: DashboardContainer;
+  mainFlyoutId: string;
   ref: React.RefObject<HTMLDivElement>;
 }
 
@@ -34,6 +35,7 @@ export type UnorderedLink = Omit<Link, 'order'>;
 export async function openLinkEditorFlyout({
   ref,
   link,
+  mainFlyoutId, // used to manage the focus of this flyout after inidividual link editor flyout is closed
   parentDashboard,
 }: LinksEditorProps): Promise<UnorderedLink | undefined> {
   const unmountFlyout = async () => {
@@ -44,6 +46,12 @@ export async function openLinkEditorFlyout({
       // wait for close animation before unmounting
       setTimeout(() => {
         if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
+
+        // return focus to the main flyout div to align with a11y standards
+        const flyoutElement = document.getElementById(mainFlyoutId);
+        if (flyoutElement) {
+          flyoutElement.focus();
+        }
       }, 180);
     });
   };
