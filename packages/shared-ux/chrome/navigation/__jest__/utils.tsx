@@ -7,14 +7,13 @@
  */
 import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
-import type { ChromeProjectNavigation } from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigation, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 
 import { EuiThemeProvider } from '@elastic/eui';
 import { getServicesMock } from '../mocks/src/jest';
 import { NavigationProvider } from '../src/services';
 import { Navigation } from '../src/ui/navigation';
 import type { PanelContentProvider } from '../src/ui';
-import type { NavigationTreeDefinition } from '../src/ui/types';
 import { NavigationServices } from '../src/types';
 
 const services = getServicesMock();

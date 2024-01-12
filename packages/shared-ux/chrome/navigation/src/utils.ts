@@ -13,16 +13,14 @@ import type {
   CloudLinkId,
   SideNavNodeStatus,
   NodeDefinition,
-} from '@kbn/core-chrome-browser';
-import type { CloudLinks } from './cloud_links';
-import type {
   NavigationTreeDefinition,
   RootNavigationItemDefinition,
   PresetDefinition,
   GroupDefinition,
   ItemDefinition,
   RecentlyAccessedDefinition,
-} from './ui';
+} from '@kbn/core-chrome-browser';
+import type { CloudLinks } from './cloud_links';
 import { getPresets } from './ui';
 
 let uniqueId = 0;

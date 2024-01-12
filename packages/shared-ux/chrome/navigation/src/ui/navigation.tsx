@@ -7,15 +7,15 @@
  */
 
 import React, { createContext, FC, useCallback, useContext, useEffect, useMemo } from 'react';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-
-import useObservable from 'react-use/lib/useObservable';
-import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import type {
+  ChromeProjectNavigationNode,
   RootNavigationItemDefinition,
   RecentlyAccessedDefinition,
   NavigationTreeDefinition,
-} from './types';
+} from '@kbn/core-chrome-browser';
+
+import useObservable from 'react-use/lib/useObservable';
+import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import {
   RecentlyAccessed,
   NavigationPanel,

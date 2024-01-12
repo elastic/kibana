@@ -13,6 +13,8 @@ import type {
   ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
+  AppDeepLinkId,
+  NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
@@ -70,6 +72,16 @@ export interface InternalChromeStart extends ChromeStart {
      * Use {@link ServerlessPluginStart.setNavigation} to set project navigation config.
      */
     setNavigation(projectNavigation: ChromeProjectNavigation): void;
+
+    setNavigationDefinition<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+    ): void;
+
+    getNavigationDefinition$: () => Observable<NavigationTreeDefinition>;
 
     /**
      * Returns an observable of the active nodes in the project navigation.

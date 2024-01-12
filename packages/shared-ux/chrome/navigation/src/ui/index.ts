@@ -14,13 +14,4 @@ export { getPresets } from './nav_tree_presets';
 
 export type { PanelContent, PanelComponentProps, PanelContentProvider } from './components';
 
-export type {
-  GroupDefinition,
-  PresetDefinition,
-  ItemDefinition,
-  NavigationGroupPreset,
-  NavigationTreeDefinition,
-  RecentlyAccessedDefinition,
-  RootNavigationItemDefinition,
-  RecentItem,
-} from './types';
+export type { RecentItem } from './types';

@@ -6,11 +6,8 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import {
-  Navigation,
-  NavigationKibanaProvider,
-  type NavigationTreeDefinition,
-} from '@kbn/shared-ux-chrome-navigation';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { Navigation, NavigationKibanaProvider } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';

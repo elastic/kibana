@@ -21,7 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { NavigationStorybookMock, navLinksMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import type { NavigationServices } from '../types';
@@ -29,7 +29,6 @@ import { NavigationProvider } from '../services';
 import { Navigation } from './navigation';
 import { getPresets } from './nav_tree_presets';
 import { ContentProvider } from './components/panel';
-import type { NavigationTreeDefinition } from './types';
 
 const storybookMock = new NavigationStorybookMock();
 

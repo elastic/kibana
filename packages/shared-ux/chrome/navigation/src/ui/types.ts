@@ -12,7 +12,6 @@ import type {
   ChromeProjectNavigationNode,
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
-import type { RecentlyAccessedProps } from './components';
 
 /**
  * @public
@@ -40,100 +39,10 @@ export interface NodeProps<
   index?: number;
 }
 
-/** The preset that can be pass to the NavigationBucket component */
-export type NavigationGroupPreset = 'analytics' | 'devtools' | 'ml' | 'management';
-
 export interface RecentItem {
   link: string;
   label: string;
   id: string;
-}
-
-/**
- * @public
- *
- *  Definition for the "Recently accessed" section of the side navigation.
- */
-export interface RecentlyAccessedDefinition extends RecentlyAccessedProps {
-  type: 'recentlyAccessed';
-}
-
-/**
- * @public
- *
- * A group root item definition.
- */
-export interface GroupDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
-  type: 'navGroup';
-  children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
-}
-
-/**
- * @public
- *
- * A group root item definition built from a specific preset.
- */
-export interface PresetDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children' | 'type'> {
-  type: 'preset';
-  preset: NavigationGroupPreset;
-}
-
-/**
- * @public
- *
- * An item root.
- */
-export interface ItemDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
-  type: 'navItem';
-}
-
-/**
- * @public
- *
- * The navigation definition for a root item in the side navigation.
- */
-export type RootNavigationItemDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> =
-  | RecentlyAccessedDefinition
-  | GroupDefinition<LinkId, Id, ChildrenId>
-  | PresetDefinition<LinkId, Id, ChildrenId>
-  | ItemDefinition<LinkId, Id, ChildrenId>;
-
-/**
- * @public
- *
- * Definition for the complete navigation tree, including body and footer
- */
-export interface NavigationTreeDefinition<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> {
-  /**
-   * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
-   * or "group" items. Be mindeful though, with great power comes great responsibility.
-   * */
-  body?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
-  /**
-   * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
-   * or "group" items. Be mindeful though, with great power comes great responsibility.
-   * */
-  footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
 
 /**

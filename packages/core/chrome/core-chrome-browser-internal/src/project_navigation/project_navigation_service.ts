@@ -15,6 +15,7 @@ import type {
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
+  NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -27,6 +28,7 @@ import {
   skip,
   distinctUntilChanged,
   skipWhile,
+  filter,
 } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -52,6 +54,7 @@ export class ProjectNavigationService {
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
   private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
+  private navigationDefinition$ = new BehaviorSubject<NavigationTreeDefinition<any> | null>(null);
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
     breadcrumbs: ChromeProjectBreadcrumb[];
@@ -114,6 +117,20 @@ export class ProjectNavigationService {
         this.projectNavigation$.next(projectNavigation);
         this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
         this.setActiveProjectNavigationNodes();
+      },
+      setNavigationDefinition: (navTreeDefinition: Observable<NavigationTreeDefinition>) => {
+        if (this.navigationDefinition$.getValue() !== null) {
+          throw new Error('Project navigation has already been set.');
+        }
+
+        navTreeDefinition
+          .pipe(takeUntil(this.stop$))
+          .subscribe(this.navigationDefinition$.next.bind(this));
+      },
+      getNavigationDefinition$: (): Observable<NavigationTreeDefinition> => {
+        return this.navigationDefinition$
+          .asObservable()
+          .pipe(filter((v): v is NavigationTreeDefinition => v !== null));
       },
       getActiveNodes$: () => {
         return this.activeNodes$.pipe(takeUntil(this.stop$));
