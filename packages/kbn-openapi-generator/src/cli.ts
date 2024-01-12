@@ -36,10 +36,10 @@ export function runCli() {
             type: 'boolean',
             default: false,
           })
-          .option('outputDirTypes', {
+          .option('outputDir', {
             describe: 'Output directory for generated types',
             demandOption: false,
-            string: true,
+            type: 'string',
           })
           .showHelpOnFail(false),
       (argv) => {

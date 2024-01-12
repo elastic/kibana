@@ -27,11 +27,12 @@ export interface GeneratorConfig {
   sourceGlob: string;
   templateName: TemplateName;
   skipLinting?: boolean;
-  outputDirTypes?: string;
+  outputDir?: string;
 }
 
 export const generate = async (config: GeneratorConfig) => {
-  const { rootDir, sourceGlob, templateName, skipLinting, outputDirTypes } = config;
+  const { rootDir, sourceGlob, templateName, skipLinting, outputDir } = config;
+  const destinationDir = outputDir ?? rootDir;
 
   if (!skipLinting) {
     await lint({
@@ -42,7 +43,7 @@ export const generate = async (config: GeneratorConfig) => {
 
   console.log(chalk.bold(`Generating API route schemas`));
   console.log(chalk.bold(`Working directory: ${chalk.underline(rootDir)}`));
-  console.log(chalk.bold(`Types output directory: ${chalk.underline(outputDirTypes ?? rootDir)}`));
+  console.log(chalk.bold(`Types output directory: ${chalk.underline(destinationDir)}`));
 
   console.log(`👀  Searching for source files`);
   const sourceFilesGlob = resolve(rootDir, sourceGlob);
@@ -57,7 +58,7 @@ export const generate = async (config: GeneratorConfig) => {
   );
 
   console.log(`🧹  Cleaning up any previously generated artifacts`);
-  await removeGenArtifacts(rootDir);
+  await removeGenArtifacts(destinationDir);
 
   console.log(`🪄   Generating new artifacts`);
   const TemplateService = await initTemplateService();
@@ -74,24 +75,24 @@ export const generate = async (config: GeneratorConfig) => {
 
       const result = TemplateService.compileTemplate(templateName, generationContext);
 
-      // Create destination path using the sourcePath, rootDir and outputDirTypes
-      const destinationPath = outputDirTypes
-        ? resolve(sourcePath.replace(rootDir, outputDirTypes))
+      // Create destination file path using the sourcePath, rootDir and outputDir
+      const destinationFilePath = outputDir
+        ? resolve(sourcePath.replace(resolve(rootDir), resolve(outputDir)))
         : sourcePath;
 
       // Create the directory if it doesn't exist
-      const parentDir = path.dirname(destinationPath);
+      const parentDir = path.dirname(destinationFilePath);
       await fs.mkdir(parentDir, { recursive: true });
 
       // Write the generation result to disk
-      await fs.writeFile(getGeneratedFilePath(destinationPath), result);
+      await fs.writeFile(getGeneratedFilePath(destinationFilePath), result);
     })
   );
 
   // Format the output folder using prettier as the generator produces
   // unformatted code and fix any eslint errors
   console.log(`💅  Formatting output`);
-  const generatedArtifactsGlob = resolve(outputDirTypes ?? rootDir, './**/*.gen.ts');
+  const generatedArtifactsGlob = resolve(destinationDir, './**/*.gen.ts');
   await formatOutput(generatedArtifactsGlob);
   await fixEslint(generatedArtifactsGlob);
 };

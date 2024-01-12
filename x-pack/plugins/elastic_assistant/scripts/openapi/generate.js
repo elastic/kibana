@@ -18,5 +18,5 @@ generate({
   rootDir: ELASTIC_ASSISTANT_ROOT,
   sourceGlob: './server/schemas/**/*.schema.yaml',
   templateName: 'zod_operation_schema',
-  outputDirTypes: ELASTIC_ASSISTANT_COMMON_OUTPUT,
+  outputDir: ELASTIC_ASSISTANT_COMMON_OUTPUT,
 });
