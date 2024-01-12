@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
-import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
@@ -40,10 +40,10 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
   const {
     services: { http },
   } = useKibana();
-
   const { isLoading: isAlertsHistoryLoading, data } = useAlertsHistory({
     featureIds: ['slo'],
     ruleId: rule.id,
+    instanceId: alert.fields[ALERT_INSTANCE_ID],
     dateRange: {
       from: 'now-30d',
       to: 'now',
