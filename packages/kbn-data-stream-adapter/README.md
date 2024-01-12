@@ -1,10 +1,10 @@
 # @kbn/data-stream-adapter
 
-Utility library to for Elasticsearch data stream management.
+Utility library for Elasticsearch data stream management.
 
 ## DataStreamAdapter
 
-It creates a single data stream. Example:
+Manage single data streams. Example:
 
 ```
 // Setup
@@ -36,7 +36,7 @@ await dataStream.install({ logger, esClient, pluginStop$ }); // Installs templat
 
 ## DataStreamSpacesAdapter
 
-It creates data stream per space. Example:
+Manage data streams per space. Example:
 
 ```
 // Setup
