@@ -111,7 +111,8 @@
     "@kbn/code-editor",
     "@kbn/shared-svg",
     "@kbn/apm-es-schemas",
-    "@kbn/key-value-metadata-table"
+    "@kbn/key-value-metadata-table",
+    "@kbn/event-stacktrace"
   ],
   "exclude": ["target/**/*"]
 }

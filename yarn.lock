@@ -3212,6 +3212,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-stacktrace@link:packages/kbn-event-stacktrace":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-es-schemas@link:packages/kbn-apm-es-schemas":
   version "0.0.0"
   uid ""

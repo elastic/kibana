@@ -30,6 +30,11 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { APMError } from '@kbn/apm-es-schemas';
+import {
+  Stacktrace,
+  ExceptionStacktrace,
+  PlaintextStacktrace,
+} from '@kbn/event-stacktrace';
 import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 import { TraceSearchType } from '../../../../../common/trace_explorer';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -43,16 +48,13 @@ import { TransactionDetailLink } from '../../../shared/links/apm/transaction_det
 import { DiscoverErrorLink } from '../../../shared/links/discover_links/discover_error_link';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { ErrorMetadata } from '../../../shared/metadata_table/error_metadata';
-import { Stacktrace } from '../../../shared/stacktrace';
 import { Summary } from '../../../shared/summary';
 import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
-import { PlaintextStacktrace } from './plaintext_stacktrace';
 import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 import { ErrorTab, ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
-import { ExceptionStacktrace } from './exception_stacktrace';
 import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
 

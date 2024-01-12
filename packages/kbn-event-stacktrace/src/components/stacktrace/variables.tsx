@@ -1,0 +1,50 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { EuiAccordion } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { Stackframe } from '@kbn/apm-es-schemas';
+import { KeyValueTable } from '@kbn/key-value-metadata-table';
+import { flattenObject } from '@kbn/key-value-metadata-table';
+
+const VariablesContainer = euiStyled.div`
+  background: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  border-radius: 0 0 ${({ theme }) =>
+    `${theme.eui.euiBorderRadiusSmall} ${theme.eui.euiBorderRadiusSmall}`};
+  padding:  ${({ theme }) => `${theme.eui.euiSizeS} ${theme.eui.euiSizeM}`};
+`;
+
+interface Props {
+  vars: Stackframe['vars'];
+}
+
+export function Variables({ vars }: Props) {
+  if (!vars) {
+    return null;
+  }
+  const flattenedVariables = flattenObject(vars);
+  return (
+    <React.Fragment>
+      <VariablesContainer>
+        <EuiAccordion
+          id="local-variables"
+          className="euiAccordion"
+          buttonContent={i18n.translate('xpack.apm.stacktraceTab.localVariablesToogleButtonLabel', {
+            defaultMessage: 'Local variables',
+          })}
+        >
+          <React.Fragment>
+            <KeyValueTable keyValuePairs={flattenedVariables} />
+          </React.Fragment>
+        </EuiAccordion>
+      </VariablesContainer>
+    </React.Fragment>
+  );
+}
