@@ -6,23 +6,39 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { CloudLinkId } from '@kbn/core-chrome-browser';
+import type { CloudLinks, CloudLink } from '@kbn/core-chrome-browser';
 
-export interface CloudLink {
-  title: string;
-  href: string;
-}
-
-export type CloudLinks = {
-  [id in CloudLinkId]?: CloudLink;
-};
-
-export const getCloudLinks = (cloud: {
+export interface CloudURLs {
   billingUrl?: string;
   deploymentUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
-}): CloudLinks => {
+}
+
+const stripTrailingForwardSlash = (str: string) => {
+  return str[str.length - 1] === '/' ? str.substring(0, str.length - 1) : str;
+};
+
+const parseCloudURLs = (cloudLinks: CloudLinks): CloudLinks => {
+  const { userAndRoles, billingAndSub, deployment, performance } = cloudLinks;
+
+  // We remove potential trailing forward slash ("/") at the end of the URL
+  // because it breaks future navigation in Cloud console once we navigate there.
+  const parseLink = (link?: CloudLink): CloudLink | undefined => {
+    if (!link) return undefined;
+    return { ...link, href: stripTrailingForwardSlash(link.href) };
+  };
+
+  return {
+    ...cloudLinks,
+    userAndRoles: parseLink(userAndRoles),
+    billingAndSub: parseLink(billingAndSub),
+    deployment: parseLink(deployment),
+    performance: parseLink(performance),
+  };
+};
+
+export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
   const { billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl } = cloud;
 
   const links: CloudLinks = {};
@@ -72,5 +88,5 @@ export const getCloudLinks = (cloud: {
     };
   }
 
-  return links;
+  return parseCloudURLs(links);
 };

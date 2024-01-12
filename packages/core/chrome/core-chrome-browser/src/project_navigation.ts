@@ -50,6 +50,15 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
+export interface CloudLink {
+  title: string;
+  href: string;
+}
+
+export type CloudLinks = {
+  [id in CloudLinkId]?: CloudLink;
+};
+
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
@@ -190,14 +199,6 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
 }
 
 /** @public */
-export interface ChromeProjectNavigation {
-  /**
-   * The navigation tree representation of the side bar navigation.
-   */
-  navigationTree: ChromeProjectNavigationNode[];
-}
-
-/** @public */
 export interface SideNavCompProps {
   activeNodes: ChromeProjectNavigationNode[][];
 }
@@ -254,8 +255,6 @@ export type NodeDefinitionWithChildren<
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
 };
-
-// ----------------------------------
 
 /** The preset that can be pass to the NavigationBucket component */
 export type NavigationGroupPreset = 'analytics' | 'devtools' | 'ml' | 'management';
@@ -361,4 +360,15 @@ export interface NavigationTreeDefinition<
    * or "group" items. Be mindeful though, with great power comes great responsibility.
    * */
   footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+}
+
+/**
+ * @public
+ *
+ * Definition for the complete navigation tree, including body and footer
+ * that is used by the UI to render the navigation.
+ */
+export interface NavigationTreeDefinitionUI {
+  body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+  footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
 }

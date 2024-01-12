@@ -29,11 +29,12 @@ export type {
 export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
 
 export type {
-  ChromeProjectNavigation,
   ChromeProjectNavigationNode,
   AppDeepLinkId,
   AppId,
   CloudLinkId,
+  CloudLink,
+  CloudLinks,
   SideNavCompProps,
   SideNavComponent,
   SideNavNodeStatus,
@@ -51,4 +52,5 @@ export type {
   RecentItem,
   NavigationGroupPreset,
   RootNavigationItemDefinition,
+  NavigationTreeDefinitionUI,
 } from './project_navigation';

@@ -9,15 +9,9 @@
 import type { Observable } from 'rxjs';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 
-import type {
-  ChromeNavLink,
-  ChromeProjectNavigation,
-  ChromeProjectNavigationNode,
-} from '@kbn/core-chrome-browser';
+import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import type { RecentItem } from './ui';
-import type { CloudLinks } from './cloud_links';
 
 type BasePathService = Pick<IBasePath, 'prepend'>;
 
@@ -34,12 +28,9 @@ export type NavigateToUrlFn = ApplicationStart['navigateToUrl'];
 export interface NavigationServices {
   basePath: BasePathService;
   recentlyAccessed$: Observable<RecentItem[]>;
-  deepLinks$: Observable<Readonly<Record<string, ChromeNavLink>>>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
-  onProjectNavigationChange: (chromeProjectNavigation: ChromeProjectNavigation) => void;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
-  cloudLinks: CloudLinks;
   isSideNavCollapsed: boolean;
 }
 
@@ -64,8 +55,6 @@ export interface NavigationKibanaDependencies {
     };
   };
   serverless: {
-    setNavigation: (projectNavigation: ChromeProjectNavigation) => void;
     getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
   };
-  cloud: CloudStart;
 }

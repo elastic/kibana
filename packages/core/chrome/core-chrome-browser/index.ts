@@ -32,9 +32,10 @@ export type {
   ChromeStart,
   ChromeStyle,
   ChromeUserBanner,
-  ChromeProjectNavigation,
   ChromeProjectNavigationNode,
   CloudLinkId,
+  CloudLink,
+  CloudLinks,
   SideNavCompProps,
   SideNavComponent,
   SideNavNodeStatus,
@@ -52,4 +53,5 @@ export type {
   RecentItem,
   NavigationGroupPreset,
   RootNavigationItemDefinition,
+  NavigationTreeDefinitionUI,
 } from './src';

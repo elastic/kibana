@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC, useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
 import type {
   ChromeProjectNavigationNode,
   RootNavigationItemDefinition,
   RecentlyAccessedDefinition,
-  NavigationTreeDefinition,
+  NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 
 import useObservable from 'react-use/lib/useObservable';
@@ -22,7 +22,6 @@ import {
   PanelProvider,
   type PanelContentProvider,
 } from './components';
-import { parseNavigationTree } from '../utils';
 import { useNavigation as useNavigationService } from '../services';
 import { NavigationSectionUI } from './components/navigation_section_ui';
 
@@ -41,25 +40,15 @@ const NavigationContext = createContext<Context>({
 });
 
 interface Props {
-  navigationTree: NavigationTreeDefinition;
+  navigationTree: NavigationTreeDefinitionUI;
   dataTestSubj?: string;
   panelContentProvider?: PanelContentProvider;
 }
 
-const NavigationComp: FC<Props> = ({
-  navigationTree: _navigationTree,
-  dataTestSubj,
-  panelContentProvider,
-}) => {
-  const { cloudLinks, deepLinks$, activeNodes$, onProjectNavigationChange } =
-    useNavigationService();
+const NavigationComp: FC<Props> = ({ navigationTree, dataTestSubj, panelContentProvider }) => {
+  const { activeNodes$ } = useNavigationService();
 
-  const deepLinks = useObservable(deepLinks$, {});
   const activeNodes = useObservable(activeNodes$, []);
-
-  const { navigationTree, navigationTreeUI } = useMemo(() => {
-    return parseNavigationTree(_navigationTree, { deepLinks, cloudLinks });
-  }, [cloudLinks, deepLinks, _navigationTree]);
 
   const contextValue = useMemo<Context>(
     () => ({
@@ -87,22 +76,18 @@ const NavigationComp: FC<Props> = ({
     []
   );
 
-  useEffect(() => {
-    onProjectNavigationChange({ navigationTree });
-  }, [navigationTree, onProjectNavigationChange]);
-
   return (
     <PanelProvider activeNodes={activeNodes} contentProvider={panelContentProvider}>
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>
-          {renderNodes(navigationTreeUI.body)}
+          {renderNodes(navigationTree.body)}
         </EuiCollapsibleNavBeta.Body>
 
         {/* Footer */}
-        {navigationTreeUI.footer && (
+        {navigationTree.footer && (
           <EuiCollapsibleNavBeta.Footer>
-            {renderNodes(navigationTreeUI.footer)}
+            {renderNodes(navigationTree.footer)}
           </EuiCollapsibleNavBeta.Footer>
         )}
 

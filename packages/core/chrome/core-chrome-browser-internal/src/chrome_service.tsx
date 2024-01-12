@@ -29,7 +29,6 @@ import type {
   ChromeHelpExtension,
   ChromeUserBanner,
   ChromeStyle,
-  ChromeProjectNavigation,
   ChromeSetProjectBreadcrumbsParams,
   NavigationTreeDefinition,
   AppDeepLinkId,
@@ -43,7 +42,7 @@ import type {
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
-import { ProjectNavigationService } from './project_navigation';
+import { CloudURLs, ProjectNavigationService } from './project_navigation';
 import { RecentlyAccessedService } from './recently_accessed';
 import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
@@ -227,7 +226,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const projectNavigation = this.projectNavigation.start({
       application,
-      navLinks,
+      navLinksService: navLinks,
       http,
       chromeBreadcrumbs$: breadcrumbs$,
     });
@@ -270,18 +269,16 @@ export class ChromeService {
       projectNavigation.setSideNavComponent(component);
     };
 
-    const setProjectNavigation = (config: ChromeProjectNavigation) => {
-      validateChromeStyle();
-      projectNavigation.setProjectNavigation(config);
-    };
-
-    function setProjectNavigationDefinition<
+    function initProjectNavigation<
       LinkId extends AppDeepLinkId = AppDeepLinkId,
       Id extends string = string,
       ChildrenId extends string = Id
-    >(navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>) {
+    >(
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      deps: { cloudUrls: CloudURLs }
+    ) {
       validateChromeStyle();
-      projectNavigation.setNavigationDefinition(navigationTree$);
+      projectNavigation.initNavigation(navigationTree$, deps);
     }
 
     const setProjectBreadcrumbs = (
@@ -536,9 +533,8 @@ export class ChromeService {
         setProjectsUrl,
         setProjectUrl,
         setProjectName,
-        setNavigation: setProjectNavigation,
-        setNavigationDefinition: setProjectNavigationDefinition,
-        getNavigationDefinition$: () => projectNavigation.getNavigationDefinition$(),
+        initNavigation: initProjectNavigation,
+        getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),

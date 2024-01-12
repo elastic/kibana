@@ -10,8 +10,6 @@ export { Navigation } from './navigation';
 
 export { RecentlyAccessed } from './components';
 
-export { getPresets } from './nav_tree_presets';
-
 export type { PanelContent, PanelComponentProps, PanelContentProvider } from './components';
 
 export type { RecentItem } from './types';
