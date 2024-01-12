@@ -849,7 +849,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
       use_document_level_security: {
         default_value: null,
-        depends_on: [],
+        depends_on: [
+          {
+            field: 'repo_type',
+            value: "organization",
+          },
+        ],
         display: DisplayType.TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
