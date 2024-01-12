@@ -9,8 +9,8 @@
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 
-import { dashboardAttributesSchemaV1 } from '../../common/content_management/v1';
-import { dashboardAttributesSchemaV2 } from '../../common/content_management/v2';
+import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from '../../common/content_management/v1';
+import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from '../../common/content_management/v2';
 import {
   createDashboardSavedObjectTypeMigrations,
   DashboardSavedObjectTypeMigrationsDeps,

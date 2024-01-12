@@ -193,6 +193,7 @@ export class ControlGroupContainer extends Container<
           childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
           getChild: (id) => this.getChild(id),
           recalculateFilters$: this.recalculateFilters$,
+          autoApplyFilters: !Boolean(this.getState().explicitInput.showApplySelections),
         });
       })
     );
@@ -201,7 +202,9 @@ export class ControlGroupContainer extends Container<
      * debounce output recalculation
      */
     this.subscriptions.add(
-      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
+      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => {
+        this.recalculateFilters();
+      })
     );
   };
 
@@ -249,11 +252,6 @@ export class ControlGroupContainer extends Container<
     flyoutRef = undefined;
   }
 
-  // public setLastSavedInput(newInput: PersistableControlGroupInput) {
-  //   console.log('set last saved input', newInput);
-  //   this.dispatch.setLastSavedInput(newInput);
-  // }
-
   public async addDataControlFromField(controlProps: AddDataControlProps) {
     const panelState = await getDataControlPanelState(this.getInput(), controlProps);
     return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
@@ -293,25 +291,7 @@ export class ControlGroupContainer extends Container<
       if (isClearableControl(child)) {
         child.resetSelections(panels[childId].explicitInput);
       }
-      // console.log('CHILD', child);
-      // if (isClearableControl(child)) {
-      //   child.clearSelections();
-      // }
     }
-
-    // for(const panel of panels) {
-    //   const
-    // }
-    // this.updateInput({ panels: this.getState().componentState.lastSavedInput.panels });
-    // const parent = useDashboard();
-    // console.log(this.getState().componentState);
-    // for (const childId of this.getChildIds()) {
-    //   const child = this.getChild(childId);
-    //   console.log('CHILD', child);
-    //   if (isClearableControl(child)) {
-    //     child.clearSelections();
-    //   }
-    // }
   };
 
   private recalculateFilters = () => {
@@ -332,6 +312,10 @@ export class ControlGroupContainer extends Container<
       this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
       this.onFiltersPublished$.next(allFilters);
     }
+  };
+
+  public publishFilters = () => {
+    this.recalculateFilters$.next(null);
   };
 
   private recalculateDataViews = () => {

@@ -211,7 +211,7 @@ export const ControlGroup = () => {
                         color={'success'}
                         iconType={'check'}
                         aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                        onClick={() => controlGroup.openAddDataControlFlyout()}
+                        onClick={() => controlGroup.publishFilters()}
                       />
                     </EuiFlexItem>
                   )}
