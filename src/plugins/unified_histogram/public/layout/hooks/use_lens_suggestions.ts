@@ -99,7 +99,7 @@ export const useLensSuggestions = ({
       const interval = computeInterval(timeRange, data);
       const language = getAggregateQueryMode(query);
       const safeQuery = cleanupESQLQueryForLensSuggestions(query[language]);
-      const esqlQuery = `${safeQuery} | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
+      const esqlQuery = `${safeQuery} | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
@@ -112,8 +112,8 @@ export const useLensSuggestions = ({
             },
           },
           {
-            id: 'rows',
-            name: 'rows',
+            id: 'results',
+            name: 'results',
             meta: {
               type: 'number',
             },
