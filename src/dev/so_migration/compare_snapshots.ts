@@ -35,7 +35,7 @@ interface SnapshotComparisonResult {
     [pluginName: string]: {
       from: MigrationInfoRecord;
       to: MigrationInfoRecord;
-      versionChange: { from: string; to: string };
+      versionChange: { from: number; to: number; emoji: string };
     };
   };
 }
@@ -63,8 +63,10 @@ async function compareSnapshots({
   if (result.hasChanges) {
     log.info(`Snapshots compared: ${from} <=> ${to}. Changed: ${result.changed.join(', ')}`);
     result.changed.forEach((pluginName) => {
-      const change = result.changes[pluginName];
-      log.info(`  ${pluginName}: ${change.versionChange.from} => ${change.versionChange.to}`);
+      const { versionChange } = result.changes[pluginName];
+      log.info(
+        `${versionChange.emoji} ${pluginName}: ${versionChange.from} => ${versionChange.to}`
+      );
     });
   } else {
     log.info(`Snapshots compared: ${from} <=> ${to}. No changes`);
@@ -170,16 +172,19 @@ function compareSnapshotFiles(
   const changes = pluginNamesWithChangedHash.reduce((changesObj, pluginName) => {
     const fromMigrationInfo = fromSnapshot.typeDefinitions[pluginName];
     const toMigrationInfo = toSnapshot.typeDefinitions[pluginName];
+    const fromVersion = Number(fromMigrationInfo.modelVersions.at(-1)?.version || '0');
+    const toVersion = Number(toMigrationInfo.modelVersions.at(-1)?.version || '0');
     changesObj[pluginName] = {
       from: fromMigrationInfo,
       to: toMigrationInfo,
       versionChange: {
-        from: fromMigrationInfo.modelVersions.at(-1)?.version || '0',
-        to: toMigrationInfo.modelVersions.at(-1)?.version || '0',
+        from: fromVersion,
+        to: toVersion,
+        emoji: Math.abs(fromVersion - toVersion) >= 2 ? '🚨' : '✅',
       },
     };
     return changesObj;
-  }, {} as Record<string, { from: MigrationInfoRecord; to: MigrationInfoRecord; versionChange: { from: string; to: string } }>);
+  }, {} as SnapshotComparisonResult['changes']);
 
   return {
     hasChanges: pluginNamesWithChangedHash.length > 0,

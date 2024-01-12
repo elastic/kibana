@@ -11,13 +11,15 @@ import { readFileSync } from 'fs';
 import { exec } from '../shared';
 import { BuildkiteClient, getKibanaDir } from '#pipeline-utils';
 
+type VersionChanges = Record<string, { from: number; to: number; emoji: string }>;
+
 export function compareSOSnapshots(
   previousSha: string,
   selectedSha: string
 ): null | {
   hasChanges: boolean;
   changed: string[];
-  versionChanges: Record<string, { from: string; to: string }>;
+  versionChanges: VersionChanges;
   command: string;
 } {
   assertValidSha(previousSha);
@@ -35,13 +37,9 @@ export function compareSOSnapshots(
     buildkite.uploadArtifacts(outputPath);
 
     const versionChanges = Object.keys(soComparisonResult.changes).reduce((changes, pluginId) => {
-      changes[pluginId] = {
-        from: soComparisonResult.changes[pluginId].versionChange.from,
-        to: soComparisonResult.changes[pluginId].versionChange.to,
-      };
-
+      changes[pluginId] = soComparisonResult.changes[pluginId].versionChange;
       return changes;
-    }, {} as Record<string, { from: string; to: string }>);
+    }, {} as VersionChanges);
 
     return {
       hasChanges: soComparisonResult.hasChanges,
@@ -58,7 +56,7 @@ export function compareSOSnapshots(
 export function makeSOComparisonBlockHtml(comparisonResult: {
   hasChanges: boolean;
   changed: string[];
-  versionChanges: Record<string, { from: string; to: string }>;
+  versionChanges: VersionChanges;
   command: string;
 }): string {
   if (comparisonResult.hasChanges) {
@@ -68,9 +66,10 @@ export function makeSOComparisonBlockHtml(comparisonResult: {
 <div>Changed plugins:</div>
  <div>
     <ul>
-${Object.keys(versionChanges).map(
-  (key) => `<li>${key}: ${versionChanges[key].from} => ${versionChanges[key].to}</li>`
-)}
+${Object.keys(versionChanges).map((key) => {
+  const { from, to, emoji } = versionChanges[key];
+  return `<li>${emoji} ${key}: ${from} => ${to}</li>`;
+})}
     </ul>
  </div>
 <i>Find detailed info in the archived artifacts, or run the command yourself: </i>
