@@ -12,12 +12,17 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPageHeader,
+  EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
   OnTimeChangeProps,
 } from '@elastic/eui';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import React, { useState } from 'react';
+import {
+  SingleDatasetLocatorParams,
+  SINGLE_DATASET_LOCATOR_ID,
+} from '@kbn/deeplinks-observability';
 import { Integration } from '../../../common/integrations';
 import { useKibana } from '../../utils/kibana_react';
 import { AssetsList } from './assets_list';
@@ -31,6 +36,9 @@ export function IntegrationPanel({ integration }: { integration: Integration }) 
   const {
     services: {
       http: { basePath },
+      share: {
+        url: { locators },
+      },
     },
   } = useKibana();
 
@@ -42,6 +50,8 @@ export function IntegrationPanel({ integration }: { integration: Integration }) 
     setStart(newStart);
     setEnd(newEnd);
   };
+
+  const logExplorerLocator = locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
 
   return (
     <>
@@ -87,8 +97,32 @@ export function IntegrationPanel({ integration }: { integration: Integration }) 
       </EuiFlexGroup>
       <EuiSpacer />
 
+      <SectionContainer title="Logs" hasError={false}>
+        <EuiFlexGroup>
+          {integration.package.data_streams
+            .filter((dataStream) => dataStream.type === 'logs')
+            .map((logStream) => (
+              <EuiFlexItem key={logStream.title} grow={false}>
+                <EuiLink
+                  data-test-subj="o11yIntegrationPanelLink"
+                  href={logExplorerLocator?.getRedirectUrl({
+                    integration: integration.metadata.integration_name,
+                    dataset: logStream.dataset,
+                    timeRange: {
+                      to: start,
+                      from: end,
+                    },
+                  })}
+                >
+                  <EuiPanel color="subdued">{logStream.title}</EuiPanel>
+                </EuiLink>
+              </EuiFlexItem>
+            ))}
+        </EuiFlexGroup>
+      </SectionContainer>
+      <EuiSpacer />
+
       {/* Show links to selected dashboards (from the metadata) */}
-      {/* Show links to each logs data set in the Logs Explorer (from the package) */}
       {/* Add a link to APM data if there is any (how to find out?) */}
 
       <EuiFlexGroup direction="column" gutterSize="s">
