@@ -89,9 +89,7 @@ export interface AssistantProviderProps {
   baseConversations: Record<string, Conversation>;
   modelEvaluatorEnabled?: boolean;
   nameSpace?: string;
-  ragOnAlerts?: boolean;
   // setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
-  setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
@@ -137,7 +135,6 @@ export interface UseAssistantContext {
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
-  getConversationId: (id?: string) => string;
   promptContexts: Record<string, PromptContext>;
   modelEvaluatorEnabled: boolean;
   nameSpace: string;
@@ -149,7 +146,6 @@ export interface UseAssistantContext {
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
-  setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
@@ -182,8 +178,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   baseConversations,
   modelEvaluatorEnabled = false,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
-  ragOnAlerts = false,
-  setConversations,
   setDefaultAllow,
   setDefaultAllowReplacement,
   title = DEFAULT_ASSISTANT_TITLE,
@@ -261,37 +255,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
 
-  const [conversations, setConversationsInternal] = useState(getInitialConversations());
-  const conversationIds = useMemo(() => Object.keys(conversations).sort(), [conversations]);
-
-  // TODO: This is a fix for conversations not loading out of localstorage. Also re-introduces our cascading render issue (as it loops back in localstorage)
-  useEffect(() => {
-    setConversationsInternal(getInitialConversations());
-  }, [getInitialConversations]);
-
-  const onConversationsUpdated = useCallback<
-    React.Dispatch<React.SetStateAction<Record<string, Conversation>>>
-  >(
-    (
-      newConversations:
-        | Record<string, Conversation>
-        | ((prev: Record<string, Conversation>) => Record<string, Conversation>)
-    ) => {
-      if (typeof newConversations === 'function') {
-        const updater = newConversations;
-        setConversationsInternal((prevValue) => {
-          const newValue = updater(prevValue);
-          setConversations(newValue);
-          return newValue;
-        });
-      } else {
-        setConversations(newConversations);
-        setConversationsInternal(newConversations);
-      }
-    },
-    [setConversations]
-  );
-
   const getConversationId = useCallback(
     // if a conversationId has been provided, use that
     // if not, check local storage
@@ -339,7 +302,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       title,
       toasts,
       unRegisterPromptContext,
-      getConversationId,
       setLastConversationId: setLocalStorageLastConversationId,
       baseConversations,
     }),
@@ -362,12 +324,10 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getComments,
       http,
       localStorageKnowledgeBase,
-      getConversationId,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
       modelEvaluatorEnabled,
       nameSpace,
-      // onConversationsUpdated,
       promptContexts,
       registerPromptContext,
       selectedSettingsTab,

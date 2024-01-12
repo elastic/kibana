@@ -103,7 +103,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
         if (selectedSystemPrompt != null) {
           setUpdatedConversationSettings((prev) =>
             keyBy(
-              'id',
+              'title',
               /*
                * updatedConversationWithPrompts calculates the present of prompt for
                * each conversation. Based on the values of selected conversation, it goes

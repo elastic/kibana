@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { merge } from 'lodash';
-import { Conversation, useFetchConversationsByUser } from '../../../..';
+import { Conversation, useFetchCurrentUserConversations } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
@@ -34,7 +34,7 @@ interface Props {
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
   selectedConversationId: string | undefined;
-  onConversationSelected: (conversationId: string) => void;
+  onConversationSelected: (conversationTitle: string, conversationId?: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
 }
@@ -69,7 +69,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     const { deleteConversation, createConversation } = useConversation();
 
-    const { data: conversationsData, isLoading, refresh } = useFetchConversationsByUser();
+    const { data: conversationsData, isLoading } = useFetchCurrentUserConversations();
 
     useEffect(() => {
       if (!isLoading) {
@@ -111,7 +111,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     // Callback for when user types to create a new system prompt
     const onCreateOption = useCallback(
-      (searchValue, flattenedOptions = []) => {
+      async (searchValue, flattenedOptions = []) => {
         if (!searchValue || !searchValue.trim().toLowerCase()) {
           return;
         }
@@ -126,6 +126,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
               option.label.trim().toLowerCase() === normalizedSearchValue
           ) !== -1;
 
+        let cId;
         if (!optionExists) {
           const newConversation: Conversation = {
             id: searchValue,
@@ -137,16 +138,16 @@ export const ConversationSelector: React.FC<Props> = React.memo(
               defaultSystemPromptId: defaultSystemPrompt?.id,
             },
           };
-          createConversation(newConversation);
+          cId = (await createConversation(newConversation))?.id;
         }
-        onConversationSelected(searchValue);
+        onConversationSelected(searchValue, cId);
       },
       [
         allSystemPrompts,
+        onConversationSelected,
         defaultConnectorId,
         defaultProvider,
         createConversation,
-        onConversationSelected,
       ]
     );
 
@@ -159,8 +160,17 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         setTimeout(() => {
           deleteConversation(cId);
         }, 0);
+        const deletedConv = { ...conversations };
+        delete deletedConv[cId];
+        setConversations(deletedConv);
       },
-      [conversationIds, deleteConversation, selectedConversationId, onConversationSelected]
+      [
+        selectedConversationId,
+        conversations,
+        onConversationSelected,
+        conversationIds,
+        deleteConversation,
+      ]
     );
 
     const onChange = useCallback(
@@ -295,7 +305,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           options={conversationOptions}
           selectedOptions={selectedOptions}
           onChange={onChange}
-          onCreateOption={onCreateOption}
+          onCreateOption={onCreateOption as unknown as () => void}
           renderOption={renderOption}
           compressed={true}
           isDisabled={isDisabled}

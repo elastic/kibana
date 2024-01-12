@@ -25,6 +25,7 @@ import { findConversations } from './find_conversations';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
+import { getLastConversation } from './get_last_conversation';
 
 export enum OpenAiProviderType {
   OpenAi = 'OpenAI',
@@ -118,6 +119,27 @@ export class AIAssistantDataClient {
   public getConversation = async (id: string): Promise<ConversationResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return getConversation(esClient, this.indexTemplateAndPattern.alias, id);
+  };
+
+  /**
+   * Creates a conversation, if given at least the "title" and "apiConfig"
+   * See {@link https://www.elastic.co/guide/en/security/current/}
+   * for more information around formats of the deserializer and serializer
+   * @param options
+   * @param options.id The id of the conversat to create or "undefined" if you want an "id" to be auto-created for you
+   * @param options.title A custom deserializer for the conversation. Optionally, you an define this as handle bars. See online docs for more information.
+   * @param options.messages Set this to true if this is a conversation that is "immutable"/"pre-packaged".
+   * @param options.apiConfig Determines how uploaded conversation item values are parsed. By default, conversation items are parsed using named regex groups. See online docs for more information.
+   * @returns The conversation created
+   */
+  public getLastConversation = async (): Promise<ConversationResponse> => {
+    const { currentUser } = this;
+    const esClient = await this.options.elasticsearchClientPromise;
+    return getLastConversation(
+      esClient,
+      this.indexTemplateAndPattern.alias,
+      currentUser?.profile_uid ?? ''
+    );
   };
 
   public findConversations = async ({

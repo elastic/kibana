@@ -65,6 +65,7 @@ export interface Conversation {
   id: string;
   title: string;
   messages: Message[];
+  updatedAt?: string;
   replacements?: Record<string, string>;
   theme?: ConversationTheme;
   isDefault?: boolean;

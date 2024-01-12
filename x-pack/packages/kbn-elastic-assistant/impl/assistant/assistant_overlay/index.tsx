@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiModal } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant } from '..';
 import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
+import { useFetchCurrentUserConversations } from '../api/use_fetch_current_user_conversations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -33,7 +34,21 @@ export const AssistantOverlay = React.memo(() => {
     WELCOME_CONVERSATION_TITLE
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay, getConversationId } = useAssistantContext();
+  const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
+
+  const { data: conversationsData, isLoading } = useFetchCurrentUserConversations();
+
+  const lastConversationId = useMemo(() => {
+    if (!isLoading) {
+      const sorted = conversationsData?.data.sort((convA, convB) =>
+        convA.updatedAt && convB.updatedAt && convA.updatedAt > convB.updatedAt ? -1 : 1
+      );
+      if (sorted && sorted.length > 0) {
+        return sorted[0].id;
+      }
+    }
+    return WELCOME_CONVERSATION_TITLE;
+  }, [conversationsData?.data, isLoading]);
 
   // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
@@ -43,7 +58,7 @@ export const AssistantOverlay = React.memo(() => {
         promptContextId: pid,
         conversationId: cid,
       }: ShowAssistantOverlayProps) => {
-        const newConversationId = getConversationId(cid);
+        const newConversationId = cid ?? lastConversationId;
         if (so)
           assistantTelemetry?.reportAssistantInvoked({
             conversationId: newConversationId,
@@ -54,7 +69,7 @@ export const AssistantOverlay = React.memo(() => {
         setPromptContextId(pid);
         setConversationId(newConversationId);
       },
-    [assistantTelemetry, getConversationId]
+    [assistantTelemetry, lastConversationId]
   );
   useEffect(() => {
     setShowAssistantOverlay(showOverlay);
@@ -64,15 +79,15 @@ export const AssistantOverlay = React.memo(() => {
   const handleShortcutPress = useCallback(() => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
-      setConversationId(getConversationId());
+      setConversationId(lastConversationId);
       assistantTelemetry?.reportAssistantInvoked({
         invokedBy: 'shortcut',
-        conversationId: getConversationId(),
+        conversationId: lastConversationId,
       });
     }
 
     setIsModalVisible(!isModalVisible);
-  }, [assistantTelemetry, isModalVisible, getConversationId]);
+  }, [isModalVisible, lastConversationId, assistantTelemetry]);
 
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(

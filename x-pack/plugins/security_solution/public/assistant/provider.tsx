@@ -12,7 +12,7 @@ import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assi
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
-import { augmentMessageCodeBlocks, LOCAL_STORAGE_KEY } from './helpers';
+import { augmentMessageCodeBlocks } from './helpers';
 import { useBaseConversations } from './use_conversation_store';
 import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from './content/anonymization';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
@@ -20,7 +20,6 @@ import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 import { useAnonymizationStore } from './use_anonymization_store';
 import { useAssistantAvailability } from './use_assistant_availability';
-import { APP_ID } from '../../common/constants';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
@@ -49,8 +48,6 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
     useAnonymizationStore();
 
-  const nameSpace = `${APP_ID}.${LOCAL_STORAGE_KEY}`;
-
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
@@ -61,7 +58,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       alertsIndexPattern={alertsIndexPattern}
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
-      assistantTelemetry={assistantTelemetry} // to server
+      assistantTelemetry={assistantTelemetry}
       defaultAllow={defaultAllow} // to server and plugin start
       defaultAllowReplacement={defaultAllowReplacement} // to server and plugin start
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
@@ -76,13 +73,8 @@ export const AssistantProvider: React.FC = ({ children }) => {
       http={http}
       assistantStreamingEnabled={assistantStreamingEnabled}
       modelEvaluatorEnabled={isModelEvaluationEnabled}
-      nameSpace={nameSpace}
-      ragOnAlerts={ragOnAlerts}
       setDefaultAllow={setDefaultAllow} // remove
       setDefaultAllowReplacement={setDefaultAllowReplacement} // remove
-      setConversations={setConversations}
-      setDefaultAllow={setDefaultAllow}
-      setDefaultAllowReplacement={setDefaultAllowReplacement}
       title={ASSISTANT_TITLE}
       toasts={toasts}
     >

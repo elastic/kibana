@@ -32,7 +32,8 @@ export const AssistantTitle: React.FC<{
   title: string | JSX.Element;
   docLinks: Omit<DocLinksStart, 'links'>;
   selectedConversation: Conversation | undefined;
-}> = ({ isDisabled = false, title, docLinks, selectedConversation }) => {
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
+}> = ({ isDisabled = false, title, docLinks, selectedConversation, setCurrentConversation }) => {
   const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
@@ -112,6 +113,7 @@ export const AssistantTitle: React.FC<{
               isDisabled={isDisabled || selectedConversation === undefined}
               selectedConnectorId={selectedConnectorId}
               selectedConversation={selectedConversation}
+              setCurrentConversation={setCurrentConversation}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

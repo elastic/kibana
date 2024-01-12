@@ -141,4 +141,4 @@ export type { DeleteKnowledgeBaseResponse } from './impl/assistant/api';
 export type { GetKnowledgeBaseStatusResponse } from './impl/assistant/api';
 export type { PostKnowledgeBaseResponse } from './impl/assistant/api';
 
-export { useFetchConversationsByUser } from './impl/assistant/api/use_fetch_conversations_by_user';
+export { useFetchCurrentUserConversations } from './impl/assistant/api/use_fetch_current_user_conversations';

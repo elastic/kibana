@@ -41,6 +41,12 @@ export const findConversations = async ({
   const ascOrDesc = sortOrder ?? ('asc' as const);
   if (sortField != null) {
     sort = [{ [sortField]: ascOrDesc }];
+  } else {
+    sort = {
+      updated_at: {
+        order: 'desc',
+      },
+    };
   }
   const response = await esClient.search<SearchEsConversationSchema>({
     body: {

@@ -51,10 +51,6 @@ export interface PostConversationParams {
   signal?: AbortSignal | undefined;
 }
 
-export interface PostConversationResponse {
-  conversation: Conversation;
-}
-
 /**
  * API call for setting up the Conversation.
  *
@@ -69,7 +65,7 @@ export const createConversationApi = async ({
   http,
   conversation,
   signal,
-}: PostConversationParams): Promise<PostConversationResponse | IHttpFetchError> => {
+}: PostConversationParams): Promise<Conversation | IHttpFetchError> => {
   try {
     const path = `/api/elastic_assistant/conversations`;
     const response = await http.post(path, {
@@ -78,7 +74,7 @@ export const createConversationApi = async ({
       signal,
     });
 
-    return response as PostConversationResponse;
+    return response as Conversation;
   } catch (error) {
     return error as IHttpFetchError;
   }

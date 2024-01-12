@@ -26,9 +26,8 @@ const ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL = `${ELASTIC_AI_ASSISTANT_URL}/conv
 export const ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND =
   `${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/_find_user` as const;
 
-export const useFetchConversationsByUser = () => {
+export const useFetchCurrentUserConversations = () => {
   const { http } = useKibana<CoreStart>().services;
-
   const query = {
     page: 1,
     perPage: 100,
@@ -42,12 +41,29 @@ export const useFetchConversationsByUser = () => {
     })
   );
 
-  const refresh = () =>
-    http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
+  return { ...querySt };
+};
+
+/**
+ * API call for getting conversation by id.
+ *
+ * @param {Object} options - The options object.
+ * @param {HttpSetup} options.http - HttpSetup
+ * @param {string} options.id - Conversation id.
+ * @param {AbortSignal} [options.signal] - AbortSignal
+ *
+ * @returns {Promise<Conversation | IHttpFetchError>}
+ */
+export const useLastConversation = () => {
+  const path = `/api/elastic_assistant/conversations/_last_user`;
+  const { http } = useKibana<CoreStart>().services;
+
+  const querySt = useQuery([path], () =>
+    http.fetch<Conversation>(path, {
       method: 'GET',
       version: AI_ASSISTANT_API_CURRENT_VERSION,
-      query,
-    });
+    })
+  );
 
-  return { ...querySt, refresh };
+  return { ...querySt };
 };

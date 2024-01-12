@@ -34,15 +34,13 @@ const NewChatByIdComponent: React.FC<Props> = ({
   const { showAssistantOverlay } = useAssistantContext();
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:
-  const showOverlay = useCallback(
-    () =>
-      showAssistantOverlay({
-        conversationId,
-        promptContextId,
-        showOverlay: true,
-      }),
-    [conversationId, promptContextId, showAssistantOverlay]
-  );
+  const showOverlay = useCallback(() => {
+    showAssistantOverlay({
+      conversationId,
+      promptContextId,
+      showOverlay: true,
+    });
+  }, [conversationId, promptContextId, showAssistantOverlay]);
 
   const icon = useMemo(() => {
     if (iconType === null) {

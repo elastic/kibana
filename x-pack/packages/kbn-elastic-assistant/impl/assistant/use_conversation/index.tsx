@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 
-import { isHttpFetchError } from '@kbn/core-http-browser';
+import { IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
@@ -80,13 +80,21 @@ interface UseConversation {
   getDefaultConversation: ({ conversationId, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
   removeLastMessage: (conversationId: string) => Promise<Message[] | undefined>;
-  setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
+  setApiConfig: ({
+    conversationId,
+    apiConfig,
+  }: SetApiConfigProps) => Promise<Conversation | IHttpFetchError<unknown>>;
   createConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getConversation: (conversationId: string) => Promise<Conversation | undefined>;
 }
 
 export const useConversation = (): UseConversation => {
-  const { allSystemPrompts, assistantTelemetry, http } = useAssistantContext();
+  const {
+    allSystemPrompts,
+    assistantTelemetry,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
+    http,
+  } = useAssistantContext();
 
   const getConversation = useCallback(
     async (conversationId: string) => {
@@ -98,12 +106,6 @@ export const useConversation = (): UseConversation => {
     },
     [http]
   );
-  const {
-    allSystemPrompts,
-    assistantTelemetry,
-    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
-    setConversations,
-  } = useAssistantContext();
 
   /**
    * Removes the last message of conversation[] for a given conversationId
@@ -157,7 +159,7 @@ export const useConversation = (): UseConversation => {
    * Append a message to the conversation[] for a given conversationId
    */
   const appendMessage = useCallback(
-    ({ conversationId, message }: AppendMessageProps): Message[] => {
+    async ({ conversationId, message }: AppendMessageProps): Promise<Message[]> => {
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId,
         role: message.role,
@@ -167,7 +169,7 @@ export const useConversation = (): UseConversation => {
       let messages: Message[] = [];
       const prevConversation = await getConversationById({ http, id: conversationId });
       if (isHttpFetchError(prevConversation)) {
-        return;
+        return [];
       }
 
       if (prevConversation != null) {
@@ -180,8 +182,7 @@ export const useConversation = (): UseConversation => {
       }
       return messages;
     },
-    [assistantTelemetry, http]
-    [isEnabledKnowledgeBase, isEnabledRAGAlerts, assistantTelemetry, setConversations]
+    [assistantTelemetry, isEnabledKnowledgeBase, isEnabledRAGAlerts, http]
   );
 
   const appendReplacements = useCallback(
@@ -267,7 +268,7 @@ export const useConversation = (): UseConversation => {
     async (conversation: Conversation): Promise<Conversation | undefined> => {
       const response = await createConversationApi({ http, conversation });
       if (!isHttpFetchError(response)) {
-        return response.conversation;
+        return response;
       }
     },
     [http]
@@ -287,9 +288,9 @@ export const useConversation = (): UseConversation => {
    * Update the apiConfig for a given conversationId
    */
   const setApiConfig = useCallback(
-    async ({ conversationId, apiConfig, title, isDefault }: SetApiConfigProps): Promise<void> => {
+    async ({ conversationId, apiConfig, title, isDefault }: SetApiConfigProps) => {
       if (isDefault && title === conversationId) {
-        await createConversationApi({
+        return createConversationApi({
           http,
           conversation: {
             apiConfig,
@@ -300,7 +301,7 @@ export const useConversation = (): UseConversation => {
           },
         });
       } else {
-        await updateConversationApi({
+        return updateConversationApi({
           http,
           conversationId,
           apiConfig,

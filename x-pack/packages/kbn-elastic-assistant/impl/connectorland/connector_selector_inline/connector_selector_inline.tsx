@@ -23,6 +23,7 @@ interface Props {
   isDisabled?: boolean;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
 }
 
 const inputContainerClassName = css`
@@ -65,7 +66,7 @@ const placeholderButtonClassName = css`
  * A compact wrapper of the ConnectorSelector component used in the Settings modal.
  */
 export const ConnectorSelectorInline: React.FC<Props> = React.memo(
-  ({ isDisabled = false, selectedConnectorId, selectedConversation }) => {
+  ({ isDisabled = false, selectedConnectorId, selectedConversation, setCurrentConversation }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { actionTypeRegistry, assistantAvailability, http } = useAssistantContext();
     const { setApiConfig } = useConversation();
@@ -93,7 +94,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     }, [isOpen]);
 
     const onChange = useCallback(
-      (connector: AIConnector) => {
+      async (connector: AIConnector) => {
         const connectorId = connector.id;
         if (connectorId === ADD_NEW_CONNECTOR) {
           return;
@@ -105,7 +106,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         setIsOpen(false);
 
         if (selectedConversation != null) {
-          setApiConfig({
+          const res = await setApiConfig({
             conversationId: selectedConversation.id,
             title: selectedConversation.title,
             isDefault: selectedConversation.isDefault,
@@ -118,9 +119,10 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               model: model ?? config?.defaultModel,
             },
           });
+          setCurrentConversation(res as Conversation);
         }
       },
-      [selectedConversation, setApiConfig]
+      [selectedConversation, setApiConfig, setCurrentConversation]
     );
 
     return (

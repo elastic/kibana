@@ -36,6 +36,7 @@ interface OwnProps {
   selectedConversationId: string;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
   shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
   title: string | JSX.Element;
@@ -62,6 +63,7 @@ export const AssistantHeader: React.FC<Props> = ({
   shouldDisableKeyboardShortcut,
   showAnonymizedValues,
   title,
+  setCurrentConversation,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -84,6 +86,7 @@ export const AssistantHeader: React.FC<Props> = ({
             isDisabled={isDisabled}
             docLinks={docLinks}
             selectedConversation={currentConversation}
+            setCurrentConversation={setCurrentConversation}
             title={title}
           />
         </EuiFlexItem>
@@ -97,7 +100,7 @@ export const AssistantHeader: React.FC<Props> = ({
           <ConversationSelector
             defaultConnectorId={defaultConnectorId}
             defaultProvider={defaultProvider}
-            selectedConversationId={selectedConversationId}
+            selectedConversationId={currentConversation.id}
             onConversationSelected={onConversationSelected}
             shouldDisableKeyboardShortcut={shouldDisableKeyboardShortcut}
             isDisabled={isDisabled}

@@ -16,7 +16,7 @@ import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { merge } from 'lodash/fp';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
-import { Conversation, Message, useFetchConversationsByUser } from '../../..';
+import { Conversation, Message, useFetchCurrentUserConversations } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
@@ -54,7 +54,7 @@ export const useConnectorSetup = ({
   // Access all conversations so we can add connector to all on initial setup
   const { actionTypeRegistry, http, baseConversations } = useAssistantContext();
 
-  const { data: conversationsData, isLoading, refresh } = useFetchConversationsByUser();
+  const { data: conversationsData, isLoading } = useFetchCurrentUserConversations();
 
   useEffect(() => {
     if (!isLoading) {

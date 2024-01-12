@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetchConversationsByUser, type Conversation } from '@kbn/elastic-assistant';
+import { useFetchCurrentUserConversations, type Conversation } from '@kbn/elastic-assistant';
 
 import { merge, unset } from 'lodash/fp';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
@@ -25,7 +25,7 @@ export const useConversationStore = (): Record<string, Conversation> => {
     [isDataQualityDashboardPageExists]
   );
 
-  const { data: conversationsData, isLoading, refresh } = useFetchConversationsByUser();
+  const { data: conversationsData, isLoading } = useFetchCurrentUserConversations();
 
   useEffect(() => {
     if (!isLoading) {
@@ -35,18 +35,22 @@ export const useConversationStore = (): Record<string, Conversation> => {
         transformed[conversation.id] = conversation;
         return transformed;
       }, {});
+
+      const notUsedBaseConversations = Object.keys(baseConversations).filter(
+        (baseId) => (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
+      );
+
+      console.log(notUsedBaseConversations)
       setConversations(
         merge(
           userConversations,
-          Object.keys(baseConversations)
-            .filter(
-              (baseId) =>
-                (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
-            )
-            .reduce<Record<string, Conversation>>((transformed, conversation) => {
+          notUsedBaseConversations.reduce<Record<string, Conversation>>(
+            (transformed, conversation) => {
               transformed[conversation] = baseConversations[conversation];
               return transformed;
-            }, {})
+            },
+            {}
+          )
         )
       );
     }

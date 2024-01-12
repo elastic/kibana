@@ -39,7 +39,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
         },
       },
       async (context, request, response): Promise<IKibanaResponse<FindConversationsResponse>> => {
-        const siemResponse = buildResponse(response);
+        const assistantResponse = buildResponse(response);
 
         /* const validationErrors = validateFindConversationsRequestQuery(request.query);
         if (validationErrors.length) {
@@ -65,7 +65,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           return response.ok({ body: result });
         } catch (err) {
           const error = transformError(err);
-          return siemResponse.error({
+          return assistantResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });

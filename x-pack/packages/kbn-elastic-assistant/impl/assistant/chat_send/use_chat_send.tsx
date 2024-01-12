@@ -27,7 +27,7 @@ export interface UseChatSendProps {
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<Record<string, Conversation> | undefined>;
 }
 
 export interface UseChatSend {

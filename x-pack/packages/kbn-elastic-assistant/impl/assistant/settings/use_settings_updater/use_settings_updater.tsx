@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { merge } from 'lodash';
-import { Conversation, Prompt, QuickPrompt, useFetchConversationsByUser } from '../../../..';
+import { Conversation, Prompt, QuickPrompt, useFetchCurrentUserConversations } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
 import { bulkConversationsChange } from '../../api/use_bulk_actions_conversations';
@@ -38,7 +38,6 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     allQuickPrompts,
     allSystemPrompts,
     assistantTelemetry,
-    conversations,
     defaultAllow,
     defaultAllowReplacement,
     baseConversations,
@@ -51,7 +50,7 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     http,
   } = useAssistantContext();
 
-  const { data: conversationsData, isLoading } = useFetchConversationsByUser();
+  const { data: conversationsData, isLoading } = useFetchCurrentUserConversations();
 
   const conversations = merge(
     baseConversations,
@@ -111,7 +110,28 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   const saveSettings = useCallback((): void => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
-    setConversations(updatedConversationSettings);
+    bulkConversationsChange(http, {
+      conversationsToUpdate: Object.keys(updatedConversationSettings).reduce(
+        (conversationsToUpdate: Conversation[], conversationId: string) => {
+          if (!updatedConversationSettings[conversationId].isDefault) {
+            conversationsToUpdate.push(updatedConversationSettings[conversationId]);
+          }
+          return conversationsToUpdate;
+        },
+        []
+      ),
+      conversationsToCreate: Object.keys(updatedConversationSettings).reduce(
+        (conversationsToCreate: Conversation[], conversationId: string) => {
+          if (updatedConversationSettings[conversationId].isDefault) {
+            conversationsToCreate.push(updatedConversationSettings[conversationId]);
+          }
+          return conversationsToCreate;
+        },
+        []
+      ),
+      conversationsToDelete: deletedConversationSettings,
+    });
+
     const didUpdateKnowledgeBase =
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
     const didUpdateRAGAlerts =
@@ -130,20 +150,22 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setDefaultAllow(updatedDefaultAllow);
     setDefaultAllowReplacement(updatedDefaultAllowReplacement);
   }, [
-    assistantTelemetry,
-    knowledgeBase.isEnabledRAGAlerts,
-    knowledgeBase.isEnabledKnowledgeBase,
     setAllQuickPrompts,
-    setAllSystemPrompts,
-    setDefaultAllow,
-    setDefaultAllowReplacement,
-    setKnowledgeBase,
-    updatedConversationSettings,
-    updatedDefaultAllow,
-    updatedDefaultAllowReplacement,
-    updatedKnowledgeBaseSettings,
     updatedQuickPromptSettings,
+    setAllSystemPrompts,
     updatedSystemPromptSettings,
+    http,
+    updatedConversationSettings,
+    deletedConversationSettings,
+    knowledgeBase.isEnabledKnowledgeBase,
+    knowledgeBase.isEnabledRAGAlerts,
+    updatedKnowledgeBaseSettings,
+    setKnowledgeBase,
+    setDefaultAllow,
+    updatedDefaultAllow,
+    setDefaultAllowReplacement,
+    updatedDefaultAllowReplacement,
+    assistantTelemetry,
   ]);
 
   return {

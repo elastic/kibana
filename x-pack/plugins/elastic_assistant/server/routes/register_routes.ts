@@ -15,6 +15,7 @@ import { readConversationRoute } from './conversation/read_route';
 import { updateConversationRoute } from './conversation/update_route';
 import { findUserConversationsRoute } from './conversation/find_user_conversations_route';
 import { bulkActionConversationsRoute } from './conversation/bulk_actions_route';
+import { readLastConversationRoute } from './conversation/read_last_route';
 
 export const registerConversationsRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -25,6 +26,7 @@ export const registerConversationsRoutes = (
   readConversationRoute(router);
   updateConversationRoute(router);
   deleteConversationRoute(router);
+  readLastConversationRoute(router);
 
   // Conversations bulk CRUD
   bulkActionConversationsRoute(router, logger);

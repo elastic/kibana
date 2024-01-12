@@ -130,7 +130,6 @@ export const transformToCreateScheme = (
 
 function transform(conversationSchema: CreateMessageSchema): ConversationResponse {
   const response: ConversationResponse = {
-    id: conversationSchema.id,
     timestamp: conversationSchema['@timestamp'],
     createdAt: conversationSchema.created_at,
     user: conversationSchema.user,

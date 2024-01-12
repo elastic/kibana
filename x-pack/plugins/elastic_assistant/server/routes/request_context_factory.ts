@@ -76,6 +76,8 @@ export class RequestContextFactory implements IRequestContextFactory {
         return appContextService.getRegisteredTools(pluginName);
       },
 
+      telemetry: core.analytics,
+
       getAIAssistantSOClient: memoize(() => {
         const username =
           startPlugins.security?.authc.getCurrentUser(request)?.username || 'elastic';
