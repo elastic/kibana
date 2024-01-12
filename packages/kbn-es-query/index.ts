@@ -58,7 +58,6 @@ export {
   getLimitFromESQLQuery,
   getLanguageDisplayName,
   cleanupESQLQueryForLensSuggestions,
-  getESQLAdHocDataview,
 } from './src/es_query';
 
 export {

@@ -79,7 +79,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-plugins-server",
     "@kbn/serverless",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/esql-utils"
   ],
   "exclude": ["target/**/*"]
 }

@@ -7,7 +7,7 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { getESQLAdHocDataview } from '@kbn/es-query';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import {
   type AggregateQuery,
   getIndexPatternFromSQLQuery,
