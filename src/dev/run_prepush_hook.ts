@@ -240,7 +240,7 @@ run(
 
       throw new Error('preflight checks failed.');
     } else {
-      log.info('All checks passed! ✨');
+      log.info('All preflight checks passed! ✨\n');
 
       reportTime(runStartTime, 'total', {
         success: true,
