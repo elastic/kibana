@@ -11,7 +11,7 @@ import { flatten, random, times } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
-import { randomNames } from './helpers/random_names';
+import { getRandomNameForIndex } from './helpers/random_names';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -19,7 +19,6 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { services
   const numServices = scenarioOpts.services;
   const transactionName = 'GET /order/{id}';
   const languages = ['go', 'dotnet', 'java', 'python'];
-  const serviceNames = randomNames;
   const agentVersions: Record<string, string[]> = {
     go: ['2.1.0', '2.0.0', '1.15.0', '1.14.0', '1.13.1'],
     dotnet: ['1.18.0', '1.17.0', '1.16.1', '1.16.0', '1.15.0'],
@@ -39,7 +38,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { services
           return times(numOfInstances).map((instanceIndex) =>
             apm
               .service({
-                name: `${serviceNames[index % serviceNames.length]}-${language}-${index}`,
+                name: `${getRandomNameForIndex(index)}-${language}-${index}`,
                 environment: ENVIRONMENT,
                 agentName: language,
               })

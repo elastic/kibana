@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const randomNames = [
+export const randomGreekishNames = [
   'Adonis',
   'Agamemnon',
   'Ajax',
@@ -135,5 +135,5 @@ export const randomNames = [
 ];
 
 export function getRandomNameForIndex(index: number) {
-  return randomNames[index % randomNames.length];
+  return randomGreekishNames[index % randomGreekishNames.length];
 }

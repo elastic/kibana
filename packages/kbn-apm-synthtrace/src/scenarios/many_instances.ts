@@ -11,13 +11,12 @@ import { random, times } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
-import { randomNames } from './helpers/random_names';
+import { getRandomNameForIndex } from './helpers/random_names';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { instances: 2000 } }) => {
   const numInstances = scenarioOpts.instances;
-  const serviceNames = randomNames;
   const agentVersions = ['2.1.0', '2.0.0', '1.15.0', '1.14.0', '1.13.1'];
   const language = 'go';
   const serviceName = 'synth-many-instances';
@@ -27,7 +26,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { instance
     generate: ({ range, clients: { apmEsClient } }) => {
       const instances = times(numInstances).map((index) => {
         const agentVersion = agentVersions[index % agentVersions.length];
-        const randomName = serviceNames[index % serviceNames.length];
+        const randomName = getRandomNameForIndex(index);
         return apm
           .service({
             name: serviceName,
