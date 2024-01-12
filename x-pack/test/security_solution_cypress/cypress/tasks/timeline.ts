@@ -180,9 +180,6 @@ export const addNotesToTimeline = (notes: string) => {
 
       cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
     });
-
-  goToQueryTab();
-  goToNotesTab();
 };
 
 export const addNoteToFirstRowEvent = (notes: string) => {
@@ -199,6 +196,12 @@ export const addEqlToTimeline = (eql: string) => {
     cy.get(TIMELINE_CORRELATION_INPUT).type(eql);
     cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   });
+};
+
+export const clearEqlInTimeline = () => {
+  cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}');
+  cy.get(TIMELINE_CORRELATION_INPUT).clear();
+  cy.get(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
 };
 
 export const addFilter = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
@@ -306,7 +309,7 @@ export const clickIdToggleField = () => {
 };
 
 export const closeTimeline = () => {
-  cy.get(CLOSE_TIMELINE_BTN).filter(':visible').click();
+  cy.get(CLOSE_TIMELINE_BTN).click();
   cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
 };
 

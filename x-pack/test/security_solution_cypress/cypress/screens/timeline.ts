@@ -30,8 +30,6 @@ export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
-export const CREATE_NEW_TIMELINE_WITH_BORDER = '[data-test-subj="timeline-new-with-border"]';
-
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
 export const DATA_PROVIDERS = '.field-value';
@@ -220,6 +218,8 @@ export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-scre
 
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
 
+export const TIMELINE_WRAPPER = '[data-test-subj="timeline-wrapper"]';
+
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
 export const TIMELINE_PROGRESS_BAR = '[data-test-subj="progress-bar"]';
@@ -252,7 +252,7 @@ export const TIMELINE_TAB_CONTENT_GRAPHS_NOTES =
 export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
   '[data-test-subj="event-fields-table-row-@timestamp"] [data-test-subj="showExtraActionsButton"]';
 
-export const TIMELINE_STATUS = '[data-test-subj="timeline-status"]';
+export const TIMELINE_STATUS = '[data-test-subj="timeline-save-status"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';
@@ -285,6 +285,12 @@ export const HOVER_ACTIONS = {
   COPY: '[data-test-subj="hover-actions-copy-button"]',
   SHOW_TOP: '[data-test-subj=show-top-field]',
 };
+
+export const TIMELINE_FILTER_OUT = '[data-test-subj="filter-out-value"]';
+
+export const TIMELINE_FILTER_FOR = '[data-test-subj="filter-for-value"]';
+
+export const TIMELINE_FILTER_BADGE_ENABLED = '[data-test-subj~="filter-enabled"]';
 
 export const GET_TIMELINE_HEADER = (fieldName: string) => {
   return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;

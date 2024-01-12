@@ -12,13 +12,12 @@ import {
   getBenchmarkRules,
   muteDetectionRules,
   setRulesStates,
-  updateRulesStates,
+  updateBenchmarkRulesStates,
 } from './utils';
 import type {
   BulkActionBenchmarkRulesResponse,
-  CspBenchmarkRule,
-  CspBenchmarkRules,
-} from '../../../../common/types/rules/v3';
+  RulesToUpdate,
+} from '../../../../common/types/rules/v4';
 
 const muteStatesMap = {
   mute: true,
@@ -29,7 +28,7 @@ export const bulkActionBenchmarkRulesHandler = async (
   soClient: SavedObjectsClientContract,
   encryptedSoClient: SavedObjectsClientContract,
   detectionRulesClient: RulesClient,
-  rulesToUpdate: CspBenchmarkRules,
+  rulesToUpdate: RulesToUpdate,
   action: 'mute' | 'unmute',
   logger: Logger
 ): Promise<BulkActionBenchmarkRulesResponse> => {
@@ -39,16 +38,17 @@ export const bulkActionBenchmarkRulesHandler = async (
   if (benchmarkRules.includes(undefined))
     throw new Error('At least one of the provided benchmark rule IDs does not exist');
 
-  const rulesKeys = benchmarkRules.map((benchmarkRule) => buildRuleKey(benchmarkRule!));
-  const newRulesStates = setRulesStates(
-    rulesKeys,
-    muteStatesMap[action],
-    benchmarkRules as CspBenchmarkRule[]
+  const rulesKeys = rulesToUpdate.map((rule) =>
+    buildRuleKey(rule.benchmark_id, rule.benchmark_version, rule.rule_number)
   );
+  const newRulesStates = setRulesStates(rulesKeys, muteStatesMap[action], rulesToUpdate);
 
-  const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
-  const disabledRulesCounter =
-    action === 'mute' ? await muteDetectionRules(soClient, detectionRulesClient, rulesIds) : 0;
+  const updatedBenchmarkRulesStates = await updateBenchmarkRulesStates(
+    encryptedSoClient,
+    newRulesStates
+  );
+  const disabledDetectionRules =
+    action === 'mute' ? await muteDetectionRules(soClient, detectionRulesClient, rulesIds) : [];
 
-  return { newCspSettings, disabledRulesCounter };
+  return { updatedBenchmarkRulesStates, disabledDetectionRules };
 };
