@@ -160,7 +160,9 @@ export default ({ getService }: FtrProviderContext): void => {
           req: {
             initials: 'ES',
             color: '#6092C0',
-            imageUrl: 'my-image',
+            // Use simple image to match server side validation of image type
+            imageUrl:
+              'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAIBJREFUeF7t14ERACAMAjG6/9A6yMcROEuOe9tb+J0A/AAnoAPCHTglSAEKUIACFAgngEEMYhCDGAwjYAxhEIMYxCAGMRhOAIMYxCAGMRhGwBrEIAYxiEEMYjCcAAYxiEEMYjCMgDWIQQxiEIMYxGA4AQxiEIMYxGAYAWsQg3UGPw2Yf8EFsz4JAAAAAElFTkSuQmCC',
           },
           headers: superUserHeaders,
         });
