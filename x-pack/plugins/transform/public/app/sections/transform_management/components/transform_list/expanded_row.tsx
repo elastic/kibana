@@ -357,7 +357,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
           defaultMessage: 'Preview',
         }
       ),
-      content: <ExpandedRowPreviewPane />,
+      content: <ExpandedRowPreviewPane item={item} />,
     },
   ];
 
