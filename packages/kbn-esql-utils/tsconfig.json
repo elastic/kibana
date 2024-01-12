@@ -17,6 +17,5 @@
   ],
   "kbn_references": [
     "@kbn/data-views-plugin",
-    "@kbn/es-query",
   ]
 }
