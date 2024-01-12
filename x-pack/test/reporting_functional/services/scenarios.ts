@@ -127,7 +127,7 @@ export function createScenarios(
   };
   const tryGeneratePdfNotAvailable = async () => {
     PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail(`sharePanel-PDFReports`);
+    await testSubjects.missingOrFail(`sharePanel-imageExports`);
   };
   const tryGeneratePdfSuccess = async () => {
     await PageObjects.reporting.openPdfReportingPanel();
@@ -139,7 +139,7 @@ export function createScenarios(
   };
   const tryReportsNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-Reports');
+    await testSubjects.missingOrFail('sharePanel-imageExports');
   };
 
   return {

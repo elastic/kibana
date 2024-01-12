@@ -127,8 +127,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Embed code shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
+        await PageObjects.share.openShareMenuItem('Embed');
         await PageObjects.share.createShortUrlExistOrFail();
+        await PageObjects.share.closeShareModal();
       });
 
       it('Permalinks shows create short-url button', async () => {
@@ -269,15 +270,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`Embed Code doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
+        await PageObjects.share.openShareMenuItem('Embed');
         await PageObjects.share.createShortUrlMissingOrFail();
+        await PageObjects.share.closeShareModal();
       });
 
       it(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlMissingOrFail();
         // close the menu
-        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.closeShareModal();
       });
 
       it('allows loading a saved query via the saved query management component', async () => {
@@ -377,8 +379,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Embed code shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
+        await PageObjects.share.openShareMenuItem('Embed');
         await PageObjects.share.createShortUrlExistOrFail();
+        await PageObjects.share.closeShareModal();
       });
 
       it('Permalinks shows create short-url button', async () => {

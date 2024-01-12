@@ -129,7 +129,7 @@ export default function (ctx: FtrProviderContext) {
       it('shows CSV reports', async () => {
         await PageObjects.share.clickShareTopNavButton();
         await testSubjects.existOrFail('sharePanel-CSVDownload');
-        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.closeShareModal();
       });
 
       savedQuerySecurityUtils.shouldAllowSavingQueries();
@@ -269,7 +269,7 @@ export default function (ctx: FtrProviderContext) {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
-        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.closeShareModal();
       });
 
       savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();

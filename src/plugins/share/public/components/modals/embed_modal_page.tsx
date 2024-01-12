@@ -546,8 +546,8 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
               <EuiFlexItem grow={0}>
                 <EuiFlexGroup gutterSize="m">
                   <EuiFlexItem>
-                    <EuiButtonEmpty onClick={this.props.onClose}>
-                      <FormattedMessage id="share.embed.doneButton" defaultMessage="Done" />
+                    <EuiButtonEmpty onClick={this.props.onClose} data-test-subj="share.doneButton">
+                      <FormattedMessage id="share.doneButton" defaultMessage="Done" />
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem>

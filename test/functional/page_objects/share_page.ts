@@ -22,7 +22,7 @@ export class SharePageObject extends FtrService {
   }
 
   async closeShareModal() {
-    return this.testSubjects.click('shareLinksDoneButton');
+    return this.testSubjects.click('share.doneButton');
   }
 
   async openShareMenuItem(itemTitle: string) {
@@ -33,7 +33,7 @@ export class SharePageObject extends FtrService {
     } else {
       // there is no easy way to ensure the menu is at the top level
       // so just close the existing menu
-      await this.clickShareTopNavButton();
+      await this.closeShareModal();
       // and then re-open the menu
       await this.clickShareTopNavButton();
     }
