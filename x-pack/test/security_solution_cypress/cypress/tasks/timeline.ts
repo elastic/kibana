@@ -82,9 +82,9 @@ import {
   TIMELINE_SEARCH_OR_FILTER,
   TIMELINE_KQLMODE_FILTER,
   TIMELINE_KQLMODE_SEARCH,
-  OPEN_TIMELINE_MODAL,
   TIMELINE_DATA_PROVIDERS_CONTAINER,
   ROW_ADD_NOTES_BUTTON,
+  TIMELINE_PANEL,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -385,7 +385,7 @@ export const saveTimeline = () => {
 
 export const markAsFavorite = () => {
   cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
-  cy.get(STAR_ICON).click();
+  cy.get(TIMELINE_PANEL).within(() => cy.get(STAR_ICON).click());
   cy.wait('@markedAsFavourite');
 };
 
@@ -416,18 +416,9 @@ export const openTimelineById = (timelineId: string): Cypress.Chainable<JQuery<H
     // value of null. Some tests return an "any" which is why this could happen.
     cy.log('"timelineId" is null or undefined');
   }
+  // We avoid use cypress.pipe() here and multiple clicks because each of these clicks
+  // can result in a new URL async operation occurring and then we get indeterminism as the URL loads multiple times.
   return cy.get(TIMELINE_TITLE_BY_ID(timelineId)).click();
-};
-
-export const openTimelineByIdFromOpenTimelineModal = (
-  timelineId: string
-): Cypress.Chainable<JQuery<HTMLElement>> => {
-  if (timelineId == null) {
-    // Log out if for some reason this happens to be null just in case for our tests we experience
-    // value of null. Some tests return an "any" which is why this could happen.
-    cy.log('"timelineId" is null or undefined');
-  }
-  return cy.get(`${OPEN_TIMELINE_MODAL} ${TIMELINE_TITLE_BY_ID(timelineId)}`).click();
 };
 
 export const openActiveTimeline = () => {

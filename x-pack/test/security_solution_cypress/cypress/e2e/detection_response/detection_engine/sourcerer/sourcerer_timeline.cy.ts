@@ -10,7 +10,6 @@ import {
   DEFAULT_INDEX_PATTERN,
 } from '@kbn/security-solution-plugin/common/constants';
 
-import { OPEN_TIMELINE_MODAL } from '../../../../screens/timeline';
 import { deleteTimelines } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
@@ -36,12 +35,7 @@ import { openTimelineUsingToggle } from '../../../../tasks/security_main';
 import { SOURCERER } from '../../../../screens/sourcerer';
 import { createTimeline } from '../../../../tasks/api_calls/timelines';
 import { getTimeline, getTimelineModifiedSourcerer } from '../../../../objects/timeline';
-import {
-  closeTimeline,
-  openTimelineById,
-  openTimelineByIdFromOpenTimelineModal,
-  openTimelineFromSettings,
-} from '../../../../tasks/timeline';
+import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
 
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
@@ -113,9 +107,8 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'
     });
 
     it('Modifies timeline to alerts only, and switches to different saved timeline without issue', function () {
-      openTimelineFromSettings();
-      cy.get(OPEN_TIMELINE_MODAL).should('be.visible');
-      openTimelineByIdFromOpenTimelineModal(this.timelineId).then(() => {
+      closeTimeline();
+      openTimelineById(this.timelineId).then(() => {
         cy.get(SOURCERER.badgeAlerts).should(`not.exist`);
         cy.get(SOURCERER.badgeModified).should(`not.exist`);
         openSourcerer('timeline');

@@ -35,7 +35,7 @@ import {
   addNameToTimelineAndSave,
   createNewTimeline,
   goToEsqlTab,
-  openTimelineByIdFromOpenTimelineModal,
+  openTimelineById,
   openTimelineFromSettings,
 } from '../../../../tasks/timeline';
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
@@ -139,16 +139,17 @@ describe.skip(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineByIdFromOpenTimelineModal(timelineId);
-            cy.get(LOADING_INDICATOR).should('not.exist');
-            goToEsqlTab();
-            verifyDiscoverEsqlQuery(esqlQuery);
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
-            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-              'have.text',
-              INITIAL_START_DATE
-            );
+            openTimelineById(timelineId).then(() => {
+              cy.get(LOADING_INDICATOR).should('not.exist');
+              goToEsqlTab();
+              verifyDiscoverEsqlQuery(esqlQuery);
+              cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
+              cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
+              cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
+                'have.text',
+                INITIAL_START_DATE
+              );
+            });
           });
       });
       it('should save/restore discover dataview/timerange/filter/query/columns when timeline is opened via url', () => {
@@ -189,10 +190,11 @@ describe.skip(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineByIdFromOpenTimelineModal(timelineId);
-            cy.get(LOADING_INDICATOR).should('not.exist');
-            goToEsqlTab();
-            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
+            openTimelineById(timelineId).then(() => {
+              cy.get(LOADING_INDICATOR).should('not.exist');
+              goToEsqlTab();
+              cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
+            });
           });
       });
     });
@@ -240,14 +242,15 @@ describe.skip(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineByIdFromOpenTimelineModal(timelineId);
-            cy.get(TIMELINE_TITLE).should('have.text', timelineName);
-            const timelineDesc = 'Timeline Description with Saved Seach';
-            addDescriptionToTimeline(timelineDesc);
-            cy.wait(`@${SAVED_SEARCH_UPDATE_WITH_DESCRIPTION}`, {
-              timeout: 30000,
-            }).then((interception) => {
-              expect(interception.request.body.data.description).eq(timelineDesc);
+            openTimelineById(timelineId).then(() => {
+              cy.get(TIMELINE_TITLE).should('have.text', timelineName);
+              const timelineDesc = 'Timeline Description with Saved Seach';
+              addDescriptionToTimeline(timelineDesc);
+              cy.wait(`@${SAVED_SEARCH_UPDATE_WITH_DESCRIPTION}`, {
+                timeout: 30000,
+              }).then((interception) => {
+                expect(interception.request.body.data.description).eq(timelineDesc);
+              });
             });
           });
       });
