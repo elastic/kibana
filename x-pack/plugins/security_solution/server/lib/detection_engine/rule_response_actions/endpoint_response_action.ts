@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { each, flatMap, flatten, map } from 'lodash';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { each } from 'lodash';
 import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { getUniqueAlerts } from './utils';
+import { getProcessAlerts, getIsolateActionPayload } from './utils';
 
-import type {
-  EndpointResponseActionAlerts,
-  ResponseActionAlerts,
-  AlertsFoundFields,
-} from './types';
+import type { ResponseActionAlerts, AlertsAction } from './types';
 
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
@@ -23,8 +19,6 @@ export const endpointResponseAction = (
   { alerts }: ResponseActionAlerts
 ) => {
   const { comment, command } = responseAction.params;
-
-  const uniqueAlerts = getUniqueAlerts(alerts, responseAction);
 
   const commonData = {
     comment,
@@ -34,33 +28,28 @@ export const endpointResponseAction = (
   };
 
   if (command === 'isolate') {
-    const actions = map(uniqueAlerts, async (alertPerAgent) => {
-      return endpointAppContextService.getActionCreateService().createActionFromAlert(
+    const actionPayload = getIsolateActionPayload(alerts);
+    return Promise.all([
+      endpointAppContextService.getActionCreateService().createActionFromAlert(
         {
-          hosts: alertPerAgent.hosts,
-          endpoint_ids: [alertPerAgent.agent.id],
-          alert_ids: alertPerAgent.alertIds,
+          ...actionPayload,
           ...commonData,
         },
-        [alertPerAgent.agent.id]
-      );
-    });
-
-    return Promise.all(actions);
+        actionPayload.endpoint_ids
+      ),
+    ]);
   }
 
-  const createActionFromAlerts = (
-    actionAlerts: EndpointResponseActionAlerts,
-    type: 'foundFields' | 'notFoundFields',
+  const createProcessActionFromAlerts = (
+    actionAlerts: Record<string, AlertsAction>,
     hasErrors: boolean
   ) => {
-    const flatAlerts = flatten(map(actionAlerts, (agent) => flatMap(agent[type])));
-    const createAction = async (alert: AlertsFoundFields) => {
-      const { hosts, agentId, alertIds, parameters, error } = alert;
+    const createAction = async (alert: AlertsAction) => {
+      const { hosts, parameters, error } = alert;
       const actionData = {
         hosts,
-        endpoint_ids: [agentId],
-        alert_ids: alertIds,
+        endpoint_ids: alert.endpoint_ids,
+        alert_ids: alert.alert_ids,
         error: hasErrors ? error : undefined,
         parameters,
         ...commonData,
@@ -68,15 +57,17 @@ export const endpointResponseAction = (
 
       return endpointAppContextService
         .getActionCreateService()
-        .createActionFromAlert(actionData, [agentId]);
+        .createActionFromAlert(actionData, alert.endpoint_ids);
     };
-
-    return each(flatAlerts, createAction);
+    return each(actionAlerts, createAction);
   };
 
   if (command === 'kill-process' || command === 'suspend-process') {
-    const processActions = createActionFromAlerts(uniqueAlerts, 'foundFields', false);
-    const processActionsWithError = createActionFromAlerts(uniqueAlerts, 'notFoundFields', true);
+    const foundFields = getProcessAlerts(alerts, responseAction.params.config, false);
+    const notFoundFields = getProcessAlerts(alerts, responseAction.params.config, true);
+
+    const processActions = createProcessActionFromAlerts(foundFields, false);
+    const processActionsWithError = createProcessActionFromAlerts(notFoundFields, true);
 
     return Promise.all([processActions, processActionsWithError]);
   }

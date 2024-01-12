@@ -33,25 +33,10 @@ export interface ResponseActionAlerts {
   alerts: AlertWithAgent[];
 }
 
-export interface AlertsFoundFields {
-  alertIds: string[];
-  agentId: string;
+export interface AlertsAction {
+  alert_ids: string[];
+  endpoint_ids: string[];
   hosts: Record<string, { name: string }>;
   parameters: Record<string, unknown>;
   error?: string;
 }
-
-export type EndpointResponseActionAlerts = Record<
-  string, // agentId
-  {
-    agent: {
-      id: string;
-      name: string;
-    };
-    alert: AlertWithAgent;
-    foundFields?: Record<string, AlertsFoundFields>;
-    notFoundFields?: Record<string, AlertsFoundFields>;
-    alertIds: string[];
-    hosts: Record<string, { name: string }>;
-  }
->;
