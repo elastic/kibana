@@ -65,8 +65,10 @@ export function useWizardActions() {
         dispatch
       ),
     }),
+    // Needs to be updated on a change of pivotConfigOptions, this will happen
+    // when a users edits runtime mappings for example.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [pivotConfigOptions]
   );
 }
 
