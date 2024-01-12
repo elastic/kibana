@@ -370,7 +370,7 @@ export const markAsFavorite = () => {
 };
 
 export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).first().click({ force: true });
+  cy.get(TIMELINE_FIELDS_BUTTON).first().click();
 };
 
 export const openTimelineInspectButton = () => {
