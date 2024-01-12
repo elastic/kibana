@@ -10,6 +10,7 @@ import { createTestConfig } from '../../../../../config/serverless/config.base';
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'Detection Engine Serverless - Lists and Items Integration Tests APIS',
+    reportName:
+      'Detection Engine - Value Lists Integration Tests - Serverless Env - Complete License',
   },
 });
