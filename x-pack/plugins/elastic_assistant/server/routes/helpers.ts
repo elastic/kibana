@@ -7,10 +7,9 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import { Logger } from '@kbn/core/server';
-import { RequestBody } from '../lib/langchain/types';
 
 interface GetPluginNameFromRequestParams {
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  request: KibanaRequest;
   defaultPluginName: string;
   logger?: Logger;
 }

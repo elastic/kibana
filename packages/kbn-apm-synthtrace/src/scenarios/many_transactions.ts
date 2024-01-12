@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
+import { random, times } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
@@ -14,36 +15,48 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-  const { numServices = 3 } = runOptions.scenarioOpts || {};
-  const numTransactions = 100;
+  const { numServices = 1 } = runOptions.scenarioOpts || {};
+  const numTransactions = 2000;
+
+  const transactionNames = ['GET', 'PUT', 'DELETE', 'UPDATE'].flatMap((method) =>
+    [
+      '/users',
+      '/products',
+      '/orders',
+      '/customers',
+      '/profile',
+      '/categories',
+      '/invoices',
+      '/payments',
+      '/cart',
+      '/reviews',
+    ].map((resource) => `${method} ${resource}`)
+  );
 
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
-      const urls = ['GET /order', 'POST /basket', 'DELETE /basket', 'GET /products'];
-
-      const successfulTimestamps = range.ratePerMinute(180);
-      const failedTimestamps = range.interval('1m').rate(180);
-
-      const instances = [...Array(numServices).keys()].map((index) =>
+      const instances = times(numServices).map((index) =>
         apm
           .service({ name: `synth-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
           .instance(`instance-${index}`)
       );
 
-      const transactionNames = [...Array(numTransactions).keys()].map(
-        (index) => `${urls[index % urls.length]}/${index}`
-      );
-
       const instanceSpans = (instance: Instance, transactionName: string) => {
-        const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
-          instance.transaction({ transactionName }).timestamp(timestamp).duration(1000).success()
-        );
+        const successfulTraceEvents = range
+          .ratePerMinute(random(1, 60))
+          .generator((timestamp) =>
+            instance
+              .transaction({ transactionName })
+              .timestamp(timestamp)
+              .duration(random(100, 10_000))
+              .success()
+          );
 
-        const failedTraceEvents = failedTimestamps.generator((timestamp) =>
+        const failedTraceEvents = range.ratePerMinute(random(1, 60)).generator((timestamp) =>
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(1000)
+            .duration(random(100, 10_000))
             .failure()
             .errors(
               instance
@@ -72,13 +85,11 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       return withClient(
         apmEsClient,
         logger.perf('generating_apm_events', () =>
-          instances
-            .flatMap((instance) =>
-              transactionNames.map((transactionName) => ({ instance, transactionName }))
-            )
-            .flatMap(({ instance, transactionName }, index) =>
-              instanceSpans(instance, transactionName)
-            )
+          instances.flatMap((instance) =>
+            times(numTransactions)
+              .map((index) => `${transactionNames[index % transactionNames.length]}-${index}`)
+              .flatMap((transactionName) => instanceSpans(instance, transactionName))
+          )
         )
       );
     },

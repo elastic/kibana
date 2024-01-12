@@ -23,14 +23,14 @@ import { EuiHighlight, EuiToken } from '@elastic/eui';
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import type { TextBasedPrivateState } from './types';
+import type { TextBasedPrivateState } from '../types';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
-import { createMockFramePublicAPI } from '../../mocks';
-import { DataViewsState } from '../../state_management';
-import { addColumnsToCache } from './fieldlist_cache';
+import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
+import { createMockFramePublicAPI } from '../../../mocks';
+import { DataViewsState } from '../../../state_management';
+import { addColumnsToCache } from '../fieldlist_cache';
 
 const fieldsFromQuery = [
   {
@@ -106,8 +106,7 @@ const initialState: TextBasedPrivateState = {
     first: {
       index: '1',
       columns: [],
-      allColumns: [],
-      query: { esql: 'SELECT * FROM foo' },
+      query: { esql: 'FROM foo' },
     },
   },
   indexPatternRefs: [
@@ -117,7 +116,7 @@ const initialState: TextBasedPrivateState = {
   ],
 };
 
-addColumnsToCache('SELECT * FROM my-fake-index-pattern', fieldsFromQuery);
+addColumnsToCache({ esql: 'FROM my-fake-index-pattern' }, fieldsFromQuery);
 
 function getFrameAPIMock({
   indexPatterns,
@@ -191,7 +190,7 @@ describe('TextBased Query Languages Data Panel', () => {
         fromDate: 'now-7d',
         toDate: 'now',
       },
-      query: { esql: 'SELECT * FROM my-fake-index-pattern' } as unknown as Query,
+      query: { esql: 'FROM my-fake-index-pattern' } as unknown as Query,
       filters: [],
       showNoDataPopover: jest.fn(),
       dropOntoWorkspace: jest.fn(),
