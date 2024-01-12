@@ -171,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
          * happening just on the response. In this case, change should
          * NOT include a migration on SO.
          */
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
           undefined,
           {
             field_names: ['client.address', 'agent.name'],
@@ -182,7 +182,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(isInvestigationFieldMigratedInSo).to.eql(false);
 
         const isInvestigationFieldMigratedInSoForRuleWithEmptyArray =
-          checkInvestigationFieldSoValue(
+          await checkInvestigationFieldSoValue(
             undefined,
             {
               field_names: [],
@@ -192,7 +192,7 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         expect(isInvestigationFieldMigratedInSoForRuleWithEmptyArray).to.eql(false);
 
-        const isInvestigationFieldSoExpectedType = checkInvestigationFieldSoValue(
+        const isInvestigationFieldSoExpectedType = await checkInvestigationFieldSoValue(
           undefined,
           {
             field_names: ['host.name'],

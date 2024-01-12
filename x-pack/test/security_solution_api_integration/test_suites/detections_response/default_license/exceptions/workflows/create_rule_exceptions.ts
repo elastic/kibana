@@ -291,7 +291,7 @@ export default ({ getService }: FtrProviderContext) => {
             hits: [{ _source: ruleSO }],
           },
         } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
-        const isInvestigationFieldMigratedInSo = checkInvestigationFieldSoValue(ruleSO, {
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(ruleSO, {
           field_names: ['client.address', 'agent.name'],
         });
 
