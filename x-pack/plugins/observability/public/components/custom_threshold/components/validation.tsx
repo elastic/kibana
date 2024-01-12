@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { isEmpty } from 'lodash';
+import { Query } from '@kbn/data-plugin/common';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import { isEmpty } from 'lodash';
 import {
   Comparator,
   CustomMetricExpressionParams,
 } from '../../../../common/custom_threshold_rule/types';
+import { SearchConfiguration } from '../types';
 
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
@@ -22,7 +23,7 @@ export function validateCustomThreshold({
   searchConfiguration,
 }: {
   criteria: CustomMetricExpressionParams[];
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: SearchConfiguration;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {
@@ -40,16 +41,16 @@ export function validateCustomThreshold({
   } & { filterQuery?: string[]; searchConfiguration?: string[] } = {};
   validationResult.errors = errors;
 
-  if (!searchConfiguration || !searchConfiguration.index) {
-    errors.searchConfiguration = [
-      i18n.translate(
-        'xpack.observability.customThreshold.rule.alertFlyout.error.invalidSearchConfiguration',
-        {
-          defaultMessage: 'Data view is required.',
-        }
-      ),
-    ];
-  }
+  // if (!searchConfiguration || (!searchConfiguration.index || !searchConfiguration.selectionType)) {
+  //   errors.searchConfiguration = [
+  //     i18n.translate(
+  //       'xpack.observability.customThreshold.rule.alertFlyout.error.invalidSearchConfiguration',
+  //       {
+  //         defaultMessage: 'Data view is required.',
+  //       }
+  //     ),
+  //   ];
+  // }
 
   if (searchConfiguration && searchConfiguration.query) {
     try {

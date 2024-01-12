@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AggregateQuery, Query } from '@kbn/es-query';
 import * as rt from 'io-ts';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -53,6 +54,20 @@ export interface TimeRange {
   to?: string;
 }
 
+export interface DatasetSource {
+  index: {
+    // TODO use DatasetSelection
+    selectionType: string;
+    selection: {
+      integration?: string;
+      dataset: string;
+    };
+  };
+  query?: Query | AggregateQuery;
+}
+
+export type SearchConfiguration = SerializedSearchSourceFields | DatasetSource;
+
 export interface AlertParams {
   criteria: MetricExpression[];
   groupBy?: string | string[];
@@ -60,7 +75,7 @@ export interface AlertParams {
   filterQuery?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: SearchConfiguration;
   shouldDropPartialBuckets?: boolean;
 }
 

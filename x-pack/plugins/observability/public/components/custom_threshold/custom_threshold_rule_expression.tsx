@@ -19,13 +19,16 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { ISearchSource, Query } from '@kbn/data-plugin/common';
+import { ISearchSource, Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewBase } from '@kbn/es-query';
+import { AllDatasetSelection, DatasetSelection } from '@kbn/log-explorer-plugin/common';
+import { DatasetsService } from '@kbn/log-explorer-plugin/public';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,14 +38,14 @@ import {
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
-import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
 import { PreviewChart } from './components/preview_chart/preview_chart';
+import { CustomDatasetSelector } from './custom_dataset_selector';
+import { AlertContextMeta, AlertParams, DatasetSource, MetricExpression } from './types';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -64,19 +67,36 @@ export const defaultExpression: MetricExpression = {
   timeUnit: 'm',
 };
 
+const isIntegration = (searchConfiguration: SerializedSearchSourceFields | DatasetSource) => {
+  return (
+    searchConfiguration &&
+    typeof searchConfiguration.index === 'object' &&
+    searchConfiguration.index.hasOwnProperty('selectionType')
+  );
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+  const { services } = useKibana();
   const {
     data,
     dataViews,
     dataViewEditor,
+    discover,
     docLinks,
+    http,
     unifiedSearch: {
       ui: { SearchBar },
     },
-  } = useKibana().services;
+  } = services;
+  const datasetsClient = new DatasetsService().start({
+    http,
+  }).client;
 
+  const [showIntegrations, setShowIntegrations] = useState<boolean>(
+    isIntegration(ruleParams.searchConfiguration)
+  );
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
@@ -90,12 +110,44 @@ export default function Expressions(props: Props) {
     }),
     [dataView]
   );
+  const [selectedDataset, setSelectedDataset] = useState<DatasetSelection>(
+    AllDatasetSelection.create()
+  );
+  const handleDatasetSelectionChange = async (datasetSelection: DatasetSelection) => {
+    const selectedDatasetDataView = await dataViews.create(datasetSelection.toDataviewSpec());
+    const ruleCriteria = (ruleParams.criteria ? ruleParams.criteria.slice() : []).map(
+      (criterion) => {
+        criterion.metrics?.forEach((metric) => {
+          metric.field = undefined;
+        });
+        return criterion;
+      }
+    );
+    setRuleParams('criteria', ruleCriteria);
+    searchSource?.setParent(undefined).setField('index', selectedDatasetDataView);
+    setRuleParams('searchConfiguration', {
+      ...(ruleParams.searchConfiguration?.query && {
+        query: ruleParams.searchConfiguration.query,
+      }),
+      index: {
+        selectionType: datasetSelection.selectionType,
+        selection: {
+          integration:
+            datasetSelection.selectionType !== 'all' ? datasetSelection.selection.name : undefined,
+          dataset: datasetSelection.selection.dataset.id,
+        },
+      },
+    });
+    setSelectedDataset(datasetSelection);
+    setDataView(selectedDatasetDataView);
+  };
 
   useEffect(() => {
     const initSearchSource = async () => {
       let initialSearchConfiguration = ruleParams.searchConfiguration;
+      const isDataSourceIntegration = isIntegration(initialSearchConfiguration);
 
-      if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
+      if (!ruleParams.searchConfiguration || !isDataSourceIntegration) {
         if (metadata?.currentOptions?.searchConfiguration) {
           initialSearchConfiguration = {
             ...metadata.currentOptions.searchConfiguration,
@@ -117,35 +169,37 @@ export default function Expressions(props: Props) {
       }
 
       try {
-        const createdSearchSource = await data.search.searchSource.create(
-          initialSearchConfiguration
-        );
-        setRuleParams('searchConfiguration', {
-          ...initialSearchConfiguration,
-          ...(ruleParams.searchConfiguration?.query && {
-            query: ruleParams.searchConfiguration.query,
-          }),
-        });
-        setSearchSource(createdSearchSource);
-        setDataView(createdSearchSource.getField('index'));
+        if (!isDataSourceIntegration && initialSearchConfiguration) {
+          const createdSearchSource = await data.search.searchSource.create(
+            initialSearchConfiguration as SerializedSearchSourceFields
+          );
+          setRuleParams('searchConfiguration', {
+            ...initialSearchConfiguration,
+            ...(ruleParams.searchConfiguration?.query && {
+              query: ruleParams.searchConfiguration.query,
+            }),
+          });
+          setSearchSource(createdSearchSource);
+          setDataView(createdSearchSource.getField('index'));
 
-        if (createdSearchSource.getField('index')) {
-          const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
-          if (!timeFieldName) {
-            setDataViewTimeFieldError(
-              i18n.translate(
-                'xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp',
-                {
-                  defaultMessage:
-                    'The selected data view does not have a timestamp field, please select another data view.',
-                }
-              )
-            );
+          if (createdSearchSource.getField('index')) {
+            const timeFieldName = createdSearchSource.getField('index')?.timeFieldName;
+            if (!timeFieldName) {
+              setDataViewTimeFieldError(
+                i18n.translate(
+                  'xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp',
+                  {
+                    defaultMessage:
+                      'The selected data view does not have a timestamp field, please select another data view.',
+                  }
+                )
+              );
+            } else {
+              setDataViewTimeFieldError(undefined);
+            }
           } else {
             setDataViewTimeFieldError(undefined);
           }
-        } else {
-          setDataViewTimeFieldError(undefined);
         }
       } catch (error) {
         setParamsError(error);
@@ -353,7 +407,7 @@ export default function Expressions(props: Props) {
     );
   }
 
-  if (!searchSource) {
+  if (!searchSource && !showIntegrations) {
     return (
       <>
         <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />
@@ -379,15 +433,38 @@ export default function Expressions(props: Props) {
         </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <DataViewSelectPopover
-        dependencies={{ dataViews, dataViewEditor }}
-        dataView={dataView}
-        metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
-        onSelectDataView={onSelectDataView}
-        onChangeMetaData={({ adHocDataViewList }) => {
-          onChangeMetaData({ ...metadata, adHocDataViewList });
-        }}
+      <EuiSwitch
+        label={i18n.translate(
+          'xpack.observability.customThreshold.rule.alertFlyout.integrationsToggle',
+          {
+            defaultMessage: 'Use integrations',
+          }
+        )}
+        checked={showIntegrations}
+        onChange={(e) => setShowIntegrations(e.target.checked)}
       />
+      <EuiSpacer size={'m'} />
+      <div style={{ minHeight: 40 }}>
+        {showIntegrations ? (
+          <CustomDatasetSelector
+            datasetsClient={datasetsClient}
+            dataViews={dataViews}
+            discover={discover}
+            onSelectionChange={handleDatasetSelectionChange}
+            selectedDataset={selectedDataset}
+          />
+        ) : (
+          <DataViewSelectPopover
+            dependencies={{ dataViews, dataViewEditor }}
+            dataView={dataView}
+            metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
+            onSelectDataView={onSelectDataView}
+            onChangeMetaData={({ adHocDataViewList }) => {
+              onChangeMetaData({ ...metadata, adHocDataViewList });
+            }}
+          />
+        )}
+      </div>
       {dataViewTimeFieldError && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
           {dataViewTimeFieldError}

@@ -19,6 +19,7 @@
       "data",
       "dataViews",
       "dataViewEditor",
+      "discover",
       "embeddable",
       "fieldFormats",
       "uiActions",
@@ -43,7 +44,6 @@
       "licensing"
     ],
     "optionalPlugins": [
-      "discover",
       "home",
       "usageCollection",
       "cloud",
