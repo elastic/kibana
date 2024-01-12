@@ -128,7 +128,7 @@ const bulkEnableRulesWithOCC = async (
 
   const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
   const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-  const tasksToEnable: TaskInstanceWithDeprecatedFields[] = [];
+  const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
@@ -218,7 +218,7 @@ const bulkEnableRulesWithOCC = async (
           );
 
           if (shouldScheduleTask) {
-            tasksToEnable.push({
+            tasksToSchedule.push({
               id: rule.id,
               taskType: `alerting:${rule.attributes.alertTypeId}`,
               schedule: rule.attributes.schedule,
@@ -233,7 +233,7 @@ const bulkEnableRulesWithOCC = async (
                 alertInstances: {},
               },
               scope: ['alerting'],
-              enabled: false,
+              enabled: false, // we create the task as disabled, taskManager.bulkEnable will enable them by randomising their schedule datetime
             });
           }
 
@@ -271,9 +271,11 @@ const bulkEnableRulesWithOCC = async (
     }
   );
 
-  await withSpan({ name: 'taskManager.bulkSchedule', type: 'tasks' }, () =>
-    context.taskManager.bulkSchedule(tasksToEnable)
-  );
+  if (tasksToSchedule.length > 0) {
+    await withSpan({ name: 'taskManager.bulkSchedule', type: 'tasks' }, () =>
+      context.taskManager.bulkSchedule(tasksToSchedule)
+    );
+  }
 
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },

@@ -177,6 +177,11 @@ describe('bulkEnableRules', () => {
       { overwrite: true }
     );
 
+    expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+
+    expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1', 'id2']);
+
     expect(result).toStrictEqual({
       errors: [],
       rules: [returnedRule1, returnedRule2],
@@ -518,19 +523,6 @@ describe('bulkEnableRules', () => {
     test('should schedule task when scheduledTaskId is defined but task with that ID does not', async () => {
       // One rule gets the task successfully, one rule doesn't so only one task should be scheduled
       taskManager.get.mockRejectedValueOnce(new Error('Failed to get task!'));
-      taskManager.schedule.mockResolvedValueOnce({
-        id: 'id1',
-        taskType: 'alerting:fakeType',
-        scheduledAt: new Date(),
-        attempts: 1,
-        status: TaskStatus.Idle,
-        runAt: new Date(),
-        startedAt: null,
-        retryAt: null,
-        state: {},
-        params: {},
-        ownerId: null,
-      });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [enabledRule1, enabledRule2],
       });
@@ -604,19 +596,6 @@ describe('bulkEnableRules', () => {
             };
           },
         });
-      taskManager.schedule.mockResolvedValueOnce({
-        id: 'id1',
-        taskType: 'alerting:fakeType',
-        scheduledAt: new Date(),
-        attempts: 1,
-        status: TaskStatus.Idle,
-        runAt: new Date(),
-        startedAt: null,
-        retryAt: null,
-        state: {},
-        params: {},
-        ownerId: null,
-      });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [enabledRule1, enabledRule2],
       });
@@ -688,19 +667,6 @@ describe('bulkEnableRules', () => {
         },
         ownerId: null,
         enabled: false,
-      });
-      taskManager.schedule.mockResolvedValueOnce({
-        id: 'id1',
-        taskType: 'alerting:fakeType',
-        scheduledAt: new Date(),
-        attempts: 1,
-        status: TaskStatus.Idle,
-        runAt: new Date(),
-        startedAt: null,
-        retryAt: null,
-        state: {},
-        params: {},
-        ownerId: null,
       });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [enabledRule1, enabledRule2],
