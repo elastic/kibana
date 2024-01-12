@@ -5,16 +5,33 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import { SerializableRecord } from '@kbn/utility-types';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { LogViewReference } from '../log_views/types';
+import { TimeRange } from './time_range';
 
-export const ItemTypeRT = rt.keyof({
-  host: null,
-  pod: null,
-  container: null,
-  awsEC2: null,
-  awsS3: null,
-  awsSQS: null,
-  awsRDS: null,
-});
+export interface LogsLocatorParams extends SerializableRecord {
+  /** Defines log position */
+  time?: number;
+  /**
+   * Optionally set the time range in the time picker.
+   */
+  timeRange?: TimeRange;
+  filter?: string;
+  logView?: LogViewReference;
+}
 
-export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
+export interface TraceLogsLocatorParams extends LogsLocatorParams {
+  traceId: string;
+}
+
+export interface NodeLogsLocatorParams extends LogsLocatorParams {
+  nodeField: string;
+  nodeId: string;
+}
+
+export interface LogsSharedLocators {
+  logsLocator: LocatorPublic<LogsLocatorParams>;
+  nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
+  traceLogsLocator: LocatorPublic<TraceLogsLocatorParams>;
+}
