@@ -50,6 +50,13 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
+export interface CloudURLs {
+  billingUrl?: string;
+  deploymentUrl?: string;
+  performanceUrl?: string;
+  usersAndRolesUrl?: string;
+}
+
 export interface CloudLink {
   title: string;
   href: string;

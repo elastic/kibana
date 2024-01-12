@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { CloudLinks, CloudLink } from '@kbn/core-chrome-browser';
-
-export interface CloudURLs {
-  billingUrl?: string;
-  deploymentUrl?: string;
-  performanceUrl?: string;
-  usersAndRolesUrl?: string;
-}
+import type { CloudLinks, CloudLink, CloudURLs } from '@kbn/core-chrome-browser';
 
 const stripTrailingForwardSlash = (str: string) => {
   return str[str.length - 1] === '/' ? str.substring(0, str.length - 1) : str;

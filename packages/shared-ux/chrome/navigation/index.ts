@@ -8,7 +8,7 @@
 
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 
-export { Navigation, getPresets } from './src/ui';
+export { Navigation } from './src/ui';
 
 export type { PanelComponentProps, PanelContent, PanelContentProvider } from './src/ui';
 

@@ -35,6 +35,7 @@ export type {
   CloudLinkId,
   CloudLink,
   CloudLinks,
+  CloudURLs,
   SideNavCompProps,
   SideNavComponent,
   SideNavNodeStatus,
