@@ -31,6 +31,12 @@ import type { InstructionProps } from '../types';
 import { usePollingAgentCount } from '../confirm_agent_enrollment';
 
 import {
+  InstallCloudFormationManagedAgentStep,
+  InstallGoogleCloudShellManagedAgentStep,
+  InstallAzureArmTemplateManagedAgentStep,
+} from '../../cloud_security_posture';
+
+import {
   InstallationModeSelectionStep,
   AgentEnrollmentKeySelectionStep,
   AgentPolicySelectionStep,
@@ -38,9 +44,6 @@ import {
   ConfigureStandaloneAgentStep,
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
-  InstallCloudFormationManagedAgentStep,
-  InstallGoogleCloudShellManagedAgentStep,
-  InstallAzureArmTemplateManagedAgentStep,
   IncomingDataConfirmationStep,
 } from '.';
 
