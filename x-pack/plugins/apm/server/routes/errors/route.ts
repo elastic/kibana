@@ -47,6 +47,7 @@ const errorsMainStatisticsRoute = createApmServerRoute({
       t.partial({
         sortField: t.string,
         sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+        searchQuery: t.string,
       }),
       environmentRt,
       kueryRt,
@@ -54,16 +55,21 @@ const errorsMainStatisticsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{ errorGroups: ErrorGroupMainStatisticsResponse }> => {
+  handler: async (resources): Promise<ErrorGroupMainStatisticsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
-    const { environment, kuery, sortField, sortDirection, start, end } =
-      params.query;
+    const {
+      environment,
+      kuery,
+      sortField,
+      sortDirection,
+      start,
+      end,
+      searchQuery,
+    } = params.query;
 
-    const errorGroups = await getErrorGroupMainStatistics({
+    return await getErrorGroupMainStatistics({
       environment,
       kuery,
       serviceName,
@@ -72,9 +78,8 @@ const errorsMainStatisticsRoute = createApmServerRoute({
       apmEventClient,
       start,
       end,
+      searchQuery,
     });
-
-    return { errorGroups };
   },
 });
 
@@ -97,11 +102,7 @@ const errorsMainStatisticsByTransactionNameRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    errorGroups: ErrorGroupMainStatisticsResponse;
-  }> => {
+  handler: async (resources): Promise<ErrorGroupMainStatisticsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
@@ -115,7 +116,7 @@ const errorsMainStatisticsByTransactionNameRoute = createApmServerRoute({
       maxNumberOfErrorGroups,
     } = params.query;
 
-    const errorGroups = await getErrorGroupMainStatistics({
+    return await getErrorGroupMainStatistics({
       environment,
       kuery,
       serviceName,
@@ -126,8 +127,6 @@ const errorsMainStatisticsByTransactionNameRoute = createApmServerRoute({
       transactionName,
       transactionType,
     });
-
-    return { errorGroups };
   },
 });
 

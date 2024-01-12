@@ -14,10 +14,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { orderBy } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
+import { merge } from 'lodash';
+import { useStateDebounced } from '../../../hooks/use_debounce';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   getLatencyAggregationType,
@@ -39,34 +39,21 @@ import { fromQuery, toQuery } from '../links/url_helpers';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
+import { TableSearchBar } from '../table_search_bar/table_search_bar';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
-interface InitialState {
-  requestId: string;
-  mainStatisticsData: ApiResponse & {
-    transactionGroupsTotalItems: number;
-  };
-}
-
-const INITIAL_STATE: InitialState = {
-  requestId: '',
-  mainStatisticsData: {
-    transactionGroups: [],
-    maxTransactionGroupsExceeded: false,
-    transactionOverflowCount: 0,
-    transactionGroupsTotalItems: 0,
-    hasActiveAlerts: false,
-  },
+const INITIAL_STATE: ApiResponse = {
+  transactionGroups: [],
+  maxCountExceeded: false,
+  transactionOverflowCount: 0,
+  hasActiveAlerts: false,
+  isSearchQueryActive: false,
 };
 
-type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
 type SortDirection = 'asc' | 'desc';
-const DEFAULT_SORT = {
-  direction: 'desc' as const,
-  field: 'impact' as const,
-};
+type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
 
 interface Props {
   hideTitle?: boolean;
@@ -106,10 +93,6 @@ export function TransactionsTable({
       comparisonEnabled,
       offset,
       latencyAggregationType: latencyAggregationTypeFromQuery,
-      page: urlPage = 0,
-      pageSize: urlPageSize = numberOfTransactionsPerPage,
-      sortField: urlSortField = 'impact',
-      sortDirection: urlSortDirection = 'desc',
     },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions',
@@ -122,191 +105,116 @@ export function TransactionsTable({
     latencyAggregationTypeFromQuery
   );
 
-  const [tableOptions, setTableOptions] = useState<{
-    page: { index: number; size: number };
-    sort: { direction: SortDirection; field: SortField };
-  }>({
-    page: { index: urlPage, size: urlPageSize },
-    sort: {
-      field: urlSortField as SortField,
-      direction: urlSortDirection as SortDirection,
-    },
-  });
-
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
   const { isXl } = useBreakpoints();
   const shouldShowSparkPlots = isSingleColumn || !isXl;
-
-  const { page, sort } = tableOptions;
-  const { direction, field } = sort;
-  const { index, size } = page;
-
   const { transactionType, serviceName } = useApmServiceContext();
-
-  const preferred = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    kuery,
-    numBuckets: 20,
-    type: ApmDocumentType.TransactionMetric,
+  const [searchQuery, setSearchQueryDebounced] = useStateDebounced('', 300);
+  const [tableOptions, setTableOptions] = useTableOptions<SortField>({
+    defaultUrlPageSize: numberOfTransactionsPerPage,
   });
 
-  const shouldUseDurationSummary =
-    latencyAggregationType === 'avg' &&
-    preferred?.source?.hasDurationSummaryField;
-
-  const { data = INITIAL_STATE, status } = useFetcher(
-    (callApmApi) => {
-      if (!latencyAggregationType || !transactionType || !preferred) {
-        return Promise.resolve(undefined);
-      }
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
-        {
-          params: {
-            path: { serviceName },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              useDurationSummary: !!shouldUseDurationSummary,
-              latencyAggregationType:
-                latencyAggregationType as LatencyAggregationType,
-              documentType: preferred.source.documentType,
-              rollupInterval: preferred.source.rollupInterval,
-            },
-          },
-        }
-      ).then((response) => {
-        const currentPageTransactionGroups = orderBy(
-          response.transactionGroups,
-          [field],
-          [direction]
-        ).slice(index * size, (index + 1) * size);
-
-        return {
-          // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuidv4(),
-          mainStatisticsData: {
-            ...response,
-            transactionGroups: currentPageTransactionGroups,
-            transactionGroupsTotalItems: response.transactionGroups.length,
-          },
-        };
-      });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      transactionType,
-      latencyAggregationType,
-      index,
-      size,
-      direction,
-      field,
-      // not used, but needed to trigger an update when offset is changed either manually by user or when time range is changed
-      offset,
-      // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
-      comparisonEnabled,
-      preferred,
-    ]
-  );
+  const [currentPage, setCurrentPage] = useState<{
+    items: ApiResponse['transactionGroups'];
+    totalCount: number;
+  }>({ items: [], totalCount: 0 });
 
   const {
-    requestId,
-    mainStatisticsData: {
-      transactionGroups,
-      maxTransactionGroupsExceeded,
-      transactionOverflowCount,
-      transactionGroupsTotalItems,
-      hasActiveAlerts,
-    },
-  } = data;
-
-  const {
-    data: transactionGroupDetailedStatistics,
-    status: transactionGroupDetailedStatisticsStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (
-        transactionGroupsTotalItems &&
-        start &&
-        end &&
-        transactionType &&
-        latencyAggregationType &&
-        preferred
-      ) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
-                transactionType,
-                documentType: preferred.source.documentType,
-                rollupInterval: preferred.source.rollupInterval,
-                useDurationSummary: !!shouldUseDurationSummary,
-                latencyAggregationType:
-                  latencyAggregationType as LatencyAggregationType,
-                transactionNames: JSON.stringify(
-                  transactionGroups.map(({ name }) => name).sort()
-                ),
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
-              },
-            },
-          }
-        );
-      }
-    },
-    // only fetches detailed statistics when requestId is invalidated by main statistics api call
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId],
-    { preservePreviousData: false }
-  );
-
-  const columns = getColumns({
-    serviceName,
-    latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-    transactionGroupDetailedStatisticsLoading: isPending(
-      transactionGroupDetailedStatisticsStatus
-    ),
-    transactionGroupDetailedStatistics,
+    mainStatistics,
+    mainStatisticsStatus,
+    detailedStatistics,
+    detailedStatisticsStatus,
+  } = useTableData({
     comparisonEnabled,
-    shouldShowSparkPlots,
+    currentPageItems: currentPage.items,
+    end,
+    environment,
+    kuery,
+    latencyAggregationType,
     offset,
-    transactionOverflowCount,
-    showAlertsColumn: hasActiveAlerts,
-    link,
-    query,
+    searchQuery,
+    serviceName,
+    start,
+    transactionType,
   });
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex: index,
-      pageSize: size,
-      totalItemCount: transactionGroupsTotalItems,
+  const columns = useMemo(() => {
+    return getColumns({
+      serviceName,
+      latencyAggregationType: latencyAggregationType as LatencyAggregationType,
+      detailedStatisticsLoading: isPending(detailedStatisticsStatus),
+      detailedStatistics,
+      comparisonEnabled,
+      shouldShowSparkPlots,
+      offset,
+      transactionOverflowCount: mainStatistics.transactionOverflowCount,
+      showAlertsColumn: mainStatistics.hasActiveAlerts,
+      link,
+      query,
+    });
+  }, [
+    comparisonEnabled,
+    detailedStatistics,
+    detailedStatisticsStatus,
+    latencyAggregationType,
+    link,
+    mainStatistics.hasActiveAlerts,
+    mainStatistics.transactionOverflowCount,
+    offset,
+    query,
+    serviceName,
+    shouldShowSparkPlots,
+  ]);
+
+  const pagination = useMemo(() => {
+    return {
+      pageIndex: tableOptions.page.index,
+      pageSize: tableOptions.page.size,
+      totalItemCount: currentPage.totalCount,
       showPerPageOptions,
-    }),
-    [index, size, transactionGroupsTotalItems, showPerPageOptions]
-  );
+    };
+  }, [
+    tableOptions.page.index,
+    tableOptions.page.size,
+    currentPage.totalCount,
+    showPerPageOptions,
+  ]);
 
   const sorting = useMemo(
-    () => ({ sort: { field, direction } }),
-    [field, direction]
+    () => ({ sort: tableOptions.sort }),
+    [tableOptions.sort]
+  );
+
+  const onChangeHandler = useOnChangeTableHandler({
+    tableOptions,
+    setTableOptions,
+    saveTableOptionsToUrl,
+  });
+
+  const onChangeSearchQuery = useCallback(
+    ({
+      searchQuery: q,
+      shouldFetchServer,
+    }: {
+      searchQuery: string;
+      shouldFetchServer: boolean;
+    }) => {
+      if (shouldFetchServer) {
+        setSearchQueryDebounced(q);
+      }
+
+      // reset pagination to first page
+      if (tableOptions.page.index !== 0) {
+        history.replace({
+          ...history.location,
+          search: fromQuery({
+            ...toQuery(history.location.search),
+            page: 0,
+          }),
+        });
+      }
+    },
+    [history, setSearchQueryDebounced, tableOptions.page.index]
   );
 
   return (
@@ -344,93 +252,300 @@ export function TransactionsTable({
         </EuiFlexItem>
       )}
 
-      {showMaxTransactionGroupsExceededWarning && maxTransactionGroupsExceeded && (
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.apm.transactionsCallout.cardinalityWarning.title',
-              {
-                defaultMessage:
-                  'Number of transaction groups exceed the allowed maximum(1,000) that are displayed.',
-              }
-            )}
-            color="warning"
-            iconType="warning"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.apm.transactionsCallout.transactionGroupLimit.exceeded"
-                defaultMessage="The maximum number of transaction groups displayed in Kibana has been reached. Try narrowing down results by using the query bar."
-              />
-            </p>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>
-        <EuiFlexItem>
-          <OverviewTableContainer
-            fixedHeight={fixedHeight}
-            isEmptyAndNotInitiated={
-              transactionGroupsTotalItems === 0 &&
-              status === FETCH_STATUS.NOT_INITIATED
-            }
-          >
-            <EuiBasicTable
-              loading={status === FETCH_STATUS.LOADING}
-              noItemsMessage={
-                status === FETCH_STATUS.LOADING
-                  ? i18n.translate('xpack.apm.transactionsTable.loading', {
-                      defaultMessage: 'Loading...',
-                    })
-                  : i18n.translate('xpack.apm.transactionsTable.noResults', {
-                      defaultMessage: 'No transactions found',
-                    })
-              }
-              error={
-                status === FETCH_STATUS.FAILURE
-                  ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
-                      defaultMessage: 'Failed to fetch',
-                    })
-                  : ''
-              }
-              items={transactionGroups}
-              columns={columns}
-              pagination={pagination}
-              sorting={sorting}
-              onChange={(newTableOptions: {
-                page?: { index: number; size: number };
-                sort?: { field: string; direction: SortDirection };
-              }) => {
-                setTableOptions({
-                  page: {
-                    index: newTableOptions.page?.index ?? 0,
-                    size:
-                      newTableOptions.page?.size ?? numberOfTransactionsPerPage,
-                  },
-                  sort: newTableOptions.sort
-                    ? {
-                        field: newTableOptions.sort.field as SortField,
-                        direction: newTableOptions.sort.direction,
-                      }
-                    : DEFAULT_SORT,
-                });
-                if (saveTableOptionsToUrl) {
-                  history.push({
-                    ...history.location,
-                    search: fromQuery({
-                      ...toQuery(history.location.search),
-                      page: newTableOptions.page?.index,
-                      pageSize: newTableOptions.page?.size,
-                      sortField: newTableOptions.sort?.field,
-                      sortDirection: newTableOptions.sort?.direction,
-                    }),
-                  });
+      {showMaxTransactionGroupsExceededWarning &&
+        mainStatistics.maxCountExceeded && (
+          <EuiFlexItem>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.apm.transactionsCallout.cardinalityWarning.title',
+                {
+                  defaultMessage:
+                    'Number of transaction groups exceed the allowed maximum(1,000) that are displayed.',
                 }
-              }}
-            />
-          </OverviewTableContainer>
-        </EuiFlexItem>
+              )}
+              color="warning"
+              iconType="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.apm.transactionsCallout.transactionGroupLimit.exceeded"
+                  defaultMessage="The maximum number of transaction groups displayed in Kibana has been reached. Try narrowing down results by using the query bar."
+                />
+              </p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
+      <EuiFlexItem>
+        <TableSearchBar
+          isEnabled={true}
+          items={mainStatistics.transactionGroups}
+          fieldsToSearch={['name']}
+          maxCountExceeded={mainStatistics.maxCountExceeded}
+          tableOptions={tableOptions}
+          isServerSearchQueryActive={mainStatistics.isSearchQueryActive}
+          onChangeCurrentPage={setCurrentPage}
+          onChangeSearchQuery={onChangeSearchQuery}
+          placeholder={i18n.translate(
+            'xpack.apm.errorGroupList.tableSearch.placeholder',
+            {
+              defaultMessage: 'Search for error message and group ID',
+            }
+          )}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <OverviewTableContainer
+          fixedHeight={fixedHeight}
+          isEmptyAndNotInitiated={
+            mainStatistics.transactionGroups.length === 0 &&
+            mainStatisticsStatus === FETCH_STATUS.NOT_INITIATED
+          }
+        >
+          <EuiBasicTable
+            loading={mainStatisticsStatus === FETCH_STATUS.LOADING}
+            noItemsMessage={
+              mainStatisticsStatus === FETCH_STATUS.LOADING
+                ? i18n.translate('xpack.apm.transactionsTable.loading', {
+                    defaultMessage: 'Loading...',
+                  })
+                : i18n.translate('xpack.apm.transactionsTable.noResults', {
+                    defaultMessage: 'No transactions found',
+                  })
+            }
+            error={
+              mainStatisticsStatus === FETCH_STATUS.FAILURE
+                ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
+                    defaultMessage: 'Failed to fetch',
+                  })
+                : ''
+            }
+            items={currentPage.items}
+            columns={columns}
+            pagination={pagination}
+            sorting={sorting}
+            // @ts-expect-error
+            onChange={onChangeHandler}
+          />
+        </OverviewTableContainer>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+}
+
+function useTableData({
+  comparisonEnabled,
+  currentPageItems,
+  end,
+  environment,
+  kuery,
+  latencyAggregationType,
+  offset,
+  searchQuery,
+  serviceName,
+  start,
+  transactionType,
+}: {
+  comparisonEnabled: boolean | undefined;
+  currentPageItems: ApiResponse['transactionGroups'];
+  end: string;
+  environment: string;
+  kuery: string;
+  latencyAggregationType: LatencyAggregationType | undefined;
+  offset: string | undefined;
+  searchQuery: string;
+  serviceName: string;
+  start: string;
+  transactionType: string | undefined;
+}) {
+  const preferredDataSource = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    numBuckets: 20,
+    type: ApmDocumentType.TransactionMetric,
+  });
+
+  const shouldUseDurationSummary =
+    latencyAggregationType === 'avg' &&
+    preferredDataSource?.source?.hasDurationSummaryField;
+
+  const { data: mainStatistics = INITIAL_STATE, status: mainStatisticsStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (
+          !latencyAggregationType ||
+          !transactionType ||
+          !preferredDataSource
+        ) {
+          return Promise.resolve(undefined);
+        }
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
+          {
+            params: {
+              path: { serviceName },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                useDurationSummary: !!shouldUseDurationSummary,
+                latencyAggregationType:
+                  latencyAggregationType as LatencyAggregationType,
+                documentType: preferredDataSource.source.documentType,
+                rollupInterval: preferredDataSource.source.rollupInterval,
+                searchQuery,
+              },
+            },
+          }
+        );
+      },
+      [
+        searchQuery,
+        end,
+        environment,
+        kuery,
+        latencyAggregationType,
+        preferredDataSource,
+        serviceName,
+        shouldUseDurationSummary,
+        start,
+        transactionType,
+      ]
+    );
+
+  const { data: detailedStatistics, status: detailedStatisticsStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (
+          start &&
+          end &&
+          transactionType &&
+          latencyAggregationType &&
+          preferredDataSource &&
+          currentPageItems.length > 0
+        ) {
+          return callApmApi(
+            'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+            {
+              params: {
+                path: { serviceName },
+                query: {
+                  environment,
+                  kuery,
+                  start,
+                  end,
+                  bucketSizeInSeconds: preferredDataSource.bucketSizeInSeconds,
+                  transactionType,
+                  documentType: preferredDataSource.source.documentType,
+                  rollupInterval: preferredDataSource.source.rollupInterval,
+                  useDurationSummary: !!shouldUseDurationSummary,
+                  latencyAggregationType:
+                    latencyAggregationType as LatencyAggregationType,
+                  transactionNames: JSON.stringify(
+                    currentPageItems.map(({ name }) => name).sort()
+                  ),
+                  offset:
+                    comparisonEnabled && isTimeComparison(offset)
+                      ? offset
+                      : undefined,
+                },
+              },
+            }
+          );
+        }
+      },
+      // only fetches detailed statistics when `currentPageItems` is updated.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [currentPageItems, offset, comparisonEnabled],
+      { preservePreviousData: false }
+    );
+
+  return {
+    mainStatistics,
+    mainStatisticsStatus,
+    detailedStatistics,
+    detailedStatisticsStatus,
+  };
+}
+
+interface TableOptions<F extends string> {
+  page: { index: number; size: number };
+  sort: { direction: SortDirection; field: F };
+}
+
+function useOnChangeTableHandler<T extends string>({
+  tableOptions,
+  setTableOptions,
+  saveTableOptionsToUrl,
+}: {
+  tableOptions: TableOptions<T>;
+  setTableOptions: (tableOptions: TableOptions<T>) => void;
+  saveTableOptionsToUrl: boolean;
+}) {
+  const history = useHistory();
+
+  return useCallback(
+    (newTableOptions: Partial<TableOptions<T>>) => {
+      setTableOptions(merge(tableOptions, newTableOptions));
+
+      if (saveTableOptionsToUrl) {
+        history.push({
+          ...history.location,
+          search: fromQuery({
+            ...toQuery(history.location.search),
+            page: newTableOptions.page?.index,
+            pageSize: newTableOptions.page?.size,
+            sortField: newTableOptions.sort?.field,
+            sortDirection: newTableOptions.sort?.direction,
+          }),
+        });
+      }
+    },
+    [setTableOptions, tableOptions, saveTableOptionsToUrl, history]
+  );
+}
+
+function useTableOptions<T extends string>({
+  defaultUrlPageSize,
+}: {
+  defaultUrlPageSize: number;
+}) {
+  const {
+    query: {
+      page: urlPage = 0,
+      pageSize: urlPageSize = defaultUrlPageSize,
+      sortField: urlSortField = 'impact',
+      sortDirection: urlSortDirection = 'desc',
+    },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions',
+    '/services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/transactions',
+    '/mobile-services/{serviceName}/overview'
+  );
+
+  const [tableOptions, setTableOptions] = useState<{
+    page: { index: number; size: number };
+    sort: { direction: SortDirection; field: T };
+  }>({
+    page: { index: urlPage, size: urlPageSize },
+    sort: {
+      field: urlSortField as T,
+      direction: urlSortDirection as SortDirection,
+    },
+  });
+
+  useEffect(() => {
+    setTableOptions({
+      page: { index: urlPage, size: urlPageSize },
+      sort: {
+        field: urlSortField as T,
+        direction: urlSortDirection as SortDirection,
+      },
+    });
+  }, [urlPage, urlPageSize, urlSortDirection, urlSortField]);
+
+  return [tableOptions, setTableOptions] as const;
 }

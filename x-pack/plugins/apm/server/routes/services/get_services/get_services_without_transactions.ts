@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  wildcardQuery,
+} from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -27,7 +31,8 @@ export interface ServicesWithoutTransactionsResponse {
     environments: string[];
     agentName: AgentName;
   }>;
-  maxServiceCountExceeded: boolean;
+  maxCountExceeded: boolean;
+  isSearchQueryActive: boolean;
 }
 
 export async function getServicesWithoutTransactions({
@@ -41,6 +46,7 @@ export async function getServicesWithoutTransactions({
   randomSampler,
   documentType,
   rollupInterval,
+  searchQuery,
 }: {
   apmEventClient: APMEventClient;
   environment: string;
@@ -52,6 +58,7 @@ export async function getServicesWithoutTransactions({
   randomSampler: RandomSampler;
   documentType: ApmDocumentType;
   rollupInterval: RollupInterval;
+  searchQuery: string | undefined;
 }): Promise<ServicesWithoutTransactionsResponse> {
   const isServiceTransactionMetric =
     documentType === ApmDocumentType.ServiceTransactionMetric;
@@ -83,6 +90,7 @@ export async function getServicesWithoutTransactions({
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
               ...serviceGroupWithOverflowQuery(serviceGroup),
+              ...wildcardQuery(SERVICE_NAME, searchQuery),
             ],
           },
         },
@@ -116,6 +124,9 @@ export async function getServicesWithoutTransactions({
     }
   );
 
+  const maxCountExceeded =
+    (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0;
+
   return {
     services:
       response.aggregations?.sample.services.buckets.map((bucket) => {
@@ -127,7 +138,7 @@ export async function getServicesWithoutTransactions({
           agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
         };
       }) ?? [],
-    maxServiceCountExceeded:
-      (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0,
+    maxCountExceeded,
+    isSearchQueryActive: !!searchQuery,
   };
 }

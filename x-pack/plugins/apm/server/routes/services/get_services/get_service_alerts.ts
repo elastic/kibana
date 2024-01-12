@@ -9,6 +9,7 @@ import {
   kqlQuery,
   termQuery,
   rangeQuery,
+  wildcardQuery,
 } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
@@ -37,6 +38,7 @@ export async function getServicesAlerts({
   start,
   end,
   environment,
+  searchQuery,
 }: {
   apmAlertsClient: ApmAlertsClient;
   kuery?: string;
@@ -46,6 +48,7 @@ export async function getServicesAlerts({
   start: number;
   end: number;
   environment?: string;
+  searchQuery?: string;
 }): Promise<ServiceAlertsResponse> {
   const params = {
     size: 0,
@@ -59,6 +62,7 @@ export async function getServicesAlerts({
           ...kqlQuery(kuery),
           ...serviceGroupWithOverflowQuery(serviceGroup),
           ...termQuery(SERVICE_NAME, serviceName),
+          ...wildcardQuery(SERVICE_NAME, searchQuery),
           ...environmentQuery(environment),
         ],
       },

@@ -8,10 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
+import {
+  CurrentPage,
+  TableSearchBar,
+} from '../table_search_bar/table_search_bar';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T extends object> {
@@ -41,16 +45,25 @@ interface Props<T extends object> {
   isLoading?: boolean;
   error?: boolean;
   tableLayout?: 'auto' | 'fixed';
+  tableSearchBar?: {
+    isEnabled?: boolean;
+    fieldsToSearch: string[];
+    maxCountExceeded: boolean;
+    isSearchQueryActive: boolean;
+    placeholder: string;
+    onChangeSearchQuery: (searchQuery: string) => void;
+    onChangeCurrentPage: (page: CurrentPage<T>) => void;
+  };
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-function defaultSortFn<T extends any>(
+function defaultSortFn<T>(
   items: T[],
   sortField: string,
   sortDirection: 'asc' | 'desc'
 ) {
-  return orderBy(items, sortField, sortDirection);
+  return orderBy(items, sortField, sortDirection) as T[];
 }
 
 export type SortFunction<T> = (
@@ -76,26 +89,43 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
     isLoading = false,
     error = false,
     tableLayout,
+    tableSearchBar = {
+      isEnabled: false,
+      fieldsToSearch: [],
+      maxCountExceeded: false,
+      isSearchQueryActive: false,
+      placeholder: 'Search...',
+      onChangeSearchQuery: () => {},
+      onChangeCurrentPage: () => {},
+    },
   } = props;
 
   const {
     urlParams: {
-      page = initialPageIndex,
+      page: pageIndex = initialPageIndex,
       pageSize = initialPageSize,
       sortField = initialSortField,
       sortDirection = initialSortDirection,
     },
   } = useLegacyUrlParams();
 
-  const renderedItems = useMemo(() => {
-    const sortedItems = sortItems
-      ? sortFn(items, sortField, sortDirection as 'asc' | 'desc')
-      : items;
+  const [currentPage, setCurrentPage] = useState<{
+    items: T[];
+    totalCount: number;
+  }>({ items: [], totalCount: 0 });
 
-    return sortedItems.slice(page * pageSize, (page + 1) * pageSize);
-  }, [page, pageSize, sortField, sortDirection, items, sortItems, sortFn]);
+  const tableOptions = useMemo(
+    () => ({
+      page: { index: pageIndex, size: pageSize },
+      sort: {
+        field: sortField as keyof T & string,
+        direction: sortDirection as 'asc' | 'desc',
+      },
+    }),
+    [pageIndex, pageSize, sortDirection, sortField]
+  );
 
-  const sort = useMemo(() => {
+  const sorting = useMemo(() => {
     return {
       sort: {
         field: sortField as keyof T,
@@ -129,12 +159,18 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
     }
     return {
       showPerPageOptions,
-      totalItemCount: items.length,
-      pageIndex: page,
+      totalItemCount: currentPage.totalCount,
+      pageIndex,
       pageSize,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
-  }, [showPerPageOptions, items, page, pageSize, pagination]);
+  }, [
+    pagination,
+    showPerPageOptions,
+    currentPage.totalCount,
+    pageIndex,
+    pageSize,
+  ]);
 
   const showNoItemsMessage = useMemo(() => {
     return isLoading
@@ -144,25 +180,77 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
       : noItemsMessage;
   }, [isLoading, noItemsMessage]);
 
-  return (
-    // @ts-expect-error TS thinks pagination should be non-nullable, but it's not
-    <EuiBasicTable
-      loading={isLoading}
-      tableLayout={tableLayout}
-      error={
-        error
-          ? i18n.translate('xpack.apm.managedTable.errorMessage', {
-              defaultMessage: 'Failed to fetch',
-            })
-          : ''
+  const onChangeSearchQuery = useCallback(
+    ({
+      searchQuery: q,
+      shouldFetchServer,
+    }: {
+      searchQuery: string;
+      shouldFetchServer: boolean;
+    }) => {
+      if (shouldFetchServer) {
+        tableSearchBar.onChangeSearchQuery(q);
       }
-      noItemsMessage={showNoItemsMessage}
-      items={renderedItems}
-      columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
-      sorting={sort}
-      onChange={onTableChange}
-      {...(paginationProps ? { pagination: paginationProps } : {})}
-    />
+
+      // reset pagination to first page
+      if (pageIndex !== 0) {
+        history.replace({
+          ...history.location,
+          search: fromQuery({
+            ...toQuery(history.location.search),
+            page: 0,
+          }),
+        });
+      }
+    },
+    [history, pageIndex, tableSearchBar]
+  );
+
+  const onChangeCurrentPage = useCallback(
+    (page: CurrentPage<T>) => {
+      setCurrentPage(page);
+      tableSearchBar.onChangeCurrentPage(page);
+    },
+    [tableSearchBar]
+  );
+
+  return (
+    <>
+      <TableSearchBar
+        isEnabled={tableSearchBar.isEnabled ?? true}
+        sortItems={sortItems}
+        sortFn={sortFn}
+        items={items}
+        fieldsToSearch={
+          tableSearchBar.fieldsToSearch as Array<keyof T & string>
+        }
+        maxCountExceeded={tableSearchBar.maxCountExceeded}
+        isServerSearchQueryActive={tableSearchBar.isSearchQueryActive}
+        onChangeSearchQuery={onChangeSearchQuery}
+        tableOptions={tableOptions}
+        onChangeCurrentPage={onChangeCurrentPage}
+        placeholder={tableSearchBar.placeholder}
+      />
+
+      {/* @ts-expect-error TS thinks pagination should be non-nullable, but it's not */}
+      <EuiBasicTable<T>
+        loading={isLoading}
+        tableLayout={tableLayout}
+        error={
+          error
+            ? i18n.translate('xpack.apm.managedTable.errorMessage', {
+                defaultMessage: 'Failed to fetch',
+              })
+            : ''
+        }
+        noItemsMessage={showNoItemsMessage}
+        items={currentPage.items}
+        columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+        sorting={sorting}
+        onChange={onTableChange}
+        {...(paginationProps ? { pagination: paginationProps } : {})}
+      />
+    </>
   );
 }
 

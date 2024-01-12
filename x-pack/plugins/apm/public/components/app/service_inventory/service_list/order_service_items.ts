@@ -49,7 +49,7 @@ export function orderServiceItems({
   sortDirection,
 }: {
   items: ServiceListItem[];
-  primarySortField: ServiceInventoryFieldName;
+  primarySortField: string;
   tiebreakerField: ServiceInventoryFieldName;
   sortDirection: 'asc' | 'desc';
 }): ServiceListItem[] {

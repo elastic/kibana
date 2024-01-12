@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useStateDebounced } from '../../../hooks/use_debounce';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
+import {
+  ServiceInventoryFieldName,
+  ServiceListItem,
+} from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
@@ -30,17 +26,11 @@ import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
-
-const initialData = {
-  requestId: '',
-  items: [],
-  hasHistoricalData: true,
-  hasLegacyData: false,
-};
+import { SortFunction } from '../../shared/managed_table';
 
 const INITIAL_PAGE_SIZE = 25;
 
-function useServicesMainStatisticsFetcher() {
+function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
   const {
     query: {
       rangeFrom,
@@ -81,13 +71,9 @@ function useServicesMainStatisticsFetcher() {
               useDurationSummary: shouldUseDurationSummary,
               documentType: preferred.source.documentType,
               rollupInterval: preferred.source.rollupInterval,
+              searchQuery,
             },
           },
-        }).then((mainStatisticsData) => {
-          return {
-            requestId: uuidv4(),
-            ...mainStatisticsData,
-          };
         });
       }
     },
@@ -99,7 +85,9 @@ function useServicesMainStatisticsFetcher() {
       end,
       serviceGroup,
       preferred,
-      // not used, but needed to update the requestId to call the details statistics API when table is options are updated
+      searchQuery,
+
+      // not used, but needed to update the requestId to call the details statistics API when table options are updated
       page,
       pageSize,
       sortField,
@@ -113,17 +101,9 @@ function useServicesMainStatisticsFetcher() {
 }
 
 function useServicesDetailedStatisticsFetcher({
-  mainStatisticsFetch,
-  initialSortField,
-  initialSortDirection,
-  tiebreakerField,
+  currentPageItems,
 }: {
-  mainStatisticsFetch: ReturnType<
-    typeof useServicesMainStatisticsFetcher
-  >['mainStatisticsFetch'];
-  initialSortField: ServiceInventoryFieldName;
-  initialSortDirection: 'asc' | 'desc';
-  tiebreakerField: ServiceInventoryFieldName;
+  currentPageItems: ServiceListItem[];
 }) {
   const {
     query: {
@@ -133,10 +113,6 @@ function useServicesDetailedStatisticsFetcher({
       kuery,
       offset,
       comparisonEnabled,
-      page = 0,
-      pageSize = INITIAL_PAGE_SIZE,
-      sortDirection = initialSortDirection,
-      sortField = initialSortField,
     },
   } = useApmParams('/services');
 
@@ -150,24 +126,9 @@ function useServicesDetailedStatisticsFetcher({
     numBuckets: 20,
   });
 
-  const { data: mainStatisticsData = initialData } = mainStatisticsFetch;
-
-  const currentPageItems = orderServiceItems({
-    items: mainStatisticsData.items,
-    primarySortField: sortField as ServiceInventoryFieldName,
-    sortDirection,
-    tiebreakerField,
-  }).slice(page * pageSize, (page + 1) * pageSize);
-
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
-      if (
-        start &&
-        end &&
-        currentPageItems.length &&
-        mainStatisticsFetch.status === FETCH_STATUS.SUCCESS &&
-        dataSourceOptions
-      ) {
+      if (start && end && currentPageItems.length > 0 && dataSourceOptions) {
         return callApmApi('POST /internal/apm/services/detailed_statistics', {
           params: {
             query: {
@@ -197,7 +158,7 @@ function useServicesDetailedStatisticsFetcher({
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, offset, comparisonEnabled],
+    [currentPageItems, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
@@ -205,16 +166,24 @@ function useServicesDetailedStatisticsFetcher({
 }
 
 export function ServiceInventory() {
-  const { mainStatisticsFetch } = useServicesMainStatisticsFetcher();
+  const [currentPage, setCurrentPage] = useState<{
+    items: ServiceListItem[];
+    totalCount: number;
+  }>({ items: [], totalCount: 0 });
+
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced(
+    '',
+    200
+  );
+
+  const { mainStatisticsFetch } =
+    useServicesMainStatisticsFetcher(debouncedSearchQuery);
 
   const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
 
   const displayHealthStatus = mainStatisticsItems.some(
     (item) => 'healthStatus' in item
   );
-
-  const hasKibanaUiLimitRestrictedData =
-    mainStatisticsFetch.data?.maxServiceCountExceeded;
 
   const serviceOverflowCount =
     mainStatisticsFetch.data?.serviceOverflowCount ?? 0;
@@ -232,10 +201,7 @@ export function ServiceInventory() {
   const initialSortDirection = 'desc';
 
   const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
-    mainStatisticsFetch,
-    initialSortField,
-    initialSortDirection,
-    tiebreakerField,
+    currentPageItems: currentPage.items,
   });
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
@@ -252,20 +218,20 @@ export function ServiceInventory() {
   const isLoading = isPending(mainStatisticsFetch.status);
 
   const isFailure = mainStatisticsFetch.status === FETCH_STATUS.FAILURE;
-  const noItemsMessage = (
-    <EuiEmptyPrompt
-      title={
-        <div>
-          {i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
-            defaultMessage: 'No services found',
-          })}
-        </div>
-      }
-      titleSize="s"
-    />
-  );
-
-  const items = mainStatisticsItems;
+  const noItemsMessage = useMemo(() => {
+    return (
+      <EuiEmptyPrompt
+        title={
+          <div>
+            {i18n.translate('xpack.apm.servicesTable.notFoundLabel', {
+              defaultMessage: 'No services found',
+            })}
+          </div>
+        }
+        titleSize="s"
+      />
+    );
+  }, []);
 
   const mlCallout = (
     <EuiFlexItem>
@@ -277,27 +243,16 @@ export function ServiceInventory() {
     </EuiFlexItem>
   );
 
-  const kibanaUiServiceLimitCallout = (
-    <EuiFlexItem>
-      <EuiCallOut
-        title={i18n.translate(
-          'xpack.apm.serviceList.ui.limit.warning.calloutTitle',
-          {
-            defaultMessage:
-              'Number of services exceed the allowed maximum that are displayed (1,000)',
-          }
-        )}
-        color="warning"
-        iconType="warning"
-      >
-        <EuiText size="s">
-          <FormattedMessage
-            defaultMessage="Max. number of services that can be viewed in Kibana has been reached. Try narrowing down results by using the query bar or consider using service groups."
-            id="xpack.apm.serviceList.ui.limit.warning.calloutDescription"
-          />
-        </EuiText>
-      </EuiCallOut>
-    </EuiFlexItem>
+  const handleSort: SortFunction<ServiceListItem> = useCallback(
+    (itemsToSort, sortField, sortDirection) => {
+      return orderServiceItems({
+        items: itemsToSort,
+        primarySortField: sortField,
+        sortDirection,
+        tiebreakerField,
+      });
+    },
+    [tiebreakerField]
   );
 
   return (
@@ -305,12 +260,11 @@ export function ServiceInventory() {
       <SearchBar showTimeComparison />
       <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && mlCallout}
-        {hasKibanaUiLimitRestrictedData && kibanaUiServiceLimitCallout}
         <EuiFlexItem>
           <ServiceList
             isLoading={isLoading}
             isFailure={isFailure}
-            items={items}
+            items={mainStatisticsItems}
             comparisonDataLoading={
               comparisonFetch.status === FETCH_STATUS.LOADING
             }
@@ -318,18 +272,19 @@ export function ServiceInventory() {
             displayAlerts={displayAlerts}
             initialSortField={initialSortField}
             initialSortDirection={initialSortDirection}
-            sortFn={(itemsToSort, sortField, sortDirection) => {
-              return orderServiceItems({
-                items: itemsToSort,
-                primarySortField: sortField,
-                sortDirection,
-                tiebreakerField,
-              });
-            }}
+            sortFn={handleSort}
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
             initialPageSize={INITIAL_PAGE_SIZE}
             serviceOverflowCount={serviceOverflowCount}
+            onChangeSearchQuery={setDebouncedSearchQuery}
+            isSearchQueryActive={
+              mainStatisticsFetch.data?.isSearchQueryActive ?? false
+            }
+            maxCountExceeded={
+              mainStatisticsFetch.data?.maxCountExceeded ?? false
+            }
+            onChangeCurrentPage={setCurrentPage}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

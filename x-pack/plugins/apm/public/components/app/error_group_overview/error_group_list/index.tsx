@@ -27,6 +27,7 @@ import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import { CurrentPage } from '../../../shared/table_search_bar/table_search_bar';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
@@ -58,7 +59,7 @@ type ErrorGroupDetailedStatistics =
   APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 interface Props {
-  mainStatistics: ErrorGroupItem[];
+  items: ErrorGroupItem[];
   serviceName: string;
   detailedStatisticsLoading: boolean;
   detailedStatistics: ErrorGroupDetailedStatistics;
@@ -66,10 +67,18 @@ interface Props {
   initialSortDirection: 'asc' | 'desc';
   comparisonEnabled?: boolean;
   isLoading: boolean;
+  tableSearchBar: {
+    fieldsToSearch: string[];
+    maxCountExceeded: boolean;
+    isSearchQueryActive: boolean;
+    placeholder: string;
+    onChangeSearchQuery: (searchQuery: string) => void;
+    onChangeCurrentPage: (page: CurrentPage<ErrorGroupItem>) => void;
+  };
 }
 
 function ErrorGroupList({
-  mainStatistics,
+  items,
   serviceName,
   detailedStatisticsLoading,
   detailedStatistics,
@@ -77,6 +86,7 @@ function ErrorGroupList({
   initialSortField,
   initialSortDirection,
   isLoading,
+  tableSearchBar,
 }: Props) {
   const { query } = useApmParams('/services/{serviceName}/errors');
   const { offset } = query;
@@ -256,24 +266,27 @@ function ErrorGroupList({
   ]);
 
   return (
-    <ManagedTable
-      noItemsMessage={
-        isLoading
-          ? i18n.translate('xpack.apm.errorsTable.loading', {
-              defaultMessage: 'Loading...',
-            })
-          : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-              defaultMessage: 'No errors found',
-            })
-      }
-      items={mainStatistics}
-      columns={columns}
-      initialSortField={initialSortField}
-      initialSortDirection={initialSortDirection}
-      sortItems={false}
-      initialPageSize={25}
-      isLoading={isLoading}
-    />
+    <>
+      <ManagedTable
+        noItemsMessage={
+          isLoading
+            ? i18n.translate('xpack.apm.errorsTable.loading', {
+                defaultMessage: 'Loading...',
+              })
+            : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+                defaultMessage: 'No errors found',
+              })
+        }
+        items={items}
+        columns={columns}
+        initialSortField={initialSortField}
+        initialSortDirection={initialSortDirection}
+        sortItems={false}
+        initialPageSize={25}
+        isLoading={isLoading}
+        tableSearchBar={tableSearchBar}
+      />
+    </>
   );
 }
 

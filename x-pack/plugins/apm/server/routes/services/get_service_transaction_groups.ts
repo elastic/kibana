@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  wildcardQuery,
+} from '@kbn/observability-plugin/server';
 import { ApmTransactionDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
@@ -43,9 +47,10 @@ export interface TransactionGroups {
 
 export interface ServiceTransactionGroupsResponse {
   transactionGroups: TransactionGroups[];
-  maxTransactionGroupsExceeded: boolean;
+  maxCountExceeded: boolean;
   transactionOverflowCount: number;
   hasActiveAlerts: boolean;
+  isSearchQueryActive: boolean;
 }
 
 export async function getServiceTransactionGroups({
@@ -60,6 +65,7 @@ export async function getServiceTransactionGroups({
   documentType,
   rollupInterval,
   useDurationSummary,
+  searchQuery,
 }: {
   environment: string;
   kuery: string;
@@ -72,6 +78,7 @@ export async function getServiceTransactionGroups({
   documentType: ApmTransactionDocumentType;
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
+  searchQuery?: string;
 }): Promise<ServiceTransactionGroupsResponse> {
   const field = getDurationFieldForTransactions(
     documentType,
@@ -107,6 +114,7 @@ export async function getServiceTransactionGroups({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
+              ...wildcardQuery(TRANSACTION_NAME, searchQuery),
             ],
           },
         },
@@ -169,10 +177,11 @@ export async function getServiceTransactionGroups({
       ...transactionGroup,
       transactionType,
     })),
-    maxTransactionGroupsExceeded:
+    maxCountExceeded:
       (response.aggregations?.transaction_groups.sum_other_doc_count ?? 0) > 0,
     transactionOverflowCount:
       response.aggregations?.transaction_overflow_count.value ?? 0,
     hasActiveAlerts: false,
+    isSearchQueryActive: !!searchQuery,
   };
 }

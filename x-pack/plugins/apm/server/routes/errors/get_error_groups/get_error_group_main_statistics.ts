@@ -10,6 +10,7 @@ import {
   kqlQuery,
   rangeQuery,
   termQuery,
+  wildcardQuery,
 } from '@kbn/observability-plugin/server';
 import {
   ERROR_CULPRIT,
@@ -17,6 +18,7 @@ import {
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -28,15 +30,19 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 
-export type ErrorGroupMainStatisticsResponse = Array<{
-  groupId: string;
-  name: string;
-  lastSeen: number;
-  occurrences: number;
-  culprit: string | undefined;
-  handled: boolean | undefined;
-  type: string | undefined;
-}>;
+export interface ErrorGroupMainStatisticsResponse {
+  errorGroups: Array<{
+    groupId: string;
+    name: string;
+    lastSeen: number;
+    occurrences: number;
+    culprit: string | undefined;
+    handled: boolean | undefined;
+    type: string | undefined;
+  }>;
+  maxCountExceeded: boolean;
+  isSearchQueryActive: boolean;
+}
 
 export async function getErrorGroupMainStatistics({
   kuery,
@@ -50,6 +56,7 @@ export async function getErrorGroupMainStatistics({
   maxNumberOfErrorGroups = 500,
   transactionName,
   transactionType,
+  searchQuery,
 }: {
   kuery: string;
   serviceName: string;
@@ -62,6 +69,7 @@ export async function getErrorGroupMainStatistics({
   maxNumberOfErrorGroups?: number;
   transactionName?: string;
   transactionType?: string;
+  searchQuery?: string;
 }): Promise<ErrorGroupMainStatisticsResponse> {
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'lastSeen';
@@ -71,6 +79,20 @@ export async function getErrorGroupMainStatistics({
   const order: AggregationsAggregateOrder = sortByLatestOccurrence
     ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
+
+  const shouldQuery = searchQuery
+    ? {
+        should: [
+          ...wildcardQuery(ERROR_LOG_MESSAGE, searchQuery),
+          ...wildcardQuery(ERROR_EXC_MESSAGE, searchQuery),
+          ...wildcardQuery(ERROR_GROUP_NAME, searchQuery),
+          ...wildcardQuery(ERROR_GROUP_ID, searchQuery, {
+            leadingWildcard: false,
+          }),
+        ],
+        minimum_should_match: 1,
+      }
+    : {};
 
   const response = await apmEventClient.search(
     'get_error_group_main_statistics',
@@ -96,6 +118,7 @@ export async function getErrorGroupMainStatistics({
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
             ],
+            ...shouldQuery,
           },
         },
         aggs: {
@@ -133,7 +156,10 @@ export async function getErrorGroupMainStatistics({
     }
   );
 
-  return (
+  const maxCountExceeded =
+    (response.aggregations?.error_groups.sum_other_doc_count ?? 0) > 0;
+
+  const errorGroups =
     response.aggregations?.error_groups.buckets.map((bucket) => {
       return {
         groupId: bucket.key as string,
@@ -147,6 +173,11 @@ export async function getErrorGroupMainStatistics({
           bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
         type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
       };
-    }) ?? []
-  );
+    }) ?? [];
+
+  return {
+    errorGroups,
+    maxCountExceeded,
+    isSearchQueryActive: !!searchQuery,
+  };
 }

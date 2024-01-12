@@ -8,6 +8,9 @@
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { MlClient } from '../helpers/get_ml_client';
 
+export const ML_SERVICE_NAME_FIELD = 'partition_field_value';
+export const ML_TRANSACTION_TYPE_FIELD = 'by_field_value';
+
 interface SharedFields {
   job_id: string;
   bucket_span: number;
@@ -44,9 +47,9 @@ type AnomalyDocument = MlRecord | MlModelPlot;
 
 export async function anomalySearch<TParams extends ESSearchRequest>(
   mlAnomalySearch: Required<MlClient>['mlSystem']['mlAnomalySearch'],
-  params: TParams
+  params: TParams,
+  jobsIds = [] // pass an empty array of job ids to anomaly search so any validation is skipped
 ): Promise<ESSearchResponse<AnomalyDocument, TParams>> {
-  const response = await mlAnomalySearch(params, []);
-
+  const response = await mlAnomalySearch(params, jobsIds);
   return response as unknown as ESSearchResponse<AnomalyDocument, TParams>;
 }

@@ -14,8 +14,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useStateDebounced } from '../../../hooks/use_debounce';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -38,13 +39,17 @@ type ErrorGroupDetailedStatistics =
   APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATISTICS: {
-  errorGroupMainStatistics: ErrorGroupMainStatistics['errorGroups'];
+  mainStatistics: ErrorGroupMainStatistics['errorGroups'];
   requestId?: string;
   currentPageGroupIds: ErrorGroupMainStatistics['errorGroups'];
+  isSearchQueryActive: boolean;
+  maxCountExceeded: boolean;
 } = {
-  errorGroupMainStatistics: [],
+  mainStatistics: [],
   requestId: undefined,
   currentPageGroupIds: [],
+  isSearchQueryActive: false,
+  maxCountExceeded: false,
 };
 
 const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
@@ -53,6 +58,108 @@ const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
 };
 
 export function ErrorGroupOverview() {
+  const { serviceName } = useApmServiceContext();
+
+  const {
+    query: {
+      environment,
+      kuery,
+      sortField = 'occurrences',
+      sortDirection = 'desc',
+      comparisonEnabled,
+    },
+  } = useApmParams('/services/{serviceName}/errors');
+
+  const { errorDistributionData, errorDistributionStatus } =
+    useErrorGroupDistributionFetcher({
+      serviceName,
+      groupId: undefined,
+      environment,
+      kuery,
+    });
+
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced(
+    '',
+    200
+  );
+
+  const {
+    mainStatistics,
+    mainStatisticsStatus,
+    detailedStatistics,
+    detailedStatisticsStatus,
+    isSearchQueryActive,
+    maxCountExceeded,
+  } = useErrorGroupListData(debouncedSearchQuery);
+
+  const tableSearchBar = useMemo(() => {
+    return {
+      fieldsToSearch: ['name', 'groupId'],
+      maxCountExceeded,
+      isSearchQueryActive,
+      onChangeSearchQuery: setDebouncedSearchQuery,
+      onChangeCurrentPage: () => {},
+      placeholder: i18n.translate(
+        'xpack.apm.servicesTable.filterServicesPlaceholder',
+        { defaultMessage: 'Filter errors...' }
+      ),
+    };
+  }, [isSearchQueryActive, maxCountExceeded, setDebouncedSearchQuery]);
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <EuiFlexGroup direction="row" gutterSize="s">
+          <ChartPointerEventContextProvider>
+            <EuiFlexItem>
+              <EuiPanel hasBorder={true}>
+                <ErrorDistribution
+                  fetchStatus={errorDistributionStatus}
+                  distribution={errorDistributionData}
+                  title={i18n.translate(
+                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+                    { defaultMessage: 'Error occurrences' }
+                  )}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <FailedTransactionRateChart kuery={kuery} />
+            </EuiFlexItem>
+          </ChartPointerEventContextProvider>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiPanel hasBorder={true}>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate(
+                'xpack.apm.serviceDetails.metrics.errorsList.title',
+                { defaultMessage: 'Errors' }
+              )}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+
+          <ErrorGroupList
+            items={mainStatistics}
+            serviceName={serviceName}
+            detailedStatisticsLoading={isPending(detailedStatisticsStatus)}
+            detailedStatistics={detailedStatistics}
+            comparisonEnabled={comparisonEnabled}
+            initialSortField={sortField}
+            initialSortDirection={sortDirection}
+            isLoading={mainStatisticsStatus === FETCH_STATUS.LOADING}
+            tableSearchBar={tableSearchBar}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function useErrorGroupListData(searchQuery: string | undefined) {
   const { serviceName } = useApmServiceContext();
 
   const {
@@ -71,16 +178,16 @@ export function ErrorGroupOverview() {
   } = useApmParams('/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
-    serviceName,
-    groupId: undefined,
-    environment,
-    kuery,
-  });
 
   const {
-    data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS,
-    status: errorGroupListDataStatus,
+    data: {
+      requestId,
+      mainStatistics,
+      currentPageGroupIds,
+      isSearchQueryActive,
+      maxCountExceeded,
+    } = INITIAL_STATE_MAIN_STATISTICS,
+    status: mainStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
@@ -90,9 +197,7 @@ export function ErrorGroupOverview() {
           'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
           {
             params: {
-              path: {
-                serviceName,
-              },
+              path: { serviceName },
               query: {
                 environment,
                 kuery,
@@ -100,24 +205,25 @@ export function ErrorGroupOverview() {
                 end,
                 sortField,
                 sortDirection: normalizedSortDirection,
+                searchQuery,
               },
             },
           }
         ).then((response) => {
-          const currentPageGroupIds = orderBy(
-            response.errorGroups,
-            sortField,
-            sortDirection
-          )
-            .slice(page * pageSize, (page + 1) * pageSize)
-            .map(({ groupId }) => groupId)
-            .sort();
-
           return {
             // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
             requestId: uuidv4(),
-            errorGroupMainStatistics: response.errorGroups,
-            currentPageGroupIds,
+            mainStatistics: response.errorGroups,
+            isSearchQueryActive: response.isSearchQueryActive,
+            maxCountExceeded: response.maxCountExceeded,
+            currentPageGroupIds: orderBy(
+              response.errorGroups,
+              sortField,
+              sortDirection
+            )
+              .slice(page * pageSize, (page + 1) * pageSize)
+              .map(({ groupId }) => groupId)
+              .sort(),
           };
         });
       }
@@ -132,15 +238,13 @@ export function ErrorGroupOverview() {
       sortDirection,
       page,
       pageSize,
+      searchQuery,
     ]
   );
 
-  const { requestId, errorGroupMainStatistics, currentPageGroupIds } =
-    errorGroupListData;
-
   const {
-    data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
-    status: errorGroupDetailedStatisticsStatus,
+    data: detailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+    status: detailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && currentPageGroupIds.length && start && end) {
@@ -174,56 +278,12 @@ export function ErrorGroupOverview() {
     { preservePreviousData: false }
   );
 
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <ChartPointerEventContextProvider>
-            <EuiFlexItem>
-              <EuiPanel hasBorder={true}>
-                <ErrorDistribution
-                  fetchStatus={status}
-                  distribution={errorDistributionData}
-                  title={i18n.translate(
-                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
-                    { defaultMessage: 'Error occurrences' }
-                  )}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <FailedTransactionRateChart kuery={kuery} />
-            </EuiFlexItem>
-          </ChartPointerEventContextProvider>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorsList.title',
-                { defaultMessage: 'Errors' }
-              )}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-
-          <ErrorGroupList
-            mainStatistics={errorGroupMainStatistics}
-            serviceName={serviceName}
-            detailedStatisticsLoading={isPending(
-              errorGroupDetailedStatisticsStatus
-            )}
-            detailedStatistics={errorGroupDetailedStatistics}
-            comparisonEnabled={comparisonEnabled}
-            initialSortField={sortField}
-            initialSortDirection={sortDirection}
-            isLoading={errorGroupListDataStatus === FETCH_STATUS.LOADING}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return {
+    mainStatistics,
+    mainStatisticsStatus,
+    detailedStatistics,
+    detailedStatisticsStatus,
+    isSearchQueryActive,
+    maxCountExceeded,
+  };
 }

@@ -85,12 +85,13 @@ export function MobileErrorsOverview() {
     kuery,
   });
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
-    serviceName,
-    groupId: undefined,
-    environment,
-    kuery: kueryWithMobileFilters,
-  });
+  const { errorDistributionData, errorDistributionStatus: status } =
+    useErrorGroupDistributionFetcher({
+      serviceName,
+      groupId: undefined,
+      environment,
+      kuery: kueryWithMobileFilters,
+    });
   const {
     data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS,
     status: errorGroupListDataStatus,

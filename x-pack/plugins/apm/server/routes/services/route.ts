@@ -107,7 +107,10 @@ const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
     query: t.intersection([
-      t.partial({ serviceGroup: t.string }),
+      t.partial({
+        searchQuery: t.string,
+        serviceGroup: t.string,
+      }),
       t.intersection([
         probabilityRt,
         t.intersection([
@@ -133,6 +136,7 @@ const servicesRoute = createApmServerRoute({
     } = resources;
 
     const {
+      searchQuery,
       environment,
       kuery,
       start,
@@ -175,6 +179,7 @@ const servicesRoute = createApmServerRoute({
       documentType,
       rollupInterval,
       useDurationSummary,
+      searchQuery,
     });
   },
 });

@@ -55,8 +55,8 @@ type TransactionGroupDetailedStatistics =
 export function getColumns({
   serviceName,
   latencyAggregationType,
-  transactionGroupDetailedStatisticsLoading,
-  transactionGroupDetailedStatistics,
+  detailedStatisticsLoading,
+  detailedStatistics,
   comparisonEnabled,
   shouldShowSparkPlots = true,
   showAlertsColumn,
@@ -67,8 +67,8 @@ export function getColumns({
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
-  transactionGroupDetailedStatisticsLoading: boolean;
-  transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
+  detailedStatisticsLoading: boolean;
+  detailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
   showAlertsColumn: boolean;
@@ -162,9 +162,9 @@ export function getColumns({
       align: RIGHT_ALIGNMENT,
       render: (_, { latency, name }) => {
         const currentTimeseries =
-          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.latency;
+          detailedStatistics?.currentPeriod?.[name]?.latency;
         const previousTimeseries =
-          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.latency;
+          detailedStatistics?.previousPeriod?.[name]?.latency;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.LATENCY_AVG
@@ -175,7 +175,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
-            isLoading={transactionGroupDetailedStatisticsLoading}
+            isLoading={detailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled && isTimeComparison(offset)
@@ -198,10 +198,9 @@ export function getColumns({
       align: RIGHT_ALIGNMENT,
       render: (_, { throughput, name }) => {
         const currentTimeseries =
-          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.throughput;
+          detailedStatistics?.currentPeriod?.[name]?.throughput;
         const previousTimeseries =
-          transactionGroupDetailedStatistics?.previousPeriod?.[name]
-            ?.throughput;
+          detailedStatistics?.previousPeriod?.[name]?.throughput;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.THROUGHPUT
@@ -212,7 +211,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
-            isLoading={transactionGroupDetailedStatisticsLoading}
+            isLoading={detailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled && isTimeComparison(offset)
@@ -258,9 +257,9 @@ export function getColumns({
       align: RIGHT_ALIGNMENT,
       render: (_, { errorRate, name }) => {
         const currentTimeseries =
-          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.errorRate;
+          detailedStatistics?.currentPeriod?.[name]?.errorRate;
         const previousTimeseries =
-          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.errorRate;
+          detailedStatistics?.previousPeriod?.[name]?.errorRate;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.FAILED_TRANSACTION_RATE
@@ -271,7 +270,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
-            isLoading={transactionGroupDetailedStatisticsLoading}
+            isLoading={detailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled && isTimeComparison(offset)
@@ -317,10 +316,9 @@ export function getColumns({
       align: RIGHT_ALIGNMENT,
       render: (_, { name }) => {
         const currentImpact =
-          transactionGroupDetailedStatistics?.currentPeriod?.[name]?.impact ??
-          0;
+          detailedStatistics?.currentPeriod?.[name]?.impact ?? 0;
         const previousImpact =
-          transactionGroupDetailedStatistics?.previousPeriod?.[name]?.impact;
+          detailedStatistics?.previousPeriod?.[name]?.impact;
         return (
           <EuiFlexGroup alignItems="flexEnd" gutterSize="xs" direction="column">
             <EuiFlexItem>
