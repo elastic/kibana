@@ -186,6 +186,71 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp2.body.isRunning).to.be(true);
       });
 
+      it('should cancel an async search without server crash', async function () {
+        await markRequiresShardDelayAgg(this);
+
+        const resp = await supertest
+          .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            params: {
+              body: {
+                query: {
+                  match_all: {},
+                },
+                ...shardDelayAgg('10s'),
+              },
+              wait_for_completion_timeout: '1ms',
+            },
+          })
+          .expect(200);
+
+        const { id } = resp.body;
+        expect(id).not.to.be(undefined);
+        expect(resp.body.isPartial).to.be(true);
+        expect(resp.body.isRunning).to.be(true);
+
+        // Send a follow-up request that waits up to 10s for completion
+        const req = supertest
+          .post(`/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('kbn-xsrf', 'foo')
+          .send({ params: { wait_for_completion_timeout: '10s' } })
+          .expect(200);
+
+        // After 2s, abort and send the cancellation (to result in a race towards cancellation)
+        // This should be swallowed and not kill the Kibana server
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            req.abort();
+            resolve(null);
+          }, 2000)
+        );
+        await supertest
+          .delete(`/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        let err: Error | undefined;
+        try {
+          await req;
+        } catch (e) {
+          err = e;
+        }
+
+        expect(err).not.to.be(undefined);
+
+        // Ensure the search was succesfully cancelled
+        await supertest
+          .post(`/internal/search/ese/${id}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(404);
+      });
+
       it('should fail without kbn-xref header', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)

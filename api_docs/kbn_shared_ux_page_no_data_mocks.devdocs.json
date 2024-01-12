@@ -256,9 +256,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-                "section": "def-common.StorybookMock",
+                "section": "def-public.StorybookMock",
                 "text": "StorybookMock"
               },
               "[]"
@@ -467,9 +467,9 @@
           "<PropArguments, {}> & ",
           {
             "pluginId": "@kbn/shared-ux-card-no-data-mocks",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxCardNoDataMocksPluginApi",
-            "section": "def-common.Params",
+            "section": "def-public.Params",
             "text": "Params"
           }
         ],

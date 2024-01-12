@@ -28,7 +28,7 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getQueryFilter } from './get_query_filter';
 
-interface GetFilterArgs {
+export interface GetFilterArgs {
   type: Type;
   filters: unknown | undefined;
   language: LanguageOrUndefined;

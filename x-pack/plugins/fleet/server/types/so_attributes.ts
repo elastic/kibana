@@ -16,6 +16,7 @@ import type {
   KafkaAcknowledgeReliabilityLevel,
   KafkaConnectionTypeType,
   AgentUpgradeDetails,
+  OutputPreset,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -144,11 +145,20 @@ interface OutputSoBaseAttributes {
   allow_edit?: string[];
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
+  preset?: OutputPreset;
 }
 
 interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
   type: OutputType['Elasticsearch'];
   secrets?: {};
+}
+
+export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
+  type: OutputType['RemoteElasticsearch'];
+  service_token?: string;
+  secrets?: {
+    service_token?: { id: string };
+  };
 }
 
 interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
@@ -209,6 +219,7 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
 
 export type OutputSOAttributes =
   | OutputSoElasticsearchAttributes
+  | OutputSoRemoteElasticsearchAttributes
   | OutputSoLogstashAttributes
   | OutputSoKafkaAttributes;
 
@@ -217,6 +228,7 @@ export interface SettingsSOAttributes {
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
+  output_secret_storage_requirements_met?: boolean;
 }
 
 export interface DownloadSourceSOAttributes {

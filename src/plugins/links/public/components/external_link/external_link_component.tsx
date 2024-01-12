@@ -9,15 +9,21 @@
 import React, { useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 
-import {
-  UrlDrilldownOptions,
-  DEFAULT_URL_DRILLDOWN_OPTIONS,
-} from '@kbn/ui-actions-enhanced-plugin/public';
 import { EuiListGroupItem } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  DEFAULT_URL_DRILLDOWN_OPTIONS,
+  UrlDrilldownOptions,
+} from '@kbn/ui-actions-enhanced-plugin/public';
 
+import {
+  EXTERNAL_LINK_TYPE,
+  Link,
+  LinksLayoutType,
+  LINKS_VERTICAL_LAYOUT,
+} from '../../../common/content_management';
+import { coreServices, trackUiMetric } from '../../services/kibana_services';
 import { validateUrl } from './external_link_tools';
-import { coreServices } from '../../services/kibana_services';
-import { Link, LinksLayoutType, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 
 export const ExternalLinkComponent = ({
   link,
@@ -59,6 +65,7 @@ export const ExternalLinkComponent = ({
   return (
     <EuiListGroupItem
       size="s"
+      external
       color="text"
       isDisabled={!link.destination || !isValidUrl}
       className={'linksPanelLink'}
@@ -77,6 +84,8 @@ export const ExternalLinkComponent = ({
       href={destination}
       onClick={async (event) => {
         if (!destination) return;
+
+        trackUiMetric?.(METRIC_TYPE.CLICK, `${EXTERNAL_LINK_TYPE}:click`);
 
         /** Only use `navigateToUrl` if we **aren't** opening in a new window/tab; otherwise, just use default href handling */
         const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;

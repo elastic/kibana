@@ -40,10 +40,10 @@ const sessionViewConfig = {
   sessionStartTime: 'sessionStartTime',
 };
 
-const renderSessionPreview = () =>
+const renderSessionPreview = (context = panelContextValue) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={panelContextValue}>
+      <RightPanelContext.Provider value={context}>
         <SessionPreviewContainer />
       </RightPanelContext.Provider>
     </TestProviders>
@@ -120,5 +120,32 @@ describe('SessionPreviewContainer', () => {
       screen.queryByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID))
     ).not.toHaveTextContent(NO_DATA_MESSAGE);
     expect(queryByTestId(SESSION_PREVIEW_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render link to session viewer if flyout is open in preview', () => {
+    (useSessionPreview as jest.Mock).mockReturnValue(sessionViewConfig);
+    (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
+
+    const { getByTestId, queryByTestId } = renderSessionPreview({
+      ...panelContextValue,
+      isPreview: true,
+    });
+
+    expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    expect(
+      getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    expect(
+      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).toBeInTheDocument();
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(SESSION_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
   });
 });

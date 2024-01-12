@@ -8,7 +8,7 @@
 
 import { createMockFilesClient as createBaseMocksFilesClient } from '@kbn/shared-ux-file-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { FilesSetup } from '.';
+import { FilesPublicSetup } from './plugin';
 import type { FilesClient, FilesClientFactory } from './types';
 
 export const createMockFilesClient = (): DeeplyMockedKeys<FilesClient> => ({
@@ -17,7 +17,7 @@ export const createMockFilesClient = (): DeeplyMockedKeys<FilesClient> => ({
   publicDownload: jest.fn(),
 });
 
-export const createMockFilesSetup = (): DeeplyMockedKeys<FilesSetup> => {
+export const createMockFilesSetup = (): DeeplyMockedKeys<FilesPublicSetup> => {
   return {
     filesClientFactory: createMockFilesClientFactory(),
     registerFileKind: jest.fn(),

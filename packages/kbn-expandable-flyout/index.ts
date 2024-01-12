@@ -7,13 +7,12 @@
  */
 
 export { ExpandableFlyout } from './src';
-export {
-  ExpandableFlyoutProvider,
-  useExpandableFlyoutContext,
-  type ExpandableFlyoutContext,
-} from './src/context';
 
-export type { ExpandableFlyoutApi } from './src/context';
+export { useExpandableFlyoutContext, type ExpandableFlyoutContext } from './src/context';
+
+export { ExpandableFlyoutProvider } from './src/provider';
 
 export type { ExpandableFlyoutProps } from './src';
 export type { FlyoutPanelProps, PanelPath } from './src/types';
+
+export { EXPANDABLE_FLYOUT_URL_KEY } from './src/constants';

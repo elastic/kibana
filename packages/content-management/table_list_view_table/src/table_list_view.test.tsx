@@ -17,12 +17,9 @@ import type { LocationDescriptor, History } from 'history';
 
 import { WithServices } from './__jest__';
 import { getTagList } from './mocks';
-import {
-  TableListViewTable,
-  type TableListViewTableProps,
-  type UserContentCommonSchema,
-} from './table_list_view_table';
+import { TableListViewTable, type TableListViewTableProps } from './table_list_view_table';
 import { getActions } from './table_list_view.test.helpers';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 const mockUseEffect = useEffect;
 

@@ -7,9 +7,8 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
+import { WebElementWrapper, type TimeoutOpt } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../ftr_provider_context';
-import { TimeoutOpt } from './types';
 
 interface ExistsOptions {
   timeout?: number;
@@ -162,6 +161,13 @@ export class TestSubjects extends FtrService {
   ): Promise<void> {
     this.log.debug(`TestSubjects.click(${selector})`);
     await this.findService.clickByCssSelector(testSubjSelector(selector), timeout, topOffset);
+  }
+
+  public async pressEnter(selector: string, timeout: number = this.FIND_TIME): Promise<void> {
+    this.log.debug(`TestSubjects.pressEnter(${selector})`);
+    const element = await this.find(selector, timeout);
+    await element.focus();
+    await element.pressKeys(this.ctx.getService('browser').keys.ENTER);
   }
 
   public async doubleClick(selector: string, timeout: number = this.FIND_TIME): Promise<void> {

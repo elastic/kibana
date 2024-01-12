@@ -45,7 +45,9 @@ describe('Bulk CRUD rules response schema', () => {
 
     const result = BulkCrudRulesResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"0.name: Required, 0.error: Required, 0: Unrecognized key(s) in object: 'author', 'created_at', 'updated_at', 'created_by', 'description', 'enabled', 'false_positives', 'from', 'immutable', 'references', 'revision', 'severity', 'severity_mapping', 'updated_by', 'tags', 'to', 'threat', 'version', 'output_index', 'max_signals', 'risk_score', 'risk_score_mapping', 'interval', 'exceptions_list', 'related_integrations', 'required_fields', 'setup', 'throttle', 'actions', 'building_block_type', 'note', 'license', 'outcome', 'alias_target_id', 'alias_purpose', 'timeline_id', 'timeline_title', 'meta', 'rule_name_override', 'timestamp_override', 'timestamp_override_fallback_disabled', 'namespace', 'investigation_fields', 'query', 'type', 'language', 'index', 'data_view_id', 'filters', 'saved_id', 'response_actions', 'alert_suppression'"`
+    );
   });
 
   test('it should NOT validate an invalid error message with a deleted value', () => {
@@ -56,7 +58,9 @@ describe('Bulk CRUD rules response schema', () => {
 
     const result = BulkCrudRulesResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"0.type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql', 0.error: Required"`
+    );
   });
 
   test('it should omit any extra rule props', () => {

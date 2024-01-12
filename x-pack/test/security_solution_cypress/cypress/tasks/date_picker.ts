@@ -31,12 +31,12 @@ export const setEndDateNow = (container: string = GLOBAL_FILTERS_CONTAINER) => {
 export const setEndDate = (date: string, container: string = GLOBAL_FILTERS_CONTAINER) => {
   cy.get(GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON(container)).first().click();
 
-  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
     if (Cypress.dom.isAttached($el)) {
-      cy.wrap($el).click({ force: true });
+      cy.wrap($el).click();
     }
     cy.wrap($el).type(`{selectall}{backspace}${date}{enter}`);
   });
@@ -45,12 +45,12 @@ export const setEndDate = (date: string, container: string = GLOBAL_FILTERS_CONT
 export const setStartDate = (date: string, container: string = GLOBAL_FILTERS_CONTAINER) => {
   cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(container)).first().click({});
 
-  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
 
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click({ force: true });
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).then(($el) => {
     if (Cypress.dom.isAttached($el)) {
-      cy.wrap($el).click({ force: true });
+      cy.wrap($el).click();
     }
     cy.wrap($el).type(`{selectall}{backspace}${date}{enter}`);
   });
@@ -76,7 +76,7 @@ export const updateDateRangeInLocalDatePickers = (
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(startDate);
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`${startDate}{enter}`);
   cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).click();
   cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).should(
     'not.have.text',
@@ -89,7 +89,7 @@ export const updateDateRangeInLocalDatePickers = (
 
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
   cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
-  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(endDate);
+  cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(`${endDate}{enter}`);
   cy.get(GET_LOCAL_DATE_PICKER_APPLY_BUTTON(localQueryBarSelector)).click();
 };
 

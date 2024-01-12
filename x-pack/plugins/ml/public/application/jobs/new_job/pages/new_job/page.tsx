@@ -178,9 +178,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       // categorization job will always use a count agg, so give it
       // to the job creator now
       const count = newJobCapsService.getAggById('count');
+      const highCount = newJobCapsService.getAggById('high_count');
       const rare = newJobCapsService.getAggById('rare');
       const eventRate = newJobCapsService.getFieldById(EVENT_RATE_FIELD_ID);
-      jobCreator.setDefaultDetectorProperties(count, rare, eventRate);
+      jobCreator.setDefaultDetectorProperties(count, highCount, rare, eventRate);
 
       const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
       jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
@@ -232,11 +233,19 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
       <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
         <EuiText size={'s'}>
-          <FormattedMessage
-            id="xpack.ml.newJob.page.createJob.dataViewName"
-            defaultMessage="Using data view {dataViewName}"
-            values={{ dataViewName: jobCreator.indexPatternDisplayName }}
-          />
+          {dataSourceContext.selectedDataView.isPersisted() ? (
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.dataViewName"
+              defaultMessage="Using data view {dataViewName}"
+              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.tempDataViewName"
+              defaultMessage="Using temporary data view {dataViewName}"
+              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
+            />
+          )}
         </EuiText>
 
         <Wizard

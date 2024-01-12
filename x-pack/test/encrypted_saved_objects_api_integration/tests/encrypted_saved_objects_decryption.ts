@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
 
   describe('encrypted saved objects decryption', () => {
     // This test uses esArchiver to load alert and action saved objects that have been created with a different encryption key
@@ -21,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('migrations', () => {
       before(async () => {
+        await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
         await esArchiver.load(
           'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_different_key'
         );
@@ -59,6 +62,20 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(migratedRule.secrets).to.be(undefined);
         expect(migratedConnector.is_missing_secrets).to.eql(false);
+      });
+
+      // This validates the shouldTransformIfDecryptionFails flag
+      // (see x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
+      it('performs model version transforms even if decryption fails', async () => {
+        const { body: decryptedResponse } = await supertest
+          .get(
+            `/api/saved_objects/get-decrypted-as-internal-user/saved-object-mv/e35debe0-6c54-11ee-88d4-47e62f05d6ef`
+          )
+          .expect(200); // operation will throw if flag is set to false
+        expect(decryptedResponse.attributes).to.eql({
+          nonEncryptedAttribute: 'elastic-migrated',
+          additionalEncryptedAttribute: 'elastic-migrated-encrypted',
+        });
       });
     });
   });

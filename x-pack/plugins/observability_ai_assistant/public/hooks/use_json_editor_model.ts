@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useEffect, useMemo, useState } from 'react';
 import { monaco } from '@kbn/monaco';
-import { useMemo } from 'react';
 import { createInitializedObject } from '../utils/create_initialized_object';
 import { useObservabilityAIAssistantChatService } from './use_observability_ai_assistant_chat_service';
+import { safeJsonParse } from '../utils/safe_json_parse';
 
 const { editor, languages, Uri } = monaco;
-
-const SCHEMA_URI = 'http://elastic.co/foo.json';
-const modelUri = Uri.parse(SCHEMA_URI);
 
 export const useJsonEditorModel = ({
   functionName,
@@ -23,21 +21,30 @@ export const useJsonEditorModel = ({
 }) => {
   const chatService = useObservabilityAIAssistantChatService();
 
-  const functionDefinition = chatService
-    .getFunctions()
-    .find((func) => func.options.name === functionName);
+  const functionDefinition = chatService.getFunctions().find((func) => func.name === functionName);
+
+  const [initialJsonValue, setInitialJsonValue] = useState<string | undefined>(initialJson);
+
+  const SCHEMA_URI = `http://elastic.co/${functionName}.json`;
+
+  const modelUri = useMemo(() => Uri.parse(SCHEMA_URI), [SCHEMA_URI]);
+
+  useEffect(() => {
+    setInitialJsonValue(initialJson);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [functionName]);
 
   return useMemo(() => {
-    if (!functionDefinition) {
+    if (!functionDefinition || !modelUri) {
       return {};
     }
 
-    const schema = { ...functionDefinition.options.parameters };
+    const schema = { ...functionDefinition.parameters };
 
-    const initialJsonString = initialJson
-      ? initialJson
-      : functionDefinition.options.parameters.properties
-      ? JSON.stringify(createInitializedObject(functionDefinition.options.parameters), null, 4)
+    const initialJsonString = initialJsonValue
+      ? JSON.stringify(safeJsonParse(initialJsonValue), null, 4) // prettify the json
+      : functionDefinition.parameters.properties
+      ? JSON.stringify(createInitializedObject(functionDefinition.parameters), null, 4)
       : '';
 
     languages.json.jsonDefaults.setDiagnosticsOptions({
@@ -60,5 +67,5 @@ export const useJsonEditorModel = ({
     }
 
     return { model, initialJsonString };
-  }, [functionDefinition, initialJson]);
+  }, [SCHEMA_URI, functionDefinition, initialJsonValue, modelUri]);
 };

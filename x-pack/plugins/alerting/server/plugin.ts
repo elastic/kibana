@@ -77,7 +77,7 @@ import {
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, getLatestRuleVersion, RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
@@ -97,7 +97,7 @@ import {
   type InitializationPromise,
   errorResult,
 } from './alerts_service';
-import { rulesSettingsFeature } from './rules_settings_feature';
+import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
@@ -255,7 +255,7 @@ export class AlertingPlugin {
       };
     });
 
-    plugins.features.registerKibanaFeature(rulesSettingsFeature);
+    plugins.features.registerKibanaFeature(getRulesSettingsFeature(!!plugins.serverless));
 
     plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
@@ -296,6 +296,7 @@ export class AlertingPlugin {
     }
 
     const ruleTypeRegistry = new RuleTypeRegistry({
+      config: this.config,
       logger: this.logger,
       taskManager: plugins.taskManager,
       taskRunnerFactory: this.taskRunnerFactory,
@@ -304,6 +305,7 @@ export class AlertingPlugin {
       alertsService: this.alertsService,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       inMemoryMetrics: this.inMemoryMetrics,
+      latestRuleVersion: getLatestRuleVersion(),
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
@@ -461,7 +463,7 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: ['alert'],
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {
@@ -489,7 +491,9 @@ export class AlertingPlugin {
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
       securityPluginStart: plugins.security,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
+        RULE_SAVED_OBJECT_TYPE,
+      ]),
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
@@ -554,7 +558,9 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
+        RULE_SAVED_OBJECT_TYPE,
+      ]),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       alertsService: this.alertsService,
@@ -569,7 +575,7 @@ export class AlertingPlugin {
       getMaintenanceWindowClientWithRequest,
     });
 
-    this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
+    this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {
       const client = getRulesClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
@@ -592,7 +598,7 @@ export class AlertingPlugin {
       getAlertingAuthorizationWithRequest,
       getRulesClientWithRequest,
       getFrameworkHealth: async () =>
-        await getHealth(core.savedObjects.createInternalRepository(['alert'])),
+        await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
     };
   }
 
@@ -619,7 +625,7 @@ export class AlertingPlugin {
         },
         listTypes: ruleTypeRegistry!.list.bind(ruleTypeRegistry!),
         getFrameworkHealth: async () =>
-          await getHealth(savedObjects.createInternalRepository(['alert'])),
+          await getHealth(savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
         areApiKeysEnabled: async () => {
           const [, { security }] = await core.getStartServices();
           return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;

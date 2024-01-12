@@ -54,8 +54,13 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     );
 
     const canSave =
-      Boolean((await server.coreStart?.capabilities.resolveCapabilities(request)).uptime.save) ??
-      false;
+      Boolean(
+        (
+          await server.coreStart?.capabilities.resolveCapabilities(request, {
+            capabilityPath: 'uptime.*',
+          })
+        ).uptime.save
+      ) ?? false;
 
     try {
       const newMonitorId = id ?? uuidV4();

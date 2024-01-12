@@ -1,0 +1,6 @@
+{
+  "devOnly": true,
+  "id": "@kbn/openapi-bundler",
+  "owner": "@elastic/security-detection-rule-management",
+  "type": "shared-common"
+}

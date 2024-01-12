@@ -5,5 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { CodeEditorStorybookMock } from './storybook';
-export type { Params as CodeEditorStorybookParams } from './storybook';
+
+export { MockedCodeEditor } from './code_editor_mock';

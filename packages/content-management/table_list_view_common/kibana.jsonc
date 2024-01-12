@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/content-management-table-list-view-common",
+  "owner": "@elastic/appex-sharedux"
+}

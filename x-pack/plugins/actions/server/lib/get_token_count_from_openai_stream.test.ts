@@ -6,6 +6,7 @@
  */
 import { Transform } from 'stream';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
+import { loggerMock } from '@kbn/logging-mocks';
 
 interface StreamMock {
   write: (data: string) => void;
@@ -32,6 +33,7 @@ function createStreamMock(): StreamMock {
   };
 }
 
+const logger = loggerMock.create();
 describe('getTokenCountFromOpenAIStream', () => {
   let tokens: Awaited<ReturnType<typeof getTokenCountFromOpenAIStream>>;
   let stream: StreamMock;
@@ -77,6 +79,7 @@ describe('getTokenCountFromOpenAIStream', () => {
       beforeEach(async () => {
         tokens = await getTokenCountFromOpenAIStream({
           responseStream: stream.transform,
+          logger,
           body: JSON.stringify(body),
         });
       });
@@ -92,6 +95,7 @@ describe('getTokenCountFromOpenAIStream', () => {
       beforeEach(async () => {
         tokens = await getTokenCountFromOpenAIStream({
           responseStream: stream.transform,
+          logger,
           body: JSON.stringify({
             ...body,
             functions: [
@@ -123,6 +127,7 @@ describe('getTokenCountFromOpenAIStream', () => {
     it('resolves the promise with the correct prompt tokens', async () => {
       const tokenPromise = getTokenCountFromOpenAIStream({
         responseStream: stream.transform,
+        logger,
         body: JSON.stringify(body),
       });
 
@@ -133,6 +138,7 @@ describe('getTokenCountFromOpenAIStream', () => {
         total: PROMPT_TOKEN_COUNT + COMPLETION_TOKEN_COUNT,
         completion: COMPLETION_TOKEN_COUNT,
       });
+      expect(logger.error).toHaveBeenCalled();
     });
   });
 });

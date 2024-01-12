@@ -12,7 +12,7 @@ import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/co
 import type { Status } from '../../../../common/api/detection_engine';
 import type { Note } from '../../../../common/api/timeline';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import type { TimelineModel } from '../../../timelines/store/timeline/model';
+import type { TimelineModel } from '../../../timelines/store/model';
 import type { inputsModel } from '../../../common/store';
 
 export interface SetEventsLoadingProps {

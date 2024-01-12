@@ -8,10 +8,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CIS_AWS, CIS_GCP, CIS_AZURE, CIS_K8S, CIS_EKS } from '../../common/constants';
-import { Cluster } from '../../common/types';
 import { CISBenchmarkIcon } from './cis_benchmark_icon';
 import { CompactFormattedNumber } from './compact_formatted_number';
 import { useNavigateFindings } from '../common/hooks/use_navigate_findings';
+import { BenchmarkData } from '../../common/types_old';
 
 // order in array will determine order of appearance in the dashboard
 const benchmarks = [
@@ -43,17 +43,17 @@ const benchmarks = [
 ];
 
 export const AccountsEvaluatedWidget = ({
-  clusters,
+  benchmarkAssets,
   benchmarkAbbreviateAbove = 999,
 }: {
-  clusters: Cluster[];
+  benchmarkAssets: BenchmarkData[];
   /** numbers higher than the value of this field will be abbreviated using compact notation and have a tooltip displaying the full value */
   benchmarkAbbreviateAbove?: number;
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const filterClustersById = (benchmarkId: string) => {
-    return clusters?.filter((obj) => obj?.meta.benchmark.id === benchmarkId) || [];
+  const getBenchmarkById = (benchmarkId: string) => {
+    return benchmarkAssets?.find((obj) => obj?.meta.benchmarkId === benchmarkId);
   };
 
   const navToFindings = useNavigateFindings();
@@ -67,10 +67,10 @@ export const AccountsEvaluatedWidget = ({
   };
 
   const benchmarkElements = benchmarks.map((benchmark) => {
-    const clusterAmount = filterClustersById(benchmark.type).length;
+    const cloudAssetAmount = getBenchmarkById(benchmark.type)?.meta?.assetCount || 0;
 
     return (
-      clusterAmount > 0 && (
+      cloudAssetAmount > 0 && (
         <EuiFlexItem
           key={benchmark.type}
           onClick={() => {
@@ -85,7 +85,7 @@ export const AccountsEvaluatedWidget = ({
             transition: ${euiTheme.animation.normal} ease-in;
             border-bottom: ${euiTheme.border.thick};
             border-color: transparent;
-
+            text-wrap: nowrap;
             :hover {
               cursor: pointer;
               border-color: ${euiTheme.colors.darkestShade};
@@ -98,7 +98,7 @@ export const AccountsEvaluatedWidget = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <CompactFormattedNumber
-                number={clusterAmount}
+                number={cloudAssetAmount}
                 abbreviateAbove={benchmarkAbbreviateAbove}
               />
             </EuiFlexItem>

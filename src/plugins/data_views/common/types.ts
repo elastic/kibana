@@ -157,6 +157,10 @@ export interface DataViewAttributes {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
+  /**
+   * Allow hidden and system indices when loading field list
+   */
+  allowHidden?: boolean;
 }
 
 /**
@@ -309,7 +313,7 @@ export interface GetFieldsOptions {
   indexFilter?: QueryDslQueryContainer;
   includeUnmapped?: boolean;
   fields?: string[];
-  forceRefresh?: boolean;
+  allowHidden?: boolean;
 }
 
 /**
@@ -518,6 +522,10 @@ export type DataViewSpec = {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
+  /**
+   * Allow hidden and system indices when loading field list
+   */
+  allowHidden?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

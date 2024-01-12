@@ -19,7 +19,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ExpandableFlyout } from '.';
-import { ExpandableFlyoutContext } from './context';
+import { ExpandableFlyoutContext, ExpandableFlyoutContextValue } from './context';
 
 export default {
   component: ExpandableFlyout,
@@ -100,7 +100,7 @@ const registeredPanels = [
 ];
 
 export const Right: Story<void> = () => {
-  const context: ExpandableFlyoutContext = {
+  const context = {
     panels: {
       right: {
         id: 'right',
@@ -109,7 +109,7 @@ export const Right: Story<void> = () => {
       preview: [],
     },
     closeFlyout: () => window.alert('closeFlyout api'),
-  } as unknown as ExpandableFlyoutContext;
+  } as unknown as ExpandableFlyoutContextValue;
 
   return (
     <ExpandableFlyoutContext.Provider value={context}>
@@ -119,7 +119,7 @@ export const Right: Story<void> = () => {
 };
 
 export const Left: Story<void> = () => {
-  const context: ExpandableFlyoutContext = {
+  const context = {
     panels: {
       right: {
         id: 'right',
@@ -130,7 +130,7 @@ export const Left: Story<void> = () => {
       preview: [],
     },
     closeFlyout: () => window.alert('closeFlyout api'),
-  } as unknown as ExpandableFlyoutContext;
+  } as unknown as ExpandableFlyoutContextValue;
 
   return (
     <ExpandableFlyoutContext.Provider value={context}>
@@ -140,7 +140,7 @@ export const Left: Story<void> = () => {
 };
 
 export const Preview: Story<void> = () => {
-  const context: ExpandableFlyoutContext = {
+  const context = {
     panels: {
       right: {
         id: 'right',
@@ -156,7 +156,7 @@ export const Preview: Story<void> = () => {
     },
     closePreviewPanel: () => window.alert('closePreviewPanel api'),
     closeFlyout: () => window.alert('closeFlyout api'),
-  } as unknown as ExpandableFlyoutContext;
+  } as unknown as ExpandableFlyoutContextValue;
 
   return (
     <ExpandableFlyoutContext.Provider value={context}>
@@ -166,7 +166,7 @@ export const Preview: Story<void> = () => {
 };
 
 export const MultiplePreviews: Story<void> = () => {
-  const context: ExpandableFlyoutContext = {
+  const context = {
     panels: {
       right: {
         id: 'right',
@@ -186,7 +186,7 @@ export const MultiplePreviews: Story<void> = () => {
     closePreviewPanel: () => window.alert('closePreviewPanel api'),
     previousPreviewPanel: () => window.alert('previousPreviewPanel api'),
     closeFlyout: () => window.alert('closeFlyout api'),
-  } as unknown as ExpandableFlyoutContext;
+  } as unknown as ExpandableFlyoutContextValue;
 
   return (
     <ExpandableFlyoutContext.Provider value={context}>

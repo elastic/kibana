@@ -17,9 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
-import type { AuthenticationServiceSetup } from '../../authentication';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
   Breadcrumb,

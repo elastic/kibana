@@ -13,7 +13,7 @@ import { saveAs } from '@elastic/filesaver';
 import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -706,7 +706,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           filteredCount={filteredItemCount}
         />
         <EuiSpacer size="l" />
-        <RedirectAppLinks application={applications}>
+        <RedirectAppLinks
+          coreStart={{
+            application: applications,
+          }}
+        >
           <Table
             basePath={http.basePath}
             taggingApi={taggingApi}

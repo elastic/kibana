@@ -31,7 +31,7 @@ export const selectMenuItem = async function (wrapper: ReactWrapper, menuItemInd
     // When the menu item is clicked, wait for all of the context menus to be there
     await waitFor(() => {
       wrapper.update();
-      return getPortal(wrapper).find('EuiContextMenuPanel').length === 2;
+      return getPortal(wrapper).find('div.euiContextMenuPanel').length === 2;
     });
   } catch (e) {
     throw new Error('Context menu did not transition');

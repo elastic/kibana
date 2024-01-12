@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
 
-  // Only update the baseline images from Jenkins session images after comparing them
+  // Only update the baseline images from CI session images after comparing them
   // These tests might fail locally because of scaling factors and resolution.
 
   describe('maps loaded from sample data', () => {

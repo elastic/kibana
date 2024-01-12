@@ -44,7 +44,7 @@ export const EditConnector: React.FC = () => {
     application: { navigateToUrl },
   } = useKibanaServices();
 
-  const { data, isLoading, refetch } = useConnector(id);
+  const { data, isLoading } = useConnector(id);
 
   if (isLoading) {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">
@@ -66,13 +66,18 @@ export const EditConnector: React.FC = () => {
           title={
             <h1>
               {i18n.translate('xpack.serverlessSearch.connectors.notFound', {
-                defaultMessage: 'Could not find a connector with id {id}',
+                defaultMessage: 'Could not find connector {id}',
                 values: { id },
               })}
             </h1>
           }
           actions={
-            <EuiButton color="primary" fill onClick={() => navigateToUrl(`./`)}>
+            <EuiButton
+              data-test-subj="serverlessSearchEditConnectorGoBackButton"
+              color="primary"
+              fill
+              onClick={() => navigateToUrl(`./`)}
+            >
               {i18n.translate('xpack.serverlessSearch.connectors.goBack', {
                 defaultMessage: 'Go back',
               })}
@@ -91,7 +96,7 @@ export const EditConnector: React.FC = () => {
         <EuiText size="s">{CONNECTOR_LABEL}</EuiText>
         <EuiFlexGroup direction="row" justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EditName connectorId={id} name={connector.name} onSuccess={refetch} />
+            <EditName connector={connector} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {deleteModalIsOpen && (
@@ -107,6 +112,7 @@ export const EditConnector: React.FC = () => {
                 id={'connectorMenu'}
                 button={
                   <EuiButtonIcon
+                    data-test-subj="serverlessSearchEditConnectorButton"
                     aria-label={i18n.translate('xpack.serverlessSearch.connectors.openMenuLabel', {
                       defaultMessage: 'Open menu',
                     })}
@@ -151,17 +157,9 @@ export const EditConnector: React.FC = () => {
       <EuiPageTemplate.Section>
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={1}>
-            <EditServiceType
-              connectorId={id}
-              serviceType={connector.service_type ?? ''}
-              onSuccess={() => refetch()}
-            />
+            <EditServiceType connector={connector} />
             <EuiSpacer />
-            <EditDescription
-              connectorId={id}
-              description={connector.description ?? ''}
-              onSuccess={refetch}
-            />
+            <EditDescription connector={connector} />
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <EuiPanel hasBorder hasShadow={false}>

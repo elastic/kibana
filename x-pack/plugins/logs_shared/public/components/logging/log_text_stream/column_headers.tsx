@@ -41,7 +41,7 @@ export const LogColumnHeaders: React.FunctionComponent<{
             columnHeader = columnConfiguration.timestampColumn.header;
           } else {
             columnHeader = firstVisiblePosition
-              ? localizedDate(firstVisiblePosition.time)
+              ? localizedDate(new Date(firstVisiblePosition.time))
               : i18n.translate('xpack.logsShared.logs.stream.timestampColumnTitle', {
                   defaultMessage: 'Timestamp',
                 });

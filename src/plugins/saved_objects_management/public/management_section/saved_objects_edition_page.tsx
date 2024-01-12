@@ -11,7 +11,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SavedObjectEdition } from './object_view';
 import './saved_objects_edition_page.scss';
 
@@ -49,25 +49,28 @@ const SavedObjectsEditionPage = ({
   }, [setBreadcrumbs, type]);
 
   return (
-    <RedirectAppLinks
-      application={coreStart.application}
-      className="savedObjectsManagementEditionPage"
-    >
-      <SavedObjectEdition
-        id={id}
-        savedObjectType={type}
-        http={coreStart.http}
-        overlays={coreStart.overlays}
-        notifications={coreStart.notifications}
-        capabilities={capabilities}
-        notFoundType={query.notFound as string}
-        uiSettings={coreStart.uiSettings}
-        history={history}
-        docLinks={docLinks}
-        settings={coreStart.settings}
-        theme={coreStart.theme}
-      />
-    </RedirectAppLinks>
+    <div className="savedObjectsManagementEditionPage">
+      <RedirectAppLinks
+        coreStart={{
+          application: coreStart.application,
+        }}
+      >
+        <SavedObjectEdition
+          id={id}
+          savedObjectType={type}
+          http={coreStart.http}
+          overlays={coreStart.overlays}
+          notifications={coreStart.notifications}
+          capabilities={capabilities}
+          notFoundType={query.notFound as string}
+          uiSettings={coreStart.uiSettings}
+          history={history}
+          docLinks={docLinks}
+          settings={coreStart.settings}
+          theme={coreStart.theme}
+        />
+      </RedirectAppLinks>
+    </div>
   );
 };
 

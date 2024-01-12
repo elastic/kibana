@@ -9,8 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { indexOf } from 'lodash';
-import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -51,6 +50,7 @@ import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_aler
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
+import { useAlertAssigneesActions } from './use_alert_assignees_actions';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;
@@ -63,7 +63,7 @@ interface AlertContextMenuProps {
   refetch: (() => void) | undefined;
 }
 
-const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
+const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   ariaLabel = i18n.MORE_ACTIONS,
   ariaRowindex,
   columnValues,
@@ -71,8 +71,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   ecsRowData,
   onRuleChange,
   scopeId,
-  globalQuery,
-  timelineQuery,
   refetch,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -81,6 +79,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
+
+  const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
+  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
+  const globalQuery = useSelector((state: State) => getGlobalQueries(state));
+  const timelineQuery = useSelector((state: State) => getTimelineQuery(state, scopeId));
 
   const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
   const alertId = getAlertId();
@@ -222,6 +225,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     refetch: refetchAll,
   });
 
+  const { alertAssigneesItems, alertAssigneesPanels } = useAlertAssigneesActions({
+    closePopover,
+    ecsRowData,
+    refetch: refetchAll,
+  });
+
   const items: AlertTableContextMenuItem[] = useMemo(
     () =>
       !isEvent && ruleId
@@ -229,6 +238,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ...addToCaseActionItems,
             ...statusActionItems,
             ...alertTagsItems,
+            ...alertAssigneesItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
           ]
@@ -248,6 +258,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       eventFilterActionItems,
       canCreateEndpointEventFilters,
       alertTagsItems,
+      alertAssigneesItems,
     ]
   );
 
@@ -258,8 +269,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
         items,
       },
       ...alertTagsPanels,
+      ...alertAssigneesPanels,
     ],
-    [alertTagsPanels, items]
+    [alertTagsPanels, alertAssigneesPanels, items]
   );
 
   const osqueryFlyout = useMemo(() => {
@@ -323,23 +335,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   );
 };
 
-const makeMapStateToProps = () => {
-  const getGlobalQueries = inputsSelectors.globalQuery();
-  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { scopeId }: AlertContextMenuProps) => {
-    return {
-      globalQuery: getGlobalQueries(state),
-      timelineQuery: getTimelineQuery(state, scopeId),
-    };
-  };
-  return mapStateToProps;
-};
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const AlertContextMenu = connector(React.memo(AlertContextMenuComponent));
+export const AlertContextMenu = React.memo(AlertContextMenuComponent);
 
 type AddExceptionFlyoutWrapperProps = Omit<
   AddExceptionFlyoutProps,

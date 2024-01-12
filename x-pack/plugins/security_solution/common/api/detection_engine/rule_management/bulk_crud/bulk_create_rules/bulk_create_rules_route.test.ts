@@ -26,7 +26,9 @@ describe('Bulk create rules request schema', () => {
 
     const result = BulkCreateRulesRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"0.type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
+    );
   });
 
   test('single array element does validate', () => {
@@ -56,7 +58,7 @@ describe('Bulk create rules request schema', () => {
 
     const result = BulkCreateRulesRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0.risk_score: Required"`);
   });
 
   test('two array elements where the first is valid but the second is invalid (risk_score) will not validate', () => {
@@ -68,7 +70,7 @@ describe('Bulk create rules request schema', () => {
 
     const result = BulkCreateRulesRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"1: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"1.risk_score: Required"`);
   });
 
   test('two array elements where the first is invalid (risk_score) but the second is valid will not validate', () => {
@@ -80,7 +82,7 @@ describe('Bulk create rules request schema', () => {
 
     const result = BulkCreateRulesRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0.risk_score: Required"`);
   });
 
   test('two array elements where both are invalid (risk_score) will not validate', () => {
@@ -95,7 +97,7 @@ describe('Bulk create rules request schema', () => {
     const result = BulkCreateRulesRequestBody.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-      `"0: Invalid input, 1: Invalid input"`
+      `"0.risk_score: Required, 1.risk_score: Required"`
     );
   });
 
@@ -121,7 +123,9 @@ describe('Bulk create rules request schema', () => {
 
     const result = BulkCreateRulesRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"0.severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'madeup'"`
+    );
   });
 
   test('You can set "note" to a string', () => {
@@ -154,6 +158,8 @@ describe('Bulk create rules request schema', () => {
 
     const result = BulkCreateRulesRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"0.note: Expected string, received object"`
+    );
   });
 });

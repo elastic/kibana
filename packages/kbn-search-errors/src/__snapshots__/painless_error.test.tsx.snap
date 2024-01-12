@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Painless error should render error message 1`] = `
+<div>
+  <EuiText
+    data-test-subj="painlessScript"
+    size="s"
+  >
+    Error executing runtime field or scripted field on data view logs
+  </EuiText>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiCodeBlock
+    data-test-subj="painlessStackTrace"
+    isCopyable={true}
+    paddingSize="s"
+  >
+    invalid
+^---- HERE
+  </EuiCodeBlock>
+  <EuiText
+    data-test-subj="painlessHumanReadableError"
+    size="s"
+  >
+    cannot resolve symbol [invalid]
+  </EuiText>
+</div>
+`;

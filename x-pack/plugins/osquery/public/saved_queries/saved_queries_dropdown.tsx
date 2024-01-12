@@ -25,7 +25,7 @@ export interface SavedQueriesDropdownProps {
   disabled?: boolean;
   onChange: (
     value:
-      | (Pick<SavedQuerySO, 'id' | 'description' | 'query' | 'ecs_mapping'> & {
+      | (Pick<SavedQuerySO, 'id' | 'description' | 'query' | 'ecs_mapping' | 'timeout'> & {
           savedQueryId: string;
         })
       | null

@@ -24,7 +24,6 @@ import {
   filterOutAlertProperty,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -37,9 +36,8 @@ import { openActiveTimeline } from '../../../tasks/timeline';
 
 import { ALERTS_URL } from '../../../urls/navigation';
 
-describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
+describe.skip('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     createRule(getNewRule());
   });
 
@@ -95,7 +93,8 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Add to timeline', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172231
+  describe.skip('Add to timeline', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
@@ -107,7 +106,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then((severityVal) => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
           openActiveTimeline();
           cy.get(PROVIDER_BADGE)
@@ -128,7 +127,8 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Show Top N', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172232
+  describe.skip('Show Top N', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
@@ -140,14 +140,15 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
           cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
         });
     });
   });
 
-  describe('Copy to clipboard', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/172233
+  describe.skip('Copy to clipboard', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
@@ -159,7 +160,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           cy.window().then((win) => {
             cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
           });

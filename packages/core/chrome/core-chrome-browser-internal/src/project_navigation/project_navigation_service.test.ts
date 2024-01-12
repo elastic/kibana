@@ -44,18 +44,18 @@ describe('breadcrumbs', () => {
         {
           id: 'root',
           title: 'Root',
-          path: ['root'],
+          path: 'root',
           breadcrumbStatus: 'hidden' as 'hidden',
           children: [
             {
               id: 'subNav',
-              path: ['root', 'subNav'],
+              path: 'root.subNav',
               title: '', // intentionally empty to skip rendering
               children: [
                 {
                   id: 'navItem1',
                   title: 'Nav Item 1',
-                  path: ['root', 'subNav', 'navItem1'],
+                  path: 'root.subNav.navItem1',
                   deepLink: {
                     id: 'navItem1',
                     title: 'Nav Item 1',
@@ -86,12 +86,38 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "breadcrumb-home",
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanelClass
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
+          },
+          "text": "Project",
         },
         Object {
           "deepLinkId": "navItem1",
@@ -125,12 +151,38 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "breadcrumb-home",
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanelClass
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
+          },
+          "text": "Project",
         },
         Object {
           "href": "/custom1",
@@ -158,12 +210,38 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "data-test-subj": "breadcrumb-home",
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanelClass
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
+          },
+          "text": "Project",
         },
         Object {
           "deepLinkId": "navItem1",
@@ -240,12 +318,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          path: ['root'],
+          path: 'root',
           children: [
             {
               id: 'item1',
               title: 'Item 1',
-              path: ['root', 'item1'],
+              path: 'root.item1',
               deepLink: {
                 id: 'item1',
                 title: 'Item 1',
@@ -266,14 +344,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
-          path: ['root', 'item1'],
+          path: 'root.item1',
           deepLink: {
             id: 'item1',
             title: 'Item 1',
@@ -297,12 +373,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          path: ['root'],
+          path: 'root',
           children: [
             {
               id: 'item1',
               title: 'Item 1',
-              path: ['root', 'item1'],
+              path: 'root.item1',
               getIsActive: () => true,
             },
           ],
@@ -317,14 +393,12 @@ describe('getActiveNodes$()', () => {
         {
           id: 'root',
           title: 'Root',
-          isActive: true,
-          path: ['root'],
+          path: 'root',
         },
         {
           id: 'item1',
           title: 'Item 1',
-          isActive: true,
-          path: ['root', 'item1'],
+          path: 'root.item1',
           getIsActive: expect.any(Function),
         },
       ],

@@ -84,10 +84,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('data drift', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier');
+      await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier');
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
 
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -97,10 +97,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
       await Promise.all([
-        ml.testResources.deleteIndexPatternByTitle('ft_fare*'),
-        ml.testResources.deleteIndexPatternByTitle('ft_fare*,ft_fareq*'),
-        ml.testResources.deleteIndexPatternByTitle('ft_farequote'),
-        ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier'),
+        ml.testResources.deleteDataViewByTitle('ft_fare*'),
+        ml.testResources.deleteDataViewByTitle('ft_fare*,ft_fareq*'),
+        ml.testResources.deleteDataViewByTitle('ft_farequote'),
+        ml.testResources.deleteDataViewByTitle('ft_ihp_outlier'),
       ]);
     });
 

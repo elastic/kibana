@@ -14,8 +14,9 @@ post:
     content:
       application/json:
         schema:
-          type: object
-          nullable: true
+          type:
+            - "object"
+            - "null"
   responses:
     '200':
       description: Indicates a successful call.

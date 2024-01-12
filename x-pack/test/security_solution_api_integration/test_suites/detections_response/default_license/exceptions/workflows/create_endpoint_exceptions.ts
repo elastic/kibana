@@ -24,7 +24,7 @@ import {
   createListsIndex,
   deleteAllExceptions,
   deleteListsIndex,
-} from '../../../../../../lists_api_integration/utils';
+} from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

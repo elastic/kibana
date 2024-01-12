@@ -4,65 +4,52 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart } from '@kbn/core/public';
-import { CustomizationCallback, DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import React from 'react';
-import { type BehaviorSubject, combineLatest, from, map, Subscription } from 'rxjs';
-import { dynamic } from '../utils/dynamic';
-import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
-import { LogExplorerStateContainer } from '../components/log_explorer';
-import { LogExplorerStartDeps } from '../types';
-import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
-const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
+/* eslint-disable react-hooks/rules-of-hooks */
+
+import React from 'react';
+import type { CoreStart } from '@kbn/core/public';
+import type { CustomizationCallback } from '@kbn/discover-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { waitFor } from 'xstate/lib/waitFor';
+import type { LogExplorerController } from '../controller';
+import { LogExplorerControllerProvider } from '../controller/provider';
+import type { LogExplorerStartDeps } from '../types';
+import { dynamic } from '../utils/dynamic';
+import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
+import { createCustomSearchBar } from './custom_search_bar';
+
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
+const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
+const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
 
 export interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
   plugins: LogExplorerStartDeps;
-  state$?: BehaviorSubject<LogExplorerStateContainer>;
+  controller: LogExplorerController;
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({ core, plugins, state$ }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({
+    core,
+    plugins,
+    controller,
+  }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
-    const { data, dataViews, discover } = plugins;
-    // Lazy load dependencies
-    const datasetServiceModuleLoadable = import('../services/datasets');
-    const logExplorerMachineModuleLoadable = import('../state_machines/log_explorer_profile');
+    const { discoverServices, service } = controller;
+    const pluginsWithOverrides = {
+      ...plugins,
+      ...discoverServices,
+    };
+    const { data, dataViews, discover, navigation, unifiedSearch } = pluginsWithOverrides;
 
-    const [{ DatasetsService }, { initializeLogExplorerProfileStateService, waitForState }] =
-      await Promise.all([datasetServiceModuleLoadable, logExplorerMachineModuleLoadable]);
-
-    const datasetsClient = new DatasetsService().start({
-      http: core.http,
-    }).client;
-
-    const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
-      datasetsClient,
-      stateContainer,
-      toasts: core.notifications.toasts,
-    });
+    service.send('RECEIVED_STATE_CONTAINER', { discoverStateContainer: stateContainer });
 
     /**
      * Wait for the machine to be fully initialized to set the restored selection
      * create the DataView and set it in the stateContainer from Discover
      */
-    await waitForState(logExplorerProfileStateService, 'initialized');
-
-    /**
-     * Subscribe the state$ BehaviorSubject when the consumer app wants to react to state changes.
-     * It emits a combined state of:
-     * - log explorer state machine context
-     * - appState from the discover stateContainer
-     */
-    let stateSubscription: Subscription;
-    if (state$) {
-      stateSubscription = createStateUpdater({
-        logExplorerProfileStateService,
-        stateContainer,
-      }).subscribe(state$);
-    }
+    await waitFor(service, (state) => state.matches('initialized'), { timeout: 30000 });
 
     /**
      * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
@@ -76,20 +63,22 @@ export const createLogExplorerProfileCustomizations =
         return (
           <KibanaContextProviderForPlugin>
             <LazyCustomDatasetSelector
-              datasetsClient={datasetsClient}
+              datasetsClient={controller.datasetsClient}
               dataViews={dataViews}
               discover={discover}
-              logExplorerProfileStateService={logExplorerProfileStateService}
+              logExplorerControllerStateService={service}
             />
           </KibanaContextProviderForPlugin>
         );
       },
       PrependFilterBar: () => (
-        <LazyCustomDatasetFilters
-          logExplorerProfileStateService={logExplorerProfileStateService}
-          data={data}
-        />
+        <LazyCustomDatasetFilters logExplorerControllerStateService={service} data={data} />
       ),
+      CustomSearchBar: createCustomSearchBar({
+        data,
+        navigation,
+        unifiedSearch,
+      }),
     });
 
     /**
@@ -102,6 +91,9 @@ export const createLogExplorerProfileCustomizations =
         openItem: { disabled: true },
         saveItem: { disabled: true },
       },
+      defaultBadges: {
+        unsavedChangesBadge: { disabled: true },
+      },
     });
 
     /**
@@ -109,32 +101,39 @@ export const createLogExplorerProfileCustomizations =
      */
     customizations.set({
       id: 'flyout',
+      size: '60%',
+      title: i18n.translate('xpack.logExplorer.flyoutDetail.title', {
+        defaultMessage: 'Log details',
+      }),
       actions: {
         defaultActions: {
           viewSingleDocument: { disabled: true },
           viewSurroundingDocument: { disabled: true },
         },
       },
+      docViewsRegistry: (registry) => {
+        registry.add({
+          id: 'doc_view_log_overview',
+          title: i18n.translate('xpack.logExplorer.flyoutDetail.docViews.overview', {
+            defaultMessage: 'Overview',
+          }),
+          order: 0,
+          component: (props) => {
+            const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
+
+            return (
+              <KibanaContextProviderForPlugin>
+                <LogExplorerControllerProvider controller={controller}>
+                  <LazyCustomFlyoutContent {...props} />
+                </LogExplorerControllerProvider>
+              </KibanaContextProviderForPlugin>
+            );
+          },
+        });
+
+        return registry;
+      },
     });
 
-    return () => {
-      if (stateSubscription) {
-        stateSubscription.unsubscribe();
-      }
-    };
+    return () => {};
   };
-
-const createStateUpdater = ({
-  logExplorerProfileStateService,
-  stateContainer,
-}: {
-  logExplorerProfileStateService: LogExplorerProfileStateService;
-  stateContainer: DiscoverStateContainer;
-}) => {
-  return combineLatest([from(logExplorerProfileStateService), stateContainer.appState.state$]).pipe(
-    map(([logExplorerState, appState]) => ({
-      logExplorerState: logExplorerState.context,
-      appState,
-    }))
-  );
-};

@@ -15,6 +15,7 @@ import {
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -189,7 +190,12 @@ function buildEuiGridColumn({
     });
 
     column.display = (
-      <div aria-label={primaryTimeAriaLabel}>
+      <div
+        aria-label={primaryTimeAriaLabel}
+        css={css`
+          text-align: left;
+        `}
+      >
         <EuiToolTip content={primaryTimeTooltip}>
           <>
             {timeFieldName} <EuiIcon type="clock" />
@@ -265,6 +271,20 @@ export function getEuiGridColumns({
       showColumnTokens,
     })
   );
+}
+
+export function hasSourceTimeFieldValue(
+  columns: string[],
+  dataView: DataView,
+  columnTypes: DataTableColumnTypes | undefined,
+  showTimeCol: boolean,
+  isPlainRecord: boolean
+) {
+  const timeFieldName = dataView.timeFieldName;
+  if (!isPlainRecord || !columns.includes('_source') || !timeFieldName || !columnTypes) {
+    return showTimeCol;
+  }
+  return timeFieldName in columnTypes;
 }
 
 export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {

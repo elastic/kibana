@@ -11,6 +11,10 @@ discover-app {
 .dscPage {
   @include euiBreakpoint('m', 'l', 'xl') {
     @include kibanaFullBodyHeight();
+
+    &.dscPage--serverless {
+      @include kibanaFullBodyHeight($euiSize * 3);
+    }
   }
 
   flex-direction: column;

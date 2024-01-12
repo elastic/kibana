@@ -63,6 +63,15 @@ describe('NewChatById', () => {
     expect(newChatButton.querySelector('.euiButtonContent__icon')).not.toBeInTheDocument();
   });
 
+  it('renders button icon when iconOnly is true', async () => {
+    render(<NewChatById iconOnly />);
+
+    const newChatButton = screen.getByTestId('newChatById');
+
+    expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+    expect(newChatButton.textContent).not.toContain('Chat');
+  });
+
   it('calls showAssistantOverlay on click', () => {
     const conversationId = 'test-conversation-id';
     const promptContextId = 'test-prompt-context-id';

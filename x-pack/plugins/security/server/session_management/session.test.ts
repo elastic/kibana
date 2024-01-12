@@ -9,6 +9,7 @@ import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { sessionCookieMock, sessionIndexMock, sessionMock } from './index.mock';
@@ -21,7 +22,6 @@ import {
   SessionUnexpectedError,
 } from './session_errors';
 import type { SessionIndex } from './session_index';
-import type { AuditLogger } from '..';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userSessionConcurrentLimitLogoutEvent } from '../audit';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';

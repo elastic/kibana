@@ -55,6 +55,7 @@ import {
   JoinDescriptor,
   LayerDescriptor,
   StyleDescriptor,
+  TileError,
   TileMetaFeature,
   VectorLayerDescriptor,
   VectorStyleDescriptor,
@@ -73,7 +74,7 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
-import type { IESSource } from '../classes/sources/es_source';
+import type { IVectorSource } from '../classes/sources/vector_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { isSpatialJoin } from '../classes/joins/is_spatial_join';
@@ -796,17 +797,13 @@ export function setHiddenLayers(hiddenLayerIds: string[]) {
   };
 }
 
-export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
-  return {
-    type: UPDATE_LAYER_PROP,
-    id: layerId,
-    propName: '__areTilesLoaded',
-    newValue: areTilesLoaded,
-  };
-}
-
-export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFeature[]) {
-  return async (
+export function setTileState(
+  layerId: string,
+  areTilesLoaded: boolean,
+  tileMetaFeatures?: TileMetaFeature[],
+  tileErrors?: TileError[]
+) {
+  return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
@@ -818,15 +815,41 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFea
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
-      propName: '__metaFromTiles',
-      newValue: mbMetaFeatures,
+      propName: '__areTilesLoaded',
+      newValue: areTilesLoaded,
     });
-    await dispatch(updateStyleMeta(layerId));
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__tileErrors',
+      newValue: tileErrors,
+    });
+
+    if (!isLayerGroup(layer) && layer.getSource().isESSource()) {
+      getInspectorAdapters(getState()).vectorTiles.setTileResults(
+        layerId,
+        tileMetaFeatures,
+        tileErrors
+      );
+    }
+
+    if (!tileMetaFeatures && !layer.getDescriptor().__tileMetaFeatures) {
+      return;
+    }
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__tileMetaFeatures',
+      newValue: tileMetaFeatures,
+    });
+    dispatch(updateStyleMeta(layerId));
   };
 }
 
 function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
-  if (isLayerGroup(layer) || !layer.getSource().isESSource()) {
+  if (isLayerGroup(layer)) {
     return;
   }
 
@@ -834,10 +857,15 @@ function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
     adapters.vectorTiles.removeLayer(layer.getId());
   }
 
+  const source = layer.getSource();
+  if ('getInspectorRequestIds' in source) {
+    (source as IVectorSource).getInspectorRequestIds().forEach((id) => {
+      adapters.requests!.resetRequest(id);
+    });
+  }
+
   if (adapters.requests && 'getValidJoins' in layer) {
-    const vectorLayer = layer as IVectorLayer;
-    adapters.requests!.resetRequest((layer.getSource() as IESSource).getId());
-    vectorLayer.getValidJoins().forEach((join) => {
+    (layer as IVectorLayer).getValidJoins().forEach((join) => {
       adapters.requests!.resetRequest(join.getRightJoinSource().getId());
     });
   }

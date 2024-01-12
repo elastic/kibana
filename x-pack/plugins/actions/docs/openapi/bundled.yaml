@@ -1,16 +1,15 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Connectors
   description: OpenAPI schema for Connectors endpoints
-  version: '0.1'
+  version: '0.2'
   contact:
     name: Connectors Team
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
-    description: local
+  - url: /
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -59,10 +58,6 @@ paths:
                   $ref: '#/components/examples/create_xmatters_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector/{connectorId}:
     get:
       summary: Retrieves a connector by ID.
@@ -85,8 +80,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes a connector.
       operationId: deleteConnector
@@ -102,8 +95,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: createConnectorId
@@ -118,7 +109,8 @@ paths:
           required: true
           schema:
             type: string
-            example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+            examples:
+              - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
       requestBody:
         required: true
         content:
@@ -140,8 +132,6 @@ paths:
                   $ref: '#/components/examples/create_index_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: updateConnector
@@ -172,10 +162,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector/{connectorId}/_execute:
     post:
       summary: Runs a connector.
@@ -194,10 +180,14 @@ paths:
             schema:
               $ref: '#/components/schemas/run_connector_request'
             examples:
+              runEmailConnectorRequest:
+                $ref: '#/components/examples/run_email_connector_request'
               runIndexConnectorRequest:
                 $ref: '#/components/examples/run_index_connector_request'
               runJiraConnectorRequest:
                 $ref: '#/components/examples/run_jira_connector_request'
+              runPagerDutyConnectorRequest:
+                $ref: '#/components/examples/run_pagerduty_connector_request'
               runServerLogConnectorRequest:
                 $ref: '#/components/examples/run_server_log_connector_request'
               runServiceNowITOMConnectorRequest:
@@ -234,10 +224,14 @@ paths:
                       - error
                       - ok
               examples:
+                runEmailConnectorResponse:
+                  $ref: '#/components/examples/run_email_connector_response'
                 runIndexConnectorResponse:
                   $ref: '#/components/examples/run_index_connector_response'
                 runJiraConnectorResponse:
                   $ref: '#/components/examples/run_jira_connector_response'
+                runPagerDutyConnectorResponse:
+                  $ref: '#/components/examples/run_pagerduty_connector_response'
                 runServerLogConnectorResponse:
                   $ref: '#/components/examples/run_server_log_connector_response'
                 runServiceNowITOMConnectorResponse:
@@ -246,10 +240,6 @@ paths:
                   $ref: '#/components/examples/run_swimlane_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connectors:
     get:
       summary: Retrieves all connectors.
@@ -270,10 +260,6 @@ paths:
                   $ref: '#/components/examples/get_connectors_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -301,46 +287,48 @@ paths:
                     enabled:
                       type: boolean
                       description: Indicates whether the connector type is enabled in Kibana.
-                      example: true
+                      examples:
+                        - true
                     enabled_in_config:
                       type: boolean
                       description: Indicates whether the connector type is enabled in the Kibana configuration file.
-                      example: true
+                      examples:
+                        - true
                     enabled_in_license:
                       type: boolean
                       description: Indicates whether the connector is enabled in the license.
-                      example: true
+                      examples:
+                        - true
                     id:
                       $ref: '#/components/schemas/connector_types'
                     is_system_action_type:
                       type: boolean
-                      example: false
+                      examples:
+                        - false
                     minimum_license_required:
                       type: string
                       description: The license that is required to use the connector type.
-                      example: basic
+                      examples:
+                        - basic
                     name:
                       type: string
                       description: The name of the connector type.
-                      example: Index
+                      examples:
+                        - Index
                     supported_feature_ids:
                       type: array
                       description: The features that are supported by the connector type.
                       items:
                         $ref: '#/components/schemas/features'
-                      example:
-                        - alerting
-                        - cases
-                        - siem
+                      examples:
+                        - - alerting
+                          - cases
+                          - siem
               examples:
                 getConnectorTypesServerlessResponse:
                   $ref: '#/components/examples/get_connector_types_generativeai_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector:
     post:
       summary: Creates a connector.
@@ -385,10 +373,6 @@ paths:
                   $ref: '#/components/examples/create_xmatters_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector/{connectorId}:
     get:
       summary: Retrieves a connector by ID.
@@ -414,8 +398,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes a connector.
       operationId: deleteConnectorWithSpaceId
@@ -434,8 +416,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: createConnectorIdWithSpaceId
@@ -452,7 +432,8 @@ paths:
           required: true
           schema:
             type: string
-            example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+            examples:
+              - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
       requestBody:
         required: true
         content:
@@ -474,8 +455,6 @@ paths:
                   $ref: '#/components/examples/create_index_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: updateConnectorWithSpaceId
@@ -509,10 +488,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connectors:
     get:
       summary: Retrieves all connectors.
@@ -537,10 +512,6 @@ paths:
                   $ref: '#/components/examples/get_connectors_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -571,43 +542,44 @@ paths:
                     enabled:
                       type: boolean
                       description: Indicates whether the connector type is enabled in Kibana.
-                      example: true
+                      examples:
+                        - true
                     enabled_in_config:
                       type: boolean
                       description: Indicates whether the connector type is enabled in the Kibana `.yml` file.
-                      example: true
+                      examples:
+                        - true
                     enabled_in_license:
                       type: boolean
                       description: Indicates whether the connector is enabled in the license.
-                      example: true
+                      examples:
+                        - true
                     id:
                       $ref: '#/components/schemas/connector_types'
                     minimum_license_required:
                       type: string
                       description: The license that is required to use the connector type.
-                      example: basic
+                      examples:
+                        - basic
                     name:
                       type: string
                       description: The name of the connector type.
-                      example: Index
+                      examples:
+                        - Index
                     supported_feature_ids:
                       type: array
                       description: The Kibana features that are supported by the connector type.
                       items:
                         $ref: '#/components/schemas/features'
-                      example:
-                        - alerting
-                        - uptime
-                        - siem
+                      examples:
+                        - - alerting
+                          - uptime
+                          - siem
               examples:
                 getConnectorTypesResponse:
                   $ref: '#/components/examples/get_connector_types_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector/{connectorId}/_execute:
     post:
       summary: Runs a connector.
@@ -679,10 +651,6 @@ paths:
                   $ref: '#/components/examples/run_swimlane_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/action/{actionId}:
     delete:
       summary: Deletes a connector.
@@ -701,8 +669,6 @@ paths:
           description: Indicates a successful call.
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves a connector by ID.
       operationId: legacyGetConnector
@@ -718,8 +684,6 @@ paths:
           $ref: '#/components/responses/200_actions'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: legacyUpdateConnector
@@ -754,10 +718,6 @@ paths:
           $ref: '#/components/responses/200_actions'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions:
     get:
       summary: Retrieves all connectors.
@@ -779,8 +739,6 @@ paths:
                   $ref: '#/components/schemas/action_response_properties'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: legacyCreateConnector
@@ -817,10 +775,6 @@ paths:
           $ref: '#/components/responses/200_actions'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/list_action_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -852,7 +806,8 @@ paths:
                     enabledInLicense:
                       type: boolean
                       description: Indicates whether the connector is enabled in the license.
-                      example: true
+                      examples:
+                        - true
                     id:
                       type: string
                       description: The unique identifier for the connector type.
@@ -864,10 +819,6 @@ paths:
                       description: The name of the connector type.
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/action/{actionId}/_execute:
     post:
       summary: Runs a connector.
@@ -918,10 +869,6 @@ paths:
                     description: The status of the action.
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
@@ -930,7 +877,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   parameters:
     kbn_xsrf:
       schema:
@@ -946,7 +894,8 @@ components:
       required: true
       schema:
         type: string
-        example: df770e30-8b8b-11ed-a780-3b746c987a81
+        examples:
+          - df770e30-8b8b-11ed-a780-3b746c987a81
     space_id:
       in: path
       name: spaceId
@@ -954,7 +903,8 @@ components:
       required: true
       schema:
         type: string
-        example: default
+        examples:
+          - default
     action_id:
       in: path
       name: actionId
@@ -962,7 +912,8 @@ components:
       required: true
       schema:
         type: string
-        example: c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
+        examples:
+          - c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
   schemas:
     config_properties_bedrock:
       title: Connector request properties for an Amazon Bedrock connector
@@ -1010,11 +961,13 @@ components:
           description: The type of connector.
           enum:
             - .bedrock
-          example: .bedrock
+          examples:
+            - .bedrock
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_bedrock'
     config_properties_cases_webhook:
@@ -1035,9 +988,9 @@ components:
           type: string
           description: |
             A JSON payload sent to the create comment URL to create a case comment. You can use variables to add Kibana Cases data to the payload. The required variable is `case.comment`. Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated once the Mustache variables have been placed when the REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
-          example:
-            body:
-              '[object Object]': null
+          examples:
+            - body:
+                '[object Object]': null
         createCommentMethod:
           type: string
           description: |
@@ -1051,19 +1004,20 @@ components:
           type: string
           description: |
             The REST API URL to create a case comment by ID in the third-party system. You can use a variable to add the external system ID to the URL. If you are using the `xpack.actions.allowedHosts setting`, add the hostname to the allowed hosts.
-          example: https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment
+          examples:
+            - https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}/comment
         createIncidentJson:
           type: string
           description: |
             A JSON payload sent to the create case URL to create a case. You can use variables to add case data to the payload. Required variables are `case.title` and `case.description`. Due to Mustache template variables (which is the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid to avoid future validation errors; disregard Mustache variables during your review.
-          example:
-            fields:
-              summary:
-                '[object Object]': null
-              description:
-                '[object Object]': null
-              labels:
-                '[object Object]': null
+          examples:
+            - fields:
+                summary:
+                  '[object Object]': null
+                description:
+                  '[object Object]': null
+                labels:
+                  '[object Object]': null
         createIncidentMethod:
           type: string
           description: |
@@ -1087,7 +1041,8 @@ components:
           type: string
           description: |
             The REST API URL to get the case by ID from the third-party system. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts. You can use a variable to add the external system ID to the URL. Due to Mustache template variables (the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
-          example: https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}
+          examples:
+            - https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}
         hasAuth:
           type: boolean
           description: If true, a username and password for login type authentication must be provided.
@@ -1100,14 +1055,14 @@ components:
           type: string
           description: |
             The JSON payload sent to the update case URL to update the case. You can use variables to add Kibana Cases data to the payload. Required variables are `case.title` and `case.description`. Due to Mustache template variables (which is the text enclosed in triple braces, for example, `{{{case.title}}}`), the JSON is not validated when you create the connector. The JSON is validated after the Mustache variables have been placed when REST method runs. Manually ensure that the JSON is valid to avoid future validation errors; disregard Mustache variables during your review.
-          example:
-            fields:
-              summary:
-                '[object Object]': null
-              description:
-                '[object Object]': null
-              labels:
-                '[object Object]': null
+          examples:
+            - fields:
+                summary:
+                  '[object Object]': null
+                description:
+                  '[object Object]': null
+                labels:
+                  '[object Object]': null
         updateIncidentMethod:
           type: string
           description: |
@@ -1121,12 +1076,14 @@ components:
           type: string
           description: |
             The REST API URL to update the case by ID in the third-party system. You can use a variable to add the external system ID to the URL. If you are using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
-          example: https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.ID}}}
+          examples:
+            - https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.ID}}}
         viewIncidentUrl:
           type: string
           description: |
             The URL to view the case in the external system. You can use variables to add the external system ID or external system title to the URL.
-          example: https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
+          examples:
+            - https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
     secrets_properties_cases_webhook:
       title: Connector secrets properties for Webhook - Case Management connector
       type: object
@@ -1154,11 +1111,13 @@ components:
           description: The type of connector.
           enum:
             - .cases-webhook
-          example: .cases-webhook
+          examples:
+            - .cases-webhook
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_cases_webhook'
     config_properties_d3security:
@@ -1200,11 +1159,13 @@ components:
           description: The type of connector.
           enum:
             - .d3security
-          example: .d3security
+          examples:
+            - .d3security
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_d3security'
     config_properties_email:
@@ -1217,8 +1178,9 @@ components:
         clientId:
           description: |
             The client identifier, which is a part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
         from:
           description: |
             The from address for all emails sent by the connector. It must be specified in `user@host-name` format.
@@ -1233,8 +1195,9 @@ components:
             The host name of the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
           type: string
         oauthTokenUrl:
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
         port:
           description: |
             The port to connect to on the service provider. If the `service` is `elastic_cloud` (for Elastic Cloud notifications) or one of Nodemailer's well-known email service providers, this property is ignored. If `service` is `other`, this property must be defined. 
@@ -1257,8 +1220,9 @@ components:
         tenantId:
           description: |
             The tenant identifier, which is part of OAuth 2.0 client credentials authentication, in GUID format. If `service` is `exchange_server`, this property is required.
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
     secrets_properties_email:
       title: Connector secrets properties for an email connector
       description: Defines secrets for connectors when type is `.email`.
@@ -1294,11 +1258,13 @@ components:
           description: The type of connector.
           enum:
             - .email
-          example: .email
+          examples:
+            - .email
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_email'
     config_properties_genai:
@@ -1362,11 +1328,13 @@ components:
           description: The type of connector.
           enum:
             - .gen-ai
-          example: .gen-ai
+          examples:
+            - .gen-ai
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_genai'
     config_properties_index:
@@ -1379,8 +1347,9 @@ components:
         executionTimeField:
           description: A field that indicates when the document was indexed.
           default: null
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
         index:
           description: The Elasticsearch index to be written to.
           type: string
@@ -1405,11 +1374,13 @@ components:
           description: The type of connector.
           enum:
             - .index
-          example: .index
+          examples:
+            - .index
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
     config_properties_jira:
       title: Connector request properties for a Jira connector
       required:
@@ -1455,11 +1426,13 @@ components:
           description: The type of connector.
           enum:
             - .jira
-          example: .jira
+          examples:
+            - .jira
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_jira'
     config_properties_opsgenie:
@@ -1500,11 +1473,13 @@ components:
           description: The type of connector.
           enum:
             - .opsgenie
-          example: .opsgenie
+          examples:
+            - .opsgenie
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_opsgenie'
     config_properties_pagerduty:
@@ -1514,9 +1489,11 @@ components:
       properties:
         apiUrl:
           description: The PagerDuty event URL.
-          type: string
-          nullable: true
-          example: https://events.pagerduty.com/v2/enqueue
+          type:
+            - string
+            - 'null'
+          examples:
+            - https://events.pagerduty.com/v2/enqueue
     secrets_properties_pagerduty:
       title: Connector secrets properties for a PagerDuty connector
       description: Defines secrets for connectors when type is `.pagerduty`.
@@ -1546,11 +1523,13 @@ components:
           description: The type of connector.
           enum:
             - .pagerduty
-          example: .pagerduty
+          examples:
+            - .pagerduty
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_pagerduty'
     config_properties_resilient:
@@ -1596,13 +1575,15 @@ components:
         connector_type_id:
           description: The type of connector.
           type: string
-          example: .resilient
+          examples:
+            - .resilient
           enum:
             - .resilient
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_resilient'
     create_connector_request_serverlog:
@@ -1618,11 +1599,13 @@ components:
           description: The type of connector.
           enum:
             - .server-log
-          example: .server-log
+          examples:
+            - .server-log
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
     config_properties_servicenow:
       title: Connector request properties for a ServiceNow ITSM connector
       required:
@@ -1693,11 +1676,13 @@ components:
           description: The type of connector.
           enum:
             - .servicenow
-          example: .servicenow
+          examples:
+            - .servicenow
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
     config_properties_servicenow_itom:
@@ -1745,11 +1730,13 @@ components:
           description: The type of connector.
           enum:
             - .servicenow-itom
-          example: .servicenow-itom
+          examples:
+            - .servicenow-itom
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
     create_connector_request_servicenow_sir:
@@ -1770,11 +1757,13 @@ components:
           description: The type of connector.
           enum:
             - .servicenow-sir
-          example: .servicenow-sir
+          examples:
+            - .servicenow-sir
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_servicenow'
     secrets_properties_slack_api:
@@ -1801,11 +1790,13 @@ components:
           description: The type of connector.
           enum:
             - .slack_api
-          example: .slack_api
+          examples:
+            - .slack_api
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_slack_api'
     secrets_properties_slack_webhook:
@@ -1832,11 +1823,13 @@ components:
           description: The type of connector.
           enum:
             - .slack
-          example: .slack
+          examples:
+            - .slack
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_slack_webhook'
     config_properties_swimlane:
@@ -2045,11 +2038,13 @@ components:
           description: The type of connector.
           enum:
             - .swimlane
-          example: .swimlane
+          examples:
+            - .swimlane
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_swimlane'
     secrets_properties_teams:
@@ -2077,11 +2072,13 @@ components:
           description: The type of connector.
           enum:
             - .teams
-          example: .teams
+          examples:
+            - .teams
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_teams'
     config_properties_tines:
@@ -2127,11 +2124,13 @@ components:
           description: The type of connector.
           enum:
             - .tines
-          example: .tines
+          examples:
+            - .tines
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_tines'
     config_properties_torq:
@@ -2172,11 +2171,13 @@ components:
           description: The type of connector.
           enum:
             - .torq
-          example: .torq
+          examples:
+            - .torq
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_torq'
     config_properties_webhook:
@@ -2208,8 +2209,9 @@ components:
           description: |
             If `true`, a user name and password must be provided for login type authentication.
         headers:
-          type: object
-          nullable: true
+          type:
+            - object
+            - 'null'
           description: A set of key-value pairs sent as headers with the request.
         method:
           type: string
@@ -2272,11 +2274,13 @@ components:
           description: The type of connector.
           enum:
             - .webhook
-          example: .webhook
+          examples:
+            - .webhook
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_webhook'
     config_properties_xmatters:
@@ -2287,8 +2291,9 @@ components:
         configUrl:
           description: |
             The request URL for the Elastic Alerts trigger in xMatters. It is applicable only when `usesBasic` is `true`.
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
         usesBasic:
           description: Specifies whether the connector uses HTTP basic authentication (`true`) or URL authentication (`false`).
           type: boolean
@@ -2328,11 +2333,13 @@ components:
           description: The type of connector.
           enum:
             - .xmatters
-          example: .xmatters
+          examples:
+            - .xmatters
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_xmatters'
     create_connector_request:
@@ -2366,20 +2373,24 @@ components:
     is_deprecated:
       type: boolean
       description: Indicates whether the connector type is deprecated.
-      example: false
+      examples:
+        - false
     is_missing_secrets:
       type: boolean
       description: Indicates whether secrets are missing for the connector. Secrets configuration properties vary depending on the connector type.
-      example: false
+      examples:
+        - false
     is_preconfigured:
       type: boolean
       description: |
         Indicates whether it is a preconfigured connector. If true, the `config` and `is_missing_secrets` properties are omitted from the response. 
-      example: false
+      examples:
+        - false
     is_system_action:
       type: boolean
       description: Indicates whether the connector is used for system actions.
-      example: false
+      examples:
+        - false
     connector_response_properties_bedrock:
       title: Connector response properties for an Amazon Bedrock connector
       type: object
@@ -2416,7 +2427,8 @@ components:
       type: integer
       description: |
         Indicates the number of saved objects that reference the connector. If `is_preconfigured` is true, this value is not calculated. This property is returned only by the get all connectors API.
-      example: 2
+      examples:
+        - 2
     connector_response_properties_cases_webhook:
       title: Connector request properties for a Webhook - Case Management connector
       type: object
@@ -2692,8 +2704,9 @@ components:
         - name
       properties:
         config:
-          type: object
-          nullable: true
+          type:
+            - object
+            - 'null'
         connector_type_id:
           type: string
           description: The type of connector.
@@ -3127,7 +3140,8 @@ components:
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_cases_webhook'
     update_connector_request_d3security:
@@ -3307,7 +3321,8 @@ components:
         name:
           type: string
           description: The display name for the connector.
-          example: my-connector
+          examples:
+            - my-connector
         secrets:
           $ref: '#/components/schemas/secrets_properties_swimlane'
     update_connector_request_teams:
@@ -3407,6 +3422,24 @@ components:
         - $ref: '#/components/schemas/update_connector_request_torq'
         - $ref: '#/components/schemas/update_connector_request_webhook'
         - $ref: '#/components/schemas/update_connector_request_xmatters'
+    run_connector_params_acknowledge_resolve_pagerduty:
+      title: PagerDuty connector parameters
+      description: Test an action that acknowledges or resolves a PagerDuty alert.
+      type: object
+      required:
+        - dedupKey
+        - eventAction
+      properties:
+        dedupKey:
+          description: The deduplication key for the PagerDuty alert.
+          type: string
+          maxLength: 255
+        eventAction:
+          description: The type of event.
+          type: string
+          enum:
+            - acknowledge
+            - resolve
     run_connector_params_documents:
       title: Index connector parameters
       description: Test an action that indexes a document into Elasticsearch.
@@ -3420,7 +3453,50 @@ components:
           items:
             type: object
             additionalProperties: true
-    run_connector_params_level_message:
+    run_connector_params_message_email:
+      title: Email connector parameters
+      description: |
+        Test an action that sends an email message. There must be at least one recipient in `to`, `cc`, or `bcc`.
+      type: object
+      anyOf:
+        - required:
+            - bcc
+            - message
+            - subject
+        - required:
+            - cc
+            - message
+            - subject
+        - required:
+            - to
+            - message
+            - subject
+      properties:
+        bcc:
+          type: array
+          items:
+            type: string
+          description: |
+            A list of "blind carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+        cc:
+          type: array
+          items:
+            type: string
+          description: |
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
+        message:
+          type: string
+          description: The email message text. Markdown format is supported.
+        subject:
+          type: string
+          description: The subject line of the email.
+        to:
+          type: array
+          description: |
+            A list of email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format.
+          items:
+            type: string
+    run_connector_params_message_serverlog:
       title: Server log connector parameters
       description: Test an action that writes an entry to the Kibana server log.
       type: object
@@ -3441,6 +3517,74 @@ components:
         message:
           type: string
           description: The message for server log connectors.
+    run_connector_params_trigger_pagerduty:
+      title: PagerDuty connector parameters
+      description: Test an action that triggers a PagerDuty alert.
+      type: object
+      required:
+        - eventAction
+      properties:
+        class:
+          description: The class or type of the event.
+          type: string
+          examples:
+            - cpu load
+        component:
+          description: The component of the source machine that is responsible for the event.
+          type: string
+          examples:
+            - eth0
+        customDetails:
+          description: Additional details to add to the event.
+          type: object
+        dedupKey:
+          description: |
+            All actions sharing this key will be associated with the same PagerDuty alert. This value is used to correlate trigger and resolution.
+          type: string
+          maxLength: 255
+        eventAction:
+          description: The type of event.
+          type: string
+          enum:
+            - trigger
+        group:
+          description: The logical grouping of components of a service.
+          type: string
+          examples:
+            - app-stack
+        links:
+          description: A list of links to add to the event.
+          type: array
+          items:
+            type: object
+            properties:
+              href:
+                description: The URL for the link.
+                type: string
+              text:
+                description: A plain text description of the purpose of the link.
+                type: string
+        severity:
+          description: The severity of the event on the affected system.
+          type: string
+          enum:
+            - critical
+            - error
+            - info
+            - warning
+          default: info
+        source:
+          description: |
+            The affected system, such as a hostname or fully qualified domain name. Defaults to the Kibana saved object id of the action.
+          type: string
+        summary:
+          description: A summery of the event.
+          type: string
+          maxLength: 1024
+        timestamp:
+          description: An ISO-8601 timestamp that indicates when the event was detected or generated.
+          type: string
+          format: date-time
     run_connector_subaction_addevent:
       title: The addEvent subaction
       type: object
@@ -3553,9 +3697,9 @@ components:
               type: object
               description: The custom properties of the alert.
               additionalProperties: true
-              example:
-                key1: value1
-                key2: value2
+              examples:
+                - key1: value1
+                  key2: value2
             entity:
               type: string
               description: The domain of the alert. For example, the application or server name.
@@ -3653,7 +3797,8 @@ components:
             id:
               type: string
               description: The Jira issue type identifier.
-              example: 10024
+              examples:
+                - 10024
     run_connector_subaction_getchoices:
       title: The getChoices subaction
       type: object
@@ -3711,7 +3856,8 @@ components:
             externalId:
               type: string
               description: The Jira, ServiceNow ITSM, or ServiceNow SecOps issue identifier.
-              example: 71778
+              examples:
+                - 71778
     run_connector_subaction_issue:
       title: The issue subaction
       type: object
@@ -3732,7 +3878,8 @@ components:
             id:
               type: string
               description: The Jira issue identifier.
-              example: 71778
+              examples:
+                - 71778
     run_connector_subaction_issues:
       title: The issues subaction
       type: object
@@ -3905,8 +4052,11 @@ components:
       properties:
         params:
           oneOf:
+            - $ref: '#/components/schemas/run_connector_params_acknowledge_resolve_pagerduty'
             - $ref: '#/components/schemas/run_connector_params_documents'
-            - $ref: '#/components/schemas/run_connector_params_level_message'
+            - $ref: '#/components/schemas/run_connector_params_message_email'
+            - $ref: '#/components/schemas/run_connector_params_message_serverlog'
+            - $ref: '#/components/schemas/run_connector_params_trigger_pagerduty'
             - title: Subaction parameters
               description: Test an action that involves a subaction.
               oneOf:
@@ -3960,7 +4110,8 @@ components:
         - .torq
         - .webhook
         - .xmatters
-      example: .server-log
+      examples:
+        - .server-log
     action_response_properties:
       title: Action response properties
       description: The properties vary depending on the action type.
@@ -4111,6 +4262,19 @@ components:
         name: updated-connector
         config:
           index: updated-index
+    run_email_connector_request:
+      summary: Send an email message from an email connector.
+      value:
+        params:
+          bcc:
+            - user1@example.com
+          cc:
+            - user2@example.com
+            - user3@example.com
+          message: Test email message.
+          subject: Test message subject
+          to:
+            - user4@example.com
     run_index_connector_request:
       summary: Run an index connector.
       value:
@@ -4124,6 +4288,17 @@ components:
       value:
         params:
           subAction: issueTypes
+    run_pagerduty_connector_request:
+      summary: Run a PagerDuty connector to trigger an alert.
+      value:
+        params:
+          eventAction: trigger
+          summary: A brief event summary
+          links:
+            - href: http://example.com/pagerduty
+              text: An example link
+          customDetails:
+            my_data_1: test data
     run_server_log_connector_request:
       summary: Run a server log connector.
       value:
@@ -4152,6 +4327,30 @@ components:
               caseId: '1000'
               caseName: Case name
               description: Description of the incident.
+    run_email_connector_response:
+      summary: Response for sending a message from an email connector.
+      value:
+        connector_id: 7fc7b9a0-ecc9-11ec-8736-e7d63118c907
+        data:
+          accepted:
+            - user1@example.com
+            - user2@example.com
+            - user3@example.com
+            - user4@example.com
+          envelope:
+            from: tester@example.com
+            to:
+              - user1@example.com
+              - user2@example.com
+              - user3@example.com
+              - user4@example.com
+          envelopeTime: 8
+          messageTime: 3
+          messageSize: 729
+          response: 250 Message queued as QzEXKcGJ
+          messageId: <08a92d29-642a-0706-750c-de5996bd5cf3@example.com>
+          rejected: []
+        status: ok
     run_index_connector_response:
       summary: Response from running an index connector.
       value:
@@ -4190,6 +4389,15 @@ components:
             name: Bug
           - id: 10000
             name: Epic
+        status: ok
+    run_pagerduty_connector_response:
+      summary: Response from running a PagerDuty connector.
+      value:
+        connector_id: 45de9f70-954f-4608-b12a-db7cf808e49d
+        data:
+          dedup_key: 5115e138b26b484a81eaea779faa6016
+          message: Event processed
+          status: success
         status: ok
     run_server_log_connector_response:
       summary: Response from running a server log connector.
@@ -4337,14 +4545,16 @@ components:
             properties:
               error:
                 type: string
-                example: Unauthorized
+                examples:
+                  - Unauthorized
                 enum:
                   - Unauthorized
               message:
                 type: string
               statusCode:
                 type: integer
-                example: 401
+                examples:
+                  - 401
                 enum:
                   - 401
     '404':
@@ -4357,15 +4567,18 @@ components:
             properties:
               error:
                 type: string
-                example: Not Found
+                examples:
+                  - Not Found
                 enum:
                   - Not Found
               message:
                 type: string
-                example: Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
+                examples:
+                  - Saved object [action/baf33fc0-920c-11ed-b36a-874bd1548a00] not found
               statusCode:
                 type: integer
-                example: 404
+                examples:
+                  - 404
                 enum:
                   - 404
     200_actions:

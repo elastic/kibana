@@ -28,7 +28,7 @@ export const NLP_DISPLAY_TITLES: Record<string, string | undefined> = {
   question_answering: i18n.translate(
     'xpack.enterpriseSearch.content.ml_inference.question_answering',
     {
-      defaultMessage: 'Named Entity Recognition',
+      defaultMessage: 'Question Answering',
     }
   ),
   text_classification: i18n.translate(
@@ -41,7 +41,7 @@ export const NLP_DISPLAY_TITLES: Record<string, string | undefined> = {
     defaultMessage: 'Dense Vector Text Embedding',
   }),
   text_expansion: i18n.translate('xpack.enterpriseSearch.content.ml_inference.text_expansion', {
-    defaultMessage: 'ELSER Text Expansion',
+    defaultMessage: 'Elastic Learned Sparse EncodeR (ELSER)',
   }),
   zero_shot_classification: i18n.translate(
     'xpack.enterpriseSearch.content.ml_inference.zero_shot_classification',

@@ -38,7 +38,8 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
   );
 
-  describe('EPM - get', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/163203
+  describe.skip('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 

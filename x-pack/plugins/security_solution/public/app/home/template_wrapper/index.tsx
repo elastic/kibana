@@ -11,18 +11,17 @@ import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/e
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { SecuritySolutionFlyout, SecuritySolutionFlyoutContextProvider } from '../../../flyout';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { SecuritySolutionFlyout } from '../../../flyout';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { GlobalKQLHeader } from './global_kql_header';
-import {
-  BOTTOM_BAR_CLASSNAME,
-  SecuritySolutionBottomBar,
-  SecuritySolutionBottomBarProps,
-} from './bottom_bar';
+import { SecuritySolutionBottomBar } from './bottom_bar';
 import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
+import { useRouteSpy } from '../../../common/utils/route/use_route_spy';
+import { SecurityPageName } from '../../types';
 
 /**
  * Need to apply the styles via a className to effect the containing bottom bar
@@ -39,14 +38,6 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
     background-color: ${({ theme }) => theme.colors.emptyShade};
   }
 
-  .${BOTTOM_BAR_CLASSNAME} {
-    animation: 'none !important'; // disable the default bottom bar slide animation
-    background: ${({ theme }) => theme.colors.emptyShade}; // Override bottom bar black background
-    color: inherit; // Necessary to override the bottom bar 'white text'
-    transform: ${(
-      { $isShowingTimelineOverlay } // Since the bottom bar wraps the whole overlay now, need to override any transforms when it is open
-    ) => ($isShowingTimelineOverlay ? 'none' : 'translateY(calc(100% - 50px))')};
-
     .${IS_DRAGGING_CLASS_NAME} & {
       // When a drag is in process the bottom flyout should slide up to allow a drop
       transform: none;
@@ -62,6 +53,8 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     const { show: isShowingTimelineOverlay } = useDeepEqualSelector((state) =>
       getTimelineShowStatus(state, TimelineId.active)
     );
+    const [routeProps] = useRouteSpy();
+    const isPreview = routeProps?.pageName === SecurityPageName.rulesCreate;
 
     // The bottomBar by default has a set 'dark' colorMode that doesn't match the global colorMode from the Advanced Settings
     // To keep the mode in sync, we pass in the globalColorMode to the bottom bar here
@@ -74,7 +67,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
      * between EuiPageTemplate and the security solution pages.
      */
     return (
-      <SecuritySolutionFlyoutContextProvider>
+      <ExpandableFlyoutProvider storage={isPreview ? 'memory' : 'url'}>
         <StyledKibanaPageTemplate
           theme={euiTheme}
           $isShowingTimelineOverlay={isShowingTimelineOverlay}
@@ -95,7 +88,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
             {children}
           </KibanaPageTemplate.Section>
           {isTimelineBottomBarVisible && (
-            <KibanaPageTemplate.BottomBar {...SecuritySolutionBottomBarProps}>
+            <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
               <EuiThemeProvider colorMode={globalColorMode}>
                 <SecuritySolutionBottomBar />
               </EuiThemeProvider>
@@ -103,7 +96,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
           )}
           <SecuritySolutionFlyout />
         </StyledKibanaPageTemplate>
-      </SecuritySolutionFlyoutContextProvider>
+      </ExpandableFlyoutProvider>
     );
   });
 

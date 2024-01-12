@@ -308,7 +308,6 @@ const EcsOptional = rt.partial({
   'faas.execution': schemaString,
   'faas.id': schemaString,
   'faas.name': schemaString,
-  'faas.trigger': schemaUnknown,
   'faas.version': schemaString,
   'file.accessed': schemaDate,
   'file.attributes': schemaStringArray,

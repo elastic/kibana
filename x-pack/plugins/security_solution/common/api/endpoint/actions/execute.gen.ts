@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { BaseActionSchema, Command, Timeout } from '../model/schema/common.gen';
 
 export type ExecuteActionRequestBody = z.infer<typeof ExecuteActionRequestBody>;
-export const ExecuteActionRequestBody = BaseActionSchema.and(
+export const ExecuteActionRequestBody = BaseActionSchema.merge(
   z.object({
     parameters: z.object({
       command: Command,

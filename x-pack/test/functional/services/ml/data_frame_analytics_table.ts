@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type ExpectedSectionTableEntries = Record<string, string>;
@@ -275,7 +275,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
     public async assertJobActionViewButtonEnabled(analyticsId: string, expectedValue: boolean) {
       await this.ensureJobActionsMenuOpen(analyticsId);
       const actionMenuViewButton = await find.byCssSelector(
-        '[data-test-subj="mlAnalyticsJobViewButton"][class="euiContextMenuItem"]'
+        '.euiContextMenuItem[data-test-subj="mlAnalyticsJobViewButton"]'
       );
       const isEnabled = await actionMenuViewButton.isEnabled();
       expect(isEnabled).to.eql(

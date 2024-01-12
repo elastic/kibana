@@ -29,7 +29,7 @@ import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
   DataFilters,
-  ESSearchSourceResponseMeta,
+  DataRequestMeta,
   MapExtent,
   Timeslice,
   VectorSourceRequestMeta,
@@ -43,11 +43,9 @@ export interface SourceStatus {
   isDeprecated?: boolean;
 }
 
-export type GeoJsonFetchMeta = ESSearchSourceResponseMeta;
-
 export interface GeoJsonWithMeta {
   data: FeatureCollection;
-  meta?: GeoJsonFetchMeta;
+  meta?: DataRequestMeta;
 }
 
 export interface BoundsRequestMeta {
@@ -135,6 +133,11 @@ export interface IVectorSource extends ISource {
     mbFeature,
     onClose,
   }: GetFeatureActionsArgs): TooltipFeatureAction[];
+
+  /*
+   * Provide unique ids for managing source requests in Inspector
+   */
+  getInspectorRequestIds(): string[];
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
@@ -180,7 +183,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
-    throw new Error('Should implement VectorSource#getGeoJson');
+    throw new Error('Should implement VectorSource#getGeoJsonWithMeta');
   }
 
   hasTooltipProperties() {
@@ -286,5 +289,9 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
           },
         ]
       : [];
+  }
+
+  getInspectorRequestIds(): string[] {
+    return [];
   }
 }

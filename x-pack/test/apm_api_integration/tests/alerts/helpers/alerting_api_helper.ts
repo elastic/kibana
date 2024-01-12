@@ -9,10 +9,11 @@ import { Client, errors } from '@elastic/elasticsearch';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import pRetry from 'p-retry';
 import type { SuperTest, Test } from 'supertest';
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import { ApmApiClient } from '../../../common/config';
 
 export const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-*';
@@ -173,13 +174,7 @@ export async function clearKibanaApmEventLog(es: Client) {
   });
 }
 
-export type ApmAlertFields = ParsedTechnicalFields & {
-  'service.name': string;
-  'service.environment': string;
-  'transaction.name': string;
-  'error.grouping_key': string;
-  'error.grouping_name': string;
-};
+export type ApmAlertFields = ParsedTechnicalFields & ObservabilityApmAlert;
 
 export async function createIndexConnector({
   supertest,
@@ -199,6 +194,7 @@ export async function createIndexConnector({
       },
       connector_type_id: '.index',
     });
+
   return body.id as string;
 }
 
@@ -228,19 +224,31 @@ export function getIndexAction({
   };
 }
 
-export async function deleteActionConnector({
+export async function deleteAllActionConnectors({
   supertest,
   es,
-  actionId,
 }: {
   supertest: SuperTest<Test>;
   es: Client;
+}): Promise<any> {
+  const res = await supertest.get(`/api/actions/connectors`);
+
+  const body = res.body as Array<{ id: string; connector_type_id: string; name: string }>;
+  return Promise.all(
+    body.map(({ id }) => {
+      return deleteActionConnector({ supertest, actionId: id });
+    })
+  );
+}
+
+async function deleteActionConnector({
+  supertest,
+  actionId,
+}: {
+  supertest: SuperTest<Test>;
   actionId: string;
 }) {
-  return Promise.all([
-    await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo'),
-    await deleteActionConnectorIndex(es),
-  ]);
+  return supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
 }
 
 export async function deleteActionConnectorIndex(es: Client) {

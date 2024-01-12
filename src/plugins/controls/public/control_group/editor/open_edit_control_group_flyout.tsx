@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import React from 'react';
 
 import { pluginServices } from '../../services';
-import { ControlGroupEditor } from './control_group_editor';
 import { ControlGroupStrings } from '../control_group_strings';
 import {
   ControlGroupContainer,
   ControlGroupContainerContext,
   setFlyoutRef,
 } from '../embeddable/control_group_container';
+import { ControlGroupEditor } from './control_group_editor';
 
 export function openEditControlGroupFlyout(this: ControlGroupContainer) {
   const {
+    core: { theme, i18n },
     overlays: { openFlyout, openConfirm },
-    theme: { theme$ },
   } = pluginServices.getServices();
 
   const onDeleteAll = (ref: OverlayRef) => {
@@ -49,7 +49,7 @@ export function openEditControlGroupFlyout(this: ControlGroupContainer) {
           onClose={() => flyoutInstance.close()}
         />
       </ControlGroupContainerContext.Provider>,
-      { theme$ }
+      { theme, i18n }
     ),
     {
       'aria-label': ControlGroupStrings.manageControl.getFlyoutCreateTitle(),

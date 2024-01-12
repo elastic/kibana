@@ -36,13 +36,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const homeUrl = await browser.getCurrentUrl();
 
       // Navigate to discover app
-      await appsMenu.clickLink('Discover');
+      await appsMenu.clickLink('Discover', { category: 'kibana' });
       const discoverUrl = await browser.getCurrentUrl();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();
 
       // Navigate to dashboard app
-      await appsMenu.clickLink('Dashboard');
+      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
 
       // Navigating back to discover
       await browser.goBack();

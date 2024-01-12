@@ -18,7 +18,6 @@ import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_BYTES_FORMAT,
-  DEFAULT_DARK_MODE,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
   DEFAULT_FROM,
@@ -69,7 +68,6 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_BYTES_FORMAT]: '0,0.[0]b',
   [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
   [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
-  [DEFAULT_DARK_MODE]: false,
   [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
@@ -117,7 +115,7 @@ export const createStartServicesMock = (
   const discover = discoverPluginMock.createStartContract();
   const cases = mockCasesContract();
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
-  cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
+  cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
@@ -199,9 +197,7 @@ export const createStartServicesMock = (
       locator,
     },
     telemetry: {},
-    theme: {
-      theme$: themeServiceMock.createTheme$(),
-    },
+    theme: themeServiceMock.createSetupContract(),
     timelines: {
       getLastUpdated: jest.fn(),
       getFieldBrowser: jest.fn(),

@@ -38,7 +38,7 @@ export const BasicDateRange = LogStreamStoryTemplate.bind({});
 
 export const CenteredOnLogEntry = LogStreamStoryTemplate.bind({});
 CenteredOnLogEntry.args = {
-  center: { time: 1595146275000, tiebreaker: 150 },
+  center: { time: '2020-07-19T08:11:15.000Z', tiebreaker: 150 },
 };
 
 export const HighlightedLogEntry = LogStreamStoryTemplate.bind({});

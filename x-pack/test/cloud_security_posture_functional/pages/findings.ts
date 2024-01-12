@@ -13,16 +13,17 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
-  const comboBox = getService('comboBox');
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
+  const timeFiveHoursAgo = (Date.now() - 18000000).toString();
 
   // We need to use a dataset for the tests to run
   // We intentionally make some fields start with a capital letter to test that the query bar is case-insensitive/case-sensitive
   const data = [
     {
-      '@timestamp': '1695819664234',
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -39,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Upper case cluster id',
     },
     {
-      '@timestamp': '1695819673242',
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -56,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Another Upper case cluster id',
     },
     {
-      '@timestamp': '1695819676242',
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       rule: {
@@ -73,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'lower case cluster id',
     },
     {
-      '@timestamp': '1695819680202',
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
@@ -94,24 +95,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ruleName1 = data[0].rule.name;
   const ruleName2 = data[1].rule.name;
 
-  const resourceId1 = data[0].resource.id;
-  const ruleSection1 = data[0].rule.section;
-
-  const benchMarkName = data[0].rule.benchmark.name;
-
-  describe('Findings Page', function () {
+  describe('Findings Page - DataTable', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
-    let findingsByResourceTable: typeof findings.findingsByResourceTable;
-    let resourceFindingsTable: typeof findings.resourceFindingsTable;
     let distributionBar: typeof findings.distributionBar;
 
     before(async () => {
       findings = pageObjects.findings;
       latestFindingsTable = findings.latestFindingsTable;
-      findingsByResourceTable = findings.findingsByResourceTable;
-      resourceFindingsTable = findings.resourceFindingsTable;
       distributionBar = findings.distributionBar;
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
@@ -122,7 +114,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.add(data);
 
       await findings.navigateToLatestFindingsPage();
-
       await retry.waitFor(
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
@@ -220,17 +211,90 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('GroupBy', () => {
-      it('groups findings by resource', async () => {
-        await comboBox.set('findings_group_by_selector', 'Resource');
-        expect(
-          await findingsByResourceTable.hasColumnValue('Applicable Benchmark', benchMarkName)
-        ).to.be(true);
+    describe('DataTable features', () => {
+      it('Edit data view field option is Enabled', async () => {
+        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
+        expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();
+        await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
+      });
+    });
+
+    describe('Findings - Fields selector', () => {
+      const CSP_FIELDS_SELECTOR_MODAL = 'cloudSecurityFieldsSelectorModal';
+      const CSP_FIELDS_SELECTOR_OPEN_BUTTON = 'cloudSecurityFieldsSelectorOpenButton';
+      const CSP_FIELDS_SELECTOR_RESET_BUTTON = 'cloudSecurityFieldsSelectorResetButton';
+      const CSP_FIELDS_SELECTOR_CLOSE_BUTTON = 'cloudSecurityFieldsSelectorCloseButton';
+
+      it('Add fields to the Findings DataTable', async () => {
+        const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+        await fieldsButton.click();
+        await testSubjects.existOrFail(CSP_FIELDS_SELECTOR_MODAL);
+
+        const agentIdCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.id'
+        );
+        await agentIdCheckbox.click();
+
+        const agentNameCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.name'
+        );
+        await agentNameCheckbox.click();
+
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
+
+        const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+        await closeFieldsButton.click();
+        await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
       });
 
-      it('navigates to resource findings page from resource id link', async () => {
-        await findingsByResourceTable.clickResourceIdLink(resourceId1, ruleSection1);
-        expect(await resourceFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
+      it('Remove fields from the Findings DataTable', async () => {
+        const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+        await fieldsButton.click();
+
+        const agentIdCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.id'
+        );
+        await agentIdCheckbox.click();
+
+        const agentNameCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.name'
+        );
+        await agentNameCheckbox.click();
+
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.name');
+
+        const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+        await closeFieldsButton.click();
+        await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
+      });
+      it('Reset fields to default', async () => {
+        const fieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_OPEN_BUTTON);
+        await fieldsButton.click();
+
+        const agentIdCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.id'
+        );
+        await agentIdCheckbox.click();
+
+        const agentNameCheckbox = await testSubjects.find(
+          'cloud-security-fields-selector-item-agent.name'
+        );
+        await agentNameCheckbox.click();
+
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.existOrFail('dataGridHeaderCell-agent.name');
+
+        const resetFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_RESET_BUTTON);
+        await resetFieldsButton.click();
+
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.id');
+        await testSubjects.missingOrFail('dataGridHeaderCell-agent.name');
+
+        const closeFieldsButton = await testSubjects.find(CSP_FIELDS_SELECTOR_CLOSE_BUTTON);
+        await closeFieldsButton.click();
+        await testSubjects.missingOrFail(CSP_FIELDS_SELECTOR_MODAL);
       });
     });
   });

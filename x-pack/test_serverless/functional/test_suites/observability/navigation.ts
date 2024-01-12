@@ -41,7 +41,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       });
       await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
 
-      // navigate to log explorer
+      // navigate to the logs explorer tab by default
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-log-explorer' });
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'observability-log-explorer',
@@ -49,7 +49,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observability-log-explorer',
       });
-      await expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
+      expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
 
       // check the aiops subsection
       await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops'); // open ai ops subsection
@@ -76,7 +76,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'management' });
 
       // navigate back to serverless oblt overview
-      await svlCommonNavigation.breadcrumbs.clickHome();
+      await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });

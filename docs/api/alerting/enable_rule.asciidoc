@@ -6,8 +6,6 @@
 
 Enable a rule.
 
-WARNING: This API supports <<token-api-authentication>> only.
-
 [NOTE]
 ====
 For the most up-to-date API details, refer to the

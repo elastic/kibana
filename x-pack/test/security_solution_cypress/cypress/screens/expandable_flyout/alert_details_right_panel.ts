@@ -12,24 +12,33 @@ import {
   TABLE_TAB_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/document_details/right/test_ids';
 import {
-  COLLAPSE_DETAILS_BUTTON_TEST_ID,
-  EXPAND_DETAILS_BUTTON_TEST_ID,
-  CHAT_BUTTON_TEST_ID,
   RISK_SCORE_TITLE_TEST_ID,
   RISK_SCORE_VALUE_TEST_ID,
-  SEVERITY_TITLE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
   FLYOUT_HEADER_TITLE_TEST_ID,
+  ASSIGNEES_HEADER_TEST_ID,
 } from '@kbn/security-solution-plugin/public/flyout/document_details/right/components/test_ids';
+import {
+  COLLAPSE_DETAILS_BUTTON_TEST_ID,
+  EXPAND_DETAILS_BUTTON_TEST_ID,
+  TITLE_HEADER_TEXT_TEST_ID,
+  TITLE_LINK_ICON_TEST_ID,
+} from '@kbn/security-solution-plugin/public/flyout/shared/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_BODY = getDataTestSubjectSelector(FLYOUT_BODY_TEST_ID);
 
 /* Header */
 
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_ICON = getDataTestSubjectSelector(
+  TITLE_LINK_ICON_TEST_ID(FLYOUT_HEADER_TITLE_TEST_ID)
+);
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE = getDataTestSubjectSelector(
-  FLYOUT_HEADER_TITLE_TEST_ID
+  TITLE_HEADER_TEXT_TEST_ID(FLYOUT_HEADER_TITLE_TEST_ID)
+);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON = getDataTestSubjectSelector(
+  TITLE_LINK_ICON_TEST_ID(FLYOUT_HEADER_TITLE_TEST_ID)
 );
 export const DOCUMENT_DETAILS_FLYOUT_CLOSE_BUTTON =
   getDataTestSubjectSelector('euiFlyoutCloseButton');
@@ -49,12 +58,10 @@ export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE =
   getDataTestSubjectSelector(RISK_SCORE_TITLE_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE =
   getDataTestSubjectSelector(RISK_SCORE_VALUE_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY =
-  getDataTestSubjectSelector(SEVERITY_TITLE_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE =
   getDataTestSubjectSelector(SEVERITY_VALUE_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_HEADER_CHAT_BUTTON =
-  getDataTestSubjectSelector(CHAT_BUTTON_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES =
+  getDataTestSubjectSelector(ASSIGNEES_HEADER_TEST_ID);
 
 /* Footer */
 

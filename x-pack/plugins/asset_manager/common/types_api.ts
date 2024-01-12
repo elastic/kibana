@@ -27,7 +27,6 @@ export const assetKindRT = rt.keyof({
   pod: null,
   container: null,
   service: null,
-  alert: null,
 });
 
 export type AssetKind = rt.TypeOf<typeof assetKindRT>;
@@ -166,18 +165,27 @@ export interface K8sCluster extends WithTimestamp {
   };
 }
 
-export interface AssetFilters {
-  type?: AssetType | AssetType[];
-  kind?: AssetKind | AssetKind[];
-  ean?: string | string[];
-  id?: string;
-  typeLike?: string;
-  kindLike?: string;
-  eanLike?: string;
-  collectionVersion?: number | 'latest' | 'all';
-  from?: string | number;
-  to?: string | number;
-}
+export const assetFiltersSingleKindRT = rt.exact(
+  rt.partial({
+    type: rt.union([assetTypeRT, rt.array(assetTypeRT)]),
+    ean: rt.union([rt.string, rt.array(rt.string)]),
+    id: rt.string,
+    parentEan: rt.string,
+    ['cloud.provider']: rt.string,
+    ['cloud.region']: rt.string,
+    ['orchestrator.cluster.name']: rt.string,
+  })
+);
+
+export type SingleKindAssetFilters = rt.TypeOf<typeof assetFiltersSingleKindRT>;
+
+const supportedKindRT = rt.union([rt.literal('host'), rt.literal('service')]);
+export const assetFiltersRT = rt.intersection([
+  assetFiltersSingleKindRT,
+  rt.partial({ kind: rt.union([supportedKindRT, rt.array(supportedKindRT)]) }),
+]);
+
+export type AssetFilters = rt.TypeOf<typeof assetFiltersRT>;
 
 export const relationRT = rt.union([
   rt.literal('ancestors'),
@@ -200,13 +208,15 @@ export const assetDateRT = rt.union([dateRt, datemathStringRt]);
 /**
  * Hosts
  */
-export const getHostAssetsQueryOptionsRT = rt.exact(
+export const getHostAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
   rt.partial({
-    from: assetDateRT,
     to: assetDateRT,
     size: sizeRT,
-  })
-);
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
 export type GetHostAssetsQueryOptions = rt.TypeOf<typeof getHostAssetsQueryOptionsRT>;
 export const getHostAssetsResponseRT = rt.type({
   hosts: rt.array(assetRT),
@@ -214,19 +224,75 @@ export const getHostAssetsResponseRT = rt.type({
 export type GetHostAssetsResponse = rt.TypeOf<typeof getHostAssetsResponseRT>;
 
 /**
+ * Containers
+ */
+export const getContainerAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
+export type GetContainerAssetsQueryOptions = rt.TypeOf<typeof getContainerAssetsQueryOptionsRT>;
+export const getContainerAssetsResponseRT = rt.type({
+  containers: rt.array(assetRT),
+});
+export type GetContainerAssetsResponse = rt.TypeOf<typeof getContainerAssetsResponseRT>;
+
+/**
  * Services
  */
-export const getServiceAssetsQueryOptionsRT = rt.exact(
+export const getServiceAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
   rt.partial({
     from: assetDateRT,
     to: assetDateRT,
     size: sizeRT,
-    parent: rt.string,
-  })
-);
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
 
 export type GetServiceAssetsQueryOptions = rt.TypeOf<typeof getServiceAssetsQueryOptionsRT>;
 export const getServiceAssetsResponseRT = rt.type({
   services: rt.array(assetRT),
 });
 export type GetServiceAssetsResponse = rt.TypeOf<typeof getServiceAssetsResponseRT>;
+
+/**
+ * Pods
+ */
+export const getPodAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersSingleKindRT,
+  }),
+]);
+export type GetPodAssetsQueryOptions = rt.TypeOf<typeof getPodAssetsQueryOptionsRT>;
+export const getPodAssetsResponseRT = rt.type({
+  pods: rt.array(assetRT),
+});
+export type GetPodAssetsResponse = rt.TypeOf<typeof getPodAssetsResponseRT>;
+
+/**
+ * Assets
+ */
+export const getAssetsQueryOptionsRT = rt.intersection([
+  rt.strict({ from: assetDateRT }),
+  rt.partial({
+    to: assetDateRT,
+    size: sizeRT,
+    stringFilters: rt.string,
+    filters: assetFiltersRT,
+  }),
+]);
+export type GetAssetsQueryOptions = rt.TypeOf<typeof getAssetsQueryOptionsRT>;
+export const getAssetsResponseRT = rt.type({
+  assets: rt.array(assetRT),
+});
+export type GetAssetsResponse = rt.TypeOf<typeof getAssetsResponseRT>;
