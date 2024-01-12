@@ -853,7 +853,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         depends_on: [
           {
             field: 'repo_type',
-            value: "organization",
+            value: 'organization',
           },
         ],
         display: DisplayType.TOGGLE,
