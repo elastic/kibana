@@ -1076,6 +1076,8 @@
       "@kbn/ml-date-utils/*": ["x-pack/packages/ml/date_utils/*"],
       "@kbn/ml-error-utils": ["x-pack/packages/ml/error_utils"],
       "@kbn/ml-error-utils/*": ["x-pack/packages/ml/error_utils/*"],
+      "@kbn/ml-form-utils": ["x-pack/packages/ml/form_utils"],
+      "@kbn/ml-form-utils/*": ["x-pack/packages/ml/form_utils/*"],
       "@kbn/ml-in-memory-table": ["x-pack/packages/ml/in_memory_table"],
       "@kbn/ml-in-memory-table/*": ["x-pack/packages/ml/in_memory_table/*"],
       "@kbn/ml-is-defined": ["x-pack/packages/ml/is_defined"],

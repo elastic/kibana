@@ -8,22 +8,25 @@
 import { merge } from 'lodash';
 
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
-
-import type { PostTransformsUpdateRequestSchema } from '../../../../../common/api_schemas/update_transforms';
-import type { TransformConfigUnion } from '../../../../../common/types/transform';
-
-import type { FormFields, FormFieldsState } from './form_field';
-import type { FormSectionsState } from './form_section';
 import { valueParsers } from './value_parsers';
+
+import type { FormFieldsState } from './form_field';
+import type { FormSectionsState } from './form_section';
 
 // Takes a value from form state and applies it to the structure
 // of the expected final configuration request object.
 // Considers options like if a value is nullable or optional.
-export const getUpdateValue = (
-  attribute: FormFields,
-  config: TransformConfigUnion,
-  formFields: FormFieldsState,
-  formSections: FormSectionsState,
+export const getUpdateValue = <
+  FF extends string,
+  FS extends string,
+  VN extends string,
+  C,
+  RC extends {}
+>(
+  attribute: FF,
+  config: C,
+  formFields: FormFieldsState<FF, FS, VN>,
+  formSections: FormSectionsState<FS>,
   enforceFormValue = false
 ) => {
   const formStateAttribute = formFields[attribute];
@@ -42,7 +45,7 @@ export const getUpdateValue = (
   const configValue = getNestedProperty(config, formStateAttribute.configFieldName, fallbackValue);
 
   // only get depending values if we're not already in a call to get depending values.
-  const dependsOnConfig: PostTransformsUpdateRequestSchema =
+  const dependsOnConfig = (
     enforceFormValue === false
       ? formStateAttribute.dependsOn.reduce((_dependsOnConfig, dependsOnField) => {
           return merge(
@@ -50,7 +53,8 @@ export const getUpdateValue = (
             getUpdateValue(dependsOnField, config, formFields, formSections, true)
           );
         }, {})
-      : {};
+      : {}
+  ) as RC;
 
   if (
     formValue === formStateAttribute.defaultValue &&

@@ -7,6 +7,7 @@
 
 import React, { type FC } from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useFormField } from '@kbn/ml-form-utils/use_form_field';
 
 import { getTransformConfigMock } from './__mocks__/transform_config';
 
@@ -14,7 +15,6 @@ import {
   useEditTransformFlyoutActions,
   EditTransformFlyoutProvider,
 } from './edit_transform_flyout_state';
-import { useFormField } from './selectors/form_field';
 import { useIsFormTouched } from './selectors/is_form_touched';
 import { useIsFormValid } from './selectors/is_form_valid';
 

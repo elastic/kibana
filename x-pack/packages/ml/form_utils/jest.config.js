@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-/**
- * Interface for the parsed result of a duration string.
- */
-export interface ParsedDuration {
-  number: number;
-  timeUnit: string;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/form_utils'],
+};

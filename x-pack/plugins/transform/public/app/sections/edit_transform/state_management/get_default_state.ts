@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { initializeFormField } from '@kbn/ml-form-utils/form_field';
+import { initializeFormSection } from '@kbn/ml-form-utils/form_section';
+
 import {
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
 } from '../../../../../common/constants';
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
-import { initializeFormField } from './form_field';
-import { initializeFormSection } from './form_section';
 import type { State } from './edit_transform_flyout_state';
 
 // Takes in a transform configuration and returns the default state to populate the form.

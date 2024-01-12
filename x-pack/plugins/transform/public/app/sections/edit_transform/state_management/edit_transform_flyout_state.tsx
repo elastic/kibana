@@ -11,11 +11,16 @@ import { useDispatch, Provider } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import useMount from 'react-use/lib/useMount';
 
+import type { FormFieldsState } from '@kbn/ml-form-utils/form_field';
+import type { FormSectionsState } from '@kbn/ml-form-utils/form_section';
+import { getFormActions } from '@kbn/ml-form-utils/redux_actions';
+
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
-import { initialize, setApiError, setFormField, setFormSection } from './actions';
-import { type FormFieldsState } from './form_field';
-import { type FormSectionsState } from './form_section';
+import { initialize, setApiError } from './actions';
+import type { FormFields } from './form_field';
+import { validators, type ValidatorName } from './validators';
+import type { FormSections } from './form_section';
 import { getDefaultState } from './get_default_state';
 
 // The edit transform flyout uses a redux-toolkit to manage its form state with
@@ -31,9 +36,16 @@ export interface ProviderProps {
 
 export interface State {
   apiErrorMessage?: string;
-  formFields: FormFieldsState;
-  formSections: FormSectionsState;
+  formFields: FormFieldsState<FormFields, FormSections, ValidatorName>;
+  formSections: FormSectionsState<FormSections>;
 }
+
+const { setFormField, setFormSection } = getFormActions<
+  FormFields,
+  FormSections,
+  ValidatorName,
+  State
+>(validators);
 
 const editTransformFlyoutSlice = createSlice({
   name: 'editTransformFlyout',
