@@ -832,11 +832,9 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
-            Refresh:
-              '0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=%2Fmock-server-basepath%2F',
           },
         });
       });
@@ -975,9 +973,12 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: 'rendered-view',
+          body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            Refresh: `0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=${encodeURIComponent(
+              '/mock-server-basepath/app/some'
+            )}`,
           },
         });
 
@@ -1007,9 +1008,12 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: 'rendered-view',
+          body: '<div/>',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
+            Refresh: `0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=${encodeURIComponent(
+              '/mock-server-basepath/app/some'
+            )}`,
           },
         });
 
