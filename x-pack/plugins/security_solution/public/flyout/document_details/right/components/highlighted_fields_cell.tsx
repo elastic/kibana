@@ -86,18 +86,21 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
 }) => (
   <>
     {values != null &&
-      values.map((value, i) => {
+      values.map((value) => {
         return (
           <EuiFlexItem
             grow={false}
-            key={`${i}-${value}`}
+            key={`${field}-${value}`}
             data-test-subj={`${field}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
           >
             {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
               <LinkFieldCell value={value} />
             ) : field === AGENT_STATUS_FIELD_NAME &&
               originalField === SENTINEL_ONE_AGENT_ID_FIELD ? (
-              <SentinelOneAgentStatus agentId={String(value ?? '')} />
+              <SentinelOneAgentStatus
+                agentId={String(value ?? '')}
+                data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+              />
             ) : field === AGENT_STATUS_FIELD_NAME ? (
               <EndpointAgentStatusById
                 endpointAgentId={String(value ?? '')}

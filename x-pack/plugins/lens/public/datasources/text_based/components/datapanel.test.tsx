@@ -106,7 +106,7 @@ const initialState: TextBasedPrivateState = {
     first: {
       index: '1',
       columns: [],
-      query: { esql: 'SELECT * FROM foo' },
+      query: { esql: 'FROM foo' },
     },
   },
   indexPatternRefs: [
@@ -116,7 +116,7 @@ const initialState: TextBasedPrivateState = {
   ],
 };
 
-addColumnsToCache({ esql: 'SELECT * FROM my-fake-index-pattern' }, fieldsFromQuery);
+addColumnsToCache({ esql: 'FROM my-fake-index-pattern' }, fieldsFromQuery);
 
 function getFrameAPIMock({
   indexPatterns,
@@ -190,7 +190,7 @@ describe('TextBased Query Languages Data Panel', () => {
         fromDate: 'now-7d',
         toDate: 'now',
       },
-      query: { esql: 'SELECT * FROM my-fake-index-pattern' } as unknown as Query,
+      query: { esql: 'FROM my-fake-index-pattern' } as unknown as Query,
       filters: [],
       showNoDataPopover: jest.fn(),
       dropOntoWorkspace: jest.fn(),
