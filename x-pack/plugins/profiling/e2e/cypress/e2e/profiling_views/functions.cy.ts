@@ -9,6 +9,7 @@ import {
   profilingDatacenterPUE,
   profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
+import { TEST_SUBJ_PREFIX_FIELD } from '@kbn/management-settings-components-field-input/input';
 
 describe('Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
@@ -192,13 +193,13 @@ describe('Functions page', () => {
       cy.get(firstRowSelector).eq(5).contains('4.07 lbs / 1.84 kg');
       cy.contains('Settings').click();
       cy.contains('Advanced Settings');
-      cy.get(`[data-test-subj="advancedSetting-editField-${profilingCo2PerKWH}"]`)
+      cy.get(`[data-test-subj="${TEST_SUBJ_PREFIX_FIELD}-${profilingCo2PerKWH}"]`)
         .clear()
         .type('0.12345');
-      cy.get(`[data-test-subj="advancedSetting-editField-${profilingDatacenterPUE}"]`)
+      cy.get(`[data-test-subj="${TEST_SUBJ_PREFIX_FIELD}-${profilingDatacenterPUE}"]`)
         .clear()
         .type('2.4');
-      cy.get(`[data-test-subj="advancedSetting-editField-${profilingPervCPUWattX86}"]`)
+      cy.get(`[data-test-subj="${TEST_SUBJ_PREFIX_FIELD}-${profilingPervCPUWattX86}"]`)
         .clear()
         .type('20');
       cy.contains('Save changes').click();
