@@ -258,7 +258,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
 
   return (
     <>
-      <EuiTitle size="xs" data-test-subj="risk-input-tab-title">
+      <EuiTitle size="xs" data-test-subj="risk-input-contexts-title">
         <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.contextsTitle"
@@ -269,7 +269,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       <EuiSpacer size="xs" />
       <ContextsTable riskScore={riskScore} loading={loadingRiskScore} />
       <EuiSpacer size="m" />
-      <EuiTitle size="xs" data-test-subj="risk-input-tab-title">
+      <EuiTitle size="xs" data-test-subj="risk-input-alert-title">
         <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.alertsTitle"

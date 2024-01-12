@@ -58,7 +58,7 @@ describe('RiskInputsTab', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-tab-title')).toBeInTheDocument();
+    expect(getByTestId('risk-input-contexts-title')).toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
       'Risk inputRule Name'
     );
