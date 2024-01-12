@@ -366,21 +366,6 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         <EuiText size="xs">
                           <strong>
                             <FormattedMessage
-                              id="xpack.security.accountManagement.apiKeyFlyout.realmLabel"
-                              defaultMessage="Realm"
-                            />
-                          </strong>
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>{apiKey.realm}</EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiHorizontalRule margin="s" />
-
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      <EuiFlexItem>
-                        <EuiText size="xs">
-                          <strong>
-                            <FormattedMessage
                               id="xpack.security.accountManagement.apiKeyFlyout.createdLabel"
                               defaultMessage="Created"
                             />
