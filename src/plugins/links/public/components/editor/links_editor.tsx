@@ -80,7 +80,7 @@ const LinksEditor = ({
   initialLayout?: LinksLayoutType;
   parentDashboard?: DashboardContainer;
   isByReference: boolean;
-  flyoutId: string; // used to manage the focus of this flyout after inidividual link editor flyout is closed
+  flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
 }) => {
   const toasts = coreServices.notifications.toasts;
   const isMounted = useMountedState();
