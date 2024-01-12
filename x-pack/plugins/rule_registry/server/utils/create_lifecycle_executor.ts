@@ -401,14 +401,7 @@ export const createLifecycleExecutor =
           const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
           return [
             alertId,
-            {
-              alertId,
-              alertUuid,
-              started,
-              flappingHistory,
-              flapping,
-              pendingRecoveredCount,
-            },
+            { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
           ];
         })
     );
@@ -430,14 +423,7 @@ export const createLifecycleExecutor =
           const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
           return [
             alertId,
-            {
-              alertId,
-              alertUuid,
-              started,
-              flappingHistory,
-              flapping,
-              pendingRecoveredCount,
-            },
+            { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
           ];
         })
     );
