@@ -23,7 +23,7 @@ import { useStateSelector } from './utils/use_state_selector';
 import {
   topPanelHeightSelector,
   currentSuggestionSelector,
-  externalCustomVisualizationSelector,
+  externalVisContextSelector,
 } from './utils/state_selectors';
 
 type LayoutProps = Pick<
@@ -62,6 +62,7 @@ export type UnifiedHistogramContainerProps = {
   | 'children'
   | 'onBrushEnd'
   | 'onFilter'
+  | 'onVisContextChanged'
   | 'withDefaultActions'
   | 'disabledActions'
 >;
@@ -78,7 +79,7 @@ export type UnifiedHistogramApi = {
   UnifiedHistogramStateService,
   | 'state$'
   | 'setChartHidden'
-  | 'setExternalCustomVisualization'
+  | 'setExternalVisContext'
   | 'setTopPanelHeight'
   | 'setBreakdownField'
   | 'setTimeInterval'
@@ -123,7 +124,7 @@ export const UnifiedHistogramContainer = forwardRef<
         stateService,
         'state$',
         'setChartHidden',
-        'setExternalCustomVisualization',
+        'setExternalVisContext',
         'setTopPanelHeight',
         'setBreakdownField',
         'setTimeInterval',
@@ -133,10 +134,7 @@ export const UnifiedHistogramContainer = forwardRef<
   }, [input$, stateService]);
   const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
-  const externalCustomVisualization = useStateSelector(
-    stateService?.state$,
-    externalCustomVisualizationSelector
-  );
+  const externalVisContext = useStateSelector(stateService?.state$, externalVisContextSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
     stateService,
@@ -157,7 +155,7 @@ export const UnifiedHistogramContainer = forwardRef<
       {...layoutProps}
       {...stateProps}
       currentSuggestion={currentSuggestion}
-      externalCustomVisualization={externalCustomVisualization}
+      externalVisContext={externalVisContext}
       isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}

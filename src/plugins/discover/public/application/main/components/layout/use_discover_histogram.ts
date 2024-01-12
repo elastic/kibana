@@ -11,7 +11,7 @@ import {
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
-  extractExternalCustomVisualizationFromSuggestion,
+  ExternalVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
@@ -27,7 +27,6 @@ import {
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
@@ -67,10 +66,10 @@ export const useDiscoverHistogram = ({
       hideChart: chartHidden,
       interval: timeInterval,
       breakdownField,
-      customVisualization,
+      visContext,
     } = stateContainer.appState.getState();
 
-    console.log('initial discover vis', customVisualization);
+    console.log('initial discover vis', visContext);
 
     return {
       localStorageKeyPrefix: 'discover',
@@ -81,7 +80,7 @@ export const useDiscoverHistogram = ({
         breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
-        externalCustomVisualization: customVisualization,
+        externalVisContext: visContext,
       },
     };
   }, [stateContainer.appState]);
@@ -93,15 +92,13 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = createUnifiedHistogramStateObservable(unifiedHistogram?.state$)?.subscribe(
       (changes) => {
-        const { lensRequestAdapter, currentSuggestion, ...stateChanges } = changes;
-        console.log('state changes', changes);
+        const { lensRequestAdapter, ...stateChanges } = changes;
 
         const appState = stateContainer.appState.getState();
         const oldState = {
           hideChart: appState.hideChart,
           interval: appState.interval,
           breakdownField: appState.breakdownField,
-          customVisualization: appState.customVisualization,
         };
         const newState = {
           ...oldState,
@@ -112,13 +109,7 @@ export const useDiscoverHistogram = ({
           inspectorAdapters.lensRequests = lensRequestAdapter;
         }
 
-        if ('currentSuggestion' in changes) {
-          newState.customVisualization =
-            extractExternalCustomVisualizationFromSuggestion(currentSuggestion);
-        }
-
         if (!isEqual(oldState, newState)) {
-          console.log('sending vis to discover state', newState.customVisualization);
           stateContainer.appState.update(newState);
         }
       }
@@ -148,9 +139,9 @@ export const useDiscoverHistogram = ({
           unifiedHistogram?.setChartHidden(changes.chartHidden);
         }
 
-        if ('externalCustomVisualization' in changes) {
-          console.log('sending external vis to histogram', changes.externalCustomVisualization);
-          unifiedHistogram?.setExternalCustomVisualization(changes.externalCustomVisualization);
+        if ('externalVisContext' in changes) {
+          console.log('sending external vis to histogram', changes.externalVisContext);
+          unifiedHistogram?.setExternalVisContext(changes.externalVisContext);
         }
       }
     );
@@ -344,6 +335,14 @@ export const useDiscoverHistogram = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
 
+  const onVisContextChanged = useCallback(
+    (visContext: ExternalVisContext | undefined) => {
+      console.log('histogram vis context changed', visContext);
+      stateContainer.appState.update({ visContext });
+    },
+    [stateContainer]
+  );
+
   return {
     ref,
     getCreationOptions,
@@ -359,6 +358,7 @@ export const useDiscoverHistogram = ({
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
     isChartLoading: isSuggestionLoading,
+    onVisContextChanged,
   };
 };
 
@@ -374,7 +374,6 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
     map(([prev, curr]) => {
       const changes: Partial<DiscoverAppState> & {
         lensRequestAdapter?: RequestAdapter;
-        currentSuggestion?: Suggestion;
       } = {};
 
       if (!curr) {
@@ -395,11 +394,6 @@ const createUnifiedHistogramStateObservable = (state$?: Observable<UnifiedHistog
 
       if (prev?.breakdownField !== curr.breakdownField) {
         changes.breakdownField = curr.breakdownField;
-      }
-
-      if (!isEqual(prev?.currentSuggestion, curr.currentSuggestion)) {
-        console.log('noticed a new histogram suggestion', curr.currentSuggestion);
-        changes.currentSuggestion = curr.currentSuggestion;
       }
 
       return changes;
@@ -431,9 +425,9 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
         changes.chartHidden = curr.hideChart;
       }
 
-      if (!isEqual(prev?.customVisualization, curr.customVisualization)) {
-        console.log('noticed new discover vis', curr.customVisualization);
-        changes.externalCustomVisualization = curr.customVisualization;
+      if (!isEqual(prev?.visContext, curr.visContext)) {
+        console.log('noticed new discover vis', curr.visContext);
+        changes.externalVisContext = curr.visContext;
       }
 
       return changes;

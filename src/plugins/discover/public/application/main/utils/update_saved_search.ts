@@ -7,7 +7,7 @@
  */
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { toExternalCustomVisualizationJSONString } from '@kbn/unified-histogram-plugin/public';
+import { toExternalVisContextJSONString } from '@kbn/unified-histogram-plugin/public';
 import { cloneDeep } from 'lodash';
 import { isTextBasedQuery } from './is_text_based_query';
 import type { DiscoverAppState } from '../services/discover_app_state_container';
@@ -65,9 +65,7 @@ export function updateSavedSearch({
     savedSearch.rowHeight = state.rowHeight;
     savedSearch.rowsPerPage = state.rowsPerPage;
     savedSearch.sampleSize = state.sampleSize;
-    savedSearch.customVisualizationJSON = toExternalCustomVisualizationJSONString(
-      state.customVisualization
-    );
+    savedSearch.visContextJSON = toExternalVisContextJSONString(state.visContext);
 
     if (state.viewMode) {
       savedSearch.viewMode = state.viewMode;

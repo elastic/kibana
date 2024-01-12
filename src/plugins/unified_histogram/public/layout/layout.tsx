@@ -18,7 +18,6 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
   LensSuggestionsApi,
-  Suggestion,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
@@ -36,6 +35,8 @@ import type {
   UnifiedHistogramRequestContext,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramInput$,
+  ExternalVisContext,
+  LensSuggestion,
 } from '../types';
 import { useLensSuggestions } from './hooks/use_lens_suggestions';
 
@@ -67,11 +68,11 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The current Lens suggestion
    */
-  currentSuggestion?: Suggestion;
+  currentSuggestion?: LensSuggestion;
   /**
-   * The external custom Lens suggestion
+   * The external custom Lens vis
    */
-  externalCustomVisualization?: Partial<Suggestion>;
+  externalVisContext?: ExternalVisContext;
   /**
    * Flag that indicates that a text based language is used
    */
@@ -161,7 +162,11 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * Callback to update the suggested chart
    */
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onSuggestionChange?: (suggestion: LensSuggestion | undefined) => void;
+  /**
+   * Callback to notify about the change in Lens attributes
+   */
+  onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
   /**
    * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
    * and {@link UnifiedHistogramHitsContext.total} to result
@@ -192,7 +197,7 @@ export const UnifiedHistogramLayout = ({
   query,
   filters,
   currentSuggestion: originalSuggestion,
-  externalCustomVisualization,
+  externalVisContext,
   isChartLoading,
   isPlainRecord,
   timeRange,
@@ -217,6 +222,7 @@ export const UnifiedHistogramLayout = ({
   onTimeIntervalChange,
   onBreakdownFieldChange,
   onSuggestionChange,
+  onVisContextChanged,
   onTotalHitsChange,
   onChartLoad,
   onFilter,
@@ -234,7 +240,6 @@ export const UnifiedHistogramLayout = ({
     dataView,
     query,
     originalSuggestion,
-    externalCustomVisualization,
     isPlainRecord,
     columns,
     timeRange,
@@ -290,6 +295,7 @@ export const UnifiedHistogramLayout = ({
           request={request}
           hits={hits}
           currentSuggestion={currentSuggestion}
+          externalVisContext={externalVisContext}
           isChartLoading={isChartLoading}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
@@ -305,6 +311,7 @@ export const UnifiedHistogramLayout = ({
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
           onSuggestionChange={onSuggestionChange}
+          onVisContextChanged={onVisContextChanged}
           onTotalHitsChange={onTotalHitsChange}
           onChartLoad={onChartLoad}
           onFilter={onFilter}

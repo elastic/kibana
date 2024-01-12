@@ -16,12 +16,11 @@ import {
   TimeRange,
 } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
+import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { computeInterval } from './compute_interval';
-import { mergeCurrentSuggestionWithExternalCustomVisualization } from '../../utils/external_custom_visualization';
-import { ExternalCustomVisualization } from '../../types';
+import type { LensSuggestion } from '../../types';
 
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
@@ -29,7 +28,6 @@ export const useLensSuggestions = ({
   dataView,
   query,
   originalSuggestion,
-  externalCustomVisualization,
   isPlainRecord,
   columns,
   data,
@@ -39,14 +37,13 @@ export const useLensSuggestions = ({
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
-  originalSuggestion?: Suggestion;
-  externalCustomVisualization?: ExternalCustomVisualization;
+  originalSuggestion?: LensSuggestion;
   isPlainRecord?: boolean;
   columns?: DatatableColumn[];
   data: DataPublicPluginStart;
   timeRange?: TimeRange;
   lensSuggestionsApi: LensSuggestionsApi;
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onSuggestionChange?: (suggestion: LensSuggestion | undefined) => void;
 }) => {
   const suggestions = useMemo(() => {
     const context = {
@@ -65,12 +62,7 @@ export const useLensSuggestions = ({
   }, [dataView, isPlainRecord, lensSuggestionsApi, query, columns]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
-
-  const currentSuggestion = mergeCurrentSuggestionWithExternalCustomVisualization({
-    allSuggestions,
-    selectedSuggestion: originalSuggestion,
-    customVisualization: externalCustomVisualization,
-  });
+  const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
 
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
   const histogramQuery = useRef<AggregateQuery | undefined>();
@@ -126,23 +118,12 @@ export const useLensSuggestions = ({
       const sug = lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
       if (sug.length) {
         histogramQuery.current = { esql: esqlQuery };
-        return mergeCurrentSuggestionWithExternalCustomVisualization({
-          allSuggestions: [sug[0]],
-          customVisualization: externalCustomVisualization,
-        });
+        return sug[0];
       }
     }
     histogramQuery.current = undefined;
     return undefined;
-  }, [
-    currentSuggestion,
-    dataView,
-    query,
-    timeRange,
-    data,
-    lensSuggestionsApi,
-    externalCustomVisualization,
-  ]);
+  }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
   useEffect(() => {
     const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
@@ -150,12 +131,7 @@ export const useLensSuggestions = ({
     if (!isEqual(suggestionDeps.current, newSuggestionsDeps)) {
       setAllSuggestions(suggestions.allSuggestions);
       console.log('deps change triggers a new suggestion');
-      onSuggestionChange?.(
-        mergeCurrentSuggestionWithExternalCustomVisualization({
-          allSuggestions: suggestions.allSuggestions,
-          customVisualization: externalCustomVisualization,
-        })
-      );
+      onSuggestionChange?.(suggestions.firstSuggestion);
 
       suggestionDeps.current = newSuggestionsDeps;
     }
@@ -164,7 +140,7 @@ export const useLensSuggestions = ({
     dataView,
     onSuggestionChange,
     query,
-    externalCustomVisualization,
+    suggestions.firstSuggestion,
     suggestions.allSuggestions,
   ]);
 

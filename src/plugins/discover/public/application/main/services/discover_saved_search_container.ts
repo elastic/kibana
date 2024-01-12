@@ -347,9 +347,9 @@ function getSavedSearchValueForComparison(
   savedSearch: Omit<SavedSearch, 'searchSource'>,
   key: keyof Omit<SavedSearch, 'searchSource'>
 ) {
-  if (key === 'customVisualizationJSON' && savedSearch.customVisualizationJSON) {
+  if (key === 'visContextJSON' && savedSearch.visContextJSON) {
     // the stringified JSON might have keys in a different order, so we parse it back into an object to compare
-    return JSON.parse(savedSearch.customVisualizationJSON);
+    return JSON.parse(savedSearch.visContextJSON);
   }
 
   return savedSearch[key];

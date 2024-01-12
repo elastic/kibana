@@ -47,6 +47,6 @@ export function getSavedSearchObjectType(
       '8.12.0': SCHEMA_SEARCH_V8_12_0,
       '8.13.0': SCHEMA_SEARCH_V8_13_0,
     },
-    migrations: () => getAllMigrations(getSearchSourceMigrations()), // TODO: add lens embeddable migrations for `customVisualizationJSON`
+    migrations: () => getAllMigrations(getSearchSourceMigrations()), // TODO: add lens embeddable migrations for `visContextJSON`
   };
 }

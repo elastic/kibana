@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isEqual } from 'lodash';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -15,23 +16,11 @@ import type {
   GenericIndexPatternColumn,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
-  Suggestion,
 } from '@kbn/lens-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
-
-export interface LensRequestData {
-  dataViewId?: string;
-  timeField?: string;
-  timeInterval?: string;
-  breakdownField?: string;
-}
-
-export interface LensAttributesContext {
-  attributes: TypedLensByValueInput['attributes'];
-  requestData: LensRequestData;
-}
+import type { ExternalVisContext, LensAttributesContext, LensSuggestion } from '../../types';
 
 export const getLensAttributes = ({
   title,
@@ -41,6 +30,8 @@ export const getLensAttributes = ({
   timeInterval,
   breakdownField,
   suggestion,
+  externalVisContext,
+  onVisContextChanged,
 }: {
   title?: string;
   filters: Filter[];
@@ -48,8 +39,31 @@ export const getLensAttributes = ({
   dataView: DataView;
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
-  suggestion: Suggestion | undefined;
+  suggestion: LensSuggestion | undefined;
+  externalVisContext?: ExternalVisContext;
+  onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
 }): LensAttributesContext => {
+  const requestData = {
+    dataViewId: dataView.id,
+    timeField: dataView.timeFieldName,
+    timeInterval,
+    breakdownField: breakdownField?.name,
+  };
+
+  if (externalVisContext) {
+    if (
+      isEqual(
+        externalVisContext.attributes?.state?.query,
+        query
+        // TODO: check that's compatible
+      ) /* && isEqual(externalVisContext.requestData, requestData) */
+    ) {
+      return externalVisContext;
+    } else {
+      onVisContextChanged?.(undefined);
+    }
+  }
+
   const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
 
   let columnOrder = ['date_column', 'count_column'];
@@ -223,11 +237,6 @@ export const getLensAttributes = ({
 
   return {
     attributes,
-    requestData: {
-      dataViewId: dataView.id,
-      timeField: dataView.timeFieldName,
-      timeInterval,
-      breakdownField: breakdownField?.name,
-    },
+    requestData,
   };
 };

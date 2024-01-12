@@ -9,7 +9,12 @@
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { LensEmbeddableOutput, LensPublicStart, Suggestion } from '@kbn/lens-plugin/public';
+import type {
+  LensEmbeddableOutput,
+  LensPublicStart,
+  TypedLensByValueInput,
+  Suggestion,
+} from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
@@ -144,13 +149,23 @@ export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
  */
 export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
 
+export interface LensSuggestion extends Suggestion {
+  internalVersion?: number;
+}
+
+export interface LensRequestData {
+  dataViewId?: string;
+  timeField?: string;
+  timeInterval?: string;
+  breakdownField?: string;
+}
+
+export interface LensAttributesContext {
+  attributes: TypedLensByValueInput['attributes'];
+  requestData: LensRequestData;
+}
+
 /**
  * Unified Histogram type for recreating a stored Lens vis
  */
-export interface ExternalCustomVisualization {
-  visualizationId: Suggestion['visualizationId'];
-  visualizationState: Suggestion<{
-    layerId?: string;
-    layers?: Array<{ layerId?: string }>;
-  }>['visualizationState'];
-}
+export type ExternalVisContext = LensAttributesContext;

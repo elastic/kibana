@@ -31,6 +31,8 @@ import type {
   UnifiedHistogramServices,
   UnifiedHistogramInput$,
   UnifiedHistogramInputMessage,
+  ExternalVisContext,
+  LensSuggestion,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { SuggestionSelector } from './suggestion_selector';
@@ -53,7 +55,8 @@ export interface ChartProps {
   query?: Query | AggregateQuery;
   filters?: Filter[];
   isPlainRecord?: boolean;
-  currentSuggestion?: Suggestion;
+  currentSuggestion?: LensSuggestion;
+  externalVisContext?: ExternalVisContext;
   allSuggestions?: Suggestion[];
   timeRange?: TimeRange;
   relativeTimeRange?: TimeRange;
@@ -75,7 +78,8 @@ export interface ChartProps {
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
+  onSuggestionChange?: (suggestion: LensSuggestion | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
@@ -100,6 +104,7 @@ export function Chart({
   breakdown,
   currentSuggestion,
   allSuggestions,
+  externalVisContext,
   isPlainRecord,
   renderCustomChartToggleActions,
   appendHistogram,
@@ -115,6 +120,7 @@ export function Chart({
   onChartHiddenChange,
   onTimeIntervalChange,
   onSuggestionChange,
+  onVisContextChanged,
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
@@ -175,8 +181,8 @@ export function Chart({
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
-  const lensAttributesContext = useMemo(
-    () =>
+  const getLensAttributesCallback = useCallback(
+    (suggestion: LensSuggestion | undefined) =>
       getLensAttributes({
         title: chart?.title,
         filters,
@@ -184,28 +190,30 @@ export function Chart({
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
-        suggestion: currentSuggestion,
+        suggestion,
+        externalVisContext,
+        onVisContextChanged,
       }),
     [
       breakdown?.field,
       chart?.timeInterval,
       chart?.title,
-      currentSuggestion,
       dataView,
       filters,
       query,
       histogramQuery,
+      externalVisContext,
+      onVisContextChanged,
     ]
   );
 
-  console.log(
-    'lens attributes',
-    lensAttributesContext.attributes,
-    lensAttributesContext.requestData
+  const lensAttributesContext = useMemo(
+    () => getLensAttributesCallback(currentSuggestion),
+    [getLensAttributesCallback, currentSuggestion]
   );
 
   const onSuggestionSelectorChange = useCallback(
-    (s: Suggestion | undefined) => {
+    (s: LensSuggestion | undefined) => {
       onSuggestionChange?.(s);
     },
     [onSuggestionChange]
@@ -421,7 +429,10 @@ export function Chart({
             setIsFlyoutVisible,
             isPlainRecord,
             query: originalQuery,
-            onSuggestionChange,
+            onSuggestionChange: (suggestion) => {
+              onSuggestionChange?.(suggestion);
+              onVisContextChanged?.(suggestion ? getLensAttributesCallback(suggestion) : undefined);
+            },
           }}
         />
       )}

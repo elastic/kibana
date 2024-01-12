@@ -20,7 +20,7 @@ import {
   FilterStateStore,
   Query,
 } from '@kbn/es-query';
-import type { ExternalCustomVisualization } from '@kbn/unified-histogram-plugin/public';
+import type { ExternalVisContext } from '@kbn/unified-histogram-plugin/public';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
@@ -147,7 +147,7 @@ export interface DiscoverAppState {
   /**
    * Customization for Lens vis in Histogram area
    */
-  customVisualization?: ExternalCustomVisualization;
+  visContext?: ExternalVisContext;
 }
 
 export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =

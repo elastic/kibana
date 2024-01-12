@@ -13,7 +13,8 @@ import { UnifiedHistogramFetchStatus } from '../..';
 import type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
-  ExternalCustomVisualization,
+  ExternalVisContext,
+  LensSuggestion,
 } from '../../types';
 import {
   getBreakdownField,
@@ -35,11 +36,11 @@ export interface UnifiedHistogramState {
   /**
    * The current Lens suggestion
    */
-  currentSuggestion: Suggestion | undefined;
+  currentSuggestion: LensSuggestion | undefined;
   /**
    * Lens vis which can be stored externally
    */
-  externalCustomVisualization: ExternalCustomVisualization | undefined;
+  externalVisContext: ExternalVisContext | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -107,13 +108,11 @@ export interface UnifiedHistogramStateService {
   /**
    * Sets current Lens suggestion
    */
-  setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
+  setCurrentSuggestion: (suggestion: LensSuggestion | undefined) => void;
   /**
    * Sets external custom Lens vis
    */
-  setExternalCustomVisualization: (
-    externalCustomVisualization: ExternalCustomVisualization | undefined
-  ) => void;
+  setExternalVisContext: (externalVisContext: ExternalVisContext | undefined) => void;
   /**
    * Sets the current top panel height
    */
@@ -164,7 +163,7 @@ export const createStateService = (
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
-    externalCustomVisualization: undefined,
+    externalVisContext: undefined,
     currentSuggestion: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
@@ -208,14 +207,12 @@ export const createStateService = (
       updateState({ breakdownField });
     },
 
-    setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
+    setCurrentSuggestion: (suggestion: LensSuggestion | undefined) => {
       updateState({ currentSuggestion: suggestion });
     },
 
-    setExternalCustomVisualization: (
-      externalCustomVisualization: ExternalCustomVisualization | undefined
-    ) => {
-      updateState({ externalCustomVisualization });
+    setExternalVisContext: (externalVisContext: ExternalVisContext | undefined) => {
+      updateState({ externalVisContext });
     },
 
     setTimeInterval: (timeInterval: string) => {

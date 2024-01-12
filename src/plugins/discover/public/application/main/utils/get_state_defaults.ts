@@ -11,7 +11,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   getChartHidden,
-  fromExternalCustomVisualizationJSONString,
+  fromExternalVisContextJSONString,
 } from '@kbn/unified-histogram-plugin/public';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -104,10 +104,8 @@ export function getStateDefaults({
   if (savedSearch.breakdownField) {
     defaultState.breakdownField = savedSearch.breakdownField;
   }
-  if (savedSearch.customVisualizationJSON) {
-    defaultState.customVisualization = fromExternalCustomVisualizationJSONString(
-      savedSearch.customVisualizationJSON
-    );
+  if (savedSearch.visContextJSON) {
+    defaultState.visContext = fromExternalVisContextJSONString(savedSearch.visContextJSON);
   }
 
   return defaultState;

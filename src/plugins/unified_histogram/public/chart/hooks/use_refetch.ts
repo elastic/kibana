@@ -8,11 +8,11 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { Suggestion } from '@kbn/lens-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { filter, share, tap } from 'rxjs';
 import {
+  LensSuggestion,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramHitsContext,
@@ -44,7 +44,7 @@ export const useRefetch = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   relativeTimeRange: TimeRange;
-  currentSuggestion?: Suggestion;
+  currentSuggestion?: LensSuggestion;
   disableAutoFetching?: boolean;
   input$: UnifiedHistogramInput$;
   beforeRefetch: () => void;
@@ -127,7 +127,7 @@ const getRefetchDeps = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   relativeTimeRange: TimeRange;
-  currentSuggestion?: Suggestion;
+  currentSuggestion?: LensSuggestion;
 }) =>
   cloneDeep([
     dataView.id,

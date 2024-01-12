@@ -28,13 +28,13 @@ export type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramAdapters,
-  ExternalCustomVisualization,
+  ExternalVisContext,
 } from './types';
 export { UnifiedHistogramFetchStatus } from './types';
 export {
   extractExternalCustomVisualizationFromSuggestion,
-  toExternalCustomVisualizationJSONString,
-  fromExternalCustomVisualizationJSONString,
+  toExternalVisContextJSONString,
+  fromExternalVisContextJSONString,
 } from './utils/external_custom_visualization';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();

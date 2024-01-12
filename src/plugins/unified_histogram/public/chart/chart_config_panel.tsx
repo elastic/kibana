@@ -9,11 +9,15 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash';
-import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
-import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../types';
-import type { LensAttributesContext } from './utils/get_lens_attributes';
+import type {
+  UnifiedHistogramServices,
+  UnifiedHistogramChartLoadEvent,
+  LensAttributesContext,
+  LensSuggestion,
+} from '../types';
 
 export function ChartConfigPanel({
   services,
@@ -33,29 +37,27 @@ export function ChartConfigPanel({
   setIsFlyoutVisible: (flag: boolean) => void;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
-  currentSuggestion?: Suggestion;
+  currentSuggestion?: LensSuggestion;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onSuggestionChange?: (suggestion: LensSuggestion | undefined) => void;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
-  const previousSuggestion = useRef<Suggestion | undefined>(undefined);
+  const previousSuggestion = useRef<LensSuggestion | undefined>(undefined);
   const previousAdapters = useRef<Record<string, Datatable> | undefined>(undefined);
   const previousQuery = useRef<Query | AggregateQuery | undefined>(undefined);
   const updateSuggestion = useCallback(
     (datasourceState, visualizationState) => {
-      console.log('new vis', datasourceState, visualizationState);
-      const updatedSuggestion = {
+      const updatedSuggestion: LensSuggestion = {
         ...currentSuggestion,
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
-      } as Suggestion;
+        internalVersion: (currentSuggestion?.internalVersion ?? 0) + 1, // TODO: remove?
+      };
       onSuggestionChange?.(updatedSuggestion);
     },
     [currentSuggestion, onSuggestionChange]
   );
-
-  console.log('lens attributes', lensAttributesContext);
 
   useEffect(() => {
     const tablesAdapters = lensAdapters?.tables?.tables;

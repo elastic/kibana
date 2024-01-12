@@ -15,8 +15,8 @@ export const topPanelHeightSelector = (state: UnifiedHistogramState) => state.to
 export const totalHitsResultSelector = (state: UnifiedHistogramState) => state.totalHitsResult;
 export const totalHitsStatusSelector = (state: UnifiedHistogramState) => state.totalHitsStatus;
 export const currentSuggestionSelector = (state: UnifiedHistogramState) => state.currentSuggestion;
-export const externalCustomVisualizationSelector = (state: UnifiedHistogramState) =>
-  state.externalCustomVisualization;
+export const externalVisContextSelector = (state: UnifiedHistogramState) =>
+  state.externalVisContext;
 export const lensAdaptersSelector = (state: UnifiedHistogramState) => state.lensAdapters;
 export const lensEmbeddableOutputSelector$ = (state: UnifiedHistogramState) =>
   state.lensEmbeddableOutput$;
