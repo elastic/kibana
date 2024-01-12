@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { PolicyData } from '../../../../../common/endpoint/types';
@@ -11,7 +12,7 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
@@ -23,14 +24,7 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 describe(
   'Automated Response Actions',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      '@brokenInServerless',
-    ],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -67,16 +61,11 @@ describe(
       }
     });
 
-    const hostname = new URL(Cypress.env('FLEET_SERVER_URL')).port;
-    const fleetHostname = `dev-fleet-server.${hostname}`;
-
     beforeEach(() => {
       login();
-      disableExpandableFlyoutAdvancedSettings();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/169828
-    describe.skip('From alerts', () => {
+    describe('From alerts', () => {
       let ruleId: string;
       let ruleName: string;
 
@@ -102,18 +91,15 @@ describe(
         visitRuleAlerts(ruleName);
         closeAllToasts();
 
-        changeAlertsFilter('event.category: "file"');
-        cy.getByTestSubj('expand-event').first().click();
-        cy.getByTestSubj('responseActionsViewTab').click();
-        cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+        changeAlertsFilter('process.name: "sshd"');
+        cy.getByTestSubj('expand-event').eq(0).click();
+        cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+        cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 
         cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
           .should('contain', 'isolate completed successfully')
           .and('contain', createdHost.hostname);
-
-        cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
-          .should('contain', 'The host does not have Elastic Defend integration installed')
-          .and('contain', 'dev-fleet-server');
+        cy.contains(/kill-process is pending|kill-process completed successfully/g);
       });
     });
   }

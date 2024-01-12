@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { navigateToAlertsList } from '../../screens/alerts';
@@ -73,8 +74,8 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
       navigateToAlertsList(`query=(language:kuery,query:'agent.id: "${endpointAgentId}" ')`);
       closeAllToasts();
       cy.getByTestSubj('expand-event').first().click();
-      cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-      cy.getByTestSubj('responseActionsViewTab').click();
+      cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+      cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
       cy.contains('Permission denied');
       cy.contains(
         'To access these results, ask your administrator for Elastic Defend Kibana privileges.'
