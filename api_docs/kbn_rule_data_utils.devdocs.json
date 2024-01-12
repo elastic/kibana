@@ -1459,7 +1459,7 @@
         "label": "AlertConsumers",
         "description": [],
         "signature": [
-          "\"ml\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\""
+          "\"ml\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1804,7 +1804,7 @@
         "label": "ValidFeatureId",
         "description": [],
         "signature": [
-          "\"ml\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\""
+          "\"ml\" | \"uptime\" | \"siem\" | \"observability\" | \"stackAlerts\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\" | \"AlertingExample\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1853,7 +1853,7 @@
           "\nregistering a new instance of the rule data client\nin a new plugin will require updating the below data structure\nto include the index name where the alerts as data will be written to."
         ],
         "signature": [
-          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; readonly ML: \"ml\"; readonly STACK_ALERTS: \"stackAlerts\"; }"
+          "{ readonly APM: \"apm\"; readonly LOGS: \"logs\"; readonly INFRASTRUCTURE: \"infrastructure\"; readonly OBSERVABILITY: \"observability\"; readonly SLO: \"slo\"; readonly SIEM: \"siem\"; readonly UPTIME: \"uptime\"; readonly ML: \"ml\"; readonly STACK_ALERTS: \"stackAlerts\"; readonly EXAMPLE: \"AlertingExample\"; }"
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
