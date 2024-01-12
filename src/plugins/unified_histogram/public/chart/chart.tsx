@@ -215,8 +215,9 @@ export function Chart({
   const onSuggestionSelectorChange = useCallback(
     (s: LensSuggestion | undefined) => {
       onSuggestionChange?.(s);
+      onVisContextChanged?.(s ? getLensAttributesCallback(s) : undefined);
     },
-    [onSuggestionChange]
+    [onSuggestionChange, onVisContextChanged, getLensAttributesCallback]
   );
 
   useEffect(() => {
@@ -429,10 +430,7 @@ export function Chart({
             setIsFlyoutVisible,
             isPlainRecord,
             query: originalQuery,
-            onSuggestionChange: (suggestion) => {
-              onSuggestionChange?.(suggestion);
-              onVisContextChanged?.(suggestion ? getLensAttributesCallback(suggestion) : undefined);
-            },
+            onSuggestionChange: onSuggestionSelectorChange,
           }}
         />
       )}

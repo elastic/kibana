@@ -409,6 +409,8 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
     map(([prev, curr]) => {
       const changes: Partial<UnifiedHistogramState> = {};
 
+      console.log('app state changed', curr);
+
       if (!curr) {
         return changes;
       }

@@ -246,6 +246,7 @@ export const UnifiedHistogramLayout = ({
     data: services.data,
     lensSuggestionsApi,
     onSuggestionChange,
+    externalVisContext,
   });
 
   const chart = suggestionUnsupported ? undefined : originalChart;

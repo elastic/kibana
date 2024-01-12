@@ -21,6 +21,7 @@ import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { computeInterval } from './compute_interval';
 import type { LensSuggestion } from '../../types';
+import { ExternalVisContext } from '../../types';
 
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
@@ -34,6 +35,7 @@ export const useLensSuggestions = ({
   timeRange,
   lensSuggestionsApi,
   onSuggestionChange,
+  externalVisContext,
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
@@ -44,6 +46,7 @@ export const useLensSuggestions = ({
   timeRange?: TimeRange;
   lensSuggestionsApi: LensSuggestionsApi;
   onSuggestionChange?: (suggestion: LensSuggestion | undefined) => void;
+  externalVisContext?: ExternalVisContext;
 }) => {
   const suggestions = useMemo(() => {
     const context = {
@@ -62,7 +65,16 @@ export const useLensSuggestions = ({
   }, [dataView, isPlainRecord, lensSuggestionsApi, query, columns]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
-  const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
+  let currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
+
+  if (externalVisContext) {
+    const matchingSuggestion = allSuggestions.find(
+      (suggestion) =>
+        suggestion.visualizationId === externalVisContext.attributes?.visualizationType
+    );
+
+    currentSuggestion = matchingSuggestion || currentSuggestion;
+  }
 
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
   const histogramQuery = useRef<AggregateQuery | undefined>();
