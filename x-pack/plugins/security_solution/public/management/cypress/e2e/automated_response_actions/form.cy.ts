@@ -162,10 +162,9 @@ describe(
 
         cy.getByTestSubj(`response-actions-list-item-1`).within(() => {
           cy.getByTestSubj('config-custom-field-name').should('have.value', '');
-          cy.getByTestSubj('config-overwrite-toggle').click();
-
+          cy.getByTestSubj('config-overwrite-toggle').click({ force: true });
           cy.getByTestSubj('config-custom-field-name').type('process.entity_id{downArrow}{enter}');
-          cy.getByTestSubj('config-overwrite-toggle').click();
+          cy.getByTestSubj('config-overwrite-toggle').click({ force: true });
         });
 
         cy.intercept('PUT', '/api/detection_engine/rules').as('updateResponseAction');

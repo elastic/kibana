@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { PolicyData } from '../../../../../common/endpoint/types';
@@ -95,9 +96,11 @@ describe(
         cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
         cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 
-        cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
-          .should('contain', /isolate is pending|isolate completed successfully/g)
-          .and('contain', createdHost.hostname);
+        cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`).should(
+          'contain',
+          createdHost.hostname
+        );
+        cy.contains(/isolate is pending|isolate completed successfully/g);
         cy.contains(/kill-process is pending|kill-process completed successfully/g);
       });
     });
