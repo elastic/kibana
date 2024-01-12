@@ -122,8 +122,10 @@ export class CsvV2ExportType extends ExportType<
 
     if (query && 'esql' in query) {
       // TODO: use columnsFromLocator
-      // We don't implement it now because it might be a breaking change for csv_v2 api that for non esql only works with saved search
-      // https://github.com/elastic/kibana/issues/151190
+      // currently locatorClient.columnsFromLocator can only extract columns from the saved search,
+      // but for the es|ql we simply want to get currently visible columns from params.columns.
+      // we didn't want to add this change inside locatorClient.columnsFromLocator, as it would change the behaviour of csv_v2 for non-ES|QL export,
+      // this should be addressed here https://github.com/elastic/kibana/issues/151190
       // const columns = await locatorClient.columnsFromLocator(params);
       const columns = params.columns as string[] | undefined;
       const filters = await locatorClient.filtersFromLocator(params);

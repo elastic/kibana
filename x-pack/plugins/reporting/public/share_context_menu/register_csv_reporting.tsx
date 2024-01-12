@@ -56,7 +56,7 @@ export const reportingCsvShareProvider = ({
         };
       }
 
-      // csv v2 uses search source and columns
+      // csv v1 uses search source and columns
       return {
         ...jobParams,
         columns: sharingData.columns as string[] | undefined,
