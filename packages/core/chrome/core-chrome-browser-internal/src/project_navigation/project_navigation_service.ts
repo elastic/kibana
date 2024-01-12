@@ -32,10 +32,10 @@ import {
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
 
-import { ChromeNavLink, NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser/src';
+import { ChromeNavLink, CloudURLs, NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser/src';
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
-import { CloudURLs, getCloudLinks } from './cloud_links';
+import { getCloudLinks } from './cloud_links';
 
 interface StartDeps {
   application: InternalApplicationStart;
