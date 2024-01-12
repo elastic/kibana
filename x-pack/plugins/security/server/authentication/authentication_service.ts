@@ -182,9 +182,6 @@ export class AuthenticationService {
     });
 
     http.registerOnPreResponse(async (request, preResponse, toolkit) => {
-      console.log({
-        status: preResponse.statusCode,
-      });
       if (!this.authenticator) {
         // Core doesn't allow returning error here.
         this.logger.error('Authentication sub-system is not fully initialized yet.');
@@ -197,8 +194,12 @@ export class AuthenticationService {
         ? `${http.basePath.get(request)}/`
         : this.authenticator.getRequestOriginalURL(request);
 
-      if (preResponse.statusCode >= 400) {
-        if (isLoginPageAvailable) {
+      if (
+        preResponse.statusCode >= 400 &&
+        canRedirectRequest(request) &&
+        request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
+      ) {
+        if (!isLoginPageAvailable) {
           const customBrandingValue = await customBranding.getBrandingFor(request, {
             unauthenticated: true,
           });
