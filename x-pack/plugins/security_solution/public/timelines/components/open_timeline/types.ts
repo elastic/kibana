@@ -59,6 +59,7 @@ export interface OpenTimelineResult {
   pinnedEventIds?: Readonly<Record<string, boolean>> | null;
   queryType?: { hasEql: boolean; hasQuery: boolean };
   savedObjectId?: string | null;
+  savedSearchId?: string | null;
   status?: TimelineStatus | null;
   title?: string | null;
   templateTimelineId?: string | null;
@@ -77,7 +78,7 @@ export interface EuiSearchBarQuery {
 }
 
 /** Performs IO to delete the specified timelines */
-export type DeleteTimelines = (timelineIds: string[], variables?: AllTimelinesVariables) => void;
+export type DeleteTimelines = (timelineIds: string[], searchIds?: string[]) => void;
 
 /** Invoked when the user clicks the action create rule from timeline */
 export type OnCreateRuleFromTimeline = (savedObjectId: string) => void;
