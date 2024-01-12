@@ -8,16 +8,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
-import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
+import { I18nStart, IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import type {
   Datatable,
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
@@ -80,6 +79,7 @@ export const getDatatableRenderer = (dependencies: {
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;
   theme: ThemeServiceStart;
+  getI18n: () => Promise<I18nStart>;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
   displayName: i18n.translate('xpack.lens.datatable.visualizationName', {
@@ -96,6 +96,7 @@ export const getDatatableRenderer = (dependencies: {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
 
     const resolvedGetType = await dependencies.getType;
+    const i18nStart = await dependencies.getI18n();
     const { hasCompatibleActions, isInteractive, getCompatibleCellValueActions } = handlers;
 
     const renderComplete = () => {
@@ -135,24 +136,22 @@ export const getDatatableRenderer = (dependencies: {
     ]);
 
     ReactDOM.render(
-      <KibanaThemeProvider theme$={dependencies.theme.theme$}>
-        <I18nProvider>
-          <DatatableComponent
-            {...config}
-            formatFactory={dependencies.formatFactory}
-            dispatchEvent={handlers.event}
-            renderMode={handlers.getRenderMode()}
-            paletteService={dependencies.paletteService}
-            getType={resolvedGetType}
-            rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
-            columnCellValueActions={columnCellValueActions}
-            columnFilterable={columnsFilterable}
-            interactive={isInteractive()}
-            theme={dependencies.theme}
-            renderComplete={renderComplete}
-          />
-        </I18nProvider>
-      </KibanaThemeProvider>,
+      <KibanaRenderContextProvider {...{ i18n: i18nStart, theme: dependencies.theme }}>
+        <DatatableComponent
+          {...config}
+          formatFactory={dependencies.formatFactory}
+          dispatchEvent={handlers.event}
+          renderMode={handlers.getRenderMode()}
+          paletteService={dependencies.paletteService}
+          getType={resolvedGetType}
+          rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+          columnCellValueActions={columnCellValueActions}
+          columnFilterable={columnsFilterable}
+          interactive={isInteractive()}
+          theme={dependencies.theme}
+          renderComplete={renderComplete}
+        />
+      </KibanaRenderContextProvider>,
       domNode
     );
   },

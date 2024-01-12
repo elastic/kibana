@@ -62,9 +62,6 @@ export { Markdown, MarkdownSimple } from './markdown';
 export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
 
-/** @deprecated Use `KibanaThemeProvider`, `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */
-export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';
-
 /** dummy plugin, we just want kibanaReact to have its own bundle */
 export function plugin() {
   return new (class KibanaReactPlugin {

@@ -23,7 +23,7 @@ import type {
   CoreTheme,
   ExecutionContextStart,
 } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
@@ -181,7 +181,7 @@ export function renderApp(
 
   ReactDOM.render(
     <I18nProvider>
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme={{ theme$ }}>
         <Router>
           <Routes>
             {devTools

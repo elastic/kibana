@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
   disableAutoApply,
   enableAutoApply,
@@ -103,7 +103,7 @@ export function toggleSettingsMenuOpen(props: {
 
   const element = (
     <Provider store={props.lensStore}>
-      <KibanaThemeProvider theme$={props.theme$}>
+      <KibanaThemeProvider theme={{ theme$: props.theme$ }}>
         <I18nProvider>
           <SettingsMenu {...props} isOpen={isMenuOpen} onClose={closeSettingsMenu} />
         </I18nProvider>

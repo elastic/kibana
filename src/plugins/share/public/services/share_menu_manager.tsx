@@ -8,11 +8,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { CoreStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
@@ -52,6 +51,7 @@ export class ShareMenuManager {
           urlService,
           anonymousAccess,
           theme: core.theme,
+          i18n: core.i18n,
         });
       },
     };
@@ -82,12 +82,14 @@ export class ShareMenuManager {
     onClose,
     objectTypeTitle,
     disabledShareUrl,
+    i18n,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
     onClose: () => void;
+    i18n: I18nStart;
   }) {
     if (this.isOpen) {
       onClose();
@@ -98,38 +100,36 @@ export class ShareMenuManager {
 
     document.body.appendChild(this.container);
     const element = (
-      <I18nProvider>
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <EuiWrappingPopover
-            id="sharePopover"
-            button={anchorElement}
-            isOpen={true}
-            closePopover={onClose}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <ShareContextMenu
-              allowEmbed={allowEmbed}
-              allowShortUrl={allowShortUrl}
-              objectId={objectId}
-              objectType={objectType}
-              objectTypeTitle={objectTypeTitle}
-              shareMenuItems={menuItems}
-              sharingData={sharingData}
-              shareableUrl={shareableUrl}
-              shareableUrlForSavedObject={shareableUrlForSavedObject}
-              shareableUrlLocatorParams={shareableUrlLocatorParams}
-              onClose={onClose}
-              embedUrlParamExtensions={embedUrlParamExtensions}
-              anonymousAccess={anonymousAccess}
-              showPublicUrlSwitch={showPublicUrlSwitch}
-              urlService={urlService}
-              snapshotShareWarning={snapshotShareWarning}
-              disabledShareUrl={disabledShareUrl}
-            />
-          </EuiWrappingPopover>
-        </KibanaThemeProvider>
-      </I18nProvider>
+      <KibanaRenderContextProvider {...{ i18n, theme }}>
+        <EuiWrappingPopover
+          id="sharePopover"
+          button={anchorElement}
+          isOpen={true}
+          closePopover={onClose}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <ShareContextMenu
+            allowEmbed={allowEmbed}
+            allowShortUrl={allowShortUrl}
+            objectId={objectId}
+            objectType={objectType}
+            objectTypeTitle={objectTypeTitle}
+            shareMenuItems={menuItems}
+            sharingData={sharingData}
+            shareableUrl={shareableUrl}
+            shareableUrlForSavedObject={shareableUrlForSavedObject}
+            shareableUrlLocatorParams={shareableUrlLocatorParams}
+            onClose={onClose}
+            embedUrlParamExtensions={embedUrlParamExtensions}
+            anonymousAccess={anonymousAccess}
+            showPublicUrlSwitch={showPublicUrlSwitch}
+            urlService={urlService}
+            snapshotShareWarning={snapshotShareWarning}
+            disabledShareUrl={disabledShareUrl}
+          />
+        </EuiWrappingPopover>
+      </KibanaRenderContextProvider>
     );
     ReactDOM.render(element, this.container);
   }

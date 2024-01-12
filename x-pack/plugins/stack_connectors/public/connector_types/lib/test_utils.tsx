@@ -13,7 +13,7 @@ import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/h
 import { act } from 'react-dom/test-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
@@ -98,7 +98,7 @@ export const createAppMockRenderer = (): AppMockRenderer => {
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+        <KibanaThemeProvider theme={{ theme$ }}>{children}</KibanaThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );

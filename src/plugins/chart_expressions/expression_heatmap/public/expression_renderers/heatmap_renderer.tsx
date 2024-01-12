@@ -10,12 +10,11 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { getTimeZone } from '@kbn/visualization-utils';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
-import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { MultiFilterEvent } from '../../common/types';
 import { ExpressionHeatmapPluginStart } from '../plugin';
 import {
@@ -83,29 +82,27 @@ export const heatmapRenderer: (
     const { isInteractive } = handlers;
 
     render(
-      <KibanaThemeProvider theme$={core.theme.theme$}>
-        <I18nProvider>
-          <div className="heatmap-container" data-test-subj="heatmapChart">
-            <HeatmapComponent
-              {...config}
-              onClickValue={onClickValue}
-              onSelectRange={onSelectRange}
-              timeZone={timeZone}
-              datatableUtilities={getDatatableUtilities()}
-              formatFactory={getFormatService().deserialize}
-              chartsThemeService={plugins.charts.theme}
-              paletteService={getPaletteService()}
-              renderComplete={renderComplete}
-              uiState={handlers.uiState as PersistedState}
-              interactive={isInteractive()}
-              chartsActiveCursorService={plugins.charts.activeCursor}
-              syncTooltips={config.syncTooltips}
-              syncCursor={config.syncCursor}
-              onClickMultiValue={onClickMultiValue}
-            />
-          </div>
-        </I18nProvider>
-      </KibanaThemeProvider>,
+      <KibanaRenderContextProvider {...core}>
+        <div className="heatmap-container" data-test-subj="heatmapChart">
+          <HeatmapComponent
+            {...config}
+            onClickValue={onClickValue}
+            onSelectRange={onSelectRange}
+            timeZone={timeZone}
+            datatableUtilities={getDatatableUtilities()}
+            formatFactory={getFormatService().deserialize}
+            chartsThemeService={plugins.charts.theme}
+            paletteService={getPaletteService()}
+            renderComplete={renderComplete}
+            uiState={handlers.uiState as PersistedState}
+            interactive={isInteractive()}
+            chartsActiveCursorService={plugins.charts.activeCursor}
+            syncTooltips={config.syncTooltips}
+            syncCursor={config.syncCursor}
+            onClickMultiValue={onClickMultiValue}
+          />
+        </div>
+      </KibanaRenderContextProvider>,
       domNode
     );
   },

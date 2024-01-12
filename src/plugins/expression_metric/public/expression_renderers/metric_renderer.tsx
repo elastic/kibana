@@ -16,7 +16,7 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { MetricRendererConfig } from '../../common/types';
 
@@ -50,7 +50,7 @@ export const getMetricRenderer =
 
       render(
         <EuiErrorBoundary>
-          <KibanaThemeProvider theme$={theme$}>
+          <KibanaThemeProvider theme={{ theme$ }}>
             <MetricComponent
               label={config.label}
               labelFont={config.labelFont ? (config.labelFont.spec as CSSProperties) : {}}

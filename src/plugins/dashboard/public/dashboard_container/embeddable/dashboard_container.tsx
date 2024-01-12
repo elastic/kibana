@@ -28,7 +28,7 @@ import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -247,7 +247,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         <ExitFullScreenButtonKibanaProvider
           coreStart={{ chrome: this.chrome, customBranding: this.customBranding }}
         >
-          <KibanaThemeProvider theme$={this.theme$}>
+          <KibanaThemeProvider theme={{ theme$: this.theme$ }}>
             <DashboardContainerContext.Provider value={this}>
               <DashboardViewport />
             </DashboardContainerContext.Provider>

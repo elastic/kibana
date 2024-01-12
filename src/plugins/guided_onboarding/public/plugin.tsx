@@ -9,7 +9,6 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { I18nProvider } from '@kbn/i18n-react';
 import {
   CoreSetup,
   CoreStart,
@@ -17,10 +16,10 @@ import {
   CoreTheme,
   ApplicationStart,
   NotificationsStart,
+  I18nStart,
 } from '@kbn/core/public';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { PLUGIN_FEATURE } from '../common/constants';
 import type {
   AppPluginStartDependencies,
@@ -47,7 +46,7 @@ export class GuidedOnboardingPlugin
     core: CoreStart,
     { cloud }: AppPluginStartDependencies
   ): GuidedOnboardingPluginStart {
-    const { chrome, http, theme, application, notifications } = core;
+    const { chrome, http, theme, application, notifications, i18n } = core;
 
     // Guided onboarding UI is only available on cloud and if the access to the Kibana feature is granted
     const isEnabled = !!(cloud?.isCloudEnabled && application.capabilities[PLUGIN_FEATURE].enabled);
@@ -64,6 +63,7 @@ export class GuidedOnboardingPlugin
             api: apiService,
             application,
             notifications,
+            i18n,
           }),
       });
     }
@@ -82,24 +82,24 @@ export class GuidedOnboardingPlugin
     api,
     application,
     notifications,
+    i18n,
   }: {
     targetDomElement: HTMLElement;
     theme$: Rx.Observable<CoreTheme>;
     api: ApiService;
     application: ApplicationStart;
     notifications: NotificationsStart;
+    i18n: I18nStart;
   }) {
     ReactDOM.render(
-      <KibanaThemeProvider theme$={theme$}>
-        <I18nProvider>
-          <GuidePanel
-            api={api}
-            application={application}
-            notifications={notifications}
-            theme$={theme$}
-          />
-        </I18nProvider>
-      </KibanaThemeProvider>,
+      <KibanaRenderContextProvider {...{ theme: { theme$ }, i18n }}>
+        <GuidePanel
+          api={api}
+          application={application}
+          notifications={notifications}
+          theme$={theme$}
+        />
+      </KibanaRenderContextProvider>,
       targetDomElement
     );
     return () => ReactDOM.unmountComponentAtNode(targetDomElement);
