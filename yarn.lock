@@ -4956,6 +4956,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/key-value-metadata-table@link:packages/kbn-key-value-metadata-table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kibana-cors-test-plugin@link:x-pack/test/functional_cors/plugins/kibana_cors_test":
   version "0.0.0"
   uid ""

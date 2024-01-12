@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { KeyValueTable } from '.';
 import { render } from '@testing-library/react';
-import { renderWithTheme } from '../../../utils/test_helpers';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 function getKeys(output: ReturnType<typeof render>) {
   const keys = output.getAllByTestId('dot-key');
@@ -33,7 +34,11 @@ describe('KeyValueTable', () => {
       { key: 'nested.b.c', value: 'ccc' },
       { key: 'nested.a', value: 'aaa' },
     ];
-    const output = renderWithTheme(<KeyValueTable keyValuePairs={data} />);
+    const output = render(
+      <EuiThemeProvider>
+        <KeyValueTable keyValuePairs={data} />
+      </EuiThemeProvider>
+    );
     const rows = output.container.querySelectorAll('tr');
     expect(rows.length).toEqual(9);
 

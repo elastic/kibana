@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Stackframe } from '@kbn/apm-es-schemas';
-import { KeyValueTable } from '../key_value_table';
-import { flattenObject } from '../../../utils/flatten_object';
+import { KeyValueTable } from '@kbn/key-value-metadata-table';
+import { flattenObject } from '@kbn/key-value-metadata-table';
 
 const VariablesContainer = euiStyled.div`
   background: ${({ theme }) => theme.eui.euiColorEmptyShade};

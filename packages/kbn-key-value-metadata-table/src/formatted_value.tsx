@@ -1,27 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { isBoolean, isNumber, isObject } from 'lodash';
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { euiStyled } from '@kbn/react-kibana-context-styled';
+import { i18n } from '@kbn/i18n';
 
 const EmptyValue = euiStyled.span`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
   text-align: left;
 `;
 
-export function FormattedKey({
-  k,
-  value,
-}: {
-  k: string;
-  value: unknown;
-}): JSX.Element {
+export function FormattedKey({ k, value }: { k: string; value: unknown }): JSX.Element {
   if (value == null) {
     return <EmptyValue>{k}</EmptyValue>;
   }
@@ -35,7 +30,13 @@ export function FormattedValue({ value }: { value: any }): JSX.Element {
   } else if (isBoolean(value) || isNumber(value)) {
     return <React.Fragment>{String(value)}</React.Fragment>;
   } else if (!value) {
-    return <EmptyValue>{NOT_AVAILABLE_LABEL}</EmptyValue>;
+    return (
+      <EmptyValue>
+        {i18n.translate('keyValueMetadataTable.notAvailableLabel', {
+          defaultMessage: 'N/A',
+        })}
+      </EmptyValue>
+    );
   }
 
   return <React.Fragment>{value}</React.Fragment>;

@@ -110,7 +110,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/code-editor",
     "@kbn/shared-svg",
-    "@kbn/apm-es-schemas"
+    "@kbn/apm-es-schemas",
+    "@kbn/key-value-metadata-table"
   ],
   "exclude": ["target/**/*"]
 }
