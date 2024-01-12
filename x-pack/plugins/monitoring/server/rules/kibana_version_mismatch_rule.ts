@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -135,6 +136,16 @@ export class KibanaVersionMismatchRule extends BaseRule {
       state.ccs
     );
     const action = `[${fullActionText}](${globalStateLink})`;
+    const internalShortMessage = i18n.translate(
+      'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalShortMessage',
+      {
+        defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. {shortActionText}`,
+        values: {
+          clusterName: cluster.clusterName,
+          shortActionText,
+        },
+      }
+    );
     const internalFullMessage = i18n.translate(
       'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalFullMessage',
       {
@@ -149,22 +160,16 @@ export class KibanaVersionMismatchRule extends BaseRule {
     services.alertsClient?.setAlertData({
       id: alertId,
       context: {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.kibanaVersionMismatch.firing.internalShortMessage',
-          {
-            defaultMessage: `Kibana version mismatch alert is firing for {clusterName}. {shortActionText}`,
-            values: {
-              clusterName: cluster.clusterName,
-              shortActionText,
-            },
-          }
-        ),
+        internalShortMessage,
         internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
         clusterName: cluster.clusterName,
         versionList: versions,
         action,
         actionPlain: shortActionText,
+      },
+      payload: {
+        [ALERT_REASON]: internalShortMessage,
       },
     });
   }

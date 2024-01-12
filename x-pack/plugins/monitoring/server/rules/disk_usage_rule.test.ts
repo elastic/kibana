@@ -10,6 +10,7 @@ import { RULE_DISK_USAGE } from '../../common/constants';
 import { fetchDiskUsageNodeStats } from '../lib/alerts/fetch_disk_usage_node_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 type IDiskUsageAlertMock = DiskUsageRule & {
   defaultParams: {
@@ -241,6 +242,9 @@ describe('DiskUsageRule', () => {
           node: `${nodeName}:${diskUsage}`,
           state: 'firing',
         },
+        payload: {
+          [ALERT_REASON]: `Disk usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify disk usage level of node.`,
+        },
       });
     });
 
@@ -386,6 +390,9 @@ describe('DiskUsageRule', () => {
           nodes: `${nodeName}:${diskUsage}`,
           node: `${nodeName}:${diskUsage}`,
           state: 'firing',
+        },
+        payload: {
+          [ALERT_REASON]: `Disk usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify disk usage level of node.`,
         },
       });
     });

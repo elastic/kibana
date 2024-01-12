@@ -10,6 +10,7 @@ import { RULE_MEMORY_USAGE } from '../../common/constants';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -225,6 +226,9 @@ describe('MemoryUsageRule', () => {
           node: `${nodeName}:${memoryUsage}.00`,
           state: 'firing',
         },
+        payload: {
+          [ALERT_REASON]: `Memory usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify memory usage level of node.`,
+        },
       });
     });
 
@@ -385,6 +389,9 @@ describe('MemoryUsageRule', () => {
           nodes: `${nodeName}:${memoryUsage}.00`,
           node: `${nodeName}:${memoryUsage}.00`,
           state: 'firing',
+        },
+        payload: {
+          [ALERT_REASON]: `Memory usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify memory usage level of node.`,
         },
       });
     });

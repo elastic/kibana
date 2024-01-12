@@ -10,6 +10,7 @@ import { RULE_CCR_READ_EXCEPTIONS } from '../../common/constants';
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 type ICCRReadExceptionsRuleMock = CCRReadExceptionsRule & {
   defaultParams: {
@@ -290,6 +291,9 @@ describe('CCRReadExceptionsRule', () => {
           followerIndex,
           followerIndices: followerIndex,
         },
+        payload: {
+          [ALERT_REASON]: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Verify follower and leader index relationships on the affected remote cluster.`,
+        },
       });
     });
 
@@ -459,6 +463,9 @@ describe('CCRReadExceptionsRule', () => {
           remoteClusters: remoteCluster,
           followerIndex,
           followerIndices: followerIndex,
+        },
+        payload: {
+          [ALERT_REASON]: `CCR read exceptions alert is firing for the following remote cluster: ${remoteCluster}. Verify follower and leader index relationships on the affected remote cluster.`,
         },
       });
     });

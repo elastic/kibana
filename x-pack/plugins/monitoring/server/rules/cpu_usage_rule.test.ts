@@ -10,6 +10,7 @@ import { RULE_CPU_USAGE } from '../../common/constants';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -194,6 +195,9 @@ describe('CpuUsageRule', () => {
           node: `${nodeName}:${cpuUsage}`,
           state: 'firing',
         },
+        payload: {
+          [ALERT_REASON]: `CPU usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify CPU level of node.`,
+        },
       });
     });
 
@@ -320,6 +324,9 @@ describe('CpuUsageRule', () => {
           nodes: `${nodeName}:${cpuUsage}`,
           node: `${nodeName}:${cpuUsage}`,
           state: 'firing',
+        },
+        payload: {
+          [ALERT_REASON]: `CPU usage alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify CPU level of node.`,
         },
       });
     });

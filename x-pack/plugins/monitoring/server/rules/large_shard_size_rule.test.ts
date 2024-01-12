@@ -10,6 +10,7 @@ import { RULE_LARGE_SHARD_SIZE } from '../../common/constants';
 import { fetchIndexShardSize } from '../lib/alerts/fetch_index_shard_size';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 type ILargeShardSizeRuleMock = LargeShardSizeRule & {
   defaultParams: {
@@ -214,6 +215,9 @@ describe('LargeShardSizeRule', () => {
           shardIndex,
           shardIndices: shardIndex,
         },
+        payload: {
+          [ALERT_REASON]: `Large shard size alert is firing for the following index: ${shardIndex}. Investigate indices with large shard sizes.`,
+        },
       });
     });
 
@@ -331,6 +335,9 @@ describe('LargeShardSizeRule', () => {
           state: 'firing',
           shardIndex,
           shardIndices: shardIndex,
+        },
+        payload: {
+          [ALERT_REASON]: `Large shard size alert is firing for the following index: ${shardIndex}. Investigate indices with large shard sizes.`,
         },
       });
     });

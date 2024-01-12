@@ -10,6 +10,7 @@ import { RULE_MISSING_MONITORING_DATA } from '../../common/constants';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -181,6 +182,9 @@ describe('MissingMonitoringDataRule', () => {
           count,
           state: 'firing',
         },
+        payload: {
+          [ALERT_REASON]: `We have not detected any monitoring data for node ${nodeName} in cluster: ${clusterName}. Verify the node is up and running, then double check the monitoring settings.`,
+        },
       });
     });
 
@@ -293,6 +297,9 @@ describe('MissingMonitoringDataRule', () => {
           clusterName,
           count,
           state: 'firing',
+        },
+        payload: {
+          [ALERT_REASON]: `We have not detected any monitoring data for node ${nodeName} in cluster: ${clusterName}. Verify the node is up and running, then double check the monitoring settings.`,
         },
       });
     });

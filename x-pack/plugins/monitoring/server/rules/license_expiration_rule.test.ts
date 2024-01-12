@@ -10,6 +10,7 @@ import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
 import { fetchLicenses } from '../lib/alerts/fetch_licenses';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -173,6 +174,10 @@ describe('LicenseExpirationRule', () => {
           expiredDate: '53 years',
           state: 'firing',
         },
+        payload: {
+          [ALERT_REASON]:
+            'License expiration alert is firing for testCluster. Your license expires in 53 years. Please update your license.',
+        },
       });
     });
 
@@ -281,6 +286,10 @@ describe('LicenseExpirationRule', () => {
           expiredDate: '2 days',
           state: 'firing',
         },
+        payload: {
+          [ALERT_REASON]:
+            'License expiration alert is firing for testCluster. Your license expires in 2 days. Please update your license.',
+        },
       });
     });
 
@@ -367,6 +376,10 @@ describe('LicenseExpirationRule', () => {
           clusterName,
           expiredDate: 'a month',
           state: 'firing',
+        },
+        payload: {
+          [ALERT_REASON]:
+            'License expiration alert is firing for testCluster. Your license expires in a month. Please update your license.',
         },
       });
     });

@@ -10,6 +10,7 @@ import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../common/constants';
 import { fetchLogstashVersions } from '../lib/alerts/fetch_logstash_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -148,6 +149,10 @@ describe('LogstashVersionMismatchRule', () => {
           versionList: ['8.0.0', '7.2.1'],
           clusterName,
           state: 'firing',
+        },
+        payload: {
+          [ALERT_REASON]:
+            'Logstash version mismatch alert is firing for testCluster. Verify you have the same version across all nodes.',
         },
       });
     });

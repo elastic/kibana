@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -125,19 +126,20 @@ export class LogstashVersionMismatchRule extends BaseRule {
       state.ccs
     );
     const action = `[${fullActionText}](${globalStateLink})`;
+    const internalShortMessage = i18n.translate(
+      'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalShortMessage',
+      {
+        defaultMessage: `Logstash version mismatch alert is firing for {clusterName}. {shortActionText}`,
+        values: {
+          clusterName: cluster.clusterName,
+          shortActionText,
+        },
+      }
+    );
     services.alertsClient?.setAlertData({
       id: alertId,
       context: {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalShortMessage',
-          {
-            defaultMessage: `Logstash version mismatch alert is firing for {clusterName}. {shortActionText}`,
-            values: {
-              clusterName: cluster.clusterName,
-              shortActionText,
-            },
-          }
-        ),
+        internalShortMessage,
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.logstashVersionMismatch.firing.internalFullMessage',
           {
@@ -154,6 +156,9 @@ export class LogstashVersionMismatchRule extends BaseRule {
         versionList: versions,
         action,
         actionPlain: shortActionText,
+      },
+      payload: {
+        [ALERT_REASON]: internalShortMessage,
       },
     });
   }

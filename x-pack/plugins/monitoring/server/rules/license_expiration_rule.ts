@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorOptions, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -168,20 +169,21 @@ export class LicenseExpirationRule extends BaseRule {
     });
     const action = `[${actionText}](elasticsearch/nodes)`;
     const expiredDate = $duration.humanize();
+    const internalShortMessage = i18n.translate(
+      'xpack.monitoring.alerts.licenseExpiration.firing.internalShortMessage',
+      {
+        defaultMessage: `License expiration alert is firing for {clusterName}. Your license expires in {expiredDate}. {actionText}`,
+        values: {
+          clusterName: cluster.clusterName,
+          expiredDate,
+          actionText,
+        },
+      }
+    );
     services.alertsClient?.setAlertData({
       id: alertId,
       context: {
-        internalShortMessage: i18n.translate(
-          'xpack.monitoring.alerts.licenseExpiration.firing.internalShortMessage',
-          {
-            defaultMessage: `License expiration alert is firing for {clusterName}. Your license expires in {expiredDate}. {actionText}`,
-            values: {
-              clusterName: cluster.clusterName,
-              expiredDate,
-              actionText,
-            },
-          }
-        ),
+        internalShortMessage,
         internalFullMessage: i18n.translate(
           'xpack.monitoring.alerts.licenseExpiration.firing.internalFullMessage',
           {
@@ -198,6 +200,9 @@ export class LicenseExpirationRule extends BaseRule {
         clusterName: cluster.clusterName,
         action,
         actionPlain: actionText,
+      },
+      payload: {
+        [ALERT_REASON]: internalShortMessage,
       },
     });
   }

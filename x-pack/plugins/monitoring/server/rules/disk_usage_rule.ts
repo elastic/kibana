@@ -11,6 +11,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { AlertInstanceContext, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -222,6 +223,9 @@ export class DiskUsageRule extends BaseRule {
         clusterName: cluster.clusterName,
         action,
         actionPlain: shortActionText,
+      },
+      payload: {
+        [ALERT_REASON]: internalShortMessage,
       },
     });
   }

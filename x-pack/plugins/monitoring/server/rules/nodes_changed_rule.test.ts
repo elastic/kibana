@@ -10,6 +10,7 @@ import { RULE_NODES_CHANGED } from '../../common/constants';
 import { fetchNodesFromClusterStats } from '../lib/alerts/fetch_nodes_from_cluster_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -210,6 +211,10 @@ describe('NodesChangedAlert', () => {
           clusterName,
           state: 'firing',
         },
+        payload: {
+          [ALERT_REASON]:
+            'Nodes changed alert is firing for testCluster. Verify that you added, removed, or restarted nodes.',
+        },
       });
     });
     it('should fire actions when nodes added, changed, and removed', async () => {
@@ -290,6 +295,10 @@ describe('NodesChangedAlert', () => {
           restarted: 'test',
           clusterName,
           state: 'firing',
+        },
+        payload: {
+          [ALERT_REASON]:
+            'Nodes changed alert is firing for testCluster. Verify that you added, removed, or restarted nodes.',
         },
       });
     });

@@ -10,6 +10,7 @@ import { RULE_THREAD_POOL_WRITE_REJECTIONS } from '../../common/constants';
 import { fetchThreadPoolRejectionStats } from '../lib/alerts/fetch_thread_pool_rejections_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -232,6 +233,9 @@ describe('ThreadpoolWriteRejectionsAlert', () => {
           threadPoolType,
           state: 'firing',
         },
+        payload: {
+          [ALERT_REASON]: `Thread pool ${threadPoolType} rejections alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify thread pool ${threadPoolType} rejections for the affected node.`,
+        },
       });
     });
     it('should not fire actions if under threshold', async () => {
@@ -392,6 +396,9 @@ describe('ThreadpoolWriteRejectionsAlert', () => {
           count,
           state: 'firing',
           threadPoolType,
+        },
+        payload: {
+          [ALERT_REASON]: `Thread pool ${threadPoolType} rejections alert is firing for node ${nodeName} in cluster: ${clusterName}. Verify thread pool ${threadPoolType} rejections for the affected node.`,
         },
       });
     });

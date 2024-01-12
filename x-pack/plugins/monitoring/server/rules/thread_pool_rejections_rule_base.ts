@@ -15,6 +15,7 @@ import {
   AlertInstanceContext,
 } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -270,6 +271,9 @@ export class ThreadPoolRejectionsRuleBase extends BaseRule {
         clusterName,
         action,
         actionPlain: shortActionText,
+      },
+      payload: {
+        [ALERT_REASON]: internalShortMessage,
       },
     });
   }

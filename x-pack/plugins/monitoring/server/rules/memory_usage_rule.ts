@@ -12,6 +12,7 @@ import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { AlertInstanceContext, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -229,6 +230,9 @@ export class MemoryUsageRule extends BaseRule {
         clusterName: cluster.clusterName,
         action,
         actionPlain: shortActionText,
+      },
+      payload: {
+        [ALERT_REASON]: internalShortMessage,
       },
     });
   }

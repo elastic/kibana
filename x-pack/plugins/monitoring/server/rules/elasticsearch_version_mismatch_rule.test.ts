@@ -10,6 +10,7 @@ import { RULE_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
 import { fetchElasticsearchVersions } from '../lib/alerts/fetch_elasticsearch_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -147,6 +148,10 @@ describe('ElasticsearchVersionMismatchAlert', () => {
           versionList: ['8.0.0', '7.2.1'],
           clusterName,
           state: 'firing',
+        },
+        payload: {
+          [ALERT_REASON]:
+            'Elasticsearch version mismatch alert is firing for testCluster. Verify you have the same version across all nodes.',
         },
       });
     });

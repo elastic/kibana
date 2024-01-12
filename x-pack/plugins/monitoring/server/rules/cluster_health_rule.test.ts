@@ -11,6 +11,7 @@ import { AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 const RealDate = Date;
 
@@ -157,6 +158,10 @@ describe('ClusterHealthRule', () => {
           clusterName,
           clusterHealth: 'yellow',
           state: 'firing',
+        },
+        payload: {
+          [ALERT_REASON]:
+            'Cluster health alert is firing for testCluster. Current health is yellow. Allocate missing replica shards.',
         },
       });
     });
