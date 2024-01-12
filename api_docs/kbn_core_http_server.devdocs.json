@@ -4921,10 +4921,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/rule_types.test.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/__mocks__/server.ts"
-              },
-              {
                 "plugin": "features",
                 "path": "x-pack/plugins/features/server/routes/index.test.ts"
               },
@@ -7263,10 +7259,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/update_rule_api_key.test.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/__mocks__/server.ts"
-              },
-              {
                 "plugin": "encryptedSavedObjects",
                 "path": "x-pack/plugins/encrypted_saved_objects/server/routes/key_rotation.test.ts"
               },
@@ -8397,10 +8389,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/update_rule.test.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/__mocks__/server.ts"
-              },
-              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/index.test.ts"
               },
@@ -8745,10 +8733,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/bulk_enable_rules.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/__mocks__/server.ts"
               },
               {
                 "plugin": "ruleRegistry",
@@ -9307,10 +9291,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/delete_rule.test.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/__mocks__/server.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -13420,6 +13400,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_ilm_explain.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/capabilities/get_capabilities_route.ts"
               },
               {
                 "plugin": "logsShared",
