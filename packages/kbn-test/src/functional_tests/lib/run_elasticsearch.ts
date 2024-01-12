@@ -188,9 +188,15 @@ function getESServerlessOptions(
     (config.has('kbnTestServer.serverArgs') &&
       (config.get('kbnTestServer.serverArgs') as string[])) ||
     [];
-  const serverlessArg = kbnServerArgs.find((arg) => arg.startsWith('--serverless'));
-  const projectType = serverlessArg
-    ? (serverlessArg.split('=')[1] as ServerlessProjectType)
+
+  const projectTypeFromArgs = kbnServerArgs
+    .filter((arg) => arg.startsWith('--serverless'))
+    .reduce((acc, arg) => {
+      const match = arg.match(/--serverless[=\s](\w+)/);
+      return acc + (match ? match[1] : '');
+    }, '');
+  const projectType = projectTypeFromArgs.length
+    ? (projectTypeFromArgs as ServerlessProjectType)
     : undefined;
 
   const commonOptions = {
