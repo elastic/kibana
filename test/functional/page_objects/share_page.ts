@@ -21,6 +21,10 @@ export class SharePageObject extends FtrService {
     return this.testSubjects.click('shareTopNavButton');
   }
 
+  async closeShareModal() {
+    return this.testSubjects.click('shareLinksDoneButton');
+  }
+
   async openShareMenuItem(itemTitle: string) {
     this.log.debug(`openShareMenuItem title:${itemTitle}`);
     const isShareMenuOpen = await this.isShareMenuOpen();
@@ -45,8 +49,8 @@ export class SharePageObject extends FtrService {
    * in a pure OSS environment, the permalinks sharing panel is displayed initially
    */
   async openPermaLinks() {
-    if (await this.testSubjects.exists('sharePanel-Permalinks')) {
-      await this.testSubjects.click(`sharePanel-Permalinks`);
+    if (await this.testSubjects.exists('shareModal-links')) {
+      await this.testSubjects.click(`shareModal-links`);
     }
   }
 

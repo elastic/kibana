@@ -113,7 +113,7 @@ export function createScenarios(
   };
   const tryDiscoverCsvNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-CSVReports');
+    await testSubjects.missingOrFail('sharePanel-CSVDownload');
   };
   const tryDiscoverCsvSuccess = async () => {
     await PageObjects.reporting.openCsvReportingPanel();

@@ -135,7 +135,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close menu
-        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.closeShareModal();
       });
 
       it('allows saving via the saved query management component popover with no saved query loaded', async () => {
@@ -385,7 +385,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close menu
-        await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.closeShareModal();
       });
 
       it('allows loading a saved query via the saved query management component', async () => {

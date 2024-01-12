@@ -476,7 +476,10 @@ export class LinkModal extends Component<LinkModalProps, State> {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
-                  <EuiButtonEmpty onClick={this.props.onClose}>
+                  <EuiButtonEmpty
+                    onClick={this.props.onClose}
+                    data-test-subj="share.links.doneButton"
+                  >
                     <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
                   </EuiButtonEmpty>
                 </EuiFlexItem>
