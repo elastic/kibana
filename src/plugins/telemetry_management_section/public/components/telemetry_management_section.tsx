@@ -76,7 +76,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
       type: 'boolean',
       value: true,
       userValue: enabled,
-      name: i18n.translate('telemetry.provideUsageDataAriaName', {
+      name: i18n.translate('telemetry.provideUsageDataTitle', {
         defaultMessage: 'Share usage with Elastic',
       }),
       // @ts-expect-error
