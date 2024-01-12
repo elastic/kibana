@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should add a phrases filter', async function () {
         await filterBar.addFilter({
           field: 'extension.raw',
-          operation: 'is one of',
+          operation: 'one of',
           value: ['jpg'],
         });
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should support filtering on nested fields', async () => {
         await filterBar.addFilter({
           field: 'nestedField.child',
-          operation: 'is',
+          operation: 'equals',
           value: 'nestedValue',
         });
         expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should support range filter on version fields', async () => {
           await filterBar.addFilter({
             field: 'version',
-            operation: 'is between',
+            operation: 'between',
             value: { from: '2.0.0', to: '3.0.0' },
           });
           expect(await filterBar.hasFilter('version', '2.0.0 to 3.0.0')).to.be(true);
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await filterBar.addFilter({
           field: 'extension.raw',
-          operation: 'is',
+          operation: 'equals',
           value: 'css',
         });
         if (pinned) {

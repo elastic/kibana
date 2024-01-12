@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('inclusive filter should be toggleable via the filter bar', async function () {
       await filterBar.addFilter({
         field: TEST_ANCHOR_FILTER_FIELD,
-        operation: 'is',
+        operation: 'equals',
         value: TEST_ANCHOR_FILTER_VALUE,
       });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const addPinnedFilter = async () => {
       await filterBar.addFilter({
         field: TEST_ANCHOR_FILTER_FIELD,
-        operation: 'is',
+        operation: 'equals',
         value: TEST_ANCHOR_FILTER_VALUE,
       });
       await filterBar.toggleFilterPinned(TEST_ANCHOR_FILTER_FIELD);
@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should preserve filters when the page is refreshed', async function () {
       await addPinnedFilter();
-      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
+      await filterBar.addFilter({ field: 'extension', operation: 'equals', value: 'png' });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       await expectFiltersToExist();
       await browser.refresh();
@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should update filters when navigating forward and backward in history', async () => {
-      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
+      await filterBar.addFilter({ field: 'extension', operation: 'equals', value: 'png' });
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       expect(await filterBar.getFilterCount()).to.be(1);
       expect(await filterBar.hasFilter('extension', 'png')).to.be(true);
@@ -161,8 +161,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter({
         condition: 'OR',
         filters: [
-          { field: 'extension', operation: 'is', value: 'png' },
-          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+          { field: 'extension', operation: 'equals', value: 'png' },
+          { field: 'bytes', operation: 'between', value: { from: '1000', to: '2000' } },
         ],
       });
 
@@ -181,8 +181,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter({
         condition: 'AND',
         filters: [
-          { field: 'extension', operation: 'is one of', value: ['png', 'jpeg'] },
-          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+          { field: 'extension', operation: 'one of', value: ['png', 'jpeg'] },
+          { field: 'bytes', operation: 'between', value: { from: '1000', to: '2000' } },
         ],
       });
 
@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.clickEditFilterById('0');
 
       expect(await filterBar.getFilterEditorPreview()).to.equal(
-        'extension: is one of png, jpeg AND bytes: 1,000B to 2KB'
+        'extension: one of png, jpeg AND bytes: 1,000B to 2KB'
       );
     });
 
@@ -205,10 +205,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             condition: 'OR',
             filters: [
               { field: 'clientip', operation: 'does not exist' },
-              { field: 'extension', operation: 'is one of', value: ['png', 'jpeg'] },
+              { field: 'extension', operation: 'one of', value: ['png', 'jpeg'] },
             ],
           },
-          { field: 'bytes', operation: 'is between', value: { from: '1000', to: '2000' } },
+          { field: 'bytes', operation: 'between', value: { from: '1000', to: '2000' } },
         ],
       });
 
@@ -219,12 +219,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.clickEditFilterById('0');
 
       expect(await filterBar.getFilterEditorPreview()).to.equal(
-        '(NOT clientip: exists OR extension: is one of png, jpeg) AND bytes: 1,000B to 2KB'
+        '(NOT clientip: exists OR extension: one of png, jpeg) AND bytes: 1,000B to 2KB'
       );
     });
 
     it('should add comma delimiter values', async () => {
-      await filterBar.addFilter({ field: 'extension', operation: 'is one of', value: 'png, jpeg' });
+      await filterBar.addFilter({ field: 'extension', operation: 'one of', value: 'png, jpeg' });
 
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       expect(await filterBar.getFilterCount()).to.be(1);
@@ -232,11 +232,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await filterBar.clickEditFilterById('0');
 
-      expect(await filterBar.getFilterEditorPreview()).to.equal('extension: is one of png, jpeg');
+      expect(await filterBar.getFilterEditorPreview()).to.equal('extension: one of png, jpeg');
     });
 
     it('should display the negated values correctly', async () => {
-      await filterBar.addFilter({ field: 'extension', operation: 'is not', value: 'png' });
+      await filterBar.addFilter({ field: 'extension', operation: 'does not equal', value: 'png' });
 
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       expect(await filterBar.getFilterCount()).to.be(1);
@@ -245,7 +245,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await filterBar.clickEditFilterById('0');
       await filterBar.addAndFilter('0');
-      await filterBar.createFilter({ field: 'extension', operation: 'is', value: 'jpeg' }, '0.1');
+      await filterBar.createFilter(
+        { field: 'extension', operation: 'equals', value: 'jpeg' },
+        '0.1'
+      );
       await testSubjects.clickWhenNotDisabled('saveFilter');
 
       const filterLabelUpdated = await filterBar.getFiltersLabel();

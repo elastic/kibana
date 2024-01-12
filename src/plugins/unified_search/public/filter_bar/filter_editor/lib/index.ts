@@ -9,12 +9,12 @@
 export { getFieldValidityAndErrorMessage } from './helpers';
 export type { Operator } from './filter_operators';
 export {
-  isOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isNotOneOfOperator,
-  isBetweenOperator,
-  isNotBetweenOperator,
+  equalsOperator,
+  doesNotEqualOperator,
+  oneOfOperator,
+  notOneOfOperator,
+  betweenOperator,
+  notBetweenOperator,
   existsOperator,
   doesNotExistOperator,
   FILTER_OPERATORS,

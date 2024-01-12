@@ -48,12 +48,12 @@ interface ParamsEditorInputProps {
   suggestionsAbstraction?: SuggestionsAbstraction;
 }
 
-const getPlaceholderText = (isFieldSelected: boolean, isOperatorSelected: boolean) => {
+const getPlaceholderText = (isFieldSelected: boolean, equalsOperatorSelected: boolean) => {
   if (!isFieldSelected) {
     return strings.getSelectFieldPlaceholderLabel();
   }
 
-  if (!isOperatorSelected) {
+  if (!equalsOperatorSelected) {
     return strings.getSelectOperatorPlaceholderLabel();
   }
 

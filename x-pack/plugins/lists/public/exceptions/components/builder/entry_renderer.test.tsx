@@ -308,7 +308,7 @@ describe('BuilderEntryItem', () => {
     ).toEqual('ip');
     expect(
       wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
-    ).toEqual('is not');
+    ).toEqual('does not exist');
     expect(
       wrapper.find('[data-test-subj="valuesAutocompleteMatchLabel"] input').props().value
     ).toEqual('1234');
@@ -812,7 +812,7 @@ describe('BuilderEntryItem', () => {
       wrapper.find(EuiComboBox).at(1).props() as unknown as {
         onChange: (a: EuiComboBoxOptionOption[]) => void;
       }
-    ).onChange([{ label: 'is not' }]);
+    ).onChange([{ label: 'does not exist' }]);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       { field: 'ip', id: '123', operator: 'excluded', type: 'match', value: '1234' },

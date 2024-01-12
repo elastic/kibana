@@ -166,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not show the badge after pinning the first filter but after disabling a filter', async () => {
-      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
+      await filterBar.addFilter({ field: 'extension', operation: 'equals', value: 'png' });
       await filterBar.addFilter({ field: 'bytes', operation: 'exists' });
       await PageObjects.discover.saveSearch(SAVED_SEARCH_WITH_FILTERS_NAME);
       await PageObjects.discover.waitUntilSearchingHasFinished();

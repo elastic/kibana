@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should support query and filtering', async () => {
       await filterBar.addFilter({
         field: 'nestedField.child',
-        operation: 'is',
+        operation: 'equals',
         value: 'nestedValue',
       });
       expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
@@ -236,12 +236,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await filterBar.addFilter({
         field: 'nestedField.child',
-        operation: 'is',
+        operation: 'equals',
         value: 'nestedValue',
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'jpg' });
+      await filterBar.addFilter({ field: 'extension', operation: 'equals', value: 'jpg' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const first = await PageObjects.discover.getCurrentDataViewId();

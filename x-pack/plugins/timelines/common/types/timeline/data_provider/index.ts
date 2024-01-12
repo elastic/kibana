@@ -14,10 +14,10 @@ export const IS_OPERATOR = ':';
 export const EXISTS_OPERATOR = ':*';
 
 /** The `is one of` operator in a KQL query */
-export const IS_ONE_OF_OPERATOR = 'includes';
+export const ONE_OF_OPERATOR = 'includes';
 
 /** The operator applied to a field */
-export type QueryOperator = typeof IS_OPERATOR | typeof EXISTS_OPERATOR | typeof IS_ONE_OF_OPERATOR;
+export type QueryOperator = typeof IS_OPERATOR | typeof EXISTS_OPERATOR | typeof ONE_OF_OPERATOR;
 
 export enum DataProviderType {
   default = 'default',

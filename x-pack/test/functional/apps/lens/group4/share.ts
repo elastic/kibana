@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should preserve filter and query when sharing', async () => {
-      await filterBarService.addFilter({ field: 'bytes', operation: 'is', value: '1' });
+      await filterBarService.addFilter({ field: 'bytes', operation: 'equals', value: '1' });
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
       await PageObjects.lens.waitForVisualization('xyVisChart');

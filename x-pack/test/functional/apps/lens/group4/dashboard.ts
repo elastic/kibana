@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'AL');
       expect(hasGeoDestFilter).to.be(true);
-      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
+      await filterBar.addFilter({ field: 'geo.src', operation: 'equals', value: 'US' });
       await filterBar.toggleFilterPinned('geo.src');
     });
 
@@ -159,9 +159,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
+      await filterBar.addFilter({ field: 'geo.src', operation: 'equals', value: 'US' });
       await filterBar.toggleFilterPinned('geo.src');
-      await filterBar.addFilter({ field: 'geo.dest', operation: 'is', value: 'LS' });
+      await filterBar.addFilter({ field: 'geo.dest', operation: 'equals', value: 'LS' });
 
       await dashboardAddPanel.clickCreateNewLink();
       await PageObjects.header.waitUntilLoadingHasFinished();

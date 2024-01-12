@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('do not apply global filters', async () => {
         it('- filter pills', async () => {
-          await filterBar.addFilter({ field: 'animal.keyword', operation: 'is', value: 'cat' });
+          await filterBar.addFilter({ field: 'animal.keyword', operation: 'equals', value: 'cat' });
           await dashboardControls.optionsListOpenPopover(firstOptionsListId);
           let afterCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
           expect(afterCount).to.be.lessThan(beforeCount);

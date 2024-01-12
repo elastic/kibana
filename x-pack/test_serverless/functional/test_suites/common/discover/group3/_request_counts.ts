@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectSearches(type, 2, async () => {
           await filterBar.addFilter({
             field: 'extension',
-            operation: 'is',
+            operation: 'equals',
             value: 'jpg',
           });
         });

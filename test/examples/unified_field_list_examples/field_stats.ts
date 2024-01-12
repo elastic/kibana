@@ -131,7 +131,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('should apply filters and queries', async () => {
-        await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'US' });
+        await filterBar.addFilter({ field: 'geo.src', operation: 'equals', value: 'US' });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
         expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be(
@@ -176,7 +176,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('should return a single-value histogram when filtering a precalculated histogram', async () => {
         await filterBar.addFilter({
           field: 'histogram-title',
-          operation: 'is',
+          operation: 'equals',
           value: 'single value',
         });
         await PageObjects.header.waitUntilLoadingHasFinished();

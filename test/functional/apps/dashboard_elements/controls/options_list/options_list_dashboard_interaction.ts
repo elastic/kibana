@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           await filterBar.addFilter({
             field: 'sound.keyword',
-            operation: 'is one of',
+            operation: 'one of',
             value: ['bark', 'bow ow ow', 'ruff'],
           });
           await header.waitUntilLoadingHasFinished();

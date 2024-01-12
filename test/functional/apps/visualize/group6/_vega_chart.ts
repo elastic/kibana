@@ -91,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const fullDataLabels = await PageObjects.vegaChart.getYAxisLabels();
           expect(fullDataLabels[0]).to.eql('0');
           expect(fullDataLabels[fullDataLabels.length - 1]).to.eql('1,600');
-          await filterBar.addFilter({ field: '@tags.raw', operation: 'is', value: 'error' });
+          await filterBar.addFilter({ field: '@tags.raw', operation: 'equals', value: 'error' });
           await PageObjects.visChart.waitForVisualizationRenderingStabilized();
           const filteredDataLabels = await PageObjects.vegaChart.getYAxisLabels();
           expect(filteredDataLabels[0]).to.eql('0');
@@ -255,7 +255,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
-        await filterBar.addFilter({ field: 'response', operation: 'is', value: '200' });
+        await filterBar.addFilter({ field: 'response', operation: 'equals', value: '200' });
 
         expect(await filterBar.getFilterCount()).to.be(1);
 
@@ -267,8 +267,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should remove all filters by calling "kibanaRemoveAllFilters" expression', async () => {
-        await filterBar.addFilter({ field: 'response', operation: 'is', value: '200' });
-        await filterBar.addFilter({ field: 'response', operation: 'is', value: '500' });
+        await filterBar.addFilter({ field: 'response', operation: 'equals', value: '200' });
+        await filterBar.addFilter({ field: 'response', operation: 'equals', value: '500' });
 
         expect(await filterBar.getFilterCount()).to.be(2);
 

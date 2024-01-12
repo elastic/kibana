@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
-      await filterBarService.addFilter({ field: 'geo.src', operation: 'is', value: 'AF' });
+      await filterBarService.addFilter({ field: 'geo.src', operation: 'equals', value: 'AF' });
       // the filter bar seems to need a moment to settle before saving and returning
       await PageObjects.common.sleep(1000);
 
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.submitQuery();
       await filterBarService.addFilter({
         field: 'host.raw',
-        operation: 'is',
+        operation: 'equals',
         value: 'cdn.theacademyofperformingartsandscience.org',
       });
 

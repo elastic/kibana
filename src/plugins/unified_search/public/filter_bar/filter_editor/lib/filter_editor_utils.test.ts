@@ -23,7 +23,7 @@ import {
   isFilterValid,
 } from './filter_editor_utils';
 
-import { existsOperator, isBetweenOperator, isOneOfOperator, isOperator } from './filter_operators';
+import { existsOperator, betweenOperator, oneOfOperator, equalsOperator } from './filter_operators';
 
 describe('Filter editor utils', () => {
   describe('getFieldFromFilter', () => {
@@ -134,12 +134,12 @@ describe('Filter editor utils', () => {
 
   describe('isFilterValid', () => {
     it('should return false if index pattern is not provided', () => {
-      const isValid = isFilterValid(undefined, stubFields[0], isOperator, 'foo');
+      const isValid = isFilterValid(undefined, stubFields[0], equalsOperator, 'foo');
       expect(isValid).toBe(false);
     });
 
     it('should return false if field is not provided', () => {
-      const isValid = isFilterValid(stubIndexPattern, undefined, isOperator, 'foo');
+      const isValid = isFilterValid(stubIndexPattern, undefined, equalsOperator, 'foo');
       expect(isValid).toBe(false);
     });
 
@@ -149,29 +149,29 @@ describe('Filter editor utils', () => {
     });
 
     it('should return false for phrases filter without phrases', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isOneOfOperator, []);
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], oneOfOperator, []);
       expect(isValid).toBe(false);
     });
 
     it('should return true for phrases filter with phrases', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isOneOfOperator, ['foo']);
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], oneOfOperator, ['foo']);
       expect(isValid).toBe(true);
     });
 
     it('should return false for range filter without range', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, undefined);
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], betweenOperator, undefined);
       expect(isValid).toBe(false);
     });
 
     it('should return true for range filter with from', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], betweenOperator, {
         from: 'foo',
       });
       expect(isValid).toBe(true);
     });
 
     it('should return true for range filter with from/to', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[0], isBetweenOperator, {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[0], betweenOperator, {
         from: 'foo',
         to: 'goo',
       });
@@ -179,7 +179,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return false for date range filter with bad from', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[4], betweenOperator, {
         from: 'foo',
         to: 'now',
       });
@@ -187,7 +187,7 @@ describe('Filter editor utils', () => {
     });
 
     it('should return false for date range filter with bad to', () => {
-      const isValid = isFilterValid(stubIndexPattern, stubFields[4], isBetweenOperator, {
+      const isValid = isFilterValid(stubIndexPattern, stubFields[4], betweenOperator, {
         from: '2020-01-01',
         to: 'mau',
       });
