@@ -51,6 +51,7 @@ export const getSuggestions = async (
     const dataView = await deps.dataViews.create(
       dataViewSpec ?? {
         title: indexPattern,
+        id: `esql-${indexPattern}`,
       }
     );
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {

@@ -91,6 +91,7 @@ export async function getStateFromAggregateQuery(
   try {
     const dataView = await dataViews.create({
       title: indexPattern,
+      id: `esql-${indexPattern}`,
     });
     if (dataView && dataView.id) {
       if (dataView?.fields?.getByName('@timestamp')?.type === 'date') {

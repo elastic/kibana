@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { type DataView } from '@kbn/data-views-plugin/public';
 import type { Query, AggregateQuery } from '../filters';
-
+interface AdHocDataViewBase {
+  id: string;
+  title: string;
+}
 type Language = keyof AggregateQuery;
 
 const DEFAULT_ESQL_LIMIT = 500;
@@ -84,4 +88,19 @@ export function getLimitFromESQLQuery(esql: string): number {
 export function cleanupESQLQueryForLensSuggestions(esql?: string): string {
   const pipes = (esql || '').split('|');
   return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
+}
+
+// Some applications need to have a dataview to work properly with ES|QL queries
+// This is a helper to create one. The id is constructed from the indexpattern.
+// As there are no runtime fields or field formatters or default time fields
+// the same adhoc dataview can be constructed/used. This comes with great advantages such
+// as solving the problem descibed here https://github.com/elastic/kibana/issues/168131
+export async function getESQLAdHocDataview(
+  indexPattern: string,
+  createDataView: (config: AdHocDataViewBase) => Promise<DataView>
+) {
+  return await createDataView({
+    title: indexPattern,
+    id: `esql-${indexPattern}`,
+  });
 }
