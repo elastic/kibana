@@ -100,7 +100,7 @@ async function getIsCredentialsValid({
   try {
     await callKibana({
       elasticsearch,
-      kibana,
+      kibana: { hostname: 'http://localhost:5620' },
       options: {
         validateStatus: (status) => status >= 200 && status < 400,
         url: `/`,
