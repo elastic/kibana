@@ -18,7 +18,7 @@
   flex-grow: 1;
   text-align: left;
   padding: $euiSizeS 0;
-  margin-left: $euiSizeS;
+  // margin-left: $euiSizeS;
   display: flex;
   align-items: flex-start;
   line-height: normal;
@@ -79,7 +79,9 @@
   padding-right: 0;
 }
 
-#fieldListGroupedAvailableFields .kbnFieldButton--isSelected {
-  border: 1px solid $euiColorPrimary;
+#fieldListGroupedAvailableFields .kbnFieldButton--isSelected .kbnFieldButton__nameInner {
+  // border: 1px solid $euiColorPrimary;
+  // text-decoration: underline;
+  font-weight: 500;
 }
 

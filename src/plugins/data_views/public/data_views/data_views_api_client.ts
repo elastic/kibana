@@ -11,7 +11,6 @@ import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
 import { FIELDS_FOR_WILDCARD_PATH } from '../../common/constants';
-import { StaleWhileRevalidateCache } from './stale_while_revalidate_cache';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
@@ -20,39 +19,21 @@ const version = '1';
  * Data Views API Client - client implementation
  */
 export class DataViewsApiClient implements IDataViewsApiClient {
+  private http: HttpSetup;
+
   /**
    * constructor
    * @param http http dependency
-   * @param staleWhileRevalidateCache cache dependency
    */
-  constructor(
-    private readonly http: HttpSetup,
-    private readonly staleWhileRevalidateCache: StaleWhileRevalidateCache
-  ) {}
-
-  private async _request<T = unknown>(
-    url: string,
-    cache: 'stale-while-revalidate' | 'reload' | 'no-store',
-    query?: {},
-    body?: string
-  ): Promise<T | undefined> {
-    let request: Promise<T>;
-
-    if (body) {
-      request = this.http.post<T>(url, { query, body, version });
-    } else if (cache === 'no-store') {
-      request = this.http.get<T>(url, { query, version });
-    } else {
-      request = this.staleWhileRevalidateCache
-        .fetch(url, { query, version, forceRefresh: cache === 'reload' })
-        .then((resp) => resp.json());
+  constructor(http: HttpSetup) {
+    this.http = http;
     }
 
+  private _request<T = unknown>(url: string, query?: {}, body?: string): Promise<T | undefined> {
+    const request = body
+      ? this.http.post<T>(url, { query, body, version })
+      : this.http.fetch<T>(url, { query, version });
     return request.catch((resp) => {
-      if (!resp?.body) {
-        throw resp;
-      }
-
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
       }
@@ -83,7 +64,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     } = options;
     return this._request<FieldsForWildcardResponse>(
       FIELDS_FOR_WILDCARD_PATH,
-      forceRefresh ? 'reload' : 'stale-while-revalidate',
       {
         pattern,
         meta_fields: metaFields,
@@ -105,8 +85,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    */
   async hasUserDataView(): Promise<boolean> {
     const response = await this._request<{ result: boolean }>(
-      this._getUrl(['has_user_index_pattern']),
-      'no-store'
+      this._getUrl(['has_user_index_pattern'])
     );
     return response?.result ?? false;
   }
