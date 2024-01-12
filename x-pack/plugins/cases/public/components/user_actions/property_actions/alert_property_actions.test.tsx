@@ -31,97 +31,99 @@ describe('AlertPropertyActions', () => {
     appMock = createAppMockRenderer();
   });
 
-  it('renders the correct number of actions', async () => {
-    appMock.render(<AlertPropertyActions {...props} />);
+  for (let index = 0; index < 100; index++) {
+    it('renders the correct number of actions', async () => {
+      appMock.render(<AlertPropertyActions {...props} />);
 
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+      userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
 
-    expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
-      1
-    );
+      expect(
+        (await screen.findByTestId('property-actions-user-action-group')).children.length
+      ).toBe(1);
 
-    expect(
-      await screen.findByTestId('property-actions-user-action-minusInCircle')
-    ).toBeInTheDocument();
-  });
-
-  it('renders the modal info correctly for one alert', async () => {
-    appMock.render(<AlertPropertyActions {...props} />);
-
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
-
-    expect(
-      await screen.findByTestId('property-actions-user-action-minusInCircle')
-    ).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
-
-    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-
-    expect(await screen.findByTestId('confirmModalTitleText')).toHaveTextContent('Remove alert');
-    expect(await screen.findByText('Remove')).toBeInTheDocument();
-  });
-
-  it('renders the modal info correctly for multiple alert', async () => {
-    appMock.render(<AlertPropertyActions {...props} totalAlerts={2} />);
-
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
-
-    expect(
-      await screen.findByTestId('property-actions-user-action-minusInCircle')
-    ).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
-
-    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-
-    expect(await screen.findByTestId('confirmModalTitleText')).toHaveTextContent('Remove alerts');
-    expect(await screen.findByText('Remove')).toBeInTheDocument();
-  });
-
-  it('remove alerts correctly', async () => {
-    appMock.render(<AlertPropertyActions {...props} />);
-
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
-
-    expect(
-      await screen.findByTestId('property-actions-user-action-minusInCircle')
-    ).toBeInTheDocument();
-
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
-
-    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-
-    userEvent.click(screen.getByText('Remove'));
-
-    await waitFor(() => {
-      expect(props.onDelete).toHaveBeenCalled();
+      expect(
+        await screen.findByTestId('property-actions-user-action-minusInCircle')
+      ).toBeInTheDocument();
     });
-  });
 
-  it('does not show the property actions without delete permissions', async () => {
-    appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
-    appMock.render(<AlertPropertyActions {...props} />);
+    it('renders the modal info correctly for one alert', async () => {
+      appMock.render(<AlertPropertyActions {...props} />);
 
-    expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
-  });
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-  it('does show the property actions with only delete permissions', async () => {
-    appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
-    appMock.render(<AlertPropertyActions {...props} />);
+      userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
 
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
-  });
+      expect(
+        await screen.findByTestId('property-actions-user-action-minusInCircle')
+      ).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
+
+      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('confirmModalTitleText')).toHaveTextContent('Remove alert');
+      expect(await screen.findByText('Remove')).toBeInTheDocument();
+    });
+
+    it('renders the modal info correctly for multiple alert', async () => {
+      appMock.render(<AlertPropertyActions {...props} totalAlerts={2} />);
+
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
+
+      expect(
+        await screen.findByTestId('property-actions-user-action-minusInCircle')
+      ).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
+
+      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('confirmModalTitleText')).toHaveTextContent('Remove alerts');
+      expect(await screen.findByText('Remove')).toBeInTheDocument();
+    });
+
+    it('remove alerts correctly', async () => {
+      appMock.render(<AlertPropertyActions {...props} />);
+
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
+
+      expect(
+        await screen.findByTestId('property-actions-user-action-minusInCircle')
+      ).toBeInTheDocument();
+
+      userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
+
+      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+
+      userEvent.click(screen.getByText('Remove'));
+
+      await waitFor(() => {
+        expect(props.onDelete).toHaveBeenCalled();
+      });
+    });
+
+    it('does not show the property actions without delete permissions', async () => {
+      appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
+      appMock.render(<AlertPropertyActions {...props} />);
+
+      expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+    });
+
+    it('does show the property actions with only delete permissions', async () => {
+      appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
+      appMock.render(<AlertPropertyActions {...props} />);
+
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
+    });
+  }
 });
