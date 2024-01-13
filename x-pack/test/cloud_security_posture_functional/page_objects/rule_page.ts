@@ -18,6 +18,8 @@ export const RULES_BULK_ACTION_OPTION_DISABLE = 'bulk-action-option-disable';
 export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
 export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
+export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
+export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
 
 export function RulePagePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -70,6 +72,19 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     clickEnableRulesRowSwitchButton: async (index: number) => {
       const enableRulesRowSwitch = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
       await enableRulesRowSwitch[index].click();
+    },
+
+    clickFilterButton: async (filterType: 'enabled' | 'disabled') => {
+      const filterButtonToClick =
+        (await filterType) === 'enabled'
+          ? await testSubjects.find(RULES_ENABLED_FILTER)
+          : await testSubjects.find(RULES_DISABLED_FILTER);
+      await filterButtonToClick.click();
+    },
+
+    getEnableRulesRowSwitchButton: async () => {
+      const enableRulesRowSwitch = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
+      return await enableRulesRowSwitch.length;
     },
   };
 

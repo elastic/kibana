@@ -34,6 +34,8 @@ export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
 export const RULES_BULK_ACTION_OPTION_DISABLE = 'bulk-action-option-disable';
 export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
 export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
+export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
+export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
@@ -183,6 +185,7 @@ export const RulesTableHeader = ({
                 withNext
                 hasActiveFilters={isEnabledRulesFilterOn}
                 onClick={toggleEnabledRulesFilter}
+                data-test-subj={RULES_ENABLED_FILTER}
               >
                 <FormattedMessage
                   id="xpack.csp.rules.rulesTable.enabledRuleFilterButton"
@@ -192,6 +195,7 @@ export const RulesTableHeader = ({
               <EuiFilterButton
                 hasActiveFilters={isDisabledRulesFilterOn}
                 onClick={toggleDisabledRulesFilter}
+                data-test-subj={RULES_DISABLED_FILTER}
               >
                 <FormattedMessage
                   id="xpack.csp.rules.rulesTable.disabledRuleFilterButton"
