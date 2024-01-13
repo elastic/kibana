@@ -17,7 +17,7 @@ import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import type { CloudDefendPluginStartDeps } from '../types';
 import './__mocks__/worker';
 import './__mocks__/resizeobserver';
-import '@kbn/code-editor/code_editor.test.helpers';
+import '@kbn/code-editor-mock/jest_helper';
 
 // @ts-ignore-next
 window.Worker = Worker;

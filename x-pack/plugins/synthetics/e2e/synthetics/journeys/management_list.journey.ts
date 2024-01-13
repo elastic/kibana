@@ -101,7 +101,7 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
   });
 
   step('Filter by Frequency', async () => {
-    const frequencyFilter = page.locator('.euiFilterButton__textShift', { hasText: 'Frequency' });
+    const frequencyFilter = page.locator('.euiFilterButton__text', { hasText: 'Frequency' });
     const fiveMinuteScheduleOption = page.getByText('Every 5 minutes').first();
 
     await frequencyFilter.click();
