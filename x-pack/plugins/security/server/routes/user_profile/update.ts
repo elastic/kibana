@@ -51,7 +51,7 @@ export function defineUpdateUserProfileDataRoute({
 
       const userProfileData = request.body;
       const imageDataUrl = userProfileData.avatar?.imageUrl;
-      if (imageDataUrl) {
+      if (imageDataUrl && typeof imageDataUrl === 'string') {
         const matches = imageDataUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
         if (!matches || matches.length !== 3) {
           return response.customError({

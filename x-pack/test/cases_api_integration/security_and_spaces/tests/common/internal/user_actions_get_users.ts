@@ -474,7 +474,8 @@ export default ({ getService }: FtrProviderContext): void => {
               initials: 4,
               // @ts-expect-error: types are not correct
               color: true,
-              imageUrl: IMAGE_URL_TEST,
+              // @ts-expect-error: types are not correct
+              imageUrl: [],
             },
             headers: superUserHeaders,
           });
