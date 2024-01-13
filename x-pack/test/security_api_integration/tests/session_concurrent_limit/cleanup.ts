@@ -243,22 +243,22 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.tryForTime(20000, async () => {
         expect(await getNumberOfSessionDocuments()).to.be(1);
       });
-      await setTimeoutAsync(500);
+
       const samlSessionCookieOne = await loginWithSAML();
       await retry.tryForTime(20000, async () => {
         expect(await getNumberOfSessionDocuments()).to.be(2);
       });
-      await setTimeoutAsync(500);
+
       const basicSessionCookieTwo = await loginWithBasic(testUser);
       await retry.tryForTime(20000, async () => {
         expect(await getNumberOfSessionDocuments()).to.be(3);
       });
-      await setTimeoutAsync(500);
+
       const samlSessionCookieTwo = await loginWithSAML();
       await retry.tryForTime(20000, async () => {
         expect(await getNumberOfSessionDocuments()).to.be(4);
       });
-      await setTimeoutAsync(500);
+
       const basicSessionCookieThree = await loginWithBasic(testUser);
       await retry.tryForTime(20000, async () => {
         expect(await getNumberOfSessionDocuments()).to.be(5);
