@@ -10,17 +10,16 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+  ELASTIC_AI_ASSISTANT_PROMPTS_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { ConversationResponse } from '../../schemas/conversations/common_attributes.gen';
 import { buildResponse } from '../utils';
 
-export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) => {
+export const deletePromptRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .delete({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+      path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_BY_ID,
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -31,27 +30,32 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
         validate: {
           request: {
             params: schema.object({
-              conversationId: schema.string(),
+              promptId: schema.string(),
             }),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse> => {
         const assistantResponse = buildResponse(response);
+        /* const validationErrors = validateQueryRuleByIds(request.query);
+        if (validationErrors.length) {
+          return siemResponse.error({ statusCode: 400, body: validationErrors });
+        }*/
+
         try {
-          const { conversationId } = request.params;
+          const { promptId } = request.params;
 
           const ctx = await context.resolve(['core', 'elasticAssistant']);
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsSOClient();
 
-          const existingConversation = await dataClient?.getConversation(conversationId);
-          if (existingConversation == null) {
+          const existingPrompt = await dataClient?.getPrompt(promptId);
+          if (existingPrompt == null) {
             return assistantResponse.error({
-              body: `conversation id: "${conversationId}" not found`,
+              body: `prompt id: "${promptId}" not found`,
               statusCode: 404,
             });
           }
-          await dataClient?.deleteConversation(conversationId);
+          await dataClient?.deletePromptById(promptId);
 
           return response.ok({ body: {} });
         } catch (err) {

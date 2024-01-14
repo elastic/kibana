@@ -6,8 +6,14 @@
  */
 
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { SavedObject, SavedObjectsType, SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { AssistantPromptSchema, AssistantPromptSoSchema } from './assistant_prompts_so_schema';
+import type {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsType,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
+import { PromptResponse } from '../schemas/prompts/crud_prompts_route.gen';
+import { FindPromptsResponse } from '../schemas/prompts/find_prompts_route.gen';
 
 export const assistantPromptsTypeName = 'elastic-ai-assistant-prompts';
 
@@ -16,16 +22,19 @@ export const assistantPromptsTypeMappings: SavedObjectsType['mappings'] = {
     id: {
       type: 'keyword',
     },
-    isDefault: {
+    is_default: {
       type: 'boolean',
     },
-    isNewConversationDefault: {
+    is_shared: {
+      type: 'boolean',
+    },
+    is_new_conversation_default: {
       type: 'boolean',
     },
     name: {
       type: 'keyword',
     },
-    promptType: {
+    prompt_type: {
       type: 'keyword',
     },
     content: {
@@ -54,12 +63,24 @@ export const assistantPromptsType: SavedObjectsType = {
   mappings: assistantPromptsTypeMappings,
 };
 
+export interface AssistantPromptSoSchema {
+  created_at: string;
+  created_by: string;
+  content: string;
+  is_default?: boolean;
+  is_shared?: boolean;
+  is_new_conversation_default?: boolean;
+  name: string;
+  prompt_type: string;
+  updated_at: string;
+  updated_by: string;
+}
+
 export const transformSavedObjectToAssistantPrompt = ({
   savedObject,
 }: {
   savedObject: SavedObject<AssistantPromptSoSchema>;
-}): AssistantPromptSchema => {
-  const dateNow = new Date().toISOString();
+}): PromptResponse => {
   const {
     version: _version,
     attributes: {
@@ -72,26 +93,23 @@ export const transformSavedObjectToAssistantPrompt = ({
       prompt_type,
       name,
       updated_by,
-      version,
+      updated_at,
       /* eslint-enable @typescript-eslint/naming-convention */
     },
     id,
-    updated_at: updatedAt,
   } = savedObject;
 
   return {
-    _version,
-    created_at,
-    created_by,
+    createdAt: created_at,
+    createdBy: created_by,
     content,
-    id,
     name,
-    prompt_type,
-    is_default,
-    is_new_conversation_default,
-    updated_at: updatedAt ?? dateNow,
-    updated_by,
-    version: version ?? 1,
+    promptType: prompt_type,
+    isDefault: is_default,
+    isNewConversationDefault: is_new_conversation_default,
+    updatedAt: updated_at,
+    updatedBy: updated_by,
+    id,
   };
 };
 
@@ -99,33 +117,48 @@ export const transformSavedObjectUpdateToAssistantPrompt = ({
   prompt,
   savedObject,
 }: {
-  prompt: AssistantPromptSchema;
+  prompt: PromptResponse;
   savedObject: SavedObjectsUpdateResponse<AssistantPromptSoSchema>;
-}): AssistantPromptSchema => {
+}): PromptResponse => {
   const dateNow = new Date().toISOString();
   const {
     version: _version,
-    attributes: { name, updated_by: updatedBy, content, prompt_type: promptType, version },
+    attributes: {
+      name,
+      updated_by: updatedBy,
+      content,
+      prompt_type: promptType,
+      is_new_conversation_default: isNewConversationDefault,
+    },
     id,
     updated_at: updatedAt,
   } = savedObject;
 
-  // TODO: Change this to do a decode and throw if the saved object is not as expected.
-  // TODO: Do a throw if after the decode this is not the correct "list_type: list"
-  // TODO: Update exception list and item types (perhaps separating out) so as to avoid
-  // defaulting
   return {
-    _version,
-    created_at: prompt.created_at,
-    created_by: prompt.created_by,
+    createdAt: prompt.createdAt,
+    createdBy: prompt.createdBy,
     content: content ?? prompt.content,
-    prompt_type: promptType ?? prompt.prompt_type,
-    version: version ?? prompt.version,
+    promptType: promptType ?? prompt.promptType,
     id,
-    is_default: prompt.is_default,
-    is_new_conversation_default: prompt.is_new_conversation_default,
+    isDefault: prompt.isDefault,
+    isNewConversationDefault: isNewConversationDefault ?? prompt.isNewConversationDefault,
     name: name ?? prompt.name,
-    updated_at: updatedAt ?? dateNow,
-    updated_by: updatedBy ?? prompt.updated_by,
+    updatedAt: updatedAt ?? dateNow,
+    updatedBy: updatedBy ?? prompt.updatedBy,
+  };
+};
+
+export const transformSavedObjectsToFoundAssistantPrompt = ({
+  savedObjectsFindResponse,
+}: {
+  savedObjectsFindResponse: SavedObjectsFindResponse<AssistantPromptSoSchema>;
+}): FindPromptsResponse => {
+  return {
+    data: savedObjectsFindResponse.saved_objects.map((savedObject) =>
+      transformSavedObjectToAssistantPrompt({ savedObject })
+    ),
+    page: savedObjectsFindResponse.page,
+    perPage: savedObjectsFindResponse.per_page,
+    total: savedObjectsFindResponse.total,
   };
 };

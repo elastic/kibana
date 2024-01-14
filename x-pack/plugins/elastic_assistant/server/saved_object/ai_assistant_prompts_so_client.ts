@@ -11,61 +11,19 @@ import {
   type SavedObjectsClientContract,
 } from '@kbn/core/server';
 
-import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
+  AssistantPromptSoSchema,
   assistantPromptsTypeName,
   transformSavedObjectToAssistantPrompt,
   transformSavedObjectUpdateToAssistantPrompt,
+  transformSavedObjectsToFoundAssistantPrompt,
 } from './elastic_assistant_prompts_type';
 import {
-  AssistantPromptSchema,
-  AssistantPromptSoSchema,
-  FoundAssistantPromptSchema,
-  transformSavedObjectsToFoundAssistantPrompt,
-} from './assistant_prompts_so_schema';
-
-export interface AssistantPromptsCreateOptions {
-  /** The comments of the endpoint list item */
-  content: string;
-  /** The entries of the endpoint list item */
-  promptType: string;
-  /** The entries of the endpoint list item */
-  name: string;
-  /** The entries of the endpoint list item */
-  isDefault?: boolean;
-  /** The entries of the endpoint list item */
-  isNewConversationDefault?: boolean;
-}
-
-export interface AssistantPromptsUpdateOptions {
-  /** The comments of the endpoint list item */
-  content: string;
-  /** The entries of the endpoint list item */
-  promptType: string;
-  /** The entries of the endpoint list item */
-  name: string;
-  /** The entries of the endpoint list item */
-  isDefault?: boolean;
-  /** The entries of the endpoint list item */
-  isNewConversationDefault?: boolean;
-  id: string;
-  _version: string;
-}
-
-export interface FindAssistantPromptsOptions {
-  /** The filter to apply in the search */
-  filter?: string;
-  /** How many per page to return */
-  perPage: number;
-  /** The page number or "undefined" if there is no page number to continue from */
-  page: number;
-  /** The search_after parameter if there is one, otherwise "undefined" can be sent in */
-  searchAfter?: SortResults;
-  /** The sort field string if there is one, otherwise "undefined" can be sent in */
-  sortField?: string;
-  /** The sort order of "asc" or "desc", otherwise "undefined" can be sent in */
-  sortOrder?: 'asc' | 'desc';
-}
+  PromptCreateProps,
+  PromptResponse,
+  PromptUpdateProps,
+} from '../schemas/prompts/crud_prompts_route.gen';
+import { FindPromptsResponse, SortOrder } from '../schemas/prompts/find_prompts_route.gen';
 
 export interface ConstructorOptions {
   /** User creating, modifying, deleting, or updating the prompts */
@@ -78,7 +36,7 @@ export interface ConstructorOptions {
 /**
  * Class for use for prompts that are used for AI assistant.
  */
-export class AIAssistantSOClient {
+export class AIAssistantPromptsSOClient {
   /** User creating, modifying, deleting, or updating the prompts */
   private readonly user: string;
 
@@ -102,7 +60,7 @@ export class AIAssistantSOClient {
    * @param options.id the "id" of an exception list
    * @returns The found exception list or null if none exists
    */
-  public getPrompt = async (id: string): Promise<AssistantPromptSchema | null> => {
+  public getPrompt = async (id: string): Promise<PromptResponse | null> => {
     const { savedObjectsClient } = this;
     if (id != null) {
       try {
@@ -135,7 +93,7 @@ export class AIAssistantSOClient {
     name,
     isDefault,
     isNewConversationDefault,
-  }: AssistantPromptsCreateOptions): Promise<AssistantPromptSchema | null> => {
+  }: PromptCreateProps): Promise<PromptResponse | null> => {
     const { savedObjectsClient, user } = this;
 
     const dateNow = new Date().toISOString();
@@ -151,7 +109,7 @@ export class AIAssistantSOClient {
           is_new_conversation_default: isNewConversationDefault ?? false,
           prompt_type: promptType,
           updated_by: user,
-          version: 1,
+          updated_at: dateNow,
         }
       );
       return transformSavedObjectToAssistantPrompt({ savedObject });
@@ -183,40 +141,26 @@ export class AIAssistantSOClient {
    * @param options.type The type of the endpoint list item (Default is "simple")
    * @returns The exception list item updated, otherwise null if not updated
    */
-  public updatePromptItem = async ({
-    promptType,
-    content,
-    name,
-    isDefault,
-    isNewConversationDefault,
-    id,
-    _version,
-  }: AssistantPromptsUpdateOptions): Promise<AssistantPromptSchema | null> => {
+  public updatePromptItem = async (
+    prompt: PromptResponse,
+    { promptType, content, name, isNewConversationDefault }: PromptUpdateProps
+  ): Promise<PromptResponse | null> => {
     const { savedObjectsClient, user } = this;
-    const prompt = await this.getPrompt(id);
-    if (prompt == null) {
-      return null;
-    } else {
-      const savedObject = await savedObjectsClient.update<AssistantPromptSoSchema>(
-        assistantPromptsTypeName,
-        prompt.id,
-        {
-          content,
-          is_default: isDefault,
-          is_new_conversation_default: isNewConversationDefault,
-          prompt_type: promptType,
-          name,
-          updated_by: user,
-        },
-        {
-          version: _version,
-        }
-      );
-      return transformSavedObjectUpdateToAssistantPrompt({
-        prompt,
-        savedObject,
-      });
-    }
+    const savedObject = await savedObjectsClient.update<AssistantPromptSoSchema>(
+      assistantPromptsTypeName,
+      prompt.id,
+      {
+        content,
+        is_new_conversation_default: isNewConversationDefault,
+        prompt_type: promptType,
+        name,
+        updated_by: user,
+      }
+    );
+    return transformSavedObjectUpdateToAssistantPrompt({
+      prompt,
+      savedObject,
+    });
   };
 
   /**
@@ -231,35 +175,41 @@ export class AIAssistantSOClient {
   };
 
   /**
-   * Finds exception lists given a set of criteria.
+   * Finds prompts given a set of criteria.
    * @param options
    * @param options.filter The filter to apply in the search
    * @param options.perPage How many per page to return
    * @param options.page The page number or "undefined" if there is no page number to continue from
    * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
-   * @param options.searchAfter The search_after parameter if there is one, otherwise "undefined" can be sent in
    * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
    * @param options.sortOrder The sort order of "asc" or "desc", otherwise "undefined" can be sent in
-   * @returns The found exception lists or null if nothing is found
+   * @returns The found prompts or null if nothing is found
    */
   public findPrompts = async ({
-    filter,
     perPage,
     page,
-    searchAfter,
     sortField,
     sortOrder,
-  }: FindAssistantPromptsOptions): Promise<FoundAssistantPromptSchema> => {
+    filter,
+    fields,
+  }: {
+    perPage: number;
+    page: number;
+    sortField?: string;
+    sortOrder?: SortOrder;
+    filter?: string;
+    fields?: string[];
+  }): Promise<FindPromptsResponse> => {
     const { savedObjectsClient } = this;
 
     const savedObjectsFindResponse = await savedObjectsClient.find<AssistantPromptSoSchema>({
       filter,
       page,
       perPage,
-      searchAfter,
       sortField,
       sortOrder,
       type: assistantPromptsTypeName,
+      fields,
     });
 
     return transformSavedObjectsToFoundAssistantPrompt({ savedObjectsFindResponse });

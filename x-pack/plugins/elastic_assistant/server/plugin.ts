@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import {
-  PluginInitializerContext,
-  CoreStart,
-  Plugin,
-  Logger,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
-import { once } from 'lodash';
+import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { ReplaySubject, type Subject } from 'rxjs';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -25,26 +18,13 @@ import {
   ElasticAssistantPluginStart,
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
-  GetElser,
 } from './types';
-import {
-  deleteKnowledgeBaseRoute,
-  getKnowledgeBaseStatusRoute,
-  postActionsConnectorExecuteRoute,
-  postEvaluateRoute,
-  postKnowledgeBaseRoute,
-} from './routes';
 import { AIAssistantService } from './ai_assistant_service';
 import { assistantPromptsType, assistantAnonimizationFieldsType } from './saved_object';
-import {
-  DataStreamAdapter,
-  getDataStreamAdapter,
-} from './ai_assistant_service/lib/create_datastream';
 import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
-import { registerConversationsRoutes } from './routes/register_routes';
+import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
-import { getCapabilitiesRoute } from './routes/capabilities/get_capabilities_route';
 
 export class ElasticAssistantPlugin
   implements
@@ -57,12 +37,12 @@ export class ElasticAssistantPlugin
 {
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
-  private dataStreamAdapter: DataStreamAdapter;
+  private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.pluginStop$ = new ReplaySubject(1);
     this.logger = initializerContext.logger.get();
-    this.dataStreamAdapter = getDataStreamAdapter();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
@@ -76,10 +56,10 @@ export class ElasticAssistantPlugin
       logger: this.logger.get('service'),
       taskManager: plugins.taskManager,
       kibanaVersion: this.kibanaVersion,
-      dataStreamAdapter: this.dataStreamAdapter,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      pluginStop$: this.pluginStop$,
     });
 
     const requestContextFactory = new RequestContextFactory({
@@ -101,27 +81,8 @@ export class ElasticAssistantPlugin
     core.savedObjects.registerType(assistantAnonimizationFieldsType);
 
     // this.assistantService registerKBTask
+    registerRoutes(router, this.logger, plugins);
 
-    const getElserId: GetElser = once(
-      async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
-        return (await plugins.ml.trainedModelsProvider(request, savedObjectsClient).getELSER())
-          .model_id;
-      }
-    );
-
-    // Knowledge Base
-    deleteKnowledgeBaseRoute(router);
-    getKnowledgeBaseStatusRoute(router, getElserId);
-    postKnowledgeBaseRoute(router, getElserId);
-    // Actions Connector Execute (LLM Wrapper)
-    postActionsConnectorExecuteRoute(router, getElserId);
-    // Evaluate
-    postEvaluateRoute(router, getElserId);
-    // Conversations
-    registerConversationsRoutes(router, this.logger);
-
-    // Capabilities
-    getCapabilitiesRoute(router);
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {
@@ -159,5 +120,7 @@ export class ElasticAssistantPlugin
 
   public stop() {
     appContextService.stop();
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
   }
 }

@@ -11,10 +11,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
-import { buildRouteValidation } from '../../schemas/common';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { EVALUATE } from '../../../common/constants';
-import { PostEvaluateBody, PostEvaluatePathQuery } from '../../schemas/evaluate/post_evaluate';
 import { performEvaluation } from '../../lib/model_evaluator/evaluation';
 import { callAgentExecutor } from '../../lib/langchain/execute_custom_llm_chain';
 import { callOpenAIFunctionsExecutor } from '../../lib/langchain/executors/openai_functions_executor';
@@ -30,6 +28,11 @@ import {
 import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
 import { RequestBody } from '../../lib/langchain/types';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
+import {
+  EvaluateRequestBody,
+  EvaluateRequestQuery,
+} from '../../schemas/evaluate/post_evaluate_route.gen';
+import { buildRouteValidationWithZod } from '../route_validation';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map
@@ -50,8 +53,8 @@ export const postEvaluateRoute = (
     {
       path: EVALUATE,
       validate: {
-        body: buildRouteValidation(PostEvaluateBody),
-        query: buildRouteValidation(PostEvaluatePathQuery),
+        body: buildRouteValidationWithZod(EvaluateRequestBody),
+        query: buildRouteValidationWithZod(EvaluateRequestQuery),
       },
     },
     async (context, request, response) => {

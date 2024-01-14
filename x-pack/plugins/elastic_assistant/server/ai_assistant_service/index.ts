@@ -5,26 +5,14 @@
  * 2.0.
  */
 
-import type { Metadata } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  createOrUpdateComponentTemplate,
-  createOrUpdateIndexTemplate,
-} from '@kbn/alerting-plugin/server';
+import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-// import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { Subject } from 'rxjs';
 import { AssistantResourceNames } from '../types';
-import {
-  conversationsFieldMap,
-  getIndexTemplateAndPattern,
-  totalFieldsLimit,
-} from './lib/conversation_configuration_type';
-import { createConcreteWriteIndex } from './lib/create_concrete_write_index';
-import { DataStreamAdapter } from './lib/create_datastream';
-import { AIAssistantDataClient } from '../conversations_data_client';
+import { AIAssistantConversationsDataClient } from '../conversations_data_client';
 import {
   InitializationPromise,
   ResourceInstallationHelper,
@@ -32,54 +20,102 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-// import { getComponentTemplateFromFieldMap } from './field_maps/component_template_from_field_map';
-import { mappingFromFieldMap } from './field_maps/mapping_from_field_map';
+import { conversationsFieldMap } from './lib/conversation_configuration_type';
 
-export const ECS_CONTEXT = `ecs`;
+const TOTAL_FIELDS_LIMIT = 2500;
+
 function getResourceName(resource: string) {
   return `.kibana-elastic-ai-assistant-${resource}`;
 }
-
-// export const getComponentTemplateName = (name: string) => `.alerts-${name}-mappings`;
 
 interface AIAssistantServiceOpts {
   logger: Logger;
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
-  dataStreamAdapter: DataStreamAdapter;
   taskManager: TaskManagerSetupContract;
+  pluginStop$: Subject<void>;
 }
 
 export interface CreateAIAssistantClientParams {
   logger: Logger;
-  namespace: string;
+  spaceId: string;
   currentUser: AuthenticatedUser | null;
 }
 
+export type CreateConversationsDataStream = (params: {
+  kibanaVersion: string;
+  spaceId?: string;
+}) => DataStreamSpacesAdapter;
+
 export class AIAssistantService {
-  private dataStreamAdapter: DataStreamAdapter;
   private initialized: boolean;
   private isInitializing: boolean = false;
-  private registeredNamespaces: Set<string> = new Set();
+  private conversationsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
-  private commonInitPromise: Promise<InitializationPromise>;
+  private initPromise: Promise<InitializationPromise>;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
-    this.dataStreamAdapter = options.dataStreamAdapter;
+    this.conversationsDataStream = this.createConversationsDataStream({
+      kibanaVersion: options.kibanaVersion,
+    });
 
-    this.commonInitPromise = this.initializeResources();
+    this.initPromise = this.initializeResources();
 
-    // Create helper for initializing context-specific resources
     this.resourceInitializationHelper = createResourceInstallationHelper(
       this.options.logger,
-      this.commonInitPromise,
-      this.installAndUpdateNamespaceLevelResources.bind(this)
+      this.initPromise,
+      this.installAndUpdateSpaceLevelResources.bind(this)
     );
   }
 
   public async isInitialized() {
     return this.initialized;
+  }
+
+  private createConversationsDataStream: CreateConversationsDataStream = ({ kibanaVersion }) => {
+    const conversationsDataStream = new DataStreamSpacesAdapter(
+      this.resourceNames.aliases.conversations,
+      {
+        kibanaVersion,
+        totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+      }
+    );
+
+    conversationsDataStream.setComponentTemplate({
+      name: this.resourceNames.componentTemplate.conversations,
+      fieldMap: conversationsFieldMap,
+    });
+
+    conversationsDataStream.setIndexTemplate({
+      name: this.resourceNames.indexTemplate.conversations,
+      componentTemplateRefs: [this.resourceNames.componentTemplate.conversations],
+    });
+
+    return conversationsDataStream;
+  };
+
+  private async initializeResources(): Promise<InitializationPromise> {
+    this.isInitializing = true;
+    try {
+      this.options.logger.debug(`Initializing resources for AIAssistantService`);
+      const esClient = await this.options.elasticsearchClientPromise;
+
+      await this.conversationsDataStream.install({
+        esClient,
+        logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
+      });
+
+      this.initialized = true;
+      this.isInitializing = false;
+      return successResult();
+    } catch (error) {
+      this.options.logger.error(`Error initializing AI assistant resources: ${error.message}`);
+      this.initialized = false;
+      this.isInitializing = false;
+      return errorResult(error.message);
+    }
   }
 
   private readonly resourceNames: AssistantResourceNames = {
@@ -106,22 +142,22 @@ export class AIAssistantService {
 
   public async createAIAssistantDatastreamClient(
     opts: CreateAIAssistantClientParams
-  ): Promise<AIAssistantDataClient | null> {
-    // Check if context specific installation has succeeded
-    const { result: initialized, error } = await this.getResourcesInitializationPromise(
-      opts.namespace
+  ): Promise<AIAssistantConversationsDataClient | null> {
+    // Check if resources installation has succeeded
+    const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
+      opts.spaceId
     );
 
-    // If initialization failed, retry
+    // If space evel resources initialization failed, retry
     if (!initialized && error) {
-      let initPromise: Promise<InitializationPromise> | undefined;
+      let initRetryPromise: Promise<InitializationPromise> | undefined;
 
       // If !this.initialized, we know that resource initialization failed
-      // and we need to retry this before retrying the namespace specific resources
+      // and we need to retry this before retrying the spaceId specific resources
       if (!this.initialized) {
         if (!this.isInitializing) {
           this.options.logger.info(`Retrying common resource initialization`);
-          initPromise = this.initializeResources();
+          initRetryPromise = this.initializeResources();
         } else {
           this.options.logger.info(
             `Skipped retrying common resource initialization because it is already being retried.`
@@ -129,14 +165,14 @@ export class AIAssistantService {
         }
       }
 
-      this.resourceInitializationHelper.retry(opts.namespace, initPromise);
+      this.resourceInitializationHelper.retry(opts.spaceId, initRetryPromise);
 
       const retryResult = await this.resourceInitializationHelper.getInitializedResources(
-        opts.namespace ?? DEFAULT_NAMESPACE_STRING
+        opts.spaceId ?? DEFAULT_NAMESPACE_STRING
       );
 
       if (!retryResult.result) {
-        const errorLogPrefix = `There was an error in the framework installing namespace-level resources and creating concrete indices for namespace "${opts.namespace}" - `;
+        const errorLogPrefix = `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId "${opts.spaceId}" - `;
         // Retry also failed
         this.options.logger.warn(
           retryResult.error && error
@@ -146,166 +182,47 @@ export class AIAssistantService {
         return null;
       } else {
         this.options.logger.info(
-          `Resource installation for "${opts.namespace}" succeeded after retry`
+          `Resource installation for "${opts.spaceId}" succeeded after retry`
         );
       }
     }
 
-    return new AIAssistantDataClient({
+    return new AIAssistantConversationsDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
-      namespace: opts.namespace,
+      spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
-      indexPatternsResorceName: 'kibana-elastic-ai-assistant-conversations',
+      indexPatternsResorceName: this.resourceNames.aliases.conversations,
       currentUser: opts.currentUser,
     });
   }
 
-  public async getResourcesInitializationPromise(
-    namespace?: string
+  public async getSpaceResourcesInitializationPromise(
+    spaceId: string | undefined = DEFAULT_NAMESPACE_STRING
   ): Promise<InitializationPromise> {
-    const registeredOpts = namespace && this.registeredNamespaces.has(namespace) ? namespace : null;
-
-    if (!registeredOpts) {
-      const errMsg = `Error getting initialized status for namespace ${namespace} - namespace has not been registered.`;
-      this.options.logger.error(errMsg);
-      return errorResult(errMsg);
-    }
-
-    const result = await this.resourceInitializationHelper.getInitializedResources(
-      namespace ?? DEFAULT_NAMESPACE_STRING
-    );
-
-    // If the context is unrecognized and namespace is not the default, we
+    const result = await this.resourceInitializationHelper.getInitializedResources(spaceId);
+    // If the spaceId is unrecognized and spaceId is not the default, we
     // need to kick off resource installation and return the promise
     if (
       result.error &&
-      result.error.includes(`Unrecognized context`) &&
-      namespace !== DEFAULT_NAMESPACE_STRING
+      result.error.includes(`Unrecognized spaceId`) &&
+      spaceId !== DEFAULT_NAMESPACE_STRING
     ) {
-      this.resourceInitializationHelper.add(namespace);
-
-      return this.resourceInitializationHelper.getInitializedResources(namespace ?? 'default');
+      this.resourceInitializationHelper.add(spaceId);
+      return this.resourceInitializationHelper.getInitializedResources(spaceId);
     }
-
     return result;
   }
 
-  private async initializeResources(): Promise<InitializationPromise> {
+  private async installAndUpdateSpaceLevelResources(
+    spaceId: string | undefined = DEFAULT_NAMESPACE_STRING
+  ) {
     try {
-      this.options.logger.debug(`Initializing resources for AIAssistantService`);
-      const esClient = await this.options.elasticsearchClientPromise;
-
-      await Promise.all([
-        /* createOrUpdateComponentTemplate({
-          logger: this.options.logger,
-          esClient,
-          template: getComponentTemplateFromFieldMap({
-            name: `${this.resourceNames.componentTemplate.conversations}-ecs`,
-            fieldMap: ecsFieldMap,
-            dynamic: false,
-            includeSettings: true,
-          }),
-          totalFieldsLimit,
-        }), */
-        createOrUpdateComponentTemplate({
-          logger: this.options.logger,
-          esClient,
-          template: {
-            name: this.resourceNames.componentTemplate.conversations,
-            // TODO: add DLM policy
-            _meta: {
-              managed: true,
-            },
-            template: {
-              settings: {},
-              mappings: mappingFromFieldMap(conversationsFieldMap, 'strict'),
-            },
-          } as ClusterPutComponentTemplateRequest,
-          totalFieldsLimit,
-        }),
-      ]);
-
-      this.initialized = true;
-      this.isInitializing = false;
-      return successResult();
-    } catch (error) {
-      this.options.logger.error(`Error initializing AI assistant resources: ${error.message}`);
-      this.initialized = false;
-      this.isInitializing = false;
-      return errorResult(error.message);
-    }
-  }
-
-  private async installAndUpdateNamespaceLevelResources(namespace?: string) {
-    try {
-      this.options.logger.debug(`Initializing namespace level resources for AIAssistantService`);
-      const esClient = await this.options.elasticsearchClientPromise;
-
-      const indexMetadata: Metadata = {
-        kibana: {
-          version: this.options.kibanaVersion,
-        },
-        managed: true,
-        namespace: namespace ?? 'default',
-      };
-
-      const indexPatterns = getIndexTemplateAndPattern(
-        'kibana-elastic-ai-assistant-conversations',
-        namespace ?? 'default'
-      );
-
-      /*
-      export const getIndexTemplateAndPattern = (
-  context: string,
-  namespace?: string
-): IIndexPatternString => {
-  const concreteNamespace = namespace ? namespace : DEFAULT_NAMESPACE_STRING;
-  const pattern = `${context}`;
-  const patternWithNamespace = `${pattern}-${concreteNamespace}`;
-  return {
-    template: `${patternWithNamespace}-index-template`,
-    pattern: `.internal.${patternWithNamespace}-*`,
-    basePattern: `.${pattern}-*`,
-    name: `.internal.${patternWithNamespace}-000001`,
-    alias: `.${patternWithNamespace}`,
-  };
-};
-*/
-
-      await createOrUpdateIndexTemplate({
-        logger: this.options.logger,
-        esClient,
-        template: {
-          name: indexPatterns.template,
-          body: {
-            data_stream: { hidden: true },
-            index_patterns: indexPatterns.pattern,
-            composed_of: [this.resourceNames.componentTemplate.conversations],
-            template: {
-              lifecycle: {},
-              settings: {
-                hidden: true,
-                'index.mapping.ignore_malformed': true,
-                'index.mapping.total_fields.limit': totalFieldsLimit,
-              },
-              mappings: {
-                dynamic: false,
-                _meta: indexMetadata,
-              },
-            },
-            _meta: indexMetadata,
-          },
-        },
-      });
-
-      await createConcreteWriteIndex({
-        logger: this.options.logger,
-        esClient,
-        totalFieldsLimit,
-        indexPatterns,
-        dataStreamAdapter: this.dataStreamAdapter,
-      });
+      this.options.logger.debug(`Initializing spaceId level resources for AIAssistantService`);
+      let indexName = await this.conversationsDataStream.getSpaceIndexName(spaceId);
+      if (!indexName) {
+        indexName = await this.conversationsDataStream.installSpace(spaceId);
+      }
     } catch (error) {
       this.options.logger.error(
         `Error initializing AI assistant namespace level resources: ${error.message}`

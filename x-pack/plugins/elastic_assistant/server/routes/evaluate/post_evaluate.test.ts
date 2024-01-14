@@ -10,16 +10,16 @@ import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPostEvaluateRequest } from '../../__mocks__/request';
 import {
-  PostEvaluateBodyInputs,
-  PostEvaluatePathQueryInputs,
-} from '../../schemas/evaluate/post_evaluate';
+  EvaluateRequestQueryInput,
+  EvaluateRequestBodyInput,
+} from '../../schemas/evaluate/post_evaluate_route.gen';
 
-const defaultBody: PostEvaluateBodyInputs = {
+const defaultBody: EvaluateRequestBodyInput = {
   dataset: undefined,
   evalPrompt: undefined,
 };
 
-const defaultQueryParams: PostEvaluatePathQueryInputs = {
+const defaultQueryParams: EvaluateRequestQueryInput = {
   agents: 'agents',
   datasetName: undefined,
   evaluationType: undefined,

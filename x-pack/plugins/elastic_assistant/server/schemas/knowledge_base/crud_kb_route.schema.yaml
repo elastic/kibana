@@ -1,0 +1,163 @@
+openapi: 3.0.0
+info:
+  title: Create Conversation API endpoint
+  version: '2023-10-31'
+paths:
+  /internal/elastic_assistant/knowledge_base/{resource}:
+    post:
+      operationId: CreateKnowledgeBase
+      x-codegen-enabled: true
+      summary: Create a KnowledgeBase
+      description: Create a KnowledgeBase
+      tags:
+        - KnowledgeBase API
+      parameters:
+        - name: resource
+          in: path
+          required: true
+          description: The KnowledgeBase `resource` value.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeBaseCreateProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+    get:
+      operationId: ReadKnowledgeBase
+      x-codegen-enabled: true
+      description: Read a single KB
+      summary: Read a KnowledgeBase
+      tags:
+        - KnowledgeBase API
+      parameters:
+        - name: resource
+          in: path
+          required: true
+          description: The KnowledgeBase `resource` value.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+    delete:
+      operationId: DeleteKnowledgeBase
+      x-codegen-enabled: true
+      description: Deletes KnowledgeBase using the `resource` field.
+      summary: Deletes a KnowledgeBase
+      tags:
+        - KnowledgeBase API
+      parameters:
+        - name: resource
+          in: path
+          required: true
+          description: The KnowledgeBase `resource` value.
+          schema:
+            type: string
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    KnowledgeBaseCreateProps:
+      type: object
+      description: AI assistant create KB settings.
+      required:
+        - 'content'
+        - 'promptType'
+      properties:
+        content:
+          type: string
+          description: Prompt content.
+        promptType:
+          type: string
+          description: Prompt type.
+        isDefault:
+          description: Is default prompt.
+          type: boolean
+        isShared:
+          description: Is shared prompt.
+          type: boolean
+        isNewConversationDefault:
+          description: Is default prompt.
+          type: boolean
+
+    KnowledgeBaseResponse:
+      type: object
+      description: AI assistant KnowledgeBase.
+      required:
+        - 'timestamp'
+        - 'content'
+        - 'role'
+      properties:
+        content:
+          type: string
+          description: Prompt content.
+        promptType:
+          type: string
+          description: Prompt type.
+        isDefault:
+          description: Is default prompt.
+          type: boolean
+        isShared:
+          description: Is shared prompt.
+          type: boolean
+        isNewConversationDefault:
+          description: Is default prompt.
+          type: boolean  

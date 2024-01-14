@@ -26,9 +26,9 @@ import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/ser
 import { Tool } from 'langchain/dist/tools/base';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { AIAssistantDataClient } from './conversations_data_client';
-import { AIAssistantSOClient } from './saved_object/ai_assistant_so_client';
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { AIAssistantConversationsDataClient } from './conversations_data_client';
+import { AIAssistantPromptsSOClient } from './saved_object/ai_assistant_prompts_so_client';
 import { RequestBody } from './lib/langchain/types';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 
@@ -98,8 +98,8 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getServerBasePath: () => string;
   getSpaceId: () => string;
   getCurrentUser: () => AuthenticatedUser | null;
-  getAIAssistantDataClient: () => Promise<AIAssistantDataClient | null>;
-  getAIAssistantSOClient: () => AIAssistantSOClient;
+  getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
+  getAIAssistantPromptsSOClient: () => AIAssistantPromptsSOClient;
   telemetry: AnalyticsServiceSetup;
 }
 /**
@@ -151,7 +151,6 @@ export interface AssistantResourceNames {
 }
 
 export interface IIndexPatternString {
-  template: string;
   pattern: string;
   alias: string;
   name: string;

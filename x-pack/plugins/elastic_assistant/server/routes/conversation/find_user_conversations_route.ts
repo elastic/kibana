@@ -11,7 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
-} from '../../../common/constants';
+} from '@kbn/elastic-assistant-common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import {
   FindConversationsRequestQuery,
@@ -49,7 +49,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant']);
-          const dataClient = await ctx.elasticAssistant.getAIAssistantDataClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const currentUser = ctx.elasticAssistant.getCurrentUser();
 
           const additionalFilter = query.filter ? `AND ${query.filter}` : '';

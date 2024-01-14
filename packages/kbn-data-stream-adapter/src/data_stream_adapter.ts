@@ -46,7 +46,7 @@ export interface GetInstallFnParams {
 }
 export interface InstallParams {
   logger: Logger;
-  esClientPromise: Promise<ElasticsearchClient>;
+  esClient: ElasticsearchClient;
   pluginStop$: Subject<void>;
   tasksTimeoutMs?: number;
 }
@@ -114,12 +114,11 @@ export class DataStreamAdapter {
     };
   }
 
-  public async install({ logger, esClientPromise, pluginStop$, tasksTimeoutMs }: InstallParams) {
+  public async install({ logger, esClient, pluginStop$, tasksTimeoutMs }: InstallParams) {
     if (this.installed) {
       throw new Error('Cannot re-install data stream');
     }
     try {
-      const esClient = await esClientPromise;
       const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });
 
       // Install component templates in parallel

@@ -28,7 +28,7 @@ export class DataStreamSpacesAdapter extends DataStreamAdapter {
 
   public async install({
     logger,
-    esClientPromise,
+    esClient,
     pluginStop$,
     tasksTimeoutMs,
   }: InstallParams): Promise<InstallationPromise> {
@@ -37,8 +37,6 @@ export class DataStreamSpacesAdapter extends DataStreamAdapter {
     }
 
     try {
-      const esClient = await esClientPromise;
-
       const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });
 
       // Install component templates in parallel

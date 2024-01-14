@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-} from '../../../common/constants';
+} from '@kbn/elastic-assistant-common';
 import { ConversationResponse } from '../../schemas/conversations/common_attributes.gen';
 import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
@@ -44,7 +44,7 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
 
-          const dataClient = await ctx.elasticAssistant.getAIAssistantDataClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const conversation = await dataClient?.getConversation(conversationId);
           return response.ok({ body: conversation ?? {} });
         } catch (err) {

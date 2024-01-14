@@ -8,6 +8,11 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
+import {
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+} from '@kbn/elastic-assistant-common';
 import { Conversation, Message } from '../../assistant_context/types';
 
 export interface GetConversationByIdParams {
@@ -32,10 +37,9 @@ export const getConversationById = async ({
   signal,
 }: GetConversationByIdParams): Promise<Conversation | IHttpFetchError> => {
   try {
-    const path = `/api/elastic_assistant/conversations/${id || ''}`;
-    const response = await http.fetch(path, {
+    const response = await http.fetch(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID, {
       method: 'GET',
-      version: '2023-10-31',
+      version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
       signal,
     });
 
@@ -67,10 +71,9 @@ export const createConversationApi = async ({
   signal,
 }: PostConversationParams): Promise<Conversation | IHttpFetchError> => {
   try {
-    const path = `/api/elastic_assistant/conversations`;
-    const response = await http.post(path, {
+    const response = await http.post(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL, {
       body: JSON.stringify(conversation),
-      version: '2023-10-31',
+      version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
       signal,
     });
 
@@ -106,10 +109,9 @@ export const deleteConversationApi = async ({
   signal,
 }: DeleteConversationParams): Promise<DeleteConversationResponse | IHttpFetchError> => {
   try {
-    const path = `/api/elastic_assistant/conversations/${id || ''}`;
-    const response = await http.fetch(path, {
+    const response = await http.fetch(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID, {
       method: 'DELETE',
-      version: '2023-10-31',
+      version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
       signal,
     });
 
@@ -152,8 +154,7 @@ export const updateConversationApi = async ({
   signal,
 }: PutConversationMessageParams): Promise<Conversation | IHttpFetchError> => {
   try {
-    const path = `/api/elastic_assistant/conversations/${conversationId || ''}`;
-    const response = await http.fetch(path, {
+    const response = await http.fetch(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID, {
       method: 'PUT',
       body: JSON.stringify({
         id: conversationId,
@@ -165,7 +166,7 @@ export const updateConversationApi = async ({
       headers: {
         'Content-Type': 'application/json',
       },
-      version: '2023-10-31',
+      version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
       signal,
     });
 

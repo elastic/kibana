@@ -8,24 +8,6 @@ import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { IIndexPatternString } from '../../types';
 
-const keyword = {
-  type: 'keyword' as const,
-  ignore_above: 1024,
-};
-
-const text = {
-  type: 'text' as const,
-};
-
-const date = {
-  type: 'date' as const,
-};
-
-const dynamic = {
-  type: 'object' as const,
-  dynamic: true,
-};
-
 export const conversationsFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
@@ -164,9 +146,6 @@ export const conversationsFieldMap: FieldMap = {
   },
 } as const;
 
-export const mappingComponentName = '.conversations-mappings';
-export const totalFieldsLimit = 1000;
-
 export const getIndexTemplateAndPattern = (
   context: string,
   namespace?: string
@@ -175,10 +154,9 @@ export const getIndexTemplateAndPattern = (
   const pattern = `${context}`;
   const patternWithNamespace = `${pattern}-${concreteNamespace}`;
   return {
-    template: `.${patternWithNamespace}-index-template`,
-    pattern: `.${patternWithNamespace}*`,
-    basePattern: `.${pattern}-*`,
-    name: `.${patternWithNamespace}-000001`,
-    alias: `.${patternWithNamespace}`,
+    pattern: `${patternWithNamespace}*`,
+    basePattern: `${pattern}-*`,
+    name: `${patternWithNamespace}-000001`,
+    alias: `${patternWithNamespace}`,
   };
 };

@@ -10,11 +10,11 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  CONVERSATIONS_TABLE_MAX_PAGE_SIZE,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-} from '../../../common/constants';
+} from '@kbn/elastic-assistant-common';
 
+import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
@@ -140,7 +140,7 @@ export const bulkActionConversationsRoute = (
         request.events.completed$.subscribe(() => abortController.abort());
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
-          const dataClient = await ctx.elasticAssistant.getAIAssistantDataClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const writer = await dataClient?.getWriter();
 

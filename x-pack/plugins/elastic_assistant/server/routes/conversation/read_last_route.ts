@@ -9,8 +9,8 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_LAST,
-} from '../../../common/constants';
+  ELASTIC_AI_ASSISTANT_CURRENT_USER_CONVERSATIONS_LAST,
+} from '@kbn/elastic-assistant-common';
 import { ConversationResponse } from '../../schemas/conversations/common_attributes.gen';
 import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
@@ -19,7 +19,7 @@ export const readLastConversationRoute = (router: ElasticAssistantPluginRouter) 
   router.versioned
     .get({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_LAST,
+      path: ELASTIC_AI_ASSISTANT_CURRENT_USER_CONVERSATIONS_LAST,
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -34,7 +34,7 @@ export const readLastConversationRoute = (router: ElasticAssistantPluginRouter) 
 
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
-          const dataClient = await ctx.elasticAssistant.getAIAssistantDataClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const conversation = await dataClient?.getLastConversation();
           return response.ok({ body: conversation ?? {} });

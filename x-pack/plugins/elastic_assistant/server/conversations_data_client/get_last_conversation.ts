@@ -25,10 +25,10 @@ export const getLastConversation = async (
       },
       query: {
         bool: {
-          filter: [
-            { term: { 'user.id': userId } },
-            { term: { excludeFromLastConversationStorage: false } },
-          ],
+          filter: [{ term: { 'user.id': userId } }],
+          must_not: {
+            term: { excludeFromLastConversationStorage: false },
+          },
         },
       },
       size: 1,

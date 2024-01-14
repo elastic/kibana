@@ -36,7 +36,7 @@ export interface ConversationDataWriter {
 interface ConversationDataWriterOptions {
   esClient: ElasticsearchClient;
   index: string;
-  namespace: string;
+  spaceId: string;
   user: { id?: UUID; name?: string };
   logger: Logger;
 }
@@ -92,7 +92,7 @@ export class ConversationDataWriter implements ConversationDataWriter {
     const conversationBody =
       params.conversationsToCreate?.flatMap((conversation) => [
         { create: { _index: this.options.index } },
-        transformToCreateScheme(changedAt, this.options.namespace, this.options.user, conversation),
+        transformToCreateScheme(changedAt, this.options.spaceId, this.options.user, conversation),
       ]) ?? [];
 
     const conversationUpdatedBody =

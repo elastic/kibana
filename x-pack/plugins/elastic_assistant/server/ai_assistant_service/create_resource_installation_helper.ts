@@ -114,7 +114,7 @@ export function createResourceInstallationHelper(
       return (
         initializedResources.has(key)
           ? initializedResources.get(key)
-          : errorResult(`Unrecognized resources key ${key}`)
+          : errorResult(`Unrecognized spaceId ${key}`)
       ) as InitializationPromise;
     },
   };

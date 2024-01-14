@@ -11,13 +11,6 @@ paths:
       description: The bulk action is applied to all conversations that match the filter or to the list of conversations by their IDs.
       tags:
         - Bulk API
-      parameters:
-        - name: dry_run
-          in: query
-          description: Enables dry run mode for the request call.
-          required: false
-          schema:
-            type: boolean
       requestBody:
         content:
           application/json:
@@ -41,6 +34,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BulkCrudActionResponse'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
 
 components:
   schemas:

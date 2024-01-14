@@ -16,7 +16,7 @@ import {
   ElasticAssistantPluginSetupDependencies,
   ElasticAssistantRequestHandlerContext,
 } from '../types';
-import { AIAssistantSOClient } from '../saved_object/ai_assistant_so_client';
+import { AIAssistantPromptsSOClient } from '../saved_object/ai_assistant_prompts_so_client';
 import { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
 
@@ -82,20 +82,20 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       telemetry: core.analytics,
 
-      getAIAssistantSOClient: memoize(() => {
+      getAIAssistantPromptsSOClient: memoize(() => {
         const username =
           startPlugins.security?.authc.getCurrentUser(request)?.username || 'elastic';
-        return new AIAssistantSOClient({
+        return new AIAssistantPromptsSOClient({
           logger: options.logger,
           user: username,
           savedObjectsClient: coreContext.savedObjects.client,
         });
       }),
 
-      getAIAssistantDataClient: memoize(async () => {
+      getAIAssistantConversationsDataClient: memoize(async () => {
         const currentUser = getCurrentUser();
         return this.assistantService.createAIAssistantDatastreamClient({
-          namespace: getSpaceId(),
+          spaceId: getSpaceId(),
           logger: this.logger,
           currentUser,
         });

@@ -190,7 +190,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (!isLoadingLast && lastConversation) {
+    if (!isLoadingLast && lastConversation && lastConversation.id) {
       setCurrentConversation(lastConversation);
     }
   }, [isLoadingLast, lastConversation]);

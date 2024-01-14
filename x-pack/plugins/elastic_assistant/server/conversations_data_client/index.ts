@@ -32,16 +32,16 @@ export enum OpenAiProviderType {
   AzureAi = 'Azure OpenAI',
 }
 
-export interface AIAssistantDataClientParams {
+export interface AIAssistantConversationsDataClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   kibanaVersion: string;
-  namespace: string;
+  spaceId: string;
   logger: Logger;
   indexPatternsResorceName: string;
   currentUser: AuthenticatedUser | null;
 }
 
-export class AIAssistantDataClient {
+export class AIAssistantConversationsDataClient {
   /** Kibana space id the conversation are part of */
   private readonly spaceId: string;
 
@@ -52,43 +52,40 @@ export class AIAssistantDataClient {
 
   private indexTemplateAndPattern: IIndexPatternString;
 
-  constructor(private readonly options: AIAssistantDataClientParams) {
+  constructor(private readonly options: AIAssistantConversationsDataClientParams) {
     this.indexTemplateAndPattern = getIndexTemplateAndPattern(
       this.options.indexPatternsResorceName,
-      this.options.namespace ?? DEFAULT_NAMESPACE_STRING
+      this.options.spaceId ?? DEFAULT_NAMESPACE_STRING
     );
     this.currentUser = this.options.currentUser;
-    this.spaceId = this.options.namespace;
+    this.spaceId = this.options.spaceId;
   }
 
   public async getWriter(): Promise<ConversationDataWriter> {
-    const namespace = this.spaceId;
-    if (this.writerCache.get(namespace)) {
-      return this.writerCache.get(namespace) as ConversationDataWriter;
+    const spaceId = this.spaceId;
+    if (this.writerCache.get(spaceId)) {
+      return this.writerCache.get(spaceId) as ConversationDataWriter;
     }
     const indexPatterns = this.indexTemplateAndPattern;
-    await this.initializeWriter(namespace, indexPatterns.alias);
-    return this.writerCache.get(namespace) as ConversationDataWriter;
+    await this.initializeWriter(spaceId, indexPatterns.alias);
+    return this.writerCache.get(spaceId) as ConversationDataWriter;
   }
 
-  private async initializeWriter(
-    namespace: string,
-    index: string
-  ): Promise<ConversationDataWriter> {
+  private async initializeWriter(spaceId: string, index: string): Promise<ConversationDataWriter> {
     const esClient = await this.options.elasticsearchClientPromise;
     const writer = new ConversationDataWriter({
       esClient,
-      namespace,
+      spaceId,
       index,
       logger: this.options.logger,
       user: { id: this.currentUser?.profile_uid, name: this.currentUser?.username },
     });
 
-    this.writerCache.set(namespace, writer);
+    this.writerCache.set(spaceId, writer);
     return writer;
   }
 
-  public getReader(options: { namespace?: string } = {}) {
+  public getReader(options: { spaceId?: string } = {}) {
     const indexPatterns = this.indexTemplateAndPattern.alias;
 
     return {

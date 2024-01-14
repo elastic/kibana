@@ -56,7 +56,7 @@ components:
 
     Message:
       type: object
-      description: AI assistant sonversation message.
+      description: AI assistant conversation message.
       required:
         - 'timestamp'
         - 'content'

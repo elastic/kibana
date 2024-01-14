@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-} from '../../../common/constants';
+} from '@kbn/elastic-assistant-common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import {
@@ -51,7 +51,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
 
-          const dataClient = await ctx.elasticAssistant.getAIAssistantDataClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const existingConversation = await dataClient?.getConversation(conversationId);
           if (existingConversation == null) {

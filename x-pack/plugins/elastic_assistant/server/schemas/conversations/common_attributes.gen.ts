@@ -76,7 +76,7 @@ export type Replacement = z.infer<typeof Replacement>;
 export const Replacement = z.object({}).catchall(z.unknown());
 
 /**
- * AI assistant sonversation message.
+ * AI assistant conversation message.
  */
 export type Message = z.infer<typeof Message>;
 export const Message = z.object({

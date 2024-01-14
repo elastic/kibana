@@ -10,21 +10,21 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import { ElasticAssistantPluginRouter } from '../../types';
-import {
-  FindConversationsRequestQuery,
-  FindConversationsResponse,
-} from '../../schemas/conversations/find_conversations_route.gen';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
+import {
+  FindPromptsRequestQuery,
+  FindPromptsResponse,
+} from '../../schemas/prompts/find_prompts_route.gen';
 
-export const findConversationsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
+export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned
     .get({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+      path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -34,24 +34,19 @@ export const findConversationsRoute = (router: ElasticAssistantPluginRouter, log
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(FindConversationsRequestQuery),
+            query: buildRouteValidationWithZod(FindPromptsRequestQuery),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<FindConversationsResponse>> => {
-        const siemResponse = buildResponse(response);
-
-        /* const validationErrors = validateFindConversationsRequestQuery(request.query);
-        if (validationErrors.length) {
-          return siemResponse.error({ statusCode: 400, body: validationErrors });
-        }*/
+      async (context, request, response): Promise<IKibanaResponse<FindPromptsResponse>> => {
+        const assistantResponse = buildResponse(response);
 
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant']);
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsSOClient();
 
-          const result = await dataClient?.findConversations({
+          const result = await dataClient?.findPrompts({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
@@ -63,7 +58,7 @@ export const findConversationsRoute = (router: ElasticAssistantPluginRouter, log
           return response.ok({ body: result });
         } catch (err) {
           const error = transformError(err);
-          return siemResponse.error({
+          return assistantResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
