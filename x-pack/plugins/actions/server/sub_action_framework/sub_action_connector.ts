@@ -147,7 +147,6 @@ export abstract class SubActionConnector<Config, Secrets> {
 
       return res;
     } catch (error) {
-      console.log('hdfjskhfjksdhfjskdhfsjkdfhsjkdfhsjkdfhsjkdfhsjkdfhjkdshfdksjfhsdjfhsdxjk')
       if (isAxiosError(error)) {
         this.logger.debug(
           `Request to external service failed. Connector Id: ${this.connector.id}. Connector type: ${this.connector.type}. Method: ${error.config?.method}. URL: ${error.config?.url}`
