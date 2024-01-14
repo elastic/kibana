@@ -39,7 +39,7 @@ describe('agg_expression_functions', () => {
     test('includes optional params when they are provided', () => {
       const actual = fn({
         field: 'ip_field',
-        ipPrefix: { prefixLength: 1, isIpv6: false },
+        ipPrefix: { prefixLength: 1, isIpv6: false, type: 'ip_prefix' },
       });
 
       expect(actual.value).toMatchInlineSnapshot(`
@@ -52,6 +52,7 @@ describe('agg_expression_functions', () => {
             "ipPrefix": Object {
               "isIpv6": false,
               "prefixLength": 1,
+              "type": "ip_prefix",
             },
             "json": undefined,
           },

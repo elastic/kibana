@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { ChangeEvent, useCallback } from 'react';
 
 import {
   EuiFormRow,
@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiSwitchProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -59,28 +60,29 @@ function IpPrefixParamEditor({
   let error;
 
   if (!isValid) {
-    error = i18n.translate('visDefaultEditor.controls.ipPrefix.errorMessage', {
-      defaultMessage:
-        'Prefix length must be between 0 and 32 for IPv4 addresses and 0 and 128 for IPv6 addresses.',
-    });
+    if (!value.isIpv6) {
+      error = i18n.translate('visDefaultEditor.controls.ipPrefix.errorMessageIpv4', {
+        defaultMessage: 'Prefix length must be between 0 and 32 for IPv4 addresses.',
+      });
+    } else {
+      error = i18n.translate('visDefaultEditor.controls.ipPrefix.errorMessageIpv6', {
+        defaultMessage: 'Prefix length must be between 0 and 128 for IPv6 addresses.',
+      });
+    }
   }
 
   useValidation(setValidity, isValid);
 
   const onPrefixLengthChange: EuiFieldNumberProps['onChange'] = useCallback(
-    (e) => {
-      if (e.target.dataset.testSubj === 'visEditorIpPrefixPrefixLength') {
-        setValue({ ...value, prefixLength: e.target.valueAsNumber });
-      }
+    (ev: ChangeEvent<HTMLInputElement>) => {
+      setValue({ ...value, prefixLength: ev.target.valueAsNumber });
     },
     [setValue, value]
   );
 
   const onIsIpv6Change: EuiSwitchProps['onChange'] = useCallback(
-    (e) => {
-      if (e.target.dataset.testSubj === 'visEditorIpPrefixIsIpv6') {
-        setValue({ ...value, isIpv6: e.target.checked });
-      }
+    (ev: EuiSwitchEvent) => {
+      setValue({ ...value, isIpv6: ev.target.checked });
     },
     [setValue, value]
   );
@@ -91,6 +93,7 @@ function IpPrefixParamEditor({
       display="rowCompressed"
       label={prefixLengthLabel}
       isInvalid={showValidation ? !isValid : false}
+      error={error}
     >
       <EuiFlexGroup gutterSize="m" responsive={false} direction={'column'}>
         <EuiFlexItem>
