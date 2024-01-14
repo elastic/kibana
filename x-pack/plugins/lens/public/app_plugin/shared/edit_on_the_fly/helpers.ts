@@ -7,19 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
-import { fetchDataFromAggregateQuery } from '../../../datasources/text_based/fetch_data_from_aggregate_query';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
-export const getQueryColumns = async (
-  query: AggregateQuery,
-  dataView: DataView,
-  deps: LensPluginStartDependencies
-) => {
+export const getQueryColumns = async (query: AggregateQuery, deps: LensPluginStartDependencies) => {
   // Fetching only columns for ES|QL for performance reasons with limit 0
   // Important note: ES doesnt return the warnings for 0 limit,
   // I am skipping them in favor of performance now
@@ -28,12 +24,7 @@ export const getQueryColumns = async (
   if ('esql' in performantQuery && performantQuery.esql) {
     performantQuery.esql = `${performantQuery.esql} | limit 0`;
   }
-  const table = await fetchDataFromAggregateQuery(
-    performantQuery,
-    dataView,
-    deps.data,
-    deps.expressions
-  );
+  const table = await fetchFieldsFromESQL(performantQuery, deps.expressions);
   return table?.columns;
 };
 
@@ -65,7 +56,7 @@ export const getSuggestions = async (
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
     }
-    const columns = await getQueryColumns(query, dataView, deps);
+    const columns = await getQueryColumns(query, deps);
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',

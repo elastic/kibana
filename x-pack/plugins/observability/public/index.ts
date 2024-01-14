@@ -40,6 +40,7 @@ export {
   apmServiceGroupMaxNumberOfServices,
   enableInfrastructureHostsView,
   enableAgentExplorerView,
+  apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
 export {
   alertsLocatorID,
