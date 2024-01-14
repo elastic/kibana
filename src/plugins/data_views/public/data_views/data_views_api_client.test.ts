@@ -34,7 +34,7 @@ describe('IndexPatternsApiClient', () => {
       query: {
         allow_hidden: undefined,
         allow_no_index: undefined,
-        apiVersion: '1',
+        apiVersion: '1', // version passed through query params for caching
         fields: undefined,
         include_unmapped: undefined,
         meta_fields: undefined,
@@ -42,6 +42,7 @@ describe('IndexPatternsApiClient', () => {
         rollup_index: undefined,
         type: undefined,
       },
+      version: '1', // version header
     });
   });
 });
