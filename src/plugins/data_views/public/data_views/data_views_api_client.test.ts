@@ -23,8 +23,25 @@ describe('IndexPatternsApiClient', () => {
   });
 
   test('uses the right URI to fetch fields for wildcard', async function () {
-    await indexPatternsApiClient.getFieldsForWildcard({ pattern: 'blah' });
+    await indexPatternsApiClient.getFieldsForWildcard({ pattern: 'blah', allowHidden: false });
 
-    expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
+    expect(fetchSpy).toHaveBeenCalledWith(expectedPath, {
+      // not sure what asResponse is but the rest of the results are useful
+      asResponse: true,
+      headers: {
+        'user-hash': '',
+      },
+      query: {
+        allow_hidden: undefined,
+        allow_no_index: undefined,
+        apiVersion: '1',
+        fields: undefined,
+        include_unmapped: undefined,
+        meta_fields: undefined,
+        pattern: 'blah',
+        rollup_index: undefined,
+        type: undefined,
+      },
+    });
   });
 });

@@ -55,7 +55,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       ? this.http.post<T>(url, { query, body, version, asResponse })
       : this.http.fetch<T>(url, {
           query,
-          version,
           ...cacheOptions,
           asResponse,
           headers: { 'user-hash': userHash },
@@ -104,7 +103,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         allow_no_index: allowNoIndex,
         include_unmapped: includeUnmapped,
         fields,
-        allow_hidden: allowHidden,
+        // default to undefined to keep value out of URL params and improve caching
+        allow_hidden: allowHidden || undefined,
         ...versionQueryParam,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
