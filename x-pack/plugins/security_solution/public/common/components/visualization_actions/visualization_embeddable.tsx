@@ -40,7 +40,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const { searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
-  const visualizationData = useVisualizationResponse({ visualizationId: id });
+  const { responses: visualizationData } = useVisualizationResponse({ visualizationId: id });
   const dataExists = visualizationData != null && visualizationData[0]?.hits?.total !== 0;
   const donutTextWrapperStyles = dataExists
     ? css`
@@ -125,7 +125,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
         isChartEmbeddablesEnabled={true}
         dataExists={dataExists}
         label={label}
-        title={dataExists ? <ChartLabel count={visualizationData[0]?.hits?.total} /> : null}
+        title={visualizationData ? <ChartLabel count={visualizationData[0]?.hits?.total} /> : null}
         donutTextWrapperClassName={donutTextWrapperClassName}
         donutTextWrapperStyles={donutTextWrapperStyles}
       >

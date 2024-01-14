@@ -2816,7 +2816,56 @@
         "path": "x-pack/plugins/logs_shared/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientSetupDeps.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ register: (shareMenuProvider: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShareMenuProvider",
+                "text": "ShareMenuProvider"
+              },
+              ") => void; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
+              {
+                "pluginId": "share",
+                "scope": "common",
+                "docId": "kibSharePluginApi",
+                "section": "def-common.AnonymousAccessServiceContract",
+                "text": "AnonymousAccessServiceContract"
+              },
+              ") => void; }"
+            ],
+            "path": "x-pack/plugins/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -3298,6 +3347,20 @@
           "description": [],
           "signature": [
             "LogViewsServiceSetup"
+          ],
+          "path": "x-pack/plugins/logs_shared/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "logsShared",
+          "id": "def-public.LogsSharedClientSetupExports.locators",
+          "type": "Object",
+          "tags": [],
+          "label": "locators",
+          "description": [],
+          "signature": [
+            "LogsSharedLocators"
           ],
           "path": "x-pack/plugins/logs_shared/public/types.ts",
           "deprecated": false,
@@ -5116,6 +5179,53 @@
       },
       {
         "parentPluginId": "logsShared",
+        "id": "def-common.createNodeLogsQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "createNodeLogsQuery",
+        "description": [],
+        "signature": [
+          "(params: ",
+          {
+            "pluginId": "logsShared",
+            "scope": "common",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-common.NodeLogsLocatorParams",
+            "text": "NodeLogsLocatorParams"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/plugins/logs_shared/common/locators/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.createNodeLogsQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "logsShared",
+                "scope": "common",
+                "docId": "kibLogsSharedPluginApi",
+                "section": "def-common.NodeLogsLocatorParams",
+                "text": "NodeLogsLocatorParams"
+              }
+            ],
+            "path": "x-pack/plugins/logs_shared/common/locators/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-common.getLogEntryCursorFromHit",
         "type": "Function",
         "tags": [],
@@ -5158,6 +5268,94 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.getLogsLocatorsFromUrlService",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogsLocatorsFromUrlService",
+        "description": [],
+        "signature": [
+          "(urlService: ",
+          "UrlService",
+          "<unknown, ",
+          "IShortUrlClient",
+          ">) => { logsLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "logsShared",
+            "scope": "common",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-common.LogsLocatorParams",
+            "text": "LogsLocatorParams"
+          },
+          ">; traceLogsLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "logsShared",
+            "scope": "common",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-common.TraceLogsLocatorParams",
+            "text": "TraceLogsLocatorParams"
+          },
+          ">; nodeLogsLocator: ",
+          {
+            "pluginId": "share",
+            "scope": "common",
+            "docId": "kibSharePluginApi",
+            "section": "def-common.LocatorPublic",
+            "text": "LocatorPublic"
+          },
+          "<",
+          {
+            "pluginId": "logsShared",
+            "scope": "common",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-common.NodeLogsLocatorParams",
+            "text": "NodeLogsLocatorParams"
+          },
+          ">; }"
+        ],
+        "path": "x-pack/plugins/logs_shared/common/locators/get_logs_locators.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.getLogsLocatorsFromUrlService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "urlService",
+            "description": [],
+            "signature": [
+              "UrlService",
+              "<unknown, ",
+              "IShortUrlClient",
+              ">"
+            ],
+            "path": "x-pack/plugins/logs_shared/common/locators/get_logs_locators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -5185,7 +5383,7 @@
             "text": "SerializableRecord"
           }
         ],
-        "path": "x-pack/plugins/logs_shared/common/locators/logs_locator.ts",
+        "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5201,7 +5399,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/logs_shared/common/locators/logs_locator.ts",
+            "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5217,7 +5415,7 @@
             "signature": [
               "{ startTime: number; endTime: number; } | undefined"
             ],
-            "path": "x-pack/plugins/logs_shared/common/locators/logs_locator.ts",
+            "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5231,7 +5429,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/logs_shared/common/locators/logs_locator.ts",
+            "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5245,7 +5443,7 @@
             "signature": [
               "{ logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined"
             ],
-            "path": "x-pack/plugins/logs_shared/common/locators/logs_locator.ts",
+            "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5276,10 +5474,21 @@
             "text": "LogsLocatorParams"
           }
         ],
-        "path": "x-pack/plugins/logs_shared/common/locators/node_logs_locator.ts",
+        "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.NodeLogsLocatorParams.nodeField",
+            "type": "string",
+            "tags": [],
+            "label": "nodeField",
+            "description": [],
+            "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "logsShared",
             "id": "def-common.NodeLogsLocatorParams.nodeId",
@@ -5287,21 +5496,7 @@
             "tags": [],
             "label": "nodeId",
             "description": [],
-            "path": "x-pack/plugins/logs_shared/common/locators/node_logs_locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsShared",
-            "id": "def-common.NodeLogsLocatorParams.nodeType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "nodeType",
-            "description": [],
-            "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
-            ],
-            "path": "x-pack/plugins/logs_shared/common/locators/node_logs_locator.ts",
+            "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5461,6 +5656,48 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.TraceLogsLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "TraceLogsLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "logsShared",
+            "scope": "common",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-common.TraceLogsLocatorParams",
+            "text": "TraceLogsLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "logsShared",
+            "scope": "common",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-common.LogsLocatorParams",
+            "text": "LogsLocatorParams"
+          }
+        ],
+        "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.TraceLogsLocatorParams.traceId",
+            "type": "string",
+            "tags": [],
+            "label": "traceId",
+            "description": [],
+            "path": "x-pack/plugins/logs_shared/common/locators/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -5491,6 +5728,36 @@
           "\"logPosition\""
         ],
         "path": "x-pack/plugins/logs_shared/common/log_views/defaults.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.INFRA_LOGS_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INFRA_LOGS_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"INFRA_LOGS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/logs_shared/common/locators/infra.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.INFRA_NODE_LOGS_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "INFRA_NODE_LOGS_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"INFRA_NODE_LOGS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/logs_shared/common/locators/infra.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6061,6 +6328,21 @@
           " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-common.TRACE_LOGS_LOCATOR_ID",
+        "type": "string",
+        "tags": [],
+        "label": "TRACE_LOGS_LOCATOR_ID",
+        "description": [],
+        "signature": [
+          "\"TRACE_LOGS_LOCATOR\""
+        ],
+        "path": "x-pack/plugins/logs_shared/common/locators/trace_logs_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
