@@ -303,7 +303,7 @@ export function Chart({
         // Modify the value as needed, e.g., appending ' modified' to each value
         const newLayer = { ...layers[key] };
         delete newLayer.table;
-        newState.state.datasourceStates.textBased.layers[key] = newLayer;
+        newState.state.datasourceStates.textBased!.layers[key] = newLayer;
       }
     }
 
