@@ -85,13 +85,13 @@ export interface Column {
 type BucketCount = number;
 type BucketTerm = string;
 
-export const useESQLFieldStatsData = ({
+export const useESQLFieldStatsData = <T extends Column>({
   searchQuery,
   columns: allColumns,
   filter,
 }: {
   searchQuery?: AggregateQuery;
-  columns?: Column[];
+  columns?: T[];
   filter?: QueryDslQueryContainer;
 }) => {
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
@@ -114,9 +114,10 @@ export const useESQLFieldStatsData = ({
       let unmounted = false;
 
       const fetchFieldStats = async () => {
+        cancelRequest();
+
         if (!isESQLQuery(searchQuery) || !allColumns) return;
 
-        cancelRequest();
         setFetchState({
           ...getInitialProgress(),
           isRunning: true,
@@ -126,6 +127,7 @@ export const useESQLFieldStatsData = ({
           const esqlBaseQuery = searchQuery.esql;
           const totalFieldsCnt = allColumns.length;
           const processedFieldStats = new Map<string, FieldStats>();
+
           setFieldStats(processedFieldStats);
 
           // GETTING STATS FOR NUMERIC FIELDS
@@ -492,6 +494,12 @@ export const useESQLOverallStatsData = (
         if (!fieldStatsRequest) {
           return;
         }
+        setOverallStatsProgress({
+          ...getInitialProgress(),
+          isRunning: true,
+          error: undefined,
+        });
+        setTableData({ totalCount: undefined, documentCountStats: undefined });
 
         const { searchQuery, intervalMs, filter } = fieldStatsRequest;
 

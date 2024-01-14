@@ -19,6 +19,7 @@ import {
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import { merge } from 'rxjs';
+import { Comparators } from '@elastic/eui';
 
 import {
   useEuiBreakpoint,
@@ -326,11 +327,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const { documentCountStats, totalCount, overallStats, overallStatsProgress, columns } =
     useESQLOverallStatsData(fieldStatsRequest);
 
-  const { fieldStats, fieldStatsProgress } = useESQLFieldStatsData({
-    searchQuery: totalCount > 0 ? fieldStatsRequest?.searchQuery : undefined,
-    columns,
-    filter: fieldStatsRequest?.filter,
-  });
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded] = useState(defaults.metricsLoaded);
   const [metricsStats, setMetricsStats] = useState<undefined | MetricFieldsStats>();
@@ -338,11 +334,70 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const [nonMetricConfigs, setNonMetricConfigs] = useState(defaults.nonMetricConfigs);
   const [nonMetricsLoaded] = useState(defaults.nonMetricsLoaded);
 
+  const [fieldStatFieldsToFetch, setFieldStatFieldsToFetch] = useState<Column[] | undefined>();
+
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
 
   const visibleFieldNames =
     dataVisualizerListState.visibleFieldNames ?? restorableDefaults.visibleFieldNames;
+
+  useEffect(
+    function updateFieldStatFieldsToFetch() {
+      // If query returns 0 document, no need to do more work here
+      if (totalCount === undefined || totalCount === 0) {
+        setFieldStatFieldsToFetch(undefined);
+        return;
+      }
+      const { sortField, sortDirection } = dataVisualizerListState;
+
+      // Otherwise, sort the list of fields by the initial sort field and sort direction
+      // Then divide into chunks by the initial page size
+
+      const itemsSorter = Comparators.property(
+        sortField as string,
+        Comparators.default(sortDirection as 'asc' | 'desc' | undefined)
+      );
+
+      const preslicedSortedConfigs = [...nonMetricConfigs, ...metricConfigs]
+        .map((c) => ({
+          ...c,
+          name: c.fieldName,
+          docCount: c.stats?.count,
+          cardinality: c.stats?.cardinality,
+        }))
+        .sort(itemsSorter);
+
+      const filteredItems = filterFields(
+        preslicedSortedConfigs,
+        dataVisualizerListState.visibleFieldNames,
+        dataVisualizerListState.visibleFieldTypes
+      );
+
+      const { pageIndex, pageSize } = dataVisualizerListState;
+
+      const pageOfConfigs = filteredItems.filteredFields
+        ?.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize)
+        .filter((d) => d.existsInDocs === true);
+
+      setFieldStatFieldsToFetch(pageOfConfigs);
+    },
+    [
+      totalCount,
+      dataVisualizerListState.pageIndex,
+      dataVisualizerListState.pageSize,
+      dataVisualizerListState.sortField,
+      dataVisualizerListState.sortDirection,
+      nonMetricConfigs,
+      metricConfigs,
+    ]
+  );
+
+  const { fieldStats, fieldStatsProgress } = useESQLFieldStatsData({
+    searchQuery: fieldStatsRequest?.searchQuery,
+    columns: fieldStatFieldsToFetch,
+    filter: fieldStatsRequest?.filter,
+  });
 
   const createMetricCards = useCallback(() => {
     if (!columns || !overallStats) return;
@@ -644,6 +699,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
           query={query}
           onTextLangQueryChange={() => {}}
           onTextLangQuerySubmit={(q?: AggregateQuery) => {
+            // Reset field stats to fetch state
+            setFieldStatFieldsToFetch(undefined);
             if (q) {
               setQuery(q);
             }
