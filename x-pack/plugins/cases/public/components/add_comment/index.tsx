@@ -23,6 +23,8 @@ import {
   UseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFilesContext } from '@kbn/shared-ux-file-context';
+import type { Owner } from '../../../common/constants/types';
 import { AttachmentType } from '../../../common/types/domain';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseUI } from '../../containers/types';
@@ -37,6 +39,7 @@ import { schema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
+import { createFileHandler } from '../markdown_editor/file_handler';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -73,8 +76,18 @@ export const AddComment = React.memo(
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
+      const [attachments, setAttachments] = useState<
+        Array<{ type: string; url: string; id: string }>
+      >([]);
+
       const { permissions, owner, appId } = useCasesContext();
-      const { isLoading, mutate: createAttachments } = useCreateAttachments();
+      const {
+        isLoading,
+        mutate: createAttachments,
+        mutateAsync: createAttachmentsAsync,
+      } = useCreateAttachments();
+      const { client: filesClient } = useFilesContext();
+
       const draftStorageKey = getMarkdownEditorStorageKey(appId, caseId, id);
 
       const { form } = useForm<AddCommentFormSchema>({
@@ -110,6 +123,22 @@ export const AddComment = React.memo(
         editor: editorRef.current,
       }));
 
+      const fileOwner = owner[0];
+      const domain = `${window.location.protocol}//${window.location.host}`;
+
+      const dropHandlers = () => {
+        return [
+          createFileHandler({
+            filesClient,
+            owner: fileOwner as Owner,
+            domain,
+            caseId,
+            createAttachments: createAttachmentsAsync,
+            onUploadFile: setAttachments,
+          }),
+        ];
+      };
+
       const onSubmit = useCallback(async () => {
         const { isValid, data } = await submit();
         if (isValid) {
@@ -121,7 +150,13 @@ export const AddComment = React.memo(
             {
               caseId,
               caseOwner: owner[0],
-              attachments: [{ ...data, type: AttachmentType.user }],
+              attachments: [
+                {
+                  ...data,
+                  type: AttachmentType.user,
+                  attachments: clearRemovedAttachments(data.comment, attachments),
+                },
+              ],
             },
             {
               onSuccess: (theCase) => {
@@ -143,6 +178,7 @@ export const AddComment = React.memo(
         onCommentPosted,
         reset,
         draftStorageKey,
+        attachments,
       ]);
 
       /**
@@ -196,6 +232,7 @@ export const AddComment = React.memo(
                   isDisabled: isLoading,
                   dataTestSubj: 'add-comment',
                   placeholder: i18n.ADD_COMMENT_HELP_TEXT,
+                  dropHandlers,
                   bottomRightContent: (
                     <EuiFlexGroup gutterSize="s" alignItems="flexEnd" responsive={false} wrap>
                       {statusActionButton && (
@@ -227,3 +264,18 @@ export const AddComment = React.memo(
 );
 
 AddComment.displayName = 'AddComment';
+
+const clearRemovedAttachments = (
+  context: string,
+  attachments: Array<{ type: string; url: string; id: string }>
+) => {
+  const removedAttachments = new Set();
+
+  for (const attachment of attachments) {
+    if (!context.includes(`(${attachment.url})`)) {
+      removedAttachments.add(attachment);
+    }
+  }
+
+  return attachments.filter((attachment) => removedAttachments.has(attachment.id));
+};

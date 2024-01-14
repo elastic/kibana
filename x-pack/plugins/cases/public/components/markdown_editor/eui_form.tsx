@@ -53,6 +53,7 @@ export const MarkdownEditorForm = React.memo(
         draftStorageKey,
         disabledUiPlugins,
         initialValue,
+        dropHandlers,
       },
       ref
     ) => {
@@ -97,6 +98,7 @@ export const MarkdownEditorForm = React.memo(
               value={field.value}
               disabledUiPlugins={disabledUiPlugins}
               data-test-subj={`${dataTestSubj}-markdown-editor`}
+              dropHandlers={dropHandlers}
             />
           </EuiFormRow>
           {bottomRightContent && (

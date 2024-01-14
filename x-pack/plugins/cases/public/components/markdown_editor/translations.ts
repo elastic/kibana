@@ -10,3 +10,11 @@ import { i18n } from '@kbn/i18n';
 export const PREVIEW = i18n.translate('xpack.cases.markdownEditor.preview', {
   defaultMessage: 'Preview',
 });
+
+export const IMAGES = i18n.translate('xpack.cases.markdownEditor.supportedFiles', {
+  defaultMessage: 'Images',
+});
+
+export const ERROR_FILE_UPLOAD = i18n.translate('xpack.cases.markdownEditor.errorUploadFile', {
+  defaultMessage: 'Upload file error',
+});

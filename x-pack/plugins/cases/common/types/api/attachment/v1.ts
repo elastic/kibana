@@ -57,12 +57,21 @@ const BasicAttachmentRequestRt = rt.union([
   PersistableStateAttachmentPayloadRt,
 ]);
 
-export const AttachmentRequestRt = rt.union([
-  rt.strict({
-    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
-    type: rt.literal(AttachmentType.user),
-    owner: rt.string,
+export const UserCommentRequestRt = rt.intersection([
+  rt.exact(
+    rt.type({
+      comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+      type: rt.literal(AttachmentType.user),
+      owner: rt.string,
+    })
+  ),
+  rt.partial({
+    attachments: rt.array(rt.type({ type: rt.string, url: rt.string, id: rt.string })),
   }),
+]);
+
+export const AttachmentRequestRt = rt.union([
+  UserCommentRequestRt,
   AlertAttachmentPayloadRt,
   rt.strict({
     type: rt.literal(AttachmentType.actions),
@@ -151,6 +160,7 @@ export const BulkGetAttachmentsResponseRt = rt.strict({
 export type FindAttachmentsQueryParams = rt.TypeOf<typeof FindAttachmentsQueryParamsRt>;
 export type AttachmentsFindResponse = rt.TypeOf<typeof AttachmentsFindResponseRt>;
 export type AttachmentRequest = rt.TypeOf<typeof AttachmentRequestRt>;
+export type UserCommentRequest = rt.TypeOf<typeof UserCommentRequestRt>;
 export type AttachmentPatchRequest = rt.TypeOf<typeof AttachmentPatchRequestRt>;
 export type BulkCreateAttachmentsRequest = rt.TypeOf<typeof BulkCreateAttachmentsRequestRt>;
 export type BulkGetAttachmentsResponse = rt.TypeOf<typeof BulkGetAttachmentsResponseRt>;

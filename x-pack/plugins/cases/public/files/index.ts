@@ -39,7 +39,7 @@ const buildFileKind = (config: FilesConfig, owner: Owner): FileKindBrowser => {
     maxSizeBytes: config.maxSize ?? MAX_FILE_SIZE,
     managementUiActions: {
       delete: {
-        enabled: false,
+        enabled: true,
         reason: i18n.FILE_DELETE_REASON(getOwnerUIName(owner)),
       },
     },

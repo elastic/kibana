@@ -29,7 +29,6 @@ import {
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
   PersistableStateAttachmentPayloadRt,
-  UserCommentAttachmentPayloadRt,
 } from '../../common/types/domain';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
@@ -55,6 +54,7 @@ import {
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
+import { UserCommentRequestRt } from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
 
@@ -64,7 +64,7 @@ export const decodeCommentRequest = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (isCommentRequestTypeUser(comment)) {
-    decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
+    decodeWithExcessOrThrow(UserCommentRequestRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
     decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeAlert(comment)) {

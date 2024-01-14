@@ -10,6 +10,7 @@ import React, { memo, forwardRef, useCallback, useRef, useState, useImperativeHa
 import type { EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import type { EuiMarkdownDropHandler } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
 
@@ -21,6 +22,7 @@ interface MarkdownEditorProps {
   onChange: (content: string) => void;
   disabledUiPlugins?: string[] | undefined;
   value: string;
+  dropHandlers?: EuiMarkdownDropHandler[];
 }
 
 export type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -32,7 +34,10 @@ export interface MarkdownEditorRef {
 }
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
-  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
+  (
+    { ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins, dropHandlers },
+    ref
+  ) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
     const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
@@ -78,6 +83,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         errors={markdownErrorMessages}
         data-test-subj={dataTestSubj}
         height={height}
+        dropHandlers={dropHandlers}
       />
     );
   }
