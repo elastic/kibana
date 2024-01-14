@@ -10,33 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useGetPackageInfoByKeyQuery, useLink, useDashboardLocator } from '../../../../hooks';
+import { useLink } from '../../../../hooks';
 import type { Agent, AgentPolicy } from '../../../../types';
-import {
-  FLEET_ELASTIC_AGENT_PACKAGE,
-  DASHBOARD_LOCATORS_IDS,
-} from '../../../../../../../common/constants';
-
-function useAgentDashboardLink(agent: Agent) {
-  const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
-
-  const isInstalled = data?.item.status === 'installed';
-  const dashboardLocator = useDashboardLocator();
-
-  const link = dashboardLocator?.getRedirectUrl({
-    dashboardId: DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS,
-    query: {
-      language: 'kuery',
-      query: `elastic_agent.id:${agent.id}`,
-    },
-  });
-
-  return {
-    isLoading,
-    isInstalled,
-    link,
-  };
-}
+import { useAgentDashboardLink } from '../hooks';
 
 const EuiButtonCompressed = styled(EuiButton)`
   height: 32px;
