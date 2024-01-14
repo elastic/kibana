@@ -51,15 +51,17 @@ export async function getCombinedMessage({
     rawValue: string;
   }) => string;
   isNewChat: boolean;
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  onNewReplacements: (
+    newReplacements: Record<string, string>
+  ) => Promise<Record<string, string> | undefined>;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
 }): Promise<Message> {
   const promptContextsContent = Object.keys(selectedPromptContexts)
     .sort()
-    .map((id) => {
-      const promptContext = transformRawData({
+    .map(async (id) => {
+      const promptContext = await transformRawData({
         allow: selectedPromptContexts[id].allow,
         allowReplacement: selectedPromptContexts[id].allowReplacement,
         currentReplacements,

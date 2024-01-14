@@ -27,7 +27,7 @@ export interface UseChatSendProps {
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
-  refresh: () => Promise<Record<string, Conversation> | undefined>;
+  refresh: () => Promise<Conversation | undefined>;
 }
 
 export interface UseChatSend {
@@ -68,7 +68,7 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
-      const onNewReplacements = (newReplacements: Record<string, string>) =>
+      const onNewReplacements = async (newReplacements: Record<string, string>) =>
         appendReplacements({
           conversationId: currentConversation.id,
           replacements: newReplacements,
@@ -125,7 +125,7 @@ export const useChatSend = ({
   );
 
   const handleRegenerateResponse = useCallback(async () => {
-    const onNewReplacements = (newReplacements: Record<string, string>) =>
+    const onNewReplacements = async (newReplacements: Record<string, string>) =>
       appendReplacements({
         conversationId: currentConversation.id,
         replacements: newReplacements,

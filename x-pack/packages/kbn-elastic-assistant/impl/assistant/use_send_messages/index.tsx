@@ -18,7 +18,9 @@ interface SendMessagesProps {
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  onNewReplacements: (
+    newReplacements: Record<string, string>
+  ) => Promise<Record<string, string> | undefined>;
   replacements?: Record<string, string>;
 }
 

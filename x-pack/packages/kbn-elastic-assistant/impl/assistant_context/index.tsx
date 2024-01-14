@@ -14,7 +14,6 @@ import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/publ
 import { useLocalStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -32,7 +31,6 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
-  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
@@ -197,9 +195,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     baseSystemPrompts
   );
 
-  const [localStorageLastConversationId, setLocalStorageLastConversationId] =
-    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
-
   /**
    * Local storage for knowledge base configuration, prefixed by assistant nameSpace
    */
@@ -253,14 +248,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
 
-  const getConversationId = useCallback(
-    // if a conversationId has been provided, use that
-    // if not, check local storage
-    // last resort, go to welcome conversation
-    (id?: string) => id ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
-    [localStorageLastConversationId]
-  );
-
   // Fetch assistant capabilities
   const { data: capabilities } = useCapabilities({ http, toasts });
   const { assistantModelEvaluation: modelEvaluatorEnabled, assistantStreamingEnabled } =
@@ -305,7 +292,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       title,
       toasts,
       unRegisterPromptContext,
-      setLastConversationId: setLocalStorageLastConversationId,
       baseConversations,
     }),
     [
@@ -337,7 +323,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setDefaultAllow,
       setDefaultAllowReplacement,
       setLocalStorageKnowledgeBase,
-      setLocalStorageLastConversationId,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
       showAssistantOverlay,

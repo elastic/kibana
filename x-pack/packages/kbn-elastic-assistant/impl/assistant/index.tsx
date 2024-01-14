@@ -101,7 +101,7 @@ const AssistantComponent: React.FC<Props> = ({
     [selectedPromptContexts]
   );
 
-  const { amendMessage, getDefaultConversation } = useConversation();
+  const { amendMessage, getDefaultConversation, getConversation } = useConversation();
   const { data: conversationsData, isLoading, refetch } = useFetchCurrentUserConversations();
   const { data: lastConversation, isLoading: isLoadingLast } = useLastConversation();
 
@@ -188,6 +188,14 @@ const AssistantComponent: React.FC<Props> = ({
   const [currentConversation, setCurrentConversation] = useState<Conversation>(
     getDefaultConversation({ conversationId: selectedConversationId })
   );
+
+  const refetchCurrentConversation = useCallback(async () => {
+    const updatedConversation = await getConversation(selectedConversationId);
+    if (updatedConversation) {
+      setCurrentConversation(updatedConversation);
+    }
+    return updatedConversation;
+  }, [getConversation, selectedConversationId]);
 
   useEffect(() => {
     if (!isLoadingLast && lastConversation && lastConversation.id) {
@@ -422,7 +430,7 @@ const AssistantComponent: React.FC<Props> = ({
     setEditingSystemPromptId,
     selectedPromptContexts,
     setSelectedPromptContexts,
-    refresh: refetchResults,
+    refresh: refetchCurrentConversation,
   });
 
   const chatbotComments = useMemo(

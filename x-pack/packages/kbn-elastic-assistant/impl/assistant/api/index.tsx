@@ -30,7 +30,9 @@ export interface FetchConnectorExecuteAction {
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  onNewReplacements: (
+    newReplacements: Record<string, string>
+  ) => Promise<Record<string, string> | undefined>;
   replacements?: Record<string, string>;
   signal?: AbortSignal | undefined;
   size?: number;
@@ -189,7 +191,7 @@ export const fetchConnectorExecuteAction = async ({
           }
         : undefined;
 
-    onNewReplacements(response.replacements ?? {});
+    await onNewReplacements(response.replacements ?? {});
 
     return {
       response: hasParsableResponse({

@@ -9,7 +9,7 @@ import { getAnonymizedData } from '../get_anonymized_data';
 import { getAnonymizedValues } from '../get_anonymized_values';
 import { getCsvFromData } from '../get_csv_from_data';
 
-export const transformRawData = ({
+export const transformRawData = async ({
   allow,
   allowReplacement,
   currentReplacements,
@@ -27,9 +27,11 @@ export const transformRawData = ({
     currentReplacements: Record<string, string> | undefined;
     rawValue: string;
   }) => string;
-  onNewReplacements?: (replacements: Record<string, string>) => void;
+  onNewReplacements: (
+    replacements: Record<string, string>
+  ) => Promise<Record<string, string> | undefined>;
   rawData: string | Record<string, unknown[]>;
-}): string => {
+}): Promise<string> => {
   if (typeof rawData === 'string') {
     return rawData;
   }
@@ -44,7 +46,7 @@ export const transformRawData = ({
   });
 
   if (onNewReplacements != null) {
-    onNewReplacements(anonymizedData.replacements);
+    await onNewReplacements(anonymizedData.replacements);
   }
 
   return getCsvFromData(anonymizedData.anonymizedData);

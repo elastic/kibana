@@ -22,7 +22,7 @@ describe('transformRawData', () => {
       allowReplacement: inputRawData.allowReplacement,
       currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
-      onNewReplacements: () => {},
+      onNewReplacements: jest.fn(),
       rawData: inputRawData.rawData,
     });
 
@@ -64,7 +64,7 @@ describe('transformRawData', () => {
       allowReplacement: inputRawData.allowReplacement,
       currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
-      onNewReplacements: () => {},
+      onNewReplacements: jest.fn(),
       rawData: inputRawData.rawData,
     });
 
@@ -88,7 +88,7 @@ describe('transformRawData', () => {
       allowReplacement: inputRawData.allowReplacement,
       currentReplacements: {},
       getAnonymizedValue: mockGetAnonymizedValue,
-      onNewReplacements: () => {},
+      onNewReplacements: jest.fn(),
       rawData: inputRawData.rawData,
     });
 
