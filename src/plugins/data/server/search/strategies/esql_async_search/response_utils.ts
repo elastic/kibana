@@ -7,20 +7,26 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
-import type { AsyncSearchResponse } from './types';
+import type { EsqlAsyncSearchResponse } from './types';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
  */
 export function toAsyncKibanaSearchResponse(
-  response: AsyncSearchResponse,
+  response: EsqlAsyncSearchResponse,
   warning?: string,
   requestParams?: ConnectionRequestParams
 ) {
   return {
     id: response.id,
-    rawResponse: response,
+    rawResponse: {
+      ...response,
+      took: 0,
+      timed_out: false,
+      _shards: { failed: 0, successful: 0, total: 0 },
+      hits: { hits: [{ _index: '', _id: '' }] },
+    },
     isPartial: response.is_partial,
     isRunning: response.is_running,
     ...(warning ? { warning } : {}),

@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { Observable } from 'rxjs';
-import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { EsqlAsyncSearchResponse } from './types';
-import { IAsyncSearchRequestParams } from '../..';
+import { EsqlAsyncSearchResponse, IAsyncSearchRequestParams } from './types';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
-import type { IAsyncSearchOptions, IEsSearchRequest } from '../../../../common';
+import type { IAsyncSearchOptions, IEsSearchRequest, IEsSearchResponse } from '../../../../common';
 import { pollSearch } from '../../../../common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
@@ -22,12 +20,14 @@ import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import { SearchConfigSchema } from '../../../../config';
 
 export const esqlAsyncSearchStrategyProvider = (
-  legacyConfig$: Observable<SharedGlobalConfig>,
   searchConfig: SearchConfigSchema,
   logger: Logger,
   usage?: SearchUsage,
   useInternalUser: boolean = false
-): ISearchStrategy<IEsSearchRequest<IAsyncSearchRequestParams>> => {
+): ISearchStrategy<
+  IEsSearchRequest<IAsyncSearchRequestParams>,
+  IEsSearchResponse<EsqlAsyncSearchResponse>
+> => {
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     return client.transport.request(
@@ -95,7 +95,7 @@ export const esqlAsyncSearchStrategyProvider = (
       }
     };
 
-    return pollSearch(search, cancel, {
+    return pollSearch<IEsSearchResponse<EsqlAsyncSearchResponse>>(search, cancel, {
       pollInterval: searchConfig.asyncSearch.pollInterval,
       ...options,
     }).pipe(
