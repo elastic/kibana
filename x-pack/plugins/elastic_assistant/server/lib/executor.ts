@@ -8,7 +8,9 @@
 import { get } from 'lodash/fp';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { KibanaRequest } from '@kbn/core-http-server';
-import { PassThrough, Readable } from 'stream';
+import { Stream } from 'openai/src/streaming';
+import { ChatCompletionChunk } from 'openai/src/resources/chat/completions';
+import { Readable, PassThrough } from 'stream';
 import { RequestBody } from './langchain/types';
 
 export interface Props {
@@ -22,11 +24,13 @@ interface StaticResponse {
   status: string;
 }
 
+type StreamResponse = Stream<ChatCompletionChunk>;
+
 export const executeAction = async ({
   actions,
   request,
   connectorId,
-}: Props): Promise<StaticResponse | Readable> => {
+}: Props): Promise<StaticResponse | StreamResponse> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
   const actionResult = await actionsClient.execute({
@@ -47,11 +51,24 @@ export const executeAction = async ({
       status: 'ok',
     };
   }
-  const readable = get('data', actionResult) as Readable;
+  const readable = get('data', actionResult) as StreamResponse;
+  console.log('readable', {
+    readable,
+    // readableT: readable.iterator,
+    // readableTy: typeof readable.iterator,
+  });
+  //
+  // if (typeof readable?.iterator !== 'function') {
+  //   throw new Error('Action result status is error: result is not streamable');
+  // }
+  // for await (const chunk of readable) {
+  //   console.log('chunk', chunk);
+  // }
 
-  if (typeof readable?.read !== 'function') {
-    throw new Error('Action result status is error: result is not streamable');
-  }
+  // console.log('before toReadableStream');
+  const rs = readable.toReadableStream();
+  // console.log('after toReadableStream', rs);
+  return rs;
 
-  return readable.pipe(new PassThrough());
+  return Readable.from(readable).pipe(new PassThrough());
 };

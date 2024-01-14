@@ -35,6 +35,8 @@ module.exports = () => ({
         // Need this since we are using TypeScript 3.8+
         require.resolve('@babel/plugin-proposal-export-namespace-from'),
 
+        require.resolve('@babel/plugin-transform-logical-assignment-operators'),
+
         // Proposal is on stage 4, and included in ECMA-262 (https://github.com/tc39/proposal-export-ns-from)
         // Need this since we are using TypeScript 3.9+
         require.resolve('@babel/plugin-proposal-private-methods'),

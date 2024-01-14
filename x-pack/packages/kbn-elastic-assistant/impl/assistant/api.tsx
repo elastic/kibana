@@ -8,6 +8,8 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
+
+import { Stream } from 'openai/src/streaming';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
@@ -125,7 +127,41 @@ export const fetchConnectorExecuteAction = async ({
         }
       );
 
+      const streamResponse = response?.response?.body;
+      if (!streamResponse) {
+        return {
+          response: `${API_ERROR}\n\nCould not get reader from response`,
+          isError: true,
+          isStream: false,
+        };
+      }
+      const controller = new AbortController();
+      // Create a Stream instance from the response using the static method
+      const stream = Stream.fromSSEResponse(response?.response, controller);
+      // const stream = ChatCompletionStream.fromReadableStream(streamResponse);
+      // Use the iterator directly
+      // const iterator = readableStreamAsyncIterable(stream);
+      console.log('streamResponse', { stream, streamResponse });
+      for await (const item of stream) {
+        // Process each item from the stream
+        console.log('chunk?', item);
+      }
+      console.log('finished?');
+      // const runner = ChatCompletionStreamingRunner.fromReadableStream(streamResponse);
+      //
+      // console.log('after runner', runner);
+      // runner.on('content', (delta, snapshot) => {
+      //   console.log('deltarunner', delta);
+      //   // process.stdout.write(delta);
+      //   // or, in a browser, you might display like this:
+      //   // document.body.innerText += delta; // or:
+      //   // document.body.innerText = snapshot;
+      // });
+      // const here = await runner.finalChatCompletion();
+      // console.log('after finalChatCompletion', here);
+
       const reader = response?.response?.body?.getReader();
+      console.log('reader??', reader);
 
       if (!reader) {
         return {
@@ -199,6 +235,7 @@ export const fetchConnectorExecuteAction = async ({
       traceData,
     };
   } catch (error) {
+    console.log('ERROR', error);
     const getReader = error?.response?.body?.getReader;
     const reader =
       isStream && typeof getReader === 'function' ? getReader.call(error.response.body) : null;
