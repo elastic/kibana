@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant } from '..';
 import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
-import { useFetchCurrentUserConversations } from '../api/conversations/use_fetch_current_user_conversations';
+import { useLastConversation } from '../api/conversations/use_fetch_current_user_conversations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -36,19 +36,14 @@ export const AssistantOverlay = React.memo(() => {
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
 
-  const { data: conversationsData, isLoading } = useFetchCurrentUserConversations();
+  const { data: lastConversation, isLoading } = useLastConversation();
 
   const lastConversationId = useMemo(() => {
     if (!isLoading) {
-      const sorted = conversationsData?.data.sort((convA, convB) =>
-        convA.updatedAt && convB.updatedAt && convA.updatedAt > convB.updatedAt ? -1 : 1
-      );
-      if (sorted && sorted.length > 0) {
-        return sorted[0].id;
-      }
+      return lastConversation?.id ?? WELCOME_CONVERSATION_TITLE;
     }
     return WELCOME_CONVERSATION_TITLE;
-  }, [conversationsData?.data, isLoading]);
+  }, [isLoading, lastConversation?.id]);
 
   // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
