@@ -170,7 +170,6 @@ describe(
         cy.getByTestSubj('ruleEditSubmitButton').click();
         cy.wait('@updateResponseAction').should(({ request }) => {
           const query = {
-            action_type_id: ResponseActionTypesEnum['.endpoint'],
             params: {
               command: secondTestedCommand,
               comment: newDescription,
@@ -179,6 +178,7 @@ describe(
                 overwrite: true,
               },
             },
+            action_type_id: ResponseActionTypesEnum['.endpoint'],
           };
           expect(request.body.response_actions[1]).to.deep.equal(query);
         });
