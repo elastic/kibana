@@ -34,7 +34,7 @@ interface Props {
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
   selectedConversationId: string | undefined;
-  onConversationSelected: (conversationTitle: string, conversationId?: string) => void;
+  onConversationSelected: (conversationId: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
 }
@@ -140,7 +140,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           };
           cId = (await createConversation(newConversation))?.id;
         }
-        onConversationSelected(searchValue, cId);
+        onConversationSelected(cId ?? DEFAULT_CONVERSATION_TITLE);
       },
       [
         allSystemPrompts,

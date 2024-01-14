@@ -297,8 +297,8 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const handleOnConversationSelected = useCallback(
-    async (cTitle: string, cId?: string) => {
-      if (conversations[cTitle] === undefined && cId) {
+    async (cId: string) => {
+      if (conversations[cId] === undefined && cId) {
         const updatedConv = await refetchResults();
         if (updatedConv) {
           setCurrentConversation(updatedConv[cId]);
@@ -307,9 +307,9 @@ const AssistantComponent: React.FC<Props> = ({
             getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv[cId] })?.id
           );
         }
-      } else {
-        setSelectedConversationId(cTitle);
-        setCurrentConversation(conversations[cTitle]);
+      } else if (cId) {
+        setSelectedConversationId(cId);
+        setCurrentConversation(conversations[cId]);
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: currentConversation })?.id
         );
@@ -530,7 +530,6 @@ const AssistantComponent: React.FC<Props> = ({
             isSettingsModalVisible={isSettingsModalVisible}
             onConversationSelected={handleOnConversationSelected}
             onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
-            selectedConversationId={selectedConversationId}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             setSelectedConversationId={setSelectedConversationId}
             showAnonymizedValues={showAnonymizedValues}

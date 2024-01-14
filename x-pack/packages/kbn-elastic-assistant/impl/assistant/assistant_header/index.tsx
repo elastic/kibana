@@ -33,7 +33,6 @@ interface OwnProps {
   isSettingsModalVisible: boolean;
   onConversationSelected: (cId: string) => void;
   onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
-  selectedConversationId: string;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
@@ -57,7 +56,6 @@ export const AssistantHeader: React.FC<Props> = ({
   isSettingsModalVisible,
   onConversationSelected,
   onToggleShowAnonymizedValues,
-  selectedConversationId,
   setIsSettingsModalVisible,
   setSelectedConversationId,
   shouldDisableKeyboardShortcut,
