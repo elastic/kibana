@@ -29,7 +29,7 @@ import { useLink, useAuthz } from '../../../../hooks';
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
 import type { AgentMetrics } from '../../../../../../../common/types';
-import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
+import { AgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
@@ -227,11 +227,14 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               </EuiToolTip>
             ),
             width: '75px',
-            render: (metrics: AgentMetrics | undefined, agent: Agent) =>
-              formatAgentCPU(
-                agent.metrics,
-                agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
-              ),
+            render: (metrics: AgentMetrics | undefined, agent: Agent) => (
+              <AgentCPU
+                agent={agent}
+                agentPolicy={
+                  agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+                }
+              />
+            ),
           },
           {
             field: 'metrics',
