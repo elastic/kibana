@@ -76,7 +76,7 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       renderHeaderActions(EndpointsHeaderAction);
     }
     return () => {
-      renderHeaderActions();
+      renderHeaderActions(undefined);
     };
   }, []);
   return (

@@ -283,7 +283,7 @@ export class AlertsService implements IAlertsService {
       return;
     }
 
-    this.options.logger.info(`Registering resources for context "${context}".`);
+    this.options.logger.debug(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, opts);
 
     // When a context is registered, we install resources in the default namespace by default

@@ -20,8 +20,10 @@ import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { TestProviders } from '../../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useGetEndpointDetails } from '../../../../management/hooks';
+import { useSentinelOneAgentData } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
 
 jest.mock('../../../../management/hooks');
+jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
@@ -86,7 +88,22 @@ describe('<HighlightedFieldsCell />', () => {
     expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render agent status component if override field is agent.status', () => {
+  it('should render sentinelone agent status cell if field is agent.status and origialField is observer.serial_number', () => {
+    (useSentinelOneAgentData as jest.Mock).mockReturnValue({ isFetched: true });
+    const { getByTestId } = render(
+      <TestProviders>
+        <HighlightedFieldsCell
+          values={['value']}
+          field={'agent.status'}
+          originalField="observer.serial_number"
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render if values is null', () => {
     const { container } = render(<HighlightedFieldsCell values={null} field={'field'} />);
 
     expect(container).toBeEmptyDOMElement();

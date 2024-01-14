@@ -55,7 +55,7 @@ describe('useVisualizationResponse', () => {
     const { result } = renderHook(() => useVisualizationResponse({ visualizationId }), {
       wrapper: ({ children }) => <TestProviders store={mockStore}>{children}</TestProviders>,
     });
-    expect(result.current).toEqual(
+    expect(result.current.responses).toEqual(
       parseVisualizationData(mockState.inputs.global.queries[0].inspect.response)
     );
   });

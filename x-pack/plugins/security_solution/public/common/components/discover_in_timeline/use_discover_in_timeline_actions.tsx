@@ -7,6 +7,7 @@
 
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { isEqualWith } from 'lodash';
 import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
 import { useDispatch } from 'react-redux';
@@ -14,15 +15,13 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { defaultHeaders } from '@kbn/securitysolution-data-table';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { TimelineId } from '../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { savedSearchComparator } from '../../../timelines/components/timeline/esql_tab_content/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
@@ -40,22 +39,16 @@ export const useDiscoverInTimelineActions = (
   const { addError } = useAppToasts();
 
   const {
-    services: {
-      customDataService: discoverDataService,
-      savedSearch: savedSearchService,
-      dataViews: dataViewService,
-    },
+    services: { customDataService: discoverDataService, savedSearch: savedSearchService },
   } = useKibana();
 
   const dispatch = useDispatch();
-
-  const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline = useShallowEqualSelector(
     (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
   );
-  const { savedSearchId } = timeline;
+  const { savedSearchId, version } = timeline;
 
   // We're using a ref here to prevent a cyclic hook-dependency chain of updateSavedSearch
   const timelineRef = useRef(timeline);
@@ -63,7 +56,7 @@ export const useDiscoverInTimelineActions = (
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync: saveSavedSearch } = useMutation({
+  const { mutateAsync: saveSavedSearch, status } = useMutation({
     mutationFn: ({
       savedSearch,
       savedSearchOptions,
@@ -71,22 +64,24 @@ export const useDiscoverInTimelineActions = (
       savedSearch: SavedSearch;
       savedSearchOptions: SaveSavedSearchOptions;
     }) => savedSearchService.save(savedSearch, savedSearchOptions),
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidate and refetch
+      if (data) {
+        dispatch(
+          timelineActions.endTimelineSaving({
+            id: TimelineId.active,
+          })
+        );
+      }
       queryClient.invalidateQueries({ queryKey: ['savedSearchById', savedSearchId] });
     },
+    mutationKey: [version],
   });
 
   const getDefaultDiscoverAppState: () => Promise<DiscoverAppState> = useCallback(async () => {
-    const localDataViewId = dataViewId ?? 'security-solution-default';
-
-    const dataView = await dataViewService.get(localDataViewId);
-    const defaultColumns = defaultHeaders.map((header) => header.id);
     return {
       query: {
-        esql: dataView
-          ? `from ${dataView.getIndexPattern()} | limit 10 | keep ${defaultColumns.join(', ')}`
-          : '',
+        esql: '',
       },
       sort: [['@timestamp', 'desc']],
       columns: [],
@@ -95,7 +90,7 @@ export const useDiscoverInTimelineActions = (
       hideChart: true,
       grid: {},
     };
-  }, [dataViewService, dataViewId]);
+  }, []);
 
   /*
    * generates Appstate from a given saved Search object
@@ -159,7 +154,6 @@ export const useDiscoverInTimelineActions = (
       function onError(error: Error) {
         addError(error, { title: DISCOVER_SEARCH_SAVE_ERROR_TITLE });
       }
-
       try {
         const id = await saveSavedSearch({
           savedSearch,
@@ -198,7 +192,9 @@ export const useDiscoverInTimelineActions = (
               savedSearch,
             })
           );
-        } else {
+        } else if (
+          !isEqualWith(timelineRef.current.savedSearch, savedSearch, savedSearchComparator)
+        ) {
           dispatch(
             timelineActions.updateSavedSearch({
               id: TimelineId.active,
@@ -219,11 +215,10 @@ export const useDiscoverInTimelineActions = (
             copyOnSave: !savedSearchId,
           });
 
-          if (!response || !response.id) {
-            throw new Error('Unknown Error occured');
-          }
-
-          if (!savedSearchId) {
+          const responseIsEmpty = !response || !response?.id;
+          if (responseIsEmpty) {
+            throw new Error('Response is empty');
+          } else if (!savedSearchId && !responseIsEmpty && status !== 'loading') {
             dispatch(
               timelineActions.updateSavedSearchId({
                 id: TimelineId.active,
@@ -234,10 +229,6 @@ export const useDiscoverInTimelineActions = (
             dispatch(timelineActions.saveTimeline({ id: TimelineId.active, saveAsNew: false }));
           }
         } catch (err) {
-          addError(DISCOVER_SEARCH_SAVE_ERROR_TITLE, {
-            title: DISCOVER_SEARCH_SAVE_ERROR_TITLE,
-            toastMessage: String(err),
-          });
           dispatch(
             timelineActions.endTimelineSaving({
               id: TimelineId.active,
@@ -246,7 +237,7 @@ export const useDiscoverInTimelineActions = (
         }
       }
     },
-    [persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]
+    [persistSavedSearch, savedSearchId, dispatch, discoverDataService, status]
   );
 
   const initializeLocalSavedSearch = useCallback(
