@@ -101,12 +101,15 @@ export class AIAssistantService {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
       const esClient = await this.options.elasticsearchClientPromise;
 
-      await this.conversationsDataStream.install({
+      const installationResult = await this.conversationsDataStream.install({
         esClient,
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
       });
 
+      if (installationResult.error !== undefined) {
+        throw installationResult.error;
+      }
       this.initialized = true;
       this.isInitializing = false;
       return successResult();
