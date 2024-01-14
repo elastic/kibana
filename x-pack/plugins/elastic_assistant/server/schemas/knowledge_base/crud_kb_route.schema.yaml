@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Create Conversation API endpoint
+  title: KnowledgeBase API endpoints
   version: '2023-10-31'
 paths:
   /internal/elastic_assistant/knowledge_base/{resource}:
@@ -18,12 +18,6 @@ paths:
           description: The KnowledgeBase `resource` value.
           schema:
             type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/KnowledgeBaseCreateProps'
       responses:
         200:
           description: Indicates a successful call.
@@ -64,7 +58,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseResponse'
+                type: object
+                properties:
+                  elser_exists:
+                    type: boolean
+                  index_exists:
+                    type: boolean
+                  pipeline_exists:
+                    type: boolean
         400:
           description: Generic Error
           content:
@@ -81,7 +82,7 @@ paths:
     delete:
       operationId: DeleteKnowledgeBase
       x-codegen-enabled: true
-      description: Deletes KnowledgeBase using the `resource` field.
+      description: Deletes KnowledgeBase with the `resource` field.
       summary: Deletes a KnowledgeBase
       tags:
         - KnowledgeBase API
@@ -115,49 +116,10 @@ paths:
 
 components:
   schemas:
-    KnowledgeBaseCreateProps:
-      type: object
-      description: AI assistant create KB settings.
-      required:
-        - 'content'
-        - 'promptType'
-      properties:
-        content:
-          type: string
-          description: Prompt content.
-        promptType:
-          type: string
-          description: Prompt type.
-        isDefault:
-          description: Is default prompt.
-          type: boolean
-        isShared:
-          description: Is shared prompt.
-          type: boolean
-        isNewConversationDefault:
-          description: Is default prompt.
-          type: boolean
-
     KnowledgeBaseResponse:
       type: object
       description: AI assistant KnowledgeBase.
-      required:
-        - 'timestamp'
-        - 'content'
-        - 'role'
       properties:
-        content:
-          type: string
-          description: Prompt content.
-        promptType:
-          type: string
-          description: Prompt type.
-        isDefault:
-          description: Is default prompt.
+        success:
           type: boolean
-        isShared:
-          description: Is shared prompt.
-          type: boolean
-        isNewConversationDefault:
-          description: Is default prompt.
-          type: boolean  
+          description: Identify the success of the method execution.

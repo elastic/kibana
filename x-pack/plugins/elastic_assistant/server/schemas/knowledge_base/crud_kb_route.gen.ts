@@ -13,57 +13,14 @@ import { z } from 'zod';
  */
 
 /**
- * AI assistant create KB settings.
- */
-export type KnowledgeBaseCreateProps = z.infer<typeof KnowledgeBaseCreateProps>;
-export const KnowledgeBaseCreateProps = z.object({
-  /**
-   * Prompt content.
-   */
-  content: z.string(),
-  /**
-   * Prompt type.
-   */
-  promptType: z.string(),
-  /**
-   * Is default prompt.
-   */
-  isDefault: z.boolean().optional(),
-  /**
-   * Is shared prompt.
-   */
-  isShared: z.boolean().optional(),
-  /**
-   * Is default prompt.
-   */
-  isNewConversationDefault: z.boolean().optional(),
-});
-
-/**
  * AI assistant KnowledgeBase.
  */
 export type KnowledgeBaseResponse = z.infer<typeof KnowledgeBaseResponse>;
 export const KnowledgeBaseResponse = z.object({
   /**
-   * Prompt content.
+   * Identify the success of the method execution.
    */
-  content: z.string(),
-  /**
-   * Prompt type.
-   */
-  promptType: z.string().optional(),
-  /**
-   * Is default prompt.
-   */
-  isDefault: z.boolean().optional(),
-  /**
-   * Is shared prompt.
-   */
-  isShared: z.boolean().optional(),
-  /**
-   * Is default prompt.
-   */
-  isNewConversationDefault: z.boolean().optional(),
+  success: z.boolean().optional(),
 });
 
 export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
@@ -76,10 +33,6 @@ export const CreateKnowledgeBaseRequestParams = z.object({
 export type CreateKnowledgeBaseRequestParamsInput = z.input<
   typeof CreateKnowledgeBaseRequestParams
 >;
-
-export type CreateKnowledgeBaseRequestBody = z.infer<typeof CreateKnowledgeBaseRequestBody>;
-export const CreateKnowledgeBaseRequestBody = KnowledgeBaseCreateProps;
-export type CreateKnowledgeBaseRequestBodyInput = z.input<typeof CreateKnowledgeBaseRequestBody>;
 
 export type CreateKnowledgeBaseResponse = z.infer<typeof CreateKnowledgeBaseResponse>;
 export const CreateKnowledgeBaseResponse = KnowledgeBaseResponse;
@@ -108,4 +61,8 @@ export const ReadKnowledgeBaseRequestParams = z.object({
 export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBaseRequestParams>;
 
 export type ReadKnowledgeBaseResponse = z.infer<typeof ReadKnowledgeBaseResponse>;
-export const ReadKnowledgeBaseResponse = KnowledgeBaseResponse;
+export const ReadKnowledgeBaseResponse = z.object({
+  elser_exists: z.boolean().optional(),
+  index_exists: z.boolean().optional(),
+  pipeline_exists: z.boolean().optional(),
+});

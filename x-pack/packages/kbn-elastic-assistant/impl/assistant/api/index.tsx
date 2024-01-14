@@ -18,6 +18,8 @@ import {
 } from '../helpers';
 import { PerformEvaluationParams } from '../settings/evaluation_settings/use_perform_evaluation';
 
+export * from './conversations';
+
 export interface FetchConnectorExecuteAction {
   isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
@@ -122,6 +124,7 @@ export const fetchConnectorExecuteAction = async ({
           signal,
           asResponse: isStream,
           rawResponse: isStream,
+          version: '1',
         }
       );
 
@@ -159,6 +162,7 @@ export const fetchConnectorExecuteAction = async ({
       body: JSON.stringify(requestBody),
       headers: { 'Content-Type': 'application/json' },
       signal,
+      version: '1',
     });
 
     if (response.status !== 'ok' || !response.data) {
@@ -252,6 +256,7 @@ export const getKnowledgeBaseStatus = async ({
     const response = await http.fetch(path, {
       method: 'GET',
       signal,
+      version: '1',
     });
 
     return response as GetKnowledgeBaseStatusResponse;
@@ -290,6 +295,7 @@ export const postKnowledgeBase = async ({
     const response = await http.fetch(path, {
       method: 'POST',
       signal,
+      version: '1',
     });
 
     return response as PostKnowledgeBaseResponse;
@@ -328,6 +334,7 @@ export const deleteKnowledgeBase = async ({
     const response = await http.fetch(path, {
       method: 'DELETE',
       signal,
+      version: '1',
     });
 
     return response as DeleteKnowledgeBaseResponse;
@@ -386,6 +393,7 @@ export const postEvaluation = async ({
       },
       query,
       signal,
+      version: '1',
     });
 
     return response as PostEvaluationResponse;

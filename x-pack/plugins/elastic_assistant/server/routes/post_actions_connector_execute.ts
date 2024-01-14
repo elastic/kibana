@@ -9,7 +9,7 @@ import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { schema } from '@kbn/config-schema';
-import { ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
@@ -43,7 +43,7 @@ export const postActionsConnectorExecuteRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
           request: {
             body: buildRouteValidationWithZod(ExecuteConnectorRequestBody),

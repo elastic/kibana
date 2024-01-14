@@ -10,10 +10,9 @@ import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
-import { Conversation, Message } from '../../assistant_context/types';
+import { Conversation, Message } from '../../../assistant_context/types';
 
 export interface GetConversationByIdParams {
   http: HttpSetup;
@@ -37,7 +36,7 @@ export const getConversationById = async ({
   signal,
 }: GetConversationByIdParams): Promise<Conversation | IHttpFetchError> => {
   try {
-    const response = await http.fetch(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID, {
+    const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'GET',
       version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
       signal,
@@ -109,7 +108,7 @@ export const deleteConversationApi = async ({
   signal,
 }: DeleteConversationParams): Promise<DeleteConversationResponse | IHttpFetchError> => {
   try {
-    const response = await http.fetch(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID, {
+    const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'DELETE',
       version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
       signal,
@@ -154,21 +153,24 @@ export const updateConversationApi = async ({
   signal,
 }: PutConversationMessageParams): Promise<Conversation | IHttpFetchError> => {
   try {
-    const response = await http.fetch(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID, {
-      method: 'PUT',
-      body: JSON.stringify({
-        id: conversationId,
-        title,
-        messages,
-        replacements,
-        apiConfig,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-      signal,
-    });
+    const response = await http.fetch(
+      `${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${conversationId}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({
+          id: conversationId,
+          title,
+          messages,
+          replacements,
+          apiConfig,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        signal,
+      }
+    );
 
     return response as Conversation;
   } catch (error) {

@@ -7,7 +7,7 @@
 
 // import { AI_ASSISTANT_API_CURRENT_VERSION } from '../common/constants';
 import { HttpSetup } from '@kbn/core/public';
-import { Conversation } from '../../assistant_context/types';
+import { Conversation } from '../../../assistant_context/types';
 
 export const ELASTIC_AI_ASSISTANT_CONVERSATIONS_KEY = 'elastic_assistant_conversations';
 

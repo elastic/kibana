@@ -19,6 +19,7 @@ import {
 import { AIAssistantPromptsSOClient } from '../saved_object/ai_assistant_prompts_so_client';
 import { AIAssistantService } from '../ai_assistant_service';
 import { appContextService } from '../services/app_context';
+import { AIAssistantAnonimizationFieldsSOClient } from '../saved_object/ai_assistant_anonimization_fields_so_client';
 
 export interface IRequestContextFactory {
   create(
@@ -86,6 +87,16 @@ export class RequestContextFactory implements IRequestContextFactory {
         const username =
           startPlugins.security?.authc.getCurrentUser(request)?.username || 'elastic';
         return new AIAssistantPromptsSOClient({
+          logger: options.logger,
+          user: username,
+          savedObjectsClient: coreContext.savedObjects.client,
+        });
+      }),
+
+      getAIAssistantAnonimizationFieldsSOClient: memoize(() => {
+        const username =
+          startPlugins.security?.authc.getCurrentUser(request)?.username || 'elastic';
+        return new AIAssistantAnonimizationFieldsSOClient({
           logger: options.logger,
           user: username,
           savedObjectsClient: coreContext.savedObjects.client,

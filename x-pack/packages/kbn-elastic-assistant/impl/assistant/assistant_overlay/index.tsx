@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant } from '..';
 import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
-import { useFetchCurrentUserConversations } from '../api/use_fetch_current_user_conversations';
+import { useFetchCurrentUserConversations } from '../api/conversations/use_fetch_current_user_conversations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 

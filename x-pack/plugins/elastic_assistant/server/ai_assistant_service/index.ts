@@ -20,7 +20,7 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import { conversationsFieldMap } from './lib/conversation_configuration_type';
+import { conversationsFieldMap } from './conversation_configuration_type';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 

@@ -6,7 +6,7 @@
  */
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { IIndexPatternString } from '../../types';
+import { IIndexPatternString } from '../types';
 
 export const conversationsFieldMap: FieldMap = {
   '@timestamp': {

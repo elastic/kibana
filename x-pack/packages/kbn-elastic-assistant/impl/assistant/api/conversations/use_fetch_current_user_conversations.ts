@@ -13,7 +13,7 @@ import {
   ELASTIC_AI_ASSISTANT_CURRENT_USER_CONVERSATIONS_LAST,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
-import { Conversation } from '../../assistant_context/types';
+import { Conversation } from '../../../assistant_context/types';
 
 export interface FetchConversationsResponse {
   page: number;

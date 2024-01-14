@@ -21,5 +21,8 @@ export const EVALUATE = `${BASE_PATH}/evaluate`;
 export const MAX_CONVERSATIONS_TO_UPDATE_IN_PARALLEL = 50;
 export const CONVERSATIONS_TABLE_MAX_PAGE_SIZE = 100;
 
+export const MAX_ANONIMIZATION_FIELDS_TO_UPDATE_IN_PARALLEL = 50;
+export const ANONIMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE = 100;
+
 // Capabilities
 export const CAPABILITIES = `${BASE_PATH}/capabilities`;

@@ -53,7 +53,7 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 import {
   useFetchCurrentUserConversations,
   useLastConversation,
-} from './api/use_fetch_current_user_conversations';
+} from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
 
 export interface Props {

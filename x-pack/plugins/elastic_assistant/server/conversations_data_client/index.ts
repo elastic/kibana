@@ -13,7 +13,7 @@ import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { IIndexPatternString } from '../types';
 import { ConversationDataWriter } from './conversations_data_writer';
-import { getIndexTemplateAndPattern } from '../ai_assistant_service/lib/conversation_configuration_type';
+import { getIndexTemplateAndPattern } from '../ai_assistant_service/conversation_configuration_type';
 import { createConversation } from './create_conversation';
 import {
   ConversationCreateProps,

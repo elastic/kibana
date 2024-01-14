@@ -10,7 +10,7 @@ import { merge } from 'lodash';
 import { Conversation, Prompt, QuickPrompt, useFetchCurrentUserConversations } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
-import { bulkConversationsChange } from '../../api/use_bulk_actions_conversations';
+import { bulkConversationsChange } from '../../api/conversations/use_bulk_actions_conversations';
 
 interface UseSettingsUpdater {
   conversationSettings: Record<string, Conversation>;
