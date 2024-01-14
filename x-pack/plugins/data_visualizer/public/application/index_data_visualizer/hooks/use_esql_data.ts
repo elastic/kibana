@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { lastValueFrom, Subscription } from 'rxjs';
+import { chunk } from 'lodash';
 import { OMIT_FIELDS } from '../../../../common/constants';
 import type { TimeBucketsInterval } from '../../../../common/services/time_buckets';
 import type {
@@ -86,7 +87,7 @@ type BucketTerm = string;
 
 export const useESQLFieldStatsData = ({
   searchQuery,
-  columns,
+  columns: allColumns,
   filter,
 }: {
   searchQuery?: AggregateQuery;
@@ -113,7 +114,7 @@ export const useESQLFieldStatsData = ({
       let unmounted = false;
 
       const fetchFieldStats = async () => {
-        if (!isESQLQuery(searchQuery) || !columns) return;
+        if (!isESQLQuery(searchQuery) || !allColumns) return;
 
         cancelRequest();
         setFetchState({
@@ -123,279 +124,290 @@ export const useESQLFieldStatsData = ({
         });
         try {
           const esqlBaseQuery = searchQuery.esql;
-          const totalFieldsCnt = columns.length;
+          const totalFieldsCnt = allColumns.length;
           const processedFieldStats = new Map<string, FieldStats>();
           setFieldStats(processedFieldStats);
 
           // GETTING STATS FOR NUMERIC FIELDS
 
-          const numericFields = columns
-            .filter((f) => f.secondaryType === 'number')
-            .map((field, idx) => {
-              const percentiles = getPercentileESQLQuery(field.name);
-              // idx * 23 + 0
-              /**
-               * 0 = min; 23
-               * 1 = max; 24
-               * 2 p0; 25
-               * 3 p5; 26
-               * 4 p10
-               * ...
-               * 22 p100
-               */
-              return {
-                field,
-                query: `${escapeESQL(`${field.name}_min`)} = MIN(${escapeESQL(field.name)}),
+          const aggregatableFieldsChunks = chunk(allColumns, 30);
+
+          for (const columns of aggregatableFieldsChunks) {
+            const numericFields = columns
+              .filter((f) => f.secondaryType === 'number')
+              .map((field, idx) => {
+                const percentiles = getPercentileESQLQuery(field.name);
+                // idx * 23 + 0
+                /**
+                 * 0 = min; 23
+                 * 1 = max; 24
+                 * 2 p0; 25
+                 * 3 p5; 26
+                 * 4 p10
+                 * ...
+                 * 22 p100
+                 */
+                return {
+                  field,
+                  query: `${escapeESQL(`${field.name}_min`)} = MIN(${escapeESQL(field.name)}),
                 ${escapeESQL(`${field.name}_max`)} = MAX(${escapeESQL(field.name)}),
               ${percentiles.join(',')}
               `,
-                startIndex: idx * (percentiles.length + 2),
-              };
-            });
+                  startIndex: idx * (percentiles.length + 2),
+                };
+              });
 
-          if (numericFields.length > 0) {
-            const numericStatsQuery =
-              '| STATS ' + numericFields.map(({ query }) => query).join(',');
+            if (numericFields.length > 0) {
+              const numericStatsQuery =
+                '| STATS ' + numericFields.map(({ query }) => query).join(',');
 
-            const fieldStatsResp = await runRequest(
-              {
-                params: {
-                  query: esqlBaseQuery + numericStatsQuery,
-                  locale: 'en',
-                  ...(filter ? { filter } : {}),
+              const fieldStatsResp = await runRequest(
+                {
+                  params: {
+                    query: esqlBaseQuery + numericStatsQuery,
+                    locale: 'en',
+                    ...(filter ? { filter } : {}),
+                  },
                 },
-              },
-              { strategy: ESQL_SEARCH_STRATEGY }
-            );
+                { strategy: ESQL_SEARCH_STRATEGY }
+              );
 
-            if (fieldStatsResp && !unmounted) {
-              const values = fieldStatsResp.rawResponse.values[0];
+              if (fieldStatsResp && !unmounted) {
+                const values = fieldStatsResp.rawResponse.values[0];
 
-              numericFields.forEach(({ field, startIndex }, idx) => {
-                const min = values[startIndex + 0];
-                const max = values[startIndex + 1];
-                const median = values[startIndex + 12];
+                numericFields.forEach(({ field, startIndex }, idx) => {
+                  const min = values[startIndex + 0];
+                  const max = values[startIndex + 1];
+                  const median = values[startIndex + 12];
 
-                const percentiles = values
-                  .slice(startIndex + 2, startIndex + 23)
-                  .map((value: number) => ({ value }));
+                  const percentiles = values
+                    .slice(startIndex + 2, startIndex + 23)
+                    .map((value: number) => ({ value }));
 
-                const distribution = processDistributionData(percentiles, PERCENTILE_SPACING, min);
+                  const distribution = processDistributionData(
+                    percentiles,
+                    PERCENTILE_SPACING,
+                    min
+                  );
 
-                processedFieldStats.set(field.name, {
-                  fieldName: field.name,
-                  ...field,
-                  min,
-                  max,
-                  median,
-                  distribution,
+                  processedFieldStats.set(field.name, {
+                    fieldName: field.name,
+                    ...field,
+                    min,
+                    max,
+                    median,
+                    distribution,
+                  });
                 });
-              });
 
-              setFetchState({
-                loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
-              });
+                setFetchState({
+                  loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
+                });
+              }
             }
-          }
 
-          // GETTING STATS FOR KEYWORD FIELDS
-          const keywordFields = columns
-            .filter((f) => f.secondaryType === 'keyword' || f.secondaryType === 'ip')
-            .map((field) => {
-              return {
-                field,
-                query: `| STATS ${escapeESQL(`${field.name}_terms`)} = count(${escapeESQL(
-                  field.name
-                )}) BY ${escapeESQL(field.name)}
+            // GETTING STATS FOR KEYWORD FIELDS
+            const keywordFields = columns
+              .filter((f) => f.secondaryType === 'keyword' || f.secondaryType === 'ip')
+              .map((field) => {
+                return {
+                  field,
+                  query: `| STATS ${escapeESQL(`${field.name}_terms`)} = count(${escapeESQL(
+                    field.name
+                  )}) BY ${escapeESQL(field.name)}
                   | LIMIT 10
                   | SORT ${escapeESQL(`${field.name}_terms`)} DESC`,
-              };
-            });
-
-          if (keywordFields.length > 0) {
-            const keywordTopTermsResp = await Promise.all(
-              keywordFields.map(({ query }) =>
-                runRequest(
-                  {
-                    params: {
-                      query: esqlBaseQuery + query,
-                      ...(filter ? { filter } : {}),
-                    },
-                  },
-                  { strategy: ESQL_SEARCH_STRATEGY }
-                )
-              )
-            );
-            if (keywordTopTermsResp && !unmounted) {
-              keywordFields.forEach(({ field }, idx) => {
-                const resp = keywordTopTermsResp[idx];
-                if (isDefined(resp)) {
-                  const results = resp.rawResponse.values as Array<[BucketCount, BucketTerm]>;
-                  const topValuesSampleSize = results.reduce((acc: number, row) => acc + row[0], 0);
-
-                  const terms = results.map((row) => ({
-                    key: row[1],
-                    doc_count: row[0],
-                    percent: row[0] / topValuesSampleSize,
-                  }));
-
-                  processedFieldStats.set(field.name, {
-                    fieldName: field.name,
-                    topValues: terms,
-                    topValuesSampleSize,
-                    topValuesSamplerShardSize: topValuesSampleSize,
-                    isTopValuesSampled: false,
-                  } as StringFieldStats);
-                }
+                };
               });
-            }
 
-            setFetchState({
-              loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
-            });
-          }
-
-          // GETTING STATS FOR BOOLEAN FIELDS
-          const booleanFields = columns
-            .filter((f) => f.secondaryType === 'boolean')
-            .map((field) => {
-              return {
-                field,
-                query: `| STATS ${escapeESQL(`${field.name}_terms`)} = count(${escapeESQL(
-                  field.name
-                )}) BY ${escapeESQL(field.name)}
-                  | LIMIT 3`,
-              };
-            });
-          if (booleanFields.length > 0) {
-            const booleanTopTermsResp = await Promise.all(
-              booleanFields.map(({ query }) =>
-                runRequest(
-                  {
-                    params: {
-                      query: esqlBaseQuery + query,
-                      locale: 'en',
-                      ...(filter ? { filter } : {}),
+            if (keywordFields.length > 0) {
+              const keywordTopTermsResp = await Promise.all(
+                keywordFields.map(({ query }) =>
+                  runRequest(
+                    {
+                      params: {
+                        query: esqlBaseQuery + query,
+                        ...(filter ? { filter } : {}),
+                      },
                     },
-                  },
-                  { strategy: ESQL_SEARCH_STRATEGY }
+                    { strategy: ESQL_SEARCH_STRATEGY }
+                  )
                 )
-              )
-            );
-            if (booleanTopTermsResp && !unmounted) {
-              booleanFields.forEach(({ field }, idx) => {
-                const resp = booleanTopTermsResp[idx];
-                if (isDefined(resp)) {
-                  const results = resp.rawResponse.values as Array<[BucketCount, boolean]>;
-                  const topValuesSampleSize = results.reduce((acc, row) => acc + row[0], 0);
+              );
+              if (keywordTopTermsResp && !unmounted) {
+                keywordFields.forEach(({ field }, idx) => {
+                  const resp = keywordTopTermsResp[idx];
+                  if (isDefined(resp)) {
+                    const results = resp.rawResponse.values as Array<[BucketCount, BucketTerm]>;
+                    const topValuesSampleSize = results.reduce(
+                      (acc: number, row) => acc + row[0],
+                      0
+                    );
 
-                  let falseCount = 0;
-                  let trueCount = 0;
-                  const terms = results.map((row) => {
-                    if (row[1] === false) {
-                      falseCount = row[0];
-                    }
-                    if (row[1] === true) {
-                      trueCount = row[0];
-                    }
-                    return {
-                      key_as_string: row[1]?.toString(),
+                    const terms = results.map((row) => ({
+                      key: row[1],
                       doc_count: row[0],
                       percent: row[0] / topValuesSampleSize,
-                    };
-                  });
+                    }));
 
-                  processedFieldStats.set(field.name, {
-                    fieldName: field.name,
-                    topValues: terms,
-                    topValuesSampleSize,
-                    topValuesSamplerShardSize: topValuesSampleSize,
-                    isTopValuesSampled: false,
-                    trueCount,
-                    falseCount,
-                  } as StringFieldStats);
-                }
-              });
+                    processedFieldStats.set(field.name, {
+                      fieldName: field.name,
+                      topValues: terms,
+                      topValuesSampleSize,
+                      topValuesSamplerShardSize: topValuesSampleSize,
+                      isTopValuesSampled: false,
+                    } as StringFieldStats);
+                  }
+                });
+              }
+
               setFetchState({
                 loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
               });
             }
-          }
 
-          const textFields = columns.filter((f) => f.secondaryType === 'text');
+            // GETTING STATS FOR BOOLEAN FIELDS
+            const booleanFields = columns
+              .filter((f) => f.secondaryType === 'boolean')
+              .map((field) => {
+                return {
+                  field,
+                  query: `| STATS ${escapeESQL(`${field.name}_terms`)} = count(${escapeESQL(
+                    field.name
+                  )}) BY ${escapeESQL(field.name)}
+                  | LIMIT 3`,
+                };
+              });
+            if (booleanFields.length > 0) {
+              const booleanTopTermsResp = await Promise.all(
+                booleanFields.map(({ query }) =>
+                  runRequest(
+                    {
+                      params: {
+                        query: esqlBaseQuery + query,
+                        locale: 'en',
+                        ...(filter ? { filter } : {}),
+                      },
+                    },
+                    { strategy: ESQL_SEARCH_STRATEGY }
+                  )
+                )
+              );
+              if (booleanTopTermsResp && !unmounted) {
+                booleanFields.forEach(({ field }, idx) => {
+                  const resp = booleanTopTermsResp[idx];
+                  if (isDefined(resp)) {
+                    const results = resp.rawResponse.values as Array<[BucketCount, boolean]>;
+                    const topValuesSampleSize = results.reduce((acc, row) => acc + row[0], 0);
 
-          if (textFields.length > 0) {
-            const textFieldsResp = await runRequest(
-              {
-                params: {
-                  query:
-                    esqlBaseQuery +
-                    `| KEEP ${textFields.map((f) => f.name).join(',')}
+                    let falseCount = 0;
+                    let trueCount = 0;
+                    const terms = results.map((row) => {
+                      if (row[1] === false) {
+                        falseCount = row[0];
+                      }
+                      if (row[1] === true) {
+                        trueCount = row[0];
+                      }
+                      return {
+                        key_as_string: row[1]?.toString(),
+                        doc_count: row[0],
+                        percent: row[0] / topValuesSampleSize,
+                      };
+                    });
+
+                    processedFieldStats.set(field.name, {
+                      fieldName: field.name,
+                      topValues: terms,
+                      topValuesSampleSize,
+                      topValuesSamplerShardSize: topValuesSampleSize,
+                      isTopValuesSampled: false,
+                      trueCount,
+                      falseCount,
+                    } as StringFieldStats);
+                  }
+                });
+                setFetchState({
+                  loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
+                });
+              }
+            }
+
+            const textFields = columns.filter((f) => f.secondaryType === 'text');
+
+            if (textFields.length > 0) {
+              const textFieldsResp = await runRequest(
+                {
+                  params: {
+                    query:
+                      esqlBaseQuery +
+                      `| KEEP ${textFields.map((f) => f.name).join(',')}
                      | LIMIT 10`,
-                  ...(filter ? { filter } : {}),
+                    ...(filter ? { filter } : {}),
+                  },
                 },
-              },
-              { strategy: ESQL_SEARCH_STRATEGY }
-            );
+                { strategy: ESQL_SEARCH_STRATEGY }
+              );
 
-            if (textFieldsResp && !unmounted) {
-              textFields.forEach((textField, idx) => {
-                const examples = (textFieldsResp.rawResponse.values as unknown[][]).map(
-                  (row) => row[idx]
-                );
+              if (textFieldsResp && !unmounted) {
+                textFields.forEach((textField, idx) => {
+                  const examples = (textFieldsResp.rawResponse.values as unknown[][]).map(
+                    (row) => row[idx]
+                  );
 
-                processedFieldStats.set(textField.name, {
-                  fieldName: textField.name,
-                  examples,
-                } as FieldExamples);
-              });
-              setFetchState({
-                loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
-              });
+                  processedFieldStats.set(textField.name, {
+                    fieldName: textField.name,
+                    examples,
+                  } as FieldExamples);
+                });
+                setFetchState({
+                  loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
+                });
+              }
             }
-          }
 
-          // GETTING STATS FOR DATE FIELDS
-          const dateFields = columns
-            .filter((f) => f.secondaryType === 'date')
-            .map((field) => {
-              return {
-                field,
-                query: `${escapeESQL(`${field.name}_earliest`)} = MIN(${escapeESQL(
-                  field.name
-                )}), ${escapeESQL(`${field.name}_latest`)} = MAX(${escapeESQL(field.name)})`,
-              };
-            });
+            // GETTING STATS FOR DATE FIELDS
+            const dateFields = columns
+              .filter((f) => f.secondaryType === 'date')
+              .map((field) => {
+                return {
+                  field,
+                  query: `${escapeESQL(`${field.name}_earliest`)} = MIN(${escapeESQL(
+                    field.name
+                  )}), ${escapeESQL(`${field.name}_latest`)} = MAX(${escapeESQL(field.name)})`,
+                };
+              });
 
-          if (dateFields.length > 0) {
-            const dateStatsQuery = ' | STATS ' + dateFields.map(({ query }) => query).join(',');
+            if (dateFields.length > 0) {
+              const dateStatsQuery = ' | STATS ' + dateFields.map(({ query }) => query).join(',');
 
-            const dateFieldsResp = await runRequest(
-              {
-                params: {
-                  query: esqlBaseQuery + dateStatsQuery,
-                  ...(filter ? { filter } : {}),
+              const dateFieldsResp = await runRequest(
+                {
+                  params: {
+                    query: esqlBaseQuery + dateStatsQuery,
+                    ...(filter ? { filter } : {}),
+                  },
                 },
-              },
-              { strategy: ESQL_SEARCH_STRATEGY }
-            );
+                { strategy: ESQL_SEARCH_STRATEGY }
+              );
 
-            if (dateFieldsResp && !unmounted) {
-              dateFields.forEach(({ field: dateField }, idx) => {
-                const row = dateFieldsResp.rawResponse.values[0] as Array<null | string | number>;
+              if (dateFieldsResp && !unmounted) {
+                dateFields.forEach(({ field: dateField }, idx) => {
+                  const row = dateFieldsResp.rawResponse.values[0] as Array<null | string | number>;
 
-                const earliest = row[idx * 2];
-                const latest = row[idx * 2 + 1];
+                  const earliest = row[idx * 2];
+                  const latest = row[idx * 2 + 1];
 
-                processedFieldStats.set(dateField.name, {
-                  fieldName: dateField.name,
-                  earliest,
-                  latest,
-                } as DateFieldStats);
-              });
-              setFetchState({
-                loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
-              });
+                  processedFieldStats.set(dateField.name, {
+                    fieldName: dateField.name,
+                    earliest,
+                    latest,
+                  } as DateFieldStats);
+                });
+                setFetchState({
+                  loaded: (processedFieldStats.size / totalFieldsCnt) * 100,
+                });
+              }
             }
           }
           setFetchState({
@@ -432,7 +444,7 @@ export const useESQLFieldStatsData = ({
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [columns, JSON.stringify({ filter })]
+    [allColumns, JSON.stringify({ filter })]
   );
 
   return { fieldStats, fieldStatsProgress: fetchState };

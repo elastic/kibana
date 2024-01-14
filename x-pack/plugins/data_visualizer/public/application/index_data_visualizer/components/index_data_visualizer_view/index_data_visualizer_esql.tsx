@@ -327,7 +327,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     useESQLOverallStatsData(fieldStatsRequest);
 
   const { fieldStats, fieldStatsProgress } = useESQLFieldStatsData({
-    searchQuery: fieldStatsRequest?.searchQuery,
+    searchQuery: totalCount > 0 ? fieldStatsRequest?.searchQuery : undefined,
     columns,
     filter: fieldStatsRequest?.filter,
   });
