@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -17,6 +17,8 @@ import {
   EuiPopover,
   EuiContextMenu,
   EuiBadge,
+  EuiToolTip,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -31,6 +33,16 @@ export interface Props {
   onDeletePipelineClick: (pipelineName: string[]) => void;
 }
 
+export const deprecatedPipelineBadge = {
+  badge: i18n.translate('xpack.ingestPipelines.list.table.deprecatedBadgeLabel', {
+    defaultMessage: 'Deprecated',
+  }),
+  badgeTooltip: i18n.translate('xpack.ingestPipelines.list.table.deprecatedBadgeTooltip', {
+    defaultMessage:
+      'This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one.',
+  }),
+};
+
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   onReloadClick,
@@ -38,9 +50,16 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onClonePipelineClick,
   onDeletePipelineClick,
 }) => {
+  const [query, setQuery] = useState('');
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
   const [showPopover, setShowPopover] = useState(false);
+
+  const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
+    if (!error) {
+      setQuery(queryText);
+    }
+  };
 
   const createMenuItems = [
     /**
@@ -64,6 +83,20 @@ export const PipelineTable: FunctionComponent<Props> = ({
       'data-test-subj': `createPipelineFromCsv`,
     },
   ];
+
+  const filteredPipelines = useMemo(() => {
+    let result = pipelines ?? [];
+
+    // When the query includes 'is:deprecated', we want to show deprecated pipelines.
+    // Otherwise hide them all since they wont be supported in the future.
+    if (query.includes('is:deprecated')) {
+      result = result.filter((item) => item?.deprecated);
+    } else {
+      result = result.filter((item) => !item?.deprecated);
+    }
+
+    return result;
+  }, [pipelines, query]);
 
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
@@ -145,12 +178,21 @@ export const PipelineTable: FunctionComponent<Props> = ({
       box: {
         incremental: true,
       },
+      query,
+      onChange: handleOnChange,
       filters: [
         {
           type: 'is',
           field: 'isManaged',
           name: i18n.translate('xpack.ingestPipelines.list.table.isManagedFilterLabel', {
             defaultMessage: 'Managed',
+          }),
+        },
+        {
+          type: 'is',
+          field: 'deprecated',
+          name: i18n.translate('xpack.ingestPipelines.list.table.isDeprecatedFilterLabel', {
+            defaultMessage: 'Deprecated',
           }),
         },
       ],
@@ -175,6 +217,16 @@ export const PipelineTable: FunctionComponent<Props> = ({
             })}
           >
             {name}
+            {pipeline.deprecated && (
+              <>
+                &nbsp;
+                <EuiToolTip content={deprecatedPipelineBadge.badgeTooltip}>
+                  <EuiBadge color="warning" data-test-subj="isDeprecatedBadge">
+                    {deprecatedPipelineBadge.badge}
+                  </EuiBadge>
+                </EuiToolTip>
+              </>
+            )}
             {pipeline.isManaged && (
               <>
                 &nbsp;
@@ -236,7 +288,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
         ],
       },
     ],
-    items: pipelines ?? [],
+    items: filteredPipelines,
   };
 
   return <EuiInMemoryTable {...tableProps} />;
