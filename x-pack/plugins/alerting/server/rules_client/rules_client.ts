@@ -62,6 +62,7 @@ import { muteAll } from './methods/mute_all';
 import { unmuteAll } from './methods/unmute_all';
 import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
+import { test } from './methods/test';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
@@ -69,6 +70,7 @@ import {
   bulkUntrackAlerts,
   BulkUntrackBody,
 } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
+import { Params as TestParams } from '../../../stack_alerts/server/rule_types/user_defined/rule_type';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -178,6 +180,8 @@ export class RulesClient {
   public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
+
+  public test = (options: { params: TestParams }) => test(this.context, options);
 
   public listRuleTypes = () => listRuleTypes(this.context);
 

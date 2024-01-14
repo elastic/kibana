@@ -49,7 +49,7 @@ import {
   AlertInstanceState,
   AlertsHealth,
   WithoutReservedActionGroups,
-  ActionVariable,
+  RuleTypeActionVariables,
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
@@ -136,10 +136,12 @@ export interface RuleExecutorOptions<
   spaceId: string;
   startedAt: Date;
   state: State;
+  apiKey?: string | null;
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
   getTimeRange: (timeWindow?: string) => { dateStart: string; dateEnd: string };
+  queryDelay?: number;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -163,7 +165,11 @@ export type ExecutorType<
     ActionGroupIds,
     AlertData
   >
-) => Promise<{ state: State }>;
+) => Promise<{
+  state: State;
+  memoryUsage?: { p50: number; p95: number; p99: number };
+  cpuUsage?: { p50: number; p95: number; p99: number };
+}>;
 
 export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validate: (object: Partial<Params>) => Params;
@@ -303,11 +309,7 @@ export interface RuleType<
   >;
   category: string;
   producer: string;
-  actionVariables?: {
-    context?: ActionVariable[];
-    state?: ActionVariable[];
-    params?: ActionVariable[];
-  };
+  actionVariables?: RuleTypeActionVariables;
   minimumLicenseRequired: LicenseType;
   useSavedObjectReferences?: {
     extractReferences: (params: Params) => RuleParamsAndRefs<ExtractedParams>;
@@ -326,6 +328,7 @@ export interface RuleType<
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
   fieldsForAAD?: string[];
+  requiresAPIkey?: boolean;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

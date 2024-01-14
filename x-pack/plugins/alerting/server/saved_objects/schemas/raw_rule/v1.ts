@@ -210,6 +210,7 @@ const rawRuleActionSchema = schema.object({
     })
   ),
   alertsFilter: schema.maybe(rawRuleAlertsFilterSchema),
+  alertTransform: schema.maybe(schema.string()),
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 

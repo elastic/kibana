@@ -7,7 +7,9 @@
 
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { AADAlert } from '@kbn/alerts-as-data-utils';
+import { Logger } from '@kbn/core/server';
 import { mapKeys, snakeCase } from 'lodash/fp';
+import { executeUserDefinedCode } from '../deno/executor';
 import {
   RuleActionParams,
   AlertInstanceState,
@@ -17,6 +19,7 @@ import {
 } from '../types';
 
 export interface TransformActionParamsOptions {
+  logger: Logger;
   actionsPlugin: ActionsPluginStartContract;
   alertId: string;
   alertType: string;
@@ -37,6 +40,8 @@ export interface TransformActionParamsOptions {
   ruleUrl?: string;
   flapping: boolean;
   aadAlert?: AADAlert;
+  alertTransform?: string;
+  apiKey?: string | null;
 }
 
 interface SummarizedAlertsWithAll {
@@ -58,7 +63,8 @@ interface SummarizedAlertsWithAll {
   };
 }
 
-export function transformActionParams({
+export async function transformActionParams({
+  logger,
   actionsPlugin,
   alertId,
   alertType,
@@ -79,49 +85,83 @@ export function transformActionParams({
   ruleUrl,
   flapping,
   aadAlert,
-}: TransformActionParamsOptions): RuleActionParams {
+  alertTransform,
+  apiKey,
+}: TransformActionParamsOptions): Promise<RuleActionParams> {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
   // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
-  const variables =
-    aadAlert !== undefined
-      ? aadAlert
-      : {
-          alertId,
-          alertName,
-          spaceId,
-          tags,
-          alertInstanceId,
-          alertActionGroup,
-          alertActionGroupName,
-          context,
-          date: new Date().toISOString(),
-          state,
-          kibanaBaseUrl,
-          params: alertParams,
-          rule: {
-            params: alertParams,
-            id: alertId,
-            name: alertName,
-            type: alertType,
-            spaceId,
-            tags,
-            url: ruleUrl,
-          },
-          alert: {
-            id: alertInstanceId,
-            uuid: alertUuid,
-            actionGroup: alertActionGroup,
-            actionGroupName: alertActionGroupName,
-            flapping,
-          },
-        };
+  const variables = {
+    alertId,
+    alertName,
+    spaceId,
+    tags,
+    alertInstanceId,
+    alertActionGroup,
+    alertActionGroupName,
+    context,
+    date: new Date().toISOString(),
+    state,
+    kibanaBaseUrl,
+    params: alertParams,
+    rule: {
+      params: alertParams,
+      id: alertId,
+      name: alertName,
+      type: alertType,
+      spaceId,
+      tags,
+      url: ruleUrl,
+    },
+    alert: {
+      id: alertInstanceId,
+      uuid: alertUuid,
+      actionGroup: alertActionGroup,
+      actionGroupName: alertActionGroupName,
+      flapping,
+    },
+    ...aadAlert,
+  };
+
+  const transformedVariables: Record<string, string> = {};
+  if (alertTransform) {
+    // Run code in child process
+    try {
+      const { stdout } = await executeUserDefinedCode({
+        logger,
+        userDefinedCode: alertTransform,
+        env: {
+          PATH: process.env.PATH,
+          ACTION_CONTEXT: JSON.stringify(variables),
+          ELASTICSEARCH_API_KEY: apiKey,
+        },
+      });
+
+      if (stdout) {
+        try {
+          logger.info(`Info returned from user defined code ${stdout.split('\n')}`);
+          const transformedVars: string[] = getTransformedVariables(stdout);
+          for (const varStr of transformedVars) {
+            const transformedVar: { key: string; value: string } = JSON.parse(varStr);
+            transformedVariables[transformedVar.key] = transformedVar.value;
+          }
+        } catch (err) {
+          logger.error(`couldn't parse the output from the alert transform`);
+        }
+      }
+    } catch (error) {
+      logger.error(`Error executing user-defined code - ${error.message}`);
+      throw error;
+    }
+  }
+
+  const allVariables = { ...variables, ...transformedVariables };
 
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,
     actionId,
     actionParams,
-    variables
+    allVariables
   );
 }
 
@@ -196,4 +236,12 @@ export function transformSummaryActionParams({
     actionParams,
     variables
   );
+}
+
+const newContextPrefix = 'newContextToAdd:';
+function getTransformedVariables(output: string) {
+  return output
+    .split('\n')
+    .filter((str) => str.indexOf(newContextPrefix) === 0)
+    .map((str) => str.substring(newContextPrefix.length));
 }

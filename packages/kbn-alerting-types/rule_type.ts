@@ -23,6 +23,12 @@ export interface ActionVariable {
   usesPublicBaseUrl?: boolean;
 }
 
+export interface RuleTypeActionVariables {
+  context?: ActionVariable[];
+  state?: ActionVariable[];
+  params?: ActionVariable[];
+}
+
 export interface RuleType<
   ActionGroupIds extends Exclude<string, RecoveredActionGroupId> = DefaultActionGroupId,
   RecoveryActionGroupId extends string = RecoveredActionGroupId

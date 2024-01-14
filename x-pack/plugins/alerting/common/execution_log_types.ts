@@ -64,6 +64,12 @@ export interface IExecutionLog {
   space_ids: string[];
   rule_name: string;
   maintenance_window_ids: string[];
+  task_mem_p50: number;
+  task_mem_p95: number;
+  task_mem_p99: number;
+  task_cpu_p50: number;
+  task_cpu_p95: number;
+  task_cpu_p99: number;
 }
 
 export interface IExecutionErrors {

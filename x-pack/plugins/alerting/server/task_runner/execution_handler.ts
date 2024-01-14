@@ -206,7 +206,7 @@ export class ExecutionHandler<
       this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
       for (const { action, alert, summarizedAlerts } of executables) {
-        const { actionTypeId } = action;
+        const { actionTypeId, alertTransform } = action;
         const actionGroup = action.group as ActionGroupIds;
 
         ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
@@ -300,6 +300,7 @@ export class ExecutionHandler<
           const ruleUrl = this.buildRuleUrl(spaceId);
           const executableAlert = alert!;
           const transformActionParamsOptions: TransformActionParamsOptions = {
+            logger: this.logger,
             actionsPlugin,
             alertId: ruleId,
             alertType: this.ruleType.id,
@@ -319,6 +320,8 @@ export class ExecutionHandler<
             actionParams: action.params,
             flapping: executableAlert.getFlapping(),
             ruleUrl: ruleUrl?.absoluteUrl,
+            alertTransform,
+            apiKey: this.apiKey,
           };
 
           if (executableAlert.isAlertAsData()) {
@@ -331,7 +334,7 @@ export class ExecutionHandler<
               actionTypeId,
               ruleUrl,
               ruleName: this.rule.name,
-              actionParams: transformActionParams(transformActionParamsOptions),
+              actionParams: await transformActionParams(transformActionParamsOptions),
             }),
           };
 
@@ -647,7 +650,7 @@ export class ExecutionHandler<
           const alertAsData = summarizedAlerts.all.data.find(
             (alertHit: AlertHit) => alertHit._id === alert.getUuid()
           );
-          if (alertAsData) {
+          if (alertAsData && !alert.getAlertAsData()) {
             alert.setAlertAsData(alertAsData);
           }
         }

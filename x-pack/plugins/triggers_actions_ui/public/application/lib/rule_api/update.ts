@@ -18,7 +18,16 @@ type RuleUpdatesBody = Pick<
 const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...res }): any => ({
   ...res,
   actions: actions.map(
-    ({ group, id, params, frequency, uuid, alertsFilter, useAlertDataForTemplate }) => ({
+    ({
+      group,
+      id,
+      params,
+      frequency,
+      uuid,
+      alertsFilter,
+      useAlertDataForTemplate,
+      alertTransform,
+    }) => ({
       group,
       id,
       params,
@@ -28,6 +37,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...
         summary: frequency!.summary,
       },
       alerts_filter: alertsFilter,
+      ...(alertTransform ? { alert_transform: alertTransform } : {}),
       ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }
         : {}),

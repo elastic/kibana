@@ -16,6 +16,7 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
   params,
   frequency,
   alerts_filter: alertsFilter,
+  alert_transform: alertTransform,
   use_alert_data_for_template: useAlertDataForTemplate,
 }) => ({
   group,
@@ -32,6 +33,7 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
         },
       }
     : {}),
+  ...(alertTransform ? { alertTransform } : {}),
   ...(alertsFilter ? { alertsFilter } : {}),
   ...(uuid && { uuid }),
 });

@@ -462,7 +462,13 @@ export class TaskRunner<
           return reachedLimit;
         };
 
-        let executorResult: { state: RuleState } | undefined;
+        let executorResult:
+          | {
+              state: RuleState;
+              memoryUsage?: { p50: number; p95: number; p99: number };
+              cpuUsage?: { p50: number; p95: number; p99: number };
+            }
+          | undefined;
         try {
           const ctx = {
             type: 'alert',
@@ -526,6 +532,7 @@ export class TaskRunner<
                 muteAll,
                 snoozeSchedule,
               },
+              ...(this.ruleType.requiresAPIkey ? { apiKey } : {}),
               logger: this.logger,
               flappingSettings,
               ...(maintenanceWindowsWithoutScopedQueryIds.length
@@ -533,6 +540,8 @@ export class TaskRunner<
                 : {}),
               getTimeRange: (timeWindow) =>
                 getTimeRange(this.logger, queryDelaySettings, timeWindow),
+              // TODO: Make only accessible by user defined rule type
+              queryDelay: queryDelaySettings.delay,
             })
           );
 
@@ -568,6 +577,13 @@ export class TaskRunner<
           wrappedScopedClusterClient.getMetrics(),
           wrappedSearchSourceClient.getMetrics(),
         ]);
+
+        if (executorResult?.cpuUsage && executorResult?.memoryUsage) {
+          this.alertingEventLogger.setUsageStats(
+            executorResult?.memoryUsage,
+            executorResult?.cpuUsage
+          );
+        }
 
         return {
           updatedRuleTypeState: executorResult?.state || undefined,

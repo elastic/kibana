@@ -69,6 +69,7 @@ export interface ActionAccordionFormProps {
     value: RuleActionAlertsFilterProperty,
     index: number
   ) => void;
+  setActionTransformProperty: (transform: string, index: number) => void;
   featureId: string;
   producerId: string;
   ruleTypeId?: string;
@@ -105,6 +106,7 @@ export const ActionForm = ({
   setActionParamsProperty,
   setActionFrequencyProperty,
   setActionAlertsFilterProperty,
+  setActionTransformProperty,
   featureId,
   messageVariables,
   summaryMessageVariables,
@@ -443,6 +445,7 @@ export const ActionForm = ({
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
               setActionAlertsFilterProperty={setActionAlertsFilterProperty}
+              setActionTransformProperty={setActionTransformProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}

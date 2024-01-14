@@ -13,8 +13,17 @@ import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID as ElasticsearchQuery } from '@kbn/rule-data-utils';
 import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containment';
+import { ID as UserDefined } from './rule_types/user_defined';
 
 const TransformHealth = TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH;
+
+const alertingRules = [
+  IndexThreshold,
+  GeoContainment,
+  ElasticsearchQuery,
+  TransformHealth,
+  UserDefined,
+];
 
 export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   id: STACK_ALERTS_FEATURE_ID,
@@ -26,7 +35,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+  alerting: alertingRules,
   privileges: {
     all: {
       app: [],
@@ -36,10 +45,10 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         rule: {
-          all: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          all: alertingRules,
         },
         alert: {
-          all: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          all: alertingRules,
         },
       },
       savedObject: {
@@ -57,10 +66,10 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         rule: {
-          read: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          read: alertingRules,
         },
         alert: {
-          read: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
+          read: alertingRules,
         },
       },
       savedObject: {

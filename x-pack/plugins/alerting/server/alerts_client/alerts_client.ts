@@ -322,43 +322,38 @@ export class AlertsClient<
     for (const id of keys(alertsToReturn)) {
       // See if there's an existing active alert document
       if (!!activeAlerts[id]) {
-        if (
+        const alert =
           this.fetchedAlerts.data.hasOwnProperty(id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
-        ) {
-          activeAlertsToIndex.push(
-            buildOngoingAlert<
-              AlertData,
-              LegacyState,
-              LegacyContext,
-              ActionGroupIds,
-              RecoveryActionGroupId
-            >({
-              alert: this.fetchedAlerts.data[id],
-              legacyAlert: activeAlerts[id],
-              rule: this.rule,
-              timestamp: currentTime,
-              payload: this.reportedAlerts[id],
-              kibanaVersion: this.options.kibanaVersion,
-            })
-          );
-        } else {
-          activeAlertsToIndex.push(
-            buildNewAlert<
-              AlertData,
-              LegacyState,
-              LegacyContext,
-              ActionGroupIds,
-              RecoveryActionGroupId
-            >({
-              legacyAlert: activeAlerts[id],
-              rule: this.rule,
-              timestamp: currentTime,
-              payload: this.reportedAlerts[id],
-              kibanaVersion: this.options.kibanaVersion,
-            })
-          );
-        }
+            ? buildOngoingAlert<
+                AlertData,
+                LegacyState,
+                LegacyContext,
+                ActionGroupIds,
+                RecoveryActionGroupId
+              >({
+                alert: this.fetchedAlerts.data[id],
+                legacyAlert: activeAlerts[id],
+                rule: this.rule,
+                timestamp: currentTime,
+                payload: this.reportedAlerts[id],
+                kibanaVersion: this.options.kibanaVersion,
+              })
+            : buildNewAlert<
+                AlertData,
+                LegacyState,
+                LegacyContext,
+                ActionGroupIds,
+                RecoveryActionGroupId
+              >({
+                legacyAlert: activeAlerts[id],
+                rule: this.rule,
+                timestamp: currentTime,
+                payload: this.reportedAlerts[id],
+                kibanaVersion: this.options.kibanaVersion,
+              });
+        activeAlerts[id].setAlertAsData(alert);
+        activeAlertsToIndex.push(alert);
       } else {
         this.options.logger.error(
           `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts`
@@ -371,30 +366,32 @@ export class AlertsClient<
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (this.fetchedAlerts.data.hasOwnProperty(id)) {
-        recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
-            ? buildRecoveredAlert<
-                AlertData,
-                LegacyState,
-                LegacyContext,
-                ActionGroupIds,
-                RecoveryActionGroupId
-              >({
-                alert: this.fetchedAlerts.data[id],
-                legacyAlert: recoveredAlerts[id],
-                rule: this.rule,
-                timestamp: currentTime,
-                payload: this.reportedAlerts[id],
-                recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
-                kibanaVersion: this.options.kibanaVersion,
-              })
-            : buildUpdatedRecoveredAlert<AlertData>({
-                alert: this.fetchedAlerts.data[id],
-                legacyRawAlert: recoveredAlertsToReturn[id],
-                timestamp: currentTime,
-                rule: this.rule,
-              })
-        );
+        const alert = recoveredAlerts[id]
+          ? buildRecoveredAlert<
+              AlertData,
+              LegacyState,
+              LegacyContext,
+              ActionGroupIds,
+              RecoveryActionGroupId
+            >({
+              alert: this.fetchedAlerts.data[id],
+              legacyAlert: recoveredAlerts[id],
+              rule: this.rule,
+              timestamp: currentTime,
+              payload: this.reportedAlerts[id],
+              recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
+              kibanaVersion: this.options.kibanaVersion,
+            })
+          : buildUpdatedRecoveredAlert<AlertData>({
+              alert: this.fetchedAlerts.data[id],
+              legacyRawAlert: recoveredAlertsToReturn[id],
+              timestamp: currentTime,
+              rule: this.rule,
+            });
+        recoveredAlertsToIndex.push(alert);
+        if (recoveredAlerts[id]) {
+          recoveredAlerts[id].setAlertAsData(alert);
+        }
       } else {
         this.options.logger.debug(
           `Could not find alert document to update for recovered alert with id ${id} and uuid ${recoveredAlerts[

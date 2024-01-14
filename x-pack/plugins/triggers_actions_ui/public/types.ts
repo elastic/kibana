@@ -54,6 +54,7 @@ import {
   ActionVariable,
   RuleLastRun,
   MaintenanceWindow,
+  RuleTypeActionVariables,
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
@@ -395,6 +396,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
+  getAdditionalActionVariables?: (ruleParams: Params) => RuleTypeActionVariables;
   defaultActionMessage?: string;
   defaultRecoveryMessage?: string;
   defaultSummaryMessage?: string;

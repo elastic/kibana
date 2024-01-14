@@ -242,17 +242,44 @@
                     "ignore_above": 1024
                 },
                 "task": {
-                    "properties": {
-                        "id": {
-                            "type": "keyword"
-                        },
-                        "scheduled": {
-                            "type": "date"
-                        },
-                        "schedule_delay": {
+                  "properties": {
+                      "id": {
+                          "type": "keyword"
+                      },
+                      "scheduled": {
+                          "type": "date"
+                      },
+                      "schedule_delay": {
+                          "type": "long"
+                      },
+                      "cpu_usage": {
+                        "properties": {
+                          "p50": {
                             "type": "long"
+                          },
+                          "p95": {
+                            "type": "long"
+                          },
+                          "p99": {
+                            "type": "long"
+                          }
                         }
+                      },
+                      "memory_usage": {
+                        "properties": {
+                          "p50": {
+                            "type": "long"
+                          },
+                          "p95": {
+                            "type": "long"
+                          },
+                          "p99": {
+                            "type": "long"
+                          }
+                        }
+                      }
                     }
+
                 },
                 "alerting": {
                     "properties": {

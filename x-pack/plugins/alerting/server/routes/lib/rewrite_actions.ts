@@ -19,6 +19,7 @@ export const rewriteActionsReq = (
     ({
       frequency,
       alerts_filter: alertsFilter,
+      alert_transform: alertTransform,
       use_alert_data_for_template: useAlertDataForTemplate,
       ...action
     }) => {
@@ -33,6 +34,7 @@ export const rewriteActionsReq = (
               },
             }
           : {}),
+        ...(alertTransform ? { alertTransform } : {}),
         ...(alertsFilter ? { alertsFilter } : {}),
       };
     }
@@ -46,13 +48,25 @@ export const rewriteActionsRes = (actions?: RuleAction[]) => {
   });
   if (!actions) return [];
   return actions.map(
-    ({ actionTypeId, frequency, alertsFilter, useAlertDataForTemplate, ...action }) => ({
+    ({
+      actionTypeId,
+      frequency,
+      alertsFilter,
+      useAlertDataForTemplate,
+      alertTransform,
+      ...action
+    }) => ({
       ...action,
       connector_type_id: actionTypeId,
       ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }
         : {}),
       ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
+      ...(alertTransform
+        ? {
+            alert_transform: alertTransform,
+          }
+        : {}),
       ...(alertsFilter
         ? {
             alerts_filter: alertsFilter,

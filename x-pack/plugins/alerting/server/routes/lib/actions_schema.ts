@@ -77,6 +77,7 @@ export const actionsSchema = schema.arrayOf(
       })
     ),
     use_alert_data_for_template: schema.maybe(schema.boolean()),
+    alert_transform: schema.maybe(schema.string()),
   }),
   { defaultValue: [] }
 );

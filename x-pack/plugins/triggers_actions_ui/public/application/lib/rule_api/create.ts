@@ -28,7 +28,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ...res,
   rule_type_id: ruleTypeId,
   actions: actions.map(
-    ({ group, id, params, frequency, alertsFilter, useAlertDataForTemplate }) => ({
+    ({ group, id, params, frequency, alertsFilter, useAlertDataForTemplate, alertTransform }) => ({
       group,
       id,
       params,
@@ -38,6 +38,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
         summary: frequency!.summary,
       },
       alerts_filter: alertsFilter,
+      ...(alertTransform ? { alert_transform: alertTransform } : {}),
       ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }
         : {}),

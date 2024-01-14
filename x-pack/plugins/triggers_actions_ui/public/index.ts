@@ -84,6 +84,7 @@ export {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   SectionLoading,
+  CodeEditorModal,
 } from './application/components';
 
 export {

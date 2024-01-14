@@ -118,6 +118,7 @@ export interface RuleAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
+  alertTransform?: string;
   useAlertDataForTemplate?: boolean;
 }
 
