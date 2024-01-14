@@ -528,7 +528,6 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        dataStream: {},
         allowAutoCreate: true,
       });
       // Component templates
@@ -558,6 +557,7 @@ describe('<TemplateCreate />', () => {
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             allowAutoCreate: true,
+            dataStream: {},
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,
