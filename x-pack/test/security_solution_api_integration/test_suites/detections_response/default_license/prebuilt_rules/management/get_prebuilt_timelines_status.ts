@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return the number of timeline templates available to install', async () => {
-      const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+      const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
 
       expect(body).toMatchObject({
         timelines_installed: 0,
@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should return the number of installed timeline templates after installing them', async () => {
       await installPrebuiltRulesAndTimelines(es, supertest);
 
-      const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+      const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
       expect(body).toMatchObject({
         timelines_installed: expect.any(Number),
         timelines_not_installed: 0,
