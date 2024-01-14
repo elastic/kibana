@@ -55,6 +55,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       ? this.http.post<T>(url, { query, body, version, asResponse })
       : this.http.fetch<T>(url, {
           query,
+          version,
           ...cacheOptions,
           asResponse,
           headers: { 'user-hash': userHash },
