@@ -142,27 +142,6 @@ ROW a = 1, b = 4, c = 3
 | WHERE c-a IN (3, b / 2, a)
 ```
 
-IS_FINITE
-IS_FINITE
-
-Returns a boolean that indicates whether its input is a finite number.
-```esql
-ROW d = 1.0
-| EVAL s = IS_FINITE(d/0)
-```
-
-IS_INFINITE
-IS_INFINITE
-
-Returns a boolean that indicates whether its input is infinite.
-```esql
-ROW d = 1.0
-| EVAL s = IS_INFINITE(d/0)
-```
-
-IS_NAN
-IS_NAN
-
 Returns a boolean that indicates whether its input is not a number.
 ```esql
 ROW d = 1.0
