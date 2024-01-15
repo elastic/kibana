@@ -707,7 +707,9 @@ export const getOperatorOptions = (
         : [equalsOperator, oneOfOperator];
     }
   } else if (item.nested != null && listType === 'detection') {
-    return isBoolean ? [equalsOperator, existsOperator] : [equalsOperator, oneOfOperator, existsOperator];
+    return isBoolean
+      ? [equalsOperator, existsOperator]
+      : [equalsOperator, oneOfOperator, existsOperator];
   } else if (isBoolean) {
     return [equalsOperator, doesNotEqualOperator, existsOperator, doesNotExistOperator];
   } else if (!includeValueListOperators) {

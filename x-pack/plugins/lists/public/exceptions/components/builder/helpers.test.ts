@@ -27,6 +27,7 @@ import {
   doesNotEqualOperator,
   doesNotExistOperator,
   doesNotMatchOperator,
+  equalsOperator,
   existsOperator,
   filterExceptionItems,
   getCorrespondingKeywordField,
@@ -48,9 +49,8 @@ import {
   isEntryNested,
   isInListOperator,
   isNotInListOperator,
-  notOneOfOperator,
-  equalsOperator,
   matchesOperator,
+  notOneOfOperator,
   oneOfOperator,
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
