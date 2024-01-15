@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -18,17 +17,17 @@ interface ActionTypeFieldProps {
 
 const CONFIG = {
   label: i18n.translate('xpack.securitySolution.responseActions.endpoint.config.script', {
-    defaultMessage: 'Script',
+    defaultMessage: 'Timeout',
   }),
   helpText: (
     <FormattedMessage
       id="xpack.securitySolution.responseActions.endpoint.config.scriptDescription"
-      defaultMessage="TODO: SPECIFY SCRIPT  DESCRIPTION "
+      defaultMessage="TODO: SPECIFY TIMEOUT  DESCRIPTION "
     />
   ),
 };
 
-const ExecuteScriptFieldComponent = ({
+const TimeoutFieldComponent = ({
   path,
   disabled,
   readDefaultValueOnForm,
@@ -38,8 +37,9 @@ const ExecuteScriptFieldComponent = ({
     readDefaultValueOnForm={readDefaultValueOnForm}
     config={CONFIG}
     isDisabled={disabled}
-    component={TextField}
+    component={NumberField}
+    required={true}
   />
 );
 
-export const ExecuteScriptField = React.memo(ExecuteScriptFieldComponent);
+export const TimeoutField = React.memo(TimeoutFieldComponent);

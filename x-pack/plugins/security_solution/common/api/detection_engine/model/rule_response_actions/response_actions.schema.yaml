@@ -113,34 +113,6 @@ components:
         - actionTypeId
         - params
 
-    EndpointParams:
-      type: object
-      properties:
-        command:
-          type: string
-          enum:
-            - isolate
-            - kill-process
-            - suspend-process
-        comment:
-          type: string
-        config:
-          required:
-            - field
-          type: object
-          properties:
-            field:
-              type: string
-              description: Field to use instead of process.pid
-            overwrite:
-              type: boolean
-              description: Whether to overwrite field with process.pid
-              default: true
-      required:
-        - command
-
-
-
     IsolateParams:
       type: object
       properties:
@@ -160,6 +132,7 @@ components:
           type: string
           enum:
             - kill-process
+            - suspend-process
         comment:
           type: string
         config:
@@ -176,6 +149,7 @@ components:
               default: true
       required:
         - command
+        - config
 
     GetFileParams:
       type: object
@@ -197,6 +171,7 @@ components:
               minLength: 1  # Minimum length of 1 (non-empty string)
       required:
         - command
+        - config
 
     ExecuteParams:
       type: object
@@ -209,15 +184,19 @@ components:
           type: string
         config:
           required:
-            - path
+            - command
           type: object
           properties:
-            script:
+            command:
               type: string
               description: Command to execute on the host
-              minLength: 1  # Minimum length of 1 (non-empty string)
+              minLength: 1  # Minimum length of 1 (non-empty string) command:
+            timeout:
+              type: number
+              description: Timeout for execute on the host
       required:
         - command
+        - config
 
     EndpointResponseAction:
       type: object

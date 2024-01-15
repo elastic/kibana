@@ -102,3 +102,29 @@ export const getIsolateAlerts = (alerts: AlertWithAgent[]) =>
       alert_ids: [...(acc.alert_ids || []), alert._id],
     };
   }, {} as AlertsAction);
+
+export const getExecuteAlerts = (
+  alerts: AlertWithAgent[],
+  config: { command: string; timeout?: number }
+) =>
+  alerts.reduce((acc, alert) => {
+    const { id: agentId, name: agentName } = alert.agent || {};
+
+    const hostName = alert.host?.name;
+    return {
+      ...acc,
+      hosts: {
+        ...(acc.hosts || {}),
+        [agentId]: {
+          name: agentName || hostName || '',
+          id: agentId,
+        },
+      },
+      parameters: {
+        command: config.command,
+        timeout: config.timeout,
+      },
+      endpoint_ids: [...new Set([...(acc.endpoint_ids || []), agentId])],
+      alert_ids: [...(acc.alert_ids || []), alert._id],
+    };
+  }, {} as AlertsAction);

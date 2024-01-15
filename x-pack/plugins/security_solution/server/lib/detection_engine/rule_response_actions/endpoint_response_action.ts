@@ -9,9 +9,15 @@ import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { each } from 'lodash';
 import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { getProcessAlerts, getIsolateAlerts, getErrorProcessAlerts } from './utils';
+import {
+  getProcessAlerts,
+  getIsolateAlerts,
+  getErrorProcessAlerts,
+  getExecuteAlerts,
+} from './utils';
 
 import type { ResponseActionAlerts, AlertsAction } from './types';
+import type { ExecuteParams } from '../../../../common/api/detection_engine';
 
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
@@ -29,6 +35,25 @@ export const endpointResponseAction = (
 
   if (command === 'isolate') {
     const actionPayload = getIsolateAlerts(alerts);
+    return Promise.all([
+      endpointAppContextService.getActionCreateService().createActionFromAlert(
+        {
+          ...actionPayload,
+          ...commonData,
+        },
+        actionPayload.endpoint_ids
+      ),
+    ]);
+  }
+
+  const isExecuteAction = (
+    params: RuleResponseEndpointAction['params']
+  ): params is ExecuteParams => {
+    return params.command === 'execute';
+  };
+
+  if (isExecuteAction(responseAction.params)) {
+    const actionPayload = getExecuteAlerts(alerts, responseAction.params.config);
     return Promise.all([
       endpointAppContextService.getActionCreateService().createActionFromAlert(
         {
