@@ -72,6 +72,8 @@ beforeEach(() => {
   ).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
   rulesClientFactoryParams.getSpaceId.mockReturnValue('default');
   rulesClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
+  rulesClientFactoryParams.uiSettings.asScopedToClient =
+    uiSettingsServiceMock.createStartContract().asScopedToClient;
 });
 
 test('creates a rules client with proper constructor arguments when security is enabled', async () => {
@@ -119,6 +121,7 @@ test('creates a rules client with proper constructor arguments when security is 
     getAuthenticationAPIKey: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
+    uiSettings: rulesClientFactoryParams.uiSettings,
   });
 });
 
@@ -163,6 +166,7 @@ test('creates a rules client with proper constructor arguments', async () => {
     getAuthenticationAPIKey: expect.any(Function),
     getAlertIndicesAlias: expect.any(Function),
     alertsService: null,
+    uiSettings: rulesClientFactoryParams.uiSettings,
   });
 });
 
