@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
   const fqTimeField = '@timestamp';
 
   async function runRequest(docs: any[], pipeline: any, timeField: string) {
-    const { body, status } = await supertest
+    const { body } = await supertest
       .post(`/internal/file_upload/preview_index_time_range`)
       .set('kbn-xsrf', 'kibana')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -88,6 +88,48 @@ export default ({ getService }: FtrProviderContext) => {
           },
           {
             message: '2014-06-30 23:59:56Z,AWE,19.6438,farequote',
+          },
+        ],
+        fqPipeline,
+        fqTimeField
+      );
+
+      expect(resp.start).to.be(1403222400000);
+      expect(resp.end).to.be(1404172796000);
+    });
+
+    it('should return the correct start and end for normal data out of order', async () => {
+      const resp = await runRequest(
+        [
+          {
+            message: '2014-06-22 00:00:00Z,JBU,877.5927,farequote',
+          },
+          {
+            message: '2014-06-21 00:00:00Z,JZA,990.4628,farequote',
+          },
+          {
+            message: '2014-06-20 00:00:00Z,AAL,132.2046,farequote',
+          },
+          {
+            message: '2014-06-23 00:00:00Z,KLM,1355.4812,farequote',
+          },
+          {
+            message: '2014-06-24 00:00:00Z,NKS,9991.3981,farequote',
+          },
+          {
+            message: '2014-06-26 23:59:35Z,JBU,923.6772,farequote',
+          },
+          {
+            message: '2014-06-27 23:59:45Z,ACA,21.5385,farequote',
+          },
+          {
+            message: '2014-06-30 23:59:56Z,AWE,19.6438,farequote',
+          },
+          {
+            message: '2014-06-28 23:59:54Z,FFT,251.573,farequote',
+          },
+          {
+            message: '2014-06-29 23:59:54Z,ASA,78.2927,farequote',
           },
         ],
         fqPipeline,
