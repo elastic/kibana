@@ -78,7 +78,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // wait for backend response
         await retry.tryForTime(5000, async () => {
-          const title = await find.byCssSelector('[]');
+          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
           expect(await title.getVisibleText()).equal(newTitle);
         });
 
@@ -1019,7 +1019,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders tabs correctly', async () => {
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-title-files');
-        // there are no alerts in stack management yet
+        await testSubjects.existOrFail('case-view-tab-title-alerts');
       });
 
       it('shows the "activity" tab by default', async () => {
