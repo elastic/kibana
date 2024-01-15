@@ -55,15 +55,8 @@ export const journey = new Journey({
     // wait for metric charts to be loaded
     await kibanaPage.waitForCharts({ count: 5, timeout: 60000 });
   })
-  .step('Go to single host asset details view', async ({ page, kbnUrl, kibanaPage }) => {
-    await page.goto(
-      kbnUrl.get(
-        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
-      )
-    );
-
-    // wait for table to be loaded
-    await page.waitForSelector(subj('hostsView-table-loaded'));
+  .step('Go to single host asset details view', async ({ page, kibanaPage }) => {
+    // get the links to asset details page
     const hostsTableLinks = await page.locator(subj('hostsViewTableEntryTitleLink'));
     // click on the first host in the table to see asset details
     await hostsTableLinks.first().click();
