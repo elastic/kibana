@@ -51,14 +51,14 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
       const { error } = await createIndex(indexName);
       setIsSaving(false);
       if (!error) {
-        loadIndices();
-        closeModal();
         notificationService.showSuccessToast(
           i18n.translate('xpack.idxMgmt.createIndex.successfullyCreatedIndexMessage', {
             defaultMessage: 'Successfully created index: {indexName}',
             values: { indexName },
           })
         );
+        closeModal();
+        loadIndices();
         return;
       }
       setCreateError(error.message);

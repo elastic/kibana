@@ -7,8 +7,8 @@
 
 import { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_LOG_VIEW, getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
@@ -26,24 +26,25 @@ export const RedirectToNodeLogs = ({
   location,
 }: RedirectToNodeLogsType) => {
   const {
-    services: { locators },
+    services: { share },
   } = useKibanaContextForPlugin();
+  const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
 
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
 
   useEffect(() => {
-    locators.nodeLogsLocator.navigate(
+    nodeLogsLocator.navigate(
       {
+        nodeField: findInventoryFields(nodeType).id,
         nodeId,
-        nodeType,
         time,
         filter,
         logView: { type: 'log-view-reference', logViewId },
       },
       { replace: true }
     );
-  }, [filter, locators.nodeLogsLocator, logViewId, nodeId, nodeType, time]);
+  }, [filter, nodeLogsLocator, logViewId, nodeId, nodeType, time]);
 
   return null;
 };

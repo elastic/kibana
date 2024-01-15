@@ -8,6 +8,9 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
@@ -22,6 +25,7 @@ import { useObservedUserItems } from './hooks/use_observed_user_items';
 import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 interface UserPanelContentProps {
+  userName: string;
   observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
   riskScoreState: RiskScoreState<RiskScoreEntity.user>;
@@ -32,6 +36,7 @@ interface UserPanelContentProps {
 }
 
 export const UserPanelContent = ({
+  userName,
   observedUser,
   managedUser,
   riskScoreState,
@@ -41,6 +46,7 @@ export const UserPanelContent = ({
   openDetailsPanel,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
+  const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
 
   return (
     <FlyoutBody>
@@ -51,9 +57,10 @@ export const UserPanelContent = ({
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
           />
-          <EuiHorizontalRule margin="m" />
+          <EuiHorizontalRule />
         </>
       )}
+      <AssetCriticalitySelector entity={{ name: userName, type: 'user' }} />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}
@@ -63,12 +70,14 @@ export const UserPanelContent = ({
         queryId={OBSERVED_USER_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
-      <ManagedUser
-        managedUser={managedUser}
-        contextID={contextID}
-        isDraggable={isDraggable}
-        openDetailsPanel={openDetailsPanel}
-      />
+      {isManagedUserEnable && (
+        <ManagedUser
+          managedUser={managedUser}
+          contextID={contextID}
+          isDraggable={isDraggable}
+          openDetailsPanel={openDetailsPanel}
+        />
+      )}
     </FlyoutBody>
   );
 };
