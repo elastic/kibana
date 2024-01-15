@@ -24,7 +24,7 @@ interface DocumentTypeData {
   rollupInterval: RollupInterval;
   hasDocBefore: boolean;
   hasDocAfter: boolean;
-  hasDurationSummary: boolean;
+  allHaveDurationSummary: boolean;
 }
 
 const getRequest = ({
@@ -105,7 +105,7 @@ export async function getDocumentSources({
       documentType: ApmDocumentType.TransactionEvent,
       rollupInterval: RollupInterval.None,
       hasDocs: true,
-      allHaveDurationSummary: false,
+      hasDurationSummaryField: false,
     },
   ];
 }
