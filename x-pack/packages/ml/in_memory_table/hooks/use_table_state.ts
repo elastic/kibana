@@ -39,10 +39,11 @@ export interface UseTableState<T extends object> {
 export function useTableState<T extends object>(
   items: T[],
   initialSortField: string,
-  initialSortDirection: 'asc' | 'desc' = 'asc'
+  initialSortDirection: 'asc' | 'desc' = 'asc',
+  initialPagionation?: Partial<Pagination>
 ) {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(initialPagionation?.pageIndex ?? 0);
+  const [pageSize, setPageSize] = useState(initialPagionation?.pageSize ?? 10);
   const [sortField, setSortField] = useState<string>(initialSortField);
   const [sortDirection, setSortDirection] = useState<Direction>(initialSortDirection);
 
@@ -63,7 +64,7 @@ export function useTableState<T extends object>(
     pageIndex,
     pageSize,
     totalItemCount: (items ?? []).length,
-    pageSizeOptions: [10, 20, 50],
+    pageSizeOptions: initialPagionation?.pageSizeOptions ?? [10, 20, 50],
     showPerPageOptions: true,
   };
 
