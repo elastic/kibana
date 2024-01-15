@@ -8,6 +8,7 @@
 import {
   frequencyValidator,
   integerAboveZeroValidator,
+  transformIdValidator,
   transformSettingsNumberOfRetriesValidator,
   transformSettingsPageSearchSizeValidator,
   retentionPolicyMaxAgeValidator,
@@ -17,6 +18,7 @@ import {
 export const validators = {
   frequencyValidator,
   integerAboveZeroValidator,
+  transformIdValidator,
   transformSettingsNumberOfRetriesValidator,
   transformSettingsPageSearchSizeValidator,
   retentionPolicyMaxAgeValidator,

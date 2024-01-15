@@ -14,14 +14,14 @@ import {
 } from '../../../../../common/constants';
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
-import type { State } from './edit_transform_flyout_state';
+import type { EditTransformFlyoutState } from './edit_transform_flyout_state';
 
 // Takes in a transform configuration and returns the default state to populate the form.
 // It supports overrides to apply a pre-existing configuration.
 // The implementation of this function is the only one that's specifically required to define
 // the features of the transform edit form. All other functions are generic and could be reused
 // in the future for other forms.
-export const getDefaultState = (config?: TransformConfigUnion): State => ({
+export const getDefaultState = (config?: TransformConfigUnion): EditTransformFlyoutState => ({
   formFields: {
     // top level attributes
     description: initializeFormField('description', 'description', config),

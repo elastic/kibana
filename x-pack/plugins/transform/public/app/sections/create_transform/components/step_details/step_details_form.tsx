@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useMemo } from 'react';
+import React, { FC, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FormTextArea } from '@kbn/ml-form-utils/components/form_text_area';
+import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
+import { useIsFormValid } from '@kbn/ml-form-utils/use_is_form_valid';
 
 import {
   EuiAccordion,
@@ -21,13 +24,11 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiCallOut,
-  EuiTextArea,
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
-import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
@@ -40,12 +41,9 @@ import { ToastNotificationText } from '../../../../components';
 import {
   useDocumentationLinks,
   useGetDataViewTitles,
-  useGetEsIndices,
   useGetEsIngestPipelines,
-  useGetTransforms,
   useGetTransformsPreview,
 } from '../../../../hooks';
-import { isTransformIdValid } from '../../../../common';
 import {
   isContinuousModeDelay,
   isRetentionPolicyMaxAge,
@@ -57,8 +55,11 @@ import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
+import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
 
 import { useDataView } from '../wizard/wizard';
+
+import { TransformDestinationIndexForm } from './transform_destination_index_form';
 
 export const StepDetailsForm: FC = () => {
   const dataView = useDataView();
@@ -69,8 +70,6 @@ export const StepDetailsForm: FC = () => {
   const toastNotifications = useToastNotifications();
   const { esIndicesCreateIndex } = useDocumentationLinks();
 
-  const transformId = useWizardSelector((s) => s.stepDetails.transformId);
-  const transformDescription = useWizardSelector((s) => s.stepDetails.formFields.description.value);
   const destinationIndex = useWizardSelector((s) => s.stepDetails.destinationIndex);
   const destinationIngestPipeline = useWizardSelector(
     (s) => s.stepDetails.destinationIngestPipeline
@@ -91,10 +90,7 @@ export const StepDetailsForm: FC = () => {
     (s) => s.stepDetails.transformSettingsNumFailureRetries
   );
   const {
-    setFormField,
-    setTransformId,
     setDataViewTimeField,
-    setDestinationIndex,
     setDestinationIngestPipeline,
     setCreateDataView,
     setContinuousModeEnabled,
@@ -109,9 +105,7 @@ export const StepDetailsForm: FC = () => {
     setValid,
   } = useWizardActions();
 
-  const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
-    destinationIndex !== undefined && destinationIndex === transformId
-  );
+  const isFormValid = useIsFormValid(stepDetailsFormSlice.name);
 
   const canCreateDataView = useMemo(
     () =>
@@ -167,27 +161,6 @@ export const StepDetailsForm: FC = () => {
     [setDataViewTimeField, destIndexAvailableTimeFields]
   );
 
-  const {
-    error: transformsError,
-    data: { transformIds },
-  } = useGetTransforms();
-
-  useEffect(() => {
-    if (transformsError !== null) {
-      toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
-          defaultMessage: 'An error occurred getting the existing transform IDs:',
-        }),
-        text: toMountPoint(<ToastNotificationText text={getErrorMessage(transformsError)} />, {
-          theme,
-          i18n: i18nStart,
-        }),
-      });
-    }
-    // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transformsError]);
-
   useEffect(() => {
     if (transformsPreviewError !== null) {
       toastNotifications.addDanger({
@@ -203,25 +176,6 @@ export const StepDetailsForm: FC = () => {
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transformsPreviewError]);
-
-  const { error: esIndicesError, data: esIndicesData } = useGetEsIndices();
-  const indexNames = esIndicesData?.map((index) => index.name) ?? [];
-
-  useEffect(() => {
-    if (esIndicesError !== null) {
-      toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
-          defaultMessage: 'An error occurred getting the existing index names:',
-        }),
-        text: toMountPoint(<ToastNotificationText text={getErrorMessage(esIndicesError)} />, {
-          theme,
-          i18n: i18nStart,
-        }),
-      });
-    }
-    // custom comparison
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [esIndicesError]);
 
   const { error: esIngestPipelinesError, data: esIngestPipelinesData } = useGetEsIngestPipelines();
   const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
@@ -301,11 +255,6 @@ export const StepDetailsForm: FC = () => {
     }
   }, [isRetentionPolicyEnabled, isRetentionPolicyAvailable, destIndexAvailableTimeFields]);
 
-  const transformIdExists = transformIds.some((id) => transformId === id);
-  const transformIdEmpty = transformId === '';
-  const transformIdValid = isTransformIdValid(transformId);
-
-  const indexNameExists = indexNames.some((name) => destinationIndex === name);
   const indexNameEmpty = destinationIndex === '';
   const indexNameValid = isValidIndexName(destinationIndex);
   const dataViewTitleExists = dataViewTitles?.some((name) => destinationIndex === name) ?? false;
@@ -324,9 +273,7 @@ export const StepDetailsForm: FC = () => {
     integerRangeMinus1To100Validator(transformSettingsNumFailureRetries).length === 0;
 
   const valid =
-    !transformIdEmpty &&
-    transformIdValid &&
-    !transformIdExists &&
+    isFormValid &&
     isTransformFrequencyValid &&
     isTransformSettingsMaxPageSearchSizeValid &&
     !indexNameEmpty &&
@@ -344,98 +291,39 @@ export const StepDetailsForm: FC = () => {
     setValid(valid);
   }, [valid]);
 
-  useEffect(() => {
-    if (destIndexSameAsId === true && !transformIdEmpty && transformIdValid) {
-      setDestinationIndex(transformId);
-    }
-  }, [destIndexSameAsId, transformId]);
-
   return (
     <div data-test-subj="transformStepDetailsForm">
       <EuiForm>
-        <EuiFormRow
+        <FormTextInput
+          slice={stepDetailsFormSlice}
+          field="transformId"
           label={i18n.translate('xpack.transform.stepDetailsForm.transformIdLabel', {
             defaultMessage: 'Transform ID',
           })}
-          isInvalid={(!transformIdEmpty && !transformIdValid) || transformIdExists}
-          error={[
-            ...(!transformIdEmpty && !transformIdValid
-              ? [
-                  i18n.translate('xpack.transform.stepDetailsForm.transformIdInvalidError', {
-                    defaultMessage:
-                      'Must contain lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores only and must start and end with alphanumeric characters.',
-                  }),
-                ]
-              : []),
-            ...(transformIdExists
-              ? [
-                  i18n.translate('xpack.transform.stepDetailsForm.transformIdExistsError', {
-                    defaultMessage: 'A transform with this ID already exists.',
-                  }),
-                ]
-              : []),
-          ]}
-        >
-          <EuiFieldText
-            value={transformId}
-            onChange={(e) => setTransformId(e.target.value)}
-            aria-label={i18n.translate(
-              'xpack.transform.stepDetailsForm.transformIdInputAriaLabel',
-              {
-                defaultMessage: 'Choose a unique transform ID.',
-              }
-            )}
-            isInvalid={(!transformIdEmpty && !transformIdValid) || transformIdExists}
-            data-test-subj="transformIdInput"
-          />
-        </EuiFormRow>
-        <EuiFormRow
+          ariaLabel={i18n.translate('xpack.transform.stepDetailsForm.transformIdInputAriaLabel', {
+            defaultMessage: 'Choose a unique transform ID.',
+          })}
+        />
+
+        <FormTextArea
+          slice={stepDetailsFormSlice}
+          field="description"
           label={i18n.translate('xpack.transform.stepDetailsForm.transformDescriptionLabel', {
             defaultMessage: 'Transform description',
           })}
-        >
-          <EuiTextArea
-            placeholder={i18n.translate(
-              'xpack.transform.stepDetailsForm.transformDescriptionPlaceholderText',
-              { defaultMessage: 'Description (optional)' }
-            )}
-            value={transformDescription}
-            onChange={(e) => setFormField({ field: 'description', value: e.target.value })}
-            aria-label={i18n.translate(
-              'xpack.transform.stepDetailsForm.transformDescriptionInputAriaLabel',
-              {
-                defaultMessage: 'Choose an optional transform description.',
-              }
-            )}
-            data-test-subj="transformDescriptionInput"
-          />
-        </EuiFormRow>
-
-        <DestinationIndexForm
-          createIndexLink={esIndicesCreateIndex}
-          destinationIndex={destinationIndex}
-          destinationIndexNameEmpty={indexNameEmpty}
-          destinationIndexNameExists={indexNameExists}
-          destinationIndexNameValid={indexNameValid}
-          destIndexSameAsId={destIndexSameAsId}
-          fullWidth={false}
-          indexNameExistsMessage={i18n.translate(
-            'xpack.transform.stepDetailsForm.destinationIndexHelpText',
-            {
-              defaultMessage:
-                'An index with this name already exists. Be aware that running this transform will modify this destination index.',
-            }
+          placeHolder={i18n.translate(
+            'xpack.transform.stepDetailsForm.transformDescriptionPlaceholderText',
+            { defaultMessage: 'Description (optional)' }
           )}
-          isJobCreated={transformIdExists}
-          onDestinationIndexChange={setDestinationIndex}
-          setDestIndexSameAsId={setDestIndexSameAsId}
-          switchLabel={i18n.translate(
-            'xpack.transform.stepDetailsForm.destinationIndexFormSwitchLabel',
+          ariaLabel={i18n.translate(
+            'xpack.transform.stepDetailsForm.transformDescriptionInputAriaLabel',
             {
-              defaultMessage: 'Use transform ID as destination index name',
+              defaultMessage: 'Choose an optional transform description.',
             }
           )}
         />
+
+        <TransformDestinationIndexForm />
 
         {ingestPipelineNames.length > 0 && (
           <EuiFormRow

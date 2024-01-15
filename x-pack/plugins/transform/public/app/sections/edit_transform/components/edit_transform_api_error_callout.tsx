@@ -10,13 +10,14 @@ import React, { type FC } from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { useSubmitErrorMessage } from '@kbn/ml-form-utils/use_submit_error_message';
 
-import { useApiErrorMessage } from '../state_management/selectors/api_error_message';
+import { editTransformFlyoutSlice } from '../state_management/edit_transform_flyout_state';
 
 export const EditTransformApiErrorCallout: FC = () => {
-  const apiErrorMessage = useApiErrorMessage();
+  const submitErrorMessage = useSubmitErrorMessage(editTransformFlyoutSlice.name);
 
-  if (apiErrorMessage === undefined) return null;
+  if (submitErrorMessage === undefined) return null;
 
   return (
     <>
@@ -28,7 +29,7 @@ export const EditTransformApiErrorCallout: FC = () => {
         color="danger"
         iconType="warning"
       >
-        <p>{apiErrorMessage}</p>
+        <p>{submitErrorMessage}</p>
       </EuiCallOut>
     </>
   );

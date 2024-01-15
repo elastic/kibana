@@ -7,12 +7,20 @@
 
 import React, { type FC, useEffect } from 'react';
 import { isEqual } from 'lodash';
+import { useDispatch } from 'react-redux';
 
 import { EuiSteps } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { getCombinedRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
+import { getErrorMessage } from '../../../../../../common/utils/errors';
+
+import { useGetTransforms } from '../../../../hooks';
 import { matchAllQuery } from '../../../../common';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { ToastNotificationText } from '../../../../components';
 
 import { useWizardActions } from '../../state_management/create_transform_store';
 
@@ -25,14 +33,19 @@ import { euiStepCreate } from '../step_create';
 import {
   applyTransformConfigToDetailsState,
   getDefaultStepDetailsState,
+  getDefaultStepDetailsFormState,
   euiStepDetails,
 } from '../step_details';
+import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
 
 import { useWizardContext } from './wizard';
 
 export const useInitializeTransformWizardState = () => {
+  const dispatch = useDispatch();
   const { searchItems, cloneConfig } = useWizardContext();
   const { dataView } = searchItems;
+  const { i18n: i18nStart, theme } = useAppDependencies();
+  const toastNotifications = useToastNotifications();
 
   const {
     setAdvancedSourceEditorEnabled,
@@ -42,7 +55,31 @@ export const useInitializeTransformWizardState = () => {
     setStepDetailsState,
   } = useWizardActions();
 
+  const {
+    error: transformsError,
+    data: { transformIds },
+    isLoading,
+  } = useGetTransforms();
+
   useEffect(() => {
+    if (transformsError !== null) {
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
+          defaultMessage: 'An error occurred getting the existing transform IDs:',
+        }),
+        text: toMountPoint(<ToastNotificationText text={getErrorMessage(transformsError)} />, {
+          theme,
+          i18n: i18nStart,
+        }),
+      });
+    }
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transformsError]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
     const initialStepDefineState = applyTransformConfigToDefineState(
       getDefaultStepDefineState(searchItems),
       cloneConfig,
@@ -61,11 +98,20 @@ export const useInitializeTransformWizardState = () => {
     }
 
     setStepDefineState(initialStepDefineState);
+
     setStepDetailsState(
       applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
     );
+
+    dispatch(
+      stepDetailsFormSlice.actions.initialize(
+        getDefaultStepDetailsFormState(cloneConfig, transformIds)
+      )
+    );
+
+    // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isLoading]);
 };
 
 export const WizardSteps: FC = () => {

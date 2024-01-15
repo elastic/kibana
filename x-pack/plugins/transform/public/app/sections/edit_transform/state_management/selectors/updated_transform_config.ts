@@ -10,16 +10,18 @@ import { createSelector } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 
 import { applyFormStateToConfig } from '@kbn/ml-form-utils/apply_form_state_to_config';
-import { selectFormFields } from '@kbn/ml-form-utils/form_field';
-import { selectFormSections } from '@kbn/ml-form-utils/form_section';
+import { createSelectFormFields } from '@kbn/ml-form-utils/use_form_field';
+import { createSelectFormSections } from '@kbn/ml-form-utils/use_form_section';
 
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { useEditTransformFlyoutContext } from '../edit_transform_flyout_state';
 
 const createSelectTransformConfig = (originalConfig: TransformConfigUnion) =>
-  createSelector(selectFormFields, selectFormSections, (formFields, formSections) =>
-    applyFormStateToConfig(originalConfig, formFields, formSections)
+  createSelector(
+    createSelectFormFields('editTransformForm'),
+    createSelectFormSections('editTransformForm'),
+    (formFields, formSections) => applyFormStateToConfig(originalConfig, formFields, formSections)
   );
 
 export const useUpdatedTransformConfig = () => {

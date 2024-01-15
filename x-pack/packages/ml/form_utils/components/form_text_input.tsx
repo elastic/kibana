@@ -5,33 +5,35 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React from 'react';
+import { useDispatch } from 'react-redux';
+import type { Draft } from 'immer';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useFormField } from '@kbn/ml-form-utils/use_form_field';
+import { useFormField } from '../use_form_field';
 
-import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
-import type { FormFields } from '../state_management/form_field';
 import { capitalizeFirstLetter } from '../utils/capitalize_first_letter';
+import type { State } from '../form_slice';
 
-interface EditTransformFlyoutFormTextInputProps {
-  field: FormFields;
-  label: string;
-  helpText?: string;
-  placeHolder?: boolean;
-}
+import type { FormTextProps } from './types';
 
-export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInputProps> = ({
+export const FormTextInput = <
+  FF extends string,
+  FS extends string,
+  VN extends string,
+  S extends State<FF, FS, VN>
+>({
+  slice,
   field,
   label,
   helpText,
   placeHolder = false,
-}) => {
-  const { defaultValue, errorMessages, value } = useFormField(field);
-  const { setFormField } = useEditTransformFlyoutActions();
-  const upperCaseField = capitalizeFirstLetter(field);
+}: FormTextProps<FF, FS, VN, S>) => {
+  const dispatch = useDispatch();
+  const { defaultValue, errorMessages, value } = useFormField(slice.name, field);
+  const upperCaseField = capitalizeFirstLetter(field as string);
 
   return (
     <EuiFormRow
@@ -52,7 +54,14 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
         }
         isInvalid={errorMessages.length > 0}
         value={value}
-        onChange={(e) => setFormField({ field, value: e.target.value })}
+        onChange={(e) =>
+          dispatch(
+            slice.actions.setFormField({
+              field: field as keyof Draft<S>['formFields'],
+              value: e.target.value,
+            })
+          )
+        }
         aria-label={label}
       />
     </EuiFormRow>

@@ -21,8 +21,6 @@ export const StepDetailsSummary: FC = () => {
     isRetentionPolicyEnabled,
     retentionPolicyDateField,
     retentionPolicyMaxAge,
-    transformId,
-    transformDescription,
     transformFrequency,
     transformSettingsMaxPageSearchSize,
     transformSettingsNumFailureRetries,
@@ -31,6 +29,10 @@ export const StepDetailsSummary: FC = () => {
     dataViewTimeField,
     valid,
   } = useWizardSelector((s) => s.stepDetails);
+  const transformId = useWizardSelector((s) => s.stepDetailsForm.formFields.transformId.value);
+  const transformDescription = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.description.value
+  );
 
   if (!valid) return null;
 

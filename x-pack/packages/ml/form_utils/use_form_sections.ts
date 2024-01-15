@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+
+import type { State } from './form_slice';
+
+const createSelectFormSections =
+  <FF extends string, FS extends string, VN extends string, S extends State<FF, FS, VN>>(
+    stateAccessor: string
+  ) =>
+  (s: Record<string, S>) => {
+    return s[stateAccessor].formSections;
+  };
+
+export const useFormSections = (stateAccessor: string) => {
+  const selectFormSections = useMemo(
+    () => createSelectFormSections(stateAccessor),
+    [stateAccessor]
+  );
+  return useSelector(selectFormSections);
+};

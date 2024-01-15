@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { initializeFormField, type FormFieldsState } from '@kbn/ml-form-utils/form_field';
-import { initializeFormSection, type FormSectionsState } from '@kbn/ml-form-utils/form_section';
+import { initializeFormField } from '@kbn/ml-form-utils/form_field';
+import { initializeFormSection } from '@kbn/ml-form-utils/form_section';
+import type { State } from '@kbn/ml-form-utils/form_slice';
 
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
@@ -14,7 +15,7 @@ import {
   DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
 } from '../../../../../../common/constants';
-import type { TransformConfigUnion, TransformId } from '../../../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import type { ValidatorName } from '../../../edit_transform/state_management/validators';
 
@@ -35,7 +36,6 @@ export interface StepDetailsState {
   isRetentionPolicyEnabled: boolean;
   retentionPolicyDateField: string;
   retentionPolicyMaxAge: string;
-  transformId: TransformId;
   transformFrequency: string;
   transformSettingsMaxPageSearchSize?: number;
   transformSettingsDocsPerSecond: number | null;
@@ -44,8 +44,27 @@ export interface StepDetailsState {
   dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;
   apiErrorMessage?: string;
-  formFields: FormFieldsState<StepDetailsFormFields, StepDetailsFormSections, ValidatorName>;
-  formSections: FormSectionsState<StepDetailsFormSections>;
+}
+
+export type StepDetailsFormState = State<'description' | 'transformId', 'n/a', ValidatorName>;
+export function getDefaultStepDetailsFormState(
+  config?: TransformConfigUnion,
+  existingTransforms: string[] = []
+): StepDetailsFormState {
+  return {
+    formFields: {
+      // top level attributes
+      description: initializeFormField('description', 'description', config),
+      transformId: initializeFormField('transformId', 'dest.index', undefined, {
+        isOptional: false,
+        validator: 'transformIdValidator',
+        reservedValues: existingTransforms,
+      }),
+    },
+    formSections: {
+      'n/a': initializeFormSection('n/a', 'n/a'),
+    },
+  };
 }
 
 export function getDefaultStepDetailsState(): StepDetailsState {
@@ -57,7 +76,6 @@ export function getDefaultStepDetailsState(): StepDetailsState {
     isRetentionPolicyEnabled: false,
     retentionPolicyDateField: '',
     retentionPolicyMaxAge: '',
-    transformId: '',
     transformFrequency: DEFAULT_TRANSFORM_FREQUENCY,
     transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
@@ -66,10 +84,6 @@ export function getDefaultStepDetailsState(): StepDetailsState {
     destinationIngestPipeline: '',
     valid: false,
     dataViewTimeField: undefined,
-    formFields: { description: initializeFormField('description', 'description') },
-    formSections: {
-      'n/a': initializeFormSection('n/a', 'n/a'),
-    },
   };
 }
 
@@ -85,11 +99,6 @@ export function applyTransformConfigToDetailsState(
       state.continuousModeDateField = continuousModeTime.field;
       state.continuousModeDelay = continuousModeTime?.delay ?? DEFAULT_CONTINUOUS_MODE_DELAY;
       state.isContinuousModeEnabled = true;
-    }
-
-    // Description
-    if (transformConfig.description !== undefined) {
-      state.formFields.description.value = transformConfig.description;
     }
 
     // Ingest Pipeline
