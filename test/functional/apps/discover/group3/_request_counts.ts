@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -242,7 +242,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearch: 'esql test',
         query1: 'from logstash-* | where bytes > 1000 | stats countB = count(bytes) ',
         query2: 'from logstash-* | where bytes < 2000 | stats countB = count(bytes) ',
-        savedSearchesRequests: 2,
+        savedSearchesRequests: 1,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
         expectedRequests: 1,
       });
