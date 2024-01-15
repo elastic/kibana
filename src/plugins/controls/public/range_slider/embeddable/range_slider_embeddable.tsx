@@ -332,7 +332,11 @@ export class RangeSliderEmbeddable
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
-    if (!hasData || !hasEitherSelection) {
+    if (
+      !hasData ||
+      !hasEitherSelection ||
+      (selectedMin === String(availableMin) && selectedMax === String(availableMax))
+    ) {
       batch(() => {
         this.dispatch.setLoading(false);
         this.dispatch.setIsInvalid(!ignoreParentSettings?.ignoreValidations && hasEitherSelection);
@@ -345,11 +349,11 @@ export class RangeSliderEmbeddable
 
     const params = {} as RangeFilterParams;
 
-    if (selectedMin) {
+    if (selectedMin && selectedMin !== String(availableMin)) {
       params.gte = Math.max(parseFloat(selectedMin), availableMin);
     }
 
-    if (selectedMax) {
+    if (selectedMax && selectedMax !== String(availableMax)) {
       params.lte = Math.min(parseFloat(selectedMax), availableMax);
     }
 
