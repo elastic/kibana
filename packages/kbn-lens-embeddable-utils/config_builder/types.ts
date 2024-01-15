@@ -39,7 +39,7 @@ export interface TimeRange {
   type: 'relative' | 'absolute';
 }
 
-export type LensLayerQuery = string | FormulaValueConfig;
+export type LensLayerQuery = string;
 export interface LensDataviewDataset {
   index: string;
   timeFieldName?: string;
@@ -62,7 +62,10 @@ export interface LensBaseConfig {
 export interface LensBaseLayer {
   label?: string;
   filter?: string;
-  format?: 'bytes' | 'currency' | 'duration' | 'number' | 'percent' | 'string';
+  format?: 'bits' | 'bytes' | 'currency' | 'duration' | 'number' | 'percent' | 'string';
+  decimals?: number;
+  normalizeByUnit?: 's' | 'm' | 'h' | 'd';
+  compactValues?: boolean;
   randomSampling?: number;
   useGlobalFilter?: boolean;
   seriesColor?: string;

@@ -52,6 +52,27 @@ export const getDefaultReferences = (
   ];
 };
 
+export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
+  const { label, decimals, format, compactValues: compact, normalizeByUnit, value } = layer;
+
+  const formulaFormat: FormulaValueConfig['format'] | undefined = format
+    ? {
+        id: format,
+        params: {
+          decimals: decimals ?? 2,
+          ...(!!compact ? { compact } : undefined),
+        },
+      }
+    : undefined;
+
+  return {
+    formula: value,
+    label,
+    timeScale: normalizeByUnit,
+    format: formulaFormat,
+  };
+}
+
 export function buildReferences(dataviews: Record<string, DataView>) {
   const references = [];
   for (const layerid in dataviews) {
@@ -81,10 +102,6 @@ export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
 
   return adHocDataViews;
 };
-
-export function isFormulaValue(value: string | FormulaValueConfig): value is FormulaValueConfig {
-  return typeof value === 'object' && 'formula' in value;
-}
 
 export function isSingleLayer(
   layer: DataSourceStateLayer

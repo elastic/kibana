@@ -19,9 +19,9 @@ import {
 import {
   addLayerColumn,
   buildDatasourceStates,
+  mapToFormula,
   buildReferences,
   getAdhocDataviews,
-  isFormulaValue,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
@@ -55,12 +55,7 @@ function buildFormulaLayer(
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(
-        ACCESSOR,
-        isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
-        dataView,
-        formulaAPI
-      ),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
     },
   };
 
@@ -85,7 +80,7 @@ function getValueColumns(layer: LensTagCloudConfig) {
     throw new Error('breakdown must be a field name when not using index source');
   }
   return [
-    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.formula : layer.value),
+    getValueColumn(ACCESSOR, layer.value),
     getValueColumn(getAccessorName('breakdown'), layer.breakdown as string),
   ];
 }

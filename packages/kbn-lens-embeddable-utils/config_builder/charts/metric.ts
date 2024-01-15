@@ -18,9 +18,9 @@ import {
   addLayerColumn,
   addLayerFormulaColumns,
   buildDatasourceStates,
+  mapToFormula,
   buildReferences,
   getAdhocDataviews,
-  isFormulaValue,
 } from '../utils';
 import {
   getBreakdownColumn,
@@ -121,12 +121,7 @@ function buildFormulaLayer(
     layer_0_trendline?: PersistedIndexPatternLayer;
   } = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(
-        ACCESSOR,
-        isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
-        dataView,
-        formulaAPI
-      ),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
     },
     ...(layer.trendLine
       ? {
@@ -134,7 +129,7 @@ function buildFormulaLayer(
             linkToLayers: [DEFAULT_LAYER_ID],
             ...getFormulaColumn(
               `${ACCESSOR}_trendline`,
-              isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
+              mapToFormula(layer),
               dataView,
               formulaAPI,
               baseLayer
@@ -164,9 +159,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('secondary');
     const formulaColumn = getFormulaColumn(
       columnName,
-      isFormulaValue(layer.querySecondaryMetric)
-        ? layer.querySecondaryMetric
-        : { formula: layer.querySecondaryMetric },
+      { formula: layer.querySecondaryMetric },
       dataView,
       formulaAPI
     );
@@ -181,7 +174,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('max');
     const formulaColumn = getFormulaColumn(
       columnName,
-      isFormulaValue(layer.queryMaxValue) ? layer.queryMaxValue : { formula: layer.queryMaxValue },
+      { formula: layer.queryMaxValue },
       dataView,
       formulaAPI
     );
@@ -203,24 +196,10 @@ function getValueColumns(layer: LensMetricConfig) {
     ...(layer.breakdown
       ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown as string)]
       : []),
-    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.formula : layer.value),
-    ...(layer.queryMaxValue
-      ? [
-          getValueColumn(
-            getAccessorName('max'),
-            isFormulaValue(layer.queryMaxValue) ? layer.queryMaxValue.formula : layer.queryMaxValue
-          ),
-        ]
-      : []),
+    getValueColumn(ACCESSOR, layer.value),
+    ...(layer.queryMaxValue ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue)] : []),
     ...(layer.querySecondaryMetric
-      ? [
-          getValueColumn(
-            getAccessorName('secondary'),
-            isFormulaValue(layer.querySecondaryMetric)
-              ? layer.querySecondaryMetric.formula
-              : layer.querySecondaryMetric
-          ),
-        ]
+      ? [getValueColumn(getAccessorName('secondary'), layer.querySecondaryMetric)]
       : []),
   ];
 }
