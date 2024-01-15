@@ -12,6 +12,8 @@ import React, { FC, useState } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { Observable, Subscription } from 'rxjs';
 import { useTimeSlider } from '../embeddable/time_slider_embeddable';
+import { ControlGroupContainer } from '../../control_group';
+import { useControlGroupContainer } from '../../control_group/embeddable/control_group_container';
 
 interface Props {
   onNext: () => void;
@@ -21,6 +23,11 @@ interface Props {
 
 export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const timeSlider = useTimeSlider();
+  const controlGroup = useControlGroupContainer();
+
+  const showApplySelectionsButton = controlGroup.select(
+    (state) => state.explicitInput.showApplySelections
+  );
 
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
@@ -81,6 +88,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
         <EuiButtonIcon
           className="timeSlider-playToggle"
           onClick={isPaused ? onPlay : onPause}
+          disabled={showApplySelectionsButton}
           iconType={isPaused ? 'playFilled' : 'pause'}
           size="s"
           display="fill"
