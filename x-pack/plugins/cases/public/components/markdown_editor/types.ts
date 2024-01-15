@@ -7,6 +7,8 @@
 
 import type { FunctionComponent } from 'react';
 import type { Plugin, PluggableList } from 'unified';
+// Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
+import type { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
 import type rehype2react from 'rehype-react';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
 export interface CursorPosition {
@@ -15,7 +17,7 @@ export interface CursorPosition {
 }
 
 export type TemporaryProcessingPluginsType = [
-  [Plugin],
+  [Plugin, Remark2RehypeOptions],
   [
     typeof rehype2react,
     Parameters<typeof rehype2react>[0] & {
