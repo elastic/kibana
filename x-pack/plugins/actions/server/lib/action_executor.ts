@@ -15,6 +15,7 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { isBoom } from '@hapi/boom';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -487,6 +488,9 @@ export class ActionExecutor {
         rawAction: rawAction.attributes,
       };
     } catch (e) {
+      if (isBoom(e, 404)) {
+        throw createTaskRunError(e, TaskErrorSource.USER);
+      }
       throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
     }
   }

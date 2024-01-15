@@ -13,6 +13,7 @@ import {
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { isBoom } from '@hapi/boom';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -134,6 +135,9 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
       { namespace }
     );
   } catch (e) {
+    if (isBoom(e, 404)) {
+      throw createTaskRunError(e, TaskErrorSource.USER);
+    }
     throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
   }
 

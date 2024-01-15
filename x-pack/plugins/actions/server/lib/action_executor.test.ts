@@ -25,6 +25,7 @@ import { PassThrough } from 'stream';
 import { SecurityConnectorFeatureId } from '../../common';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import Boom from '@hapi/boom';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -1272,6 +1273,21 @@ test('throws an error when failing to load action through savedObjectsClient', a
   } catch (e) {
     expect(e.message).toBe('No access');
     expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+  }
+});
+
+test('throws a USER error when the action SO is not found', async () => {
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
+    new Boom.Boom(`Not Found`, {
+      statusCode: 404,
+    })
+  );
+
+  try {
+    await actionExecutor.execute(executeParams);
+  } catch (e) {
+    expect(e.message).toBe('Not Found');
+    expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
   }
 });
 

@@ -29,6 +29,7 @@ import {
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { isBoom } from '@hapi/boom';
 import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
   ActionTaskExecutorParams,
@@ -287,28 +288,35 @@ async function getActionTaskParams(
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
   if (isPersistedActionTask(executorParams)) {
-    const actionTask =
-      await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-        executorParams.actionTaskParamsId,
-        { namespace }
-      );
-    const {
-      attributes: { relatedSavedObjects },
-      references,
-    } = actionTask;
+    try {
+      const actionTask =
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+          executorParams.actionTaskParamsId,
+          { namespace }
+        );
+      const {
+        attributes: { relatedSavedObjects },
+        references,
+      } = actionTask;
 
-    const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
-      injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
+      const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
+        injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
 
-    return {
-      ...actionTask,
-      attributes: {
-        ...actionTask.attributes,
-        ...(actionId ? { actionId } : {}),
-        ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
-      },
-    };
+      return {
+        ...actionTask,
+        attributes: {
+          ...actionTask.attributes,
+          ...(actionId ? { actionId } : {}),
+          ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
+        },
+      };
+    } catch (e) {
+      if (isBoom(e, 404)) {
+        throw createTaskRunError(e, TaskErrorSource.USER);
+      }
+      throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    }
   } else {
     return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
   }

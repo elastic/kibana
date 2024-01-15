@@ -20,6 +20,7 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { mockedRawRuleSO, mockedRule } from './fixtures';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import Boom from '@hapi/boom';
 
 // create mocks
 const rulesClient = rulesClientMock.create();
@@ -238,6 +239,21 @@ describe('rule_loader', () => {
       } catch (e) {
         expect(e.message).toMatch('wops');
         expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+      }
+    });
+
+    test('returns USER error for a "not found SO"', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(
+        new Boom.Boom(`Not Found`, {
+          statusCode: 404,
+        })
+      );
+
+      try {
+        await getRuleAttributes(context, ruleId, spaceId);
+      } catch (e) {
+        expect(e.message).toMatch('Not Found');
+        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
       }
     });
   });
