@@ -117,6 +117,8 @@ describe('rules_client_conflict_retries', () => {
 
 async function update(success: boolean) {
   try {
+    rulesClientParams.uiSettings.asScopedToClient =
+      uiSettingsServiceMock.createStartContract().asScopedToClient;
     await rulesClient.update({
       id: MockAlertId,
       data: {
