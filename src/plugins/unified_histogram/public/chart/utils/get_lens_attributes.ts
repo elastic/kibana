@@ -232,7 +232,7 @@ export const getLensAttributes = ({
         dataView.id &&
         !dataView.isPersisted() && {
           adHocDataViews: {
-            [dataView.id]: dataView.toSpec(false),
+            [dataView.id]: dataView.toMinimalSpec(),
           },
         }),
     },
