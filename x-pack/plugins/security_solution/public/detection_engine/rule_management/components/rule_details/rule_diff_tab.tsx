@@ -25,14 +25,14 @@ const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
   stringify(jsObject, { space: 2 });
 
 const HIDDEN_PROPERTIES = [
+  /* Not a user-facing property. Can be confused with "version" by users. */
+  'revision',
+
   /* Generates diff when the rule is enabled/disabled by user */
   'enabled',
 
   /* Never present in prebuilt rule updates. Generates diff if user adds exceptions to installed rule. */
   'exceptions_list',
-
-  /* Techical property. Can be confused with "version" by users. */
-  'revision',
 
   /* Not used anymore, but gets defaulted to an empty string when the rule is updated */
   'output_index',
@@ -46,11 +46,16 @@ const HIDDEN_PROPERTIES = [
   'filters',
   'timestamp_override_fallback_disabled',
 
-  /* Not relevant to the upgrade flow. */
+  /* Not relevant to the upgrade flow until we allow rule customisation. */
   'updated_at',
   'updated_by',
   'created_at',
   'created_by',
+
+  /* Never present in prebuilt rule updates. */
+  'outcome',
+  'alias_target_id',
+  'alias_purpose',
 ];
 
 interface RuleDiffTabProps {
