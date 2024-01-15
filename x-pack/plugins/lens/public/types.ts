@@ -42,6 +42,7 @@ import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -511,8 +512,6 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Promise<DataSourceInfo[]>;
 
   injectReferencesToLayers?: (state: T, references?: SavedObjectReference[]) => T;
-
-  suggestsLimitedColumns?: (state: T) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
@@ -1393,6 +1392,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
       | BrushTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
+      | ChartSizeEvent
   ) => void;
 }
 
