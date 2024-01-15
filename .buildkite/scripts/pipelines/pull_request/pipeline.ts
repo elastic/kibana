@@ -268,10 +268,26 @@ const uploadPipeline = (pipelineContent: string | object) => {
     if (
       (await doAnyChangesMatch([
         /^package.json/,
+        /^src\/plugins\/data/,
+        /^src\/plugins\/kibana_utils/,
+        /^src\/plugins\/inspector/,
+        /^src\/plugins\/data_views/,
+        /^src\/core/,
         /^packages\/kbn-securitysolution-.*/,
+        /^packages\/kbn-es-query/,
+        /^packages\/kbn-securitysolution-io-ts-list-types/,
+        /^packages\/kbn-i18n-react/,
+        /^packages\/kbn-i18n/,
+        /^packages\/shared-ux/,
+        /^packages\/kbn-doc-links/,
+        /^packages\/kbn-securitysolution-io-ts-list-types/,
         /^x-pack\/plugins\/threat_intelligence/,
         /^x-pack\/packages\/security-solution/,
-        /^x-pack\/test\/security_solution_cypress/,
+        /^x-pack\/test\/threat_intelligence_cypress/,
+        /^x-pack\/plugins\/cases/,
+        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/plugins\/triggers_actions_ui/,
+        /^x-pack\/plugins\/rule_registry/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
