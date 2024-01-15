@@ -29,6 +29,7 @@ export const createBaseHandlers = (): IInterpreterRenderHandlers => ({
   isSyncColorsEnabled: () => false,
   isSyncTooltipsEnabled: () => false,
   isSyncCursorEnabled: () => true,
+  shouldUseSizeTransitionVeil: () => false,
   isInteractive: () => true,
   getExecutionContext: () => undefined,
 });
