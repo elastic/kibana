@@ -94,12 +94,12 @@ export const TransformRetentionPolicy = <
               >
                 <EuiSelect
                   aria-label={i18n.translate(
-                    'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldSelectAriaLabel',
+                    'xpack.transform.retentionPolicyFieldSelectAriaLabel',
                     {
                       defaultMessage: 'Date field to set retention policy',
                     }
                   )}
-                  data-test-subj="retentionPolicyFieldSelect"
+                  data-test-subj="transformRetentionPolicyDateFieldSelect"
                   options={retentionDateFieldOptions}
                   value={retentionPolicyField.value}
                   onChange={(e) =>
