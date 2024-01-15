@@ -10,6 +10,13 @@ import type { ServiceFactory } from './service_factory';
 import type { ServiceConstructor } from './service_contructor';
 import type { ServiceIdentifier, ServiceLabel, ServiceScope } from './service';
 
+/**
+ * Base abstract type of all service registration interfaces,
+ * defining the properties that are shared between all kinds
+ * of registrations.
+ *
+ * @abstract
+ */
 export interface ServiceRegistrationBase<T> {
   id: ServiceIdentifier<T>;
   scope: ServiceScope; // TODO: | ContainerPredicate ff specified, the service will be instantiated at the closest level
@@ -28,6 +35,17 @@ export interface ServiceConstructorRegistration<T> extends ServiceRegistrationBa
   service: ServiceConstructor<T>;
 }
 
+export interface ServiceInstanceRegistration<T> extends ServiceRegistrationBase<T> {
+  instance: T;
+}
+
+/**
+ * Composite type from all the different service registration types.
+ * - {@link ServiceFactoryRegistration}
+ * - {@link ServiceConstructorRegistration}
+ * - {@link ServiceInstanceRegistration}
+ */
 export type ServiceRegistration<T = unknown> =
   | ServiceFactoryRegistration<T>
-  | ServiceConstructorRegistration<T>;
+  | ServiceConstructorRegistration<T>
+  | ServiceInstanceRegistration<T>;

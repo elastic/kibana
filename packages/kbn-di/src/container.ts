@@ -11,51 +11,12 @@ import type {
   InjectionContainer,
   CreateChildOptions,
   ServiceIdentifier,
-  ServiceScope,
   ServiceLabel,
-  ServiceFactory,
-  ServiceConstructor,
   ServiceRegistration,
   InjectionParameter,
+  ServiceMetadata,
 } from './types';
-import { isConstructorRegistration, isFactoryRegistration, getContainerRoot } from './helpers';
-
-/**
- * @internal
- */
-interface ServiceMetadata<T = unknown> {
-  /**
-   * The identifier of the service
-   */
-  id: ServiceIdentifier<T>;
-  /**
-   * The scope for this service
-   */
-  scope: ServiceScope;
-  /**
-   * The labels defined for this service
-   */
-  labels: ServiceLabel[];
-
-  /**
-   * The type of provider that was used to define this service
-   * - factory: registered using a {@link ServiceFactoryRegistration}
-   * - constructor: registered using a {@link ServiceConstructorRegistration}
-   * - instance: TODO
-   */
-  providerType: 'factory' | 'constructor' | 'instance';
-
-  /**
-   * The factory definition
-   * only present when providerType === 'factory'
-   */
-  factory?: ServiceFactory<T>;
-  /**
-   * The constructor definition
-   * only present when providerType === 'factory'
-   */
-  service?: ServiceConstructor<T>;
-}
+import { getContainerRoot, convertRegistration } from './helpers';
 
 export interface InjectionContainerConstructorOptions<Ctx = unknown> {
   containerId: string;
@@ -135,27 +96,8 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
     // TODO: check scope / registerAt to find the correct owner
     const registry = this.root.getServiceMetadata();
 
-    if (isFactoryRegistration(registration)) {
-      registry.set(registration.id, {
-        id: registration.id,
-        scope: registration.scope,
-        labels: registration.labels ?? [],
-        providerType: 'factory',
-        factory: registration.factory,
-      });
-    } else if (isConstructorRegistration(registration)) {
-      // TODO: should probably convert everything to factory given it's easy and would simplify impl
-      registry.set(registration.id, {
-        id: registration.id,
-        scope: registration.scope,
-        labels: registration.labels ?? [],
-        providerType: 'constructor',
-        service: registration.service,
-      });
-    } else {
-      // TODO later
-      throw new Error('unsupported for now');
-    }
+    const serviceMeta = convertRegistration(registration);
+    registry.set(serviceMeta.id, serviceMeta);
 
     if (registration.labels) {
       registration.labels.forEach((label) => {
@@ -219,29 +161,14 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
       }
     };
 
-    if (metadata.providerType === 'factory') {
-      const parameters: unknown[] = [];
-      for (const parameter of metadata.factory!.params) {
-        parameters.push(resolveParameter(parameter));
-      }
-      try {
-        instance = metadata.factory!.fn(...parameters) as T;
-      } catch (e) {
-        throw new Error(`Error calling factory for service ${String(identifier)}: ${e.message}`);
-      }
-    } else if (metadata.providerType === 'constructor') {
-      const parameters: unknown[] = [];
-      for (const parameter of metadata.service!.params) {
-        parameters.push(resolveParameter(parameter));
-      }
-      try {
-        instance = new metadata.service!.type(...parameters) as T;
-      } catch (e) {
-        throw new Error(`Error calling factory for service ${String(identifier)}: ${e.message}`);
-      }
-    } else {
-      // TODO later
-      throw new Error('unsupported for now');
+    const parameters: unknown[] = [];
+    for (const parameter of metadata.factory.params) {
+      parameters.push(resolveParameter(parameter));
+    }
+    try {
+      instance = metadata.factory.fn(...parameters) as T;
+    } catch (e) {
+      throw new Error(`Error calling factory for service ${String(identifier)}: ${e.message}`);
     }
 
     owningContainer.serviceMap.set(identifier, instance);
@@ -269,7 +196,11 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
     this.serviceMetadata.set(CONTEXT_SERVICE_KEY, {
       id: CONTEXT_SERVICE_KEY,
       scope: 'container',
-      providerType: 'factory', // TODO: need to change to instance
+      providerType: 'instance',
+      factory: {
+        fn: () => this.context,
+        params: [],
+      },
       labels: [],
     });
   }

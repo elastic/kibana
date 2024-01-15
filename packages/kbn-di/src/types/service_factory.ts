@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { InjectionParameter } from '../service';
+import type { InjectionParameter } from './injection_parameters';
 
 export type FactoryFunction<T> = (...args: any[]) => T;
 

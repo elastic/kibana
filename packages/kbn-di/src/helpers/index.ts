@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { isFactoryRegistration, isConstructorRegistration } from './registration';
+export {
+  isFactoryRegistration,
+  isConstructorRegistration,
+  isInstanceRegistration,
+} from './registration';
 export { getContainerRoot } from './container';
+export { convertRegistration } from './metadata';

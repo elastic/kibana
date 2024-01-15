@@ -13,7 +13,9 @@ export type {
   ServiceRegistrationBase,
   ServiceConstructorRegistration,
   ServiceFactoryRegistration,
+  ServiceInstanceRegistration,
   ServiceRegistration,
 } from './service_registration';
 export type { InjectionContainer, CreateChildOptions } from './container';
 export type { ByIdInjection, ByLabelInjection, InjectionParameter } from './injection_parameters';
+export type { ServiceMetadata } from './service_metadata';

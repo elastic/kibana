@@ -10,7 +10,10 @@ import type {
   ServiceRegistration,
   ServiceFactoryRegistration,
   ServiceConstructorRegistration,
-} from '../types/service_registration';
+  ServiceInstanceRegistration,
+  ServiceFactory,
+  ServiceConstructor,
+} from '../types';
 
 export function isFactoryRegistration<T>(
   registration: ServiceRegistration<T>
@@ -23,3 +26,25 @@ export function isConstructorRegistration<T>(
 ): registration is ServiceConstructorRegistration<T> {
   return 'service' in registration;
 }
+
+export function isInstanceRegistration<T>(
+  registration: ServiceRegistration<T>
+): registration is ServiceInstanceRegistration<T> {
+  return 'instance' in registration;
+}
+
+export const constructorToFactory = <T>(constructor: ServiceConstructor<T>): ServiceFactory<T> => {
+  return {
+    fn: (...args: any[]) => {
+      return new constructor.type(...args);
+    },
+    params: constructor.params,
+  };
+};
+
+export const instanceToFactory = <T>(instance: T): ServiceFactory<T> => {
+  return {
+    fn: () => instance,
+    params: [],
+  };
+};

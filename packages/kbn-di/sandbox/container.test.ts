@@ -101,6 +101,38 @@ describe('InjectionContainerImpl', () => {
       expect(instanceB.getB()).toEqual(`value from B: A`);
     });
 
+    it('retrieves or injects instances', () => {
+      const container = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      container.register<number>({
+        id: 'someNumber',
+        scope: 'global',
+        instance: 42,
+      });
+
+      container.register<{ getNumber: () => number }>({
+        id: 'service',
+        scope: 'global',
+        factory: {
+          fn: (someNumber: number) => {
+            return {
+              getNumber: () => someNumber,
+            };
+          },
+          params: [serviceId('someNumber')],
+        },
+      });
+
+      const someNumber = container.get('someNumber');
+      expect(someNumber).toBe(42);
+
+      const service = container.get<{ getNumber: () => number }>('service');
+      expect(service.getNumber()).toEqual(42);
+    });
+
     it('injects by labels', () => {
       const container = new InjectionContainerImpl({
         containerId: 'root',
