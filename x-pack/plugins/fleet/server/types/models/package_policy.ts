@@ -10,9 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { isValidNamespace } from '../../../common/services';
 
 export const NamespaceSchema = schema.string({
-  minLength: 1,
   validate: (value) => {
-    const namespaceValidation = isValidNamespace(value || '');
+    const namespaceValidation = isValidNamespace(value || '', true);
     if (!namespaceValidation.valid && namespaceValidation.error) {
       return namespaceValidation.error;
     }
@@ -96,7 +95,7 @@ const ExperimentalDataStreamFeatures = schema.arrayOf(
 const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  namespace: NamespaceSchema,
+  namespace: schema.maybe(NamespaceSchema),
   policy_id: schema.string(),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
@@ -122,7 +121,6 @@ export const NewPackagePolicySchema = schema.object({
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
-  namespace: schema.maybe(NamespaceSchema),
   policy_id: schema.maybe(schema.string()),
   enabled: schema.maybe(schema.boolean()),
   package: schema.maybe(
