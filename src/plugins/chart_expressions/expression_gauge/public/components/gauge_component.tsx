@@ -12,7 +12,11 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import {
+  type ChartSizeSpec,
+  getOverridesFor,
+  useSizeTransitionVeil,
+} from '@kbn/chart-expressions-common';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import { i18n } from '@kbn/i18n';
 import {
@@ -178,6 +182,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     chartsThemeService,
     renderComplete,
     overrides,
+    shouldUseVeil,
+    setChartSize,
   }) => {
     const {
       shape: gaugeType,
@@ -251,6 +257,26 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
         }
       },
       [renderComplete]
+    );
+
+    const chartSizeSpec: ChartSizeSpec = {
+      maxDimensions: {
+        ...(gaugeType === GaugeShapes.HORIZONTAL_BULLET
+          ? {
+              x: { value: 600, unit: 'pixels' },
+              y: { value: 300, unit: 'pixels' },
+            }
+          : {
+              y: { value: 600, unit: 'pixels' },
+              x: { value: 300, unit: 'pixels' },
+            }),
+      },
+    };
+
+    const { veil, onResize, containerRef } = useSizeTransitionVeil(
+      chartSizeSpec,
+      setChartSize,
+      shouldUseVeil
     );
 
     const table = data;
@@ -359,7 +385,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       : {};
 
     return (
-      <div className="gauge__wrapper">
+      <div className="gauge__wrapper" ref={containerRef}>
+        {veil}
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
@@ -369,6 +396,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             onRenderChange={onRenderChange}
+            onResize={onResize}
             locale={i18n.getLocale()}
             {...getOverridesFor(overrides, 'settings')}
           />
