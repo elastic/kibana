@@ -270,7 +270,7 @@ const getColumns = ({
       return (
         <EuiSwitch
           className="eui-textTruncate"
-          checked={isRuleMuted ? true : false}
+          checked={!isRuleMuted}
           onChange={useChangeCspRuleStatusFn}
           data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
           label=""

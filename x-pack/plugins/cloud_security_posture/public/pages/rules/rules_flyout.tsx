@@ -83,19 +83,19 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStatus }: RuleFlyoutProp
         <EuiSpacer />
         <EuiSwitch
           className="eui-textTruncate"
-          checked={isRuleMuted}
+          checked={!isRuleMuted}
           onChange={switchRuleStatus}
           data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
           label={
             rule.status === 'muted' ? (
               <FormattedMessage
-                id="xpack.csp.rules.ruleFlyout.ruleFlyoutEnabledText"
-                defaultMessage="Enabled"
+                id="xpack.csp.rules.ruleFlyout.ruleFlyoutDisabledText"
+                defaultMessage="Disabled"
               />
             ) : (
               <FormattedMessage
-                id="xpack.csp.rules.ruleFlyout.ruleFlyoutDisabledText"
-                defaultMessage="Disabled"
+                id="xpack.csp.rules.ruleFlyout.ruleFlyoutEnabledText"
+                defaultMessage="Enabled"
               />
             )
           }

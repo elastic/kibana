@@ -80,23 +80,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ).to.be(true);
       });
 
-      it('It should disable Disable option when there are all rules selected are already disabled', async () => {
+      it('It should disable Enable option when there are all rules selected are already enabled ', async () => {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
         expect(
           (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
             'true'
-        ).to.be(false);
+        ).to.be(true);
         expect(
           (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
             'true'
-        ).to.be(true);
+        ).to.be(false);
       });
 
-      it('It should disable Enable option when there are all rules selected are already enabled', async () => {
+      it('It should disable Disable option when there are all rules selected are already Disabled', async () => {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
-        await rule.rulePage.clickBulkActionOption(RULES_BULK_ACTION_OPTION_ENABLE);
+        await rule.rulePage.clickBulkActionOption(RULES_BULK_ACTION_OPTION_DISABLE);
         await pageObjects.header.waitUntilLoadingHasFinished();
         await rule.rulePage.clickClearAllRulesSelection();
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -105,11 +105,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(
           (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
             'true'
-        ).to.be(true);
+        ).to.be(false);
         expect(
           (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
             'true'
-        ).to.be(false);
+        ).to.be(true);
       });
 
       it('Both option should not be disabled if selected rules contains both enabled and disabled rules', async () => {

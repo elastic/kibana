@@ -318,20 +318,20 @@ const CurrentPageOfTotal = ({
   );
   const items = [
     <EuiContextMenuItem
-      disabled={selectedRules.length === 0 || !areAllSelectedRulesUnmuted ? true : false}
-      onClick={changeCspRuleStatusMute}
+      disabled={selectedRules.length === 0 || !areAllSelectedRulesMuted ? true : false}
+      onClick={changeCspRuleStatusUnmute}
       data-test-subj={RULES_BULK_ACTION_OPTION_ENABLE}
     >
-      <EuiText>
+      <EuiText key="disabled">
         <FormattedMessage id="xpack.csp.rules.rulesTable.optionEnable" defaultMessage="Enable" />
       </EuiText>
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      disabled={selectedRules.length === 0 || !areAllSelectedRulesMuted ? true : false}
-      onClick={changeCspRuleStatusUnmute}
+      disabled={selectedRules.length === 0 || !areAllSelectedRulesUnmuted ? true : false}
+      onClick={changeCspRuleStatusMute}
       data-test-subj={RULES_BULK_ACTION_OPTION_DISABLE}
     >
-      <EuiText key="disabled">
+      <EuiText>
         <FormattedMessage id="xpack.csp.rules.rulesTable.optionDisable" defaultMessage="Disable" />
       </EuiText>
     </EuiContextMenuItem>,

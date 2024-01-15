@@ -65,7 +65,9 @@ export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
+
   const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
+
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
     ruleNumber: undefined,
@@ -117,9 +119,9 @@ export const RulesContainer = () => {
   }, [data, rulesStates?.data]);
 
   const filteredRulesWithStatuses: CspBenchmarkRulesWithStatus[] = useMemo(() => {
-    if (enabledDisabledItemsFilter === 'enabled')
+    if (enabledDisabledItemsFilter === 'disabled')
       return rulesWithStatus?.filter((e) => e?.status === 'muted');
-    else if (enabledDisabledItemsFilter === 'disabled')
+    else if (enabledDisabledItemsFilter === 'enabled')
       return rulesWithStatus?.filter((e) => e?.status === 'unmuted');
     else return rulesWithStatus;
   }, [rulesWithStatus, enabledDisabledItemsFilter]);
