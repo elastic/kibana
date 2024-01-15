@@ -58,7 +58,7 @@ export async function getServicesItems({
   documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
-  searchQuery: string | undefined;
+  searchQuery?: string;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {

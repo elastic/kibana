@@ -11,10 +11,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-const memoizedItems = memoize(
+const memoizeResult = memoize(
   <T, P extends keyof T>(page: CurrentPage<T>, fieldsToSearch: P[]) => page,
-  <T, P extends keyof T>(page: CurrentPage<T>, fieldsToSearch: P[]) =>
-    JSON.stringify(page.items.map((item) => pick(item, fieldsToSearch)))
+  <T, P extends keyof T>(page: CurrentPage<T>, fieldsToSearch: P[]) => {
+    return JSON.stringify(page.items.map((item) => pick(item, fieldsToSearch)));
+  }
 );
 
 interface TableOptions<F extends string> {
@@ -36,7 +37,7 @@ export function TableSearchBar<T, P extends keyof T & string>({
   onChangeSearchQuery,
   placeholder,
   tableOptions,
-  isEnabled = true,
+  isEnabled,
   sortItems = true,
   sortFn = defaultSortFn,
 }: {
@@ -48,7 +49,7 @@ export function TableSearchBar<T, P extends keyof T & string>({
   onChangeSearchQuery: OnChangeSearchQuery;
   placeholder: string;
   tableOptions: TableOptions<P>;
-  isEnabled?: boolean;
+  isEnabled: boolean;
   sortItems?: boolean;
   sortFn?: SortFunction<T, P>;
 }) {
@@ -57,7 +58,7 @@ export function TableSearchBar<T, P extends keyof T & string>({
   const { core } = useApmPluginContext();
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
     apmEnableTableSearchBar,
-    true
+    false
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,18 +68,20 @@ export function TableSearchBar<T, P extends keyof T & string>({
   );
 
   const currentPage = useMemo(() => {
-    return memoizedItems(
-      getCurrentPage({
-        items,
-        fieldsToSearch,
-        maxCountExceeded,
-        searchQuery,
-        tableOptions,
-        sortItems,
-        sortFn,
-      }),
-      fieldsToSearch
-    );
+    const _currentPage = getCurrentPage({
+      items,
+      fieldsToSearch,
+      maxCountExceeded,
+      searchQuery,
+      tableOptions,
+      sortItems,
+      sortFn,
+    });
+
+    return fieldsToSearch.length > 0
+      ? memoizeResult(_currentPage, fieldsToSearch)
+      : _currentPage;
+
     // we need to spread `fieldsToSearch` because it's an array and we want to compare its values
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

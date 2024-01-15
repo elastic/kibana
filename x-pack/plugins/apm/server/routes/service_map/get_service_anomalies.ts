@@ -44,7 +44,7 @@ export async function getServiceAnomalies({
   environment: string;
   start: number;
   end: number;
-  searchQuery: string | undefined;
+  searchQuery?: string;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
     if (!mlClient) {

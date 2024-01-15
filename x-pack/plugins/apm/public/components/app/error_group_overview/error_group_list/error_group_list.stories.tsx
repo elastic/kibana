@@ -42,7 +42,7 @@ export const Example: Story<Args> = (args) => {
   return <ErrorGroupList {...args} />;
 };
 Example.args = {
-  mainStatistics: [
+  items: [
     {
       name: 'net/http: abort Handler',
       occurrences: 14,
@@ -96,6 +96,6 @@ export const EmptyState: Story<Args> = (args) => {
   return <ErrorGroupList {...args} />;
 };
 EmptyState.args = {
-  mainStatistics: [],
+  items: [],
   serviceName: 'test service',
 };

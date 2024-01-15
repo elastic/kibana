@@ -243,7 +243,7 @@ export function ServiceInventory() {
     </EuiFlexItem>
   );
 
-  const handleSort: SortFunction<ServiceListItem> = useCallback(
+  const sortFn: SortFunction<ServiceListItem> = useCallback(
     (itemsToSort, sortField, sortDirection) => {
       return orderServiceItems({
         items: itemsToSort,
@@ -272,7 +272,7 @@ export function ServiceInventory() {
             displayAlerts={displayAlerts}
             initialSortField={initialSortField}
             initialSortDirection={initialSortDirection}
-            sortFn={handleSort}
+            sortFn={sortFn}
             comparisonData={comparisonFetch?.data}
             noItemsMessage={noItemsMessage}
             initialPageSize={INITIAL_PAGE_SIZE}

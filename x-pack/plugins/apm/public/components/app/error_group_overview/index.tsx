@@ -100,8 +100,8 @@ export function ErrorGroupOverview() {
       onChangeSearchQuery: setDebouncedSearchQuery,
       onChangeCurrentPage: () => {},
       placeholder: i18n.translate(
-        'xpack.apm.servicesTable.filterServicesPlaceholder',
-        { defaultMessage: 'Filter errors...' }
+        'xpack.apm.errorsTable.filterErrorsPlaceholder',
+        { defaultMessage: 'Filter errors' }
       ),
     };
   }, [
