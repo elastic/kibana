@@ -32,6 +32,7 @@ export {
   apmTraceExplorerTab,
   apmLabsButton,
   enableInfrastructureHostsView,
+  enableInfrastructureProfilingIntegration,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
