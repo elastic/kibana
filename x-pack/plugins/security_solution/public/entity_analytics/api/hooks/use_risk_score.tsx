@@ -41,6 +41,7 @@ export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity
   isAuthorized: boolean;
   isDeprecated: boolean;
   loading: boolean;
+  error: unknown;
 }
 
 export interface UseRiskScoreParams {
@@ -132,8 +133,18 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       isDeprecated,
       isModuleEnabled: isEnabled,
       isInspected: false,
+      error,
     }),
-    [inspect, isDeprecated, isEnabled, isAuthorized, refetchAll, response.data, response.totalCount]
+    [
+      inspect,
+      isDeprecated,
+      isEnabled,
+      isAuthorized,
+      refetchAll,
+      response.data,
+      response.totalCount,
+      error,
+    ]
   );
 
   const requestTimerange = useMemo(

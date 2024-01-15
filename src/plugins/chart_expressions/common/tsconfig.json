@@ -4,11 +4,13 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@emotion/react/types/css-prop",
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
@@ -17,5 +19,6 @@
     "@kbn/core-execution-context-common",
     "@kbn/expressions-plugin",
     "@kbn/data-plugin",
+    "@kbn/ui-theme",
   ]
 }
