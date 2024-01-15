@@ -15,6 +15,8 @@ import {
   EuiLink,
   EuiSkeletonRectangle,
   EuiToolTip,
+  EuiButtonIcon,
+  EuiText,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -30,6 +32,12 @@ import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicat
 import { IntegrationIcon } from '../common';
 import { useLinkToLogExplorer } from '../../hooks';
 
+const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
+  defaultMessage: 'Expand',
+});
+const collapseDatasetAriaLabel = i18n.translate('xpack.datasetQuality.collapseLabel', {
+  defaultMessage: 'Collapse',
+});
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
 });
@@ -96,16 +104,36 @@ const degradedDocsColumnTooltip = (
   />
 );
 
-export const getDatasetQualitTableColumns = ({
+export const getDatasetQualityTableColumns = ({
   fieldFormats,
+  selectedDataset,
   setSelectedDataset,
   loadingDegradedStats,
 }: {
   fieldFormats: FieldFormatsStart;
+  selectedDataset?: DataStreamStat;
   loadingDegradedStats?: boolean;
   setSelectedDataset: Dispatch<SetStateAction<DataStreamStat | undefined>>;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
+    {
+      name: '',
+      render: (dataStreamStat: DataStreamStat) => {
+        const isExpanded = dataStreamStat === selectedDataset;
+
+        return (
+          <EuiButtonIcon
+            size="m"
+            color="text"
+            onClick={() => setSelectedDataset(isExpanded ? undefined : dataStreamStat)}
+            iconType={isExpanded ? 'minimize' : 'expand'}
+            title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+            aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+          />
+        );
+      },
+      width: '40px',
+    },
     {
       name: nameColumnName,
       field: 'title',
@@ -118,7 +146,7 @@ export const getDatasetQualitTableColumns = ({
             <EuiFlexItem grow={false}>
               <IntegrationIcon integration={integration} />
             </EuiFlexItem>
-            <EuiLink onClick={() => setSelectedDataset(dataStreamStat)}>{title}</EuiLink>
+            <EuiText size="s">{title}</EuiText>
           </EuiFlexGroup>
         );
       },

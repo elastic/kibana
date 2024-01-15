@@ -10,7 +10,7 @@ import { find, orderBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
-import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
+import { getDatasetQualityTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { getDefaultTimeRange, useKibanaContextForPlugin } from '../utils';
 
@@ -48,8 +48,14 @@ export const useDatasetQualityTable = () => {
   );
 
   const columns = useMemo(
-    () => getDatasetQualitTableColumns({ fieldFormats, setSelectedDataset, loadingDegradedStats }),
-    [fieldFormats, loadingDegradedStats]
+    () =>
+      getDatasetQualityTableColumns({
+        fieldFormats,
+        selectedDataset,
+        setSelectedDataset,
+        loadingDegradedStats,
+      }),
+    [fieldFormats, loadingDegradedStats, selectedDataset, setSelectedDataset]
   );
 
   const pagination = {
