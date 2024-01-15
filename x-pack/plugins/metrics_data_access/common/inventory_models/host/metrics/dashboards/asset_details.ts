@@ -30,8 +30,12 @@ export const assetDetails = {
       chartType: 'xy',
       formFormulas: ['cpuUsage', 'memoryUsage'],
       chartConfig: {
-        emphasizeFitting: true,
         fittingFunction: 'Linear',
+        yBounds: {
+          mode: 'custom',
+          lowerBound: 0,
+          upperBound: 1,
+        },
         ...(metricsDataViewId
           ? {
               dataset: {
@@ -46,7 +50,6 @@ export const assetDetails = {
       chartType: 'xy',
       formFormulas: ['logRate'],
       chartConfig: {
-        emphasizeFitting: true,
         fittingFunction: 'Linear',
         ...(logsDataViewId
           ? {

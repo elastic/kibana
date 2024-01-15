@@ -19,30 +19,40 @@ export const memoryUsageBreakdown = {
     }),
     layers: [
       {
-        ...formulas.memoryCache,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.cache', {
-          defaultMessage: 'Cache',
-        }),
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
+          {
+            ...formulas.memoryCache,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.cache',
+              {
+                defaultMessage: 'Cache',
+              }
+            ),
+          },
+          {
+            ...formulas.memoryUsed,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.used',
+              {
+                defaultMessage: 'Used',
+              }
+            ),
+          },
+          {
+            ...formulas.memoryFreeExcludingCache,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.free',
+              {
+                defaultMessage: 'Free',
+              }
+            ),
+          },
+        ],
       },
-      {
-        ...formulas.memoryUsed,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.used', {
-          defaultMessage: 'Used',
-        }),
-      },
-      {
-        ...formulas.memoryFreeExcludingCache,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.free', {
-          defaultMessage: 'Free',
-        }),
-      },
-    ].map((formula) => ({
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      ...formula,
-    })),
-    emphasizeFitting: true,
+    ],
     fittingFunction: 'Linear',
     legend: {
       position: 'bottom',

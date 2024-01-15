@@ -12,7 +12,6 @@ import { formulas } from '../../../kubernetes/node/metrics';
 export const assetDetailsKubernetesNode = {
   get: ({ metricsDataViewId }: { metricsDataViewId?: string }) => {
     const baseConfig: Partial<LensXYConfigBase> = {
-      emphasizeFitting: true,
       fittingFunction: 'Linear',
       axisTitleVisibility: {
         showXAxisTitle: false,
@@ -43,12 +42,14 @@ export const assetDetailsKubernetesNode = {
               defaultMessage: 'Node CPU Capacity',
             }
           ),
-          layers: [formulas.nodeCpuCapacity, formulas.nodeCpuUsed].map((formula) => ({
-            seriesType: 'area',
-            type: 'series',
-            xAxis: '@timestamp',
-            ...formula,
-          })),
+          layers: [
+            {
+              seriesType: 'area',
+              type: 'series',
+              xAxis: '@timestamp',
+              yAxis: [formulas.nodeCpuCapacity, formulas.nodeCpuUsed],
+            },
+          ],
           ...baseConfig,
         },
         {
@@ -60,12 +61,14 @@ export const assetDetailsKubernetesNode = {
               defaultMessage: 'Node Memory Capacity',
             }
           ),
-          layers: [formulas.nodeMemoryCapacity, formulas.nodeMemoryUsed].map((formula) => ({
-            seriesType: 'area',
-            type: 'series',
-            xAxis: '@timestamp',
-            ...formula,
-          })),
+          layers: [
+            {
+              seriesType: 'area',
+              type: 'series',
+              xAxis: '@timestamp',
+              yAxis: [formulas.nodeMemoryCapacity, formulas.nodeMemoryUsed],
+            },
+          ],
           ...baseConfig,
         },
         {
@@ -77,12 +80,14 @@ export const assetDetailsKubernetesNode = {
               defaultMessage: 'Node Disk Capacity',
             }
           ),
-          layers: [formulas.nodeDiskCapacity, formulas.nodeDiskUsed].map((formula) => ({
-            seriesType: 'area',
-            type: 'series',
-            xAxis: '@timestamp',
-            ...formula,
-          })),
+          layers: [
+            {
+              seriesType: 'area',
+              type: 'series',
+              xAxis: '@timestamp',
+              yAxis: [formulas.nodeDiskCapacity, formulas.nodeDiskUsed],
+            },
+          ],
           ...baseConfig,
         },
         {
@@ -94,12 +99,14 @@ export const assetDetailsKubernetesNode = {
               defaultMessage: 'Node Pod Capacity',
             }
           ),
-          layers: [formulas.nodePodCapacity, formulas.nodePodUsed].map((formula) => ({
-            seriesType: 'area',
-            type: 'series',
-            xAxis: '@timestamp',
-            ...formula,
-          })),
+          layers: [
+            {
+              seriesType: 'area',
+              type: 'series',
+              xAxis: '@timestamp',
+              yAxis: [formulas.nodePodCapacity, formulas.nodePodUsed],
+            },
+          ],
           ...baseConfig,
         },
       ],

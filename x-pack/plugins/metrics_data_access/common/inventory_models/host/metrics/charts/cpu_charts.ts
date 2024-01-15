@@ -18,24 +18,30 @@ export const cpuUsageBreakdown = {
       defaultMessage: 'CPU Usage',
     }),
     layers: [
-      formulas.cpuUsageIowait,
-      formulas.cpuUsageIrq,
-      formulas.cpuUsageNice,
-      formulas.cpuUsageSoftirq,
-      formulas.cpuUsageSteal,
-      formulas.cpuUsageUser,
-      formulas.cpuUsageSystem,
-    ].map((formula) => ({
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      ...formula,
-    })),
-    emphasizeFitting: true,
+      {
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
+          formulas.cpuUsageIowait,
+          formulas.cpuUsageIrq,
+          formulas.cpuUsageNice,
+          formulas.cpuUsageSoftirq,
+          formulas.cpuUsageSteal,
+          formulas.cpuUsageUser,
+          formulas.cpuUsageSystem,
+        ],
+      },
+    ],
     fittingFunction: 'Linear',
     legend: {
       position: 'bottom',
       show: true,
+    },
+    yBounds: {
+      mode: 'custom',
+      lowerBound: 0,
+      upperBound: 1,
     },
     axisTitleVisibility: {
       showXAxisTitle: false,
@@ -59,10 +65,14 @@ export const normalizedLoad1m = {
       defaultMessage: 'Normalized Load',
     }),
     layers: [
-      { seriesType: 'line', type: 'series', xAxis: '@timestamp', ...formulas.normalizedLoad1m },
-      { type: 'reference', value: '1', color: '#6092c0' },
+      {
+        seriesType: 'line',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [formulas.normalizedLoad1m],
+      },
+      { type: 'reference', yAxis: [{ value: '1' }], color: '#6092c0' },
     ],
-    emphasizeFitting: true,
     fittingFunction: 'Linear',
     legend: {
       show: false,
@@ -88,13 +98,14 @@ export const loadBreakdown = {
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
       defaultMessage: 'Load',
     }),
-    layers: [formulas.load1m, formulas.load5m, formulas.load15m].map((formula) => ({
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      ...formula,
-    })),
-    emphasizeFitting: true,
+    layers: [
+      {
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [formulas.load1m, formulas.load5m, formulas.load15m],
+      },
+    ],
     fittingFunction: 'Linear',
     legend: {
       position: 'bottom',

@@ -19,33 +19,29 @@ export const rxTx = {
     }),
     layers: [
       {
-        ...formulas.rx,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.rx', {
-          defaultMessage: 'Inbound (RX)',
-        }),
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
+          {
+            ...formulas.rx,
+            label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.rx', {
+              defaultMessage: 'Inbound (RX)',
+            }),
+          },
+          {
+            ...formulas.tx,
+            label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.tx', {
+              defaultMessage: 'Outbound (TX)',
+            }),
+          },
+        ],
       },
-      {
-        ...formulas.tx,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.tx', {
-          defaultMessage: 'Outbound (TX)',
-        }),
-      },
-    ].map((formula) => ({
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      ...formula,
-    })),
-    emphasizeFitting: true,
+    ],
     fittingFunction: 'Linear',
     legend: {
       show: true,
       position: 'bottom',
-    },
-    yBounds: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
     },
     axisTitleVisibility: {
       showXAxisTitle: false,

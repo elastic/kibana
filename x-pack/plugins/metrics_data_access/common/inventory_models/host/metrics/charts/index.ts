@@ -55,7 +55,7 @@ export const createBasicCharts = <T extends ChartType>({
               seriesType: 'line',
               type: 'series',
               xAxis: '@timestamp',
-              ...formulas[curr],
+              yAxis: [formulas[curr]],
               ...layerConfig,
             },
           ],

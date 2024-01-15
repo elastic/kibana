@@ -41,7 +41,6 @@ export const hostsView = {
             size: 20,
           },
         },
-        emphasizeFitting: true,
         fittingFunction: 'Linear',
         ...(metricsDataViewId
           ? {
@@ -69,7 +68,6 @@ export const hostsView = {
           lowerBound: 0,
           upperBound: 1,
         },
-        emphasizeFitting: true,
         fittingFunction: 'Linear',
         ...(metricsDataViewId
           ? {

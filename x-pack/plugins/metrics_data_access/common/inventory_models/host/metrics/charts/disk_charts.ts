@@ -19,26 +19,32 @@ export const diskSpaceUsageAvailable = {
     }),
     layers: [
       {
-        ...formulas.diskUsage,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used', {
-          defaultMessage: 'Used',
-        }),
-      },
-      {
-        ...formulas.diskSpaceAvailability,
-        label: i18n.translate(
-          'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.available',
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
           {
-            defaultMessage: 'Available',
-          }
-        ),
+            ...formulas.diskUsage,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used',
+              {
+                defaultMessage: 'Used',
+              }
+            ),
+          },
+          {
+            ...formulas.diskSpaceAvailability,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.available',
+              {
+                defaultMessage: 'Available',
+              }
+            ),
+          },
+        ],
       },
-    ].map((formula) => ({
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      ...formula,
-    })),
+    ],
+    fittingFunction: 'Linear',
     legend: {
       show: true,
       position: 'bottom',
@@ -66,23 +72,27 @@ export const diskUsageByMountPoint = {
     }),
     layers: [
       {
-        ...formulas.diskUsage,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used', {
-          defaultMessage: 'Used',
-        }),
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        breakdown: {
+          type: 'topValues',
+          field: 'system.filesystem.mount_point',
+          size: 5,
+        },
+        yAxis: [
+          {
+            ...formulas.diskUsage,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used',
+              {
+                defaultMessage: 'Used',
+              }
+            ),
+          },
+        ],
       },
-    ].map((formula) => ({
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      breakdown: {
-        type: 'topValues',
-        field: 'system.filesystem.mount_point',
-        size: 5,
-      },
-      ...formula,
-    })),
-    emphasizeFitting: true,
+    ],
     fittingFunction: 'Linear',
     legend: {
       show: true,
@@ -115,24 +125,31 @@ export const diskThroughputReadWrite = {
     }),
     layers: [
       {
-        ...formulas.diskIORead,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.read', {
-          defaultMessage: 'Read',
-        }),
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
+          {
+            ...formulas.diskIORead,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.read',
+              {
+                defaultMessage: 'Read',
+              }
+            ),
+          },
+          {
+            ...formulas.diskIOWrite,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.write',
+              {
+                defaultMessage: 'Write',
+              }
+            ),
+          },
+        ],
       },
-      {
-        ...formulas.diskIOWrite,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.write', {
-          defaultMessage: 'Write',
-        }),
-      },
-    ].map((formula) => ({
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      ...formula,
-    })),
-    emphasizeFitting: true,
+    ],
     fittingFunction: 'Linear',
     legend: {
       show: true,
@@ -161,24 +178,31 @@ export const diskIOReadWrite = {
     }),
     layers: [
       {
-        ...formulas.diskReadThroughput,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.read', {
-          defaultMessage: 'Read',
-        }),
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
+          {
+            ...formulas.diskReadThroughput,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.read',
+              {
+                defaultMessage: 'Read',
+              }
+            ),
+          },
+          {
+            ...formulas.diskWriteThroughput,
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.write',
+              {
+                defaultMessage: 'Write',
+              }
+            ),
+          },
+        ],
       },
-      {
-        ...formulas.diskWriteThroughput,
-        label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.metric.label.write', {
-          defaultMessage: 'Write',
-        }),
-      },
-    ].map((formula) => ({
-      seriesType: 'area',
-      type: 'series',
-      xAxis: '@timestamp',
-      ...formula,
-    })),
-    emphasizeFitting: true,
+    ],
     fittingFunction: 'Linear',
     legend: {
       show: true,
