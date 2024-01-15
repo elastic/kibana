@@ -8,6 +8,8 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
   EuiLoadingChart,
   EuiLoadingSpinner,
   EuiPanel,
@@ -17,7 +19,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
+import rison from '@kbn/rison';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import moment from 'moment';
@@ -59,6 +63,11 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
     to: new Date(),
   };
 
+  function getAlertsLink() {
+    const kuery = `kibana.alert.rule.uuid:"${rule.id}"`;
+    return http.basePath.prepend(`/app/observability/alerts?_a=${rison.encode({ kuery })}`);
+  }
+
   if (isLoading) {
     return <EuiLoadingChart size="m" mono data-test-subj="loading" />;
   }
@@ -71,16 +80,27 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="alertsHistoryPanel">
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate(
-                  'xpack.observability.slo.burnRateRule.alertDetailsAppSection.alertsHistory.title',
-                  { defaultMessage: '{sloName} alerts history', values: { sloName: slo.name } }
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
+          <EuiFlexGroup direction="row" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate(
+                    'xpack.observability.slo.burnRateRule.alertDetailsAppSection.alertsHistory.title',
+                    { defaultMessage: '{sloName} alerts history', values: { sloName: slo.name } }
+                  )}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink color="text" href={getAlertsLink()}>
+                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
+                <FormattedMessage
+                  id="xpack.observability.slo.burnRateRule.alertDetailsAppSection.alertsHistory.alertsLink"
+                  defaultMessage="View alerts"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
