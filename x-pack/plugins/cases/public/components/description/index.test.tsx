@@ -28,6 +28,7 @@ const defaultProps = {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/174321
+// FLAKY: https://github.com/elastic/kibana/issues/174322
 // FLAKY: https://github.com/elastic/kibana/issues/164045
 // FLAKY: https://github.com/elastic/kibana/issues/164048
 // FLAKY: https://github.com/elastic/kibana/issues/164049
