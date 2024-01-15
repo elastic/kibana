@@ -105,7 +105,7 @@ export async function getDocumentSources({
       documentType: ApmDocumentType.TransactionEvent,
       rollupInterval: RollupInterval.None,
       hasDocs: true,
-      hasDurationSummaryField: false,
+      allHaveDurationSummary: false,
     },
   ];
 }
@@ -159,7 +159,7 @@ const getDocumentTypesInfo = async ({
       rollupInterval,
       hasDocBefore: docTypeResponses[QUERY_INDEX.BEFORE].hits.total.value > 0,
       hasDocAfter: docTypeResponses[QUERY_INDEX.CURRENT].hits.total.value > 0,
-      hasDurationSummary: docTypeResponses[QUERY_INDEX.DURATION_SUMMARY]
+      allHaveDurationSummary: docTypeResponses[QUERY_INDEX.DURATION_SUMMARY]
         ? docTypeResponses[QUERY_INDEX.DURATION_SUMMARY].hits.total.value === 0
         : true,
     };
@@ -223,7 +223,7 @@ const mapToSources = (
       hasDocAfter,
       hasDocBefore,
       rollupInterval,
-      hasDurationSummary,
+      allHaveDurationSummary,
     } = source;
 
     const hasDocBeforeOrAfter = hasDocBefore || hasDocAfter;
@@ -240,7 +240,7 @@ const mapToSources = (
       documentType,
       rollupInterval,
       hasDocs,
-      hasDurationSummaryField: hasDurationSummary,
+      hasDurationSummaryField: allHaveDurationSummary,
     };
   });
 };
