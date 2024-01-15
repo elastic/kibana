@@ -30,7 +30,6 @@ interface OnChildChangedProps {
   recalculateFilters$: Subject<null>;
   childOrder: ChildEmbeddableOrderCache;
   getChild: (id: string) => ControlEmbeddable;
-  autoApplyFilters: boolean;
 }
 
 interface ChainingSystem {
@@ -101,14 +100,8 @@ export const ControlGroupChainingSystems: {
       }
       return { filters, timeslice };
     },
-    onChildChange: ({
-      childOutputChangedId,
-      childOrder,
-      recalculateFilters$,
-      getChild,
-      autoApplyFilters,
-    }) => {
-      if (autoApplyFilters && childOutputChangedId === childOrder.lastChildId) {
+    onChildChange: ({ childOutputChangedId, childOrder, recalculateFilters$, getChild }) => {
+      if (childOutputChangedId === childOrder.lastChildId) {
         // the last control's output has updated, recalculate filters
         recalculateFilters$.next(null);
         return;
@@ -129,7 +122,7 @@ export const ControlGroupChainingSystems: {
         }
 
         // recalculate filters when there are no chained controls to the right of the updated control
-        if (autoApplyFilters && nextControl.id === childOrder.lastChildId) {
+        if (nextControl.id === childOrder.lastChildId) {
           recalculateFilters$.next(null);
           return;
         }

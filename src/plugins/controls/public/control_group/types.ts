@@ -32,6 +32,7 @@ export interface ControlGroupCreationOptions {
 
 export type ControlGroupComponentState = ControlGroupSettings & {
   lastSavedInput: PersistableControlGroupInput;
+  applyButtonEnabled?: boolean;
 };
 
 export interface ControlGroupSettings {

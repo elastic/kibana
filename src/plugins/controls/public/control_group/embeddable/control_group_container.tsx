@@ -103,7 +103,7 @@ export class ControlGroupContainer extends Container<
 
   private cleanupStateTools: () => void;
 
-  public onFiltersPublished$: Subject<Filter[]>;
+  public onFiltersPublished$: Subject<{ filters: Filter[]; timeslice?: [number, number] }>;
   public onControlRemoved$: Subject<string>;
 
   /** This currently reports the **entire** persistable control group input on unsaved changes */
@@ -127,7 +127,7 @@ export class ControlGroupContainer extends Container<
     );
 
     this.recalculateFilters$ = new Subject();
-    this.onFiltersPublished$ = new Subject<Filter[]>();
+    this.onFiltersPublished$ = new Subject<{ filters: Filter[]; timeslice?: [number, number] }>();
     this.onControlRemoved$ = new Subject<string>();
 
     // start diffing control group state
@@ -193,7 +193,6 @@ export class ControlGroupContainer extends Container<
           childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
           getChild: (id) => this.getChild(id),
           recalculateFilters$: this.recalculateFilters$,
-          autoApplyFilters: !Boolean(this.getState().explicitInput.showApplySelections),
         });
       })
     );
@@ -203,7 +202,26 @@ export class ControlGroupContainer extends Container<
      */
     this.subscriptions.add(
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => {
-        this.recalculateFilters();
+        const { filters, timeslice } = this.recalculateFilters();
+        if (
+          !compareFilters(this.output.filters ?? [], filters ?? [], COMPARE_ALL_OPTIONS) ||
+          !isEqual(this.output.timeslice, timeslice)
+        ) {
+          this.dispatch.setApplyButtonEnabled(true);
+          const autoApplyFilters = !Boolean(this.getState().explicitInput.showApplySelections);
+          if (autoApplyFilters) {
+            this.onFiltersPublished$.next({ filters, timeslice });
+          }
+        } else {
+          this.dispatch.setApplyButtonEnabled(false);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.onFiltersPublished$.pipe(debounceTime(10)).subscribe(({ filters, timeslice }) => {
+        this.dispatch.setApplyButtonEnabled(false);
+        this.updateOutput({ filters: uniqFilters(filters), timeslice });
       })
     );
   };
@@ -294,7 +312,7 @@ export class ControlGroupContainer extends Container<
     }
   };
 
-  private recalculateFilters = () => {
+  private recalculateFilters = (): { filters: Filter[]; timeslice?: [number, number] } => {
     const allFilters: Filter[] = [];
     let timeslice;
     Object.values(this.children).map((child) => {
@@ -304,18 +322,12 @@ export class ControlGroupContainer extends Container<
         timeslice = childOutput.timeslice;
       }
     });
-    // if filters are different, publish them
-    if (
-      !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||
-      !isEqual(this.output.timeslice, timeslice)
-    ) {
-      this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
-      this.onFiltersPublished$.next(allFilters);
-    }
+    return { filters: allFilters, timeslice };
   };
 
   public publishFilters = () => {
-    this.recalculateFilters$.next(null);
+    const { filters, timeslice } = this.recalculateFilters();
+    this.onFiltersPublished$.next({ filters, timeslice });
   };
 
   private recalculateDataViews = () => {

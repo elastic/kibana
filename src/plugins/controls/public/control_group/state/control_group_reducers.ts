@@ -49,6 +49,12 @@ export const controlGroupReducers = {
   // ) => {
   //   state.explicitInput.showSelectionReset = action.payload;
   // },
+  setApplyButtonEnabled: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupComponentState['applyButtonEnabled']>
+  ) => {
+    state.componentState.applyButtonEnabled = action.payload;
+  },
   setDefaultControlWidth: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['defaultControlWidth']>

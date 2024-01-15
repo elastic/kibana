@@ -51,6 +51,7 @@ export const ControlGroup = () => {
   const showApplySelections = contextSelect((state) => state.explicitInput.showApplySelections);
 
   const showAddButton = contextSelect((state) => state.componentState.showAddButton);
+  const applyButtonEnabled = contextSelect((state) => state.componentState.applyButtonEnabled);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -206,6 +207,7 @@ export const ControlGroup = () => {
                     <EuiFlexItem>
                       <EuiButtonIcon
                         size="m"
+                        disabled={!applyButtonEnabled}
                         iconSize="m"
                         display="fill"
                         color={'success'}
