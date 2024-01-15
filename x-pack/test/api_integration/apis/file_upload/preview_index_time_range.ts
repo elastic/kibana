@@ -94,8 +94,10 @@ export default ({ getService }: FtrProviderContext) => {
         fqTimeField
       );
 
-      expect(resp.start).to.be(1403222400000);
-      expect(resp.end).to.be(1404172796000);
+      expect(resp).to.eql({
+        start: 1403222400000,
+        end: 1404172796000,
+      });
     });
 
     it('should return the correct start and end for normal data out of order', async () => {
@@ -136,8 +138,10 @@ export default ({ getService }: FtrProviderContext) => {
         fqTimeField
       );
 
-      expect(resp.start).to.be(1403222400000);
-      expect(resp.end).to.be(1404172796000);
+      expect(resp).to.eql({
+        start: 1403222400000,
+        end: 1404172796000,
+      });
     });
 
     it('should return the correct start and end for data with bad last doc', async () => {
@@ -179,8 +183,10 @@ export default ({ getService }: FtrProviderContext) => {
         fqTimeField
       );
 
-      expect(resp.start).to.be(1403222400000);
-      expect(resp.end).to.be(1404086394000);
+      expect(resp).to.eql({
+        start: 1403222400000,
+        end: 1404086394000,
+      });
     });
 
     it('should return the correct start and end for data with bad data near the end', async () => {
@@ -222,8 +228,10 @@ export default ({ getService }: FtrProviderContext) => {
         fqTimeField
       );
 
-      expect(resp.start).to.be(1403222400000);
-      expect(resp.end).to.be(1404172796000);
+      expect(resp).to.eql({
+        start: 1403222400000,
+        end: 1404172796000,
+      });
     });
 
     it('should return the correct start and end for data with bad first doc', async () => {
@@ -265,8 +273,10 @@ export default ({ getService }: FtrProviderContext) => {
         fqTimeField
       );
 
-      expect(resp.start).to.be(1403308800000);
-      expect(resp.end).to.be(1404172796000);
+      expect(resp).to.eql({
+        start: 1403308800000,
+        end: 1404172796000,
+      });
     });
 
     it('should return the correct start and end for data with bad near the start', async () => {
@@ -308,8 +318,10 @@ export default ({ getService }: FtrProviderContext) => {
         fqTimeField
       );
 
-      expect(resp.start).to.be(1403222400000);
-      expect(resp.end).to.be(1404172796000);
+      expect(resp).to.eql({
+        start: 1403222400000,
+        end: 1404172796000,
+      });
     });
 
     it('should return null start and end for entire bad data', async () => {
@@ -332,8 +344,10 @@ export default ({ getService }: FtrProviderContext) => {
         fqTimeField
       );
 
-      expect(resp.start).to.be(null);
-      expect(resp.end).to.be(null);
+      expect(resp).to.eql({
+        start: null,
+        end: null,
+      });
     });
   });
 };
