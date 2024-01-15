@@ -15,7 +15,6 @@ import {
   IndexNameFormComponent,
   checkIndexExists,
   getTimeFieldRange,
-  getTimeFromDoc,
   analyzeFile,
 } from './api';
 import { setStartServices } from './kibana_services';
@@ -52,7 +51,6 @@ export class FileUploadPlugin
       hasImportPermission,
       checkIndexExists,
       getTimeFieldRange,
-      getTimeFromDoc,
       analyzeFile,
     };
   }
