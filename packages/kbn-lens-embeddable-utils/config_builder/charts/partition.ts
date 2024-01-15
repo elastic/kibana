@@ -24,9 +24,9 @@ import {
 import {
   addLayerColumn,
   buildDatasourceStates,
-  mapToFormula,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 

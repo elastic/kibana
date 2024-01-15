@@ -16,9 +16,9 @@ import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensGaugeConfig } 
 import {
   addLayerFormulaColumns,
   buildDatasourceStates,
-  mapToFormula,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import { getFormulaColumn, getValueColumn } from '../columns';
 

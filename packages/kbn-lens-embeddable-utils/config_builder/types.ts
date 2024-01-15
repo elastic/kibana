@@ -69,8 +69,12 @@ export interface LensBaseLayer {
   randomSampling?: number;
   useGlobalFilter?: boolean;
   seriesColor?: string;
-  dataset?: LensDataset;
   value: LensLayerQuery;
+}
+
+export interface LensBaseXYLayer {
+  dataset?: LensDataset;
+  yAxis: LensBaseLayer[];
 }
 
 export type LensConfig =
@@ -239,7 +243,7 @@ export interface LensReferenceLineLayerBase {
   value?: string;
 }
 
-export type LensReferenceLineLayer = LensReferenceLineLayerBase & LensBaseLayer;
+export type LensReferenceLineLayer = LensReferenceLineLayerBase & LensBaseXYLayer;
 
 export interface LensAnnotationLayerBaseProps {
   name: string;
@@ -248,7 +252,7 @@ export interface LensAnnotationLayerBaseProps {
 }
 
 export type LensAnnotationLayer = Identity<
-  LensBaseLayer & {
+  LensBaseXYLayer & {
     type: 'annotation';
     events: Array<
       | Identity<
@@ -267,7 +271,7 @@ export type LensAnnotationLayer = Identity<
 >;
 
 export type LensSeriesLayer = Identity<
-  LensBaseLayer & {
+  LensBaseXYLayer & {
     type: 'series';
     breakdown?: LensBreakdownConfig;
     xAxis: LensBreakdownConfig;

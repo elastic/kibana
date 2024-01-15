@@ -62,9 +62,13 @@ test('generates xy chart config', async () => {
         {
           type: 'series',
           seriesType: 'bar',
-          label: 'test',
-          value: 'count',
           xAxis: '@timestamp',
+          yAxis: [
+            {
+              label: 'test',
+              value: 'count',
+            },
+          ],
         },
       ],
     },
@@ -97,7 +101,7 @@ test('generates xy chart config', async () => {
                     "fieldName": "@timestamp",
                   },
                   Object {
-                    "columnId": "metric_formula_accessor0",
+                    "columnId": "metric_formula_accessor0_0",
                     "fieldName": "count",
                     "meta": Object {
                       "type": "number",
@@ -110,7 +114,7 @@ test('generates xy chart config', async () => {
                     "fieldName": "@timestamp",
                   },
                   Object {
-                    "columnId": "metric_formula_accessor0",
+                    "columnId": "metric_formula_accessor0_0",
                     "fieldName": "count",
                     "meta": Object {
                       "type": "number",
@@ -152,7 +156,7 @@ test('generates xy chart config', async () => {
           "layers": Array [
             Object {
               "accessors": Array [
-                "metric_formula_accessor0",
+                "metric_formula_accessor0_0",
               ],
               "layerId": "layer_0",
               "layerType": "data",

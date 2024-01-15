@@ -186,8 +186,7 @@ describe('buildDatasourceStates', () => {
             dataset: {
               esql: 'from test | limit 10',
             },
-            label: 'test',
-            value: 'test',
+            yAxis: [{ label: 'test', value: 'test' }],
           },
         ],
       },
