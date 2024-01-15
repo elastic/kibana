@@ -28,9 +28,6 @@ export interface StepDetailsState {
   continuousModeDelay: string;
   destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
-  isRetentionPolicyEnabled: boolean;
-  retentionPolicyDateField: string;
-  retentionPolicyMaxAge: string;
   transformFrequency: string;
   transformSettingsMaxPageSearchSize?: number;
   transformSettingsDocsPerSecond: number | null;
@@ -40,8 +37,13 @@ export interface StepDetailsState {
 }
 
 export type StepDetailsFormState = State<
-  'description' | 'destinationIndex' | 'transformId' | 'dataViewTimeField',
-  'createDataView',
+  | 'description'
+  | 'destinationIndex'
+  | 'transformId'
+  | 'dataViewTimeField'
+  | 'retentionPolicyField'
+  | 'retentionPolicyMaxAge',
+  'createDataView' | 'retentionPolicy',
   ValidatorName
 >;
 export function getDefaultStepDetailsFormState(
@@ -57,6 +59,8 @@ export function getDefaultStepDetailsFormState(
         validator: 'transformIdValidator',
         reservedValues: existingTransforms,
       }),
+
+      // destination index
       destinationIndex: initializeFormField('destinationIndex', 'dest.index', undefined, {
         isOptional: false,
         validator: 'indexNameValidator',
@@ -65,11 +69,38 @@ export function getDefaultStepDetailsFormState(
         validator: 'stringValidator',
         section: 'createDataView',
       }),
+      // retention_policy.*
+      retentionPolicyField: initializeFormField(
+        'retentionPolicyField',
+        'retention_policy.time.field',
+        config,
+        {
+          dependsOn: ['retentionPolicyMaxAge'],
+          isNullable: false,
+          isOptional: true,
+          isOptionalInSection: false,
+          section: 'retentionPolicy',
+        }
+      ),
+      retentionPolicyMaxAge: initializeFormField(
+        'retentionPolicyMaxAge',
+        'retention_policy.time.max_age',
+        config,
+        {
+          dependsOn: ['retentionPolicyField'],
+          isNullable: false,
+          isOptional: true,
+          isOptionalInSection: false,
+          section: 'retentionPolicy',
+          validator: 'retentionPolicyMaxAgeValidator',
+        }
+      ),
     },
     formSections: {
       createDataView: initializeFormSection('createDataView', 'n/a', undefined, {
         defaultEnabled: true,
       }),
+      retentionPolicy: initializeFormSection('retentionPolicy', 'retention_policy', config),
     },
   };
 }
@@ -79,9 +110,6 @@ export function getDefaultStepDetailsState(): StepDetailsState {
     continuousModeDateField: '',
     continuousModeDelay: DEFAULT_CONTINUOUS_MODE_DELAY,
     isContinuousModeEnabled: false,
-    isRetentionPolicyEnabled: false,
-    retentionPolicyDateField: '',
-    retentionPolicyMaxAge: '',
     transformFrequency: DEFAULT_TRANSFORM_FREQUENCY,
     transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
@@ -113,14 +141,6 @@ export function applyTransformConfigToDetailsState(
     // Frequency
     if (transformConfig.frequency !== undefined) {
       state.transformFrequency = transformConfig.frequency;
-    }
-
-    // Retention policy
-    const retentionPolicyTime = transformConfig.retention_policy?.time;
-    if (retentionPolicyTime !== undefined) {
-      state.retentionPolicyDateField = retentionPolicyTime.field;
-      state.retentionPolicyMaxAge = retentionPolicyTime.max_age;
-      state.isRetentionPolicyEnabled = true;
     }
 
     // Settings

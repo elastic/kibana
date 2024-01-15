@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, type FC } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import type { Draft } from 'immer';
 
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
@@ -14,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
 import { useFormSections } from '@kbn/ml-form-utils/use_form_sections';
+import { createFormSlice, type State } from '@kbn/ml-form-utils/form_slice';
 
 import type { PostTransformsPreviewRequestSchema } from '../../../../../common/api_schemas/transforms';
 import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
@@ -23,20 +25,26 @@ import { useAppDependencies, useToastNotifications } from '../../../app_dependen
 import { useGetTransformsPreview } from '../../../hooks';
 import { ToastNotificationText } from '../../../components';
 
-import {
-  useEditTransformFlyoutContext,
-  editTransformFlyoutSlice,
-} from '../state_management/edit_transform_flyout_state';
+import { useEditTransformFlyoutContext } from '../state_management/edit_transform_flyout_state';
 import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
 
-export const EditTransformRetentionPolicy: FC = () => {
+export const TransformRetentionPolicy = <
+  FF extends string,
+  FS extends string,
+  VN extends string,
+  S extends State<FF, FS, VN>
+>({
+  slice,
+}: {
+  slice: ReturnType<typeof createFormSlice<FF, FS, VN, S>>;
+}) => {
   const dispatch = useDispatch();
   const { i18n: i18nStart, theme } = useAppDependencies();
 
   const toastNotifications = useToastNotifications();
 
   const { config, dataViewId } = useEditTransformFlyoutContext();
-  const formSections = useFormSections(editTransformFlyoutSlice.name);
+  const formSections = useFormSections(slice.name);
   const retentionPolicyField = useRetentionPolicyField();
 
   const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
@@ -89,7 +97,7 @@ export const EditTransformRetentionPolicy: FC = () => {
       <EuiFormRow
         helpText={
           isRetentionPolicyAvailable === false
-            ? i18n.translate('xpack.transform.transformList.editFlyoutFormEetentionPolicyError', {
+            ? i18n.translate('xpack.transform.RetentionPolicyError', {
                 defaultMessage:
                   'Retention policy settings are not available for indices without date fields.',
               })
@@ -97,49 +105,40 @@ export const EditTransformRetentionPolicy: FC = () => {
         }
       >
         <EuiSwitch
-          name="transformEditRetentionPolicySwitch"
-          label={i18n.translate(
-            'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
-            {
-              defaultMessage: 'Retention policy',
-            }
-          )}
+          name="transformRetentionPolicy"
+          label={i18n.translate('xpack.transform.retentionPolicySwitchLabel', {
+            defaultMessage: 'Retention policy',
+          })}
           checked={formSections.retentionPolicy.enabled}
           onChange={(e) =>
             dispatch(
-              editTransformFlyoutSlice.actions.setFormSection({
-                section: 'retentionPolicy',
+              slice.actions.setFormSection({
+                section: 'retentionPolicy' as keyof Draft<S>['formSections'],
                 enabled: e.target.checked,
               })
             )
           }
           disabled={!isRetentionPolicyAvailable}
-          data-test-subj="transformEditRetentionPolicySwitch"
+          data-test-subj="transformRetentionPolicySwitch"
         />
       </EuiFormRow>
       {formSections.retentionPolicy.enabled && (
-        <div data-test-subj="transformEditRetentionPolicyContent">
+        <div data-test-subj="transformRetentionPolicyContent">
           <EuiSpacer size="m" />
           {
             // If data view or date fields info not available
             // gracefully defaults to text input
             dataViewId ? (
               <EuiFormRow
-                label={i18n.translate(
-                  'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
-                  {
-                    defaultMessage: 'Field',
-                  }
-                )}
+                label={i18n.translate('xpack.transform.retentionPolicyFieldLabel', {
+                  defaultMessage: 'Date field for retention policy',
+                })}
                 isInvalid={retentionPolicyField.errorMessages.length > 0}
                 error={retentionPolicyField.errorMessages}
-                helpText={i18n.translate(
-                  'xpack.transform.transformList.editFlyoutFormRetentionPolicyDateFieldHelpText',
-                  {
-                    defaultMessage:
-                      'Select the date field that can be used to identify out of date documents in the destination index.',
-                  }
-                )}
+                helpText={i18n.translate('xpack.transform.retentionPolicyDateFieldHelpText', {
+                  defaultMessage:
+                    'Select the date field that can be used to identify out of date documents in the destination index.',
+                })}
               >
                 <EuiSelect
                   aria-label={i18n.translate(
@@ -148,13 +147,13 @@ export const EditTransformRetentionPolicy: FC = () => {
                       defaultMessage: 'Date field to set retention policy',
                     }
                   )}
-                  data-test-subj="transformEditFlyoutRetentionPolicyFieldSelect"
+                  data-test-subj="retentionPolicyFieldSelect"
                   options={retentionDateFieldOptions}
                   value={retentionPolicyField.value}
                   onChange={(e) =>
                     dispatch(
-                      editTransformFlyoutSlice.actions.setFormField({
-                        field: 'retentionPolicyField',
+                      slice.actions.setFormField({
+                        field: 'retentionPolicyField' as keyof Draft<S>['formFields'],
                         value: e.target.value,
                       })
                     )
@@ -168,26 +167,27 @@ export const EditTransformRetentionPolicy: FC = () => {
               </EuiFormRow>
             ) : (
               <FormTextInput
-                slice={editTransformFlyoutSlice}
-                field="retentionPolicyField"
-                label={i18n.translate(
-                  'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
-                  {
-                    defaultMessage: 'Field',
-                  }
-                )}
+                slice={slice}
+                field={'retentionPolicyField' as keyof S['formFields']}
+                label={i18n.translate('xpack.transform.retentionPolicyFieldLabel', {
+                  defaultMessage: 'Date field to set retention policy',
+                })}
               />
             )
           }
           <FormTextInput
-            slice={editTransformFlyoutSlice}
-            field="retentionPolicyMaxAge"
+            slice={slice}
+            field={'retentionPolicyMaxAge' as keyof S['formFields']}
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel',
               {
                 defaultMessage: 'Max age',
               }
             )}
+            helpText={i18n.translate('xpack.transform.retentionPolicyMaxAgeHelpText', {
+              defaultMessage:
+                'Documents that are older than the configured value will be removed from the destination index.',
+            })}
           />
         </div>
       )}

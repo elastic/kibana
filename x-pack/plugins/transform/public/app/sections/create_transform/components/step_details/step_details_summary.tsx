@@ -17,9 +17,6 @@ export const StepDetailsSummary: FC = () => {
   const {
     continuousModeDateField,
     isContinuousModeEnabled,
-    isRetentionPolicyEnabled,
-    retentionPolicyDateField,
-    retentionPolicyMaxAge,
     transformFrequency,
     transformSettingsMaxPageSearchSize,
     transformSettingsNumFailureRetries,
@@ -38,6 +35,16 @@ export const StepDetailsSummary: FC = () => {
   );
   const destinationIndex = useWizardSelector(
     (s) => s.stepDetailsForm.formFields.destinationIndex.value
+  );
+
+  const isRetentionPolicyEnabled = useWizardSelector(
+    (s) => s.stepDetailsForm.formSections.retentionPolicy.enabled
+  );
+  const retentionPolicyDateField = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.retentionPolicyField.value
+  );
+  const retentionPolicyMaxAge = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.retentionPolicyMaxAge.value
   );
 
   if (!valid) return null;

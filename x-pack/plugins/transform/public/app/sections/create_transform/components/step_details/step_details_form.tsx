@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
 
 import {
   EuiAccordion,
@@ -25,7 +26,6 @@ import { useIsFormValid } from '@kbn/ml-form-utils/use_is_form_valid';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
@@ -35,7 +35,6 @@ import { ToastNotificationText } from '../../../../components';
 import { useGetEsIngestPipelines, useGetTransformsPreview } from '../../../../hooks';
 import {
   isContinuousModeDelay,
-  isRetentionPolicyMaxAge,
   isTransformWizardFrequency,
   integerRangeMinus1To100Validator,
   transformSettingsPageSearchSizeValidator,
@@ -47,11 +46,14 @@ import { stepDetailsFormSlice } from '../../state_management/step_details_slice'
 
 import { useDataView } from '../wizard/wizard';
 
+import { TransformRetentionPolicy } from '../../../edit_transform/components/transform_retention_policy';
+
 import { TransformDestinationIndexForm } from './transform_destination_index_form';
 import { TransformCreateDataViewForm } from './transform_create_data_view_form';
 import { TransformLatestCallout } from './transform_latest_callout';
 
 export const StepDetailsForm: FC = () => {
+  const dispatch = useDispatch();
   const dataView = useDataView();
 
   const { i18n: i18nStart, theme } = useAppDependencies();
@@ -63,9 +65,6 @@ export const StepDetailsForm: FC = () => {
   const isContinuousModeEnabled = useWizardSelector((s) => s.stepDetails.isContinuousModeEnabled);
   const continuousModeDelay = useWizardSelector((s) => s.stepDetails.continuousModeDelay);
   const continuousModeDateField = useWizardSelector((s) => s.stepDetails.continuousModeDateField);
-  const isRetentionPolicyEnabled = useWizardSelector((s) => s.stepDetails.isRetentionPolicyEnabled);
-  const retentionPolicyDateField = useWizardSelector((s) => s.stepDetails.retentionPolicyDateField);
-  const retentionPolicyMaxAge = useWizardSelector((s) => s.stepDetails.retentionPolicyMaxAge);
   const transformFrequency = useWizardSelector((s) => s.stepDetails.transformFrequency);
   const transformSettingsMaxPageSearchSize = useWizardSelector(
     (s) => s.stepDetails.transformSettingsMaxPageSearchSize
@@ -78,9 +77,6 @@ export const StepDetailsForm: FC = () => {
     setContinuousModeEnabled,
     setContinuousModeDelay,
     setContinuousModeDateField,
-    setRetentionPolicyEnabled,
-    setRetentionPolicyDateField,
-    setRetentionPolicyMaxAge,
     setTransformFrequency,
     setTransformSettingsMaxPageSearchSize,
     setTransformSettingsNumFailureRetries,
@@ -158,30 +154,11 @@ export const StepDetailsForm: FC = () => {
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
   useEffect(() => {
     if (!isRetentionPolicyAvailable) {
-      setRetentionPolicyDateField('');
+      dispatch(
+        stepDetailsFormSlice.actions.setFormField({ field: 'retentionPolicyField', value: '' })
+      );
     }
   }, []);
-
-  const retentionPolicyMaxAgeEmpty = retentionPolicyMaxAge === '';
-  const isRetentionPolicyMaxAgeValid = isRetentionPolicyMaxAge(retentionPolicyMaxAge);
-
-  useEffect(() => {
-    // Reset retention policy settings when the user disables the whole option
-    if (!isRetentionPolicyEnabled) {
-      setRetentionPolicyDateField(
-        isRetentionPolicyAvailable ? destIndexAvailableTimeFields[0] : ''
-      );
-      setRetentionPolicyMaxAge('');
-    }
-
-    // When retention policy is first enabled, pick a default option
-    if (isRetentionPolicyAvailable && isRetentionPolicyEnabled && retentionPolicyDateField === '') {
-      // If a time field '@timestamp' exists, prioritize that
-      const prioritizeTimestamp = destIndexAvailableTimeFields.find((d) => d === '@timestamp');
-      // else pick the first available option
-      setRetentionPolicyDateField(prioritizeTimestamp ?? destIndexAvailableTimeFields[0]);
-    }
-  }, [isRetentionPolicyEnabled, isRetentionPolicyAvailable, destIndexAvailableTimeFields]);
 
   const isTransformFrequencyValid = isTransformWizardFrequency(transformFrequency);
 
@@ -201,13 +178,7 @@ export const StepDetailsForm: FC = () => {
     isTransformFrequencyValid &&
     isTransformSettingsMaxPageSearchSizeValid &&
     // (!dataViewTitleExists || !createDataView) &&
-    (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid)) &&
-    (!isRetentionPolicyAvailable ||
-      !isRetentionPolicyEnabled ||
-      (isRetentionPolicyAvailable &&
-        isRetentionPolicyEnabled &&
-        !retentionPolicyMaxAgeEmpty &&
-        isRetentionPolicyMaxAgeValid));
+    (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid));
 
   useEffect(() => {
     setValid(valid);
@@ -372,91 +343,7 @@ export const StepDetailsForm: FC = () => {
           </>
         )}
 
-        {/* Retention policy */}
-        <EuiFormRow
-          helpText={
-            isRetentionPolicyAvailable === false
-              ? i18n.translate('xpack.transform.stepDetailsForm.retentionPolicyError', {
-                  defaultMessage:
-                    'Retention policy settings are not available for indices without date fields.',
-                })
-              : ''
-          }
-        >
-          <EuiSwitch
-            name="transformRetentionPolicy"
-            label={i18n.translate('xpack.transform.stepCreateForm.retentionPolicyLabel', {
-              defaultMessage: 'Retention policy',
-            })}
-            checked={isRetentionPolicyEnabled === true}
-            onChange={() => setRetentionPolicyEnabled(!isRetentionPolicyEnabled)}
-            disabled={isRetentionPolicyAvailable === false}
-            data-test-subj="transformRetentionPolicySwitch"
-          />
-        </EuiFormRow>
-        {isRetentionPolicyEnabled && isRetentionPolicyAvailable && (
-          <>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.transform.stepDetailsForm.retentionPolicyDateFieldLabel',
-                {
-                  defaultMessage: 'Date field for retention policy',
-                }
-              )}
-              helpText={i18n.translate(
-                'xpack.transform.stepDetailsForm.retentionPolicyDateFieldHelpText',
-                {
-                  defaultMessage:
-                    'Select the date field that can be used to identify out of date documents in the destination index.',
-                }
-              )}
-            >
-              <EuiSelect
-                options={destIndexAvailableTimeFields.map((text: string) => ({ text }))}
-                value={retentionPolicyDateField}
-                onChange={(e) => setRetentionPolicyDateField(e.target.value)}
-                data-test-subj="transformRetentionPolicyDateFieldSelect"
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate('xpack.transform.stepDetailsForm.retentionPolicyMaxAgeLabel', {
-                defaultMessage: 'Max age',
-              })}
-              isInvalid={!retentionPolicyMaxAgeEmpty && !isRetentionPolicyMaxAgeValid}
-              error={
-                !retentionPolicyMaxAgeEmpty &&
-                !isRetentionPolicyMaxAgeValid && [retentionPolicyMaxAgeInvalidErrorMessage]
-              }
-              helpText={i18n.translate(
-                'xpack.transform.stepDetailsForm.retentionPolicyMaxAgeHelpText',
-                {
-                  defaultMessage:
-                    'Documents that are older than the configured value will be removed from the destination index.',
-                }
-              )}
-            >
-              <EuiFieldText
-                placeholder={i18n.translate(
-                  'xpack.transform.stepDetailsForm.retentionPolicyMaxAgePlaceholderText',
-                  {
-                    defaultMessage: 'max_age e.g. {exampleValue}',
-                    values: { exampleValue: '7d' },
-                  }
-                )}
-                value={retentionPolicyMaxAge}
-                onChange={(e) => setRetentionPolicyMaxAge(e.target.value)}
-                aria-label={i18n.translate(
-                  'xpack.transform.stepDetailsForm.retentionPolicyMaxAgeAriaLabel',
-                  {
-                    defaultMessage: 'Choose a max age.',
-                  }
-                )}
-                isInvalid={!retentionPolicyMaxAgeEmpty && !isRetentionPolicyMaxAgeValid}
-                data-test-subj="transformRetentionPolicyMaxAgeInput"
-              />
-            </EuiFormRow>
-          </>
-        )}
+        <TransformRetentionPolicy slice={stepDetailsFormSlice} />
 
         <EuiSpacer size="l" />
 

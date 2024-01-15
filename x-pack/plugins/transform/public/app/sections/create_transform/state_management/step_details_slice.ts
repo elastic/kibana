@@ -40,15 +40,6 @@ export const stepDetailsSlice = createSlice({
     setContinuousModeDateField: (state, action: PayloadAction<string>) => {
       state.continuousModeDateField = action.payload;
     },
-    setRetentionPolicyEnabled: (state, action: PayloadAction<boolean>) => {
-      state.isRetentionPolicyEnabled = action.payload;
-    },
-    setRetentionPolicyDateField: (state, action: PayloadAction<string>) => {
-      state.retentionPolicyDateField = action.payload;
-    },
-    setRetentionPolicyMaxAge: (state, action: PayloadAction<string>) => {
-      state.retentionPolicyMaxAge = action.payload;
-    },
     setTransformFrequency: (state, action: PayloadAction<string>) => {
       state.transformFrequency = action.payload;
     },
