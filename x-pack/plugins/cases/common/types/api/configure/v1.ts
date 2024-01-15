@@ -16,7 +16,7 @@ import { CustomFieldTextTypeRt, CustomFieldToggleTypeRt } from '../../domain';
 import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, ClosureTypeRt } from '../../domain/configure/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
-import { CaseCustomFieldTextWithValidationValueRt } from '../case/v1';
+import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
 
 export const CustomFieldConfigurationWithoutTypeRt = rt.strict({
   /**
