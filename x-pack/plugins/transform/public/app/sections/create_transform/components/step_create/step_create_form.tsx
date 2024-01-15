@@ -61,7 +61,9 @@ export const StepCreateForm: FC = () => {
     (s) => s.stepDetailsForm.formSections.createDataView.enabled
   );
   const transformId = useWizardSelector((s) => s.stepDetailsForm.formFields.transformId.value);
-  const timeFieldName = useWizardSelector((s) => s.stepDetails.dataViewTimeField);
+  const timeFieldName = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.dataViewTimeField.value
+  );
 
   const transformConfig = useWizardSelector((s) => selectCreateTransformRequestBody(s, dataView));
 

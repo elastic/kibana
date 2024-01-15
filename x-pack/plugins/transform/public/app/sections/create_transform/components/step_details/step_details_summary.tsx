@@ -24,13 +24,15 @@ export const StepDetailsSummary: FC = () => {
     transformSettingsMaxPageSearchSize,
     transformSettingsNumFailureRetries,
     destinationIngestPipeline,
-    dataViewTimeField,
     valid,
   } = useWizardSelector((s) => s.stepDetails);
   const createDataView = useWizardSelector(
     (s) => s.stepDetailsForm.formSections.createDataView.enabled
   );
   const transformId = useWizardSelector((s) => s.stepDetailsForm.formFields.transformId.value);
+  const dataViewTimeField = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.dataViewTimeField.value
+  );
   const transformDescription = useWizardSelector(
     (s) => s.stepDetailsForm.formFields.description.value
   );

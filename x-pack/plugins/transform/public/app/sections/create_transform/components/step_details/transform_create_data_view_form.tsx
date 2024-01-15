@@ -18,7 +18,7 @@ import { useGetDataViewTitles, useGetTransformsPreview } from '../../../../hooks
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
 import { useDataView } from '../wizard/wizard';
@@ -35,12 +35,12 @@ export const TransformCreateDataViewForm: FC = () => {
   const createDataView = useWizardSelector(
     (s) => s.stepDetailsForm.formSections.createDataView.enabled
   );
-  const dataViewTimeField = useWizardSelector((s) => s.stepDetails.dataViewTimeField);
+  const dataViewTimeField = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.dataViewTimeField.value
+  );
   const destinationIndex = useWizardSelector(
     (s) => s.stepDetailsForm.formFields.destinationIndex.value
   );
-
-  const { setDataViewTimeField } = useWizardActions();
 
   const previewRequest = useWizardSelector((state) => selectPreviewRequest(state, dataView));
 
@@ -60,11 +60,14 @@ export const TransformCreateDataViewForm: FC = () => {
 
   useEffect(
     function resetDataViewTimeField() {
-      setDataViewTimeField(destIndexAvailableTimeFields[0]);
+      dispatch(
+        stepDetailsFormSlice.actions.setFormField({
+          field: 'dataViewTimeField',
+          value: destIndexAvailableTimeFields[0],
+        })
+      );
     },
-    // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [destIndexAvailableTimeFields]
+    [dispatch, destIndexAvailableTimeFields]
   );
 
   useEffect(() => {
@@ -94,9 +97,14 @@ export const TransformCreateDataViewForm: FC = () => {
       // this is to account for undefined when user chooses not to use a date field
       const timeField = destIndexAvailableTimeFields.find((col) => col === value);
 
-      setDataViewTimeField(timeField);
+      dispatch(
+        stepDetailsFormSlice.actions.setFormField({
+          field: 'dataViewTimeField',
+          value: timeField ?? '',
+        })
+      );
     },
-    [setDataViewTimeField, destIndexAvailableTimeFields]
+    [dispatch, destIndexAvailableTimeFields]
   );
 
   const canCreateDataView = useMemo(

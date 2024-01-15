@@ -36,12 +36,11 @@ export interface StepDetailsState {
   transformSettingsDocsPerSecond: number | null;
   transformSettingsNumFailureRetries?: number | string;
   valid: boolean;
-  dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;
 }
 
 export type StepDetailsFormState = State<
-  'description' | 'destinationIndex' | 'transformId',
+  'description' | 'destinationIndex' | 'transformId' | 'dataViewTimeField',
   'createDataView',
   ValidatorName
 >;
@@ -53,7 +52,7 @@ export function getDefaultStepDetailsFormState(
     formFields: {
       // top level attributes
       description: initializeFormField('description', 'description', config),
-      transformId: initializeFormField('transformId', '', undefined, {
+      transformId: initializeFormField('transformId', 'n/a', undefined, {
         isOptional: false,
         validator: 'transformIdValidator',
         reservedValues: existingTransforms,
@@ -61,6 +60,9 @@ export function getDefaultStepDetailsFormState(
       destinationIndex: initializeFormField('destinationIndex', 'dest.index', config, {
         isOptional: false,
         validator: 'indexNameValidator',
+      }),
+      dataViewTimeField: initializeFormField('dataViewTimeField', 'n/a', config, {
+        validator: 'stringValidator',
       }),
     },
     formSections: {
@@ -85,7 +87,6 @@ export function getDefaultStepDetailsState(): StepDetailsState {
     transformSettingsNumFailureRetries: undefined,
     destinationIngestPipeline: '',
     valid: false,
-    dataViewTimeField: undefined,
   };
 }
 
