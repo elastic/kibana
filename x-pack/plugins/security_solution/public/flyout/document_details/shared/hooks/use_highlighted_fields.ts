@@ -8,6 +8,10 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find, isEmpty } from 'lodash/fp';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import {
+  SENTINEL_ONE_AGENT_ID_FIELD,
+  isAlertFromSentinelOneEvent,
+} from '../../../../common/utils/sentinelone_alert_check';
 import { isAlertFromEndpointEvent } from '../../../../common/utils/endpoint_alert_check';
 import {
   getEventCategoriesFromData,
@@ -95,6 +99,14 @@ export const useHighlightedFields = ({
     if (
       field.id === 'agent.id' &&
       !isAlertFromEndpointEvent({ data: dataFormattedForFieldBrowser })
+    ) {
+      return acc;
+    }
+
+    // if the field is observer.serial_number and the event is not a sentinel one event we skip it
+    if (
+      field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
+      !isAlertFromSentinelOneEvent({ data: dataFormattedForFieldBrowser })
     ) {
       return acc;
     }
