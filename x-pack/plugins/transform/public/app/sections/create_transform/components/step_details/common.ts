@@ -42,7 +42,6 @@ export interface StepDetailsState {
   valid: boolean;
   dataViewTimeField?: string | undefined;
   _meta?: Record<string, unknown>;
-  apiErrorMessage?: string;
 }
 
 export type StepDetailsFormState = State<

@@ -7,28 +7,23 @@
 
 import React, { FC, useEffect, useMemo } from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FormTextArea } from '@kbn/ml-form-utils/components/form_text_area';
-import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
-import { useIsFormValid } from '@kbn/ml-form-utils/use_is_form_valid';
-
 import {
   EuiAccordion,
   EuiComboBox,
-  EuiLink,
   EuiSwitch,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormTextArea } from '@kbn/ml-form-utils/components/form_text_area';
+import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
+import { useIsFormValid } from '@kbn/ml-form-utils/use_is_form_valid';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
@@ -37,12 +32,7 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
-import {
-  useDocumentationLinks,
-  useGetDataViewTitles,
-  useGetEsIngestPipelines,
-  useGetTransformsPreview,
-} from '../../../../hooks';
+import { useGetEsIngestPipelines, useGetTransformsPreview } from '../../../../hooks';
 import {
   isContinuousModeDelay,
   isRetentionPolicyMaxAge,
@@ -50,7 +40,6 @@ import {
   integerRangeMinus1To100Validator,
   transformSettingsPageSearchSizeValidator,
 } from '../../../../common/validators';
-import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
@@ -59,24 +48,18 @@ import { stepDetailsFormSlice } from '../../state_management/step_details_slice'
 import { useDataView } from '../wizard/wizard';
 
 import { TransformDestinationIndexForm } from './transform_destination_index_form';
+import { TransformCreateDataViewForm } from './transform_create_data_view_form';
+import { TransformLatestCallout } from './transform_latest_callout';
 
 export const StepDetailsForm: FC = () => {
   const dataView = useDataView();
-  const stepDefineState = useWizardSelector((s) => s.stepDefine);
 
-  const { application, i18n: i18nStart, theme } = useAppDependencies();
-  const { capabilities } = application;
+  const { i18n: i18nStart, theme } = useAppDependencies();
   const toastNotifications = useToastNotifications();
-  const { esIndicesCreateIndex } = useDocumentationLinks();
 
-  const destinationIndex = useWizardSelector(
-    (s) => s.stepDetailsForm.formFields.destinationIndex.value
-  );
   const destinationIngestPipeline = useWizardSelector(
     (s) => s.stepDetails.destinationIngestPipeline
   );
-  const createDataView = useWizardSelector((s) => s.stepDetails.createDataView);
-  const dataViewTimeField = useWizardSelector((s) => s.stepDetails.dataViewTimeField);
   const isContinuousModeEnabled = useWizardSelector((s) => s.stepDetails.isContinuousModeEnabled);
   const continuousModeDelay = useWizardSelector((s) => s.stepDetails.continuousModeDelay);
   const continuousModeDateField = useWizardSelector((s) => s.stepDetails.continuousModeDateField);
@@ -91,9 +74,7 @@ export const StepDetailsForm: FC = () => {
     (s) => s.stepDetails.transformSettingsNumFailureRetries
   );
   const {
-    setDataViewTimeField,
     setDestinationIngestPipeline,
-    setCreateDataView,
     setContinuousModeEnabled,
     setContinuousModeDelay,
     setContinuousModeDateField,
@@ -107,19 +88,6 @@ export const StepDetailsForm: FC = () => {
   } = useWizardActions();
 
   const isFormValid = useIsFormValid(stepDetailsFormSlice.name);
-
-  const canCreateDataView = useMemo(
-    () =>
-      capabilities.savedObjectsManagement?.edit === true ||
-      capabilities.indexPatterns?.save === true,
-    [capabilities]
-  );
-
-  useEffect(() => {
-    if (!canCreateDataView) {
-      setCreateDataView(false);
-    }
-  });
 
   const previewRequest = useWizardSelector((state) => selectPreviewRequest(state, dataView));
 
@@ -136,31 +104,6 @@ export const StepDetailsForm: FC = () => {
     );
     return timeFields;
   }, [transformPreview]);
-
-  useEffect(
-    function resetDataViewTimeField() {
-      setDataViewTimeField(destIndexAvailableTimeFields[0]);
-    },
-    // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [destIndexAvailableTimeFields]
-  );
-
-  const onTimeFieldChanged = React.useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const value = e.target.value;
-      // If the value is an empty string, it's not a valid selection
-      if (value === '') {
-        return;
-      }
-      // Find the time field based on the selected value
-      // this is to account for undefined when user chooses not to use a date field
-      const timeField = destIndexAvailableTimeFields.find((col) => col === value);
-
-      setDataViewTimeField(timeField);
-    },
-    [setDataViewTimeField, destIndexAvailableTimeFields]
-  );
 
   useEffect(() => {
     if (transformsPreviewError !== null) {
@@ -196,22 +139,6 @@ export const StepDetailsForm: FC = () => {
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [esIngestPipelinesError]);
-
-  const { error: dataViewTitlesError, data: dataViewTitles } = useGetDataViewTitles();
-
-  useEffect(() => {
-    if (dataViewTitlesError !== null) {
-      toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingDataViewTitles', {
-          defaultMessage: 'An error occurred getting the existing data view titles:',
-        }),
-        text: toMountPoint(<ToastNotificationText text={getErrorMessage(dataViewTitlesError)} />, {
-          theme,
-          i18n: i18nStart,
-        }),
-      });
-    }
-  }, [dataViewTitlesError]);
 
   const sourceIndexDateFieldNames = dataView.fields
     .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
@@ -256,8 +183,6 @@ export const StepDetailsForm: FC = () => {
     }
   }, [isRetentionPolicyEnabled, isRetentionPolicyAvailable, destIndexAvailableTimeFields]);
 
-  const dataViewTitleExists = dataViewTitles?.some((name) => destinationIndex === name) ?? false;
-
   const isTransformFrequencyValid = isTransformWizardFrequency(transformFrequency);
 
   const transformSettingsMaxPageSearchSizeErrors = transformSettingsPageSearchSizeValidator(
@@ -275,7 +200,7 @@ export const StepDetailsForm: FC = () => {
     isFormValid &&
     isTransformFrequencyValid &&
     isTransformSettingsMaxPageSearchSizeValid &&
-    (!dataViewTitleExists || !createDataView) &&
+    // (!dataViewTitleExists || !createDataView) &&
     (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid)) &&
     (!isRetentionPolicyAvailable ||
       !isRetentionPolicyEnabled ||
@@ -355,39 +280,9 @@ export const StepDetailsForm: FC = () => {
           </EuiFormRow>
         )}
 
-        {stepDefineState && stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
-          <>
-            <EuiSpacer size={'m'} />
-            <EuiCallOut color="warning" iconType="warning" size="m">
-              <p>
-                <FormattedMessage
-                  id="xpack.transform.stepDetailsForm.destinationIndexWarning"
-                  defaultMessage="Before you start the transform, use index templates or the {docsLink} to ensure the mappings for your destination index match the source index. Otherwise, the destination index is created with dynamic mappings. If the transform fails, check the messages tab on the Stack Management page for errors."
-                  values={{
-                    docsLink: (
-                      <EuiLink href={esIndicesCreateIndex} target="_blank">
-                        {i18n.translate('xpack.transform.stepDetailsForm.createIndexAPI', {
-                          defaultMessage: 'Create index API',
-                        })}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size={'m'} />
-          </>
-        ) : null}
+        <TransformLatestCallout />
 
-        <CreateDataViewForm
-          canCreateDataView={canCreateDataView}
-          createDataView={createDataView}
-          dataViewTitleExists={dataViewTitleExists}
-          setCreateDataView={setCreateDataView}
-          dataViewAvailableTimeFields={destIndexAvailableTimeFields}
-          dataViewTimeField={dataViewTimeField}
-          onTimeFieldChanged={onTimeFieldChanged}
-        />
+        <TransformCreateDataViewForm />
 
         {/* Continuous mode */}
         <EuiFormRow
