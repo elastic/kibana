@@ -11,26 +11,50 @@ import { TestProviders } from '../../../../common/mock';
 import { times } from 'lodash/fp';
 import { RiskInputsTab } from './risk_inputs';
 import { alertDataMock } from '../mocks';
+import { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
 
-const mockUseAlertsByIds = jest.fn().mockReturnValue({ loading: false, data: [] });
+const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
 
-jest.mock('../../../../common/containers/alerts/use_alerts_by_ids', () => ({
-  useAlertsByIds: () => mockUseAlertsByIds(),
+jest.mock('../../../hooks/use_risk_contributing_alerts', () => ({
+  useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
 }));
 
-const ALERT_IDS = ['123'];
+const mockUseRiskScore = jest.fn().mockReturnValue({ loading: false, data: [] });
+
+jest.mock('../../../api/hooks/use_risk_score', () => ({
+  useRiskScore: () => mockUseRiskScore(),
+}));
+
+const riskScore = {
+  '@timestamp': '2021-08-19T16:00:00.000Z',
+  user: {
+    name: 'elastic',
+    risk: {
+      rule_risks: [],
+      calculated_score_norm: 100,
+      multipliers: [],
+      calculated_level: RiskSeverity.critical,
+    },
+  },
+};
 
 describe('RiskInputsTab', () => {
   it('renders', () => {
-    mockUseAlertsByIds.mockReturnValue({
+    mockUseRiskContributingAlerts.mockReturnValue({
       loading: false,
       error: false,
       data: [alertDataMock],
     });
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScore],
+    });
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab alertIds={ALERT_IDS} />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
       </TestProviders>
     );
 
@@ -41,7 +65,6 @@ describe('RiskInputsTab', () => {
   });
 
   it('paginates', () => {
-    const alertsIds = times((number) => number.toString(), 11);
     const alerts = times(
       (number) => ({
         ...alertDataMock,
@@ -50,15 +73,20 @@ describe('RiskInputsTab', () => {
       11
     );
 
-    mockUseAlertsByIds.mockReturnValue({
+    mockUseRiskContributingAlerts.mockReturnValue({
       loading: false,
       error: false,
       data: alerts,
     });
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScore],
+    });
 
     const { getAllByTestId, getByLabelText } = render(
       <TestProviders>
-        <RiskInputsTab alertIds={alertsIds} />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
       </TestProviders>
     );
 

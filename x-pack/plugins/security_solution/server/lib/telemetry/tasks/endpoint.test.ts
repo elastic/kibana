@@ -56,4 +56,29 @@ describe('endpoint telemetry task test', () => {
       1
     );
   });
+
+  test('endpoint telemetry task should fetch endpoint data even if fetchPolicyConfigs throws an error', async () => {
+    const testTaskExecutionPeriod = {
+      last: new Date().toISOString(),
+      current: new Date().toISOString(),
+    };
+    const mockTelemetryEventsSender = createMockTelemetryEventsSender();
+    mockTelemetryEventsSender.getTelemetryUsageCluster = jest
+      .fn()
+      .mockReturnValue(telemetryUsageCounter);
+    const mockTelemetryReceiver = createMockTelemetryReceiver();
+    mockTelemetryReceiver.fetchPolicyConfigs = jest.fn().mockRejectedValueOnce(new Error());
+    const telemetryEndpointTaskConfig = createTelemetryEndpointTaskConfig(1);
+
+    await telemetryEndpointTaskConfig.runTask(
+      'test-id',
+      logger,
+      mockTelemetryReceiver,
+      mockTelemetryEventsSender,
+      testTaskExecutionPeriod
+    );
+
+    expect(mockTelemetryReceiver.fetchPolicyConfigs).toHaveBeenCalled();
+    expect(mockTelemetryEventsSender.sendOnDemand).toHaveBeenCalled();
+  });
 });
