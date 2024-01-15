@@ -70,7 +70,7 @@ interface Props {
   tableSearchBar: {
     fieldsToSearch: string[];
     maxCountExceeded: boolean;
-    isSearchQueryActive: boolean;
+    isSearchSideSearchQueryActive: boolean;
     placeholder: string;
     onChangeSearchQuery: (searchQuery: string) => void;
     onChangeCurrentPage: (page: CurrentPage<ErrorGroupItem>) => void;
@@ -266,27 +266,25 @@ function ErrorGroupList({
   ]);
 
   return (
-    <>
-      <ManagedTable
-        noItemsMessage={
-          isLoading
-            ? i18n.translate('xpack.apm.errorsTable.loading', {
-                defaultMessage: 'Loading...',
-              })
-            : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-                defaultMessage: 'No errors found',
-              })
-        }
-        items={items}
-        columns={columns}
-        initialSortField={initialSortField}
-        initialSortDirection={initialSortDirection}
-        sortItems={false}
-        initialPageSize={25}
-        isLoading={isLoading}
-        tableSearchBar={tableSearchBar}
-      />
-    </>
+    <ManagedTable
+      noItemsMessage={
+        isLoading
+          ? i18n.translate('xpack.apm.errorsTable.loading', {
+              defaultMessage: 'Loading...',
+            })
+          : i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
+              defaultMessage: 'No errors found',
+            })
+      }
+      items={items}
+      columns={columns}
+      initialSortField={initialSortField}
+      initialSortDirection={initialSortDirection}
+      sortItems={false}
+      initialPageSize={25}
+      isLoading={isLoading}
+      tableSearchBar={tableSearchBar}
+    />
   );
 }
 

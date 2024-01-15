@@ -50,7 +50,7 @@ export interface ServiceTransactionGroupsResponse {
   maxCountExceeded: boolean;
   transactionOverflowCount: number;
   hasActiveAlerts: boolean;
-  isSearchQueryActive: boolean;
+  isSearchSideSearchQueryActive: boolean;
 }
 
 export async function getServiceTransactionGroups({
@@ -182,6 +182,6 @@ export async function getServiceTransactionGroups({
     transactionOverflowCount:
       response.aggregations?.transaction_overflow_count.value ?? 0,
     hasActiveAlerts: false,
-    isSearchQueryActive: !!searchQuery,
+    isSearchSideSearchQueryActive: !!searchQuery,
   };
 }

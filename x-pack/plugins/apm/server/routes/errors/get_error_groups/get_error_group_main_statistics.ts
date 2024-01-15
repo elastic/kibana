@@ -41,7 +41,7 @@ export interface ErrorGroupMainStatisticsResponse {
     type: string | undefined;
   }>;
   maxCountExceeded: boolean;
-  isSearchQueryActive: boolean;
+  isSearchSideSearchQueryActive: boolean;
 }
 
 export async function getErrorGroupMainStatistics({
@@ -178,6 +178,6 @@ export async function getErrorGroupMainStatistics({
   return {
     errorGroups,
     maxCountExceeded,
-    isSearchQueryActive: !!searchQuery,
+    isSearchSideSearchQueryActive: !!searchQuery,
   };
 }

@@ -294,7 +294,7 @@ interface Props {
   serviceOverflowCount: number;
   maxCountExceeded: boolean;
   onChangeSearchQuery: (searchQuery: string) => void;
-  isSearchQueryActive: boolean;
+  isSearchSideSearchQueryActive: boolean;
   onChangeCurrentPage: (page: CurrentPage<ServiceListItem>) => void;
 }
 export function ServiceList({
@@ -313,7 +313,7 @@ export function ServiceList({
   serviceOverflowCount,
   maxCountExceeded,
   onChangeSearchQuery,
-  isSearchQueryActive,
+  isSearchSideSearchQueryActive,
   onChangeCurrentPage,
 }: Props) {
   const breakpoints = useBreakpoints();
@@ -358,7 +358,7 @@ export function ServiceList({
     return {
       fieldsToSearch: ['serviceName'],
       maxCountExceeded,
-      isSearchQueryActive,
+      isSearchSideSearchQueryActive,
       onChangeSearchQuery,
       onChangeCurrentPage,
       placeholder: i18n.translate(
@@ -367,7 +367,7 @@ export function ServiceList({
       ),
     };
   }, [
-    isSearchQueryActive,
+    isSearchSideSearchQueryActive,
     maxCountExceeded,
     onChangeCurrentPage,
     onChangeSearchQuery,

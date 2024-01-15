@@ -26,7 +26,7 @@ export interface ServicesItemsResponse {
   items: MergedServiceStat[];
   maxCountExceeded: boolean;
   serviceOverflowCount: number;
-  isSearchQueryActive: boolean;
+  isSearchSideSearchQueryActive: boolean;
 }
 
 export async function getServicesItems({
@@ -80,7 +80,7 @@ export async function getServicesItems({
       {
         services: servicesWithoutTransactions,
         maxCountExceeded,
-        isSearchQueryActive,
+        isSearchSideSearchQueryActive,
       },
       healthStatuses,
       alertCounts,
@@ -113,7 +113,7 @@ export async function getServicesItems({
         }) ?? [],
       maxCountExceeded,
       serviceOverflowCount,
-      isSearchQueryActive,
+      isSearchSideSearchQueryActive,
     };
   });
 }

@@ -278,8 +278,8 @@ export function ServiceInventory() {
             initialPageSize={INITIAL_PAGE_SIZE}
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
-            isSearchQueryActive={
-              mainStatisticsFetch.data?.isSearchQueryActive ?? false
+            isSearchSideSearchQueryActive={
+              mainStatisticsFetch.data?.isSearchSideSearchQueryActive ?? false
             }
             maxCountExceeded={
               mainStatisticsFetch.data?.maxCountExceeded ?? false

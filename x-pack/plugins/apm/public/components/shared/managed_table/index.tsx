@@ -49,7 +49,7 @@ interface Props<T extends object> {
     isEnabled?: boolean;
     fieldsToSearch: string[];
     maxCountExceeded: boolean;
-    isSearchQueryActive: boolean;
+    isSearchSideSearchQueryActive: boolean;
     placeholder: string;
     onChangeSearchQuery: (searchQuery: string) => void;
     onChangeCurrentPage: (page: CurrentPage<T>) => void;
@@ -93,7 +93,7 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
       isEnabled: false,
       fieldsToSearch: [],
       maxCountExceeded: false,
-      isSearchQueryActive: false,
+      isSearchSideSearchQueryActive: false,
       placeholder: 'Search...',
       onChangeSearchQuery: () => {},
       onChangeCurrentPage: () => {},
@@ -225,7 +225,7 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
           tableSearchBar.fieldsToSearch as Array<keyof T & string>
         }
         maxCountExceeded={tableSearchBar.maxCountExceeded}
-        isServerSearchQueryActive={tableSearchBar.isSearchQueryActive}
+        isServerSearchQueryActive={tableSearchBar.isSearchSideSearchQueryActive}
         onChangeSearchQuery={onChangeSearchQuery}
         tableOptions={tableOptions}
         onChangeCurrentPage={onChangeCurrentPage}
