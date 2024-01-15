@@ -15,6 +15,7 @@ export default createTestConfig({
   ],
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'Entity Analytics API Integration Tests -  Serverless - Risk Engine',
+    reportName:
+      'Entity Analytics - Risk Engine Integration Tests - Serverless Env - Complete License',
   },
 });
