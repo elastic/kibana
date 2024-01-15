@@ -70,7 +70,11 @@ export const useLensSuggestions = ({
   if (externalVisContext) {
     const matchingSuggestion = allSuggestions.find(
       (suggestion) =>
-        suggestion.visualizationId === externalVisContext.attributes?.visualizationType
+        suggestion.visualizationId === externalVisContext.attributes?.visualizationType &&
+        // @ts-expect-error visualization state has different structure between vis types
+        suggestion.visualizationState?.shape ===
+          // @ts-expect-error visualization state has different structure between vis types
+          externalVisContext.attributes?.state?.visualization?.shape
     );
 
     currentSuggestion = matchingSuggestion || currentSuggestion;
