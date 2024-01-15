@@ -99,7 +99,7 @@ describe('LicenseExpirationRule', () => {
       jest.useRealTimers();
     });
 
-    it('should fire actions', async () => {
+    it('should fire action', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2023-03-30T00:00:00.000Z'));
       const alert = new LicenseExpirationRule();
       const type = alert.getRuleType();

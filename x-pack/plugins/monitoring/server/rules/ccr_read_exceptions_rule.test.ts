@@ -133,7 +133,7 @@ describe('CCRReadExceptionsRule', () => {
       jest.resetAllMocks();
     });
 
-    it('should fire actions', async () => {
+    it('should fire action', async () => {
       const rule = new CCRReadExceptionsRule() as ICCRReadExceptionsRuleMock;
       const type = rule.getRuleType();
       await type.executor({

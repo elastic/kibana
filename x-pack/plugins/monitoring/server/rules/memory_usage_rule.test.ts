@@ -97,7 +97,7 @@ describe('MemoryUsageRule', () => {
       jest.resetAllMocks();
     });
 
-    it('should fire actions', async () => {
+    it('should fire action', async () => {
       const rule = new MemoryUsageRule();
       const type = rule.getRuleType();
       await type.executor({

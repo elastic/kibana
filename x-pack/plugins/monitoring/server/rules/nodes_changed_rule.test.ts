@@ -142,7 +142,7 @@ describe('NodesChangedAlert', () => {
       jest.resetAllMocks();
     });
 
-    it('should fire actions when nodes change', async () => {
+    it('should fire action when nodes change', async () => {
       (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
         return nodesChanged;
       });
@@ -217,7 +217,7 @@ describe('NodesChangedAlert', () => {
         },
       });
     });
-    it('should fire actions when nodes added, changed, and removed', async () => {
+    it('should fire action when nodes added, changed, and removed', async () => {
       (fetchNodesFromClusterStats as jest.Mock).mockImplementation(() => {
         return nodesAddedChangedRemoved;
       });

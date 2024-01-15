@@ -99,7 +99,7 @@ describe('ElasticsearchVersionMismatchAlert', () => {
       jest.resetAllMocks();
     });
 
-    it('should fire actions', async () => {
+    it('should fire action', async () => {
       const rule = new ElasticsearchVersionMismatchRule();
       const type = rule.getRuleType();
       await type.executor({

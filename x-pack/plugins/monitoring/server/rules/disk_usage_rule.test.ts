@@ -109,7 +109,7 @@ describe('DiskUsageRule', () => {
       jest.resetAllMocks();
     });
 
-    it('should fire actions', async () => {
+    it('should fire action', async () => {
       const rule = new DiskUsageRule() as IDiskUsageAlertMock;
       const type = rule.getRuleType();
       await type.executor({
