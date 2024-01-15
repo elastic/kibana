@@ -15,10 +15,7 @@ import {
   updateOptionsSchema,
   createResultSchema,
 } from '@kbn/content-management-utils';
-import {
-  MIN_SAVED_SEARCH_SAMPLE_SIZE,
-  MAX_SAVED_SEARCH_SAMPLE_SIZE,
-} from '@kbn/saved-search-so-plugin/common';
+import { MIN_SAVED_SEARCH_SAMPLE_SIZE, MAX_SAVED_SEARCH_SAMPLE_SIZE } from '@kbn/saved-search';
 
 const sortSchema = schema.arrayOf(schema.string(), { maxSize: 2 });
 

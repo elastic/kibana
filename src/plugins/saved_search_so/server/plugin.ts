@@ -8,6 +8,7 @@
 
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { getSavedSearchObjectType } from './saved_objects';
 
 /**
@@ -15,16 +16,22 @@ import { getSavedSearchObjectType } from './saved_objects';
  */
 export interface SavedSearchSOPublicSetupDependencies {
   data: DataPluginSetup;
+  lens: LensServerPluginSetup;
 }
 
 export class SavedSearchSOServerPlugin implements Plugin<object, object, object> {
   constructor() {}
 
-  public setup(core: CoreSetup, { data }: SavedSearchSOPublicSetupDependencies) {
+  public setup(core: CoreSetup, { data, lens }: SavedSearchSOPublicSetupDependencies) {
     const searchSource = data.search.searchSource;
 
     const getSearchSourceMigrations = searchSource.getAllMigrations.bind(searchSource);
-    core.savedObjects.registerType(getSavedSearchObjectType(getSearchSourceMigrations));
+    core.savedObjects.registerType(
+      getSavedSearchObjectType({
+        getSearchSourceMigrations,
+        lensEmbeddableFactory: lens.lensEmbeddableFactory,
+      })
+    );
 
     return {};
   }

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { MIN_SAVED_SEARCH_SAMPLE_SIZE, MAX_SAVED_SEARCH_SAMPLE_SIZE, VIEW_MODE } from './constants';
+export {
+  MIN_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_SAVED_SEARCH_SAMPLE_SIZE,
+  VIEW_MODE,
+} from './src/constants';

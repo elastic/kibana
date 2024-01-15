@@ -10,16 +10,16 @@ export {
   VIEW_MODE,
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
-} from '@kbn/saved-search-so-plugin/common';
-export { getSavedSearchUrl, getSavedSearchFullPathUrl } from './saved_searches_url';
-export { fromSavedSearchAttributes } from './saved_searches_utils';
-
+} from '@kbn/saved-search';
 export type {
   DiscoverGridSettings,
   DiscoverGridSettingsColumn,
-  SavedSearch,
   SavedSearchAttributes,
-} from './types';
+} from '@kbn/saved-search/types';
+export { getSavedSearchUrl, getSavedSearchFullPathUrl } from './saved_searches_url';
+export { fromSavedSearchAttributes } from './saved_searches_utils';
+
+export type { SavedSearch } from './types';
 
 export { SavedSearchType, LATEST_VERSION } from './constants';
 export { getKibanaContextFn } from './expressions/kibana_context';
