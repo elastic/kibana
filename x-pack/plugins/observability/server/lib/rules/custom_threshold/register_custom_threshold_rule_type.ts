@@ -127,7 +127,7 @@ export function thresholdRuleType(
     },
     schemas: {
       params: {
-        type: 'config-schema',
+        type: 'config-schema' as const,
         schema: paramsSchema,
       },
     },
