@@ -33,10 +33,17 @@ const ANALYZE_MESSAGE = i18n.translate(
 
 export function UXActionMenu({
   appMountParameters,
+  isDev,
 }: {
   appMountParameters: AppMountParameters;
+  isDev: boolean;
 }) {
-  const { http, application } = useKibanaServices();
+  const {
+    http,
+    application,
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useKibanaServices();
+
   const { urlParams } = useLegacyUrlParams();
   const { rangeTo, rangeFrom, serviceName } = urlParams;
 
@@ -84,7 +91,10 @@ export function UXActionMenu({
             defaultMessage: 'Add data',
           })}
         </EuiHeaderLink>
-        <UxInspectorHeaderLink />
+        <UxInspectorHeaderLink isDev={isDev} />
+        {ObservabilityAIAssistantActionMenuItem ? (
+          <ObservabilityAIAssistantActionMenuItem />
+        ) : null}
       </EuiHeaderLinks>
     </HeaderMenuPortal>
   );

@@ -1,12 +1,13 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
+    "scripts/**/*",
     "typings/**/*",
     "public/**/*.json",
     "server/**/*"
@@ -24,10 +25,42 @@
     "@kbn/spaces-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/stack-connectors-plugin",
-    "@kbn/alerting-plugin"
+    "@kbn/alerting-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/typed-react-router-config",
+    "@kbn/ui-theme",
+    "@kbn/user-profile-components",
+    "@kbn/observability-shared-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/monaco",
+    "@kbn/io-ts-utils",
+    "@kbn/std",
+    "@kbn/alerting-plugin",
+    "@kbn/features-plugin",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/i18n-react",
+    "@kbn/field-formats-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/es-query",
+    "@kbn/rule-registry-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/share-plugin",
+    "@kbn/utility-types-jest",
+    "@kbn/analytics-client",
+    "@kbn/tooling-log",
+    "@kbn/babel-register",
+    "@kbn/dev-cli-runner",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-http-browser",
+    "@kbn/security-plugin-types-common",
+    "@kbn/ml-plugin",
+    "@kbn/expect",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/apm-synthtrace",
+    "@kbn/code-editor"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

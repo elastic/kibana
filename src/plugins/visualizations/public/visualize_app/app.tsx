@@ -14,12 +14,10 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { VisualizeServices } from './types';
 import {
   VisualizeEditor,
@@ -38,6 +36,7 @@ interface NoDataComponentProps {
   dataViews: DataViewsContract;
   dataViewEditor: DataViewEditorStart;
   onDataViewCreated: (dataView: unknown) => void;
+  noDataPage?: NoDataPagePluginStart;
 }
 
 const NoDataComponent = ({
@@ -45,12 +44,31 @@ const NoDataComponent = ({
   dataViews,
   dataViewEditor,
   onDataViewCreated,
+  noDataPage,
 }: NoDataComponentProps) => {
   const analyticsServices = {
     coreStart: core,
     dataViews,
     dataViewEditor,
+    noDataPage,
   };
+
+  const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+  const AnalyticsNoDataPageKibanaProvider = withSuspense(
+    React.lazy(() =>
+      importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+        return { default: NoDataProvider };
+      })
+    )
+  );
+  const AnalyticsNoDataPage = withSuspense(
+    React.lazy(() =>
+      importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+        return { default: NoDataPage };
+      })
+    )
+  );
+
   return (
     <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
       <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
@@ -65,6 +83,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       core,
       kbnUrlStateStorage,
       dataViewEditor,
+      noDataPage,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -93,7 +112,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
       if (hasUserDataView) {
         // Adding this check as TSVB asks for the default dataview on initialization
-        const defaultDataView = await dataViews.getDefaultDataView();
+        const defaultDataView = await dataViews.defaultDataViewExists();
         if (!defaultDataView) {
           setShowNoDataPage(true);
         }
@@ -125,6 +144,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
         dataViewEditor={dataViewEditor}
         dataViews={dataViews}
         onDataViewCreated={onDataViewCreated}
+        noDataPage={noDataPage}
       />
     );
   }

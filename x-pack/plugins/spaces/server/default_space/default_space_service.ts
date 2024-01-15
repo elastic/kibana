@@ -13,8 +13,8 @@ import type { CoreSetup, Logger, SavedObjectsServiceStart, ServiceStatus } from 
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
-import type { SpacesLicense } from '../../common/licensing';
 import { createDefaultSpace } from './create_default_space';
+import type { SpacesLicense } from '../../common/licensing';
 
 interface Deps {
   coreStatus: CoreSetup['status'];

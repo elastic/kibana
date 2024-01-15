@@ -7,12 +7,11 @@
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  useObservabilityAIAssistant,
-  ContextualInsight,
   type Message,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo, useState } from 'react';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { ErrorSampleDetailTabContent } from './error_sample_detail';
@@ -25,7 +24,9 @@ export function ErrorSampleContextualInsight({
   error: APMError;
   transaction?: Transaction;
 }) {
-  const aiAssistant = useObservabilityAIAssistant();
+  const {
+    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+  } = useApmPluginContext();
 
   const [logStacktrace, setLogStacktrace] = useState('');
   const [exceptionStacktrace, setExceptionStacktrace] = useState('');
@@ -43,47 +44,39 @@ export function ErrorSampleContextualInsight({
       {
         '@timestamp': now,
         message: {
-          role: MessageRole.System,
-          content: `You are apm-gpt, a helpful assistant for performance analysis, optimisation and
-          root cause analysis of software. Answer as concisely as possible.`,
-        },
-      },
-      {
-        '@timestamp': now,
-        message: {
           role: MessageRole.User,
           content: `I'm an SRE. I am looking at an exception and trying to understand what it means.
 
-          Your task is to describe what the error means and what it could be caused by.
-    
-          The error occurred on a service called ${serviceName}, which is a ${runtimeName} service written in ${languageName}. The
-          runtime version is ${runtimeVersion}.
-    
-          The request it occurred for is called ${transactionName}.
-    
-          ${
-            logStacktrace
-              ? `The log stacktrace:
-          ${logStacktrace}`
-              : ''
-          }
-    
-          ${
-            exceptionStacktrace
-              ? `The exception stacktrace:
-          ${exceptionStacktrace}`
-              : ''
-          }
-          `,
+Your task is to describe what the error means and what it could be caused by.
+
+The error occurred on a service called ${serviceName}, which is a ${runtimeName} service written in ${languageName}. The
+runtime version is ${runtimeVersion}.
+
+The request it occurred for is called ${transactionName}.
+
+${
+  logStacktrace
+    ? `The log stacktrace:
+${logStacktrace}`
+    : ''
+}
+
+${
+  exceptionStacktrace
+    ? `The exception stacktrace:
+${exceptionStacktrace}`
+    : ''
+}
+`,
         },
       },
     ];
   }, [error, transaction, logStacktrace, exceptionStacktrace]);
 
-  return aiAssistant.isEnabled() && messages ? (
+  return ObservabilityAIAssistantContextualInsight && messages ? (
     <>
       <EuiFlexItem>
-        <ContextualInsight
+        <ObservabilityAIAssistantContextualInsight
           messages={messages}
           title={i18n.translate(
             'xpack.apm.errorGroupContextualInsight.explainErrorTitle',

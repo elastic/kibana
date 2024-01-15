@@ -11,6 +11,7 @@ import type { ILogViewsClient } from './types';
 
 export const createLogViewsClientMock = (): jest.Mocked<ILogViewsClient> => ({
   getLogView: jest.fn(),
+  getInternalLogView: jest.fn(),
   getResolvedLogView: jest.fn((logViewReference: LogViewReference) =>
     Promise.resolve(createResolvedLogViewMock())
   ),

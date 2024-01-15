@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { FINAL_SUMMARY_KQL } from './single_metric_config';
 import { ColumnFilter, ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -14,6 +15,7 @@ import {
   PERCENTILE,
   ReportTypes,
   FORMULA_COLUMN,
+  RECORDS_FIELD,
 } from '../constants';
 import {
   CLS_LABEL,
@@ -94,7 +96,11 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         label: 'Monitor availability',
         id: 'monitor_availability',
         columnType: FORMULA_COLUMN,
-        formula: "1- (count(kql='summary.down > 0') / count(kql='summary: *'))",
+        formula: `1- (count(kql='${FINAL_SUMMARY_KQL} and summary.down > 0') / count(kql='summary: *'))`,
+        columnFilter: {
+          language: 'kuery',
+          query: FINAL_SUMMARY_KQL,
+        },
       },
       {
         label: 'Monitor Errors',
@@ -104,7 +110,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         columnFilters: [
           {
             language: 'kuery',
-            query: `summary.down > 0`,
+            query: `${FINAL_SUMMARY_KQL} and summary.down > 0`,
           },
         ],
       },
@@ -124,8 +130,8 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
       },
       {
         label: 'Total runs',
-        id: 'monitor.check_group',
-        field: 'monitor.check_group',
+        id: 'total_test_runs',
+        field: RECORDS_FIELD,
         columnType: OPERATION_COLUMN,
         columnFilters: [
           {

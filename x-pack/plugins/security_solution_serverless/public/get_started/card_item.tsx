@@ -5,122 +5,98 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
-import type { CardId, SectionId, StepId } from './types';
-import * as i18n from './translations';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { useMemo, useCallback } from 'react';
+import classnames from 'classnames';
+import type {
+  CardId,
+  ExpandedCardSteps,
+  ToggleTaskCompleteStatus,
+  OnStepClicked,
+  SectionId,
+  StepId,
+} from './types';
+import { getCard } from './helpers';
 import { CardStep } from './card_step';
-import { getSections } from './sections';
+import { useCardItemStyles } from './styles/card_item.styles';
 
 const CardItemComponent: React.FC<{
-  euiTheme: EuiThemeComputed;
-  shadow?: string;
-  stepsLeft?: number;
-  timeInMins?: number;
-  onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
-  finishedSteps: Record<CardId, Set<StepId>>;
-  sectionId: SectionId;
+  activeStepIds: StepId[] | undefined;
   cardId: CardId;
+  expandedCardSteps: ExpandedCardSteps;
+  finishedSteps: Set<StepId>;
+  toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
+  onStepClicked: OnStepClicked;
+  sectionId: SectionId;
 }> = ({
-  stepsLeft,
-  timeInMins,
-  shadow,
-  euiTheme,
-  onStepClicked,
-  finishedSteps,
-  sectionId,
+  activeStepIds,
   cardId,
+  expandedCardSteps,
+  finishedSteps,
+  toggleTaskCompleteStatus,
+  onStepClicked,
+  sectionId,
 }) => {
-  const section = getSections().find((s) => s.id === sectionId);
-  const cardItem = section?.cards?.find((c) => c.id === cardId);
-  const [expandCard, setExpandCard] = useState(false);
-  const toggleCard = useCallback(
-    (e) => {
-      e.preventDefault();
-      setExpandCard(!expandCard);
-    },
-    [expandCard]
+  const isExpandedCard = expandedCardSteps[cardId].isExpanded;
+
+  const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
+  const expandedSteps = useMemo(
+    () => new Set(expandedCardSteps[cardId]?.expandedSteps ?? []),
+    [cardId, expandedCardSteps]
   );
-  return cardItem ? (
+
+  const cardClassNames = classnames('card-item', {
+    'card-expanded': isExpandedCard,
+  });
+
+  const cardItemPanelStyle = useCardItemStyles();
+  const getCardStep = useCallback(
+    (stepId: StepId) => cardItem?.steps?.find((step) => step.id === stepId),
+    [cardItem?.steps]
+  );
+  const steps = useMemo(
+    () =>
+      activeStepIds?.reduce<React.ReactElement[]>((acc, stepId) => {
+        const step = getCardStep(stepId);
+        if (step && cardItem) {
+          acc.push(
+            <CardStep
+              cardId={cardItem.id}
+              expandedSteps={expandedSteps}
+              finishedSteps={finishedSteps}
+              key={stepId}
+              toggleTaskCompleteStatus={toggleTaskCompleteStatus}
+              onStepClicked={onStepClicked}
+              sectionId={sectionId}
+              step={step}
+            />
+          );
+        }
+        return acc;
+      }, []),
+    [
+      activeStepIds,
+      cardItem,
+      expandedSteps,
+      finishedSteps,
+      getCardStep,
+      onStepClicked,
+      sectionId,
+      toggleTaskCompleteStatus,
+    ]
+  );
+
+  return cardItem && activeStepIds ? (
     <EuiPanel
+      className={cardClassNames}
       hasBorder
-      paddingSize="m"
-      css={css`
-        ${shadow ?? ''};
-      `}
+      paddingSize="none"
+      css={cardItemPanelStyle}
+      borderRadius="none"
+      data-test-subj={cardId}
     >
-      <EuiFlexGroup
-        gutterSize="m"
-        css={css`
-          gap: 14px;
-          padding: ${euiTheme.size.xxs} 10px;
-        `}
-        direction="column"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            onClick={toggleCard}
-            css={css`
-              cursor: pointer;
-            `}
-          >
-            <EuiFlexItem grow={false}>
-              {cardItem.icon && <EuiIcon {...cardItem.icon} className="eui-alignMiddle" />}
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <EuiTitle
-                size="xxs"
-                css={css`
-                  line-height: ${euiTheme.base * 2}px;
-                `}
-              >
-                <h4>{cardItem.title}</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            {(timeInMins != null || stepsLeft != null) && (
-              <EuiFlexItem
-                css={css`
-                  align-items: end;
-                `}
-              >
-                <EuiText
-                  size="s"
-                  css={css`
-                    line-height: ${euiTheme.base * 2}px;
-                  `}
-                >
-                  {stepsLeft != null && stepsLeft > 0 && (
-                    <strong>{i18n.STEPS_LEFT(stepsLeft)}</strong>
-                  )}
-                  {timeInMins != null && timeInMins > 0 && (
-                    <span>
-                      {' • '}
-                      {i18n.STEP_TIME_MIN(timeInMins)}
-                    </span>
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {expandCard && cardItem.steps && (
-          <EuiFlexItem>
-            {cardItem.steps.map((step) => {
-              return (
-                <CardStep
-                  key={step.id}
-                  sectionId={sectionId}
-                  cardId={cardItem.id}
-                  step={step}
-                  onStepClicked={onStepClicked}
-                  finishedStepsByCard={finishedSteps[cardItem.id]}
-                />
-              );
-            })}
-          </EuiFlexItem>
-        )}
+      <EuiFlexGroup gutterSize="s" direction="column">
+        <EuiFlexItem>{steps}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   ) : null;

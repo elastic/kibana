@@ -182,9 +182,9 @@ describe('AutocompleteFieldListsComponent', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] EuiComboBoxPill`)
+        .find(`[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input`)
         .at(0)
-        .text()
+        .props().value
     ).toEqual('some name');
   });
 
@@ -211,6 +211,7 @@ describe('AutocompleteFieldListsComponent', () => {
 
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith({
+        '@timestamp': DATE_NOW,
         _version: undefined,
         created_at: DATE_NOW,
         created_by: 'some user',

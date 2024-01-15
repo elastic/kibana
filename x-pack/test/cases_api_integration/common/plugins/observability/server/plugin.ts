@@ -31,7 +31,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       cases: ['observabilityFixture'],
       privileges: {
         all: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles', 'casesGetConnectorsConfigure'],
           app: ['kibana'],
           cases: {
             all: ['observabilityFixture'],
@@ -43,7 +43,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
         read: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles', 'casesGetConnectorsConfigure'],
           app: ['kibana'],
           cases: {
             read: ['observabilityFixture'],

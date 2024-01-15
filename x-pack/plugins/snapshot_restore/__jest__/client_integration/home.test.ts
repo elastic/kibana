@@ -9,13 +9,7 @@ import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { SNAPSHOT_STATE } from '../../public/application/constants';
 import { API_BASE_PATH } from '../../common';
-import {
-  setupEnvironment,
-  pageHelpers,
-  nextTick,
-  getRandomString,
-  findTestSubject,
-} from './helpers';
+import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
 import { HomeTestBed } from './helpers/home.helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
 
@@ -46,7 +40,10 @@ describe('<SnapshotRestoreHome />', () => {
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
     });
 
     test('should set the correct app title', () => {
@@ -74,15 +71,6 @@ describe('<SnapshotRestoreHome />', () => {
     });
 
     describe('tabs', () => {
-      beforeEach(async () => {
-        testBed = await setup(httpSetup);
-
-        await act(async () => {
-          await nextTick();
-          testBed.component.update();
-        });
-      });
-
       test('should have 4 tabs', () => {
         const { find } = testBed;
 
@@ -108,12 +96,11 @@ describe('<SnapshotRestoreHome />', () => {
         expect(exists('repositoryList')).toBe(true);
         expect(exists('snapshotList')).toBe(false);
 
-        actions.selectTab('snapshots');
-
         await act(async () => {
-          await nextTick();
-          testBed.component.update();
+          actions.selectTab('snapshots');
         });
+
+        testBed.component.update();
 
         expect(exists('repositoryList')).toBe(false);
         expect(exists('snapshotListEmpty')).toBe(true);
@@ -130,10 +117,7 @@ describe('<SnapshotRestoreHome />', () => {
       test('should display an empty prompt', async () => {
         const { component, exists } = await setup(httpSetup);
 
-        await act(async () => {
-          await nextTick();
-          component.update();
-        });
+        component.update();
 
         expect(exists('sectionLoading')).toBe(false);
         expect(exists('emptyPrompt')).toBe(true);
@@ -160,12 +144,10 @@ describe('<SnapshotRestoreHome />', () => {
       beforeEach(async () => {
         httpRequestsMockHelpers.setLoadRepositoriesResponse({ repositories });
 
-        testBed = await setup(httpSetup);
-
         await act(async () => {
-          await nextTick();
-          testBed.component.update();
+          testBed = await setup(httpSetup);
         });
+        testBed.component.update();
       });
 
       test('should list them in the table', async () => {
@@ -208,9 +190,8 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           actions.clickReloadButton();
-          await nextTick();
-          component.update();
         });
+        component.update();
 
         expect(httpSetup.get).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}repositories`,
@@ -264,9 +245,8 @@ describe('<SnapshotRestoreHome />', () => {
 
           await act(async () => {
             confirmButton!.click();
-            await nextTick();
-            component.update();
           });
+          component.update();
 
           expect(httpSetup.delete).toHaveBeenLastCalledWith(
             `${API_BASE_PATH}repositories/${repo1.name}`,
@@ -281,11 +261,10 @@ describe('<SnapshotRestoreHome />', () => {
 
           expect(exists('repositoryDetail')).toBe(false);
 
-          await actions.clickRepositoryAt(0);
           await act(async () => {
-            await nextTick();
-            testBed.component.update();
+            await actions.clickRepositoryAt(0);
           });
+          testBed.component.update();
 
           expect(exists('repositoryDetail')).toBe(true);
         });
@@ -345,9 +324,8 @@ describe('<SnapshotRestoreHome />', () => {
 
             await act(async () => {
               find('repositoryDetail.verifyRepositoryButton').simulate('click');
-              await nextTick();
-              component.update();
             });
+            component.update();
 
             expect(httpSetup.get).toHaveBeenLastCalledWith(
               `${API_BASE_PATH}repositories/${repo1.name}/verify`,
@@ -454,13 +432,13 @@ describe('<SnapshotRestoreHome />', () => {
       test('should display an empty prompt', () => {
         const { exists } = testBed;
 
-        expect(exists('emptyPrompt')).toBe(true);
+        expect(exists('snapshotListEmpty')).toBe(true);
       });
 
       test('should invite the user to first register a repository', () => {
         const { find, exists } = testBed;
-        expect(find('emptyPrompt.title').text()).toBe('Start by registering a repository');
-        expect(exists('emptyPrompt.registerRepositoryButton')).toBe(true);
+        expect(find('snapshotListEmpty.title').text()).toBe('Start by registering a repository');
+        expect(exists('snapshotListEmpty.registerRepositoryButton')).toBe(true);
       });
     });
 
@@ -607,9 +585,8 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           router.navigateTo(href!);
-          await nextTick();
-          component.update();
         });
+        component.update();
 
         // Make sure that we navigated to the repository list
         // and opened the detail panel for the repository
@@ -625,9 +602,8 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           actions.clickReloadButton();
-          await nextTick();
-          component.update();
         });
+        component.update();
 
         expect(httpSetup.get).toHaveBeenLastCalledWith(
           `${API_BASE_PATH}snapshots`,
@@ -690,9 +666,8 @@ describe('<SnapshotRestoreHome />', () => {
 
             await act(async () => {
               router.navigateTo(href);
-              await nextTick();
-              component.update();
             });
+            component.update();
 
             // Make sure that we navigated to the repository list
             // and opened the detail panel for the repository
@@ -755,13 +730,11 @@ describe('<SnapshotRestoreHome />', () => {
 
             describe('summary tab', () => {
               test('should set the correct summary values', () => {
-                const { version, versionId, uuid, indices } = snapshot1;
+                const { version, uuid, indices } = snapshot1;
 
                 const { find } = testBed;
 
-                expect(find('snapshotDetail.version.value').text()).toBe(
-                  `${version} / ${versionId}`
-                );
+                expect(find('snapshotDetail.version.value').text()).toBe(version);
                 expect(find('snapshotDetail.uuid.value').text()).toBe(uuid);
                 expect(find('snapshotDetail.state.value').text()).toBe('Snapshot complete');
                 expect(find('snapshotDetail.includeGlobalState.value').text()).toEqual('Yes');

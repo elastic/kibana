@@ -12,14 +12,15 @@ import {
   getCspmCloudFormationDefaultValue,
   getPosturePolicy,
   NewPackagePolicyPostureInput,
+  getAwsCredentialsType,
 } from '../utils';
 import {
-  AwsCredentialsType,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
 import { CLOUDBEAT_AWS } from '../../../../common/constants';
+import { AwsCredentialsType } from '../../../../common/types_old';
 /**
  * Update CloudFormation template and stack name in the Agent Policy
  * based on the selected policy template
@@ -42,10 +43,6 @@ const getSetupFormatFromInput = (
 
   return 'cloud_formation';
 };
-
-const getAwsCredentialsType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
-): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
 
 export const useAwsCredentialsForm = ({
   newPolicy,

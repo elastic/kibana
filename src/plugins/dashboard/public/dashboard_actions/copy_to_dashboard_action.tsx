@@ -8,10 +8,10 @@
 
 import React from 'react';
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
 import { pluginServices } from '../services/plugin_services';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
@@ -39,16 +39,12 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
   public order = 1;
 
   private dashboardCapabilities;
-  private theme$;
   private openModal;
 
-  constructor(private PresentationUtilContext: PresentationUtilPluginStart['ContextProvider']) {
+  constructor(private core: CoreStart) {
     ({
       dashboardCapabilities: this.dashboardCapabilities,
       overlays: { openModal: this.openModal },
-      settings: {
-        theme: { theme$: this.theme$ },
-      },
     } = pluginServices.getServices());
   }
 
@@ -81,15 +77,15 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
       throw new IncompatibleActionError();
     }
 
+    const { theme, i18n } = this.core;
     const session = this.openModal(
       toMountPoint(
         <CopyToDashboardModal
-          PresentationUtilContext={this.PresentationUtilContext}
           closeModal={() => session.close()}
           dashboardId={(embeddable.parent as DashboardContainer).getDashboardSavedObjectId()}
           embeddable={embeddable}
         />,
-        { theme$: this.theme$ }
+        { theme, i18n }
       ),
       {
         maxWidth: 400,

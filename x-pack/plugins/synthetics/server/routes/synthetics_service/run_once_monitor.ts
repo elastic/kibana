@@ -9,7 +9,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { MonitorFields } from '../../../common/runtime_types';
+import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from '../monitor_cruds/monitor_validation';
 
@@ -36,19 +36,24 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
 
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
-    if (!validationResult.valid || !validationResult.decodedMonitor) {
+    const decodedMonitor = validationResult.decodedMonitor;
+    if (!validationResult.valid || !decodedMonitor) {
       const { reason: message, details, payload } = validationResult;
       return response.badRequest({ body: { message, attributes: { details, ...payload } } });
     }
 
     const privateLocations: PrivateLocationAttributes[] = await getPrivateLocationsForMonitor(
       savedObjectsClient,
-      validationResult.decodedMonitor
+      decodedMonitor
     );
 
     const [, errors] = await syntheticsMonitorClient.testNowConfigs(
       {
-        monitor: { ...validationResult.decodedMonitor, config_id: monitorId } as MonitorFields,
+        monitor: {
+          ...decodedMonitor,
+          [ConfigKey.CONFIG_ID]: monitorId,
+          [ConfigKey.MONITOR_QUERY_ID]: monitorId,
+        } as MonitorFields,
         id: monitorId,
         testRunId: monitorId,
       },

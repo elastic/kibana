@@ -1,9 +1,15 @@
 {
   "ml.get_trained_models_stats": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
-      "from": 0,
-      "size": 0
+      "from": "",
+      "size": [
+        "100"
+      ]
     },
     "methods": [
       "GET"
@@ -12,6 +18,10 @@
       "_ml/trained_models/{model_id}/_stats",
       "_ml/trained_models/_stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-trained-models-stats.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-trained-models-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

@@ -7,7 +7,9 @@
 
 import { isString } from 'lodash';
 
-export class ApiActions {
+import type { ApiActions as ApiActionsType } from '@kbn/security-plugin-types-server';
+
+export class ApiActions implements ApiActionsType {
   private readonly prefix: string;
 
   constructor() {

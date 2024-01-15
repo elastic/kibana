@@ -1,5 +1,11 @@
 {
   "watcher.deactivate_watch": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "PUT",
       "POST"
@@ -7,6 +13,10 @@
     "patterns": [
       "_watcher/watch/{watch_id}/_deactivate"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-deactivate-watch.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-deactivate-watch.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

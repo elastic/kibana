@@ -5,19 +5,34 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+jest.mock(
+  'puid',
+  () =>
+    class MockPuid {
+      generate() {
+        return 'mock-report-id';
+      }
+    }
+);
+
 import rison from '@kbn/rison';
+
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+
 import { ReportingCore } from '../../..';
-import { TaskPayloadPDFV2 } from '../../../../common/types/export_types/printable_pdf_v2';
-import { JobParamsPDFDeprecated } from '../../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../../lib/store';
-import { ReportApiJSON } from '../../../lib/store/report';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import { ReportingRequestHandlerContext, ReportingSetup } from '../../../types';
+import { createMockReportingCore } from '../../../test_helpers';
+import {
+  ReportingJobResponse,
+  ReportingRequestHandlerContext,
+  ReportingSetup,
+} from '../../../types';
 import { RequestHandler } from './request_handler';
 
-jest.mock('../../../lib/crypto', () => ({
+jest.mock('@kbn/reporting-server/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),
@@ -108,6 +123,7 @@ describe('Handle request to generate', () => {
           "attempts": 0,
           "completed_at": undefined,
           "created_by": "testymcgee",
+          "error": undefined,
           "execution_time_ms": undefined,
           "jobtype": "printable_pdf_v2",
           "kibana_id": undefined,
@@ -203,10 +219,10 @@ describe('Handle request to generate', () => {
     test('disallows invalid export type', async () => {
       expect(await requestHandler.handleGenerateRequest('neanderthals', mockJobParams))
         .toMatchInlineSnapshot(`
-      Object {
-        "body": "Invalid export-type of neanderthals",
-      }
-    `);
+              Object {
+                "body": "Invalid export-type of neanderthals",
+              }
+          `);
     });
 
     test('disallows unsupporting license', async () => {
@@ -219,10 +235,10 @@ describe('Handle request to generate', () => {
 
       expect(await requestHandler.handleGenerateRequest('csv_searchsource', mockJobParams))
         .toMatchInlineSnapshot(`
-      Object {
-        "body": "seeing this means the license isn't supported",
-      }
-    `);
+              Object {
+                "body": "seeing this means the license isn't supported",
+              }
+          `);
     });
 
     test('disallows invalid browser timezone', async () => {
@@ -246,47 +262,12 @@ describe('Handle request to generate', () => {
     });
 
     test('generates the download path', async () => {
-      const response = (await requestHandler.handleGenerateRequest(
+      const { body } = (await requestHandler.handleGenerateRequest(
         'csv_searchsource',
         mockJobParams
-      )) as unknown as { body: { job: ReportApiJSON } };
-      const { id, created_at: _created_at, ...snapObj } = response.body.job;
-      expect(snapObj).toMatchInlineSnapshot(`
-      Object {
-        "attempts": 0,
-        "completed_at": undefined,
-        "created_by": "testymcgee",
-        "execution_time_ms": undefined,
-        "index": ".reporting-foo-index-234",
-        "jobtype": "csv_searchsource",
-        "kibana_id": undefined,
-        "kibana_name": undefined,
-        "max_attempts": undefined,
-        "meta": Object {
-          "isDeprecated": undefined,
-          "layout": "preserve_layout",
-          "objectType": "cool_object_type",
-        },
-        "metrics": undefined,
-        "migration_version": "7.14.0",
-        "output": Object {},
-        "payload": Object {
-          "browserTimezone": "UTC",
-          "layout": Object {
-            "id": "preserve_layout",
-          },
-          "objectType": "cool_object_type",
-          "relativeUrls": Array [],
-          "spaceId": undefined,
-          "title": "cool_title",
-          "version": "7.14.0",
-        },
-        "queue_time_ms": undefined,
-        "started_at": undefined,
-        "status": "pending",
-        "timeout": undefined,
-      }
-    `);
+      )) as unknown as { body: ReportingJobResponse };
+
+      expect(body.path).toMatch('/mock-server-basepath/api/reporting/jobs/download/mock-report-id');
     });
   });
 });

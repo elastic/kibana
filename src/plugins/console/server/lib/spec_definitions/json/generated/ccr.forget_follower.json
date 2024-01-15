@@ -1,11 +1,21 @@
 {
   "ccr.forget_follower": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "POST"
     ],
     "patterns": [
-      "{indices}/_ccr/forget_follower"
+      "{index}/_ccr/forget_follower"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-post-forget-follower.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ccr-post-forget-follower.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

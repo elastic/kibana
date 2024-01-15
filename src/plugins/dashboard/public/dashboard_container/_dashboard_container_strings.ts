@@ -19,7 +19,7 @@ export const emptyScreenStrings = {
     }),
   getEditModeSubtitle: () =>
     i18n.translate('dashboard.emptyScreen.editModeSubtitle', {
-      defaultMessage: 'Create a visualization of your data, or add one from the Visualize Library.',
+      defaultMessage: 'Create a visualization of your data, or add one from the library.',
     }),
   getAddFromLibraryButtonTitle: () =>
     i18n.translate('dashboard.emptyScreen.addFromLibrary', {
@@ -83,7 +83,12 @@ export const dashboardSavedObjectErrorStrings = {
     }),
 };
 
-export const panelStorageErrorStrings = {
+export const backupServiceStrings = {
+  viewModeStorageError: (message: string) =>
+    i18n.translate('dashboard.viewmodeBackup.error', {
+      defaultMessage: 'Error encountered while backing up view mode: {message}',
+      values: { message },
+    }),
   getPanelsGetError: (message: string) =>
     i18n.translate('dashboard.panelStorageError.getError', {
       defaultMessage: 'Error encountered while fetching unsaved changes: {message}',

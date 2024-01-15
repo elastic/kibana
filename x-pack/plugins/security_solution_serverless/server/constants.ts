@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// TODO: this probably shouldn't live in code
 const namespace = 'elastic-system';
 const USAGE_SERVICE_BASE_API_URL = `https://usage-api.${namespace}/api`;
 const USAGE_SERVICE_BASE_API_URL_V1 = `${USAGE_SERVICE_BASE_API_URL}/v1`;

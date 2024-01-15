@@ -40,6 +40,7 @@ export {
   apmServiceGroupMaxNumberOfServices,
   enableInfrastructureHostsView,
   enableAgentExplorerView,
+  apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
 export {
   alertsLocatorID,
@@ -52,7 +53,6 @@ export {
 
 export type { SloEditLocatorParams } from './locators/slo_edit';
 
-export type { UXMetrics } from './pages/overview/components/sections/ux/core_web_vitals/core_vitals';
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 
 export { DatePicker } from './pages/overview/components/date_picker/date_picker';
@@ -89,3 +89,6 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';
+export { WithKueryAutocompletion } from './components/rule_kql_filter/with_kuery_autocompletion';
+export { AutocompleteField } from './components/rule_kql_filter/autocomplete_field';
+export { RuleFlyoutKueryBar } from './components/rule_kql_filter/kuery_bar';

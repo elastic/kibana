@@ -46,8 +46,9 @@ export interface IWaterfall {
   errorItems: IWaterfallError[];
   exceedsMax: boolean;
   totalErrorsCount: number;
-  traceItemCount: number;
+  traceDocsTotal: number;
   maxTraceItems: number;
+  orphanTraceItemsCount: number;
 }
 
 interface IWaterfallItemBase<TDocument, TDoctype> {
@@ -191,7 +192,7 @@ export function getClockSkew(
     case 'error':
     case 'span':
       return parentItem.skew;
-    // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
+    // transaction is the initial entry in a service. Calculate skew for this, and it will be propagated to all child spans
     case 'transaction': {
       const parentStart = parentItem.doc.timestamp.us + parentItem.skew;
 
@@ -415,6 +416,26 @@ function getErrorCountByParentId(
   }, {});
 }
 
+export const getOrphanTraceItemsCount = (
+  traceDocs: Array<WaterfallTransaction | WaterfallSpan>
+) => {
+  const waterfallItemsIds = new Set(
+    traceDocs.map((doc) =>
+      doc.processor.event === 'span'
+        ? (doc?.span as WaterfallSpan['span']).id
+        : doc?.transaction?.id
+    )
+  );
+
+  let missingTraceItemsCounter = 0;
+  traceDocs.some((item) => {
+    if (item.parent?.id && !waterfallItemsIds.has(item.parent.id)) {
+      missingTraceItemsCounter++;
+    }
+  });
+  return missingTraceItemsCounter;
+};
+
 export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const { traceItems, entryTransaction } = apiResponse;
   if (isEmpty(traceItems.traceDocs) || !entryTransaction) {
@@ -427,8 +448,9 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
       getErrorCount: () => 0,
       exceedsMax: false,
       totalErrorsCount: 0,
-      traceItemCount: 0,
+      traceDocsTotal: 0,
       maxTraceItems: 0,
+      orphanTraceItemsCount: 0,
     };
   }
 
@@ -464,6 +486,8 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const duration = getWaterfallDuration(items);
   const legends = getLegends(items);
 
+  const orphanTraceItemsCount = getOrphanTraceItemsCount(traceItems.traceDocs);
+
   return {
     entryWaterfallTransaction,
     rootWaterfallTransaction,
@@ -476,7 +500,8 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     getErrorCount: (parentId: string) => errorCountByParentId[parentId] ?? 0,
     exceedsMax: traceItems.exceedsMax,
     totalErrorsCount: traceItems.errorDocs.length,
-    traceItemCount: traceItems.traceItemCount,
+    traceDocsTotal: traceItems.traceDocsTotal,
     maxTraceItems: traceItems.maxTraceItems,
+    orphanTraceItemsCount,
   };
 }

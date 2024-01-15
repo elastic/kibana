@@ -84,6 +84,8 @@ describe('EphemeralTaskLifecycle', () => {
           delay: 3000,
           max_attempts: 20,
         },
+        metrics_reset_interval: 3000,
+        claim_strategy: 'default',
         ...config,
       },
       elasticsearchAndSOAvailability$,
@@ -189,6 +191,7 @@ describe('EphemeralTaskLifecycle', () => {
             task: taskManagerMock.createTask(),
             result: TaskRunResult.Success,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );

@@ -7,9 +7,9 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-
 import { TestProviders } from '../../../common/mock';
 import { SecuritySolutionTemplateWrapper } from '.';
+import { SecurityPageName } from '../../types';
 
 const mockUseShowTimeline = jest.fn((): [boolean] => [false]);
 jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
@@ -17,9 +17,9 @@ jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
   useShowTimeline: () => mockUseShowTimeline(),
 }));
 
-jest.mock('./bottom_bar', () => ({
-  ...jest.requireActual('./bottom_bar'),
-  SecuritySolutionBottomBar: () => <div>{'Bottom Bar'}</div>,
+jest.mock('./timeline', () => ({
+  ...jest.requireActual('./timeline'),
+  Timeline: () => <div>{'Timeline'}</div>,
 }));
 
 jest.mock('../../../common/components/navigation/use_security_solution_navigation', () => {
@@ -49,6 +49,13 @@ jest.mock('../../../common/components/navigation/use_security_solution_navigatio
   };
 });
 
+const mockUseRouteSpy = jest.fn((): [{ pageName: string }] => [
+  { pageName: SecurityPageName.alerts },
+]);
+jest.mock('../../../common/utils/route/use_route_spy', () => ({
+  useRouteSpy: () => mockUseRouteSpy(),
+}));
+
 const renderComponent = () => {
   return render(
     <TestProviders>
@@ -70,7 +77,7 @@ describe('SecuritySolutionTemplateWrapper', () => {
 
     await waitFor(() => {
       expect(getByText('child of wrapper')).toBeInTheDocument();
-      expect(getByText('Bottom Bar')).toBeInTheDocument();
+      expect(getByText('Timeline')).toBeInTheDocument();
     });
   });
 
@@ -81,7 +88,7 @@ describe('SecuritySolutionTemplateWrapper', () => {
 
     await waitFor(() => {
       expect(getByText('child of wrapper')).toBeInTheDocument();
-      expect(queryByText('Bottom Bar')).not.toBeInTheDocument();
+      expect(queryByText('Timeline')).not.toBeInTheDocument();
     });
   });
 });

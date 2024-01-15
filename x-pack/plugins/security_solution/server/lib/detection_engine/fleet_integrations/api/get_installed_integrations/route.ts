@@ -21,48 +21,56 @@ export const getInstalledIntegrationsRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: GET_INSTALLED_INTEGRATIONS_URL,
-      validate: {},
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const ctx = await context.resolve(['core', 'securitySolution']);
-        const fleet = ctx.securitySolution.getInternalFleetServices();
-        const set = createInstalledIntegrationSet();
+        try {
+          const ctx = await context.resolve(['core', 'securitySolution']);
+          const fleet = ctx.securitySolution.getInternalFleetServices();
+          const set = createInstalledIntegrationSet();
 
-        // Pulls all packages into memory just like the main fleet landing page
-        // No pagination support currently, so cannot batch this call
-        const allThePackages = await fleet.packages.getPackages();
-        allThePackages.forEach((fleetPackage) => {
-          set.addPackage(fleetPackage);
-        });
+          // Pulls all packages into memory just like the main fleet landing page
+          // No pagination support currently, so cannot batch this call
+          const allThePackages = await fleet.packages.getPackages();
+          allThePackages.forEach((fleetPackage) => {
+            set.addPackage(fleetPackage);
+          });
 
-        const packagePolicies = await fleet.packagePolicy.list(fleet.internalReadonlySoClient, {});
-        packagePolicies.items.forEach((policy) => {
-          set.addPackagePolicy(policy);
-        });
+          const packagePolicies = await fleet.packagePolicy.list(
+            fleet.internalReadonlySoClient,
+            {}
+          );
+          packagePolicies.items.forEach((policy) => {
+            set.addPackagePolicy(policy);
+          });
 
-        const installedIntegrations = set.getIntegrations();
+          const installedIntegrations = set.getIntegrations();
 
-        const body: GetInstalledIntegrationsResponse = {
-          installed_integrations: installedIntegrations,
-        };
+          const body: GetInstalledIntegrationsResponse = {
+            installed_integrations: installedIntegrations,
+          };
 
-        return response.ok({ body });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return response.ok({ body });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

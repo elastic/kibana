@@ -10,7 +10,7 @@ import {
   InstructionsSchema,
   INSTRUCTION_VARIANT,
 } from '@kbn/home-plugin/server';
-import { APMConfig } from '../..';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   createDownloadServerDeb,
   createDownloadServerOsx,
@@ -19,17 +19,20 @@ import {
   createStartServerUnix,
   createStartServerUnixSysv,
   createWindowsServerInstructions,
+  createDownloadServerOtherLinux,
+  createStartServerUnixBinari,
 } from '../../../common/tutorial/instructions/apm_server_instructions';
 
 const EDIT_CONFIG = createEditConfig();
 const START_SERVER_UNIX = createStartServerUnix();
 const START_SERVER_UNIX_SYSV = createStartServerUnixSysv();
+const START_SERVER_UNIX_BINARI = createStartServerUnixBinari();
 
 export function getOnPremApmServerInstructionSet({
-  apmConfig,
+  apmIndices,
   isFleetPluginEnabled,
 }: {
-  apmConfig: APMConfig;
+  apmIndices: APMIndices;
   isFleetPluginEnabled: boolean;
 }): InstructionsSchema['instructionSets'][0] {
   return {
@@ -61,6 +64,14 @@ export function getOnPremApmServerInstructionSet({
           createDownloadServerRpm(),
           EDIT_CONFIG,
           START_SERVER_UNIX_SYSV,
+        ],
+      },
+      {
+        id: INSTRUCTION_VARIANT.OTHER_LINUX,
+        instructions: [
+          createDownloadServerOtherLinux(),
+          EDIT_CONFIG,
+          START_SERVER_UNIX_BINARI,
         ],
       },
       {
@@ -121,7 +132,7 @@ export function getOnPremApmServerInstructionSet({
         }
       ),
       esHitsCheck: {
-        index: apmConfig.indices.onboarding,
+        index: apmIndices.onboarding,
         query: {
           bool: {
             filter: [{ term: { 'processor.event': 'onboarding' } }],

@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import datemath from '@kbn/datemath';
 import {
   EuiFieldSearch,
   EuiFlexItem,
@@ -16,14 +15,13 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiDataGridSorting,
-  Pagination,
   EuiSuperDatePicker,
   OnTimeChangeProps,
   EuiSwitch,
   EuiDataGridColumn,
+  EuiCallOut,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
@@ -32,6 +30,7 @@ import {
 } from '../../../constants';
 import {
   EventLogDataGrid,
+  type EventLogDataGrid as EventLogDataGridProps,
   getIsColumnSortable,
   ColumnHeaderWithToolTip,
   numTriggeredActionsDisplay,
@@ -46,22 +45,10 @@ import { RefineSearchPrompt } from '../../common/components/refine_search_prompt
 import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_link';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
-import {
-  ComponentOpts as RuleApis,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
+import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { RefreshToken } from './types';
-
-const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
-
-const getParsedDate = (date: string) => {
-  if (date.includes('now')) {
-    return datemath.parse(date)?.format() || date;
-  }
-  return date;
-};
 
 const API_FAILED_MESSAGE = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.apiError',
@@ -100,18 +87,17 @@ const MAX_RESULTS = 1000;
 
 export type RuleEventLogListOptions = 'stackManagement' | 'default';
 
-export type RuleEventLogListCommonProps = {
+export interface RuleEventLogListCommonProps {
   ruleId: string;
   localStorageKey?: string;
   refreshToken?: RefreshToken;
   initialPageSize?: number;
-  // Duplicating these properties is extremely silly but it's the only way to get Jest to cooperate with the way this component is structured
-  overrideLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
-  overrideLoadGlobalExecutionLogAggregations?: RuleApis['loadGlobalExecutionLogAggregations'];
   hasRuleNames?: boolean;
   hasAllSpaceSwitch?: boolean;
+  filteredRuleTypes?: string[];
   setHeaderActions?: (components?: React.ReactNode[]) => void;
-} & Pick<RuleApis, 'loadExecutionLogAggregations' | 'loadGlobalExecutionLogAggregations'>;
+  getRuleDetailsRoute?: (ruleId: string) => string;
+}
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
   T extends 'default'
@@ -127,14 +113,12 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     ruleId,
     localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
     refreshToken,
-    loadGlobalExecutionLogAggregations,
-    loadExecutionLogAggregations,
-    overrideLoadGlobalExecutionLogAggregations,
-    overrideLoadExecutionLogAggregations,
     initialPageSize = 10,
     hasRuleNames = false,
     hasAllSpaceSwitch = false,
     setHeaderActions,
+    filteredRuleTypes,
+    getRuleDetailsRoute,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
@@ -160,15 +144,14 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const [filter, setFilter] = useState<string[]>([]);
   const [actualTotalItemCount, setActualTotalItemCount] = useState<number>(0);
-  const [pagination, setPagination] = useState<Pagination>({
+  const [pagination, setPagination] = useState<EventLogDataGridProps['pagination']>({
     pageIndex: 0,
     pageSize: initialPageSize,
     totalItemCount: 0,
   });
 
   // Date related states
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [dateStart, setDateStart] = useState<string>('now-24h');
+  const [dateStart, setDateStart] = useState<string>('now-15m');
   const [dateEnd, setDateEnd] = useState<string>('now');
   const [dateFormat] = useState(() => uiSettings?.get('dateFormat'));
   const [commonlyUsedRanges] = useState(() => {
@@ -213,50 +196,44 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadLogsFn = useMemo(() => {
-    if (ruleId === '*') {
-      return overrideLoadGlobalExecutionLogAggregations ?? loadGlobalExecutionLogAggregations;
-    }
-    return overrideLoadExecutionLogAggregations ?? loadExecutionLogAggregations;
-  }, [
-    ruleId,
-    overrideLoadExecutionLogAggregations,
-    overrideLoadGlobalExecutionLogAggregations,
-    loadExecutionLogAggregations,
-    loadGlobalExecutionLogAggregations,
-  ]);
-
-  const loadEventLogs = async () => {
-    if (!loadLogsFn) {
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const result = await loadLogsFn({
-        id: ruleId,
-        sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
-        outcomeFilter: filter,
-        message: searchText,
-        dateStart: getParsedDate(dateStart),
-        dateEnd: getParsedDate(dateEnd),
-        page: pagination.pageIndex,
-        perPage: pagination.pageSize,
-        namespaces,
-      });
-      setLogs(result.data);
-      setPagination({
-        ...pagination,
-        totalItemCount: Math.min(result.total, MAX_RESULTS),
-      });
-      setActualTotalItemCount(result.total);
-    } catch (e) {
+  const onError = useCallback(
+    (e) => {
+      if (e.body.statusCode === 413) {
+        return;
+      }
       notifications.toasts.addDanger({
         title: API_FAILED_MESSAGE,
         text: e.body?.message ?? e,
       });
+    },
+    [notifications]
+  );
+
+  const { data, isLoading, hasExceedLogs, loadEventLogs } = useLoadRuleEventLogs({
+    id: ruleId,
+    sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
+    outcomeFilter: filter,
+    message: searchText,
+    dateStart,
+    dateEnd,
+    page: pagination.pageIndex,
+    perPage: pagination.pageSize,
+    namespaces,
+    ruleTypeIds: filteredRuleTypes,
+    onError,
+  });
+
+  useEffect(() => {
+    if (!data) {
+      return;
     }
-    setIsLoading(false);
-  };
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      totalItemCount: Math.min(data.total, MAX_RESULTS),
+    }));
+    setLogs(data.data);
+    setActualTotalItemCount(data.total);
+  }, [data]);
 
   const getPaginatedRowIndex = useCallback(
     (rowIndex: number) => {
@@ -658,6 +635,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           onFlyoutOpen={onFlyoutOpen}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
+          getRuleDetailsRoute={getRuleDetailsRoute}
         />
       </>
     );
@@ -694,10 +672,10 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, [refreshToken]);
 
   return (
-    <EuiFlexGroup gutterSize="none" direction="column">
+    <EuiFlexGroup gutterSize="none" direction="column" data-test-subj="ruleEventLogListTable">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
               isClearable
@@ -745,11 +723,24 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           message={searchText}
           refreshToken={internalRefreshToken}
           namespaces={namespaces}
+          filteredRuleTypes={filteredRuleTypes}
         />
         <EuiSpacer />
       </EuiFlexItem>
       <EuiFlexItem>
-        {renderList()}
+        {hasExceedLogs && (
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.exceedLog.refineSearch.prompt"
+                defaultMessage="Results are limited to 10,000 documents, refine your search to see others."
+              />
+            }
+            data-test-subj="exceedLimitLogsCallout"
+            size="m"
+          />
+        )}
+        {!hasExceedLogs && renderList()}
         {isOnLastPage && (
           <RefineSearchPrompt
             documentSize={actualTotalItemCount}
@@ -769,23 +760,5 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     </EuiFlexGroup>
   );
 };
-
-const RuleEventLogListTableWithSpaces: React.FC<RuleEventLogListTableProps> = (props) => {
-  const { spaces } = useKibana().services;
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const SpacesContextWrapper = useCallback(
-    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
-    [spaces]
-  );
-  return (
-    <SpacesContextWrapper feature="triggersActions">
-      <RuleEventLogListTable {...props} />
-    </SpacesContextWrapper>
-  );
-};
-
-export const RuleEventLogListTableWithApi = withBulkRuleOperations(RuleEventLogListTableWithSpaces);
-
 // eslint-disable-next-line import/no-default-export
-export { RuleEventLogListTableWithApi as default };
+export { RuleEventLogListTable as default };

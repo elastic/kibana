@@ -34,21 +34,28 @@ export enum TELEMETRY_EVENT {
   // Landing page - dashboard
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
-
-  // Breadcrumbs
-  BREADCRUMB = 'breadcrumb_',
 }
 
 export enum TelemetryEventTypes {
   AlertsGroupingChanged = 'Alerts Grouping Changed',
   AlertsGroupingToggled = 'Alerts Grouping Toggled',
   AlertsGroupingTakeAction = 'Alerts Grouping Take Action',
+  BreadcrumbClicked = 'Breadcrumb Clicked',
+  AssistantInvoked = 'Assistant Invoked',
+  AssistantMessageSent = 'Assistant Message Sent',
+  AssistantQuickPrompt = 'Assistant Quick Prompt',
+  AssistantSettingToggled = 'Assistant Setting Toggled',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
   MLJobUpdate = 'ML Job Update',
+  AddRiskInputToTimelineClicked = 'Add Risk Input To Timeline Clicked',
+  ToggleRiskSummaryClicked = 'Toggle Risk Summary Clicked',
+  RiskInputsExpandedFlyoutOpened = 'Risk Inputs Expanded Flyout Opened',
   CellActionClicked = 'Cell Action Clicked',
   AnomaliesCountClicked = 'Anomalies Count Clicked',
+  DataQualityIndexChecked = 'Data Quality Index Checked',
+  DataQualityCheckAllCompleted = 'Data Quality Check All Completed',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

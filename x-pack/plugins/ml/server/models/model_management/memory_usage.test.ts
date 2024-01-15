@@ -133,10 +133,16 @@ describe('Model service', () => {
     }),
   } as unknown as jest.Mocked<MlClient>;
 
+  const mlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
+
   let service: MemoryUsageService;
 
   beforeEach(() => {
-    service = new MemoryUsageService(mlClient);
+    service = new MemoryUsageService(mlClient, mlFeatures);
   });
 
   afterEach(() => {});

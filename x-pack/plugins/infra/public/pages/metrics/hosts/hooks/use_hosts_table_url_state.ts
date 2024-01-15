@@ -16,6 +16,7 @@ import { useUrlState } from '../../../../utils/use_url_state';
 import { DEFAULT_PAGE_SIZE, LOCAL_STORAGE_PAGE_SIZE_KEY } from '../constants';
 
 export const GET_DEFAULT_TABLE_PROPERTIES: TableProperties = {
+  detailsItemId: null,
   sorting: {
     direction: 'asc',
     field: 'name',
@@ -29,7 +30,7 @@ export const GET_DEFAULT_TABLE_PROPERTIES: TableProperties = {
 const HOST_TABLE_PROPERTIES_URL_STATE_KEY = 'tableProperties';
 
 const reducer = (prevState: TableProperties, params: Payload) => {
-  const payload = Object.fromEntries(Object.entries(params).filter(([_, v]) => !!v));
+  const payload = Object.fromEntries(Object.entries(params).filter(([_, v]) => v !== undefined));
 
   return {
     ...prevState,
@@ -77,6 +78,7 @@ const SortingRT = rt.intersection([
 ]);
 
 const TableStateRT = rt.type({
+  detailsItemId: rt.union([rt.string, rt.null]),
   pagination: PaginationRT,
   sorting: SortingRT,
 });

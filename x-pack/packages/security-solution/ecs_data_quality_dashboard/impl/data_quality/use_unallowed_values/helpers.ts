@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core-http-browser';
+import { INTERNAL_API_VERSION } from '../helpers';
 import * as i18n from '../translations';
 import type {
   Bucket,
@@ -81,6 +82,7 @@ export async function fetchUnallowedValues({
       headers: { 'Content-Type': 'application/json' },
       method: 'POST',
       signal: abortController.signal,
+      version: INTERNAL_API_VERSION,
     });
   } catch (e) {
     throw new Error(

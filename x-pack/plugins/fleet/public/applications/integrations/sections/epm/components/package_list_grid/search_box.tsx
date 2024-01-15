@@ -54,6 +54,24 @@ export const SearchBox: FunctionComponent<Props> = ({
     });
   };
 
+  const onCategoryButtonClick = () => {
+    if (selectedSubCategory) {
+      if (setSelectedSubCategory) setSelectedSubCategory(undefined);
+      setUrlandReplaceHistory({
+        categoryId: selectedCategory,
+        subCategoryId: '',
+      });
+    } else {
+      setCategory('');
+      if (setSelectedSubCategory) setSelectedSubCategory(undefined);
+      setUrlandReplaceHistory({
+        searchString: '',
+        categoryId: '',
+        subCategoryId: '',
+      });
+    }
+  };
+
   const selectedCategoryTitle = selectedCategory
     ? categories.find((category) => category.id === selectedCategory)?.title
     : undefined;
@@ -100,15 +118,7 @@ export const SearchBox: FunctionComponent<Props> = ({
             {getCategoriesLabel}
             <button
               data-test-subj="epmList.categoryBadge.closeBtn"
-              onClick={() => {
-                setCategory('');
-                if (setSelectedSubCategory) setSelectedSubCategory(undefined);
-                setUrlandReplaceHistory({
-                  searchString: '',
-                  categoryId: '',
-                  subCategoryId: '',
-                });
-              }}
+              onClick={onCategoryButtonClick}
               aria-label="Remove filter"
               style={{
                 padding: euiTheme.size.xs,

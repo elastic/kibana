@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common/api/metrics/case';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 

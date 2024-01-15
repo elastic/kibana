@@ -15,6 +15,7 @@ const createInternalClientMock = () => {
     delete: jest.fn(),
     update: jest.fn(),
     find: jest.fn(),
+    findByName: jest.fn(),
     bulkDelete: jest.fn(),
   };
 

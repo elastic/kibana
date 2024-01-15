@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep } from 'lodash';
+import rison from '@kbn/rison';
 import {
   Query,
   fromKueryExpression,
@@ -161,4 +162,15 @@ export function checkCardinalitySuccess(data: any) {
   }
 
   return response;
+}
+
+export function getRisonValue<T extends string | boolean | number | object | undefined | null>(
+  risonString: string,
+  defaultValue: T
+) {
+  try {
+    return rison.decode(risonString) as T;
+  } catch (error) {
+    return defaultValue;
+  }
 }

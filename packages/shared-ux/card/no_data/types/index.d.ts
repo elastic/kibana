@@ -56,7 +56,7 @@ export type NoDataCardKibanaDependencies = KibanaDependencies & RedirectAppLinks
  * Props for the `NoDataCard` pure component.
  */
 export type NoDataCardComponentProps = Partial<
-  Omit<EuiCardProps, 'layout' | 'isDisabled' | 'button' | 'onClick' | 'description'>
+  Pick<EuiCardProps, 'className' | 'href' | 'title'>
 > & {
   /**
    * Provide just a string for the button's label, or a whole component;
@@ -79,4 +79,4 @@ export type NoDataCardComponentProps = Partial<
 /**
  * Props for the `NoDataCard` sevice-connected component.
  */
-export type NoDataCardProps = Omit<NoDataCardComponentProps, 'canAccessFleet'>;
+export type NoDataCardProps = NoDataCardComponentProps;

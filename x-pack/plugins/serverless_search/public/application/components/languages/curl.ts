@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../../common/doc_links';
-import { LanguageDefinition, Languages } from './types';
 
 export const curlDefinition: LanguageDefinition = {
   buildSearchQuery: `curl -X POST "\$\{ES_URL\}/books/_search?pretty" \\
@@ -24,6 +24,12 @@ export const curlDefinition: LanguageDefinition = {
   configureClient: ({ apiKey, url }) => `export ES_URL="${url}"
 export API_KEY="${apiKey}"`,
   docLink: docLinks.apiIntro,
+  github: {
+    link: 'https://github.com/curl/curl',
+    label: i18n.translate('xpack.serverlessSearch.languages.cURL.githubLabel', {
+      defaultMessage: 'curl',
+    }),
+  },
   iconType: 'curl.svg',
   id: Languages.CURL,
   ingestData: `curl -X POST "\$\{ES_URL\}/_bulk?pretty" \\
@@ -49,7 +55,7 @@ export API_KEY="${apiKey}"`,
   -d'
 { "index" : { "_index" : "${indexName ?? 'index_name'}" } }
 {"name": "foo", "title": "bar" }
-`,
+'`,
   installClient: `# if cURL is not already installed on your system
 # then install it with the package manager of your choice
 

@@ -4,201 +4,92 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { Evaluation } from '../../../../common/types';
-import type { FindingsBaseProps, FindingsBaseURLQuery } from '../../../common/types';
-import { FindingsTable } from './latest_findings_table';
+import React from 'react';
+import { Filter } from '@kbn/es-query';
+import { EuiSpacer } from '@elastic/eui';
+import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../../common/constants';
+import { EmptyState } from '../../../components/empty_state';
+import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
-import * as TEST_SUBJECTS from '../test_subjects';
-import { useLatestFindings } from './use_latest_findings';
-import type { FindingsGroupByNoneQuery } from './use_latest_findings';
+import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
+import { LatestFindingsTable } from './latest_findings_table';
+import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_renderer';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import { getFindingsPageSizeInfo, getFilters } from '../utils/utils';
-import { LimitedResultsBar } from '../layout/findings_layout';
-import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
-import { usePageSlice } from '../../../common/hooks/use_page_slice';
 import { ErrorCallout } from '../layout/error_callout';
-import { useLimitProperties } from '../../../common/utils/get_limit_properties';
-import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../../common/constants';
-import { CspFinding } from '../../../../common/schemas/csp_finding';
-import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
-import { getPaginationTableParams } from '../../../common/hooks/use_cloud_posture_table/utils';
 
-export const getDefaultQuery = ({
-  query,
-  filters,
-}: FindingsBaseURLQuery): FindingsBaseURLQuery &
-  FindingsGroupByNoneQuery & { findingIndex: number } => ({
-  query,
-  filters,
-  sort: { field: '@timestamp', direction: 'desc' },
-  pageIndex: 0,
-  findingIndex: -1,
-});
-
-export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-  const {
-    pageIndex,
-    query,
-    sort,
-    queryError,
-    pageSize,
-    setTableOptions,
-    urlQuery,
-    setUrlQuery,
-    filters,
-    onResetFilters,
-  } = useCloudPostureTable({
-    dataView,
-    defaultQuery: getDefaultQuery,
-    paginationLocalStorageKey: LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY,
-  });
-
-  /**
-   * Page ES query result
-   */
-  const findingsGroupByNone = useLatestFindings({
-    query,
-    sort,
-    enabled: !queryError,
-  });
-
-  const slicedPage = usePageSlice(findingsGroupByNone.data?.page, pageIndex, pageSize);
-
-  const error = findingsGroupByNone.error || queryError;
-
-  const { isLastLimitedPage, limitedTotalItemCount } = useLimitProperties({
-    total: findingsGroupByNone.data?.total,
-    pageIndex,
-    pageSize,
-  });
-
-  const handleDistributionClick = (evaluation: Evaluation) => {
-    setUrlQuery({
-      pageIndex: 0,
-      filters: getFilters({
-        filters,
-        dataView,
-        field: 'result.evaluation',
-        value: evaluation,
-        negate: false,
-      }),
-    });
+export const LatestFindingsContainer = () => {
+  const renderChildComponent = (groupFilters: Filter[]) => {
+    return (
+      <LatestFindingsTable
+        nonPersistedFilters={groupFilters}
+        height={DEFAULT_GROUPING_TABLE_HEIGHT}
+        showDistributionBar={false}
+      />
+    );
   };
 
-  const flyoutFindingIndex = urlQuery?.findingIndex;
-
-  const pagination = getPaginationTableParams({
+  const {
+    isGroupSelected,
+    groupData,
+    grouping,
+    isFetching,
+    activePageIndex,
     pageSize,
-    pageIndex,
-    totalItemCount: limitedTotalItemCount,
-  });
+    selectedGroup,
+    onChangeGroupsItemsPerPage,
+    onChangeGroupsPage,
+    setUrlQuery,
+    isGroupLoading,
+    onResetFilters,
+    error,
+    totalPassedFindings,
+    onDistributionBarClick,
+    totalFailedFindings,
+    isEmptyResults,
+  } = useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
 
-  const onOpenFlyout = useCallback(
-    (flyoutFinding: CspFinding) => {
-      setUrlQuery({
-        findingIndex: slicedPage.findIndex(
-          (finding) =>
-            finding.resource.id === flyoutFinding?.resource.id &&
-            finding.rule.id === flyoutFinding?.rule.id
-        ),
-      });
-    },
-    [slicedPage, setUrlQuery]
-  );
-
-  const onCloseFlyout = () =>
-    setUrlQuery({
-      findingIndex: -1,
-    });
-
-  const onPaginateFlyout = useCallback(
-    (nextFindingIndex: number) => {
-      // the index of the finding in the current page
-      const newFindingIndex = nextFindingIndex % pageSize;
-
-      // if the finding is not in the current page, we need to change the page
-      const flyoutPageIndex = Math.floor(nextFindingIndex / pageSize);
-
-      setUrlQuery({
-        pageIndex: flyoutPageIndex,
-        findingIndex: newFindingIndex,
-      });
-    },
-    [pageSize, setUrlQuery]
-  );
+  if (error || isEmptyResults) {
+    return (
+      <>
+        <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+        <EuiSpacer size="m" />
+        {error && <ErrorCallout error={error} />}
+        {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
+      </>
+    );
+  }
+  if (isGroupSelected) {
+    return (
+      <>
+        <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+        <div>
+          <EuiSpacer size="m" />
+          <FindingsDistributionBar
+            distributionOnClick={onDistributionBarClick}
+            passed={totalPassedFindings}
+            failed={totalFailedFindings}
+          />
+          <CloudSecurityGrouping
+            data={groupData}
+            grouping={grouping}
+            renderChildComponent={renderChildComponent}
+            onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
+            onChangeGroupsPage={onChangeGroupsPage}
+            activePageIndex={activePageIndex}
+            isFetching={isFetching}
+            pageSize={pageSize}
+            selectedGroup={selectedGroup}
+            isGroupLoading={isGroupLoading}
+          />
+        </div>
+      </>
+    );
+  }
 
   return (
-    <div data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
-      <FindingsSearchBar
-        dataView={dataView!}
-        setQuery={(newQuery) => {
-          setUrlQuery({ ...newQuery, pageIndex: 0 });
-        }}
-        loading={findingsGroupByNone.isFetching}
-      />
-      <EuiSpacer size="m" />
-      {!error && (
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false} style={{ width: 188 }}>
-            <FindingsGroupBySelector type="default" />
-            <EuiSpacer size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {error && <ErrorCallout error={error} />}
-      {!error && (
-        <>
-          {findingsGroupByNone.isSuccess && !!findingsGroupByNone.data.page.length && (
-            <FindingsDistributionBar
-              {...{
-                distributionOnClick: handleDistributionClick,
-                type: i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
-                  defaultMessage: 'Findings',
-                }),
-                total: findingsGroupByNone.data.total,
-                passed: findingsGroupByNone.data.count.passed,
-                failed: findingsGroupByNone.data.count.failed,
-                ...getFindingsPageSizeInfo({
-                  pageIndex,
-                  pageSize,
-                  currentPageSize: slicedPage.length,
-                }),
-              }}
-            />
-          )}
-          <EuiSpacer />
-          <FindingsTable
-            onResetFilters={onResetFilters}
-            onCloseFlyout={onCloseFlyout}
-            onPaginateFlyout={onPaginateFlyout}
-            onOpenFlyout={onOpenFlyout}
-            flyoutFindingIndex={flyoutFindingIndex}
-            loading={findingsGroupByNone.isFetching}
-            items={slicedPage}
-            pagination={pagination}
-            sorting={{
-              sort: { field: sort.field, direction: sort.direction },
-            }}
-            setTableOptions={setTableOptions}
-            onAddFilter={(field, value, negate) =>
-              setUrlQuery({
-                pageIndex: 0,
-                filters: getFilters({
-                  filters,
-                  dataView,
-                  field,
-                  value,
-                  negate,
-                }),
-              })
-            }
-          />
-        </>
-      )}
-      {isLastLimitedPage && <LimitedResultsBar />}
-    </div>
+    <>
+      <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+      <LatestFindingsTable groupSelectorComponent={grouping.groupSelector} />
+    </>
   );
 };

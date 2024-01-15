@@ -1,14 +1,15 @@
 {
   "search_application.post_behavioral_analytics_event": {
-    "url_params": {
-      "debug": "__flag__"
-    },
     "methods": [
       "POST"
     ],
     "patterns": [
       "_application/analytics/{collection_name}/event/{event_type}"
     ],
-    "documentation": "http://todo.com/tbd"
+    "documentation": "http://todo.com/tbd",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

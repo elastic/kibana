@@ -9,6 +9,11 @@ const createAlertsClientMock = () => {
     return {
       initializeExecution: jest.fn(),
       processAndLogAlerts: jest.fn(),
+      processAlerts: jest.fn(),
+      logAlerts: jest.fn(),
+      updateAlertMaintenanceWindowIds: jest.fn(),
+      getMaintenanceWindowScopedQueryAlerts: jest.fn(),
+      updateAlertsMaintenanceWindowIdByScopedQuery: jest.fn(),
       getTrackedAlerts: jest.fn(),
       getProcessedAlerts: jest.fn(),
       getAlertsToSerialize: jest.fn(),
@@ -30,9 +35,11 @@ const createPublicAlertsClientMock = () => {
   return jest.fn().mockImplementation(() => {
     return {
       create: jest.fn(),
-      getAlertLimitValue: jest.fn(),
+      report: jest.fn(),
+      getAlertLimitValue: jest.fn().mockReturnValue(1000),
       setAlertLimitReached: jest.fn(),
-      getRecoveredAlerts: jest.fn(),
+      getRecoveredAlerts: jest.fn().mockReturnValue([]),
+      setAlertData: jest.fn(),
     };
   });
 };

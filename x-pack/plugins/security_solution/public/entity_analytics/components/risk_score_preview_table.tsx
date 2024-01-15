@@ -9,11 +9,13 @@ import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { RiskSeverity } from '../../../common/search_strategy';
-import { RiskScore } from '../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from './severity/common';
 
 import { HostDetailsLink, UserDetailsLink } from '../../common/components/links';
-import type { RiskScore as IRiskScore } from '../../../server/lib/risk_engine/types';
-import { RiskScoreEntity } from '../../../common/risk_engine/types';
+import {
+  RiskScoreEntity,
+  type RiskScore as IRiskScore,
+} from '../../../common/entity_analytics/risk_engine';
 
 type RiskScoreColumn = EuiBasicTableColumn<IRiskScore> & {
   field: keyof IRiskScore;
@@ -43,7 +45,7 @@ export const RiskScorePreviewTable = ({
       name: 'Level',
       render: (risk: RiskSeverity | null) => {
         if (risk != null) {
-          return <RiskScore severity={risk} />;
+          return <RiskScoreLevel severity={risk} />;
         }
 
         return '';

@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-page-no-data-config",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-        "id": "def-common.NoDataConfigPage",
+        "id": "def-public.NoDataConfigPage",
         "type": "Function",
         "tags": [],
         "label": "NoDataConfigPage",
@@ -37,7 +21,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-            "id": "def-common.NoDataConfigPage.$1",
+            "id": "def-public.NoDataConfigPage.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -56,7 +40,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-        "id": "def-common.NoDataConfigPageKibanaProvider",
+        "id": "def-public.NoDataConfigPageKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "NoDataConfigPageKibanaProvider",
@@ -74,7 +58,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-            "id": "def-common.NoDataConfigPageKibanaProvider.$1",
+            "id": "def-public.NoDataConfigPageKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...dependencies\n}",
@@ -95,7 +79,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-        "id": "def-common.NoDataConfigPageProvider",
+        "id": "def-public.NoDataConfigPageProvider",
         "type": "Function",
         "tags": [],
         "label": "NoDataConfigPageProvider",
@@ -113,7 +97,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-            "id": "def-common.NoDataConfigPageProvider.$1",
+            "id": "def-public.NoDataConfigPageProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
@@ -134,7 +118,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-        "id": "def-common.NoDataConfigPageWithSolutionNavBar",
+        "id": "def-public.NoDataConfigPageWithSolutionNavBar",
         "type": "Function",
         "tags": [],
         "label": "NoDataConfigPageWithSolutionNavBar",
@@ -142,13 +126,11 @@
         "signature": [
           "{ (props: Props<",
           "_EuiPageOuterProps",
-          " & Omit<",
-          "_EuiPageInnerProps",
-          "<\"main\">, \"border\" | \"component\"> & ",
+          " & Omit<any, \"border\" | \"component\"> & ",
           "_EuiPageRestrictWidth",
           " & ",
           "_EuiPageBottomBorder",
-          " & { contentBorder?: boolean | undefined; minHeight?: ",
+          " & { contentBorder?: any; minHeight?: ",
           "Property",
           ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
           "CommonProps",
@@ -167,7 +149,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-            "id": "def-common.NoDataConfigPageWithSolutionNavBar.$1",
+            "id": "def-public.NoDataConfigPageWithSolutionNavBar.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -198,7 +180,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-        "id": "def-common.NoDataConfigPageKibanaDependencies",
+        "id": "def-public.NoDataConfigPageKibanaDependencies",
         "type": "Type",
         "tags": [],
         "label": "NoDataConfigPageKibanaDependencies",
@@ -215,20 +197,18 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-        "id": "def-common.NoDataConfigPageProps",
+        "id": "def-public.NoDataConfigPageProps",
         "type": "Type",
         "tags": [],
         "label": "NoDataConfigPageProps",
         "description": [],
         "signature": [
           "_EuiPageOuterProps",
-          " & Omit<",
-          "_EuiPageInnerProps",
-          "<\"main\">, \"border\" | \"component\"> & ",
+          " & Omit<any, \"border\" | \"component\"> & ",
           "_EuiPageRestrictWidth",
           " & ",
           "_EuiPageBottomBorder",
-          " & { contentBorder?: boolean | undefined; minHeight?: ",
+          " & { contentBorder?: any; minHeight?: ",
           "Property",
           ".MinHeight<string | number> | undefined; offset?: number | undefined; mainProps?: (",
           "CommonProps",
@@ -247,7 +227,7 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-page-no-data-config",
-        "id": "def-common.NoDataConfigPageServices",
+        "id": "def-public.NoDataConfigPageServices",
         "type": "Type",
         "tags": [],
         "label": "NoDataConfigPageServices",
@@ -263,6 +243,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

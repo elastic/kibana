@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { TransformListAction, TransformListRow } from '../../../../common';
-import { AuthorizationContext } from '../../../../lib/authorization';
+import { useTransformCapabilities } from '../../../../hooks';
 
 import { editActionNameText, EditActionName } from './edit_action_name';
 import { useSearchItems } from '../../../../hooks/use_search_items';
@@ -19,7 +19,7 @@ import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 export type EditAction = ReturnType<typeof useEditAction>;
 export const useEditAction = (forceDisable: boolean, transformNodes: number) => {
-  const { canCreateTransform } = useContext(AuthorizationContext).capabilities;
+  const { canCreateTransform } = useTransformCapabilities();
 
   const [config, setConfig] = useState<TransformConfigUnion>();
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);

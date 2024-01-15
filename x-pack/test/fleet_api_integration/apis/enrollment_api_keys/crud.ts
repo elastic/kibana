@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents, getEsClientForAPIKey } from '../agents/services';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -161,14 +162,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return a 400 if the policy_id is not a valid policy', async () => {
+      it('should return a 404 if the policy_id does not exist', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment_api_keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'idonotexists',
           })
-          .expect(400);
+          .expect(404);
 
         expect(apiResponse.message).to.be('Agent policy "idonotexists" not found');
       });
@@ -222,11 +223,11 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy1',
             name: 'something',
           })
-          .expect(400);
+          .expect(409);
 
         expect(noSpacesDupe).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
+          statusCode: 409,
+          error: 'Conflict',
           message: 'An enrollment key named something already exists for agent policy policy1',
         });
 
@@ -237,10 +238,10 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy1',
             name: 'something else',
           })
-          .expect(400);
+          .expect(409);
         expect(hasSpacesDupe).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
+          statusCode: 409,
+          error: 'Conflict',
           message: 'An enrollment key named something else already exists for agent policy policy1',
         });
       });
@@ -324,6 +325,7 @@ export default function (providerContext: FtrProviderContext) {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment-api-keys`)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
           .send({
             policy_id: 'policy1',
           })
@@ -332,11 +334,20 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should get and delete with deprecated API', async () => {
-        await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
-        await supertest.get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`).expect(200);
+        await supertest
+          .get(`/api/fleet/enrollment-api-keys`)
+          .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+        await supertest
+          .get(`/api/fleet/enrollment-api-keys/${ENROLLMENT_KEY_ID}`)
+          .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
 
         await supertest
           .delete(`/api/fleet/enrollment-api-keys/${keyId}`)
+          .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
       });

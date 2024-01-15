@@ -8,13 +8,13 @@
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   kibanaObservable,
   createSecuritySolutionStorageMock,
+  TestProviders,
 } from '../../../../common/mock';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
@@ -54,9 +54,9 @@ describe('NewTemplateTimeline', () => {
       });
 
       wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <NewTemplateTimeline outline={true} closeGearMenu={mockClosePopover} title={mockTitle} />
-        </ReduxStoreProvider>
+        <TestProviders store={store}>
+          <NewTemplateTimeline outline={true} onClick={mockClosePopover} title={mockTitle} />
+        </TestProviders>
       );
     });
 
@@ -91,9 +91,9 @@ describe('NewTemplateTimeline', () => {
       });
 
       wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <NewTemplateTimeline outline={true} closeGearMenu={mockClosePopover} title={mockTitle} />
-        </ReduxStoreProvider>
+        <TestProviders store={store}>
+          <NewTemplateTimeline outline={true} onClick={mockClosePopover} title={mockTitle} />
+        </TestProviders>
       );
     });
 

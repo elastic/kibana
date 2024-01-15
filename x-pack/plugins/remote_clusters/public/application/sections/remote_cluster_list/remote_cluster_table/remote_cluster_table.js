@@ -25,7 +25,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { UIM_SHOW_DETAILS_CLICK } from '../../../constants';
 import { PROXY_MODE } from '../../../../../common/constants';
 import { trackUiMetric, METRIC_TYPE, getRouter } from '../../../services';
-import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
+import { ConnectionStatus, RemoveClusterButtonProvider, SecurityModel } from '../components';
 
 const getFilteredClusters = (clusters, queryText) => {
   if (queryText) {
@@ -235,7 +235,7 @@ export class RemoteClusterTable extends Component {
         name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.addressesColumnTitle', {
           defaultMessage: 'Addresses',
         }),
-        dataTestSubj: 'remoteClustersAddress',
+        'data-test-subj': 'remoteClustersAddress',
         truncateText: true,
         render: (mode, { seeds, proxyAddress }) => {
           const clusterAddressString = mode === PROXY_MODE ? proxyAddress : seeds.join(', ');
@@ -250,6 +250,16 @@ export class RemoteClusterTable extends Component {
         },
       },
       {
+        field: 'securityModel',
+        name: i18n.translate('xpack.remoteClusters.remoteClusterList.table.authTypeColumnTitle', {
+          defaultMessage: 'Authentication type',
+        }),
+        sortable: true,
+        render: (securityModel) => {
+          return <SecurityModel securityModel={securityModel} />;
+        },
+      },
+      {
         field: 'mode',
         name: i18n.translate(
           'xpack.remoteClusters.remoteClusterList.table.connectionsColumnTitle',
@@ -259,6 +269,7 @@ export class RemoteClusterTable extends Component {
         ),
         sortable: true,
         width: '160px',
+        align: 'right',
         render: (mode, { connectedNodesCount, connectedSocketsCount }) => {
           const remoteNodesCount =
             mode === PROXY_MODE ? connectedSocketsCount : connectedNodesCount;

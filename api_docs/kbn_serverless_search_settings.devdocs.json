@@ -1,0 +1,43 @@
+{
+  "id": "@kbn/serverless-search-settings",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/serverless-search-settings",
+        "id": "def-common.SEARCH_PROJECT_SETTINGS",
+        "type": "Array",
+        "tags": [],
+        "label": "SEARCH_PROJECT_SETTINGS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/serverless/settings/search_project/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

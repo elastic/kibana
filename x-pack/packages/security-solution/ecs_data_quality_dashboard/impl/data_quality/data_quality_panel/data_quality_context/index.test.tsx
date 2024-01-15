@@ -10,9 +10,21 @@ import React from 'react';
 
 import { DataQualityProvider, useDataQualityContext } from '.';
 
+const mockReportDataQualityIndexChecked = jest.fn();
+const mockReportDataQualityCheckAllClicked = jest.fn();
 const mockHttpFetch = jest.fn();
+const mockTelemetryEvents = {
+  reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
+  reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
+};
 const ContextWrapper: React.FC = ({ children }) => (
-  <DataQualityProvider httpFetch={mockHttpFetch}>{children}</DataQualityProvider>
+  <DataQualityProvider
+    httpFetch={mockHttpFetch}
+    telemetryEvents={mockTelemetryEvents}
+    isILMAvailable={true}
+  >
+    {children}
+  </DataQualityProvider>
 );
 
 describe('DataQualityContext', () => {
@@ -36,5 +48,19 @@ describe('DataQualityContext', () => {
     httpFetch(path);
 
     expect(mockHttpFetch).toBeCalledWith(path);
+  });
+
+  test('it should return the telemetry events', async () => {
+    const { result } = renderHook(useDataQualityContext, { wrapper: ContextWrapper });
+    const telemetryEvents = await result.current.telemetryEvents;
+
+    expect(telemetryEvents).toEqual(mockTelemetryEvents);
+  });
+
+  test('it should return the isILMAvailable param', async () => {
+    const { result } = renderHook(useDataQualityContext, { wrapper: ContextWrapper });
+    const isILMAvailable = await result.current.isILMAvailable;
+
+    expect(isILMAvailable).toEqual(true);
   });
 });

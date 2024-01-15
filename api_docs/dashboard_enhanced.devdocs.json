@@ -30,8 +30,8 @@
             "pluginId": "dashboardEnhanced",
             "scope": "common",
             "docId": "kibDashboardEnhancedPluginApi",
-            "section": "def-common.DrilldownConfig",
-            "text": "DrilldownConfig"
+            "section": "def-common.DashboardDrilldownConfig",
+            "text": "DashboardDrilldownConfig"
           },
           ", Context, ",
           {
@@ -125,8 +125,8 @@
                 "pluginId": "dashboardEnhanced",
                 "scope": "common",
                 "docId": "kibDashboardEnhancedPluginApi",
-                "section": "def-common.DrilldownConfig",
-                "text": "DrilldownConfig"
+                "section": "def-common.DashboardDrilldownConfig",
+                "text": "DashboardDrilldownConfig"
               },
               ", context: Context, useUrlForState: boolean) => Promise<",
               "KibanaLocation",
@@ -139,7 +139,7 @@
               {
                 "parentPluginId": "dashboardEnhanced",
                 "id": "def-public.AbstractDashboardDrilldown.getLocation.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "config",
                 "description": [],
@@ -148,8 +148,8 @@
                     "pluginId": "dashboardEnhanced",
                     "scope": "common",
                     "docId": "kibDashboardEnhancedPluginApi",
-                    "section": "def-common.DrilldownConfig",
-                    "text": "DrilldownConfig"
+                    "section": "def-common.DashboardDrilldownConfig",
+                    "text": "DashboardDrilldownConfig"
                   }
                 ],
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
@@ -212,7 +212,7 @@
             "label": "getDisplayName",
             "description": [],
             "signature": [
-              "() => any"
+              "() => string"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
@@ -255,8 +255,8 @@
                 "pluginId": "dashboardEnhanced",
                 "scope": "common",
                 "docId": "kibDashboardEnhancedPluginApi",
-                "section": "def-common.DrilldownConfig",
-                "text": "DrilldownConfig"
+                "section": "def-common.DashboardDrilldownConfig",
+                "text": "DashboardDrilldownConfig"
               },
               ", ",
               {
@@ -311,7 +311,7 @@
             "label": "createConfig",
             "description": [],
             "signature": [
-              "() => { dashboardId: string; useCurrentFilters: boolean; useCurrentDateRange: boolean; openInNewTab: boolean; }"
+              "() => { useCurrentFilters: boolean; useCurrentDateRange: boolean; openInNewTab: boolean; dashboardId: string; }"
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
             "deprecated": false,
@@ -332,16 +332,16 @@
                 "pluginId": "dashboardEnhanced",
                 "scope": "common",
                 "docId": "kibDashboardEnhancedPluginApi",
-                "section": "def-common.DrilldownConfig",
-                "text": "DrilldownConfig"
+                "section": "def-common.DashboardDrilldownConfig",
+                "text": "DashboardDrilldownConfig"
               },
               ") => config is ",
               {
                 "pluginId": "dashboardEnhanced",
                 "scope": "common",
                 "docId": "kibDashboardEnhancedPluginApi",
-                "section": "def-common.DrilldownConfig",
-                "text": "DrilldownConfig"
+                "section": "def-common.DashboardDrilldownConfig",
+                "text": "DashboardDrilldownConfig"
               }
             ],
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
@@ -351,7 +351,7 @@
               {
                 "parentPluginId": "dashboardEnhanced",
                 "id": "def-public.AbstractDashboardDrilldown.isConfigValid.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "config",
                 "description": [],
@@ -360,8 +360,8 @@
                     "pluginId": "dashboardEnhanced",
                     "scope": "common",
                     "docId": "kibDashboardEnhancedPluginApi",
-                    "section": "def-common.DrilldownConfig",
-                    "text": "DrilldownConfig"
+                    "section": "def-common.DashboardDrilldownConfig",
+                    "text": "DashboardDrilldownConfig"
                   }
                 ],
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
@@ -385,8 +385,8 @@
                 "pluginId": "dashboardEnhanced",
                 "scope": "common",
                 "docId": "kibDashboardEnhancedPluginApi",
-                "section": "def-common.DrilldownConfig",
-                "text": "DrilldownConfig"
+                "section": "def-common.DashboardDrilldownConfig",
+                "text": "DashboardDrilldownConfig"
               },
               ", context: Context) => Promise<string>"
             ],
@@ -397,7 +397,7 @@
               {
                 "parentPluginId": "dashboardEnhanced",
                 "id": "def-public.AbstractDashboardDrilldown.getHref.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "config",
                 "description": [],
@@ -406,8 +406,8 @@
                     "pluginId": "dashboardEnhanced",
                     "scope": "common",
                     "docId": "kibDashboardEnhancedPluginApi",
-                    "section": "def-common.DrilldownConfig",
-                    "text": "DrilldownConfig"
+                    "section": "def-common.DashboardDrilldownConfig",
+                    "text": "DashboardDrilldownConfig"
                   }
                 ],
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
@@ -446,8 +446,8 @@
                 "pluginId": "dashboardEnhanced",
                 "scope": "common",
                 "docId": "kibDashboardEnhancedPluginApi",
-                "section": "def-common.DrilldownConfig",
-                "text": "DrilldownConfig"
+                "section": "def-common.DashboardDrilldownConfig",
+                "text": "DashboardDrilldownConfig"
               },
               ", context: Context) => Promise<void>"
             ],
@@ -458,7 +458,7 @@
               {
                 "parentPluginId": "dashboardEnhanced",
                 "id": "def-public.AbstractDashboardDrilldown.execute.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "config",
                 "description": [],
@@ -467,8 +467,8 @@
                     "pluginId": "dashboardEnhanced",
                     "scope": "common",
                     "docId": "kibDashboardEnhancedPluginApi",
-                    "section": "def-common.DrilldownConfig",
-                    "text": "DrilldownConfig"
+                    "section": "def-common.DashboardDrilldownConfig",
+                    "text": "DashboardDrilldownConfig"
                   }
                 ],
                 "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
@@ -514,8 +514,8 @@
                 "pluginId": "dashboard",
                 "scope": "public",
                 "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardAppLocatorParams",
-                "text": "DashboardAppLocatorParams"
+                "section": "def-public.DashboardLocatorParams",
+                "text": "DashboardLocatorParams"
               },
               ">"
             ],
@@ -838,7 +838,14 @@
         "label": "Config",
         "description": [],
         "signature": [
-          "{ dashboardId?: string | undefined; useCurrentFilters: boolean; useCurrentDateRange: boolean; openInNewTab: boolean; }"
+          "{ dashboardId?: string | undefined; } & ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.DashboardDrilldownOptions",
+            "text": "DashboardDrilldownOptions"
+          }
         ],
         "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/types.ts",
         "deprecated": false,
@@ -903,8 +910,8 @@
                 "pluginId": "uiActionsEnhanced",
                 "scope": "server",
                 "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-server.SetupContract",
-                "text": "SetupContract"
+                "section": "def-server.UiActionsEnhancedServerSetup",
+                "text": "UiActionsEnhancedServerSetup"
               }
             ],
             "path": "x-pack/plugins/dashboard_enhanced/server/plugin.ts",
@@ -1115,13 +1122,20 @@
     "misc": [
       {
         "parentPluginId": "dashboardEnhanced",
-        "id": "def-common.DrilldownConfig",
+        "id": "def-common.DashboardDrilldownConfig",
         "type": "Type",
         "tags": [],
-        "label": "DrilldownConfig",
+        "label": "DashboardDrilldownConfig",
         "description": [],
         "signature": [
-          "{ dashboardId?: string | undefined; useCurrentFilters: boolean; useCurrentDateRange: boolean; openInNewTab: boolean; }"
+          "{ dashboardId?: string | undefined; } & ",
+          {
+            "pluginId": "presentationUtil",
+            "scope": "public",
+            "docId": "kibPresentationUtilPluginApi",
+            "section": "def-public.DashboardDrilldownOptions",
+            "text": "DashboardDrilldownOptions"
+          }
         ],
         "path": "x-pack/plugins/dashboard_enhanced/common/drilldowns/dashboard_drilldown/types.ts",
         "deprecated": false,

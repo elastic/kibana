@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await setAllowExpensiveQueries(false);
 
-      await common.navigateToApp('dashboard');
+      await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await dashboard.ensureDashboardIsInEditMode();
       await timePicker.setDefaultDataRange();
@@ -69,9 +69,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('Can search options list for available options', async () => {
+    it('Can search options list for available options - exact match, case insensitive', async () => {
       await dashboardControls.optionsListOpenPopover(controlId);
-      await dashboardControls.optionsListPopoverSearchForOption('meo');
+      await dashboardControls.optionsListPopoverSearchForOption('mEOw');
       await dashboardControls.ensureAvailableOptionsEqual(
         controlId,
         {
@@ -84,9 +84,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
     });
 
-    it('Can search options list for available options - case sensitive', async () => {
+    it('Can search options list for available options - does not find partial match', async () => {
       await dashboardControls.optionsListOpenPopover(controlId);
-      await dashboardControls.optionsListPopoverSearchForOption('MEO');
+      await dashboardControls.optionsListPopoverSearchForOption('meo');
       const cardinality = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();
       expect(cardinality).to.be(0);
       await dashboardControls.optionsListPopoverClearSearch();

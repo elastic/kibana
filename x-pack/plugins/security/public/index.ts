@@ -6,30 +6,31 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin-types-public';
 
 import type {
   PluginSetupDependencies,
   PluginStartDependencies,
-  SecurityPluginSetup,
   SecurityPluginStart,
 } from './plugin';
 import { SecurityPlugin } from './plugin';
 
-export type { SecurityPluginSetup, SecurityPluginStart };
-export type { AuthenticatedUser } from '../common/model';
-export type { SecurityLicense, SecurityLicenseFeatures } from '../common/licensing';
+export type { SecurityPluginStart, SecurityPluginSetup };
+export type { AuthenticatedUser, SecurityLicenseFeatures, SecurityLicense } from '../common';
 export type { UiApi, ChangePasswordProps, PersonalInfoProps } from './ui_api';
-export type { UserMenuLink, SecurityNavControlServiceStart } from './nav_control';
+
+export { ALL_SPACES_ID } from '../common/constants';
+
+// Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {
+  AuthenticationServiceStart,
+  AuthenticationServiceSetup,
+  SecurityNavControlServiceStart,
+  UserMenuLink,
   UserProfileBulkGetParams,
   UserProfileGetCurrentParams,
   UserProfileSuggestParams,
-  UpdateUserProfileHook,
-} from './account_management';
-
-export type { AuthenticationServiceStart, AuthenticationServiceSetup } from './authentication';
-
-export { ALL_SPACES_ID } from '../common/constants';
+} from '@kbn/security-plugin-types-public';
 
 export const plugin: PluginInitializer<
   SecurityPluginSetup,

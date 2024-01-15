@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   createAPMTransactionErrorRateIndicator,
   createSLO,
@@ -16,41 +17,32 @@ const generator = new ApmTransactionErrorRateTransformGenerator();
 
 describe('APM Transaction Error Rate Transform Generator', () => {
   it('returns the expected transform params with every specified indicator params', async () => {
-    const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
-    const transform = generator.getTransformParams(slo);
-
-    expect(transform).toMatchSnapshot({
-      transform_id: expect.any(String),
-      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
-    });
-    expect(transform.transform_id).toEqual(`slo-${slo.id}-${slo.revision}`);
-    expect(transform.source.runtime_mappings!['slo.id']).toMatchObject({
-      script: { source: `emit('${slo.id}')` },
-    });
-    expect(transform.source.runtime_mappings!['slo.revision']).toMatchObject({
-      script: { source: `emit(${slo.revision})` },
-    });
-  });
-
-  it('returns the expected transform params for timeslices slo', async () => {
-    const slo = createSLOWithTimeslicesBudgetingMethod({
+    const slo = createSLO({
+      id: 'irrelevant',
       indicator: createAPMTransactionErrorRateIndicator(),
     });
     const transform = generator.getTransformParams(slo);
 
-    expect(transform).toMatchSnapshot({
-      transform_id: expect.any(String),
-      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
+    expect(transform).toMatchSnapshot();
+  });
+
+  it('returns the expected transform params for timeslices slo', async () => {
+    const slo = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
+      indicator: createAPMTransactionErrorRateIndicator(),
     });
+    const transform = generator.getTransformParams(slo);
+
+    expect(transform).toMatchSnapshot();
   });
 
   it("does not include the query filter when params are '*'", async () => {
     const slo = createSLO({
       indicator: createAPMTransactionErrorRateIndicator({
-        environment: '*',
-        service: '*',
-        transactionName: '*',
-        transactionType: '*',
+        environment: ALL_VALUE,
+        service: ALL_VALUE,
+        transactionName: ALL_VALUE,
+        transactionType: ALL_VALUE,
       }),
     });
     const transform = generator.getTransformParams(slo);
@@ -86,9 +78,9 @@ describe('APM Transaction Error Rate Transform Generator', () => {
     const slo = createSLO({
       indicator: createAPMTransactionErrorRateIndicator({
         service: 'my-service',
-        environment: '*',
-        transactionName: '*',
-        transactionType: '*',
+        environment: ALL_VALUE,
+        transactionName: ALL_VALUE,
+        transactionType: ALL_VALUE,
       }),
     });
 
@@ -101,10 +93,10 @@ describe('APM Transaction Error Rate Transform Generator', () => {
   it("groups by the 'service.environment'", () => {
     const slo = createSLO({
       indicator: createAPMTransactionErrorRateIndicator({
-        service: '*',
+        service: ALL_VALUE,
         environment: 'production',
-        transactionName: '*',
-        transactionType: '*',
+        transactionName: ALL_VALUE,
+        transactionType: ALL_VALUE,
       }),
     });
 
@@ -117,10 +109,10 @@ describe('APM Transaction Error Rate Transform Generator', () => {
   it("groups by the 'transaction.name'", () => {
     const slo = createSLO({
       indicator: createAPMTransactionErrorRateIndicator({
-        service: '*',
-        environment: '*',
+        service: ALL_VALUE,
+        environment: ALL_VALUE,
         transactionName: 'GET /foo',
-        transactionType: '*',
+        transactionType: ALL_VALUE,
       }),
     });
 
@@ -133,9 +125,9 @@ describe('APM Transaction Error Rate Transform Generator', () => {
   it("groups by the 'transaction.type'", () => {
     const slo = createSLO({
       indicator: createAPMTransactionErrorRateIndicator({
-        service: '*',
-        environment: '*',
-        transactionName: '*',
+        service: ALL_VALUE,
+        environment: ALL_VALUE,
+        transactionName: ALL_VALUE,
         transactionType: 'request',
       }),
     });

@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -16,7 +17,7 @@ import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state'
 import { LogsLinkToStream } from './logs_link_to_stream';
 import { LogsSearchBar } from './logs_search_bar';
 import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
-import { useLogViewReference } from '../../../hooks/use_log_view_reference';
+import { useLogViewReference } from '../../../../../../hooks/use_log_view_reference';
 
 export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
@@ -35,6 +36,9 @@ export const LogsTabContent = () => {
 
   const { logViewReference: logView, loading: logViewLoading } = useLogViewReference({
     id: 'hosts-logs-view',
+    name: i18n.translate('xpack.infra.hostsViewPage.tabs.logs.LogsByHostWidgetName', {
+      defaultMessage: 'Logs by host',
+    }),
     extraFields: ['host.name'],
   });
 

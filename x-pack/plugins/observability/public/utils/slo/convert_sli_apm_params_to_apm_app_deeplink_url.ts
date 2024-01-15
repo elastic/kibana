@@ -5,35 +5,38 @@
  * 2.0.
  */
 
-interface Props {
-  duration?: string;
-  environment: string;
-  filter: string | undefined;
-  service: string;
-  transactionName: string;
-  transactionType: string;
-}
+import {
+  ALL_VALUE,
+  apmTransactionDurationIndicatorSchema,
+  apmTransactionErrorRateIndicatorSchema,
+  SLOResponse,
+} from '@kbn/slo-schema';
 
-export function convertSliApmParamsToApmAppDeeplinkUrl({
-  duration,
-  environment,
-  filter,
-  service,
-  transactionName,
-  transactionType,
-}: Props) {
-  if (!service) {
-    return '';
+export function convertSliApmParamsToApmAppDeeplinkUrl(slo: SLOResponse): string | undefined {
+  if (
+    !apmTransactionDurationIndicatorSchema.is(slo.indicator) &&
+    !apmTransactionErrorRateIndicatorSchema.is(slo.indicator)
+  ) {
+    return undefined;
   }
+
+  const {
+    indicator: {
+      params: { environment, filter, service, transactionName, transactionType },
+    },
+    timeWindow: { duration },
+    groupBy,
+    instanceId,
+  } = slo;
 
   const qs = new URLSearchParams('comparisonEnabled=true');
 
   if (environment) {
-    qs.append('environment', environment === '*' ? 'ENVIRONMENT_ALL' : environment);
+    qs.append('environment', environment === ALL_VALUE ? 'ENVIRONMENT_ALL' : environment);
   }
 
   if (transactionType) {
-    qs.append('transactionType', transactionType === '*' ? '' : transactionType);
+    qs.append('transactionType', transactionType === ALL_VALUE ? '' : transactionType);
   }
 
   if (duration) {
@@ -42,11 +45,14 @@ export function convertSliApmParamsToApmAppDeeplinkUrl({
   }
 
   const kueryParams = [];
-  if (transactionName && transactionName !== '*') {
+  if (transactionName && transactionName !== ALL_VALUE) {
     kueryParams.push(`transaction.name : "${transactionName}"`);
   }
   if (filter && filter.length > 0) {
     kueryParams.push(filter);
+  }
+  if (groupBy !== ALL_VALUE && instanceId !== ALL_VALUE) {
+    kueryParams.push(`${groupBy} : "${instanceId}"`);
   }
 
   if (kueryParams.length > 0) {

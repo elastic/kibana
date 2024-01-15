@@ -8,7 +8,11 @@
 import { cloneDeep } from 'lodash';
 
 import { RulesClient, ConstructorOptions } from './rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
 import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
@@ -20,6 +24,11 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RetryForConflictsAttempts } from './lib/retry_if_conflicts';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { RecoveredActionGroup } from '../common';
+import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
+
+jest.mock('./application/rule/methods/get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
 
 let rulesClient: RulesClient;
 
@@ -34,6 +43,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const logger = loggingSystemMock.create().get();
@@ -48,13 +58,17 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger,
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -214,7 +228,7 @@ function expectSuccess(
 // tests to run when the method is expected to fail
 function expectConflict(success: boolean, err: Error, method: 'update' | 'create' = 'update') {
   const conflictErrorMessage = SavedObjectsErrorHelpers.createConflictError(
-    'alert',
+    RULE_SAVED_OBJECT_TYPE,
     MockAlertId
   ).message;
 
@@ -236,7 +250,7 @@ function mockSavedObjectUpdateConflictErrorTimes(times: number) {
   // default success value
   const mockUpdateValue = {
     id: MockAlertId,
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       actions: [],
       scheduledTaskId: 'scheduled-task-id',
@@ -250,10 +264,10 @@ function mockSavedObjectUpdateConflictErrorTimes(times: number) {
   // queue up specified number of errors before a success call
   for (let i = 0; i < times; i++) {
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(
-      SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId)
+      SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockAlertId)
     );
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
-      SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId)
+      SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockAlertId)
     );
   }
 }
@@ -263,9 +277,9 @@ function setupRawAlertMocks(
   overrides: Record<string, unknown> = {},
   attributeOverrides: Record<string, unknown> = {}
 ) {
-  const rawAlert = {
+  const rawRule = {
     id: MockAlertId,
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       enabled: true,
       tags: ['foo'],
@@ -284,10 +298,10 @@ function setupRawAlertMocks(
     version: '123',
     ...overrides,
   };
-  const decryptedRawAlert = {
-    ...rawAlert,
+  const decryptedRawRule = {
+    ...rawRule,
     attributes: {
-      ...rawAlert.attributes,
+      ...rawRule.attributes,
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
   };
@@ -297,11 +311,11 @@ function setupRawAlertMocks(
 
   // splitting this out as it's easier to set a breakpoint :-)
   unsecuredSavedObjectsClient.get.mockImplementation(async () => {
-    return cloneDeep(rawAlert);
+    return cloneDeep(rawRule);
   });
 
   encryptedSavedObjects.getDecryptedAsInternalUser.mockImplementation(async () => {
-    return cloneDeep(decryptedRawAlert);
+    return cloneDeep(decryptedRawRule);
   });
 }
 
@@ -358,10 +372,12 @@ beforeEach(() => {
     async executor() {
       return { state: {} };
     },
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   }));
 
   ruleTypeRegistry.get.mockReturnValue({
@@ -375,10 +391,12 @@ beforeEach(() => {
     async executor() {
       return { state: {} };
     },
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: { validate: (params) => params },
     },
+    validLegacyConsumers: [],
   });
 
   rulesClient = new RulesClient(rulesClientParams);

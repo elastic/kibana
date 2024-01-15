@@ -5,46 +5,40 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { left } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import { getListArrayMock } from '../../../../detection_engine/schemas/types/lists.mock';
-import type { SavedQueryRuleCreateProps } from './rule_schemas';
-import { RuleCreateProps } from './rule_schemas';
 import {
+  getCreateEsqlRulesSchemaMock,
+  getCreateMachineLearningRulesSchemaMock,
+  getCreateRulesSchemaMock,
+  getCreateRulesSchemaMockWithDataView,
   getCreateSavedQueryRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
-  getCreateRulesSchemaMock,
   getCreateThresholdRulesSchemaMock,
-  getCreateRulesSchemaMockWithDataView,
-  getCreateMachineLearningRulesSchemaMock,
 } from './rule_request_schema.mock';
-import { buildResponseRuleSchema } from './build_rule_schemas';
+import type { SavedQueryRuleCreateProps } from './rule_schemas.gen';
+import { RuleCreateProps } from './rule_schemas.gen';
 
 describe('rules schema', () => {
   test('empty objects do not validate', () => {
     const payload = {};
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(message.errors.length).toBeGreaterThan(0);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
-  test('made up values do not validate', () => {
+  test('strips any unknown values', () => {
     const payload: RuleCreateProps & { madeUp: string } = {
       ...getCreateRulesSchemaMock(),
       madeUp: 'hi',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(getCreateRulesSchemaMock());
   });
 
   test('[rule_id] does not validate', () => {
@@ -52,11 +46,11 @@ describe('rules schema', () => {
       rule_id: 'rule-1',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(message.errors.length).toBeGreaterThan(0);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description] does not validate', () => {
@@ -65,11 +59,11 @@ describe('rules schema', () => {
       description: 'some description',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(message.errors.length).toBeGreaterThan(0);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from] does not validate', () => {
@@ -79,11 +73,11 @@ describe('rules schema', () => {
       from: 'now-5m',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(message.errors.length).toBeGreaterThan(0);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from, to] does not validate', () => {
@@ -94,11 +88,11 @@ describe('rules schema', () => {
       to: 'now',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(message.errors.length).toBeGreaterThan(0);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from, to, name] does not validate', () => {
@@ -110,11 +104,11 @@ describe('rules schema', () => {
       name: 'some-name',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(message.errors.length).toBeGreaterThan(0);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from, to, name, severity] does not validate', () => {
@@ -127,11 +121,11 @@ describe('rules schema', () => {
       severity: 'low',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(message.errors.length).toBeGreaterThan(0);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
@@ -145,13 +139,9 @@ describe('rules schema', () => {
       type: 'query',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('risk_score: Required');
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
@@ -166,13 +156,9 @@ describe('rules schema', () => {
       type: 'query',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('risk_score: Required');
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
@@ -188,13 +174,9 @@ describe('rules schema', () => {
       index: ['index-1'],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('risk_score: Required');
   });
 
   test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
@@ -212,11 +194,9 @@ describe('rules schema', () => {
       interval: '5m',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
@@ -234,13 +214,9 @@ describe('rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('risk_score: Required');
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
@@ -259,11 +235,9 @@ describe('rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
@@ -283,11 +257,9 @@ describe('rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
@@ -304,11 +276,9 @@ describe('rules schema', () => {
       risk_score: 50,
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
@@ -329,11 +299,9 @@ describe('rules schema', () => {
       type: 'query',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can send in a namespace', () => {
@@ -342,11 +310,9 @@ describe('rules schema', () => {
       namespace: 'a namespace',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can send in an empty array to threat', () => {
@@ -355,11 +321,9 @@ describe('rules schema', () => {
       threat: [],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
@@ -394,11 +358,9 @@ describe('rules schema', () => {
       ],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('allows references to be sent as valid', () => {
@@ -407,11 +369,9 @@ describe('rules schema', () => {
       references: ['index-1'],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('references cannot be numbers', () => {
@@ -420,11 +380,11 @@ describe('rules schema', () => {
       references: [5],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "references"']);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'references.0: Expected string, received number'
+    );
   });
 
   test('indexes cannot be numbers', () => {
@@ -433,11 +393,9 @@ describe('rules schema', () => {
       index: [5],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('index.0: Expected string, received number');
   });
 
   test('saved_query type can have filters with it', () => {
@@ -446,11 +404,9 @@ describe('rules schema', () => {
       filters: [],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('filters cannot be a string', () => {
@@ -459,13 +415,9 @@ describe('rules schema', () => {
       filters: 'some string',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "some string" supplied to "filters"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('filters: Expected array, received string');
   });
 
   test('language validates with kuery', () => {
@@ -474,11 +426,9 @@ describe('rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('language validates with lucene', () => {
@@ -487,11 +437,9 @@ describe('rules schema', () => {
       language: 'lucene',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('language does not validate with something made up', () => {
@@ -500,13 +448,11 @@ describe('rules schema', () => {
       language: 'something-made-up',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "something-made-up" supplied to "language"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up'"
+    );
   });
 
   test('max_signals cannot be negative', () => {
@@ -515,13 +461,11 @@ describe('rules schema', () => {
       max_signals: -1,
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "-1" supplied to "max_signals"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'max_signals: Number must be greater than or equal to 1'
+    );
   });
 
   test('max_signals cannot be zero', () => {
@@ -530,11 +474,11 @@ describe('rules schema', () => {
       max_signals: 0,
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to "max_signals"']);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'max_signals: Number must be greater than or equal to 1'
+    );
   });
 
   test('max_signals can be 1', () => {
@@ -543,11 +487,9 @@ describe('rules schema', () => {
       max_signals: 1,
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can optionally send in an array of tags', () => {
@@ -556,11 +498,9 @@ describe('rules schema', () => {
       tags: ['tag_1', 'tag_2'],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You cannot send in an array of tags that are numbers', () => {
@@ -569,15 +509,11 @@ describe('rules schema', () => {
       tags: [0, 1, 2],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to "tags"',
-      'Invalid value "1" supplied to "tags"',
-      'Invalid value "2" supplied to "tags"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'tags.0: Expected string, received number, tags.1: Expected string, received number, tags.2: Expected string, received number'
+    );
   });
 
   test('You cannot send in an array of threat that are missing "framework"', () => {
@@ -601,13 +537,9 @@ describe('rules schema', () => {
       ],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threat,framework"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('threat.0.framework: Required');
   });
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
@@ -627,13 +559,9 @@ describe('rules schema', () => {
       ],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threat,tactic"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('threat.0.tactic: Required');
   });
 
   test('You can send in an array of threat that are missing "technique"', () => {
@@ -651,11 +579,9 @@ describe('rules schema', () => {
       ],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can optionally send in an array of false positives', () => {
@@ -664,11 +590,9 @@ describe('rules schema', () => {
       false_positives: ['false_1', 'false_2'],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You cannot send in an array of false positives that are numbers', () => {
@@ -677,27 +601,11 @@ describe('rules schema', () => {
       false_positives: [5, 4],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "5" supplied to "false_positives"',
-      'Invalid value "4" supplied to "false_positives"',
-    ]);
-    expect(message.schema).toEqual({});
-  });
-
-  test('You cannot set the immutable to a number when trying to create a rule', () => {
-    const payload = {
-      ...getCreateRulesSchemaMock(),
-      immutable: 5,
-    };
-
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['invalid keys "immutable"']);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'false_positives.0: Expected string, received number, false_positives.1: Expected string, received number'
+    );
   });
 
   test('You cannot set the risk_score to 101', () => {
@@ -706,13 +614,11 @@ describe('rules schema', () => {
       risk_score: 101,
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "101" supplied to "risk_score"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'risk_score: Number must be less than or equal to 100'
+    );
   });
 
   test('You cannot set the risk_score to -1', () => {
@@ -721,11 +627,11 @@ describe('rules schema', () => {
       risk_score: -1,
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "risk_score"']);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'risk_score: Number must be greater than or equal to 0'
+    );
   });
 
   test('You can set the risk_score to 0', () => {
@@ -734,11 +640,9 @@ describe('rules schema', () => {
       risk_score: 0,
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can set the risk_score to 100', () => {
@@ -747,11 +651,9 @@ describe('rules schema', () => {
       risk_score: 100,
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can set meta to any object you want', () => {
@@ -762,11 +664,9 @@ describe('rules schema', () => {
       },
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You cannot create meta as a string', () => {
@@ -775,13 +675,9 @@ describe('rules schema', () => {
       meta: 'should not work',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "should not work" supplied to "meta"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('meta: Expected object, received string');
   });
 
   test('You can omit the query string when filters are present', () => {
@@ -791,11 +687,9 @@ describe('rules schema', () => {
       filters: [],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('validates with timeline_id and timeline_title', () => {
@@ -805,11 +699,9 @@ describe('rules schema', () => {
       timeline_title: 'timeline-title',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
@@ -818,11 +710,11 @@ describe('rules schema', () => {
       severity: 'junk',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "severity"']);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      "severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk'"
+    );
   });
 
   test('You cannot send in an array of actions that are missing "group"', () => {
@@ -831,13 +723,9 @@ describe('rules schema', () => {
       actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,group"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('actions.0.group: Required');
   });
 
   test('You cannot send in an array of actions that are missing "id"', () => {
@@ -846,13 +734,9 @@ describe('rules schema', () => {
       actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,id"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('actions.0.id: Required');
   });
 
   test('You cannot send in an array of actions that are missing "action_type_id"', () => {
@@ -861,13 +745,9 @@ describe('rules schema', () => {
       actions: [{ group: 'group', id: 'id', params: {} }],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,action_type_id"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('actions.0.action_type_id: Required');
   });
 
   test('You cannot send in an array of actions that are missing "params"', () => {
@@ -876,13 +756,9 @@ describe('rules schema', () => {
       actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,params"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('actions.0.params: Required');
   });
 
   test('You cannot send in an array of actions that are including "actionTypeId"', () => {
@@ -898,13 +774,9 @@ describe('rules schema', () => {
       ],
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "actions,action_type_id"',
-    ]);
-    expect(message.schema).toEqual({});
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('actions.0.action_type_id: Required');
   });
 
   describe('note', () => {
@@ -914,11 +786,9 @@ describe('rules schema', () => {
         note: '# documentation markdown here',
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('You can set note to an empty string', () => {
@@ -927,11 +797,9 @@ describe('rules schema', () => {
         note: '',
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('You cannot create note as an object', () => {
@@ -942,13 +810,9 @@ describe('rules schema', () => {
         },
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "{"somethingHere":"something else"}" supplied to "note"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual('note: Expected string, received object');
     });
 
     test('empty name is not valid', () => {
@@ -957,11 +821,11 @@ describe('rules schema', () => {
         name: '',
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "name"']);
-      expect(message.schema).toEqual({});
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'name: String must contain at least 1 character(s)'
+      );
     });
 
     test('empty description is not valid', () => {
@@ -970,13 +834,11 @@ describe('rules schema', () => {
         description: '',
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "" supplied to "description"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'description: String must contain at least 1 character(s)'
+      );
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
@@ -994,11 +856,9 @@ describe('rules schema', () => {
         note: '# some markdown',
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
   });
 
@@ -1025,46 +885,37 @@ describe('rules schema', () => {
       rule_id: 'rule-1',
     };
 
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(payload);
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('saved_id is required when type is saved_query and will not validate without it', () => {
     /* eslint-disable @typescript-eslint/naming-convention */
     const { saved_id, ...payload } = getCreateSavedQueryRulesSchemaMock();
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "saved_id"',
-    ]);
-    expect(message.schema).toEqual({});
+
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('saved_id: Required');
   });
 
   test('threshold is required when type is threshold and will not validate without it', () => {
     const { threshold, ...payload } = getCreateThresholdRulesSchemaMock();
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "threshold"',
-    ]);
-    expect(message.schema).toEqual({});
+
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual('threshold: Required');
   });
 
   test('threshold rules fail validation if threshold is not greater than 0', () => {
     const payload = getCreateThresholdRulesSchemaMock();
     payload.threshold.value = 0;
-    const decoded = RuleCreateProps.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "0" supplied to "threshold,value"',
-    ]);
-    expect(message.schema).toEqual({});
+
+    const result = RuleCreateProps.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toEqual(
+      'threshold.value: Number must be greater than or equal to 1'
+    );
   });
 
   describe('exception_list', () => {
@@ -1085,11 +936,9 @@ describe('rules schema', () => {
         exceptions_list: getListArrayMock(),
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
@@ -1109,11 +958,9 @@ describe('rules schema', () => {
         exceptions_list: [],
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
@@ -1133,15 +980,11 @@ describe('rules schema', () => {
         exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
-        'Invalid value "undefined" supplied to "exceptions_list,type"',
-        'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        "exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'not a namespace type'"
+      );
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
@@ -1160,60 +1003,89 @@ describe('rules schema', () => {
         note: '# some markdown',
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
   });
 
   describe('threat_match', () => {
     test('You can set a threat query, index, mapping, filters when creating a rule', () => {
       const payload = getCreateThreatMatchRulesSchemaMock();
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('threat_index, threat_query, and threat_mapping are required when type is "threat_match" and validation fails without them', () => {
       /* eslint-disable @typescript-eslint/naming-convention */
       const { threat_index, threat_query, threat_mapping, ...payload } =
         getCreateThreatMatchRulesSchemaMock();
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "undefined" supplied to "threat_query"',
-        'Invalid value "undefined" supplied to "threat_mapping"',
-        'Invalid value "undefined" supplied to "threat_index"',
-      ]);
-      expect(message.schema).toEqual({});
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'threat_query: Required, threat_mapping: Required, threat_index: Required'
+      );
     });
 
     test('fails validation when threat_mapping is an empty array', () => {
       const payload = getCreateThreatMatchRulesSchemaMock();
       payload.threat_mapping = [];
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "[]" supplied to "threat_mapping"',
-      ]);
-      expect(message.schema).toEqual({});
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'threat_mapping: Array must contain at least 1 element(s)'
+      );
+    });
+  });
+
+  describe('esql rule type', () => {
+    it('should validate correct payload', () => {
+      const payload = getCreateEsqlRulesSchemaMock();
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    it('should drop the "index" property', () => {
+      const payload = { ...getCreateEsqlRulesSchemaMock(), index: ['test*'] };
+      const expected = getCreateEsqlRulesSchemaMock();
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(expected);
+    });
+
+    it('should drop the "data_view_id" property', () => {
+      const payload = { ...getCreateEsqlRulesSchemaMock(), data_view_id: 'test' };
+      const expected = getCreateEsqlRulesSchemaMock();
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(expected);
+    });
+
+    it('should drop the "filters" property', () => {
+      const payload = { ...getCreateEsqlRulesSchemaMock(), filters: [] };
+      const expected = getCreateEsqlRulesSchemaMock();
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(expected);
     });
   });
 
   describe('data_view_id', () => {
     test('validates when "data_view_id" and index are defined', () => {
       const payload = { ...getCreateRulesSchemaMockWithDataView(), index: ['auditbeat-*'] };
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(payload);
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('"data_view_id" cannot be a number', () => {
@@ -1222,280 +1094,171 @@ describe('rules schema', () => {
         data_view_id: 5,
       };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      expect(getPaths(left(message.errors))).toEqual([
-        'Invalid value "5" supplied to "data_view_id"',
-      ]);
-      expect(message.schema).toEqual({});
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'data_view_id: Expected string, received number'
+      );
     });
 
     test('it should validate a type of "query" with "data_view_id" defined', () => {
       const payload = getCreateRulesSchemaMockWithDataView();
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      const expected = getCreateRulesSchemaMockWithDataView();
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(expected);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('it should validate a type of "saved_query" with "data_view_id" defined', () => {
       const payload = { ...getCreateSavedQueryRulesSchemaMock(), data_view_id: 'logs-*' };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      const expected = { ...getCreateSavedQueryRulesSchemaMock(), data_view_id: 'logs-*' };
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(expected);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('it should validate a type of "threat_match" with "data_view_id" defined', () => {
       const payload = { ...getCreateThreatMatchRulesSchemaMock(), data_view_id: 'logs-*' };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      const expected = { ...getCreateThreatMatchRulesSchemaMock(), data_view_id: 'logs-*' };
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(expected);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
     test('it should validate a type of "threshold" with "data_view_id" defined', () => {
       const payload = { ...getCreateThresholdRulesSchemaMock(), data_view_id: 'logs-*' };
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
-      const expected = { ...getCreateThresholdRulesSchemaMock(), data_view_id: 'logs-*' };
-
-      expect(getPaths(left(message.errors))).toEqual([]);
-      expect(message.schema).toEqual(expected);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
 
-    test('it should NOT validate a type of "machine_learning" with "data_view_id" defined', () => {
+    test('it should drop "data_view_id" when passed to "machine_learning" rules', () => {
       const payload = { ...getCreateMachineLearningRulesSchemaMock(), data_view_id: 'logs-*' };
+      const expected = getCreateMachineLearningRulesSchemaMock();
 
-      const decoded = RuleCreateProps.decode(payload);
-      const checked = exactCheck(payload, decoded);
-      const message = pipe(checked, foldLeftRight);
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(expected);
+    });
 
-      expect(message.schema).toEqual({});
-      expect(getPaths(left(message.errors))).toEqual(['invalid keys "data_view_id"']);
+    test('You can omit investigation_fields', () => {
+      // getCreateRulesSchemaMock doesn't include investigation_fields
+      const payload: RuleCreateProps = getCreateRulesSchemaMock();
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    test('You cannot pass empty object for investigation_fields', () => {
+      const payload: Omit<RuleCreateProps, 'investigation_fields'> & {
+        investigation_fields: unknown;
+      } = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: {},
+      };
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual('investigation_fields.field_names: Required');
+    });
+
+    test('You can send in investigation_fields', () => {
+      const payload: RuleCreateProps = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { field_names: ['field1', 'field2'] },
+      };
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    test('You cannot send in an empty array of investigation_fields.field_names', () => {
+      const payload = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { field_names: [] },
+      };
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'investigation_fields.field_names: Array must contain at least 1 element(s)'
+      );
+    });
+
+    test('You cannot send in an array of investigation_fields.field_names that are numbers', () => {
+      const payload = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { field_names: [0, 1, 2] },
+      };
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual(
+        'investigation_fields.field_names.0: Expected string, received number, investigation_fields.field_names.1: Expected string, received number, investigation_fields.field_names.2: Expected string, received number'
+      );
+    });
+
+    test('You cannot send in investigation_fields without specifying fields', () => {
+      const payload = {
+        ...getCreateRulesSchemaMock(),
+        investigation_fields: { foo: true },
+      };
+
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toEqual('investigation_fields.field_names: Required');
     });
   });
 
-  describe('response', () => {
-    const testSchema = {
-      required: {
-        testRequiredString: t.string,
-      },
-      optional: {
-        testOptionalString: t.string,
-      },
-      defaultable: {
-        testDefaultableString: t.string,
-      },
-    };
-    const schema = buildResponseRuleSchema(
-      testSchema.required,
-      testSchema.optional,
-      testSchema.defaultable
-    );
+  describe('alerts suppression', () => {
+    test('should drop suppression fields apart from duration for "threshold" rule type', () => {
+      const payload = {
+        ...getCreateThresholdRulesSchemaMock(),
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: { value: 5, unit: 'm' },
+          missing_field_strategy: 'suppress',
+        },
+      };
 
-    describe('required fields', () => {
-      test('should allow required fields with the correct type', () => {
-        const payload = {
-          testRequiredString: 'required_string',
-          testDefaultableString: 'defaultable_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-
-      test('should not allow required fields to be undefined', () => {
-        const payload = {
-          testRequiredString: undefined,
-          testDefaultableString: 'defaultable_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "testRequiredString"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
-
-      test('should not allow required fields to be omitted entirely', () => {
-        const payload = {
-          testDefaultableString: 'defaultable_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "testRequiredString"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
-
-      test('should not allow required fields with an incorrect type', () => {
-        const payload = {
-          testRequiredString: 5,
-          testDefaultableString: 'defaultable_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "5" supplied to "testRequiredString"',
-        ]);
-        expect(message.schema).toEqual({});
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual({
+        ...payload,
+        alert_suppression: {
+          duration: { value: 5, unit: 'm' },
+        },
       });
     });
+    test('should validate only suppression duration for "threshold" rule type', () => {
+      const payload = {
+        ...getCreateThresholdRulesSchemaMock(),
+        alert_suppression: {
+          duration: { value: 5, unit: 'm' },
+        },
+      };
 
-    describe('optional fields', () => {
-      test('should allow optional fields with the correct type', () => {
-        const payload: t.TypeOf<typeof schema> = {
-          testRequiredString: 'required_string',
-          testOptionalString: 'optional_string',
-          testDefaultableString: 'defaultable_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-
-      test('should allow optional fields to be undefined', () => {
-        const payload: t.TypeOf<typeof schema> = {
-          testRequiredString: 'required_string',
-          testOptionalString: undefined,
-          testDefaultableString: 'defaultable_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-
-      test('should allow optional fields to be omitted entirely', () => {
-        const payload = {
-          testRequiredString: 'required_string',
-          testDefaultableString: 'defaultable_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-
-      test('should not allow optional fields with an incorrect type', () => {
-        const payload = {
-          testRequiredString: 'required_string',
-          testOptionalString: 5,
-          testDefaultableString: 'defaultable_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "5" supplied to "testOptionalString"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
     });
+    test('should throw error if alert suppression duration is absent for "threshold" rule type', () => {
+      const payload = {
+        ...getCreateThresholdRulesSchemaMock(),
+        alert_suppression: {
+          group_by: ['host.name'],
+          missing_field_strategy: 'suppress',
+        },
+      };
 
-    describe('defaultable fields', () => {
-      test('should allow defaultable fields with the correct type', () => {
-        const payload = {
-          testRequiredString: 'required_string',
-          testDefaultableString: 'defaultable_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([]);
-        expect(message.schema).toEqual(payload);
-      });
-
-      test('should not allow defaultable fields to be undefined', () => {
-        const payload = {
-          testRequiredString: 'required_string',
-          testDefaultableString: undefined,
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "testDefaultableString"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
-
-      test('should allow defaultable fields to be omitted entirely', () => {
-        const payload = {
-          testRequiredString: 'required_string',
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "undefined" supplied to "testDefaultableString"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
-
-      test('should not allow defaultable fields with an incorrect type', () => {
-        const payload = {
-          testRequiredString: 'required_string',
-          testDefaultableString: 5,
-        };
-
-        const decoded = schema.decode(payload);
-        const checked = exactCheck(payload, decoded);
-        const message = pipe(checked, foldLeftRight);
-
-        expect(getPaths(left(message.errors))).toEqual([
-          'Invalid value "5" supplied to "testDefaultableString"',
-        ]);
-        expect(message.schema).toEqual({});
-      });
+      const result = RuleCreateProps.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"alert_suppression.duration: Required"`
+      );
     });
   });
 });

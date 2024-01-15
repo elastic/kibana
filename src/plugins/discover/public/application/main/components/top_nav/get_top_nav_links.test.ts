@@ -27,7 +27,7 @@ test('getTopNavLinks result', () => {
     onOpenInspector: jest.fn(),
     services,
     state,
-    isPlainRecord: false,
+    isTextBased: false,
     adHocDataViews: [],
     topNavCustomization: undefined,
   });
@@ -74,13 +74,13 @@ test('getTopNavLinks result', () => {
   `);
 });
 
-test('getTopNavLinks result for sql mode', () => {
+test('getTopNavLinks result for ES|QL mode', () => {
   const topNavLinks = getTopNavLinks({
     dataView: dataViewMock,
     onOpenInspector: jest.fn(),
     services,
     state,
-    isPlainRecord: true,
+    isTextBased: true,
     adHocDataViews: [],
     topNavCustomization: undefined,
   });

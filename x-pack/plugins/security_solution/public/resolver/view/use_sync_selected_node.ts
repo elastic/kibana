@@ -25,12 +25,8 @@ export function useSyncSelectedNode({ id }: { id: string }) {
   const resolverComponentInstanceID = id;
   const locationSearch = useLocation().search;
   const sideEffectors = useContext(SideEffectContext);
-  const selectedNode = useSelector((state: State) =>
-    selectors.selectedNode(state.analyzer.analyzerById[id])
-  );
-  const idToNodeMap = useSelector((state: State) =>
-    selectors.graphNodeForID(state.analyzer.analyzerById[id])
-  );
+  const selectedNode = useSelector((state: State) => selectors.selectedNode(state.analyzer[id]));
+  const idToNodeMap = useSelector((state: State) => selectors.graphNodeForID(state.analyzer[id]));
 
   const currentPanelParameters = panelViewAndParameters({
     locationSearch,

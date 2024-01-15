@@ -43,6 +43,20 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     const { core, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
 
+    const fleetPluginStart = await plugins.fleet.start();
+    const agentClient = fleetPluginStart.agentService.asInternalUser;
+
+    // If undefined, we will follow fleet's strategy to select latest available version:
+    // for serverless we will use the latest published version, for statefull we will use
+    // current Kibana version. If false, irrespective of fleet flags and logic, we are
+    // explicitly deciding to not append the current version.
+    const includeCurrentVersion = kibanaVersion.endsWith('-SNAPSHOT')
+      ? false
+      : undefined;
+
+    const elasticAgentVersion =
+      await agentClient.getLatestAgentAvailableVersion(includeCurrentVersion);
+
     const kibanaUrl =
       core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
       plugins.cloud?.setup?.kibanaUrl ?? // then cloud id
@@ -53,7 +67,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     return {
       apiEndpoint,
       scriptDownloadUrl,
-      elasticAgentVersion: kibanaVersion,
+      elasticAgentVersion,
     };
   },
 });
@@ -66,6 +80,9 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       t.type({
         name: t.string,
       }),
+      t.type({
+        type: t.union([t.literal('logFiles'), t.literal('systemLogs')]),
+      }),
       t.partial({
         state: t.record(t.string, t.unknown),
       }),
@@ -77,7 +94,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     const {
       context,
       params: {
-        body: { name, state },
+        body: { name, type, state },
       },
       core,
       request,
@@ -91,13 +108,15 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       name
     );
 
+    const generatedState =
+      type === 'systemLogs' ? { namespace: 'default' } : state;
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
     const { id } = await saveObservabilityOnboardingFlow({
       savedObjectsClient,
       observabilityOnboardingState: {
-        type: 'logFiles',
-        state: state as ObservabilityOnboardingFlow['state'],
+        type,
+        state: generatedState as ObservabilityOnboardingFlow['state'],
         progress: {},
       },
     });

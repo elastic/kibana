@@ -30,6 +30,9 @@ export enum TableId {
   rulePreview = 'rule-preview',
   kubernetesPageSessions = 'kubernetes-page-sessions',
   alertsOnCasePage = 'alerts-case-page',
+  alertsRiskInputs = 'alerts-risk-inputs',
+  // New version of `alertsRiskInputs` designed to support multiple kinds of risk inputs
+  riskInputs = 'risk-inputs',
 }
 
 export enum TableEntityType {
@@ -50,6 +53,8 @@ export const tableEntity: Record<TableId, TableEntityType> = {
   [TableId.rulePreview]: TableEntityType.event,
   [TableId.hostsPageSessions]: TableEntityType.session,
   [TableId.kubernetesPageSessions]: TableEntityType.session,
+  [TableId.alertsRiskInputs]: TableEntityType.alert,
+  [TableId.riskInputs]: TableEntityType.alert,
 } as const;
 
 const TableIdLiteralRt = runtimeTypes.union([
@@ -63,6 +68,7 @@ const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.rulePreview),
   runtimeTypes.literal(TableId.kubernetesPageSessions),
   runtimeTypes.literal(TableId.alertsOnCasePage),
+  runtimeTypes.literal(TableId.alertsRiskInputs),
 ]);
 
 export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;

@@ -16,6 +16,7 @@ import {
   COMPARE_ALL_OPTIONS,
   compareFilters,
   Filter,
+  FilterCompareOptions,
   FilterStateStore,
   Query,
 } from '@kbn/es-query';
@@ -23,12 +24,12 @@ import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import type { DiscoverGridSettings } from '../../../components/discover_grid/types';
 
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
@@ -73,6 +74,12 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param replace
    */
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
+
+  /*
+   * Get updated AppState when given a saved search
+   *
+   * */
+  getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
 
 export interface DiscoverAppState {
@@ -129,6 +136,10 @@ export interface DiscoverAppState {
    */
   rowsPerPage?: number;
   /**
+   * Custom sample size
+   */
+  sampleSize?: number;
+  /**
    * Breakdown field of chart
    */
   breakdownField?: string;
@@ -168,6 +179,13 @@ export const getDiscoverAppStateContainer = ({
 
   const hasChanged = () => {
     return !isEqualState(initialState, appStateContainer.getState());
+  };
+
+  const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
+    return getStateDefaults({
+      savedSearch: newSavedSearch,
+      services,
+    });
   };
 
   const resetToState = (state: DiscoverAppState) => {
@@ -260,6 +278,7 @@ export const getDiscoverAppStateContainer = ({
     replaceUrlState,
     syncState: startAppStateUrlSync,
     update,
+    getAppStateFromSavedSearch,
   };
 };
 
@@ -285,7 +304,7 @@ export function getInitialState(
       ? defaultAppState
       : {
           ...defaultAppState,
-          ...cleanupUrlState(stateStorageURL),
+          ...cleanupUrlState(stateStorageURL, services.uiSettings),
         },
     services.uiSettings
   );
@@ -310,13 +329,17 @@ export function setState(
 /**
  * Helper function to compare 2 different filter states
  */
-export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
+export function isEqualFilters(
+  filtersA?: Filter[] | Filter,
+  filtersB?: Filter[] | Filter,
+  comparatorOptions: FilterCompareOptions = COMPARE_ALL_OPTIONS
+) {
   if (!filtersA && !filtersB) {
     return true;
   } else if (!filtersA || !filtersB) {
     return false;
   }
-  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
+  return compareFilters(filtersA, filtersB, comparatorOptions);
 }
 
 /**

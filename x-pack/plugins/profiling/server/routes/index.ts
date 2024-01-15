@@ -18,7 +18,8 @@ import {
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { registerFlameChartSearchRoute } from './flamechart';
 import { registerTopNFunctionsSearchRoute } from './functions';
-import { registerSetupRoute } from './setup';
+import { registerSetupRoute } from './setup/route';
+import { registerStorageExplorerRoute } from './storage_explorer/route';
 import {
   registerTraceEventsTopNContainersSearchRoute,
   registerTraceEventsTopNDeploymentsSearchRoute,
@@ -34,6 +35,7 @@ export interface RouteRegisterParameters {
     start: ProfilingPluginStartDeps;
     setup: ProfilingPluginSetupDeps;
     config: ProfilingConfig;
+    stackVersion: string;
     telemetryUsageCounter?: TelemetryUsageCounter;
   };
   services: {
@@ -44,6 +46,8 @@ export interface RouteRegisterParameters {
     }) => ProfilingESClient;
   };
 }
+
+export const IDLE_SOCKET_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 export function registerRoutes(params: RouteRegisterParameters) {
   registerFlameChartSearchRoute(params);
@@ -56,4 +60,5 @@ export function registerRoutes(params: RouteRegisterParameters) {
   // Setup of Profiling resources, automates the configuration of Universal Profiling
   // and will show instructions on how to add data
   registerSetupRoute(params);
+  registerStorageExplorerRoute(params);
 }

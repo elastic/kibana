@@ -23,7 +23,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { SyncJobType } from '../../../../../../../common/types/connectors';
+import { SyncJobType } from '@kbn/search-connectors';
 
 import { ConnectorViewIndex, CrawlerViewIndex } from '../../../../types';
 
@@ -215,7 +215,9 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
             <EuiFlexItem>
               <ConnectorCronEditor
                 disabled={isGated}
-                frequencyBlockList={type === SyncJobType.ACCESS_CONTROL ? [] : undefined}
+                frequencyBlockList={
+                  type === SyncJobType.ACCESS_CONTROL || type === SyncJobType.FULL ? [] : undefined
+                }
                 scheduling={scheduling[type]}
                 type={type}
                 onReset={() => {

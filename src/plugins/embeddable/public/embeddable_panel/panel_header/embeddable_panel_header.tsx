@@ -44,8 +44,8 @@ export const EmbeddablePanelHeader = ({
   );
 
   const title = embeddable.getTitle();
+  const description = embeddable.getDescription();
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
-  const description = useSelectFromEmbeddableInput('description', embeddable);
   const hidePanelTitle = useSelectFromEmbeddableInput('hidePanelTitles', embeddable);
   const parentHidePanelTitle = useSelectFromEmbeddableInput('hidePanelTitles', embeddable.parent);
 
@@ -85,7 +85,7 @@ export const EmbeddablePanelHeader = ({
 
   if (!showPanelBar) {
     return (
-      <div className={headerClasses}>
+      <div data-test-subj={`embeddablePanelHeading`} className={headerClasses}>
         {embeddablePanelContextMenu}
         {ariaLabelElement}
       </div>
@@ -104,7 +104,7 @@ export const EmbeddablePanelHeader = ({
           hideTitle={hideTitle}
           embeddable={embeddable}
           description={description}
-          customizePanelAction={universalActions.customizePanel}
+          editPanelAction={universalActions.editPanel}
         />
         {showBadges && badgeComponents}
       </h2>

@@ -216,9 +216,14 @@ describe('MetricsService', () => {
               "eventLoopDelayHistogram": undefined,
               "eventLoopUtilization": undefined,
               "memory": Object {
+                "arrayBuffersInBytes": undefined,
+                "externalInBytes": undefined,
                 "heap": Object {
+                  "sizeLimit": undefined,
+                  "totalInBytes": undefined,
                   "usedInBytes": undefined,
                 },
+                "residentSetSizeInBytes": undefined,
               },
               "uptime": undefined,
             },

@@ -112,10 +112,15 @@ export function MachineLearningAnomalyExplorerProvider(
       await testSubjects.click(`mlAnomaliesTableEntityCellRemoveFilterButton-${influencerValue}`);
     },
 
-    async openAddToDashboardControl() {
+    async openAddToDashboardControl(swimLaneType: SwimlaneType = 'overall') {
       await testSubjects.click('mlAnomalyTimelinePanelMenu');
       await testSubjects.click('mlAnomalyTimelinePanelAddToDashboardButton');
-      await testSubjects.existOrFail('mlAddToDashboardModal');
+      if (swimLaneType === 'overall') {
+        await testSubjects.click('mlAnomalyTimelinePanelAddOverallToDashboardButton');
+      } else {
+        await testSubjects.click('mlAnomalyTimelinePanelAddViewByToDashboardButton');
+      }
+      await testSubjects.existOrFail('savedObjectSaveModal');
     },
 
     async attachSwimLaneToCase(swimLaneType: SwimlaneType = 'overall', params: CreateCaseParams) {
@@ -132,14 +137,24 @@ export function MachineLearningAnomalyExplorerProvider(
 
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        await this.filterDashboardSearchWithSearchString(dashboardTitle);
-        await testSubjects.clickWhenNotDisabledWithoutRetry('~mlEmbeddableAddAndEditDashboard');
+        const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+        const label = await dashboardSelector.findByCssSelector(
+          `label[for="new-dashboard-option"]`
+        );
+        await label.click();
+        await testSubjects.click('confirmSaveSavedObjectButton');
+        await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+          testSubjects
+            .missingOrFail('confirmSaveSavedObjectButton')
+            .then(() => true)
+            .catch(() => false)
+        );
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();
         expect(dashboardItemCount).to.not.eql(undefined);
       });
-      // changing to the dashboard app might take sime time
+      // changing to the dashboard app might take some time
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
       const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
       expect(await swimlane.isDisplayed()).to.eql(
@@ -154,23 +169,6 @@ export function MachineLearningAnomalyExplorerProvider(
 
     async waitForDashboardsToLoad() {
       await testSubjects.existOrFail('mlDashboardSelectionTable loaded', { timeout: 60 * 1000 });
-    },
-
-    async filterDashboardSearchWithSearchString(filter: string, expectedRowCount: number = 1) {
-      await retry.tryForTime(20 * 1000, async () => {
-        await this.waitForDashboardsToLoad();
-        const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
-        await searchBarInput.clearValueWithKeyboard();
-        await searchBarInput.type(filter);
-        await this.assertDashboardSearchInputValue(filter);
-        await this.waitForDashboardsToLoad();
-
-        const dashboardRows = await testSubjects.findAll('~mlDashboardSelectionTableRow', 2000);
-        expect(dashboardRows.length).to.eql(
-          expectedRowCount,
-          `Dashboard table should have ${expectedRowCount} rows, got ${dashboardRows.length}`
-        );
-      });
     },
 
     async assertDashboardSearchInputValue(expectedSearchValue: string) {
@@ -232,6 +230,7 @@ export function MachineLearningAnomalyExplorerProvider(
     async attachAnomalyChartsToCase(params: CreateCaseParams) {
       await testSubjects.click('mlExplorerAnomalyPanelMenu');
       await testSubjects.click('mlAnomalyAttachChartsToCasesButton');
+      await testSubjects.click('mlAnomalyChartsSubmitAttachment');
 
       await cases.create.createCaseFromModal(params);
     },

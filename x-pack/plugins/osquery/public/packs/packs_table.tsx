@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -28,11 +27,11 @@ import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 import type { PackSavedObject } from './types';
 
-const UpdatedBy = styled.span`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
+const updatedAtCss = {
+  whiteSpace: 'nowrap' as const,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
 
 const EMPTY_ARRAY: PackSavedObject[] = [];
 
@@ -105,7 +104,7 @@ const PacksTableComponent = () => {
 
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
-        <UpdatedBy>{`${moment(updatedAt).fromNow()}${updatedBy}`}</UpdatedBy>
+        <span css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
       </EuiToolTip>
     ) : (
       '-'
@@ -133,7 +132,12 @@ const PacksTableComponent = () => {
 
       return (
         <EuiToolTip position="top" content={playText}>
-          <EuiButtonIcon iconType="play" onClick={handlePlayClick(item)} isDisabled={!enabled} />
+          <EuiButtonIcon
+            iconType="play"
+            onClick={handlePlayClick(item)}
+            isDisabled={!enabled}
+            data-test-subj={`play-${item.name}-button`}
+          />
         </EuiToolTip>
       );
     },

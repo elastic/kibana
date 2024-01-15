@@ -23,7 +23,6 @@ export type {
   ScopedTutorialContextFactory,
 } from './services';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { HomeServerPlugin } from './plugin';
 import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
@@ -33,6 +32,9 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export const plugin = (initContext: PluginInitializerContext) => new HomeServerPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { HomeServerPlugin } = await import('./plugin');
+  return new HomeServerPlugin(initContext);
+};
 
 export { INSTRUCTION_VARIANT } from '../common/instruction_variant';

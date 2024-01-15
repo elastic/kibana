@@ -26,7 +26,7 @@ import {
 import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { createInternalESClientWithContext } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
 
@@ -49,16 +49,16 @@ const agentConfigurationRoute = createApmServerRoute({
   }> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
-    const { context, request, params, config } = resources;
-
-    const internalESClient = await createInternalESClientWithContext({
-      context,
-      request,
-      debug: params.query._inspect,
-      config,
+    const apmIndices = await resources.getApmIndices();
+    const [internalESClient, apmEventClient] = await Promise.all([
+      createInternalESClientWithResources(resources),
+      getApmEventClient(resources),
+    ]);
+    const configurations = await listConfigurations({
+      internalESClient,
+      apmIndices,
+      apmEventClient,
     });
-
-    const configurations = await listConfigurations(internalESClient);
 
     return { configurations };
   },
@@ -74,19 +74,17 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
   handler: async (resources): Promise<AgentConfiguration> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
-    const { params, logger, context, request, config } = resources;
-    const { name, environment, _inspect } = params.query;
+    const { params, logger } = resources;
+    const { name, environment } = params.query;
     const service = { name, environment };
-
-    const internalESClient = await createInternalESClientWithContext({
-      context,
-      request,
-      debug: _inspect,
-      config,
-    });
+    const [internalESClient, apmEventClient] = await Promise.all([
+      createInternalESClientWithResources(resources),
+      getApmEventClient(resources),
+    ]);
     const exactConfig = await findExactConfiguration({
       service,
       internalESClient,
+      apmEventClient,
     });
 
     if (!exactConfig) {
@@ -115,26 +113,17 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
   handler: async (resources): Promise<{ result: string }> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
-    const {
-      params,
-      logger,
-      core,
-      telemetryUsageCounter,
-      context,
-      request,
-      config,
-    } = resources;
+    const { params, logger, core, telemetryUsageCounter } = resources;
     const { service } = params.body;
-
-    const internalESClient = await createInternalESClientWithContext({
-      context,
-      request,
-      debug: params.query._inspect,
-      config,
-    });
+    const apmIndices = await resources.getApmIndices();
+    const [internalESClient, apmEventClient] = await Promise.all([
+      createInternalESClientWithResources(resources),
+      getApmEventClient(resources),
+    ]);
     const exactConfig = await findExactConfiguration({
       service,
       internalESClient,
+      apmEventClient,
     });
     if (!exactConfig) {
       logger.info(
@@ -158,6 +147,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
         coreStartPromise: core.start(),
         fleetPluginStart: await resources.plugins.fleet.start(),
         internalESClient,
+        apmIndices,
         telemetryUsageCounter,
       });
       logger.info(
@@ -181,29 +171,20 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
   ]),
   handler: async (resources): Promise<void> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
-    const {
-      params,
-      logger,
-      core,
-      telemetryUsageCounter,
-      context,
-      request,
-      config,
-    } = resources;
+    const { params, logger, core, telemetryUsageCounter } = resources;
     const { body, query } = params;
-
-    const internalESClient = await createInternalESClientWithContext({
-      context,
-      request,
-      debug: params.query._inspect,
-      config,
-    });
+    const apmIndices = await resources.getApmIndices();
+    const [internalESClient, apmEventClient] = await Promise.all([
+      createInternalESClientWithResources(resources),
+      getApmEventClient(resources),
+    ]);
 
     // if the config already exists, it is fetched and updated
     // this is to avoid creating two configs with identical service params
     const exactConfig = await findExactConfiguration({
       service: body.service,
       internalESClient,
+      apmEventClient,
     });
 
     // if the config exists ?overwrite=true is required
@@ -229,6 +210,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
       await syncAgentConfigsToApmPackagePolicies({
         coreStartPromise: core.start(),
         fleetPluginStart: await resources.plugins.fleet.start(),
+        apmIndices,
         internalESClient,
         telemetryUsageCounter,
       });
@@ -258,7 +240,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
   ): Promise<SearchHit<AgentConfiguration, undefined, undefined> | null> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
-    const { params, logger, context, config, request } = resources;
+    const { params, logger } = resources;
 
     const {
       service,
@@ -266,12 +248,9 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       mark_as_applied_by_agent: markAsAppliedByAgent,
     } = params.body;
 
-    const internalESClient = await createInternalESClientWithContext({
-      context,
-      request,
-      debug: params.query._inspect,
-      config,
-    });
+    const internalESClient = await createInternalESClientWithResources(
+      resources
+    );
     const configuration = await searchConfigurations({
       service,
       internalESClient,
@@ -331,14 +310,9 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   }> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
-    const { context, request, params, config } = resources;
+    const { context, params, config } = resources;
     const [internalESClient, apmEventClient] = await Promise.all([
-      createInternalESClientWithContext({
-        context,
-        request,
-        debug: params.query._inspect,
-        config,
-      }),
+      createInternalESClientWithResources(resources),
       getApmEventClient(resources),
     ]);
     const coreContext = await context.core;

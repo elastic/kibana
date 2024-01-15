@@ -19,7 +19,7 @@
   pointer-events: none;
   visibility: hidden;
   position: fixed;
-  top: 0;
+  top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
   right: 0;
   bottom: 0;
   left: 0;
@@ -35,47 +35,45 @@
   position: relative; // This is temporary for apps that relied on this being present on `.application`
 }
 
-@mixin kbnAffordForHeader($headerHeight) {
-  @include euiHeaderAffordForFixed($headerHeight);
+.kbnBody {
+  padding-top: var(--euiFixedHeadersOffset, 0);
+}
 
-  #securitySolutionStickyKQL,
-  #app-fixed-viewport {
-    top: $headerHeight;
+// Conditionally override :root CSS fixed header variable. Updating `--euiFixedHeadersOffset`
+// on the body will cause all child EUI components to automatically update their offsets
+.kbnBody--hasHeaderBanner {
+  --euiFixedHeadersOffset: var(--kbnHeaderOffsetWithBanner);
+
+  // Offset fixed EuiHeaders by the top banner
+  .euiHeader[data-fixed-header] {
+    margin-top: var(--kbnHeaderBannerHeight);
   }
 
-  @include euiBreakpoint('xl', 'l') {
-    .kbnStickyMenu {
-      position: sticky;
-      max-height: calc(100vh - #{$headerHeight + $euiSize});
-      top: $headerHeight + $euiSize;
-    }
-
-    .kbnSolutionNav__sidebar {
-      position: sticky;
-      max-height: calc(100vh - #{$headerHeight});
-      top: $headerHeight;
-    }
+  // Prevent banners from covering full screen data grids
+  .euiDataGrid--fullScreen {
+    height: calc(100vh - var(--kbnHeaderBannerHeight));
+    top: var(--kbnHeaderBannerHeight);
   }
 }
 
-.kbnBody {
-  @include kbnAffordForHeader($kbnHeaderOffset);
+// Set a body CSS variable for the app container to use - calculates the total
+// height of all fixed headers + the sticky action menu toolbar
+.kbnBody--hasProjectActionMenu {
+  --kbnAppHeadersOffset: calc(var(--kbnHeaderOffset) + var(--kbnProjectHeaderAppActionMenuHeight));
 
   &.kbnBody--hasHeaderBanner {
-    padding-top: $kbnHeaderBannerHeight;
-
-    @include kbnAffordForHeader($kbnHeaderOffsetWithBanner);
-
-    // Prevents banners from covering full screen data grids
-    .euiDataGrid--fullScreen {
-      height: calc(100vh - #{$kbnHeaderBannerHeight});
-      top: $kbnHeaderBannerHeight;
-    }
+    --kbnAppHeadersOffset: calc(var(--kbnHeaderOffsetWithBanner) + var(--kbnProjectHeaderAppActionMenuHeight));
   }
-  &.kbnBody--chromeHidden {
-    @include kbnAffordForHeader(0);
+}
+
+.kbnBody--chromeHidden {
+  --euiFixedHeadersOffset: 0;
+
+  &.kbnBody--hasHeaderBanner {
+    --euiFixedHeadersOffset: var(--kbnHeaderBannerHeight);
   }
-  &.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
-    @include kbnAffordForHeader($kbnHeaderBannerHeight);
+
+  &.kbnBody--hasProjectActionMenu {
+    --kbnAppHeadersOffset: var(--euiFixedHeadersOffset, 0);
   }
 }

@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
+  AssetDetailsFlyoutViewedParams,
+  AssetDetailsPageViewedParams,
   HostEntryClickedParams,
   HostFlyoutFilterActionParams,
   HostsViewQueryHostsCountRetrievedParams,
   HostsViewQuerySubmittedParams,
   InfraTelemetryEventTypes,
   ITelemetryClient,
+  PerformanceMetricInnerEvents,
 } from './types';
 
 /**
@@ -60,4 +64,26 @@ export class TelemetryClient implements ITelemetryClient {
       params
     );
   }
+
+  public reportAssetDetailsFlyoutViewed = (params: AssetDetailsFlyoutViewedParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ASSET_DETAILS_FLYOUT_VIEWED, params);
+  };
+
+  public reportAssetDetailsPageViewed = (params: AssetDetailsPageViewedParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.ASSET_DETAILS_PAGE_VIEWED, params);
+  };
+
+  public reportPerformanceMetricEvent = (
+    eventName: string,
+    duration: number,
+    innerEvents: PerformanceMetricInnerEvents = {},
+    meta: Record<string, unknown> = {}
+  ) => {
+    reportPerformanceMetricEvent(this.analytics, {
+      eventName,
+      duration,
+      meta,
+      ...innerEvents,
+    });
+  };
 }

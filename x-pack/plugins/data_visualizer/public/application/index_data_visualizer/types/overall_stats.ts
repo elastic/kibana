@@ -17,7 +17,15 @@ export interface AggregatableField {
   existsInDocs: boolean;
 }
 
-export type NonAggregatableField = Omit<AggregatableField, 'stats'>;
+export interface NonAggregatableField {
+  fieldName: string;
+  stats?: {
+    cardinality?: number;
+    count?: number;
+    sampleCount?: number;
+  };
+  existsInDocs: boolean;
+}
 
 export interface OverallStats {
   totalCount: number;

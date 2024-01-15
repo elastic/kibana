@@ -35,8 +35,6 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
-  servers:
-    - url: https://localhost:5601
 
 delete:
   summary: Deletes a rule.
@@ -67,8 +65,6 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
-  servers:
-    - url: https://localhost:5601
 
 post:
   summary: Creates a rule with a specific rule identifier.
@@ -94,7 +90,8 @@ post:
       required: true
       schema:
         type: string
-        example: ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
+        examples:
+          - ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74
   requestBody:
     required: true
     content:
@@ -102,8 +99,12 @@ post:
         schema:
           $ref: '../components/schemas/create_rule_request.yaml'
         examples:
+          createEsQueryEsqlRuleIdRequest:
+            $ref: '../components/examples/create_es_query_esql_rule_request.yaml'
           createEsQueryRuleIdRequest:
             $ref: '../components/examples/create_es_query_rule_request.yaml'
+          createEsQueryKqlRuleIdRequest:
+            $ref: '../components/examples/create_es_query_kql_rule_request.yaml'
           createIndexThreholdRuleIdRequest:
             $ref: '../components/examples/create_index_threshold_rule_request.yaml'
   responses:
@@ -114,8 +115,12 @@ post:
           schema:
             $ref: '../components/schemas/rule_response_properties.yaml' 
           examples:
+            createEsQueryEsqlRuleIdResponse:
+              $ref: '../components/examples/create_es_query_esql_rule_response.yaml'
             createEsQueryRuleIdResponse:
               $ref: '../components/examples/create_es_query_rule_response.yaml'
+            createEsQueryKqlRuleIdResponse:
+              $ref: '../components/examples/create_es_query_kql_rule_response.yaml'
             createIndexThresholdRuleIdResponse:
               $ref: '../components/examples/create_index_threshold_rule_response.yaml'
     '401':
@@ -130,8 +135,6 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
-  servers:
-    - url: https://localhost:5601
 
 put:
   summary: Updates the attributes for a rule.
@@ -184,7 +187,3 @@ put:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

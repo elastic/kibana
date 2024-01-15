@@ -5,17 +5,17 @@
  * 2.0.
  */
 import { get, pick } from 'lodash';
-import { ConfigKey, DataStream, FormMonitorType, MonitorFields } from '../types';
+import { ConfigKey, MonitorTypeEnum, FormMonitorType, MonitorFields } from '../types';
 import { DEFAULT_FIELDS } from '../constants';
 
 export const serializeNestedFormField = (fields: Record<string, any>) => {
-  const monitorType = fields[ConfigKey.MONITOR_TYPE] as DataStream;
+  const monitorType = fields[ConfigKey.MONITOR_TYPE] as MonitorTypeEnum;
   const monitorFields: Record<string, any> = {};
   const defaults = DEFAULT_FIELDS[monitorType] as MonitorFields;
   Object.keys(defaults).map((key) => {
     /* split key names on dot to handle dot notation fields,
      * which are changed to nested fields by react-hook-form */
-    monitorFields[key] = get(fields, key.split('.')) ?? defaults[key as ConfigKey];
+    monitorFields[key] = get(fields, key.split('.')) ?? fields[key] ?? defaults[key as ConfigKey];
   });
   return monitorFields as MonitorFields;
 };

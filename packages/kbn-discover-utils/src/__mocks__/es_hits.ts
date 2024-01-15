@@ -49,3 +49,8 @@ export const esHitsMock = [
     },
   },
 ];
+
+export const esHitsMockWithSort = esHitsMock.map((hit) => ({
+  ...hit,
+  sort: [hit._source.date], // some `sort` param should be specified for "fetch more" to work
+}));

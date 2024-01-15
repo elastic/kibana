@@ -30,6 +30,18 @@ jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 
+jest.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
+  return {
+    useBulkGetUserProfiles: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
+  };
+});
+
+jest.mock('../../../common/components/user_profiles/use_suggest_users', () => {
+  return {
+    useSuggestUsers: jest.fn().mockReturnValue({ isLoading: false, data: [] }),
+  };
+});
+
 jest.mock('../../../assistant/use_assistant_availability');
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/test', search: '?' });
 jest.mock('react-router-dom', () => {
@@ -114,6 +126,8 @@ describe('Details Panel Component', () => {
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
       (useAssistantAvailability as jest.Mock).mockReturnValue({
+        hasConnectorsAllPrivilege: true,
+        hasConnectorsReadPrivilege: true,
         hasAssistantPrivilege: false,
         isAssistantEnabled: true,
       });

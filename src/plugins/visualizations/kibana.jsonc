@@ -17,7 +17,6 @@
       "navigation",
       "embeddable",
       "inspector",
-      "savedObjects",
       "screenshotMode",
       "presentationUtil",
       "dataViews",
@@ -33,12 +32,15 @@
       "home",
       "share",
       "spaces",
-      "savedObjectsTaggingOss"
+      "savedObjectsTaggingOss",
+      "serverless",
+      "noDataPage"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "charts"
+      "charts",
+      "savedObjects",
     ],
     "extraPublicDirs": [
       "common/constants",

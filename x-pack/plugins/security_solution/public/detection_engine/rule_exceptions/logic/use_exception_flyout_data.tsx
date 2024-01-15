@@ -7,6 +7,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 
 import type { FieldSpec, DataViewSpec } from '@kbn/data-views-plugin/common';
 
@@ -17,6 +18,7 @@ import { useFetchIndex } from '../../../common/containers/source';
 
 import * as i18n from '../../../common/containers/source/translations';
 import { useRuleIndices } from '../../rule_management/logic/use_rule_indices';
+import { getMachineLearningJobId } from '../../../detections/pages/detection_engine/rules/helpers';
 
 export interface ReturnUseFetchExceptionFlyoutData {
   isLoading: boolean;
@@ -51,27 +53,33 @@ export const useFetchIndexPatterns = (rules: Rule[] | null): ReturnUseFetchExcep
   }, [spaces]);
   // If data view is defined, it superceeds use of rule defined index patterns.
   // If no rule is available, use fields from default data view id.
-  const memoDataViewId = useMemo(
-    () =>
-      rules != null && isSingleRule
-        ? rules[0].data_view_id || null
-        : `security-solution-${activeSpaceId}`,
-    [isSingleRule, rules, activeSpaceId]
-  );
+  const memoDataViewId = useMemo(() => {
+    if (rules != null && isSingleRule) {
+      return ('data_view_id' in rules[0] && rules[0].data_view_id) || null;
+    }
+    return `security-solution-${activeSpaceId}`;
+  }, [isSingleRule, rules, activeSpaceId]);
 
-  const memoNonDataViewIndexPatterns = useMemo(
-    () =>
-      !memoDataViewId && rules != null && isSingleRule && rules[0].index != null
-        ? rules[0].index
-        : [],
-    [memoDataViewId, isSingleRule, rules]
-  );
+  const memoNonDataViewIndexPatterns = useMemo(() => {
+    if (rules != null && isSingleRule && rules[0].type === 'esql') {
+      return getIndexListFromEsqlQuery(rules?.[0].query);
+    }
+    return !memoDataViewId &&
+      rules != null &&
+      isSingleRule &&
+      'index' in rules[0] &&
+      rules[0].index != null
+      ? rules[0].index
+      : [];
+  }, [memoDataViewId, isSingleRule, rules]);
 
   // Index pattern logic for ML
-  const memoMlJobIds = useMemo(
-    () => (isMLRule && isSingleRule && rules != null ? rules[0].machine_learning_job_id ?? [] : []),
-    [isMLRule, isSingleRule, rules]
-  );
+  const memoMlJobIds = useMemo(() => {
+    if (isMLRule && isSingleRule && rules != null) {
+      return getMachineLearningJobId(rules[0]) ?? [];
+    }
+    return [];
+  }, [isMLRule, isSingleRule, rules]);
   const { mlJobLoading, ruleIndices: mlRuleIndices } = useRuleIndices(memoMlJobIds);
 
   // We only want to provide a non empty array if it's an ML rule and we were able to fetch

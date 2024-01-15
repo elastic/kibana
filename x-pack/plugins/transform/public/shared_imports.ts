@@ -6,8 +6,6 @@
  */
 
 export { XJsonMode } from '@kbn/ace';
-export type { UseRequestConfig } from '@kbn/es-ui-shared-plugin/public';
-export { useRequest } from '@kbn/es-ui-shared-plugin/public';
 
 export type { GetMlSharedImportsReturnType } from '@kbn/ml-plugin/public';
 export { getMlSharedImports } from '@kbn/ml-plugin/public';

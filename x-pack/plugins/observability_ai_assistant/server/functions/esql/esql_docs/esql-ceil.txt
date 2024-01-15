@@ -1,0 +1,10 @@
+CEIL
+
+
+Round a number up to the nearest integer.
+ROW a=1.8
+| EVAL a=CEIL(a)
+This is a noop for long (including unsigned) and integer.
+      For double this picks the the closest double value to the integer ala
+      Math.ceil.
+Supported types:

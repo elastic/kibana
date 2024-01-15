@@ -7,7 +7,7 @@
 
 import { KibanaRequest } from '@kbn/core/server';
 import seedrandom from 'seedrandom';
-import { APMRouteHandlerResources } from '../../..';
+import { APMRouteHandlerResources } from '../../../routes/apm_routes/register_apm_server_routes';
 
 export async function getRandomSampler({
   security,

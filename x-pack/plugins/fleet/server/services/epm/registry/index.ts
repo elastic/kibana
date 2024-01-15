@@ -26,16 +26,16 @@ import type {
   PackageVerificationResult,
   ArchivePackage,
   BundledPackage,
+  AssetsMap,
 } from '../../../types';
 import {
-  getArchiveFilelist,
   getPathParts,
-  unpackBufferToCache,
   setVerificationResult,
-  getVerificationResult,
   getPackageInfo,
   setPackageInfo,
   generatePackageInfoFromArchiveBuffer,
+  unpackBufferToAssetsMap,
+  getVerificationResult,
 } from '../archive';
 import { streamToBuffer, streamToString } from '../streams';
 import { appContextService } from '../..';
@@ -43,6 +43,7 @@ import {
   PackageNotFoundError,
   RegistryResponseError,
   PackageFailedVerificationError,
+  PackageUnsupportedMediaTypeError,
 } from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
@@ -73,8 +74,7 @@ export async function fetchList(
     }
   }
 
-  setKibanaVersion(url);
-  setCapabilities(url);
+  setConstraints(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -106,8 +106,7 @@ async function _fetchFindLatestPackage(
     );
 
     if (!ignoreConstraints) {
-      setKibanaVersion(url);
-      setCapabilities(url);
+      setConstraints(url);
     }
 
     try {
@@ -199,8 +198,9 @@ export async function getBundledArchive(
   const bundledPackage = await getBundledPackageByName(pkgName);
 
   if (bundledPackage && bundledPackage.version === pkgVersion) {
+    const archiveBuffer = await bundledPackage.getBuffer();
     const archivePackage = await generatePackageInfoFromArchiveBuffer(
-      bundledPackage.buffer,
+      archiveBuffer,
       'application/zip'
     );
 
@@ -223,8 +223,12 @@ export async function fetchFile(filePath: string): Promise<Response> {
 }
 
 function setKibanaVersion(url: URL) {
+  const config = appContextService.getConfig();
+
   const disableVersionCheck =
-    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
+    (config?.developer?.disableRegistryVersionCheck ?? false) ||
+    config?.internal?.registry?.kibanaVersionCheckEnabled === false;
+
   if (disableVersionCheck) {
     return;
   }
@@ -236,11 +240,29 @@ function setKibanaVersion(url: URL) {
   }
 }
 
+function setSpecVersion(url: URL) {
+  const specMin = appContextService.getConfig()?.internal?.registry?.spec?.min;
+  const specMax = appContextService.getConfig()?.internal?.registry?.spec?.max;
+
+  if (specMin) {
+    url.searchParams.set('spec.min', specMin);
+  }
+  if (specMax) {
+    url.searchParams.set('spec.max', specMax);
+  }
+}
+
 function setCapabilities(url: URL) {
-  const capabilities = appContextService.getConfig()?.internal?.capabilities;
+  const capabilities = appContextService.getConfig()?.internal?.registry?.capabilities;
   if (capabilities && capabilities.length > 0) {
     url.searchParams.set('capabilities', capabilities.join(','));
   }
+}
+
+function setConstraints(url: URL) {
+  setKibanaVersion(url);
+  setCapabilities(url);
+  setSpecVersion(url);
 }
 
 export async function fetchCategories(
@@ -257,8 +279,7 @@ export async function fetchCategories(
     }
   }
 
-  setKibanaVersion(url);
-  setCapabilities(url);
+  setConstraints(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
@@ -298,16 +319,15 @@ export async function getPackage(
 ): Promise<{
   paths: string[];
   packageInfo: ArchivePackage;
+  assetsMap: AssetsMap;
   verificationResult?: PackageVerificationResult;
 }> {
   const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
-  let paths = getArchiveFilelist({ name, version });
-  let packageInfo = getPackageInfo({ name, version });
-  let verificationResult = verifyPackage ? getVerificationResult({ name, version }) : undefined;
+  let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
+  let verificationResult: PackageVerificationResult | undefined = verifyPackage
+    ? getVerificationResult({ name, version })
+    : undefined;
 
-  if (paths && packageInfo) {
-    return { paths, packageInfo, verificationResult };
-  }
   const {
     archiveBuffer,
     archivePath,
@@ -325,28 +345,28 @@ export async function getPackage(
     verificationResult = latestVerificationResult;
     setVerificationResult({ name, version }, latestVerificationResult);
   }
-  if (!paths || paths.length === 0) {
-    paths = await withPackageSpan('Unpack archive', () =>
-      unpackBufferToCache({
-        name,
-        version,
-        archiveBuffer,
-        contentType: ensureContentType(archivePath),
-      })
-    );
-  }
+
+  const { assetsMap, paths } = await unpackBufferToAssetsMap({
+    name,
+    version,
+    archiveBuffer,
+    contentType: ensureContentType(archivePath),
+  });
 
   if (!packageInfo) {
     packageInfo = await getPackageInfoFromArchiveOrCache(name, version, archiveBuffer, archivePath);
   }
 
-  return { paths, packageInfo, verificationResult };
+  return { paths, packageInfo, assetsMap, verificationResult };
 }
 
 function ensureContentType(archivePath: string) {
   const contentType = mime.lookup(archivePath);
+
   if (!contentType) {
-    throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+    throw new PackageUnsupportedMediaTypeError(
+      `Unknown compression format for '${archivePath}'. Please use .zip or .gz`
+    );
   }
   return contentType;
 }

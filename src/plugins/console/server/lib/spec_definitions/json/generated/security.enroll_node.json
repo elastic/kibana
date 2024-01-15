@@ -1,11 +1,21 @@
 {
   "security.enroll_node": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_security/enroll/node"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-node-enrollment.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-node-enrollment.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

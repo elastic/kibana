@@ -40,10 +40,12 @@ const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup
 
 const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();
+  const currentLocation$ = new Subject<string>();
 
   return {
     applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),
     currentAppId$: currentAppId$.asObservable(),
+    currentLocation$: currentLocation$.asObservable(),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     navigateToApp: jest.fn(),
     navigateToUrl: jest.fn(),
@@ -73,13 +75,19 @@ const createHistoryMock = (): jest.Mocked<History> => {
   };
 };
 
-const createInternalStartContractMock = (): jest.Mocked<InternalApplicationStart> => {
-  const currentAppId$ = new Subject<string | undefined>();
+const createInternalStartContractMock = (
+  currentAppId?: string
+): jest.Mocked<InternalApplicationStart> => {
+  const currentAppId$ = currentAppId
+    ? new BehaviorSubject<string | undefined>(currentAppId)
+    : new Subject<string | undefined>();
+  const currentLocation$ = new Subject<string>();
 
   return {
     applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),
     capabilities: capabilitiesServiceMock.createStartContract().capabilities,
     currentAppId$: currentAppId$.asObservable(),
+    currentLocation$: currentLocation$.asObservable(),
     currentActionMenu$: new BehaviorSubject<MountPoint | undefined>(undefined),
     getComponent: jest.fn(),
     getUrlForApp: jest.fn(),

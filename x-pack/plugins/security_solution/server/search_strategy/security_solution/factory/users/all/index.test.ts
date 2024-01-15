@@ -10,11 +10,11 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 import * as buildQuery from './query.all_users.dsl';
 import { allUsers } from '.';
 import { mockDeps, mockOptions, mockSearchStrategyResponse } from './__mocks__';
-import type { UsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/all';
 import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
 
 import { get } from 'lodash/fp';
 import { RiskScoreEntity } from '../../../../../../common/search_strategy';
+import type { UsersRequestOptions } from '../../../../../../common/api/search_strategy';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };
@@ -117,6 +117,7 @@ describe('allHosts search strategy', () => {
         defaultIndex: ['ml_user_risk_score_latest_test-space'],
         filterQuery: { terms: { 'user.name': userName } },
         riskScoreEntity: RiskScoreEntity.user,
+        factoryQueryType: expect.stringContaining('RiskScore'),
       });
     });
 

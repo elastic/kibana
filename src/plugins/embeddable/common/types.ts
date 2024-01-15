@@ -22,6 +22,7 @@ export enum ViewMode {
 }
 
 export type EmbeddableInput = {
+  version?: string;
   viewMode?: ViewMode;
   title?: string;
   description?: string;
@@ -72,7 +73,9 @@ export type EmbeddableInput = {
   executionContext?: KibanaExecutionContext;
 };
 
-export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {
+export interface PanelState<
+  E extends EmbeddableInput & { id: string } = { id: string; version?: string }
+> {
   // The type of embeddable in this panel. Will be used to find the factory in which to
   // load the embeddable.
   type: string;
@@ -80,9 +83,6 @@ export interface PanelState<E extends EmbeddableInput & { id: string } = { id: s
   // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
   // will be derived from the container's input. **State in here will override state derived from the container.**
   explicitInput: Partial<E> & { id: string };
-
-  // allows individual embeddable panels to maintain versioning information separate from the main Kibana version
-  version?: string;
 }
 
 export type EmbeddableStateWithType = EmbeddableInput & { type: string };

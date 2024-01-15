@@ -41,6 +41,7 @@ export type {
   Installation,
   EpmPackageInstallStatus,
   InstallationStatus,
+  InstallFailedAttempt,
   PackageInfo,
   ArchivePackage,
   RegistryVarsEntry,
@@ -85,12 +86,17 @@ export type {
   ExperimentalDataStreamFeature,
   Secret,
   SecretElasticDoc,
+  SecretPath,
   VarSecretReference,
   PolicySecretReference,
+  DeletedSecretResponse,
+  DeletedSecretReference,
   PackageListItem,
   PackageList,
   InstallationInfo,
   ActionStatusOptions,
+  PackageSpecTags,
+  AssetsMap,
 } from '../../common/types';
 export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
 export { dataTypes } from '../../common/constants';

@@ -17,7 +17,6 @@ import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
  *    and installing plugins against built Kibana. This test must be run against source only in order to build the
  *    fixture plugins
  */
-// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
 
@@ -41,7 +40,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       runOptions: {
         ...httpConfig.get('kbnTestServer.runOptions'),
         // Don't wait for Kibana to be completely ready so that we can test the status timeouts
-        wait: /Kibana is now unavailable/,
+        // but wait for http service to listen.
+        wait: /\[http\.server\.Kibana\] http server running at/,
         alwaysUseSource: true,
       },
     },

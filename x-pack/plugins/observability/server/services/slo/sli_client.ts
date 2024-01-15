@@ -11,22 +11,25 @@ import {
   AggregationsSumAggregate,
   AggregationsValueCountAggregate,
   MsearchMultisearchBody,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  ALL_VALUE,
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
-  toMomentUnitOfTime,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import moment from 'moment';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { DateRange, Duration, IndicatorData, SLO } from '../../domain/models';
 import { InternalQueryError } from '../../errors';
+import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
+import { getLookbackDateRange } from '../../domain/services/get_lookback_date_range';
 
 export interface SLIClient {
   fetchSLIDataFrom(
     slo: SLO,
+    instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>>;
 }
@@ -45,19 +48,29 @@ export class DefaultSLIClient implements SLIClient {
 
   async fetchSLIDataFrom(
     slo: SLO,
+    instanceId: string,
     lookbackWindows: LookbackWindow[]
   ): Promise<Record<WindowName, IndicatorData>> {
     const sortedLookbackWindows = [...lookbackWindows].sort((a, b) =>
       a.duration.isShorterThan(b.duration) ? 1 : -1
     );
     const longestLookbackWindow = sortedLookbackWindows[0];
-    const longestDateRange = getLookbackDateRange(longestLookbackWindow.duration);
+    const delayInSeconds = getDelayInSecondsFromSLO(slo);
+    const longestDateRange = getLookbackDateRange(
+      new Date(),
+      longestLookbackWindow.duration,
+      delayInSeconds
+    );
 
     if (occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
-        ...commonQuery(slo, longestDateRange),
+        ...commonQuery(slo, instanceId, longestDateRange),
         index: SLO_DESTINATION_INDEX_PATTERN,
-        aggs: toLookbackWindowsAggregationsQuery(sortedLookbackWindows),
+        aggs: toLookbackWindowsAggregationsQuery(
+          longestDateRange.to,
+          sortedLookbackWindows,
+          delayInSeconds
+        ),
       });
 
       return handleWindowedResult(result.aggregations, lookbackWindows);
@@ -65,9 +78,13 @@ export class DefaultSLIClient implements SLIClient {
 
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const result = await this.esClient.search<unknown, EsAggregations>({
-        ...commonQuery(slo, longestDateRange),
+        ...commonQuery(slo, instanceId, longestDateRange),
         index: SLO_DESTINATION_INDEX_PATTERN,
-        aggs: toLookbackWindowsSlicedAggregationsQuery(slo, sortedLookbackWindows),
+        aggs: toLookbackWindowsSlicedAggregationsQuery(
+          longestDateRange.to,
+          sortedLookbackWindows,
+          delayInSeconds
+        ),
       });
 
       return handleWindowedResult(result.aggregations, lookbackWindows);
@@ -79,73 +96,109 @@ export class DefaultSLIClient implements SLIClient {
 
 function commonQuery(
   slo: SLO,
+  instanceId: string,
   dateRange: DateRange
 ): Pick<MsearchMultisearchBody, 'size' | 'query'> {
+  const filter: QueryDslQueryContainer[] = [
+    { term: { 'slo.id': slo.id } },
+    { term: { 'slo.revision': slo.revision } },
+    {
+      range: {
+        '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+      },
+    },
+  ];
+
+  if (instanceId !== ALL_VALUE) {
+    filter.push({ term: { 'slo.instanceId': instanceId } });
+  }
+
   return {
     size: 0,
     query: {
       bool: {
-        filter: [
-          { term: { 'slo.id': slo.id } },
-          { term: { 'slo.revision': slo.revision } },
-          {
-            range: {
-              '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
-            },
-          },
-        ],
+        filter,
       },
     },
   };
 }
 
-function toLookbackWindowsAggregationsQuery(sortedLookbackWindow: LookbackWindow[]) {
+function toLookbackWindowsAggregationsQuery(
+  startedAt: Date,
+  sortedLookbackWindow: LookbackWindow[],
+  delayInSeconds = 0
+) {
   return sortedLookbackWindow.reduce<Record<string, AggregationsAggregationContainer>>(
-    (acc, lookbackWindow) => ({
-      ...acc,
-      [lookbackWindow.name]: {
-        date_range: {
-          field: '@timestamp',
-          ranges: [{ from: `now-${lookbackWindow.duration.format()}/m`, to: 'now/m' }],
+    (acc, lookbackWindow) => {
+      const lookbackDateRange = getLookbackDateRange(
+        startedAt,
+        lookbackWindow.duration,
+        delayInSeconds
+      );
+
+      return {
+        ...acc,
+        [lookbackWindow.name]: {
+          date_range: {
+            field: '@timestamp',
+            ranges: [
+              {
+                from: lookbackDateRange.from.toISOString(),
+                to: lookbackDateRange.to.toISOString(),
+              },
+            ],
+          },
+          aggs: {
+            good: { sum: { field: 'slo.numerator' } },
+            total: { sum: { field: 'slo.denominator' } },
+          },
         },
-        aggs: {
-          good: { sum: { field: 'slo.numerator' } },
-          total: { sum: { field: 'slo.denominator' } },
-        },
-      },
-    }),
+      };
+    },
     {}
   );
 }
 
-function toLookbackWindowsSlicedAggregationsQuery(slo: SLO, lookbackWindows: LookbackWindow[]) {
+function toLookbackWindowsSlicedAggregationsQuery(
+  startedAt: Date,
+  lookbackWindows: LookbackWindow[],
+  delayInSeconds = 0
+) {
   return lookbackWindows.reduce<Record<string, AggregationsAggregationContainer>>(
-    (acc, lookbackWindow) => ({
-      ...acc,
-      [lookbackWindow.name]: {
-        date_range: {
-          field: '@timestamp',
-          ranges: [
-            {
-              from: `now-${lookbackWindow.duration.format()}/m`,
-              to: 'now/m',
+    (acc, lookbackWindow) => {
+      const lookbackDateRange = getLookbackDateRange(
+        startedAt,
+        lookbackWindow.duration,
+        delayInSeconds
+      );
+
+      return {
+        ...acc,
+        [lookbackWindow.name]: {
+          date_range: {
+            field: '@timestamp',
+            ranges: [
+              {
+                from: lookbackDateRange.from.toISOString(),
+                to: lookbackDateRange.to.toISOString(),
+              },
+            ],
+          },
+          aggs: {
+            good: {
+              sum: {
+                field: 'slo.isGoodSlice',
+              },
             },
-          ],
-        },
-        aggs: {
-          good: {
-            sum: {
-              field: 'slo.isGoodSlice',
+            total: {
+              value_count: {
+                field: 'slo.isGoodSlice',
+              },
             },
           },
-          total: {
-            value_count: {
-              field: 'slo.isGoodSlice',
-            },
-          },
         },
-      },
-    }),
+      };
+    },
     {}
   );
 }
@@ -179,16 +232,4 @@ function handleWindowedResult(
   }
 
   return indicatorDataPerLookbackWindow;
-}
-
-function getLookbackDateRange(duration: Duration): { from: Date; to: Date } {
-  const unit = toMomentUnitOfTime(duration.unit);
-  const now = moment.utc().startOf('minute');
-  const from = now.clone().subtract(duration.value, unit);
-  const to = now.clone();
-
-  return {
-    from: from.toDate(),
-    to: to.toDate(),
-  };
 }

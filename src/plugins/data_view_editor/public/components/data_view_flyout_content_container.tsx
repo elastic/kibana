@@ -50,10 +50,11 @@ const DataViewFlyoutContentContainer = ({
     try {
       let saveResponse;
       if (editData) {
-        const { name = '', timeFieldName, title = '' } = dataViewSpec;
+        const { name = '', timeFieldName, title = '', allowHidden = false } = dataViewSpec;
         editData.setIndexPattern(title);
         editData.name = name;
         editData.timeFieldName = timeFieldName;
+        editData.setAllowHidden(allowHidden);
         saveResponse = editData.isPersisted()
           ? await dataViews.updateSavedObject(editData)
           : editData;
@@ -67,11 +68,14 @@ const DataViewFlyoutContentContainer = ({
         await dataViews.refreshFields(saveResponse);
 
         if (persist) {
-          const message = i18n.translate('indexPatternEditor.saved', {
-            defaultMessage: "Saved '{indexPatternName}'",
-            values: { indexPatternName: saveResponse.getName() },
+          const title = i18n.translate('indexPatternEditor.saved', {
+            defaultMessage: 'Saved',
           });
-          notifications.toasts.addSuccess(message);
+          const text = `'${saveResponse.getName()}'`;
+          notifications.toasts.addSuccess({
+            title,
+            text,
+          });
         }
         await onSave(saveResponse);
       }

@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiButton,
-  EuiBetaBadge,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
@@ -31,7 +31,7 @@ import {
 import { SessionViewTelemetryKey } from '../../types';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
-import { BETA, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
+import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
   index: string;
@@ -174,9 +174,6 @@ export const TTYPlayer = ({
     <div css={styles.container}>
       <EuiPanel hasShadow={false} borderRadius="none" hasBorder={false} css={styles.header}>
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
             <TTYSearchBar
               lines={lines}
@@ -227,26 +224,28 @@ export const TTYPlayer = ({
         <div ref={ref} data-test-subj="sessionView:TTYPlayer" css={styles.terminal} />
       </div>
 
-      <TTYPlayerControls
-        currentProcessEvent={currentProcessEvent}
-        processStartMarkers={processStartMarkers}
-        isPlaying={isPlaying}
-        currentLine={currentLine}
-        linesLength={lines.length}
-        onSeekLine={onSeekLine}
-        onTogglePlayback={onTogglePlayback}
-        onClose={onClose}
-        onJumpToEvent={onJumpToEvent}
-        textSizer={
-          <TTYTextSizer
-            tty={tty}
-            containerHeight={containerHeight}
-            fontSize={fontSize}
-            onFontSizeChanged={setFontSize}
-            isFullscreen={isFullscreen}
-          />
-        }
-      />
+      <EuiThemeProvider colorMode="dark">
+        <TTYPlayerControls
+          currentProcessEvent={currentProcessEvent}
+          processStartMarkers={processStartMarkers}
+          isPlaying={isPlaying}
+          currentLine={currentLine}
+          linesLength={lines.length}
+          onSeekLine={onSeekLine}
+          onTogglePlayback={onTogglePlayback}
+          onClose={onClose}
+          onJumpToEvent={onJumpToEvent}
+          textSizer={
+            <TTYTextSizer
+              tty={tty}
+              containerHeight={containerHeight}
+              fontSize={fontSize}
+              onFontSizeChanged={setFontSize}
+              isFullscreen={isFullscreen}
+            />
+          }
+        />
+      </EuiThemeProvider>
     </div>
   );
 };

@@ -12,19 +12,17 @@ import {
   LogViewColumnConfiguration,
   LogViewReference,
   ResolvedLogView,
+  LogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
 import { flowRight } from 'lodash';
 import type { InfraClientCoreSetup } from '../../public/types';
 import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../constants';
-import { findInventoryFields } from '../inventory_models';
 import type { TimeRange } from '../time';
 import {
   replaceLogFilterInQueryString,
   replaceLogPositionInQueryString,
   replaceLogViewInQueryString,
 } from '../url_state_storage_service';
-import type { LogsLocatorParams } from './logs_locator';
-import type { NodeLogsLocatorParams } from './node_logs_locator';
 
 interface LocationToDiscoverParams {
   core: InfraClientCoreSetup;
@@ -32,15 +30,6 @@ interface LocationToDiscoverParams {
   filter?: string;
   logView?: LogViewReference;
 }
-
-export const createNodeLogsQuery = (params: NodeLogsLocatorParams) => {
-  const { nodeType, nodeId, filter } = params;
-
-  const nodeFilter = `${findInventoryFields(nodeType).id}: ${nodeId}`;
-  const query = filter ? `(${nodeFilter}) and (${filter})` : nodeFilter;
-
-  return query;
-};
 
 export const createSearchString = ({
   time,

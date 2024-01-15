@@ -5,29 +5,26 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { EcsBase, EcsEvent, EcsHost, EcsUser, EcsAgent } from '@kbn/ecs';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { SearchTypes } from '../../../../detection_engine/types';
 import type { Inspect, Maybe } from '../../../common';
-import type { RequestBasicOptions } from '../..';
 
 export interface ManagedUserDetailsStrategyResponse extends IEsSearchResponse {
-  userDetails?: AzureManagedUser;
+  users: ManagedUserHits;
   inspect?: Maybe<Inspect>;
 }
 
-export interface ManagedUserDetailsRequestOptions
-  extends Pick<RequestBasicOptions, 'defaultIndex' | 'factoryQueryType'>,
-    IEsSearchRequest {
-  userName: string;
+export enum ManagedUserDatasetKey {
+  ENTRA = 'entityanalytics_entra_id.user',
+  OKTA = 'entityanalytics_okta.user',
 }
 
-export interface AzureManagedUser extends Pick<EcsBase, '@timestamp'> {
-  agent: EcsAgent;
-  host: EcsHost;
-  event: EcsEvent;
-  user: EcsUser & {
-    last_name?: string;
-    first_name?: string;
-    phone?: string[];
-  };
+export interface ManagedUserHit {
+  _index: string;
+  _id: string;
+  fields?: ManagedUserFields;
 }
+
+export type ManagedUserHits = Partial<Record<ManagedUserDatasetKey, ManagedUserHit>>;
+
+export type ManagedUserFields = Record<string, SearchTypes[]>;

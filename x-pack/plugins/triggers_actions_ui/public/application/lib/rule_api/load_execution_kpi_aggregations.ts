@@ -16,6 +16,7 @@ export interface LoadExecutionKPIAggregationsProps {
   message?: string;
   dateStart: string;
   dateEnd?: string;
+  ruleTypeIds?: string[];
 }
 
 export const loadExecutionKPIAggregations = ({
@@ -25,8 +26,9 @@ export const loadExecutionKPIAggregations = ({
   message,
   dateStart,
   dateEnd,
+  ruleTypeIds,
 }: LoadExecutionKPIAggregationsProps & { http: HttpSetup }) => {
-  const filter = getFilter({ outcomeFilter, message });
+  const filter = getFilter({ outcomeFilter, message, ruleTypeIds });
 
   return http.get<IExecutionKPIResult>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${id}/_execution_kpi`,

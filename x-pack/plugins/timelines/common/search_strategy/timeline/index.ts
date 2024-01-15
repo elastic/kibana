@@ -5,44 +5,28 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest } from '@kbn/data-plugin/common';
-import { ESQuery } from '../../typed_json';
 import {
-  TimelineEventsQueries,
-  TimelineEventsAllRequestOptions,
   TimelineEventsAllStrategyResponse,
-  TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
-  TimelineEventsLastEventTimeRequestOptions,
   TimelineEventsLastEventTimeStrategyResponse,
   TimelineKpiStrategyResponse,
-  EntityType,
 } from './events';
-import { PaginationInputPaginated, TimerangeInput, SortField } from '../common';
-import type { RunTimeMappings } from './events/eql';
+import { SortField } from '../common';
+import {
+  TimelineEventsAllOptionsInput,
+  TimelineEventsDetailsRequestOptionsInput,
+  TimelineEventsLastEventTimeRequestOptionsInput,
+  TimelineEventsQueries,
+  TimelineKpiRequestOptionsInput,
+} from '../../api/search_strategy';
 
 export * from './events';
 
 export type TimelineFactoryQueryTypes = TimelineEventsQueries;
 
-export interface TimelineRequestBasicOptions extends IEsSearchRequest {
-  timerange?: TimerangeInput;
-  filterQuery: ESQuery | string | undefined;
-  defaultIndex: string[];
-  factoryQueryType?: TimelineFactoryQueryTypes;
-  entityType?: EntityType;
-  runtimeMappings: RunTimeMappings;
-}
-
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
   esTypes: string[];
   type: string;
-}
-
-export interface TimelineRequestOptionsPaginated<Field = string>
-  extends TimelineRequestBasicOptions {
-  pagination: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
-  sort: Array<TimelineRequestSortField<Field>>;
 }
 
 export type TimelineStrategyResponseType<T extends TimelineFactoryQueryTypes> =
@@ -58,11 +42,11 @@ export type TimelineStrategyResponseType<T extends TimelineFactoryQueryTypes> =
 
 export type TimelineStrategyRequestType<T extends TimelineFactoryQueryTypes> =
   T extends TimelineEventsQueries.all
-    ? TimelineEventsAllRequestOptions
+    ? TimelineEventsAllOptionsInput
     : T extends TimelineEventsQueries.details
-    ? TimelineEventsDetailsRequestOptions
+    ? TimelineEventsDetailsRequestOptionsInput
     : T extends TimelineEventsQueries.kpi
-    ? TimelineRequestBasicOptions
+    ? TimelineKpiRequestOptionsInput
     : T extends TimelineEventsQueries.lastEventTime
-    ? TimelineEventsLastEventTimeRequestOptions
+    ? TimelineEventsLastEventTimeRequestOptionsInput
     : never;

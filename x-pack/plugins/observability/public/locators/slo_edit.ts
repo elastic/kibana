@@ -11,7 +11,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { CreateSLOForm } from '../pages/slo_edit/types';
 import { sloEditLocatorID } from '../../common';
-import { SLO_CREATE_PATH, SLOS_PATH } from '../routes/paths';
+import { SLO_CREATE_PATH, SLOS_PATH } from '../../common/locators/paths';
 
 export type SloEditParams = RecursivePartial<CreateSLOForm>;
 

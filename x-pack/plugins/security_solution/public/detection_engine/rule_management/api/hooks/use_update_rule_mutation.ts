@@ -14,8 +14,9 @@ import { transformOutput } from '../../../../detections/containers/detection_eng
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { updateRule } from '../api';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
-import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
+import { useUpdateRuleByIdCache } from './use_fetch_rule_by_id_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from './use_fetch_rule_management_filters_query';
+import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
 
 export const UPDATE_RULE_MUTATION_KEY = ['PUT', DETECTION_ENGINE_RULES_URL];
 
@@ -24,7 +25,8 @@ export const useUpdateRuleMutation = (
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
-  const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
+  const updateRuleCache = useUpdateRuleByIdCache();
 
   return useMutation<RuleResponse, Error, RuleUpdateProps>(
     (rule: RuleUpdateProps) => updateRule({ rule: transformOutput(rule) }),
@@ -33,12 +35,16 @@ export const useUpdateRuleMutation = (
       mutationKey: UPDATE_RULE_MUTATION_KEY,
       onSettled: (...args) => {
         invalidateFindRulesQuery();
-        invalidateFetchRuleByIdQuery();
         invalidateFetchRuleManagementFilters();
+        invalidateFetchCoverageOverviewQuery();
 
-        if (options?.onSettled) {
-          options.onSettled(...args);
+        const [response] = args;
+
+        if (response) {
+          updateRuleCache(response);
         }
+
+        options?.onSettled?.(...args);
       },
     }
   );

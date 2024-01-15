@@ -37,16 +37,17 @@ export const DashboardListingPage = ({
 }: DashboardListingPageProps) => {
   const {
     data: { query },
+    serverless,
     chrome: { setBreadcrumbs },
     dashboardContentManagement: { findDashboards },
   } = pluginServices.getServices();
 
-  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
   useEffect(() => {
     let isMounted = true;
     (async () => {
       const isInNoDataState = await isDashboardAppInNoDataState();
-      if (isInNoDataState && isMounted) setShowNoDataPage(true);
+      setShowNoDataPage(isInNoDataState && isMounted);
     })();
     return () => {
       isMounted = false;
@@ -59,7 +60,13 @@ export const DashboardListingPage = ({
         text: getDashboardBreadcrumb(),
       },
     ]);
-  }, [setBreadcrumbs]);
+
+    if (serverless?.setBreadcrumbs) {
+      // if serverless breadcrumbs available,
+      // reset any deeper context breadcrumbs to only keep the main "dashboard" part that comes from the navigation config
+      serverless.setBreadcrumbs([]);
+    }
+  }, [setBreadcrumbs, serverless]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
@@ -84,6 +91,10 @@ export const DashboardListingPage = ({
   }, [title, redirectTo, query, kbnUrlStateStorage, findDashboards]);
 
   const titleFilter = title ? `${title}` : '';
+
+  if (showNoDataPage === undefined) {
+    return null;
+  }
 
   return (
     <>

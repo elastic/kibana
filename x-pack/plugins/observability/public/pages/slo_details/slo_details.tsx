@@ -8,10 +8,10 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMutating } from '@tanstack/react-query';
-import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
@@ -23,10 +23,13 @@ import PageNotFound from '../404';
 import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import type { SloDetailsPathParams } from './types';
-import { AutoRefreshButton } from '../slos/components/auto_refresh_button';
+import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
+import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
+import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export function SloDetailsPage() {
   const {
@@ -39,8 +42,14 @@ export function SloDetailsPage() {
   const hasRightLicense = hasAtLeast('platinum');
 
   const { sloId } = useParams<SloDetailsPathParams>();
-  const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
-  const { isLoading, slo } = useFetchSloDetails({ sloId, shouldRefetch: isAutoRefreshing });
+  const sloInstanceId = useGetInstanceIdQueryParam();
+  const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
+  const { isLoading, data: slo } = useFetchSloDetails({
+    sloId,
+    instanceId: sloInstanceId,
+    shouldRefetch: isAutoRefreshing,
+  });
   const isCloningOrDeleting = Boolean(useIsMutating());
 
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
@@ -58,6 +67,7 @@ export function SloDetailsPage() {
 
   const handleToggleAutoRefresh = () => {
     setIsAutoRefreshing(!isAutoRefreshing);
+    storeAutoRefreshState(!isAutoRefreshing);
   };
 
   return (
@@ -77,6 +87,7 @@ export function SloDetailsPage() {
       }}
       data-test-subj="sloDetailsPage"
     >
+      <HeaderMenu />
       {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
       {!isLoading && <SloDetails slo={slo!} isAutoRefreshing={isAutoRefreshing} />}
     </ObservabilityPageTemplate>
@@ -86,13 +97,14 @@ export function SloDetailsPage() {
 function getBreadcrumbs(
   basePath: IBasePath,
   slo: SLOWithSummaryResponse | undefined
-): EuiBreadcrumbProps[] {
+): ChromeBreadcrumb[] {
   return [
     {
       href: basePath.prepend(paths.observability.slos),
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
+      deepLinkId: 'observability-overview:slos',
     },
     {
       text:

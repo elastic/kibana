@@ -13,7 +13,7 @@ import { Router } from '@kbn/shared-ux-router';
 import {
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageTemplate,
   EuiPageHeader,
   EuiText,
   EuiTitle,
@@ -97,9 +97,9 @@ export const App = ({
             showSearchBar={true}
             indexPatterns={[dataView]}
             useDefaultBehaviors={true}
-            showSaveQuery={true}
+            saveQueryMenuVisibility="allowed_by_app_privilege" // allowed only for this example app, use `globally_managed` by default
           />
-          <EuiPageContent>
+          <EuiPageTemplate.Section>
             <EuiText>
               <p>In addition to state from query bar also sync your arbitrary application state:</p>
             </EuiText>
@@ -109,7 +109,7 @@ export const App = ({
               onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}
               aria-label="My name"
             />
-          </EuiPageContent>
+          </EuiPageTemplate.Section>
         </EuiPageBody>
       </Router>
     </StateContainersExamplesPage>

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsResponse } from '../../../../common/api';
-import { CaseMetricsFeature } from '../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../common/types/api';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import { createCaseError } from '../../../common/error';
 
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';

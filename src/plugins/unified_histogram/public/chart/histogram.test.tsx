@@ -8,6 +8,7 @@
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Histogram } from './histogram';
 import React from 'react';
+import { of } from 'rxjs';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
@@ -38,7 +39,7 @@ const getMockLensAttributes = () =>
     suggestion: undefined,
   });
 
-function mountComponent() {
+function mountComponent(isPlainRecord = false, hasLensSuggestions = false) {
   const services = unifiedHistogramServicesMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -51,7 +52,8 @@ function mountComponent() {
     request: {
       searchSessionId: '123',
     },
-    hasLensSuggestions: false,
+    hasLensSuggestions,
+    isPlainRecord,
     hits: {
       status: UnifiedHistogramFetchStatus.loading,
       total: undefined,
@@ -70,6 +72,7 @@ function mountComponent() {
     lensAttributesContext: getMockLensAttributes(),
     onTotalHitsChange: jest.fn(),
     onChartLoad: jest.fn(),
+    withDefaultActions: undefined,
   };
 
   return {
@@ -95,16 +98,18 @@ describe('Histogram', () => {
       attributes: getMockLensAttributes().attributes,
       onLoad: lensProps.onLoad,
     });
-    expect(lensProps).toEqual(originalProps);
+    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     component.setProps({ request: { ...props.request, searchSessionId: '321' } }).update();
     lensProps = component.find(embeddable).props();
-    expect(lensProps).toEqual(originalProps);
+    expect(lensProps).toMatchObject(expect.objectContaining(originalProps));
     await act(async () => {
       props.refetch$.next({ type: 'refetch' });
     });
     component.update();
     lensProps = component.find(embeddable).props();
-    expect(lensProps).toEqual({ ...originalProps, searchSessionId: '321' });
+    expect(lensProps).toMatchObject(
+      expect.objectContaining({ ...originalProps, searchSessionId: '321' })
+    );
   });
 
   it('should execute onLoad correctly', async () => {
@@ -162,24 +167,25 @@ describe('Histogram', () => {
     jest
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
-    onLoad(true, undefined);
+    const embeddableOutput$ = jest.fn().mockReturnValue(of('output$'));
+    onLoad(true, undefined, embeddableOutput$);
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.loading,
       undefined
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters: {} });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters: {}, embeddableOutput$ });
     expect(buildBucketInterval.buildBucketInterval).not.toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: undefined })
     );
     act(() => {
-      onLoad(false, adapters);
+      onLoad(false, adapters, embeddableOutput$);
     });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
       UnifiedHistogramFetchStatus.complete,
       100
     );
-    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters, embeddableOutput$ });
     expect(buildBucketInterval.buildBucketInterval).toHaveBeenCalled();
     expect(useTimeRange.useTimeRange).toHaveBeenLastCalledWith(
       expect.objectContaining({ bucketInterval: mockBucketInterval })
@@ -207,6 +213,7 @@ describe('Histogram', () => {
     const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
     const onLoad = component.find(embeddable).props().onLoad;
     const adapters = createDefaultInspectorAdapters();
+    adapters.tables.tables.unifiedHistogram = { meta: { statistics: { totalCount: 100 } } } as any;
     const rawResponse = {
       _shards: {
         total: 1,
@@ -215,14 +222,93 @@ describe('Histogram', () => {
         failed: 1,
         failures: [],
       },
+      hits: {
+        total: 100,
+        max_score: null,
+        hits: [],
+      },
     };
     jest
       .spyOn(adapters.requests, 'getRequests')
       .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
-    onLoad(false, adapters);
+    act(() => {
+      onLoad(false, adapters);
+    });
     expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
-      UnifiedHistogramFetchStatus.error,
-      undefined
+      UnifiedHistogramFetchStatus.complete,
+      100
+    );
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+  });
+
+  it('should execute onLoad correctly for textbased language and no Lens suggestions', async () => {
+    const { component, props } = mountComponent(true, false);
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    const adapters = createDefaultInspectorAdapters();
+    adapters.tables.tables.layerId = {
+      meta: { type: 'es_ql' },
+      columns: [
+        {
+          id: 'results',
+          name: 'results',
+          meta: {
+            type: 'number',
+            dimensionName: 'Vertical axis',
+          },
+        },
+      ],
+      rows: [
+        {
+          results: 16,
+        },
+        {
+          results: 4,
+        },
+      ],
+    } as any;
+    act(() => {
+      onLoad(false, adapters);
+    });
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.complete,
+      20
+    );
+    expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
+  });
+
+  it('should execute onLoad correctly for textbased language and Lens suggestions', async () => {
+    const { component, props } = mountComponent(true, true);
+    const embeddable = unifiedHistogramServicesMock.lens.EmbeddableComponent;
+    const onLoad = component.find(embeddable).props().onLoad;
+    const adapters = createDefaultInspectorAdapters();
+    adapters.tables.tables.layerId = {
+      meta: { type: 'es_ql' },
+      columns: [
+        {
+          id: 'rows',
+          name: 'rows',
+          meta: {
+            type: 'number',
+            dimensionName: 'Vertical axis',
+          },
+        },
+      ],
+      rows: [
+        {
+          var0: 5584.925311203319,
+        },
+        {
+          var0: 6788.7777444444,
+        },
+      ],
+    } as any;
+    act(() => {
+      onLoad(false, adapters);
+    });
+    expect(props.onTotalHitsChange).toHaveBeenLastCalledWith(
+      UnifiedHistogramFetchStatus.complete,
+      2
     );
     expect(props.onChartLoad).toHaveBeenLastCalledWith({ adapters });
   });

@@ -8,12 +8,9 @@
 import React, { useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiSpacer,
-  EuiPageHeader,
-} from '@elastic/eui';
+import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { ComponentTemplateDeserialized } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { ComponentTemplateForm } from '../component_template_form';
@@ -32,7 +29,7 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const { api, breadcrumbs } = useComponentTemplatesContext();
+  const { api } = useComponentTemplatesContext();
 
   const onSave = async (componentTemplate: ComponentTemplateDeserialized) => {
     const { name } = componentTemplate;
@@ -58,19 +55,31 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
     setSaveError(null);
   };
 
+  const isCloning = Boolean(sourceComponentTemplate);
   useEffect(() => {
-    breadcrumbs.setCreateBreadcrumbs();
-  }, [breadcrumbs]);
+    if (isCloning) {
+      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateClone);
+    } else {
+      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateCreate);
+    }
+  }, [isCloning]);
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.createComponentTemplate.pageTitle"
-              defaultMessage="Create component template"
-            />
+            {isCloning ? (
+              <FormattedMessage
+                id="xpack.idxMgmt.cloneComponentTemplate.pageTitle"
+                defaultMessage="Clone component template"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.idxMgmt.createComponentTemplate.pageTitle"
+                defaultMessage="Create component template"
+              />
+            )}
           </span>
         }
         bottomBorder
@@ -85,6 +94,6 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
         saveError={saveError}
         clearSaveError={clearSaveError}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

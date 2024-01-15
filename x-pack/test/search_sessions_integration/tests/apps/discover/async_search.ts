@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/discover/default'
       );
       await kibanaServer.uiSettings.replace({
-        'discover:enableSql': true,
+        'discover:enableESQL': true,
       });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await browser.navigateTo(savedSessionURL);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await searchSessions.expectState('restored');
-      await testSubjects.existOrFail('discoverNoResultsError'); // expect error because of fake searchSessionId
+      await testSubjects.existOrFail('discoverErrorCalloutTitle'); // expect error because of fake searchSessionId
       await PageObjects.common.clearAllToasts();
       const searchSessionId1 = await getSearchSessionId();
       expect(searchSessionId1).to.be(fakeSearchSessionId);
@@ -84,10 +84,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Note this currently fails, for some reason the fakeSearchSessionId is not restored
       await searchSessions.expectState('restored');
       expect(await getSearchSessionId()).to.be(fakeSearchSessionId);
+
+      // back navigation takes discover to fakeSearchSessionId which is in error state
+      // clean up page to get out of error state before proceeding to next test
+      await PageObjects.common.clearAllToasts();
+      await queryBar.clickQuerySubmitButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('navigation to context cleans the session', async () => {
-      await PageObjects.common.clearAllToasts();
       const table = await PageObjects.discover.getDocTable();
       const isLegacy = await PageObjects.discover.useLegacyTable();
       await table.clickRowToggle({ rowIndex: 0 });
@@ -130,6 +135,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const searchesCountAfterRestore = searchSessionListAfterRestore[0].searchesCount;
 
       expect(searchesCountBeforeRestore).to.be(searchesCountAfterRestore); // no new searches started during restore
+    });
+
+    it('should should clean the search session when navigating to ESQL mode, and reinitialize when navigating back', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await searchSessions.exists()).to.be(true);
+      await PageObjects.discover.selectTextBaseLang();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await searchSessions.missingOrFail();
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await searchSessions.exists()).to.be(true);
     });
   });
 

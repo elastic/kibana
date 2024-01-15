@@ -9,6 +9,7 @@ import React, { FC, useEffect } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import { PanelLoader } from '@kbn/panel-loader';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
   EmbeddableFactory,
@@ -45,7 +46,7 @@ type LensAttributes<TVisType, TVisState> = Omit<
   visualizationType: TVisType;
   state: Omit<Document['state'], 'datasourceStates' | 'visualization'> & {
     datasourceStates: {
-      formBased: FormBasedPersistedState;
+      formBased?: FormBasedPersistedState;
       textBased?: TextBasedPersistedState;
     };
     visualization: TVisState;
@@ -85,6 +86,8 @@ export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceI
   extraActions?: Action[];
   showInspector?: boolean;
 };
+
+export type EmbeddableComponent = React.ComponentType<EmbeddableComponentProps>;
 
 interface PluginsStartDependencies {
   uiActions: UiActionsStart;
@@ -158,7 +161,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   }, [embeddable, input]);
 
   if (loading || !embeddable) {
-    return <EuiLoadingChart />;
+    return <PanelLoader />;
   }
 
   return (

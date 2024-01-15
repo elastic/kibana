@@ -19,9 +19,9 @@ import type { HostsTableColumns } from '.';
 import * as i18n from './translations';
 import type { Maybe, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
-import { RiskScore } from '../../../components/risk_score/severity/common';
-import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
+import { VIEW_HOSTS_BY_SEVERITY } from '../../../../entity_analytics/components/host_risk_score_table/translations';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
+import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
@@ -141,21 +141,14 @@ export const getHostsColumns = (
   if (showRiskColumn) {
     columns.push({
       field: 'node.risk',
-      name: (
-        <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
-          <>
-            {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.host)}{' '}
-            <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
-      ),
+      name: ENTITY_RISK_LEVEL(RiskScoreEntity.host),
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
       render: (riskScore: RiskSeverity) => {
         if (riskScore != null) {
           return (
-            <RiskScore
+            <RiskScoreLevel
               toolTipContent={
                 <EuiLink onClick={() => dispatchSeverityUpdate(riskScore)}>
                   <EuiText size="xs">{VIEW_HOSTS_BY_SEVERITY(riskScore.toLowerCase())}</EuiText>

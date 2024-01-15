@@ -4,11 +4,12 @@
     "outDir": "target/types",
   },
   "include": [
+    "__mocks__/**/*",
     "server/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "common/**/*",
-    "public/**/*"
+    "public/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -33,6 +34,11 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/alerting-plugin",
+    "@kbn/securitysolution-ecs",
+    "@kbn/ui-theme",
+    "@kbn/cases-components",
+    "@kbn/code-editor-mock",
   ],
   "exclude": [
     "target/**/*",

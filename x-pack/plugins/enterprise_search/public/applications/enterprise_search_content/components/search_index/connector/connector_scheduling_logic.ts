@@ -7,7 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ConnectorScheduling, SyncJobType } from '../../../../../../common/types/connectors';
+import { ConnectorScheduling, SyncJobType } from '@kbn/search-connectors';
+
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
 
 import {

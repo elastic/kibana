@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { nonEmptyStringRt } from '@kbn/io-ts-utils';
+import { nonEmptyStringRt, toNumberRt } from '@kbn/io-ts-utils';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -84,7 +84,11 @@ const tracesByIdRoute = createApmServerRoute({
     path: t.type({
       traceId: t.string,
     }),
-    query: t.intersection([rangeRt, t.type({ entryTransactionId: t.string })]),
+    query: t.intersection([
+      rangeRt,
+      t.type({ entryTransactionId: t.string }),
+      t.partial({ maxTraceItems: toNumberRt }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -94,11 +98,19 @@ const tracesByIdRoute = createApmServerRoute({
     entryTransaction?: Transaction;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
-    const { params, config } = resources;
+    const { params, config, logger } = resources;
     const { traceId } = params.path;
     const { start, end, entryTransactionId } = params.query;
     const [traceItems, entryTransaction] = await Promise.all([
-      getTraceItems(traceId, config, apmEventClient, start, end),
+      getTraceItems({
+        traceId,
+        config,
+        apmEventClient,
+        start,
+        end,
+        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
+        logger,
+      }),
       getTransaction({
         transactionId: entryTransactionId,
         traceId,

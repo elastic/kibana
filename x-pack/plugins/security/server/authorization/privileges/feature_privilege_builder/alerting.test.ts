@@ -8,8 +8,8 @@
 import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/server';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 
-import { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
+import { Actions } from '../../actions';
 
 describe(`feature_privilege_builder`, () => {
   describe(`alerting`, () => {
@@ -87,6 +87,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getRuleState",
             "alerting:alert-type/my-feature/rule/getAlertSummary",
             "alerting:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:alert-type/my-feature/rule/runSoon",
@@ -174,6 +175,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getRuleState",
             "alerting:alert-type/my-feature/rule/getAlertSummary",
             "alerting:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:alert-type/my-feature/rule/runSoon",
@@ -221,6 +223,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getRuleState",
             "alerting:alert-type/my-feature/rule/getAlertSummary",
             "alerting:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:alert-type/my-feature/rule/runSoon",
@@ -325,6 +328,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getRuleState",
             "alerting:alert-type/my-feature/rule/getAlertSummary",
             "alerting:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:alert-type/my-feature/rule/runSoon",
@@ -389,6 +393,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getRuleState",
             "alerting:alert-type/my-feature/rule/getAlertSummary",
             "alerting:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:alert-type/my-feature/rule/runSoon",
@@ -412,6 +417,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-feature/rule/getRuleState",
             "alerting:readonly-alert-type/my-feature/rule/getAlertSummary",
             "alerting:readonly-alert-type/my-feature/rule/getExecutionLog",
+            "alerting:readonly-alert-type/my-feature/rule/getActionErrorLog",
             "alerting:readonly-alert-type/my-feature/rule/find",
             "alerting:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:readonly-alert-type/my-feature/rule/runSoon",
@@ -504,6 +510,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getRuleState",
             "alerting:alert-type/my-feature/rule/getAlertSummary",
             "alerting:alert-type/my-feature/rule/getExecutionLog",
+            "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:alert-type/my-feature/rule/runSoon",
@@ -527,6 +534,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-feature/rule/getRuleState",
             "alerting:readonly-alert-type/my-feature/rule/getAlertSummary",
             "alerting:readonly-alert-type/my-feature/rule/getExecutionLog",
+            "alerting:readonly-alert-type/my-feature/rule/getActionErrorLog",
             "alerting:readonly-alert-type/my-feature/rule/find",
             "alerting:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
             "alerting:readonly-alert-type/my-feature/rule/runSoon",

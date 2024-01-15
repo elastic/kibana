@@ -11,13 +11,13 @@ export const response: UxFetchDataResponse = {
   appLink: '/app/ux',
   coreWebVitals: {
     cls: 0.01,
-    fid: 13.5,
     lcp: 1942.6666666666667,
     tbt: 281.55833333333334,
     fcp: 1487,
+    inp: 285,
     coreVitalPages: 100,
     lcpRanks: [65, 19, 16],
-    fidRanks: [73, 11, 16],
+    inpRanks: [73, 11, 16],
     clsRanks: [86, 8, 6],
   },
 };

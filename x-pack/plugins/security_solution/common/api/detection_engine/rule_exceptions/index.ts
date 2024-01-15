@@ -6,5 +6,6 @@
  */
 
 export * from './create_rule_exceptions/create_rule_exceptions_route';
+export * from './create_shared_exceptions_list/create_shared_exceptions_list_route';
 export * from './find_exception_references/find_exception_references_route';
 export * from './urls';

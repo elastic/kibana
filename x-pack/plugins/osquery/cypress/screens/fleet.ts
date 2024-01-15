@@ -9,5 +9,5 @@ export const ADD_AGENT_BUTTON = 'addAgentButton';
 
 export const AGENT_POLICIES_TAB = 'fleet-agent-policies-tab';
 export const ENROLLMENT_TOKENS_TAB = 'fleet-enrollment-tokens-tab';
-export const DEFAULT_POLICY = 'Fleet Server policy';
+export const DEFAULT_POLICY = 'Default policy';
 export const OSQUERY_POLICY = 'Osquery policy';

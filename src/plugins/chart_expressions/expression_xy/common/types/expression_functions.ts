@@ -136,6 +136,7 @@ export interface DataLayerArgs {
   isStacked: boolean;
   isHorizontal: boolean;
   palette: PaletteOutput;
+  colorMapping?: string; // JSON stringified object of the color mapping
   decorations?: DataDecorationConfigResult[];
   curveType?: XYCurveType;
 }
@@ -163,6 +164,7 @@ export interface ExtendedDataLayerArgs {
   isStacked: boolean;
   isHorizontal: boolean;
   palette: PaletteOutput;
+  colorMapping?: string;
   // palette will always be set on the expression
   decorations?: DataDecorationConfigResult[];
   curveType?: XYCurveType;
@@ -231,6 +233,7 @@ export interface XYArgs extends DataLayerArgs {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  minBarHeight?: number;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   detailedTooltip?: boolean;
@@ -282,6 +285,7 @@ export interface LayeredXYArgs {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  minBarHeight?: number;
   orderBucketsBySum?: boolean;
   showTooltip: boolean;
   splitRowAccessor?: ExpressionValueVisDimension | string;
@@ -305,6 +309,7 @@ export interface XYProps {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  minBarHeight: number;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   detailedTooltip?: boolean;

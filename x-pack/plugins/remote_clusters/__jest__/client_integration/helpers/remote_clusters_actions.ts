@@ -49,9 +49,20 @@ export interface RemoteClustersActions {
     getLabel: () => string;
     exists: () => boolean;
   };
+  isOnFirstStep: () => boolean;
   saveButton: {
     click: () => void;
     isDisabled: () => boolean;
+  };
+  setupTrust: {
+    isSubmitInConfirmDisabled: () => boolean;
+    toggleConfirmSwitch: () => void;
+    setupTrustConfirmClick: () => void;
+    backToFirstStepClick: () => void;
+    apiCardExist: () => boolean;
+    certCardExist: () => boolean;
+    apiCardDocsExist: () => boolean;
+    certCardDocsExist: () => boolean;
   };
   getErrorMessages: () => string[];
   globalErrorExists: () => boolean;
@@ -148,7 +159,7 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
-  const createSaveButtonActions = () => {
+  const createSetupTrustActions = () => {
     const click = () => {
       act(() => {
         find('remoteClusterFormSaveButton').simulate('click');
@@ -157,7 +168,56 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
       component.update();
     };
     const isDisabled = () => find('remoteClusterFormSaveButton').props().disabled;
-    return { saveButton: { click, isDisabled } };
+
+    const setupTrustConfirmClick = () => {
+      act(() => {
+        find('setupTrustDoneButton').simulate('click');
+      });
+
+      component.update();
+    };
+
+    const backToFirstStepClick = () => {
+      act(() => {
+        find('setupTrustBackButton').simulate('click');
+      });
+
+      component.update();
+    };
+
+    const isOnFirstStep = () => exists('remoteClusterFormNameInput');
+
+    const toggleConfirmSwitch = () => {
+      act(() => {
+        const $checkbox = find('remoteClusterTrustCheckbox');
+        const isChecked = $checkbox.props().checked;
+        $checkbox.simulate('change', { target: { checked: !isChecked } });
+      });
+
+      component.update();
+    };
+
+    const isSubmitInConfirmDisabled = () => find('remoteClusterTrustSubmitButton').props().disabled;
+
+    const apiCardExist = () => exists('setupTrustApiKeyCard');
+    const certCardExist = () => exists('setupTrustCertCard');
+    const apiCardDocsExist = () => exists('setupTrustApiKeyCardDocs');
+    const certCardDocsExist = () => exists('setupTrustCertCardDocs');
+
+    return {
+      isOnFirstStep,
+      saveButton: { click, isDisabled },
+      setupTrust: {
+        setupTrustConfirmClick,
+        isSubmitInConfirmDisabled,
+        toggleConfirmSwitch,
+        apiCardExist,
+        certCardExist,
+        apiCardDocsExist,
+        certCardDocsExist,
+        backToFirstStepClick,
+      },
+    };
   };
 
   const createServerNameActions = () => {
@@ -192,7 +252,7 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     ...createCloudUrlInputActions(),
     ...createProxyAddressActions(),
     ...createServerNameActions(),
-    ...createSaveButtonActions(),
+    ...createSetupTrustActions(),
     getErrorMessages: form.getErrorsMessages,
     globalErrorExists,
   };

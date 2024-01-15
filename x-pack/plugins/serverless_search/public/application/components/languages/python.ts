@@ -6,21 +6,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { docLinks } from '../../../../common/doc_links';
-import { LanguageDefinition, Languages } from './types';
 import { INDEX_NAME_PLACEHOLDER } from '../../constants';
 
 export const pythonDefinition: LanguageDefinition = {
-  advancedConfig: docLinks.pythonAdvancedConfig,
+  apiReference: docLinks.pythonApiReference,
   basicConfig: docLinks.pythonBasicConfig,
   buildSearchQuery: `client.search(index="books", q="snow")`,
-  configureClient: ({ url, apiKey }) => `from elasticsearch import Elasticsearch
+  configureClient: ({ url, apiKey }) => `from elasticsearch_serverless import Elasticsearch
 
 client = Elasticsearch(
   "${url}",
   api_key="${apiKey}"
 )`,
   docLink: docLinks.pythonClient,
+  github: {
+    link: 'https://github.com/elastic/elasticsearch-serverless-python',
+    label: i18n.translate('xpack.serverlessSearch.languages.python.githubLabel', {
+      defaultMessage: 'elasticsearch-serverless-python',
+    }),
+  },
   iconType: 'python.svg',
   id: Languages.PYTHON,
   ingestData: `documents = [
@@ -39,7 +45,11 @@ client = Elasticsearch(
 ]
 
 client.bulk(operations=documents)`,
-  ingestDataIndex: ({ apiKey, url, indexName }) => `from elasticsearch import Elasticsearch
+  ingestDataIndex: ({
+    apiKey,
+    url,
+    indexName,
+  }) => `from elasticsearch_serverless import Elasticsearch
 
 client = Elasticsearch(
   "${url}",
@@ -53,10 +63,10 @@ documents = [
 
 client.bulk(operations=documents)
 `,
-  installClient: `python -m pip install elasticsearch
+  installClient: `python -m pip install elasticsearch-serverless
 
 # If your application uses async/await in Python you can install with the async extra
-# python -m pip install elasticsearch[async]
+# python -m pip install elasticsearch_serverless[async]
   `,
   name: i18n.translate('xpack.serverlessSearch.languages.python', {
     defaultMessage: 'Python',

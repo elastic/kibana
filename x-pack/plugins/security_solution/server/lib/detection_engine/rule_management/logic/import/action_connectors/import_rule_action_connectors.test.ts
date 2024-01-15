@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import {
   getImportRulesSchemaMock,
   webHookConnector,
@@ -419,6 +419,7 @@ describe('importRuleActionConnectors', () => {
           },
         ],
         description: 'some description',
+        immutable: false,
         language: 'kuery',
         name: 'Query with a rule id',
         query: 'user.name: root or user.name: admin',
@@ -529,6 +530,7 @@ describe('importRuleActionConnectors', () => {
           },
         ],
         description: 'some description',
+        immutable: false,
         language: 'kuery',
         name: 'Query with a rule id',
         query: 'user.name: root or user.name: admin',
@@ -547,6 +549,7 @@ describe('importRuleActionConnectors', () => {
           },
         ],
         description: 'some description',
+        immutable: false,
         language: 'kuery',
         name: 'Query with a rule id',
         id: '0abc78e0-7031-11ed-b076-53cc4d57aaf1',

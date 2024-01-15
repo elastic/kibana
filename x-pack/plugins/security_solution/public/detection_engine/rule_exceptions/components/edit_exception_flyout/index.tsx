@@ -48,7 +48,6 @@ import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsConditions } from '../flyout_components/item_conditions';
 
-import { filterIndexPatterns } from '../../utils/helpers';
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
@@ -118,6 +117,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       exceptionItems,
       exceptionItemMeta: { name: exceptionItemName },
       newComment,
+      commentErrorExists,
       bulkCloseAlerts,
       disableBulkClose,
       bulkCloseIndex,
@@ -130,6 +130,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     exceptionItems: [itemToEdit],
     exceptionItemMeta: { name: itemToEdit.name },
     newComment: '',
+    commentErrorExists: false,
     bulkCloseAlerts: false,
     disableBulkClose: true,
     bulkCloseIndex: undefined,
@@ -193,6 +194,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       dispatch({
         type: 'setComment',
         comment,
+      });
+    },
+    [dispatch]
+  );
+
+  const setCommentError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setCommentError',
+        errorExists,
       });
     },
     [dispatch]
@@ -338,8 +349,17 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       exceptionItems.every((item) => item.entries.length === 0) ||
       isLoading ||
       entryErrorExists ||
+      expireErrorExists ||
+      commentErrorExists,
+    [
+      isLoading,
+      entryErrorExists,
+      exceptionItems,
+      isSubmitting,
+      isClosingAlerts,
       expireErrorExists,
-    [isLoading, entryErrorExists, exceptionItems, isSubmitting, isClosingAlerts, expireErrorExists]
+      commentErrorExists,
+    ]
   );
 
   return (
@@ -350,8 +370,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         </EuiTitle>
         <EuiSpacer size="m" />
       </FlyoutHeader>
-      {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
       <FlyoutBodySection className="builder-section">
+        {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
         <ExceptionsFlyoutMeta
           exceptionItemName={exceptionItemName}
           onChange={setExceptionItemMeta}
@@ -369,7 +389,6 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           isEdit
           onExceptionItemAdd={setExceptionItemsToAdd}
           onSetErrorExists={setConditionsValidationError}
-          onFilterIndexPatterns={filterIndexPatterns}
           getExtendedFields={getExtendedFields}
         />
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
@@ -400,6 +419,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           exceptionItemComments={itemToEdit.comments}
           newCommentValue={newComment}
           newCommentOnChange={setComment}
+          setCommentError={setCommentError}
         />
         {listType !== ExceptionListTypeEnum.ENDPOINT && (
           <>

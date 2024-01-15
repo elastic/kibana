@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { v1 as uuidv1 } from 'uuid';
+import { ALL_VALUE } from '@kbn/slo-schema';
+import { v4 as uuidv4 } from 'uuid';
 
 export const aSummaryDocument = ({
-  id = uuidv1(),
+  id = uuidv4(),
   sliValue = 0.9,
   consumed = 0.4,
   isTempDoc = false,
@@ -33,7 +34,7 @@ export const aSummaryDocument = ({
         duration: '30d',
         type: 'rolling',
       },
-      instanceId: '*',
+      instanceId: ALL_VALUE,
       name: 'irrelevant',
       description: '',
       id,
@@ -55,7 +56,7 @@ export const aSummaryDocument = ({
 export const aHitFromSummaryIndex = (_source: any) => {
   return {
     _index: '.slo-observability.summary-v2',
-    _id: uuidv1(),
+    _id: uuidv4(),
     _score: 1,
     _source,
   };
@@ -64,7 +65,7 @@ export const aHitFromSummaryIndex = (_source: any) => {
 export const aHitFromTempSummaryIndex = (_source: any) => {
   return {
     _index: '.slo-observability.summary-v2.temp',
-    _id: uuidv1(),
+    _id: uuidv4(),
     _score: 1,
     _source,
   };

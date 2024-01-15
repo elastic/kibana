@@ -8,13 +8,13 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '../../../../../../test/global_mocks';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';
 import { setup, ComponentTemplateEditTestBed } from './helpers/component_template_edit.helpers';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -48,8 +48,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -69,6 +69,7 @@ describe('<ComponentTemplateEdit />', () => {
   let testBed: ComponentTemplateEditTestBed;
 
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   const COMPONENT_TEMPLATE_NAME = 'comp-1';
   const COMPONENT_TEMPLATE_TO_EDIT = {
@@ -93,6 +94,12 @@ describe('<ComponentTemplateEdit />', () => {
     });
 
     testBed.component.update();
+  });
+
+  test('updates the breadcrumbs to component templates', () => {
+    expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+      IndexManagementBreadcrumb.componentTemplateEdit
+    );
   });
 
   test('should set the correct page title', () => {

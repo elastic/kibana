@@ -1,0 +1,279 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "risk-score.risk-score-latest-default",
+    "id": "1",
+    "source": {
+      "host": {
+        "name": "suricata-zeek-sensor-toronto",
+        "risk": {
+          "calculated_score_norm": 96,
+          "calculated_level": "Critical",
+          "id_field": "host.name",
+          "id_value": "suricata-zeek-sensor-toronto",
+          "calculated_score": 190,
+          "category_1_score": 190,
+          "category_1_count": 1,
+          "notes": [],
+          "inputs": [
+            {
+              "id": "2e17f189-d77d-4537-8d84-592e29334493",
+              "index": ".internal.alerts-security.alerts-default-000001",
+              "description": "Alert from Rule: Rule 2",
+              "category": "category_1",
+              "risk_score": 70,
+              "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2022-08-12T14:45:36.171Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "risk-score.risk-score-latest-default",
+    "source": {
+      "host": {
+        "name": "suricata-sensor-london",
+        "risk": {
+          "calculated_score_norm": 20,
+          "calculated_level": "Low",
+          "id_field": "host.name",
+          "id_value": "suricata-sensor-london",
+          "calculated_score": 70,
+          "category_1_score": 70,
+          "category_1_count": 1,
+          "notes": [],
+          "inputs": [
+            {
+              "id": "2e17f189-d77d-4537-8d84-592e29334493",
+              "index": ".internal.alerts-security.alerts-default-000001",
+              "description": "Alert from Rule: Rule 2",
+              "category": "category_1",
+              "risk_score": 70,
+              "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2022-08-12T14:45:36.171Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "risk-score.risk-score-latest-default",
+    "source": {
+      "host": {
+        "name": "zeek-newyork-sha-aa8df15",
+        "risk": {
+          "calculated_score_norm": 23,
+          "calculated_level": "Low",
+          "id_field": "host.name",
+          "id_value": "zeek-newyork-sha-aa8df15",
+          "calculated_score": 70,
+          "category_1_score": 70,
+          "category_1_count": 1,
+          "notes": [],
+          "inputs": [
+            {
+              "id": "2e17f189-d77d-4537-8d84-592e29334493",
+              "index": ".internal.alerts-security.alerts-default-000001",
+              "description": "Alert from Rule: Rule 2",
+              "category": "category_1",
+              "risk_score": 70,
+              "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2022-08-12T14:45:36.171Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "risk-score.risk-score-latest-default",
+    "source": {
+      "host": {
+        "name": "zeek-sensor-amsterdam",
+        "risk": {
+          "calculated_score_norm": 70,
+          "calculated_level": "Critical",
+          "id_field": "host.name",
+          "id_value": "zeek-newyork-sha-aa8df15",
+          "calculated_score": 190,
+          "category_1_score": 190,
+          "category_1_count": 1,
+          "notes": [],
+          "inputs": [
+            {
+              "id": "2e17f189-d77d-4537-8d84-592e29334493",
+              "index": ".internal.alerts-security.alerts-default-000001",
+              "description": "Alert from Rule: Rule 2",
+              "category": "category_1",
+              "risk_score": 70,
+              "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2022-08-12T14:45:36.171Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "5",
+    "index": "risk-score.risk-score-latest-default",
+    "source": {
+      "host": {
+        "name": "mothra",
+        "risk": {
+          "calculated_score_norm": 1,
+          "calculated_level": "Low",
+          "id_field": "host.name",
+          "id_value": "mothra",
+          "calculated_score": 20,
+          "category_1_score": 20,
+          "category_1_count": 1,
+          "notes": [],
+          "inputs": [
+            {
+              "id": "2e17f189-d77d-4537-8d84-592e29334493",
+              "index": ".internal.alerts-security.alerts-default-000001",
+              "description": "Alert from Rule: Rule 2",
+              "category": "category_1",
+              "risk_score": 20,
+              "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2022-08-12T14:45:36.171Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "6",
+    "index": "risk-score.risk-score-latest-default",
+    "source": {
+      "host": {
+        "name": "host-0",
+        "risk": {
+          "calculated_score_norm": 1,
+          "calculated_level": "Low",
+          "id_field": "host.name",
+          "id_value": "host-0",
+          "calculated_score": 20,
+          "category_1_score": 20,
+          "category_1_count": 1,
+          "notes": [],
+          "inputs": [
+            {
+              "id": "2e17f189-d77d-4537-8d84-592e29334493",
+              "index": ".internal.alerts-security.alerts-default-000001",
+              "description": "Alert from Rule: Rule 2",
+              "category": "category_1",
+              "risk_score": 20,
+              "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2022-08-12T14:45:36.171Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "risk-score.risk-score-latest-default",
+    "id": "7",
+    "source": {
+      "user": {
+        "name": "root",
+        "risk": {
+          "calculated_score_norm": 11,
+          "calculated_level": "Low",
+          "id_field": "user.name",
+          "id_value": "root",
+          "calculated_score": 30,
+          "category_1_score": 30,
+          "category_1_count": 1,
+          "notes": [],
+          "inputs": [
+            {
+              "id": "2e17f189-d77d-4537-8d84-592e29334493",
+              "index": ".internal.alerts-security.alerts-default-000001",
+              "description": "Alert from Rule: Rule 2",
+              "category": "category_1",
+              "risk_score": 30,
+              "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ]
+        }
+      },  
+      "@timestamp": "2022-08-12T14:45:36.171Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "8",
+    "index": "risk-score.risk-score-latest-default",
+    "source": {
+      "host": {
+        "name": "User name 1",
+        "risk": {
+          "calculated_score_norm": 20,
+          "calculated_level": "Low",
+          "id_field": "user.name",
+          "id_value": "User name 1",
+          "calculated_score": 50,
+          "category_1_score": 50,
+          "category_1_count": 1,
+          "notes": [],
+          "inputs": [
+            {
+              "id": "2e17f189-d77d-4537-8d84-592e29334493",
+              "index": ".internal.alerts-security.alerts-default-000001",
+              "description": "Alert from Rule: Rule 2",
+              "category": "category_1",
+              "risk_score": 50,
+              "timestamp": "2023-08-14T09:08:18.664Z"
+            }
+          ]
+        }
+      },
+      "@timestamp": "2022-08-12T14:45:36.171Z"
+    },
+    "type": "_doc"
+  }
+}

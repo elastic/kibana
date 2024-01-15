@@ -233,6 +233,15 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
+      taskToDisable: {
+        title: 'Task used for testing it being disabled',
+        description: '',
+        maxAttempts: 1,
+        paramsSchema: schema.object({}),
+        createTaskRunner: () => ({
+          async run() {},
+        }),
+      },
     });
 
     const taskWithTiming = {

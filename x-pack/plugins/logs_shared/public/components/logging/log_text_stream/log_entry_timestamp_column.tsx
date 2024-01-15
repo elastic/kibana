@@ -13,8 +13,8 @@ import { LogEntryColumnContent } from './log_entry_column';
 
 interface LogEntryTimestampColumnProps {
   format?: TimeFormat;
-  time: number;
-  render?: (timestamp: number) => React.ReactNode;
+  time: string;
+  render?: (time: string) => React.ReactNode;
 }
 
 export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(
@@ -31,3 +31,6 @@ const TimestampColumnContent = euiStyled(LogEntryColumnContent)`
   text-overflow: clip;
   white-space: pre;
 `;
+
+// eslint-disable-next-line import/no-default-export
+export default LogEntryTimestampColumn;

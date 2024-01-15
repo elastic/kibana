@@ -1,0 +1,44 @@
+title: Create data view request
+type: object
+required:
+  - data_view
+properties:
+  data_view:
+    type: object
+    required:
+      - title
+    description: The data view object.
+    properties:
+      allowNoIndex:
+        $ref: 'allownoindex.yaml'
+      fieldAttrs:
+        $ref: 'fieldattrs.yaml'
+      fieldFormats:
+        $ref: 'fieldformats.yaml'
+      fields:
+        type: object
+      id:
+        type: string
+      name:
+        type: string
+        description: The data view name.
+      namespaces:
+        $ref: 'namespaces.yaml'
+      runtimeFieldMap:
+        $ref: 'runtimefieldmap.yaml'
+      sourceFilters:
+        $ref: 'sourcefilters.yaml'
+      timeFieldName:
+        $ref: 'timefieldname.yaml'
+      title:
+        $ref: 'title.yaml'
+      type:
+        $ref: 'type.yaml'
+      typeMeta:
+        $ref: 'typemeta.yaml'
+      version:
+        type: string
+  override:
+    type: boolean
+    description: Override an existing data view if a data view with the provided title already exists.
+    default: false

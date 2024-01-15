@@ -11,14 +11,82 @@ import {
   validateYamlConfig,
   validateCATrustedFingerPrint,
   validateKafkaHeaders,
+  validateKafkaHosts,
 } from './output_form_validators';
 
 describe('Output form validation', () => {
+  describe('validateKafkaHosts', () => {
+    it('should not work without any urls', () => {
+      const res = validateKafkaHosts([]);
+
+      expect(res).toEqual([{ message: 'Host is required' }]);
+    });
+
+    it('should work with valid url', () => {
+      const res = validateKafkaHosts(['test.fr:9200']);
+
+      expect(res).toBeUndefined();
+    });
+
+    it('should work with multiple valid urls', () => {
+      const res = validateKafkaHosts(['test.fr:9200', 'test2.fr:9200', 'test.fr:9999']);
+
+      expect(res).toBeUndefined();
+    });
+
+    it('should return an error with invalid url', () => {
+      const res = validateKafkaHosts(['toto']);
+
+      expect(res).toEqual([
+        { index: 0, message: 'Invalid format. Expected "host:port" without protocol.' },
+      ]);
+    });
+
+    it('should return an error with url with defined protocol', () => {
+      const res = validateKafkaHosts(['https://test.fr:9200']);
+
+      expect(res).toEqual([
+        { index: 0, message: 'Invalid format. Expected "host:port" without protocol.' },
+      ]);
+    });
+
+    it('should return an error with url with invalid port', () => {
+      const res = validateKafkaHosts(['test.fr:qwerty9200']);
+
+      expect(res).toEqual([
+        { index: 0, message: 'Invalid port number. Expected a number between 1 and 65535' },
+      ]);
+    });
+
+    it('should return an error with multiple invalid urls', () => {
+      const res = validateKafkaHosts(['toto', 'tata']);
+
+      expect(res).toEqual([
+        { index: 0, message: 'Invalid format. Expected "host:port" without protocol.' },
+        { index: 1, message: 'Invalid format. Expected "host:port" without protocol.' },
+      ]);
+    });
+    it('should return an error with duplicate urls', () => {
+      const res = validateKafkaHosts(['test.fr:2000', 'test.fr:2000']);
+
+      expect(res).toEqual([
+        { index: 0, message: 'Duplicate URL' },
+        { index: 1, message: 'Duplicate URL' },
+      ]);
+    });
+  });
+
   describe('validateESHosts', () => {
     it('should not work without any urls', () => {
       const res = validateESHosts([]);
 
       expect(res).toEqual([{ message: 'URL is required' }]);
+    });
+
+    it('should not work with empty url', () => {
+      const res = validateESHosts(['']);
+
+      expect(res).toEqual([{ index: 0, message: 'URL is required' }]);
     });
 
     it('should work with valid url', () => {
@@ -54,6 +122,11 @@ describe('Output form validation', () => {
         { index: 0, message: 'Duplicate URL' },
         { index: 1, message: 'Duplicate URL' },
       ]);
+    });
+    it('should return an error when invalid protocol', () => {
+      const res = validateESHosts(['ftp://test.fr']);
+
+      expect(res).toEqual([{ index: 0, message: 'Invalid protocol' }]);
     });
   });
 

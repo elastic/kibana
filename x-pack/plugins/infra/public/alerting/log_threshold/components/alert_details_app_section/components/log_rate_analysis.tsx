@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { pick, orderBy } from 'lodash';
 import moment from 'moment';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
@@ -14,26 +13,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
-  LogRateAnalysisContent,
   LOG_RATE_ANALYSIS_TYPE,
-  type LogRateAnalysisResultsData,
   type LogRateAnalysisType,
-} from '@kbn/aiops-plugin/public';
+} from '@kbn/aiops-utils/log_rate_analysis_type';
+import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { TopAlert } from '@kbn/observability-plugin/public';
-import {
-  ContextualInsight,
-  useObservabilityAIAssistant,
-  type Message,
-  MessageRole,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { ALERT_END } from '@kbn/rule-data-utils';
+import { pick, orderBy } from 'lodash';
 import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
-  Comparator,
   CountRuleParams,
   isRatioRuleParams,
   PartialRuleParams,
@@ -56,15 +49,17 @@ interface SignificantFieldValue {
 
 export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ rule, alert }) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews, logsShared } = services;
+  const {
+    dataViews,
+    logsShared,
+    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+  } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
-    { significantFieldValues: SignificantFieldValue[] } | undefined
+    | { logRateAnalysisType: LogRateAnalysisType; significantFieldValues: SignificantFieldValue[] }
+    | undefined
   >();
-  const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType | undefined>(
-    undefined
-  );
 
   const validatedParams = useMemo(() => decodeOrThrow(ruleParamsRT)(rule.params), [rule]);
 
@@ -95,19 +90,6 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
     if (!isRatioRuleParams(validatedParams)) {
       getDataView();
-
-      switch (validatedParams.count.comparator) {
-        case Comparator.GT:
-        case Comparator.GT_OR_EQ:
-          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.SPIKE);
-          break;
-        case Comparator.LT:
-        case Comparator.LT_OR_EQ:
-          setLogRateAnalysisType(LOG_RATE_ANALYSIS_TYPE.DIP);
-          break;
-        default:
-          setLogRateAnalysisType(undefined);
-      }
     }
   }, [validatedParams, alert, dataViews, logsShared]);
 
@@ -179,7 +161,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
   const onAnalysisCompleted = (analysisResults: LogRateAnalysisResultsData | undefined) => {
     const significantFieldValues = orderBy(
-      analysisResults?.significantTerms?.map((item) => ({
+      analysisResults?.significantItems?.map((item) => ({
         field: item.fieldName,
         value: item.fieldValue,
         docCount: item.doc_count,
@@ -188,10 +170,14 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       ['pValue', 'docCount'],
       ['asc', 'asc']
     ).slice(0, 50);
-    setLogRateAnalysisParams(significantFieldValues ? { significantFieldValues } : undefined);
-  };
 
-  const aiAssistant = useObservabilityAIAssistant();
+    const logRateAnalysisType = analysisResults?.analysisType;
+    setLogRateAnalysisParams(
+      significantFieldValues && logRateAnalysisType
+        ? { logRateAnalysisType, significantFieldValues }
+        : undefined
+    );
+  };
 
   const messages = useMemo<Message[] | undefined>(() => {
     const hasLogRateAnalysisParams =
@@ -200,6 +186,8 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
     if (!hasLogRateAnalysisParams) {
       return undefined;
     }
+
+    const { logRateAnalysisType } = logRateAnalysisParams;
 
     const header = 'Field name,Field value,Doc count,p-value';
     const rows = logRateAnalysisParams.significantFieldValues
@@ -210,10 +198,16 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases and decreases in log rates. It makes it easy to find and investigate causes of unusual spikes or dips by using the analysis workflow view.
       You are using "Log Rate Analysis" and ran the statistical analysis on the log messages which occured during the alert.
       You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that ${
-        logRateAnalysisType === 'spike'
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
           ? 'contribute to the log rate spike'
           : 'are less or not present in the log rate dip'
       }:
+
+      ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the results shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.'
+          : 'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.'
+      }
 
       ${header}
       ${rows}
@@ -221,28 +215,23 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
       Based on the above analysis results and your observability expert knowledge, output the following:
       Analyse the type of these logs and explain their usual purpose (1 paragraph).
       ${
-        logRateAnalysisType === 'spike'
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
           ? 'Based on the type of these logs do a root cause analysis on why the field and value combinations from the analysis results are causing this log rate spike (2 parapraphs)'
-          : 'Based on the type of these logs do a concise analysis why the statistically significant field and value combinations are less present or missing from the log rate dip with concrete examples based on the analysis results data. Do not guess, just output what you are sure of (2 paragraphs)'
+          : 'Based on the type of these logs explain why the statistically significant field and value combinations are less in number or missing from the log rate dip with concrete examples based on the analysis results data which contains items that are present in the baseline time range and are missing or less in number in the deviation time range (2 paragraphs)'
       }.
       ${
-        logRateAnalysisType === 'spike'
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
           ? 'Recommend concrete remediations to resolve the root cause (3 bullet points).'
           : ''
       }
-      Do not repeat the given instructions in your output.`;
 
-    const now = new Date().toString();
+      Do not mention individual p-values from the analysis results.
+      Do not repeat the full list of field names and field values back to the user.
+      Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
+
+    const now = new Date().toISOString();
 
     return [
-      {
-        '@timestamp': now,
-        message: {
-          role: MessageRole.System,
-          content: `You are logs-gpt, a helpful assistant for logs-based observability. Answer as
-          concisely as possible.`,
-        },
-      },
       {
         '@timestamp': now,
         message: {
@@ -251,7 +240,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         },
       },
     ];
-  }, [logRateAnalysisParams, logRateAnalysisType]);
+  }, [logRateAnalysisParams]);
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -270,8 +259,8 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
         <EuiFlexItem>
           <LogRateAnalysisContent
+            embeddingOrigin="observability_log_threshold_alert_details"
             dataView={dataView}
-            analysisType={logRateAnalysisType}
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
             initialAnalysisStart={initialAnalysisStart}
@@ -292,14 +281,18 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
               'unifiedSearch',
               'theme',
               'lens',
+              'i18n',
             ])}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {aiAssistant.isEnabled() && messages ? (
+        {ObservabilityAIAssistantContextualInsight && messages ? (
           <EuiFlexItem grow={false}>
-            <ContextualInsight title={logRateAnalysisTitle} messages={messages} />
+            <ObservabilityAIAssistantContextualInsight
+              title={logRateAnalysisTitle}
+              messages={messages}
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

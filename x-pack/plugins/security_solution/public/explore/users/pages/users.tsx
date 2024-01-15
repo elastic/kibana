@@ -52,6 +52,7 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { userNameExistsFilter } from './details/helpers';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const ID = 'UsersQueryId';
 
@@ -102,7 +103,8 @@ const UsersComponent = () => {
     return globalFilters;
   }, [severitySelection, tabName, globalFilters]);
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
   const [globalFiltersQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
@@ -175,10 +177,10 @@ const UsersComponent = () => {
   );
 
   const capabilities = useMlCapabilities();
-  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const navTabs = useMemo(
-    () => navTabsUsers(hasMlUserPermissions(capabilities), isPlatinumOrTrialLicense),
-    [capabilities, isPlatinumOrTrialLicense]
+    () => navTabsUsers(hasMlUserPermissions(capabilities), hasEntityAnalyticsCapability),
+    [capabilities, hasEntityAnalyticsCapability]
   );
 
   return (
@@ -187,7 +189,7 @@ const UsersComponent = () => {
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>

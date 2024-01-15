@@ -8,7 +8,10 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import type {
@@ -60,6 +63,7 @@ export interface RunResilientMigratorParams {
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
+  esCapabilities: ElasticsearchCapabilities;
 }
 
 /**
@@ -86,6 +90,7 @@ export async function runResilientMigrator({
   migrationsConfig,
   typeRegistry,
   docLinks,
+  esCapabilities,
 }: RunResilientMigratorParams): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
@@ -101,6 +106,7 @@ export async function runResilientMigrator({
     typeRegistry,
     docLinks,
     logger,
+    esCapabilities,
   });
   const migrationClient = client.child(MIGRATION_CLIENT_OPTIONS);
   return migrationStateActionMachine({

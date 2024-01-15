@@ -35,6 +35,7 @@ steps:
     label: 'Pick Test Group Run Order'
     agents:
       queue: kibana-default
+    timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'

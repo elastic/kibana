@@ -19,7 +19,7 @@ import { sourcererReducer, sourcererModel } from './sourcerer';
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
 import type { UsersPluginReducer } from '../../explore/users/store';
-import type { TimelinePluginReducer } from '../../timelines/store/timeline';
+import type { TimelinePluginReducer } from '../../timelines/store';
 
 import type { SecuritySubPlugins } from '../../app/types';
 import type { ManagementPluginReducer } from '../../management';
@@ -33,7 +33,8 @@ import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 import { analyzerReducer } from '../../resolver/store/reducer';
-import type { AnalyzerOuterState } from '../../resolver/types';
+import { securitySolutionDiscoverReducer } from './discover/reducer';
+import type { AnalyzerState } from '../../resolver/types';
 
 enableMapSet();
 
@@ -63,7 +64,7 @@ export const createInitialState = (
   },
   dataTableState: DataTableState,
   groupsState: GroupState,
-  analyzerState: AnalyzerOuterState
+  analyzerState: AnalyzerState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -119,6 +120,11 @@ export const createInitialState = (
     dataTable: dataTableState.dataTable,
     groups: groupsState.groups,
     analyzer: analyzerState.analyzer,
+    discover: {
+      app: undefined,
+      internal: undefined,
+      savedSearch: undefined,
+    },
   };
 
   return preloadedState;
@@ -139,5 +145,6 @@ export const createReducer: (
     dataTable: dataTableReducer,
     groups: groupsReducer,
     analyzer: analyzerReducer,
+    discover: securitySolutionDiscoverReducer,
     ...pluginsReducer,
   });

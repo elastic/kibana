@@ -16,6 +16,7 @@ import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import {
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
@@ -25,15 +26,9 @@ import {
   TRANSACTION_TYPE,
 } from '../es_fields/apm';
 import { getEnvironmentLabel } from '../environment_filter_values';
+import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
-
-export enum ApmRuleType {
-  ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
-  TransactionErrorRate = 'apm.transaction_error_rate',
-  TransactionDuration = 'apm.transaction_duration',
-  Anomaly = 'apm.anomaly',
-}
 
 export enum AggregationType {
   Avg = 'avg',
@@ -185,24 +180,27 @@ export function formatTransactionErrorRateReason({
 export function formatAnomalyReason({
   serviceName,
   severityLevel,
-  measured,
+  anomalyScore,
   windowSize,
   windowUnit,
+  detectorType,
 }: {
   serviceName: string;
   severityLevel: string;
-  measured: number;
+  anomalyScore: number;
   windowSize: number;
   windowUnit: string;
+  detectorType: AnomalyDetectorType;
 }) {
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {interval} for {serviceName}.`,
+      defaultMessage: `{severityLevel} {detectorTypeLabel} anomaly with a score of {anomalyScore}, was detected in the last {interval} for {serviceName}.`,
       values: {
         serviceName,
         severityLevel,
-        measured,
+        detectorTypeLabel: getApmMlDetectorLabel(detectorType),
+        anomalyScore,
         interval: formatDurationFromTimeUnitChar(
           windowSize,
           windowUnit as TimeUnitChar
@@ -245,7 +243,7 @@ export const RULE_TYPES_CONFIG: Record<
   },
   [ApmRuleType.Anomaly]: {
     name: i18n.translate('xpack.apm.anomalyAlert.name', {
-      defaultMessage: 'Anomaly',
+      defaultMessage: 'APM Anomaly',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
@@ -299,6 +297,35 @@ export const ANOMALY_ALERT_SEVERITY_TYPES = [
 export type AnomalyAlertSeverityType = ValuesType<
   typeof ANOMALY_ALERT_SEVERITY_TYPES
 >['type'];
+
+export function getApmMlDetectorLabel(type: AnomalyDetectorType) {
+  switch (type) {
+    case AnomalyDetectorType.txLatency:
+      return i18n.translate('xpack.apm.alerts.anomalyDetector.latencyLabel', {
+        defaultMessage: 'latency',
+      });
+    case AnomalyDetectorType.txThroughput:
+      return i18n.translate(
+        'xpack.apm.alerts.anomalyDetector.throughputLabel',
+        {
+          defaultMessage: 'throughput',
+        }
+      );
+    case AnomalyDetectorType.txFailureRate:
+      return i18n.translate(
+        'xpack.apm.alerts.anomalyDetector.failedTransactionRateLabel',
+        {
+          defaultMessage: 'failed transaction rate',
+        }
+      );
+  }
+}
+
+export const ANOMALY_DETECTOR_SELECTOR_OPTIONS = [
+  AnomalyDetectorType.txLatency,
+  AnomalyDetectorType.txThroughput,
+  AnomalyDetectorType.txFailureRate,
+].map((type) => ({ type, label: getApmMlDetectorLabel(type) }));
 
 // Server side registrations
 // x-pack/plugins/apm/server/lib/alerts/<alert>.ts

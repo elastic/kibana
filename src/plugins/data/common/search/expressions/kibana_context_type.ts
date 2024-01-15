@@ -5,18 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Filter } from '@kbn/es-query';
+import { Filter, ExecutionContextSearch } from '@kbn/es-query';
 import { ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
-import { Query, TimeRange } from '../../query';
+import { Query } from '../../query';
 import { DataViewField } from '../..';
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ExecutionContextSearch = {
-  filters?: Filter[];
-  query?: Query | Query[];
-  timeRange?: TimeRange;
-  disableShardWarnings?: boolean;
-};
 
 export type ExpressionValueSearchContext = ExpressionValueBoxed<
   'kibana_context',

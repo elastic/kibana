@@ -13,6 +13,8 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
+import { defineConfigureRoute } from './configure';
+import { routeDefinitionParamsMock } from './index.mock';
 import {
   ElasticsearchConnectionStatus,
   ERROR_CONFIGURE_FAILURE,
@@ -22,8 +24,6 @@ import {
   ERROR_OUTSIDE_PREBOOT_STAGE,
 } from '../../common';
 import { interactiveSetupMock } from '../mocks';
-import { defineConfigureRoute } from './configure';
-import { routeDefinitionParamsMock } from './index.mock';
 
 describe('Configure routes', () => {
   let router: jest.Mocked<IRouter>;

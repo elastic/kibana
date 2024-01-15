@@ -9,6 +9,7 @@ import cypress from 'cypress';
 import path from 'path';
 import Url from 'url';
 import { FtrProviderContext } from './ftr_provider_context';
+import { createObservabilityOnboardingUsers } from '../server/test_helpers/create_observability_onboarding_users';
 
 export async function cypressTestRunner({
   ftrProviderContext: { getService },
@@ -22,11 +23,24 @@ export async function cypressTestRunner({
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
 
+  const kibanaUrl = Url.format({
+    protocol: config.get('servers.kibana.protocol'),
+    hostname: config.get('servers.kibana.hostname'),
+    port: config.get('servers.kibana.port'),
+    auth: `${username}:${password}`,
+  });
+
   const esNode = Url.format({
     protocol: config.get('servers.elasticsearch.protocol'),
     port: config.get('servers.elasticsearch.port'),
     hostname: config.get('servers.elasticsearch.hostname'),
     auth: `${username}:${password}`,
+  });
+
+  // Creates ObservabilityOnboarding users
+  await createObservabilityOnboardingUsers({
+    elasticsearch: { node: esNode, username, password },
+    kibana: { hostname: kibanaUrl },
   });
 
   const esRequestTimeout = config.get('timeouts.esRequestTimeout');

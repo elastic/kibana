@@ -28,7 +28,7 @@ export const getIgnoreGlobalFilterIcon = ({
         type={'filterIgnore'}
         color={color}
         css={css`
-          margin-top: 15px;
+          margin-top: 5px;
         `}
       />
     ),

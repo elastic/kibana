@@ -16,6 +16,7 @@ import { useActionResultsPrivileges } from './use_action_privileges';
 
 interface ActionResultsSummaryProps {
   actionId: string;
+  startDate?: string;
   expirationDate?: string;
   agentIds?: string[];
   error?: string;
@@ -32,6 +33,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   expirationDate,
   agentIds,
   error,
+  startDate,
 }) => {
   const [pageIndex] = useState(0);
   const [pageSize] = useState(50);
@@ -46,6 +48,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     data: { aggregations, edges },
   } = useActionResults({
     actionId,
+    startDate,
     activePage: pageIndex,
     agentIds,
     limit: pageSize,
@@ -158,7 +161,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     setIsLive(() => {
       if (!agentIds?.length || expired || error) return false;
 
-      return !!(aggregations.totalResponded !== agentIds?.length);
+      return aggregations.totalResponded !== agentIds?.length;
     });
   }, [agentIds?.length, aggregations.totalResponded, error, expired]);
 

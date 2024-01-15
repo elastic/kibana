@@ -84,6 +84,7 @@ export const createAppContextStartContractMock = (
     config$,
     kibanaVersion: '8.99.0', // Fake version :)
     kibanaBranch: 'main',
+    kibanaInstanceId: '1',
     telemetryEventsSender: createMockTelemetryEventsSender(),
     bulkActionsResolver: {} as any,
     messageSigningService: createMessageSigningServiceMock(),
@@ -200,5 +201,7 @@ export function createUninstallTokenServiceMock(): UninstallTokenServiceInterfac
     generateTokensForPolicyIds: jest.fn(),
     generateTokensForAllPolicies: jest.fn(),
     encryptTokens: jest.fn(),
+    checkTokenValidityForAllPolicies: jest.fn(),
+    checkTokenValidityForPolicy: jest.fn(),
   };
 }

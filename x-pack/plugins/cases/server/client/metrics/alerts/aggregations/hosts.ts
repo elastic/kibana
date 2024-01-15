@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SingleCaseMetricsResponse } from '../../../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../../../common/types/api';
 import type { AggregationBuilder, AggregationResponse } from '../../types';
 
 type HostsAggregate = HostsAggregateResponse | undefined;

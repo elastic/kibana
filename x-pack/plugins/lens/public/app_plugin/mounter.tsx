@@ -19,16 +19,13 @@ import {
   Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
 
 import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
@@ -101,6 +98,8 @@ export async function getLensServices(
     spaces,
     share,
     unifiedSearch,
+    serverless,
+    contentManagement,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -113,6 +112,7 @@ export async function getLensServices(
     storage,
     inspector: getLensInspectorService(inspector),
     navigation,
+    contentManagement,
     fieldFormats,
     stateTransfer,
     usageCollection,
@@ -128,7 +128,7 @@ export async function getLensServices(
     settings: coreStart.settings,
     application: coreStart.application,
     notifications: coreStart.notifications,
-    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement.client),
+    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
@@ -147,6 +147,7 @@ export async function getLensServices(
     unifiedSearch,
     docLinks: coreStart.docLinks,
     locator,
+    serverless,
   };
 }
 
@@ -343,6 +344,22 @@ export async function mountApp(
           dataViews: data.dataViews,
           dataViewEditor: startDependencies.dataViewEditor,
         };
+        const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+        const AnalyticsNoDataPageKibanaProvider = withSuspense(
+          React.lazy(() =>
+            importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+              return { default: NoDataProvider };
+            })
+          )
+        );
+        const AnalyticsNoDataPage = withSuspense(
+          React.lazy(() =>
+            importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+              return { default: NoDataPage };
+            })
+          )
+        );
+
         return (
           <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
             <AnalyticsNoDataPage

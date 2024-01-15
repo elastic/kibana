@@ -6,52 +6,12 @@
  */
 
 import type { RouteValidationFunction } from '@kbn/core/server';
+import { createPlainError, decodeOrThrow, formatErrors, throwErrors } from '@kbn/io-ts-utils';
 import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
+import { Errors, Type } from 'io-ts';
 
-type ErrorFactory = (message: string) => Error;
-
-const getErrorPath = ([first, ...rest]: Context): string[] => {
-  if (typeof first === 'undefined') {
-    return [];
-  } else if (first.type instanceof IntersectionType) {
-    const [, ...next] = rest;
-    return getErrorPath(next);
-  } else if (first.type instanceof UnionType) {
-    const [, ...next] = rest;
-    return [first.key, ...getErrorPath(next)];
-  }
-
-  return [first.key, ...getErrorPath(rest)];
-};
-
-const getErrorType = ({ context }: ValidationError) =>
-  context[context.length - 1]?.type?.name ?? 'unknown';
-
-const formatError = (error: ValidationError) =>
-  error.message ??
-  `in ${getErrorPath(error.context).join('/')}: ${JSON.stringify(
-    error.value
-  )} does not match expected type ${getErrorType(error)}`;
-
-export const formatErrors = (errors: ValidationError[]) =>
-  `Failed to validate: \n${errors.map((error) => `  ${formatError(error)}`).join('\n')}`;
-
-export const createPlainError = (message: string) => new Error(message);
-
-export const throwErrors = (createError: ErrorFactory) => (errors: Errors) => {
-  throw createError(formatErrors(errors));
-};
-
-export const decodeOrThrow =
-  <DecodedValue, EncodedValue, InputValue>(
-    runtimeType: Type<DecodedValue, EncodedValue, InputValue>,
-    createError: ErrorFactory = createPlainError
-  ) =>
-  (inputValue: InputValue) =>
-    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+export { createPlainError, decodeOrThrow, formatErrors, throwErrors };
 
 type ValdidationResult<Value> = ReturnType<RouteValidationFunction<Value>>;
 

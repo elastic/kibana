@@ -1,6 +1,6 @@
 get:
   summary: Retrieves a list of all connector types.
-  operationId: getConnectorTypes
+  operationId: getConnectorTypesWithSpaceId
   description: >
     You do not need any Kibana feature privileges to run this API.
   tags:
@@ -27,40 +27,39 @@ get:
                 enabled:
                   type: boolean
                   description: Indicates whether the connector type is enabled in Kibana.
-                  example: true
+                  examples:
+                    - true
                 enabled_in_config:
                   type: boolean
                   description: Indicates whether the connector type is enabled in the Kibana `.yml` file.
-                  example: true
+                  examples:
+                    - true
                 enabled_in_license:
                   type: boolean
                   description: Indicates whether the connector is enabled in the license.
-                  example: true
+                  examples:
+                    - true
                 id:
                   $ref: '../components/schemas/connector_types.yaml'
                 minimum_license_required:
                   type: string
                   description: The license that is required to use the connector type.
-                  example: basic
+                  examples:
+                    - basic
                 name:
                   type: string
                   description: The name of the connector type.
-                  example: Index
+                  examples:
+                    - Index
                 supported_feature_ids:
                   type: array
                   description: The Kibana features that are supported by the connector type.
                   items:
                     $ref: '../components/schemas/features.yaml'
-                  example:
-                    - alerting
-                    - uptime
-                    - siem
+                  examples:
+                    - [alerting, uptime, siem]
           examples:
             getConnectorTypesResponse:
               $ref: '../components/examples/get_connector_types_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

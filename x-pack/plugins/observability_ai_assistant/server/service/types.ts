@@ -5,44 +5,72 @@
  * 2.0.
  */
 
-import { IncomingMessage } from 'http';
-import { KibanaRequest } from '@kbn/core/server';
-import {
-  Conversation,
-  ConversationCreateRequest,
-  ConversationUpdateRequest,
+import type { FromSchema } from 'json-schema-to-ts';
+import type {
+  CompatibleJSONSchema,
+  FunctionDefinition,
+  FunctionResponse,
   Message,
+  RegisterContextDefinition,
 } from '../../common/types';
+import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
+import type { ObservabilityAIAssistantClient } from './client';
 
-export interface IObservabilityAIAssistantClient {
-  chat: (options: { messages: Message[]; connectorId: string }) => Promise<IncomingMessage>;
-  get: (conversationId: string) => void;
-  find: (options?: { query?: string }) => Promise<{ conversations: Conversation[] }>;
-  create: (conversation: ConversationCreateRequest) => Promise<Conversation>;
-  update: (conversation: ConversationUpdateRequest) => Promise<Conversation>;
-  delete: (conversationId: string) => Promise<void>;
+export type RespondFunctionResources = Pick<
+  ObservabilityAIAssistantRouteHandlerResources,
+  'context' | 'logger' | 'plugins' | 'request'
+>;
+
+type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
+  options: {
+    arguments: TArguments;
+    messages: Message[];
+    connectorId: string;
+  },
+  signal: AbortSignal
+) => Promise<TResponse>;
+
+export interface FunctionHandler {
+  definition: FunctionDefinition;
+  respond: RespondFunction<any, FunctionResponse>;
 }
 
-export interface IObservabilityAIAssistantService {
-  getClient: (options: {
-    request: KibanaRequest;
-  }) => Promise<IObservabilityAIAssistantClient | undefined>;
-}
+export type RegisterFunction = <
+  TParameters extends CompatibleJSONSchema = any,
+  TResponse extends FunctionResponse = any,
+  TArguments = FromSchema<TParameters>
+>(
+  definition: FunctionDefinition<TParameters>,
+  respond: RespondFunction<TArguments, TResponse>
+) => void;
+export type FunctionHandlerRegistry = Map<string, FunctionHandler>;
+
+export type ChatRegistrationFunction = ({}: {
+  signal: AbortSignal;
+  resources: RespondFunctionResources;
+  client: ObservabilityAIAssistantClient;
+  registerFunction: RegisterFunction;
+  registerContext: RegisterContextDefinition;
+}) => Promise<void>;
 
 export interface ObservabilityAIAssistantResourceNames {
   componentTemplate: {
     conversations: string;
+    kb: string;
   };
   indexTemplate: {
     conversations: string;
-  };
-  ilmPolicy: {
-    conversations: string;
+    kb: string;
   };
   aliases: {
     conversations: string;
+    kb: string;
   };
   indexPatterns: {
     conversations: string;
+    kb: string;
+  };
+  pipelines: {
+    kb: string;
   };
 }

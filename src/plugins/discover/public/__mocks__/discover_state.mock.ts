@@ -23,6 +23,10 @@ export function getDiscoverStateMock({
   const container = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
+    customizationContext: {
+      displayMode: 'standalone',
+      showLogExplorerTabs: false,
+    },
   });
   container.savedSearchState.set(
     savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock

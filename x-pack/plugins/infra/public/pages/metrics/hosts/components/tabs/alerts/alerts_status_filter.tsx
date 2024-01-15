@@ -13,6 +13,7 @@ import {
   ACTIVE_ALERTS,
   ALL_ALERTS,
   RECOVERED_ALERTS,
+  UNTRACKED_ALERTS,
 } from '../../../../../../common/alerts/constants';
 export interface AlertStatusFilterProps {
   status: AlertStatus;
@@ -37,6 +38,12 @@ const options: EuiButtonGroupOptionProps[] = [
     label: RECOVERED_ALERTS.label,
     value: RECOVERED_ALERTS.query,
     'data-test-subj': 'hostsView-alert-status-filter-recovered-button',
+  },
+  {
+    id: UNTRACKED_ALERTS.status,
+    label: UNTRACKED_ALERTS.label,
+    value: UNTRACKED_ALERTS.query,
+    'data-test-subj': 'hostsView-alert-status-filter-untracked-button',
   },
 ];
 

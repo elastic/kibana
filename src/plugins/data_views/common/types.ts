@@ -157,6 +157,10 @@ export interface DataViewAttributes {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
+  /**
+   * Allow hidden and system indices when loading field list
+   */
+  allowHidden?: boolean;
 }
 
 /**
@@ -309,6 +313,7 @@ export interface GetFieldsOptions {
   indexFilter?: QueryDslQueryContainer;
   includeUnmapped?: boolean;
   fields?: string[];
+  allowHidden?: boolean;
 }
 
 /**
@@ -318,6 +323,11 @@ export interface FieldsForWildcardResponse {
   fields: FieldSpec[];
   indices: string[];
 }
+
+/**
+ * Existing Indices response
+ */
+export type ExistingIndicesResponse = string[];
 
 export interface IDataViewsApiClient {
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
@@ -512,15 +522,24 @@ export type DataViewSpec = {
    * Name of the data view. Human readable name used to differentiate data view.
    */
   name?: string;
+  /**
+   * Allow hidden and system indices when loading field list
+   */
+  allowHidden?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SourceFilter = {
   value: string;
+  clientId?: string | number;
 };
 
 export interface HasDataService {
   hasESData: () => Promise<boolean>;
   hasUserDataView: () => Promise<boolean>;
   hasDataView: () => Promise<boolean>;
+}
+
+export interface ClientConfigType {
+  scriptedFieldsEnabled?: boolean;
 }

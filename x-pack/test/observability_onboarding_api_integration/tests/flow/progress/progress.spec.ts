@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { ObservabilityOnboardingApiClientKey } from '../../../common/config';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ObservabilityOnboardingApiError } from '../../../common/observability_onboarding_api_supertest';
 import { expectToReject } from '../../../common/utils/expect_to_reject';
-import { createLogDoc } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const observabilityOnboardingApiClient = getService('observabilityOnboardingApiClient');
-  const es = getService('es');
+  const synthtrace = getService('logSynthtraceEsClient');
 
   async function callApi({
     onboardingId,
@@ -44,10 +44,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         endpoint: 'POST /internal/observability_onboarding/logs/flow',
         params: {
           body: {
+            type: 'logFiles',
             name: 'name',
             state: {
               datasetName,
               namespace,
+              logFilePaths: ['my-service.log'],
             },
           },
         },
@@ -102,6 +104,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         describe('when ea-status is complete', () => {
           describe('should not skip logs verification', () => {
+            const agentId = 'my-agent-id';
+
             before(async () => {
               await observabilityOnboardingApiClient.logMonitoringUser({
                 endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
@@ -112,6 +116,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   },
                   body: {
                     status: 'complete',
+                    payload: {
+                      agentId,
+                    },
                   },
                 },
               });
@@ -131,40 +138,217 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             describe('when logs have been ingested', () => {
-              before(async () => {
-                await es.indices.createDataStream({
-                  name: `logs-${datasetName}-${namespace}`,
+              describe('with a different agentId', () => {
+                describe('and onboarding type is logFiles', () => {
+                  before(async () => {
+                    await synthtrace.index([
+                      timerange('2023-11-20T10:00:00.000Z', '2023-11-20T10:01:00.000Z')
+                        .interval('1m')
+                        .rate(1)
+                        .generator((timestamp) =>
+                          log
+                            .create()
+                            .message('This is a log message')
+                            .timestamp(timestamp)
+                            .dataset(datasetName)
+                            .namespace(namespace)
+                            .service('my-service')
+                            .defaults({
+                              'agent.id': 'another-agent-id',
+                              'log.file.path': '/my-service.log',
+                            })
+                        ),
+                    ]);
+                  });
+
+                  it('should return log-ingest as incomplete', async () => {
+                    const request = await callApi({
+                      onboardingId,
+                    });
+
+                    expect(request.status).to.be(200);
+
+                    const logsIngestProgress = request.body.progress['logs-ingest'];
+                    expect(logsIngestProgress).to.have.property('status', 'loading');
+                  });
+
+                  after(async () => {
+                    await synthtrace.clean();
+                  });
                 });
 
-                const doc = createLogDoc({
-                  time: new Date('06/28/2023').getTime(),
-                  logFilepath: '/my-service.log',
-                  serviceName: 'my-service',
-                  namespace,
-                  datasetName,
-                  message: 'This is a log message',
-                });
+                describe('and onboarding type is systemLogs', () => {
+                  let systemLogsOnboardingId: string;
 
-                await es.bulk({
-                  body: [{ create: { _index: `logs-${datasetName}-${namespace}` } }, doc],
-                  refresh: 'wait_for',
+                  before(async () => {
+                    const req = await observabilityOnboardingApiClient.logMonitoringUser({
+                      endpoint: 'POST /internal/observability_onboarding/logs/flow',
+                      params: {
+                        body: {
+                          type: 'systemLogs',
+                          name: 'name',
+                        },
+                      },
+                    });
+
+                    systemLogsOnboardingId = req.body.onboardingId;
+
+                    await observabilityOnboardingApiClient.logMonitoringUser({
+                      endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
+                      params: {
+                        path: {
+                          id: systemLogsOnboardingId,
+                          name: 'ea-status',
+                        },
+                        body: {
+                          status: 'complete',
+                          payload: {
+                            agentId,
+                          },
+                        },
+                      },
+                    });
+
+                    await synthtrace.index([
+                      timerange('2023-11-20T10:00:00.000Z', '2023-11-20T10:01:00.000Z')
+                        .interval('1m')
+                        .rate(1)
+                        .generator((timestamp) =>
+                          log
+                            .create()
+                            .message('This is a system log message')
+                            .timestamp(timestamp)
+                            .dataset('system.syslog')
+                            .namespace(namespace)
+                            .defaults({
+                              'agent.id': 'another-agent-id',
+                              'log.file.path': '/var/log/system.log',
+                            })
+                        ),
+                    ]);
+                  });
+
+                  it('should return log-ingest as incomplete', async () => {
+                    const request = await callApi({
+                      onboardingId: systemLogsOnboardingId,
+                    });
+
+                    expect(request.status).to.be(200);
+
+                    const logsIngestProgress = request.body.progress['logs-ingest'];
+                    expect(logsIngestProgress).to.have.property('status', 'loading');
+                  });
+
+                  after(async () => {
+                    await synthtrace.clean();
+                  });
                 });
               });
 
-              it('should return log-ingest as complete', async () => {
-                const request = await callApi({
-                  onboardingId,
+              describe('with the expected agentId', () => {
+                describe('and onboarding type is logFiles', () => {
+                  before(async () => {
+                    await synthtrace.index([
+                      timerange('2023-11-20T10:00:00.000Z', '2023-11-20T10:01:00.000Z')
+                        .interval('1m')
+                        .rate(1)
+                        .generator((timestamp) =>
+                          log
+                            .create()
+                            .message('This is a log message')
+                            .timestamp(timestamp)
+                            .dataset(datasetName)
+                            .namespace(namespace)
+                            .service('my-service')
+                            .defaults({
+                              'agent.id': agentId,
+                              'log.file.path': '/my-service.log',
+                            })
+                        ),
+                    ]);
+                  });
+
+                  it('should return log-ingest as complete', async () => {
+                    const request = await callApi({
+                      onboardingId,
+                    });
+
+                    expect(request.status).to.be(200);
+
+                    const logsIngestProgress = request.body.progress['logs-ingest'];
+                    expect(logsIngestProgress).to.have.property('status', 'complete');
+                  });
+
+                  after(async () => {
+                    await synthtrace.clean();
+                  });
                 });
 
-                expect(request.status).to.be(200);
+                describe('and onboarding type is systemLogs', () => {
+                  let systemLogsOnboardingId: string;
 
-                const logsIngestProgress = request.body.progress['logs-ingest'];
-                expect(logsIngestProgress).to.have.property('status', 'complete');
-              });
+                  before(async () => {
+                    const req = await observabilityOnboardingApiClient.logMonitoringUser({
+                      endpoint: 'POST /internal/observability_onboarding/logs/flow',
+                      params: {
+                        body: {
+                          type: 'systemLogs',
+                          name: 'name',
+                        },
+                      },
+                    });
 
-              after(async () => {
-                await es.indices.deleteDataStream({
-                  name: `logs-${datasetName}-${namespace}`,
+                    systemLogsOnboardingId = req.body.onboardingId;
+
+                    await observabilityOnboardingApiClient.logMonitoringUser({
+                      endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
+                      params: {
+                        path: {
+                          id: systemLogsOnboardingId,
+                          name: 'ea-status',
+                        },
+                        body: {
+                          status: 'complete',
+                          payload: {
+                            agentId,
+                          },
+                        },
+                      },
+                    });
+
+                    await synthtrace.index([
+                      timerange('2023-11-20T10:00:00.000Z', '2023-11-20T10:01:00.000Z')
+                        .interval('1m')
+                        .rate(1)
+                        .generator((timestamp) =>
+                          log
+                            .create()
+                            .message('This is a system log message')
+                            .timestamp(timestamp)
+                            .dataset('system.syslog')
+                            .namespace(namespace)
+                            .defaults({
+                              'agent.id': agentId,
+                              'log.file.path': '/var/log/system.log',
+                            })
+                        ),
+                    ]);
+                  });
+
+                  it('should return log-ingest as complete', async () => {
+                    const request = await callApi({
+                      onboardingId: systemLogsOnboardingId,
+                    });
+
+                    expect(request.status).to.be(200);
+
+                    const logsIngestProgress = request.body.progress['logs-ingest'];
+                    expect(logsIngestProgress).to.have.property('status', 'complete');
+                  });
+
+                  after(async () => {
+                    await synthtrace.clean();
+                  });
                 });
               });
             });

@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   applyActionListEsSearchMock,
   createActionRequestsEsSearchResultsMock,
-  createActionResponsesEsSearchResultsMock,
 } from '../services/actions/mocks';
-import { getActions, getActionResponses } from './action_list_helpers';
+import { getActions } from './action_list_helpers';
 
 describe('action helpers', () => {
   let mockScopedEsClient: ScopedClusterClientMock;
@@ -36,18 +34,7 @@ describe('action helpers', () => {
                 must: [
                   {
                     bool: {
-                      filter: [
-                        {
-                          term: {
-                            input_type: 'endpoint',
-                          },
-                        },
-                        {
-                          term: {
-                            type: 'INPUT_ACTION',
-                          },
-                        },
-                      ],
+                      filter: [],
                     },
                   },
                 ],
@@ -96,16 +83,6 @@ describe('action helpers', () => {
                   {
                     bool: {
                       filter: [
-                        {
-                          term: {
-                            input_type: 'endpoint',
-                          },
-                        },
-                        {
-                          term: {
-                            type: 'INPUT_ACTION',
-                          },
-                        },
                         {
                           range: {
                             '@timestamp': {
@@ -211,16 +188,6 @@ describe('action helpers', () => {
                     bool: {
                       filter: [
                         {
-                          term: {
-                            input_type: 'endpoint',
-                          },
-                        },
-                        {
-                          term: {
-                            type: 'INPUT_ACTION',
-                          },
-                        },
-                        {
                           range: {
                             '@timestamp': {
                               gte: 'now-1d',
@@ -305,99 +272,6 @@ describe('action helpers', () => {
 
       expect(actions.actionIds).toEqual(['123']);
       expect(actions.actionRequests?.body?.hits?.hits[0]._source?.agent.id).toEqual('agent-a');
-    });
-  });
-
-  describe('#getActionResponses', () => {
-    it('should use base filters correctly when no other filter options provided', async () => {
-      const esClient = mockScopedEsClient.asInternalUser;
-      applyActionListEsSearchMock(esClient);
-      await getActionResponses({ esClient, actionIds: [] });
-
-      expect(esClient.search).toHaveBeenCalledWith(
-        {
-          body: {
-            query: {
-              bool: {
-                filter: [],
-              },
-            },
-          },
-          from: 0,
-          index: ['.fleet-actions-results', '.logs-endpoint.action.responses-*'],
-          size: 10000,
-        },
-        {
-          headers: {
-            'X-elastic-product-origin': 'fleet',
-          },
-          ignore: [404],
-          meta: true,
-        }
-      );
-    });
-    it('should query with actionIds and elasticAgentIds when provided', async () => {
-      const actionIds = [uuidv4(), uuidv4()];
-      const elasticAgentIds = ['123', '456'];
-      const esClient = mockScopedEsClient.asInternalUser;
-      applyActionListEsSearchMock(esClient);
-      await getActionResponses({ esClient, actionIds, elasticAgentIds });
-
-      expect(esClient.search).toHaveBeenCalledWith(
-        {
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      agent_id: elasticAgentIds,
-                    },
-                  },
-                  {
-                    terms: {
-                      action_id: actionIds,
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          from: 0,
-          index: ['.fleet-actions-results', '.logs-endpoint.action.responses-*'],
-          size: 10000,
-        },
-        {
-          headers: {
-            'X-elastic-product-origin': 'fleet',
-          },
-          ignore: [404],
-          meta: true,
-        }
-      );
-    });
-    it('should return expected output', async () => {
-      const esClient = mockScopedEsClient.asInternalUser;
-      const actionRes = createActionResponsesEsSearchResultsMock();
-      applyActionListEsSearchMock(esClient, undefined, actionRes);
-
-      const responses = await getActionResponses({
-        esClient,
-        actionIds: ['123'],
-        elasticAgentIds: ['agent-a'],
-      });
-
-      const responseHits = responses.body.hits.hits;
-
-      expect(responseHits.length).toEqual(2);
-      expect(
-        responseHits.map((e) => e._index).filter((e) => e.includes('.fleet-actions-results')).length
-      ).toEqual(1);
-      expect(
-        responseHits
-          .map((e) => e._index)
-          .filter((e) => e.includes('.logs-endpoint.action.responses')).length
-      ).toEqual(1);
     });
   });
 });

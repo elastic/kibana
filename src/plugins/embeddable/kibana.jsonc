@@ -12,10 +12,11 @@
       "inspector",
       "uiActions",
       "savedObjectsFinder",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
+      "contentManagement"
     ],
     "optionalPlugins": ["savedObjectsTaggingOss", "usageCollection"],
-    "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils"],
+    "requiredBundles": ["savedObjects", "kibanaReact", "kibanaUtils", "unifiedSearch"],
     "extraPublicDirs": ["common"]
   }
 }

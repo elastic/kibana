@@ -17,6 +17,7 @@ import React, {
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import {
   EuiBadge,
@@ -35,6 +36,7 @@ import {
   type ExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
+import { getSidebarVisibility, SidebarVisibility } from './get_sidebar_visibility';
 import {
   UnifiedFieldListSidebar,
   type UnifiedFieldListSidebarCustomizableProps,
@@ -48,6 +50,7 @@ import type {
 } from '../../types';
 
 export interface UnifiedFieldListSidebarContainerApi {
+  sidebarVisibility: SidebarVisibility;
   refetchFieldsExistenceInfo: ExistingFieldsFetcher['refetchFieldsExistenceInfo'];
   closeFieldListFlyout: () => void;
   // no user permission or missing dataViewFieldEditor service will result in `undefined` API methods
@@ -71,11 +74,6 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
    * Return static configuration options which don't need to change
    */
   getCreationOptions: () => UnifiedFieldListSidebarContainerCreationOptions;
-
-  /**
-   * In case if you have a sidebar toggle button
-   */
-  isSidebarCollapsed?: boolean;
 
   /**
    * Custom content to render at the top of field list in the flyout (for example a data view picker)
@@ -115,7 +113,6 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     services,
     dataView,
     workspaceSelectedFieldNames,
-    isSidebarCollapsed, // TODO later: pull the logic of collapsing the sidebar to this component
     prependInFlyout,
     variant = 'responsive',
     onFieldEdited,
@@ -125,6 +122,14 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   );
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
+  const [sidebarVisibility] = useState(() =>
+    getSidebarVisibility({
+      localStorageKey: stateService.creationOptions.localStorageKeyPrefix
+        ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
+        : undefined,
+    })
+  );
+  const isSidebarCollapsed = useObservable(sidebarVisibility.isCollapsed$, false);
 
   const canEditDataView =
     Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
@@ -229,13 +234,14 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   useImperativeHandle(
     componentRef,
     () => ({
+      sidebarVisibility,
       refetchFieldsExistenceInfo,
       closeFieldListFlyout,
       createField: editField,
       editField,
       deleteField,
     }),
-    [refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
+    [sidebarVisibility, refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
   );
 
   if (!dataView) {
@@ -250,7 +256,14 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     isAffectedByGlobalFilter,
     onEditField: editField,
     onDeleteField: deleteField,
+    compressed: stateService.creationOptions.compressed ?? false,
+    buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
   };
+
+  if (stateService.creationOptions.showSidebarToggleButton) {
+    commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
+    commonSidebarProps.onToggleSidebar = sidebarVisibility.toggle;
+  }
 
   const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;
 
@@ -319,6 +332,8 @@ const UnifiedFieldListSidebarContainer = forwardRef<
               <UnifiedFieldListSidebar
                 {...commonSidebarProps}
                 alwaysShowActionButton={true}
+                buttonAddFieldVariant="primary" // always for the flyout
+                isSidebarCollapsed={undefined}
                 prepend={prependInFlyout?.()}
               />
             </EuiFlyout>
@@ -333,12 +348,12 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   }
 
   if (variant === 'list-always') {
-    return (!isSidebarCollapsed && renderListVariant()) || null;
+    return renderListVariant();
   }
 
   return (
     <>
-      {!isSidebarCollapsed && <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>}
+      <EuiHideFor sizes={['xs', 's']}>{renderListVariant()}</EuiHideFor>
       <EuiShowFor sizes={['xs', 's']}>{renderButtonVariant()}</EuiShowFor>
     </>
   );

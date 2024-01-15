@@ -73,7 +73,6 @@ describe('useFistLastSeen', () => {
 
     expect(mockSearch).toHaveBeenCalledWith({
       defaultIndex: [],
-      factoryQueryType: 'firstlastseen',
       field: 'host.name',
       order: 'asc',
       value: 'some-host',
@@ -103,7 +102,6 @@ describe('useFistLastSeen', () => {
 
     expect(mockSearch).toHaveBeenCalledWith({
       defaultIndex: [],
-      factoryQueryType: 'firstlastseen',
       field: 'host.name',
       order: 'desc',
       value: 'some-host',

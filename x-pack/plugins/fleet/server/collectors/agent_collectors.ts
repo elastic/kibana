@@ -58,24 +58,37 @@ export const getAgentUsage = async (
   };
 };
 
+export interface AgentPerVersion {
+  version: string;
+  count: number;
+}
+
 export interface AgentData {
-  agents_per_version: Array<
-    {
-      version: string;
-      count: number;
-    } & AgentStatus
-  >;
+  agents_per_version: Array<AgentPerVersion & AgentStatus>;
   agent_checkin_status: {
     error: number;
     degraded: number;
   };
   agents_per_policy: number[];
+  agents_per_os: Array<{
+    name: string;
+    version: string;
+    count: number;
+  }>;
+  upgrade_details: Array<{
+    target_version: string;
+    state: string;
+    error_msg: string;
+    agent_count: number;
+  }>;
 }
 
 const DEFAULT_AGENT_DATA = {
   agent_checkin_status: { error: 0, degraded: 0 },
   agents_per_policy: [],
   agents_per_version: [],
+  agents_per_os: [],
+  upgrade_details: [],
 };
 
 export const getAgentData = async (
@@ -116,6 +129,35 @@ export const getAgentData = async (
           },
           policies: {
             terms: { field: 'policy_id' },
+          },
+          os: {
+            multi_terms: {
+              terms: [
+                {
+                  field: 'local_metadata.os.name.keyword',
+                },
+                {
+                  field: 'local_metadata.os.version.keyword',
+                },
+              ],
+            },
+          },
+          upgrade_details: {
+            multi_terms: {
+              size: 1000,
+              terms: [
+                {
+                  field: 'upgrade_details.target_version.keyword',
+                },
+                {
+                  field: 'upgrade_details.state',
+                },
+                {
+                  field: 'upgrade_details.metadata.error_msg.keyword',
+                  missing: '',
+                },
+              ],
+            },
           },
         },
       },
@@ -166,10 +208,27 @@ export const getAgentData = async (
       (bucket: any) => bucket.doc_count
     );
 
+    const agentsPerOS = ((response?.aggregations?.os as any).buckets ?? []).map((bucket: any) => ({
+      name: bucket.key[0],
+      version: bucket.key[1],
+      count: bucket.doc_count,
+    }));
+
+    const upgradeDetails = ((response?.aggregations?.upgrade_details as any).buckets ?? []).map(
+      (bucket: any) => ({
+        target_version: bucket.key[0],
+        state: bucket.key[1],
+        error_msg: bucket.key[2],
+        agent_count: bucket.doc_count,
+      })
+    );
+
     return {
       agent_checkin_status: statuses,
       agents_per_policy: agentsPerPolicy,
       agents_per_version: agentsPerVersion,
+      agents_per_os: agentsPerOS,
+      upgrade_details: upgradeDetails,
     };
   } catch (error) {
     if (error.statusCode === 404) {

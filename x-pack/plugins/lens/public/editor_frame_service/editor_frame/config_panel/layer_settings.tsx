@@ -18,9 +18,6 @@ export function LayerSettings({
 }) {
   if (!activeVisualization.LayerHeaderComponent) {
     const description = activeVisualization.getDescription(layerConfigProps.state);
-    if (!description) {
-      return null;
-    }
     return <StaticHeader label={description.label} icon={description.icon} />;
   }
 

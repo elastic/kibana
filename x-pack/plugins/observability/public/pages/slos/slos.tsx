@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
@@ -16,10 +16,13 @@ import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
-import { AutoRefreshButton } from './components/auto_refresh_button';
+import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
 import { HeaderTitle } from './components/header_title';
 import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
+import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 
 export function SlosPage() {
   const {
@@ -30,10 +33,11 @@ export function SlosPage() {
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
-  const { isInitialLoading, isLoading, isError, sloList } = useFetchSloList();
-  const { total } = sloList || { total: 0 };
+  const { isLoading, isError, data: sloList } = useFetchSloList();
+  const { total } = sloList ?? { total: 0 };
 
-  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
+  const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(getAutoRefreshState());
 
   useBreadcrumbs([
     {
@@ -41,6 +45,7 @@ export function SlosPage() {
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
+      deepLinkId: 'observability-overview:slos',
     },
   ]);
 
@@ -56,11 +61,8 @@ export function SlosPage() {
 
   const handleToggleAutoRefresh = () => {
     setIsAutoRefreshing(!isAutoRefreshing);
+    storeAutoRefreshState(!isAutoRefreshing);
   };
-
-  if (isInitialLoading) {
-    return null;
-  }
 
   return (
     <ObservabilityPageTemplate
@@ -88,6 +90,9 @@ export function SlosPage() {
       }}
       data-test-subj="slosPage"
     >
+      <HeaderMenu />
+      <SloOutdatedCallout />
+      <EuiSpacer size="l" />
       <SloList autoRefresh={isAutoRefreshing} />
     </ObservabilityPageTemplate>
   );

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-jest.mock('moment', () => ({ tz: { guess: jest.fn() } }));
+import { tz } from 'moment-timezone';
 
-import { tz } from 'moment';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { Job } from '../job';
@@ -27,7 +26,7 @@ describe('ReportingAPIClient', () => {
   describe('getReportURL', () => {
     it('should generate the internal report download URL', () => {
       expect(apiClient.getReportURL('123')).toMatchInlineSnapshot(
-        `"/base/path/internal/reporting/jobs/download/123"`
+        `"/base/path/internal/reporting/jobs/download/123?elasticInternalOrigin=true"`
       );
     });
   });

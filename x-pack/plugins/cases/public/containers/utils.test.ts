@@ -11,9 +11,11 @@ import {
   createUpdateSuccessToaster,
   constructAssigneesFilter,
   constructReportersFilter,
+  constructCustomFieldsFilter,
 } from './utils';
 
 import type { CaseUI } from './types';
+import { CustomFieldTypes } from '../../common/types/domain';
 
 const caseBeforeUpdate = {
   comments: [
@@ -158,10 +160,6 @@ describe('utils', () => {
       expect(constructAssigneesFilter([])).toEqual({});
     });
 
-    it('returns none if the assignees are null', () => {
-      expect(constructAssigneesFilter(null)).toEqual({ assignees: 'none' });
-    });
-
     it('returns none for null values in the assignees array', () => {
       expect(constructAssigneesFilter([null, '123'])).toEqual({ assignees: ['none', '123'] });
     });
@@ -184,6 +182,41 @@ describe('utils', () => {
           },
         ])
       ).toEqual({ reporters: ['test', '123'] });
+    });
+  });
+
+  describe('constructCustomFieldsFilter', () => {
+    it('returns an empty object if the customFields is empty', () => {
+      expect(constructCustomFieldsFilter({})).toEqual({});
+    });
+
+    it('returns the customFields correctly', () => {
+      expect(
+        constructCustomFieldsFilter({
+          '957846f4-a792-45a2-bc9a-c028973dfdde': {
+            type: CustomFieldTypes.TOGGLE,
+            options: ['on'],
+          },
+          'dbeb8e9c-240b-4adb-b83e-e645e86c07ed': {
+            type: CustomFieldTypes.TOGGLE,
+            options: ['off'],
+          },
+          'c1f0c0a0-2aaf-11ec-8d3d-0242ac130003': {
+            type: CustomFieldTypes.TOGGLE,
+            options: [],
+          },
+          'e0e8c50a-8d65-4f00-b6f0-d8a131fd34b4': {
+            type: CustomFieldTypes.TOGGLE,
+            options: ['on', 'off'],
+          },
+        })
+      ).toEqual({
+        customFields: {
+          '957846f4-a792-45a2-bc9a-c028973dfdde': [true],
+          'dbeb8e9c-240b-4adb-b83e-e645e86c07ed': [false],
+          'e0e8c50a-8d65-4f00-b6f0-d8a131fd34b4': [true, false],
+        },
+      });
     });
   });
 });

@@ -11,6 +11,10 @@ import {
   AggregateOf as AggregationResultOf,
   AggregateOfMap as AggregationResultOfMap,
   SearchHit,
+  ClusterDetails,
+  ESQLColumn,
+  ESQLRow,
+  ESQLSearchReponse,
 } from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;
@@ -34,4 +38,13 @@ export type ESSearchResponse<
   TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
-export type { InferSearchResponseOf, AggregationResultOf, AggregationResultOfMap, SearchHit };
+export type {
+  InferSearchResponseOf,
+  AggregationResultOf,
+  AggregationResultOfMap,
+  SearchHit,
+  ClusterDetails,
+  ESQLColumn,
+  ESQLRow,
+  ESQLSearchReponse,
+};

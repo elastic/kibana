@@ -28,52 +28,59 @@ export const exportTimelinesRoute = (
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
       path: TIMELINE_EXPORT_URL,
-      validate: {
-        query: buildRouteValidationWithExcess(exportTimelinesQuerySchema),
-        body: buildRouteValidationWithExcess(exportTimelinesRequestBodySchema),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      try {
-        const siemResponse = buildSiemResponse(response);
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+      access: 'public',
+    })
+    .addVersion(
+      {
+        validate: {
+          request: {
+            query: buildRouteValidationWithExcess(exportTimelinesQuerySchema),
+            body: buildRouteValidationWithExcess(exportTimelinesRequestBodySchema),
+          },
+        },
+        version: '2023-10-31',
+      },
+      async (context, request, response) => {
+        try {
+          const siemResponse = buildSiemResponse(response);
+          const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
-        const exportSizeLimit = config.maxTimelineImportExportSize;
+          const exportSizeLimit = config.maxTimelineImportExportSize;
 
-        if (request.body?.ids != null && request.body.ids.length > exportSizeLimit) {
+          if (request.body?.ids != null && request.body.ids.length > exportSizeLimit) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: `Can't export more than ${exportSizeLimit} timelines`,
+            });
+          }
+
+          const responseBody = await getExportTimelineByObjectIds({
+            frameworkRequest,
+            ids: request.body?.ids,
+          });
+
+          return response.ok({
+            headers: {
+              'Content-Disposition': `attachment; filename="${request.query.file_name}"`,
+              'Content-Type': 'application/ndjson',
+            },
+            body: responseBody,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          const siemResponse = buildSiemResponse(response);
+
           return siemResponse.error({
-            statusCode: 400,
-            body: `Can't export more than ${exportSizeLimit} timelines`,
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        const responseBody = await getExportTimelineByObjectIds({
-          frameworkRequest,
-          ids: request.body?.ids,
-        });
-
-        return response.ok({
-          headers: {
-            'Content-Disposition': `attachment; filename="${request.query.file_name}"`,
-            'Content-Type': 'application/ndjson',
-          },
-          body: responseBody,
-        });
-      } catch (err) {
-        const error = transformError(err);
-        const siemResponse = buildSiemResponse(response);
-
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

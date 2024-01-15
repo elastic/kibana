@@ -10,7 +10,6 @@ import React from 'react';
 import { PluginInitializerContext } from '@kbn/core/public';
 import { AdvancedSettingsPlugin } from './plugin';
 export type { AdvancedSettingsSetup, AdvancedSettingsStart } from './types';
-export { ComponentRegistry } from './component_registry';
 
 /**
  * Exports the field component as a React.lazy component. We're explicitly naming it lazy here

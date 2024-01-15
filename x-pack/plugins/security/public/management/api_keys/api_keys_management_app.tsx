@@ -16,9 +16,9 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
 import { Router } from '@kbn/shared-ux-router';
 
-import type { AuthenticationServiceSetup } from '../../authentication';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
   Breadcrumb,
@@ -44,10 +44,9 @@ export const apiKeysManagementApp = Object.freeze({
         defaultMessage: 'API keys',
       }),
       async mount({ element, theme$, setBreadcrumbs, history }) {
-        const [[coreStart], { APIKeysGridPage }, { APIKeysAPIClient }] = await Promise.all([
+        const [[coreStart], { APIKeysGridPage }] = await Promise.all([
           getStartServices(),
           import('./api_keys_grid'),
-          import('./api_keys_api_client'),
         ]);
 
         render(
@@ -64,12 +63,7 @@ export const apiKeysManagementApp = Object.freeze({
               })}
               href="/"
             >
-              <APIKeysGridPage
-                history={history}
-                notifications={coreStart.notifications}
-                apiKeysAPIClient={new APIKeysAPIClient(coreStart.http)}
-                readOnly={!coreStart.application.capabilities.api_keys.save}
-              />
+              <APIKeysGridPage />
             </Breadcrumb>
           </Providers>,
           element

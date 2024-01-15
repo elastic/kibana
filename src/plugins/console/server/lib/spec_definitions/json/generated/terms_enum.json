@@ -1,12 +1,22 @@
 {
   "terms_enum": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET",
       "POST"
     ],
     "patterns": [
-      "{indices}/_terms_enum"
+      "{index}/_terms_enum"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-terms-enum.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/search-terms-enum.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

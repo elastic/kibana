@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppFeatureKeys } from '@kbn/security-solution-plugin/common';
+import type { AppFeatureKeys } from '@kbn/security-solution-features/src/types';
 import type { SecurityProductTypes } from '../config';
 import { ProductTier } from '../product';
 import { PLI_APP_FEATURES } from './pli_config';

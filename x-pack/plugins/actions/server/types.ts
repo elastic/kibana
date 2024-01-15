@@ -35,6 +35,7 @@ export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
 import type { ActionExecutionSource } from './lib';
+import { Connector, ConnectorWithExtraFindData } from './application/connector/types';
 export type { ActionExecutionSource } from './lib';
 
 export { ActionExecutionSourceType } from './lib';
@@ -75,30 +76,20 @@ export interface ActionTypeExecutorOptions<
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
+  request?: KibanaRequest;
 }
 
-export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
-  id: string;
-  actionTypeId: string;
-  name: string;
-  isMissingSecrets?: boolean;
-  config?: Config;
-  isPreconfigured: boolean;
-  isDeprecated: boolean;
-  isSystemAction: boolean;
-}
+export type ActionResult = Connector;
 
 export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets
-> extends ActionResult<Config> {
+> extends ActionResult {
   secrets: Secrets;
   config: Config;
 }
 
-export interface FindActionResult extends ActionResult {
-  referencedByCount: number;
-}
+export type FindActionResult = ConnectorWithExtraFindData;
 
 // signature of the action type executor function
 export type ExecutorType<
@@ -222,6 +213,11 @@ export interface ResponseSettings {
 
 export interface SSLSettings {
   verificationMode?: 'none' | 'certificate' | 'full';
+  pfx?: Buffer;
+  cert?: Buffer;
+  key?: Buffer;
+  passphrase?: string;
+  ca?: Buffer;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {

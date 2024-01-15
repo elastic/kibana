@@ -10,7 +10,11 @@ import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
@@ -31,6 +35,7 @@ import {
 } from '../../../../rules_client/tests/test_helpers';
 import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { migrateLegacyActionsMock } from '../../../../rules_client/lib/siem_legacy_actions/retrieve_migrated_legacy_actions.mock';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -56,7 +61,12 @@ jest.mock('uuid', () => {
   return { v4: () => `${uuid++}` };
 });
 
+jest.mock('../get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
+
 const { isSnoozeActive } = jest.requireMock('../../../../lib/snooze/is_snooze_active');
+const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -65,6 +75,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -82,14 +93,18 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 const paramsModifier = jest.fn();
 
@@ -107,7 +122,7 @@ describe('bulkEdit()', () => {
   let actionsClient: jest.Mocked<ActionsClient>;
   const existingRule = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       enabled: false,
       tags: ['foo'],
@@ -227,10 +242,12 @@ describe('bulkEdit()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
       },
+      validLegacyConsumers: [],
     });
 
     (migrateLegacyActions as jest.Mock).mockResolvedValue(migrateLegacyActionsMock);
@@ -253,7 +270,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo', 'test-1'],
@@ -298,7 +315,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               tags: ['foo', 'test-1'],
               revision: 1,
@@ -314,7 +331,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: [],
@@ -355,7 +372,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               tags: [],
               revision: 1,
@@ -371,7 +388,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['test-1', 'test-2'],
@@ -413,7 +430,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               tags: ['test-1', 'test-2'],
               revision: 1,
@@ -724,6 +741,7 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -733,6 +751,7 @@ describe('bulkEdit()', () => {
           mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
           shouldWrite: true,
         },
+        validLegacyConsumers: [],
       });
       const existingAction = {
         frequency: {
@@ -913,7 +932,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo'],
@@ -964,7 +983,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               params: expect.objectContaining({
                 index: ['test-1', 'test-2', 'test-4', 'test-5'],
@@ -982,7 +1001,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo'],
@@ -1028,7 +1047,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               params: expect.objectContaining({
                 index: ['test-1'],
@@ -1086,7 +1105,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo', 'test-1'],
@@ -1131,7 +1150,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               snoozeSchedule: [snoozePayload],
               revision: 0,
@@ -1162,7 +1181,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               revision: 0,
               snoozeSchedule: [snoozePayload],
@@ -1208,7 +1227,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               revision: 0,
               snoozeSchedule: [...existingSnooze, snoozePayload],
@@ -1253,7 +1272,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               muteAll: true,
               revision: 0,
@@ -1298,7 +1317,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               revision: 0,
               snoozeSchedule: [existingSnooze[1], existingSnooze[2]],
@@ -1343,7 +1362,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               revision: 0,
               snoozeSchedule: [],
@@ -1388,7 +1407,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               revision: 0,
               snoozeSchedule: [existingSnooze[0]],
@@ -1439,40 +1458,6 @@ describe('bulkEdit()', () => {
       expect(response.errors[0].message).toEqual(
         'Error updating rule: could not add snooze - Rule cannot have more than 5 snooze schedules'
       );
-    });
-
-    test('should ignore siem rules when bulk editing snooze', async () => {
-      mockCreatePointInTimeFinderAsInternalUser({
-        saved_objects: [
-          {
-            ...existingDecryptedRule,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            attributes: { ...existingDecryptedRule.attributes, consumer: 'siem' } as any,
-          },
-        ],
-      });
-
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(getMockAttribute());
-
-      const snoozePayload = getSnoozeSchedule();
-
-      await rulesClient.bulkEdit({
-        filter: '',
-        operations: [
-          {
-            operation: 'set',
-            field: 'snoozeSchedule',
-            value: snoozePayload,
-          },
-        ],
-      });
-
-      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-      expect(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes as any)
-          .snoozeSchedule
-      ).toEqual([]);
     });
   });
 
@@ -1541,7 +1526,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo', 'test-1'],
@@ -1594,7 +1579,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               tags: ['foo', 'test-1'],
               params: {
@@ -1613,7 +1598,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo', 'test-1'],
@@ -1667,7 +1652,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               tags: ['foo', 'test-1'],
               params: {
@@ -1686,7 +1671,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo'],
@@ -1740,7 +1725,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               tags: ['foo'],
               params: {
@@ -1830,7 +1815,7 @@ describe('bulkEdit()', () => {
         },
         page: 1,
         perPage: 0,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
       });
     });
     test('should call unsecuredSavedObjectsClient.find for aggregations when called with ids options', async () => {
@@ -1900,7 +1885,7 @@ describe('bulkEdit()', () => {
         },
         page: 1,
         perPage: 0,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
       });
     });
     test('should throw if number of matched rules greater than 10_000', async () => {
@@ -2048,7 +2033,7 @@ describe('bulkEdit()', () => {
           type: 'function',
         },
         perPage: 100,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         namespaces: ['default'],
       });
     });
@@ -2103,7 +2088,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo'],
@@ -2244,7 +2229,7 @@ describe('bulkEdit()', () => {
           saved_objects: [
             {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
               attributes: {
                 enabled: true,
                 tags: ['foo'],
@@ -2338,7 +2323,9 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
+        validLegacyConsumers: [],
       });
 
       const result = await rulesClient.bulkEdit({
@@ -2382,7 +2369,9 @@ describe('bulkEdit()', () => {
         async executor() {
           return { state: {} };
         },
+        category: 'test',
         producer: 'alerts',
+        validLegacyConsumers: [],
       });
 
       const result = await rulesClient.bulkEdit({
@@ -2495,6 +2484,66 @@ describe('bulkEdit()', () => {
         `Error updating rule with ID "${existingDecryptedRule.id}": the interval 10m is longer than the action frequencies`
       );
     });
+
+    test('should only validate schedule limit if schedule is being modified', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {
+              enabled: true,
+              tags: ['foo', 'test-1'],
+              alertTypeId: 'myType',
+              schedule: { interval: '1m' },
+              consumer: 'myApp',
+              scheduledTaskId: 'task-123',
+              executionStatus: {
+                lastExecutionDate: '2019-02-12T21:01:22.479Z',
+                status: 'pending',
+              },
+              params: {},
+              throttle: null,
+              notifyWhen: null,
+              actions: [],
+              revision: 0,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(validateScheduleLimit).toHaveBeenCalledTimes(0);
+
+      await rulesClient.bulkEdit({
+        operations: [
+          {
+            field: 'schedule',
+            operation: 'set',
+            value: { interval: '2m' },
+          },
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(validateScheduleLimit).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('paramsModifier', () => {
@@ -2503,7 +2552,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo'],
@@ -2545,7 +2594,7 @@ describe('bulkEdit()', () => {
         [
           expect.objectContaining({
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: expect.objectContaining({
               params: expect.objectContaining({
                 index: ['test-index-*'],
@@ -2584,7 +2633,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo'],
@@ -2627,7 +2676,7 @@ describe('bulkEdit()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               enabled: true,
               tags: ['foo'],

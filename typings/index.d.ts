@@ -16,7 +16,5 @@ declare module 'axios/lib/adapters/xhr';
 declare module 'react-syntax-highlighter/dist/cjs/create-element';
 declare module 'react-syntax-highlighter/dist/cjs/prism-light';
 
-// Monaco languages support
-declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
-declare module 'monaco-editor/esm/vs/basic-languages/css/css';
-declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+declare module 'find-cypress-specs';
+declare module '@cypress/grep/src/plugin';

@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { useEffect } from 'react';
 import { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { MarkdownSimple, toMountPoint } from '@kbn/kibana-react-plugin/public';
-import React, { useEffect } from 'react';
 
 export const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart) => {
   const infoTitle = i18n.translate('discover.viewAlert.documentsMayVaryInfoTitle', {
@@ -22,7 +21,7 @@ export const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart
 
   toastNotifications.addInfo({
     title: infoTitle,
-    text: toMountPoint(<MarkdownSimple>{infoDescription}</MarkdownSimple>),
+    text: infoDescription,
   });
 };
 

@@ -14,9 +14,10 @@ import {
   PanelNotFoundError,
   type EmbeddableInput,
   isReferenceOrValueEmbeddable,
+  isFilterableEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
+import { type AggregateQuery } from '@kbn/es-query';
 import { DashboardPanelState } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
@@ -61,7 +62,10 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     // TODO: Fix this, potentially by adding a 'canSave' function to embeddable interface
     const { maps, visualize } = this.applicationCapabilities;
     const canSave = embeddable.type === 'map' ? maps.save : visualize.save;
-
+    const { isOfAggregateQueryType } = await import('@kbn/es-query');
+    const query = isFilterableEmbeddable(embeddable) && (await embeddable.getQuery());
+    // Textbased panels (i.e. ES|QL, SQL) should not save to library
+    const isTextBasedEmbeddable = isOfAggregateQueryType(query as AggregateQuery);
     return Boolean(
       canSave &&
         !isErrorEmbeddable(embeddable) &&
@@ -70,7 +74,8 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
         embeddable.getRoot().isContainer &&
         embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
         isReferenceOrValueEmbeddable(embeddable) &&
-        !embeddable.inputIsRefType(embeddable.getInput())
+        !embeddable.inputIsRefType(embeddable.getInput()) &&
+        !isTextBasedEmbeddable
     );
   }
 

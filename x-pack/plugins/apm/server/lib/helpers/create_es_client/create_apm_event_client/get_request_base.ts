@@ -6,12 +6,11 @@
  */
 
 import type { ESFilter } from '@kbn/es-types';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { uniq } from 'lodash';
 import { ApmDataSource } from '../../../../../common/data_source';
-import {} from '../../../../../common/document_type';
 import { PROCESSOR_EVENT } from '../../../../../common/es_fields/apm';
-import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 import {
   getConfigForDocumentType,
   getProcessorEventForDocumentType,
@@ -26,7 +25,7 @@ const processorEventIndexMap = {
 
 export function processorEventsToIndex(
   events: ProcessorEvent[],
-  indices: ApmIndicesConfig
+  indices: APMIndices
 ) {
   return uniq(
     events.flatMap((event) =>
@@ -37,7 +36,7 @@ export function processorEventsToIndex(
 
 export function getRequestBase(options: {
   apm: { events: ProcessorEvent[] } | { sources: ApmDataSource[] };
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
 }) {
   const events =
     'events' in options.apm
@@ -58,9 +57,9 @@ export function getRequestBase(options: {
 
   if ('sources' in options.apm) {
     options.apm.sources.forEach((source) => {
-      const { getQuery } = getConfigForDocumentType(source.documentType);
-      if (getQuery) {
-        filters.push(getQuery(source.rollupInterval));
+      const documentTypeConfig = getConfigForDocumentType(source.documentType);
+      if ('getQuery' in documentTypeConfig) {
+        filters.push(documentTypeConfig.getQuery(source.rollupInterval));
       }
     });
   }

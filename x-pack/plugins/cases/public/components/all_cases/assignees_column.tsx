@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { CaseUI } from '../../../common/ui/types';
-import { getEmptyTagValue } from '../empty_value';
+import { getEmptyCellValue } from '../empty_value';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
@@ -58,7 +58,7 @@ const AssigneesColumnComponent: React.FC<AssigneesColumnProps> = ({
   }, [allAssignees, isAvatarListExpanded, limitedAvatars, shouldShowExpandListButton]);
 
   if (allAssignees.length <= 0) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   }
 
   return (

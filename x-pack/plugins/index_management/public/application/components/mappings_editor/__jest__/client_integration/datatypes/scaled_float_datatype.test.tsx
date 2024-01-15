@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed, kibanaVersion } from '../helpers';
+import { componentHelpers, MappingsEditorTestBed } from '../helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
@@ -21,8 +21,7 @@ export const defaultScaledFloatParameters = {
   store: false,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/145102
-describe.skip('Mappings editor: scaled float datatype', () => {
+describe('Mappings editor: scaled float datatype', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component
    */
@@ -32,7 +31,7 @@ describe.skip('Mappings editor: scaled float datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -90,15 +89,12 @@ describe.skip('Mappings editor: scaled float datatype', () => {
     await act(async () => {
       form.setInputValue('scalingFactor.input', '123');
     });
-    await updateFieldAndCloseFlyout();
-    expect(exists('mappingsEditorFieldEdit')).toBe(false);
 
-    if (kibanaVersion.major < 7) {
-      expect(exists('boostParameterToggle')).toBe(true);
-    } else {
-      // Since 8.x the boost parameter is deprecated
-      expect(exists('boostParameterToggle')).toBe(false);
-    }
+    component.update();
+
+    await updateFieldAndCloseFlyout();
+
+    expect(exists('mappingsEditorFieldEdit')).toBe(false);
 
     // It should have the default parameters values added, plus the scaling factor
     updatedMappings.properties.myField = {

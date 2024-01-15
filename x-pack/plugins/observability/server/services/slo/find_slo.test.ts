@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { ALL_VALUE, Paginated } from '@kbn/slo-schema';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import { SLO } from '../../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createSummarySearchClientMock } from './mocks';
 import { SLORepository } from './slo_repository';
-import { Paginated, SLOSummary, SummarySearchClient } from './summary_search_client';
+import { SLOSummary, SummarySearchClient } from './summary_search_client';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -92,6 +94,9 @@ describe('FindSLO', () => {
             updatedAt: slo.updatedAt.toISOString(),
             enabled: slo.enabled,
             revision: slo.revision,
+            groupBy: slo.groupBy,
+            instanceId: ALL_VALUE,
+            version: SLO_MODEL_VERSION,
           },
         ],
       });
@@ -135,6 +140,19 @@ describe('FindSLO', () => {
       `);
     });
   });
+
+  describe('validation', () => {
+    it("throws an error when 'perPage > 5000'", async () => {
+      const slo = createSLO();
+      mockSummarySearchClient.search.mockResolvedValueOnce(summarySearchResult(slo));
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await expect(findSLO.execute({ perPage: '5000' })).resolves.not.toThrow();
+      await expect(findSLO.execute({ perPage: '5001' })).rejects.toThrowError(
+        'perPage limit set to 5000'
+      );
+    });
+  });
 });
 
 function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
@@ -145,6 +163,7 @@ function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
     results: [
       {
         id: slo.id,
+        instanceId: slo.groupBy === ALL_VALUE ? ALL_VALUE : 'host-abcde',
         summary: {
           status: 'HEALTHY',
           sliValue: 0.9999,

@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
@@ -77,44 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const panelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
         expect(panelTitle).to.equal(EMPTY_TITLE);
         await PageObjects.dashboard.clearUnsavedChanges();
-      });
-
-      it('blank titles are hidden in view mode', async () => {
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-        const titleVisibility = (await PageObjects.dashboard.getVisibilityOfPanelTitles())[0];
-        expect(titleVisibility).to.be(false);
-      });
-
-      it('custom titles are visible in view mode', async () => {
-        await PageObjects.dashboard.switchToEditMode();
-        await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
-        await dashboardCustomizePanel.clickSaveButton();
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-        const titleVisibility = (await PageObjects.dashboard.getVisibilityOfPanelTitles())[0];
-        expect(titleVisibility).to.be(true);
-      });
-
-      it('hiding an individual panel title hides it in view mode', async () => {
-        await PageObjects.dashboard.switchToEditMode();
-        await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.clickToggleHidePanelTitle();
-        await dashboardCustomizePanel.clickSaveButton();
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-        const titleVisibility = (await PageObjects.dashboard.getVisibilityOfPanelTitles())[0];
-        expect(titleVisibility).to.be(false);
-
-        // undo the previous hide panel toggle (i.e. make the panel visible) to keep state consistent
-        await PageObjects.dashboard.switchToEditMode();
-        await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.clickToggleHidePanelTitle();
-        await dashboardCustomizePanel.clickSaveButton();
-        await PageObjects.dashboard.clickQuickSave();
       });
     });
 

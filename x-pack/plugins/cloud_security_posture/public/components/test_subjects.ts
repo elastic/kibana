@@ -29,7 +29,31 @@ export const NO_VULNERABILITIES_STATUS_TEST_SUBJ = {
   NO_VULNERABILITIES: 'no-vulnerabilities-vuln-mgmt-found',
   INDEX_TIMEOUT: 'vulnerabilities-timeout',
 };
+export const CNVM_NOT_INSTALLED_ACTION_SUBJ = 'cnvm-not-installed-action';
+export const CSPM_NOT_INSTALLED_ACTION_SUBJ = 'cspm-not-installed-action';
+export const KSPM_NOT_INSTALLED_ACTION_SUBJ = 'kspm-not-installed-action';
 
 export const VULNERABILITIES_CONTAINER_TEST_SUBJ = 'vulnerabilities_container';
 
-export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vuknerabilities_cvss_score_badge';
+export const VULNERABILITIES_CVSS_SCORE_BADGE_SUBJ = 'vulnerabilities_cvss_score_badge';
+
+export const TAKE_ACTION_SUBJ = 'csp:take_action';
+export const CREATE_RULE_ACTION_SUBJ = 'csp:create_rule';
+
+export const CSP_GROUPING = 'cloudSecurityGrouping';
+export const CSP_GROUPING_LOADING = 'cloudSecurityGroupingLoading';
+export const CSP_FINDINGS_COMPLIANCE_SCORE = 'cloudSecurityFindingsComplianceScore';
+
+export const CSP_FIELDS_SELECTOR_MODAL = 'cloudSecurityFieldsSelectorModal';
+export const CSP_FIELDS_SELECTOR_OPEN_BUTTON = 'cloudSecurityFieldsSelectorOpenButton';
+export const CSP_FIELDS_SELECTOR_RESET_BUTTON = 'cloudSecurityFieldsSelectorResetButton';
+export const CSP_FIELDS_SELECTOR_CLOSE_BUTTON = 'cloudSecurityFieldsSelectorCloseButton';
+
+export const AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'aws-credentials-type-selector';
+export const AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
+  CLOUDFORMATION: 'aws-cloudformation-setup-option',
+  MANUAL: 'aws-manual-setup-option',
+};
+
+export const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
+export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';

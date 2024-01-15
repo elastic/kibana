@@ -13,9 +13,15 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import type { ModelItem } from '../models_list';
 
-const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS).filter(
-  (taskType) => taskType !== SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION
-);
+const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
+
+export function isDfaTrainedModel(modelItem: ModelItem) {
+  return (
+    modelItem.metadata?.analytics_config !== undefined ||
+    modelItem.inference_config?.regression !== undefined ||
+    modelItem.inference_config?.classification !== undefined
+  );
+}
 
 export function isTestable(modelItem: ModelItem, checkForState = false) {
   if (
@@ -33,5 +39,5 @@ export function isTestable(modelItem: ModelItem, checkForState = false) {
     return true;
   }
 
-  return false;
+  return isDfaTrainedModel(modelItem);
 }

@@ -8,7 +8,6 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
-import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { RouteValidatorConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import {
@@ -17,7 +16,9 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
+import { initCopyToSpacesApi } from './copy_to_space';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -33,7 +34,6 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { initCopyToSpacesApi } from './copy_to_space';
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
@@ -80,7 +80,7 @@ describe('copy to space', () => {
     });
 
     initCopyToSpacesApi({
-      externalRouter: router,
+      router,
       getStartServices: async () => [coreStart, {}, {}],
       log,
       getSpacesService: () => spacesServiceStart,

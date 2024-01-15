@@ -10,6 +10,9 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
+import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+import { SloBurnRateRuleParams } from './slo_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AlertingApiProvider({ getService }: FtrProviderContext) {
@@ -85,6 +88,68 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
         }
         return response;
       });
+    },
+
+    async createIndexConnector({ name, indexName }: { name: string; indexName: string }) {
+      const { body } = await supertest
+        .post(`/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo')
+        .send({
+          name,
+          config: {
+            index: indexName,
+            refresh: true,
+          },
+          connector_type_id: '.index',
+        });
+      return body.id as string;
+    },
+
+    async createRule({
+      name,
+      ruleTypeId,
+      params,
+      actions = [],
+      tags = [],
+      schedule,
+      consumer,
+    }: {
+      ruleTypeId: string;
+      name: string;
+      params: MetricThresholdParams | ThresholdParams | SloBurnRateRuleParams;
+      actions?: any[];
+      tags?: any[];
+      schedule?: { interval: string };
+      consumer: string;
+    }) {
+      const { body } = await supertest
+        .post(`/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo')
+        .send({
+          params,
+          consumer,
+          schedule: schedule || {
+            interval: '5m',
+          },
+          tags,
+          name,
+          rule_type_id: ruleTypeId,
+          actions,
+        });
+      return body;
+    },
+
+    async findRule(ruleId: string) {
+      if (!ruleId) {
+        throw new Error(`'ruleId' is undefined`);
+      }
+      const response = await supertest
+        .get('/api/alerting/rules/_find')
+        .set('kbn-xsrf', 'foo')
+        .set('x-elastic-internal-origin', 'foo');
+      return response.body.data.find((obj: any) => obj.id === ruleId);
     },
   };
 }

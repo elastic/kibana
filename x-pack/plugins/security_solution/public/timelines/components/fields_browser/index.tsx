@@ -63,13 +63,19 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
     scopeIdSelector(state, sourcererScope)
   );
   useEffect(() => {
+    let ignore = false;
     const fetchAndSetDataView = async (dataViewId: string) => {
       const aDatView = await dataViews.get(dataViewId);
+      if (ignore) return;
       setDataView(aDatView);
     };
     if (selectedDataViewId != null && !missingPatterns.length) {
       fetchAndSetDataView(selectedDataViewId);
     }
+
+    return () => {
+      ignore = true;
+    };
   }, [selectedDataViewId, missingPatterns, dataViews]);
 
   const openFieldEditor = useCallback<OpenFieldEditor>(

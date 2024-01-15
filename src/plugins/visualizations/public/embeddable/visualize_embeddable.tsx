@@ -7,7 +7,7 @@
  */
 
 import _, { get } from 'lodash';
-import { Subscription, ReplaySubject } from 'rxjs';
+import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
@@ -19,6 +19,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
+import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import {
   Adapters,
   AttributeService,
@@ -39,6 +40,7 @@ import {
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { isFallbackDataView } from '../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
@@ -351,11 +353,13 @@ export class VisualizeEmbeddable
       this.deps
         .start()
         .plugins.data.search.showWarnings(this.getInspectorAdapters()!.requests!, (warning) => {
-          if (
-            warning.type === 'shard_failure' &&
-            warning.reason.type === 'unsupported_aggregation_on_downsampled_index'
-          ) {
-            warnings.push(warning.reason.reason || warning.message);
+          if (hasUnsupportedDownsampledAggregationFailure(warning)) {
+            warnings.push(
+              i18n.translate('visualizations.embeddable.tsdbRollupWarning', {
+                defaultMessage:
+                  'Visualization uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+              })
+            );
             return true;
           }
           if (this.vis.type.suppressWarnings?.()) {
@@ -471,27 +475,38 @@ export class VisualizeEmbeddable
     });
 
     this.subscriptions.push(
-      this.handler.events$.subscribe(async (event) => {
-        if (!this.input.disableTriggers) {
-          const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
-          let context;
+      this.handler.events$
+        .pipe(
+          mergeMap(async (event) => {
+            // Visualize doesn't respond to sizing events, so ignore.
+            if (isChartSizeEvent(event)) {
+              return;
+            }
+            if (!this.input.disableTriggers) {
+              const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+              let context;
 
-          if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
-            context = {
-              embeddable: this,
-              timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
-              ...event.data,
-            };
-          } else {
-            context = {
-              embeddable: this,
-              data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
-            };
-          }
+              if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+                context = {
+                  embeddable: this,
+                  timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+                  ...event.data,
+                };
+              } else {
+                context = {
+                  embeddable: this,
+                  data: {
+                    timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
+                    ...event.data,
+                  },
+                };
+              }
 
-          getUiActions().getTrigger(triggerId).exec(context);
-        }
-      })
+              await getUiActions().getTrigger(triggerId).exec(context);
+            }
+          })
+        )
+        .subscribe()
     );
 
     if (this.vis.description) {
@@ -582,7 +597,7 @@ export class VisualizeEmbeddable
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
-        disableShardWarnings: true,
+        disableWarningToasts: true,
       },
       variables: {
         embeddableTitle: this.getTitle(),

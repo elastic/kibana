@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsResponse } from '../../../common/api';
-import { CaseMetricsFeature } from '../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../common/types/api';
+import { CaseMetricsFeature } from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { SingleCaseBaseHandler } from './single_case_base_handler';

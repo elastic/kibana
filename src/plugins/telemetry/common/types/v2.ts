@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { TelemetryConfigLabels } from '../../server/config';
+
 export interface Telemetry {
   /** Whether telemetry is enabled */
   enabled?: boolean | null;
@@ -24,6 +26,7 @@ export interface FetchTelemetryConfigResponse {
   optIn: boolean | null;
   sendUsageFrom: 'server' | 'browser';
   telemetryNotifyUserAboutOptInDefault: boolean;
+  labels: TelemetryConfigLabels;
 }
 
 export interface FetchLastReportedResponse {

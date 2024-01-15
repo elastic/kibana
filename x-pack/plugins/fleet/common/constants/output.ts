@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NewOutput } from '../types';
+import type { NewOutput, OutputType, ValueOf } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
@@ -13,6 +13,7 @@ export const outputType = {
   Elasticsearch: 'elasticsearch',
   Logstash: 'logstash',
   Kafka: 'kafka',
+  RemoteElasticsearch: 'remote_elasticsearch',
 } as const;
 
 export const DEFAULT_OUTPUT_ID = 'fleet-default-output';
@@ -42,6 +43,12 @@ export const kafkaAuthType = {
   Userpass: 'user_pass',
   Ssl: 'ssl',
   Kerberos: 'kerberos',
+  None: 'none',
+} as const;
+
+export const kafkaConnectionType = {
+  Plaintext: 'plaintext',
+  Encryption: 'encryption',
 } as const;
 
 export const kafkaSaslMechanism = {
@@ -60,18 +67,19 @@ export const kafkaTopicWhenType = {
   Equals: 'equals',
   Contains: 'contains',
   Regexp: 'regexp',
-  Range: 'range',
-  Network: 'network',
-  HasFields: 'has_fields',
-  Or: 'or',
-  And: 'and',
-  Not: 'not',
 } as const;
 
 export const kafkaAcknowledgeReliabilityLevel = {
-  Commit: 'Wait for local commit',
-  Replica: 'Wait for all replicas to commit',
-  DoNotWait: 'Do not wait',
+  Commit: 1,
+  Replica: -1,
+  DoNotWait: 0,
+} as const;
+
+export const kafkaVerificationModes = {
+  Full: 'full',
+  None: 'none',
+  Strict: 'strict',
+  Certificate: 'certificate',
 } as const;
 
 export const kafkaSupportedVersions = [
@@ -111,3 +119,20 @@ export const kafkaSupportedVersions = [
   '2.5.1',
   '2.6.0',
 ];
+
+export const RESERVED_CONFIG_YML_KEYS = [
+  'bulk_max_size',
+  'workers',
+  'queue.mem.events',
+  'flush.min_events',
+  'flush.timeout',
+  'compression',
+  'idle_timeout',
+];
+
+export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+];
+
+export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';

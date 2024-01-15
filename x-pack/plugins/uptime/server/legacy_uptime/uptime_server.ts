@@ -7,8 +7,16 @@
 
 import { Logger } from '@kbn/core/server';
 import { createLifecycleRuleTypeFactory, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { INITIAL_REST_VERSION } from '../../common/constants';
+import { DynamicSettingsSchema } from './routes/dynamic_settings';
+import { UptimeRouter } from '../types';
 import { uptimeRequests } from './lib/requests';
-import { createRouteWithAuth, legacyUptimeRestApiRoutes, uptimeRouteWrapper } from './routes';
+import {
+  createRouteWithAuth,
+  legacyUptimePublicRestApiRoutes,
+  legacyUptimeRestApiRoutes,
+  uptimeRouteWrapper,
+} from './routes';
 import { UptimeServerSetup, UptimeCorePluginsSetup } from './lib/adapters';
 
 import { statusCheckAlertFactory } from './lib/alerts/status_check';
@@ -28,7 +36,8 @@ export const initUptimeServer = (
   server: UptimeServerSetup,
   plugins: UptimeCorePluginsSetup,
   ruleDataClient: IRuleDataClient,
-  logger: Logger
+  logger: Logger,
+  router: UptimeRouter
 ) => {
   legacyUptimeRestApiRoutes.forEach((route) => {
     const { method, options, handler, validate, path } = uptimeRouteWrapper(
@@ -44,16 +53,86 @@ export const initUptimeServer = (
 
     switch (method) {
       case 'GET':
-        server.router.get(routeDefinition, handler);
+        router.get(routeDefinition, handler);
         break;
       case 'POST':
-        server.router.post(routeDefinition, handler);
+        router.post(routeDefinition, handler);
         break;
       case 'PUT':
-        server.router.put(routeDefinition, handler);
+        router.put(routeDefinition, handler);
         break;
       case 'DELETE':
-        server.router.delete(routeDefinition, handler);
+        router.delete(routeDefinition, handler);
+        break;
+      default:
+        throw new Error(`Handler for method ${method} is not defined`);
+    }
+  });
+
+  legacyUptimePublicRestApiRoutes.forEach((route) => {
+    const { method, options, handler, validate, path } = uptimeRouteWrapper(
+      createRouteWithAuth(libs, route),
+      server
+    );
+
+    const routeDefinition = {
+      path,
+      validate,
+      options,
+    };
+
+    switch (method) {
+      case 'GET':
+        router.versioned
+          .get({
+            access: 'public',
+            path: routeDefinition.path,
+            options: {
+              tags: options?.tags,
+            },
+          })
+          .addVersion(
+            {
+              version: INITIAL_REST_VERSION,
+              validate: {
+                request: {
+                  body: validate ? validate?.body : undefined,
+                },
+                response: {
+                  200: {
+                    body: DynamicSettingsSchema,
+                  },
+                },
+              },
+            },
+            handler
+          );
+        break;
+      case 'PUT':
+        router.versioned
+          .put({
+            access: 'public',
+            path: routeDefinition.path,
+            options: {
+              tags: options?.tags,
+            },
+          })
+          .addVersion(
+            {
+              version: INITIAL_REST_VERSION,
+              validate: {
+                request: {
+                  body: validate ? validate?.body : undefined,
+                },
+                response: {
+                  200: {
+                    body: DynamicSettingsSchema,
+                  },
+                },
+              },
+            },
+            handler
+          );
         break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);

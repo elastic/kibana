@@ -8,12 +8,16 @@
 import { chatRoutes } from './chat/route';
 import { connectorRoutes } from './connectors/route';
 import { conversationRoutes } from './conversations/route';
+import { functionRoutes } from './functions/route';
+import { knowledgeBaseRoutes } from './knowledge_base/route';
 
 export function getGlobalObservabilityAIAssistantServerRouteRepository() {
   return {
     ...chatRoutes,
     ...conversationRoutes,
     ...connectorRoutes,
+    ...functionRoutes,
+    ...knowledgeBaseRoutes,
   };
 }
 

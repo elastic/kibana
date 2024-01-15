@@ -111,7 +111,7 @@ export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
             compressed={!isMonitorPage}
             disabled={showSpinner}
             label={btnLabel}
-            showLabel={!!isMonitorPage}
+            showLabel={false}
             aria-label={btnLabel}
             onChange={onAlertClick}
             checked={!!hasAlert}
@@ -126,10 +126,6 @@ export const EnableMonitorAlert = ({ monitorId, selectedMonitor }: Props) => {
       </EuiToolTip>
     </div>
   ) : (
-    <DefineAlertConnectors
-      showPopover={!isMonitorPage}
-      showHelpText={!!isMonitorPage}
-      showLabel={!!isMonitorPage}
-    />
+    <DefineAlertConnectors />
   );
 };

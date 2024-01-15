@@ -5,19 +5,28 @@
  * 2.0.
  */
 
+import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server/types';
+import type { ObservabilityAIAssistantService } from '../service';
 import type {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from '../types';
-import type { IObservabilityAIAssistantService } from '../service/types';
+
+export type ObservabilityAIAssistantRequestHandlerContext = CustomRequestHandlerContext<{
+  rac: RacApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
+  alerting: AlertingApiRequestHandlerContext;
+}>;
 
 export interface ObservabilityAIAssistantRouteHandlerResources {
   request: KibanaRequest;
-  context: RequestHandlerContext;
+  context: ObservabilityAIAssistantRequestHandlerContext;
   logger: Logger;
-  service: IObservabilityAIAssistantService;
+  service: ObservabilityAIAssistantService;
   plugins: {
     [key in keyof ObservabilityAIAssistantPluginSetupDependencies]: {
       setup: Required<ObservabilityAIAssistantPluginSetupDependencies>[key];
@@ -31,6 +40,9 @@ export interface ObservabilityAIAssistantRouteHandlerResources {
 
 export interface ObservabilityAIAssistantRouteCreateOptions {
   options: {
+    timeout?: {
+      idleSocket?: number;
+    };
     tags: Array<'access:ai_assistant'>;
   };
 }

@@ -26,6 +26,7 @@ import {
   IndexFieldsStrategyResponse,
 } from '../../../common/search_strategy';
 import { StartPlugins } from '../../types';
+import { parseOptions } from './parse_options';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
@@ -100,9 +101,11 @@ export const requestIndexFieldSearch = async (
   indexPatterns: DataViewsServerPluginStart,
   useInternalUser?: boolean
 ): Promise<IndexFieldsStrategyResponse> => {
+  const options = parseOptions(request);
+
   const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
   const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
-  if ('dataViewId' in request && 'indices' in request) {
+  if ('dataViewId' in options && 'indices' in options) {
     throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
   }
 
@@ -120,10 +123,10 @@ export const requestIndexFieldSearch = async (
   let runtimeMappings = {};
 
   // if dataViewId is provided, get fields and indices from the Kibana Data View
-  if ('dataViewId' in request) {
+  if ('dataViewId' in options) {
     let dataView;
     try {
-      dataView = await dataViewService.get(request.dataViewId);
+      dataView = await dataViewService.get(options.dataViewId);
     } catch (r) {
       if (
         r.output.payload.statusCode === 404 &&
@@ -148,14 +151,14 @@ export const requestIndexFieldSearch = async (
       []
     );
 
-    if (!request.onlyCheckIfIndicesExist) {
+    if (!options.onlyCheckIfIndicesExist) {
       const dataViewSpec = dataView.toSpec();
       const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];
       runtimeMappings = dataViewSpec.runtimeFieldMap ?? {};
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
-  } else if ('indices' in request) {
-    const patternList = dedupeIndexName(request.indices);
+  } else if ('indices' in options) {
+    const patternList = dedupeIndexName(options.indices);
     indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
       (acc: string[], doesIndexExist, i) => {
         if (doesIndexExist) {
@@ -165,11 +168,11 @@ export const requestIndexFieldSearch = async (
       },
       []
     );
-    if (!request.onlyCheckIfIndicesExist) {
+    if (!options.onlyCheckIfIndicesExist) {
       const fieldDescriptor = (
         await Promise.all(
           indicesExist.map(async (index, n) => {
-            const fieldCapsOptions = request.includeUnmapped
+            const fieldCapsOptions = options.includeUnmapped
               ? { includeUnmapped: true, allow_no_indices: true }
               : undefined;
             if (index.startsWith('.alerts-observability') || useInternalUser) {

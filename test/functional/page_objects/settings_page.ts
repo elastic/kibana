@@ -177,9 +177,20 @@ export class SettingsPageObject extends FtrService {
   async selectTimeFieldOption(selection: string) {
     // open dropdown
     const timefield = await this.getTimeFieldNameField();
-    await timefield.click();
-    await this.browser.pressKeys(selection);
-    await this.browser.pressKeys(this.browser.keys.TAB);
+    const prevValue = await timefield.getAttribute('value');
+    const enabled = await timefield.isEnabled();
+
+    if (prevValue === selection || !enabled) {
+      return;
+    }
+    await this.retry.waitFor('time field dropdown have the right value', async () => {
+      await timefield.click();
+      await timefield.type(this.browser.keys.DELETE, { charByChar: true });
+      await this.browser.pressKeys(selection);
+      await this.browser.pressKeys(this.browser.keys.TAB);
+      const value = await timefield.getAttribute('value');
+      return value === selection;
+    });
   }
 
   async getTimeFieldOption(selection: string) {
@@ -192,7 +203,7 @@ export class SettingsPageObject extends FtrService {
 
   async setNameField(dataViewName: string) {
     const field = await this.getNameField();
-    await field.clearValue();
+    await field.clearValueWithKeyboard();
     await field.type(dataViewName);
   }
 
@@ -291,6 +302,13 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
+  async getFieldFilterTabCount() {
+    return await this.retry.try(async () => {
+      const text = await this.testSubjects.getVisibleText('tab-sourceFilters');
+      return text.split(' ')[2].replace(/\((.*)\)/, '$1');
+    });
+  }
+
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
     return await Promise.all(
@@ -343,6 +361,19 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+  }
+
+  async setSchemaFieldTypeFilter(type: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.clickWhenNotDisabledWithoutRetry('schemaFieldTypeFilterDropdown');
+      await this.find.byCssSelector(
+        '.euiPopover-isOpen[data-test-subj="schemaFieldTypeFilterDropdown-popover"]'
+      );
+    });
+    await this.testSubjects.existOrFail(`schemaFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.click(`schemaFieldTypeFilterDropdown-option-${type}`);
+    await this.testSubjects.existOrFail(`schemaFieldTypeFilterDropdown-option-${type}-checked`);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
   }
 
@@ -463,13 +494,20 @@ export class SettingsPageObject extends FtrService {
     await customDataViewIdInput.type(value);
   }
 
+  async allowHiddenClick() {
+    await this.testSubjects.click('toggleAdvancedSetting');
+    const allowHiddenField = await this.testSubjects.find('allowHiddenField');
+    await (await allowHiddenField.findByTagName('button')).click();
+  }
+
   async createIndexPattern(
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
     isStandardIndexPattern = true,
     customDataViewId?: string,
-    dataViewName?: string
+    dataViewName?: string,
+    allowHidden?: boolean
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
@@ -482,6 +520,11 @@ export class SettingsPageObject extends FtrService {
       } else {
         await this.clickAddNewIndexPatternButton();
       }
+
+      if (allowHidden) {
+        await this.allowHiddenClick();
+      }
+
       await this.header.waitUntilLoadingHasFinished();
       if (!isStandardIndexPattern) {
         await this.selectRollupIndexPatternType();
@@ -535,19 +578,26 @@ export class SettingsPageObject extends FtrService {
       throw new Error('No Data View name provided for edit');
     }
 
-    this.clickEditIndexButton();
+    await this.clickEditIndexButton();
     await this.header.waitUntilLoadingHasFinished();
 
     await this.retry.try(async () => {
+      if (dataViewName) {
+        await this.setNameField(dataViewName);
+      }
       await this.setIndexPatternField(indexPatternName);
+      await this.header.waitUntilLoadingHasFinished();
+      if (timefield) {
+        await this.selectTimeFieldOption(timefield);
+      }
+      const indexPatternSaveBtn = await this.getSaveIndexPatternButton();
+      await indexPatternSaveBtn.click();
+
+      const form = await this.testSubjects.findAll('indexPatternEditorForm');
+      const hasValidationErrors =
+        form.length !== 0 && (await form[0].getAttribute('data-validation-error')) === '1';
+      expect(hasValidationErrors).to.eql(false);
     });
-    if (dataViewName) {
-      await this.setNameField(dataViewName);
-    }
-    if (timefield) {
-      await this.selectTimeFieldOption(timefield);
-    }
-    await (await this.getSaveIndexPatternButton()).click();
 
     if (errorCheck) {
       await this.retry.try(async () => {
@@ -621,6 +671,10 @@ export class SettingsPageObject extends FtrService {
     const currentName = await field.getAttribute('value');
     this.log.debug(`setIndexPatternField set to ${currentName}`);
     expect(currentName).to.eql(indexPatternName);
+    await this.retry.waitFor('validating the given index pattern should be finished', async () => {
+      const isValidating = await field.getAttribute('data-is-validating');
+      return isValidating === '0';
+    });
   }
 
   async getCreateIndexPatternGoToStep2Button() {
@@ -745,6 +799,23 @@ export class SettingsPageObject extends FtrService {
     if (doSaveField) {
       await this.clickSaveField();
     }
+  }
+
+  async editFieldFilter(name: string, newName: string) {
+    await this.testSubjects.click(`edit_filter-${name}`);
+    await this.testSubjects.setValue(`filter_input_${name}`, newName);
+    await this.testSubjects.click(`save_filter-${name}`);
+
+    const table = await this.find.byClassName('euiTable');
+    await this.retry.waitFor('field filter to be changed', async () => {
+      const tableCells = await table.findAllByCssSelector('td');
+      const fieldNames = await Promise.all(
+        tableCells.map(async (cell) => {
+          return (await cell.getVisibleText()).trim();
+        })
+      );
+      return fieldNames.includes(newName);
+    });
   }
 
   async addFieldFilter(name: string) {

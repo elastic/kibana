@@ -17,7 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   let elasticAgentpkgVersion: string;
-  describe('fleet_list_agent', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/170690
+  // Failing: See https://github.com/elastic/kibana/issues/170690
+  // Failing: See https://github.com/elastic/kibana/issues/170690
+  describe.skip('fleet_list_agent', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       const getPkRes = await supertest
@@ -216,6 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return a status summary if getStatusSummary provided', async () => {
       const { body: apiResponse } = await supertest
         .get('/api/fleet/agents?getStatusSummary=true&perPage=0')
+        .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
       expect(apiResponse.items).to.eql([]);

@@ -16,6 +16,7 @@ import { EuiFieldSearch, type EuiFieldSearchProps } from '@elastic/eui';
 export interface FieldNameSearchProps {
   'data-test-subj': string;
   append?: EuiFieldSearchProps['append'];
+  compressed?: EuiFieldSearchProps['compressed'];
   nameFilter: string;
   screenReaderDescriptionId?: string;
   onChange: (nameFilter: string) => unknown;
@@ -25,6 +26,7 @@ export interface FieldNameSearchProps {
  * Search input for fields list
  * @param dataTestSubject
  * @param append
+ * @param compressed
  * @param nameFilter
  * @param screenReaderDescriptionId
  * @param onChange
@@ -33,6 +35,7 @@ export interface FieldNameSearchProps {
 export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
   'data-test-subj': dataTestSubject,
   append,
+  compressed,
   nameFilter,
   screenReaderDescriptionId,
   onChange,
@@ -52,6 +55,7 @@ export const FieldNameSearch: React.FC<FieldNameSearchProps> = ({
       placeholder={searchPlaceholder}
       value={nameFilter}
       append={append}
+      compressed={compressed}
     />
   );
 };

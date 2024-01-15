@@ -56,7 +56,7 @@ export function convertMigrationFunction(
 
       return { transformedDoc: result, additionalDocs: [] };
     } catch (error) {
-      log.error(error);
+      log.error(`Error trying to transform document: ${error.message}`);
       throw new TransformSavedObjectDocumentError(error, version);
     }
   };
@@ -92,13 +92,14 @@ export function transformComparator(a: Transform, b: Transform) {
  */
 export function downgradeRequired(
   doc: SavedObjectUnsanitizedDoc,
-  latestVersions: Record<TransformType, string>
+  latestVersions: Record<TransformType, string>,
+  targetTypeVersion?: string
 ): boolean {
   const docTypeVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
-  const latestMigrationVersion = maxVersion(
-    latestVersions[TransformType.Migrate],
-    latestVersions[TransformType.Convert]
-  );
+  const latestMigrationVersion =
+    targetTypeVersion ??
+    maxVersion(latestVersions[TransformType.Migrate], latestVersions[TransformType.Convert]);
+
   if (!docTypeVersion || !latestMigrationVersion) {
     return false;
   }

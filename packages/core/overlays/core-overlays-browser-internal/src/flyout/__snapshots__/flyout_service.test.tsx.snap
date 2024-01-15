@@ -12,6 +12,20 @@ exports[`FlyoutService openFlyout() renders a flyout to the DOM 1`] = `
 Array [
   Array [
     <KibanaRenderContextProvider
+      analytics={
+        Object {
+          "optIn": [MockFunction],
+          "reportEvent": [MockFunction],
+          "telemetryCounter$": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        }
+      }
       i18n={
         Object {
           "Context": [MockFunction],
@@ -19,6 +33,7 @@ Array [
       }
       theme={
         Object {
+          "getTheme": [MockFunction],
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -45,22 +60,43 @@ exports[`FlyoutService openFlyout() with a currently active flyout replaces the 
 Array [
   Array [
     <KibanaRenderContextProvider
+      analytics={
+        Object {
+          "optIn": [MockFunction],
+          "reportEvent": [MockFunction],
+          "telemetryCounter$": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        }
+      }
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <KibanaThemeProvider
-                    theme={
+                  "children": <KibanaErrorBoundaryProvider
+                    analytics={
                       Object {
-                        "theme$": Observable {
-                          "_subscribe": [Function],
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
                         },
                       }
                     }
                   >
-                    <EuiErrorBoundary>
+                    <KibanaErrorBoundary>
                       <EuiFlyout
                         onClose={[Function]}
                       >
@@ -69,8 +105,8 @@ Array [
                           mount={[Function]}
                         />
                       </EuiFlyout>
-                    </EuiErrorBoundary>
-                  </KibanaThemeProvider>,
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>,
                 },
                 Object {},
               ],
@@ -78,16 +114,23 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaThemeProvider
-                  theme={
+                "value": <KibanaErrorBoundaryProvider
+                  analytics={
                     Object {
-                      "theme$": Observable {
-                        "_subscribe": [Function],
+                      "optIn": [MockFunction],
+                      "reportEvent": [MockFunction],
+                      "telemetryCounter$": Subject {
+                        "closed": false,
+                        "currentObservers": null,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [],
+                        "thrownError": null,
                       },
                     }
                   }
                 >
-                  <EuiErrorBoundary>
+                  <KibanaErrorBoundary>
                     <EuiFlyout
                       onClose={[Function]}
                     >
@@ -96,8 +139,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiFlyout>
-                  </EuiErrorBoundary>
-                </KibanaThemeProvider>,
+                  </KibanaErrorBoundary>
+                </KibanaErrorBoundaryProvider>,
               },
             ],
           },
@@ -105,6 +148,7 @@ Array [
       }
       theme={
         Object {
+          "getTheme": [MockFunction],
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -124,22 +168,43 @@ Array [
   ],
   Array [
     <KibanaRenderContextProvider
+      analytics={
+        Object {
+          "optIn": [MockFunction],
+          "reportEvent": [MockFunction],
+          "telemetryCounter$": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        }
+      }
       i18n={
         Object {
           "Context": [MockFunction] {
             "calls": Array [
               Array [
                 Object {
-                  "children": <KibanaThemeProvider
-                    theme={
+                  "children": <KibanaErrorBoundaryProvider
+                    analytics={
                       Object {
-                        "theme$": Observable {
-                          "_subscribe": [Function],
+                        "optIn": [MockFunction],
+                        "reportEvent": [MockFunction],
+                        "telemetryCounter$": Subject {
+                          "closed": false,
+                          "currentObservers": null,
+                          "hasError": false,
+                          "isStopped": false,
+                          "observers": Array [],
+                          "thrownError": null,
                         },
                       }
                     }
                   >
-                    <EuiErrorBoundary>
+                    <KibanaErrorBoundary>
                       <EuiFlyout
                         onClose={[Function]}
                       >
@@ -148,8 +213,8 @@ Array [
                           mount={[Function]}
                         />
                       </EuiFlyout>
-                    </EuiErrorBoundary>
-                  </KibanaThemeProvider>,
+                    </KibanaErrorBoundary>
+                  </KibanaErrorBoundaryProvider>,
                 },
                 Object {},
               ],
@@ -157,16 +222,23 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <KibanaThemeProvider
-                  theme={
+                "value": <KibanaErrorBoundaryProvider
+                  analytics={
                     Object {
-                      "theme$": Observable {
-                        "_subscribe": [Function],
+                      "optIn": [MockFunction],
+                      "reportEvent": [MockFunction],
+                      "telemetryCounter$": Subject {
+                        "closed": false,
+                        "currentObservers": null,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [],
+                        "thrownError": null,
                       },
                     }
                   }
                 >
-                  <EuiErrorBoundary>
+                  <KibanaErrorBoundary>
                     <EuiFlyout
                       onClose={[Function]}
                     >
@@ -175,8 +247,8 @@ Array [
                         mount={[Function]}
                       />
                     </EuiFlyout>
-                  </EuiErrorBoundary>
-                </KibanaThemeProvider>,
+                  </KibanaErrorBoundary>
+                </KibanaErrorBoundaryProvider>,
               },
             ],
           },
@@ -184,6 +256,7 @@ Array [
       }
       theme={
         Object {
+          "getTheme": [MockFunction],
           "theme$": Observable {
             "_subscribe": [Function],
           },

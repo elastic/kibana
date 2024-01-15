@@ -13,6 +13,8 @@ import type {
   CasesStatusResponse,
   CasesBulkGetRequest,
   CasesBulkGetResponse,
+  CasesMetricsRequest,
+  CasesMetricsResponse,
 } from '../../common/types/api';
 import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../../common/ui';
 import {
@@ -21,7 +23,6 @@ import {
   CASE_STATUS_URL,
   INTERNAL_BULK_GET_CASES_URL,
 } from '../../common/constants';
-import type { CasesMetricsRequest, CasesMetricsResponse } from '../../common/api';
 import { convertAllCasesToCamel, convertToCamelCase } from './utils';
 import {
   decodeCasesBulkGetResponse,

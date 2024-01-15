@@ -2090,6 +2090,12 @@ ace.define(
           case 'p':
             next('p');
             switch (ch) {
+              case 'a':
+                next('a');
+                next('t');
+                next('c');
+                next('h');
+                return 'patch';
               case 'u':
                 next('u');
                 next('t');
@@ -2106,6 +2112,12 @@ ace.define(
           case 'P':
             next('P');
             switch (ch) {
+              case 'A':
+                next('A');
+                next('T');
+                next('C');
+                next('H');
+                return 'PATCH';
               case 'U':
                 next('U');
                 next('T');
@@ -2120,7 +2132,7 @@ ace.define(
             }
             break;
           default:
-            error('Expected one of GET/POST/PUT/DELETE/HEAD');
+            error('Expected one of GET/POST/PUT/DELETE/HEAD/PATCH');
         }
       },
       value, // Place holder for the value function.
@@ -2254,7 +2266,7 @@ ace.define(
             annotate('error', e.message);
             // snap
             const substring = text.substr(at);
-            const nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE/m);
+            const nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE|PATCH/m);
             if (nextMatch < 1) return;
             reset(at + nextMatch);
           }

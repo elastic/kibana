@@ -8,13 +8,19 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { getTimeZone } from '@kbn/visualization-utils';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  ChartSizeEvent,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MultiFilterEvent } from '../../common/types';
 import { ExpressionHeatmapPluginStart } from '../plugin';
 import {
   EXPRESSION_HEATMAP_NAME,
@@ -28,7 +34,6 @@ import {
   getPaletteService,
   getUISettings,
 } from '../services';
-import { getTimeZone } from '../utils/get_timezone';
 
 interface ExpressioHeatmapRendererDependencies {
   getStartDeps: StartServicesGetter<ExpressionHeatmapPluginStart>;
@@ -54,6 +59,9 @@ export const heatmapRenderer: (
     const onSelectRange = (data: BrushEvent['data']) => {
       handlers.event({ name: 'brush', data });
     };
+    const onClickMultiValue = (data: MultiFilterEvent['data']) => {
+      handlers.event({ name: 'multiFilter', data });
+    };
 
     const renderComplete = () => {
       const executionContext = handlers.getExecutionContext();
@@ -73,6 +81,18 @@ export const heatmapRenderer: (
 
       handlers.done();
     };
+
+    const chartSizeEvent: ChartSizeEvent = {
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          x: { value: 100, unit: 'percentage' },
+          y: { value: 100, unit: 'percentage' },
+        },
+      },
+    };
+
+    handlers.event(chartSizeEvent);
 
     const timeZone = getTimeZone(getUISettings());
     const { HeatmapComponent } = await import('../components/heatmap_component');
@@ -97,6 +117,7 @@ export const heatmapRenderer: (
               chartsActiveCursorService={plugins.charts.activeCursor}
               syncTooltips={config.syncTooltips}
               syncCursor={config.syncCursor}
+              onClickMultiValue={onClickMultiValue}
             />
           </div>
         </I18nProvider>

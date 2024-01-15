@@ -9,12 +9,42 @@
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { extractReferences } from '../saved_visualization_references';
 import { visualizationsClient } from '../../content_management';
+import { TypesStart } from '../../vis_types';
 
 interface UpdateBasicSoAttributesDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   overlays: OverlayStart;
+  typesService: TypesStart;
+  contentManagement: ContentManagementPublicStart;
+}
+
+function getClientForType(
+  type: string,
+  typesService: TypesStart,
+  contentManagement: ContentManagementPublicStart
+) {
+  const visAliases = typesService.getAliases();
+  return (
+    visAliases
+      .find((v) => v.appExtensions?.visualizations.docTypes.includes(type))
+      ?.appExtensions?.visualizations.client(contentManagement) || visualizationsClient
+  );
+}
+
+function getAdditionalOptionsForUpdate(
+  type: string,
+  typesService: TypesStart,
+  method: 'update' | 'create'
+) {
+  const visAliases = typesService.getAliases();
+  const aliasType = visAliases.find((v) => v.appExtensions?.visualizations.docTypes.includes(type));
+  if (!aliasType) {
+    return { overwrite: true };
+  }
+  return aliasType?.appExtensions?.visualizations?.clientOptions?.[method];
 }
 
 export const updateBasicSoAttributes = async (
@@ -27,7 +57,9 @@ export const updateBasicSoAttributes = async (
   },
   dependencies: UpdateBasicSoAttributesDependencies
 ) => {
-  const so = await visualizationsClient.get(soId);
+  const client = getClientForType(type, dependencies.typesService, dependencies.contentManagement);
+
+  const so = await client.get(soId);
   const extractedReferences = extractReferences({
     attributes: so.item.attributes,
     references: so.item.references,
@@ -48,14 +80,14 @@ export const updateBasicSoAttributes = async (
     );
   }
 
-  return await visualizationsClient.update({
+  return await client.update({
     id: soId,
     data: {
       ...attributes,
     },
     options: {
-      overwrite: true,
       references,
+      ...getAdditionalOptionsForUpdate(type, dependencies.typesService, 'update'),
     },
   });
 };

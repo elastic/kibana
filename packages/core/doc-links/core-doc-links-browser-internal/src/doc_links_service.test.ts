@@ -7,11 +7,13 @@
  */
 
 import { getDocLinksMock, getDocLinksMetaMock } from './doc_links_service.test.mocks';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { DocLinksService } from './doc_links_service';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 
 describe('DocLinksService', () => {
   let injectedMetadata: ReturnType<typeof injectedMetadataServiceMock.createStartContract>;
+  let coreContext: ReturnType<typeof coreContextMock.create>;
   let service: DocLinksService;
 
   beforeEach(() => {
@@ -26,7 +28,8 @@ describe('DocLinksService', () => {
       settings: 'http://settings.test.url',
     });
 
-    service = new DocLinksService();
+    coreContext = coreContextMock.create();
+    service = new DocLinksService(coreContext);
   });
 
   afterEach(() => {
@@ -43,6 +46,7 @@ describe('DocLinksService', () => {
       expect(getDocLinksMetaMock).toHaveBeenCalledTimes(1);
       expect(getDocLinksMetaMock).toHaveBeenCalledWith({
         kibanaBranch: 'test-branch',
+        buildFlavor: coreContext.env.packageInfo.buildFlavor,
       });
     });
 
@@ -64,6 +68,7 @@ describe('DocLinksService', () => {
       expect(getDocLinksMock).toHaveBeenCalledTimes(1);
       expect(getDocLinksMock).toHaveBeenCalledWith({
         kibanaBranch: 'test-branch',
+        buildFlavor: coreContext.env.packageInfo.buildFlavor,
       });
     });
 

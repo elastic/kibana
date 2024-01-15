@@ -33,6 +33,7 @@ import {
 } from './helpers';
 import {
   getDocsCount,
+  getIndexId,
   getIndexNames,
   getTotalDocsCount,
   getTotalPatternIncompatible,
@@ -49,6 +50,7 @@ import * as i18n from './translations';
 import type { PatternRollup, SelectedIndex, SortConfig } from '../../types';
 import { useIlmExplain } from '../../use_ilm_explain';
 import { useStats } from '../../use_stats';
+import { useDataQualityContext } from '../data_quality_context';
 
 const IndexPropertiesContainer = styled.div`
   margin-bottom: ${euiThemeVars.euiSizeS};
@@ -59,7 +61,9 @@ const EMPTY_INDEX_NAMES: string[] = [];
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -89,8 +93,8 @@ interface Props {
   patternRollup: PatternRollup | undefined;
   selectedIndex: SelectedIndex | null;
   setSelectedIndex: (selectedIndex: SelectedIndex | null) => void;
+  startDate?: string | null;
   theme?: PartialTheme;
-  baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -98,12 +102,13 @@ interface Props {
     indexNames: string[];
     pattern: string;
   }) => void;
-  updatePatternRollup: (patternRollup: PatternRollup) => void;
+  updatePatternRollup: (patternRollup: PatternRollup, requestTime?: number) => void;
 }
 
 const PatternComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
+  endDate,
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick,
@@ -115,17 +120,23 @@ const PatternComponent: React.FC<Props> = ({
   patternRollup,
   selectedIndex,
   setSelectedIndex,
+  startDate,
   theme,
   baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const { isILMAvailable } = useDataQualityContext();
   const [sorting, setSorting] = useState<SortConfig>(defaultSort);
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(MIN_PAGE_SIZE);
 
-  const { error: statsError, loading: loadingStats, stats } = useStats(pattern);
+  const {
+    error: statsError,
+    loading: loadingStats,
+    stats,
+  } = useStats({ pattern, startDate, endDate });
   const { error: ilmExplainError, loading: loadingIlmExplain, ilmExplain } = useIlmExplain(pattern);
 
   const loading = useMemo(
@@ -153,7 +164,12 @@ const PatternComponent: React.FC<Props> = ({
                 formatNumber={formatNumber}
                 docsCount={getDocsCount({ stats, indexName })}
                 getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-                ilmPhase={ilmExplain != null ? getIlmPhase(ilmExplain[indexName]) : undefined}
+                ilmPhase={
+                  isILMAvailable && ilmExplain != null
+                    ? getIlmPhase(ilmExplain?.[indexName], isILMAvailable)
+                    : undefined
+                }
+                indexId={getIndexId({ stats, indexName })}
                 indexName={indexName}
                 isAssistantEnabled={isAssistantEnabled}
                 openCreateCaseFlyout={openCreateCaseFlyout}
@@ -169,31 +185,36 @@ const PatternComponent: React.FC<Props> = ({
       }
     },
     [
+      itemIdToExpandedRowMap,
       addSuccessToast,
       canUserCreateAndReadCases,
       formatBytes,
       formatNumber,
+      stats,
       getGroupByFieldsOnClick,
       ilmExplain,
+      isILMAvailable,
       isAssistantEnabled,
-      itemIdToExpandedRowMap,
       openCreateCaseFlyout,
       pattern,
       patternRollup,
-      stats,
       theme,
       baseTheme,
       updatePatternRollup,
     ]
   );
 
-  const ilmExplainPhaseCounts = useMemo(() => getIlmExplainPhaseCounts(ilmExplain), [ilmExplain]);
+  const ilmExplainPhaseCounts = useMemo(
+    () => (isILMAvailable ? getIlmExplainPhaseCounts(ilmExplain) : undefined),
+    [ilmExplain, isILMAvailable]
+  );
 
   const items = useMemo(
     () =>
       getSummaryTableItems({
         ilmExplain,
         indexNames: indexNames ?? EMPTY_INDEX_NAMES,
+        isILMAvailable,
         pattern,
         patternDocsCount: patternRollup?.docsCount ?? 0,
         results: patternRollup?.results,
@@ -204,6 +225,7 @@ const PatternComponent: React.FC<Props> = ({
     [
       ilmExplain,
       indexNames,
+      isILMAvailable,
       pattern,
       patternRollup?.docsCount,
       patternRollup?.results,
@@ -214,27 +236,44 @@ const PatternComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (shouldCreateIndexNames({ indexNames, stats, ilmExplain })) {
+    const newIndexNames = getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable });
+    const newDocsCount = getTotalDocsCount({ indexNames: newIndexNames, stats });
+
+    if (
+      shouldCreateIndexNames({
+        indexNames,
+        ilmExplain,
+        isILMAvailable,
+        newIndexNames,
+        stats,
+      })
+    ) {
       updatePatternIndexNames({
-        indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
+        indexNames: newIndexNames,
         pattern,
       });
     }
 
-    if (shouldCreatePatternRollup({ error, patternRollup, stats, ilmExplain })) {
+    if (
+      shouldCreatePatternRollup({
+        error,
+        ilmExplain,
+        isILMAvailable,
+        newDocsCount,
+        patternRollup,
+        stats,
+      })
+    ) {
       updatePatternRollup({
-        docsCount: getTotalDocsCount({
-          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
-          stats,
-        }),
+        docsCount: newDocsCount,
         error,
         ilmExplain,
         ilmExplainPhaseCounts,
-        indices: getIndexNames({ stats, ilmExplain, ilmPhases }).length,
+        indices: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }).length,
         pattern,
         results: undefined,
         sizeInBytes: getTotalSizeInBytes({
-          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases }),
+          indexNames: getIndexNames({ stats, ilmExplain, ilmPhases, isILMAvailable }),
           stats,
         }),
         stats,
@@ -246,6 +285,7 @@ const PatternComponent: React.FC<Props> = ({
     ilmExplainPhaseCounts,
     ilmPhases,
     indexNames,
+    isILMAvailable,
     pattern,
     patternRollup,
     stats,

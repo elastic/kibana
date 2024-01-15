@@ -6,30 +6,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
 import { i18n } from '@kbn/i18n';
-
 import {
-  ConnectorStatus,
-  FilteringPolicy,
-  FilteringRule,
-  FilteringRuleRule,
-  SyncJobType,
-} from '../../../common/types/connectors';
+  fetchConnectors,
+  fetchSyncJobsByConnectorId,
+  putUpdateNative,
+  updateConnectorConfiguration,
+  updateConnectorNameAndDescription,
+  updateConnectorScheduling,
+  updateConnectorServiceType,
+  updateConnectorStatus,
+  updateFiltering,
+  updateFilteringDraft,
+} from '@kbn/search-connectors';
+
+import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
+import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
-import { fetchSyncJobsByConnectorId } from '../../lib/connectors/fetch_sync_jobs';
-import { cancelSyncs } from '../../lib/connectors/post_cancel_syncs';
-import { updateFiltering } from '../../lib/connectors/put_update_filtering';
-import { updateFilteringDraft } from '../../lib/connectors/put_update_filtering_draft';
-import { putUpdateNative } from '../../lib/connectors/put_update_native';
-import { startConnectorSync } from '../../lib/connectors/start_sync';
-import { updateConnectorConfiguration } from '../../lib/connectors/update_connector_configuration';
-import { updateConnectorNameAndDescription } from '../../lib/connectors/update_connector_name_and_description';
-import { updateConnectorScheduling } from '../../lib/connectors/update_connector_scheduling';
-import { updateConnectorServiceType } from '../../lib/connectors/update_connector_service_type';
-import { updateConnectorStatus } from '../../lib/connectors/update_connector_status';
+import { startSync } from '../../lib/connectors/start_sync';
+import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
@@ -37,7 +34,10 @@ import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { validateEnum } from '../../utils/validate_enum';
+import {
+  isAccessControlDisabledException,
+  isExpensiveQueriesNotAllowedException,
+} from '../../utils/identify_exceptions';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
@@ -56,7 +56,13 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       try {
-        const body = await addConnector(client, request.body);
+        const body = await addConnector(client, {
+          deleteExistingConnector: request.body.delete_existing_connector,
+          indexName: request.body.index_name,
+          isNative: request.body.is_native,
+          language: request.body.language,
+          serviceType: request.body.service_type,
+        });
         return response.ok({ body });
       } catch (error) {
         if (
@@ -92,7 +98,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await cancelSyncs(client, request.params.connectorId);
+      await cancelSyncs(client.asCurrentUser, request.params.connectorId);
       return response.ok();
     })
   );
@@ -113,7 +119,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const configuration = await updateConnectorConfiguration(
-        client,
+        client.asCurrentUser,
         request.params.connectorId,
         request.body
       );
@@ -137,7 +143,11 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await updateConnectorScheduling(client, request.params.connectorId, request.body);
+      await updateConnectorScheduling(
+        client.asCurrentUser,
+        request.params.connectorId,
+        request.body
+      );
       return response.ok();
     })
   );
@@ -156,7 +166,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(
+      await startSync(
         client,
         request.params.connectorId,
         SyncJobType.FULL,
@@ -177,7 +187,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(client, request.params.connectorId, SyncJobType.INCREMENTAL);
+      await startSync(client, request.params.connectorId, SyncJobType.INCREMENTAL);
       return response.ok();
     })
   );
@@ -192,9 +202,27 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const { client } = (await context.core).elasticsearch;
-      await startConnectorSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
-      return response.ok();
+      try {
+        const { client } = (await context.core).elasticsearch;
+        await startSync(client, request.params.connectorId, SyncJobType.ACCESS_CONTROL);
+        return response.ok();
+      } catch (error) {
+        if (isAccessControlDisabledException(error)) {
+          return createError({
+            errorCode: ErrorCode.ACCESS_CONTROL_DISABLED,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.connectors.accessControlSync.accessControlDisabledError',
+              {
+                defaultMessage:
+                  'Access control sync cannot be created. You must first enable Document Level Security.',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
     })
   );
 
@@ -215,7 +243,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await fetchSyncJobsByConnectorId(
-        client,
+        client.asCurrentUser,
         request.params.connectorId,
         request.query.from,
         request.query.size,
@@ -292,7 +320,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorServiceType(
-        client,
+        client.asCurrentUser,
         request.params.connectorId,
         request.body.serviceType
       );
@@ -313,7 +341,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const result = await updateConnectorStatus(
-        client,
+        client.asCurrentUser,
         request.params.connectorId,
         request.body.status as ConnectorStatus
       );
@@ -337,10 +365,14 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name, description } = request.body;
-      const result = await updateConnectorNameAndDescription(client, request.params.connectorId, {
-        description,
-        name,
-      });
+      const result = await updateConnectorNameAndDescription(
+        client.asCurrentUser,
+        request.params.connectorId,
+        {
+          description,
+          name,
+        }
+      );
       return response.ok({ body: result });
     })
   );
@@ -357,12 +389,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
               field: schema.string(),
               id: schema.string(),
               order: schema.number(),
-              policy: schema.string({
-                validate: validateEnum(FilteringPolicy, 'policy'),
-              }),
-              rule: schema.string({
-                validate: validateEnum(FilteringRuleRule, 'rule'),
-              }),
+              policy: schema.string(),
+              rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
             })
@@ -377,7 +405,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
       const { advanced_snippet, filtering_rules } = request.body;
-      const result = await updateFilteringDraft(client, connectorId, {
+      const result = await updateFilteringDraft(client.asCurrentUser, connectorId, {
         advancedSnippet: advanced_snippet,
         // Have to cast here because our API schema validator doesn't know how to deal with enums
         // We're relying on the schema in the validator above to flag if something goes wrong
@@ -399,12 +427,8 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
               field: schema.string(),
               id: schema.string(),
               order: schema.number(),
-              policy: schema.string({
-                validate: validateEnum(FilteringPolicy, 'policy'),
-              }),
-              rule: schema.string({
-                validate: validateEnum(FilteringRuleRule, 'rule'),
-              }),
+              policy: schema.string(),
+              rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
             })
@@ -419,7 +443,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
       const { advanced_snippet, filtering_rules } = request.body;
-      const result = await updateFiltering(client, connectorId, {
+      const result = await updateFiltering(client.asCurrentUser, connectorId, {
         advancedSnippet: advanced_snippet,
         // Have to cast here because our API schema validator doesn't know how to deal with enums
         // We're relying on the schema in the validator above to flag if something goes wrong
@@ -444,8 +468,75 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
       const connectorId = decodeURIComponent(request.params.connectorId);
       const { is_native } = request.body;
-      const result = await putUpdateNative(client, connectorId, is_native);
+      const result = await putUpdateNative(client.asCurrentUser, connectorId, is_native);
       return result ? response.ok({ body: result }) : response.conflict();
+    })
+  );
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors',
+      validate: {
+        query: schema.object({
+          fetchCrawlersOnly: schema.maybe(schema.boolean()),
+          from: schema.number({ defaultValue: 0, min: 0 }),
+          searchQuery: schema.string({ defaultValue: '' }),
+          size: schema.number({ defaultValue: 10, min: 0 }),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { fetchCrawlersOnly, from, size, searchQuery } = request.query;
+
+      let connectorResult;
+      let connectorCountResult;
+      try {
+        connectorResult = await fetchConnectors(
+          client.asCurrentUser,
+          undefined,
+          fetchCrawlersOnly,
+          searchQuery
+        );
+
+        const indicesSlice = connectorResult
+          .reduce((acc: string[], connector) => {
+            if (connector.index_name) {
+              acc.push(connector.index_name);
+            }
+            return acc;
+          }, [])
+          .slice(from, from + size);
+        connectorCountResult = await fetchIndexCounts(client, indicesSlice);
+      } catch (error) {
+        if (isExpensiveQueriesNotAllowedException(error)) {
+          return createError({
+            errorCode: ErrorCode.EXPENSIVE_QUERY_NOT_ALLOWED_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.expensive_query_not_allowed_error',
+              {
+                defaultMessage:
+                  'Expensive search queries not allowed. "search.allow_expensive_queries" is set to false ',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
+      return response.ok({
+        body: {
+          connectors: connectorResult.slice(from, from + size),
+          counts: connectorCountResult,
+          meta: {
+            page: {
+              from,
+              size,
+              total: connectorResult.length,
+            },
+          },
+        },
+      });
     })
   );
 }

@@ -25,6 +25,8 @@ interface DataViewsServiceFactoryDeps {
   uiSettings: UiSettingsServiceStart;
   fieldFormats: FieldFormatsStart;
   capabilities: CoreStart['capabilities'];
+  scriptedFieldsEnabled: boolean;
+  rollupsEnabled: boolean;
 }
 
 /**
@@ -38,14 +40,18 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
     request?: KibanaRequest,
     byPassCapabilities?: boolean
   ) {
-    const { logger, uiSettings, fieldFormats, capabilities } = deps;
+    const { logger, uiSettings, fieldFormats, capabilities, rollupsEnabled } = deps;
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
     return new DataViewsService({
       uiSettings: new UiSettingsServerToCommon(uiSettingsClient),
       savedObjectsClient: new SavedObjectsClientWrapper(savedObjectsClient),
-      apiClient: new IndexPatternsApiServer(elasticsearchClient, savedObjectsClient),
+      apiClient: new IndexPatternsApiServer(
+        elasticsearchClient,
+        savedObjectsClient,
+        rollupsEnabled
+      ),
       fieldFormats: formats,
       onError: (error) => {
         logger.error(error);
@@ -57,13 +63,22 @@ export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
         byPassCapabilities
           ? true
           : request
-          ? (await capabilities.resolveCapabilities(request)).indexPatterns.save === true
+          ? (
+              await capabilities.resolveCapabilities(request, {
+                capabilityPath: 'indexPatterns.save',
+              })
+            ).indexPatterns.save === true
           : false,
       getCanSaveAdvancedSettings: async () =>
         byPassCapabilities
           ? true
           : request
-          ? (await capabilities.resolveCapabilities(request)).advancedSettings.save === true
+          ? (
+              await capabilities.resolveCapabilities(request, {
+                capabilityPath: 'advancedSettings.save',
+              })
+            ).advancedSettings.save === true
           : false,
+      scriptedFieldsEnabled: deps.scriptedFieldsEnabled,
     });
   };

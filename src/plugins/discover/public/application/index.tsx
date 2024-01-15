@@ -8,19 +8,27 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DiscoverRouter } from './discover_router';
 import { DiscoverServices } from '../build_services';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
+import type { DiscoverCustomizationContext } from './types';
 
 export interface RenderAppProps {
   element: HTMLElement;
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
+  customizationContext: DiscoverCustomizationContext;
   isDev: boolean;
 }
 
-export const renderApp = ({ element, services, profileRegistry, isDev }: RenderAppProps) => {
+export const renderApp = ({
+  element,
+  services,
+  profileRegistry,
+  customizationContext,
+  isDev,
+}: RenderAppProps) => {
   const { history: getHistory, capabilities, chrome, data, core } = services;
 
   const history = getHistory();
@@ -36,15 +44,17 @@ export const renderApp = ({ element, services, profileRegistry, isDev }: RenderA
     });
   }
   const unmount = toMountPoint(
-    wrapWithTheme(
-      <DiscoverRouter
-        services={services}
-        profileRegistry={profileRegistry}
-        history={history}
-        isDev={isDev}
-      />,
-      core.theme.theme$
-    )
+    <DiscoverRouter
+      services={services}
+      profileRegistry={profileRegistry}
+      customizationContext={customizationContext}
+      history={history}
+      isDev={isDev}
+    />,
+    {
+      theme: core.theme,
+      i18n: core.i18n,
+    }
   )(element);
 
   return () => {

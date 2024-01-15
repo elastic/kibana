@@ -67,8 +67,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           endpoint: 'POST /internal/observability_onboarding/logs/flow',
           params: {
             body: {
+              type: 'logFiles',
               name: 'name',
-              state: {},
+              state: {
+                datasetName: 'my-dataset',
+                serviceName: 'my-service',
+                namespace: 'my-namespace',
+                logFilePaths: ['my-service.log'],
+              },
             },
           },
         });

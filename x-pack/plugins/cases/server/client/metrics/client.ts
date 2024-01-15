@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { CasesStatusRequest, CasesStatusResponse } from '../../../common/types/api';
 import type {
+  CasesStatusRequest,
+  CasesStatusResponse,
   SingleCaseMetricsResponse,
   CasesMetricsRequest,
   CasesMetricsResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
 import type { CasesClientArgs } from '../types';

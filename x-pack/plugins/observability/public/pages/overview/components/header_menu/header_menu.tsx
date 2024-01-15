@@ -8,12 +8,18 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+
 import { useKibana } from '../../../../utils/kibana_react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import HeaderMenuPortal from './header_menu_portal';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const { http, theme } = useKibana().services;
+  const {
+    http,
+    theme,
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useKibana().services;
+
   const {
     appMountParameters: { setHeaderActionMenu },
   } = usePluginContext();
@@ -28,6 +34,7 @@ export function HeaderMenu(): React.ReactElement | null {
         >
           {addDataLinkText}
         </EuiHeaderLink>
+        {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
       </EuiHeaderLinks>
     </HeaderMenuPortal>
   );

@@ -8,11 +8,19 @@
 
 import './src/register_globals';
 
-export { monaco } from './src/monaco_imports';
+export {
+  monaco,
+  cssConf,
+  cssLanguage,
+  markdownConf,
+  markdownLanguage,
+  yamlConf,
+  yamlLanguage,
+} from './src/monaco_imports';
 export { XJsonLang } from './src/xjson';
 export { SQLLang } from './src/sql';
 export { ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang } from './src/esql';
-export type { ESQLCustomAutocompleteCallbacks } from './src/esql';
+export type { ESQLCallbacks } from './src/esql';
 
 export * from './src/painless';
 /* eslint-disable-next-line @kbn/eslint/module_migration */

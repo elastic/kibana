@@ -70,3 +70,12 @@ export interface LatestFunctionConfigUI {
   unique_key: Array<EuiComboBoxOptionOption<string>> | undefined;
   sort: EuiComboBoxOptionOption<string> | undefined;
 }
+
+export enum TRANSFORM_ACTIONS {
+  DELETE = 'delete',
+  REAUTHORIZE = 'reauthorize',
+  RESET = 'reset',
+  SCHEDULE_NOW = 'schedule_now',
+  STOP = 'stop',
+  START = 'start',
+}

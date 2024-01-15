@@ -11,6 +11,7 @@ import type { TimelineEventsDetailsItem } from '../../../../common/search_strate
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { getSummaryRows } from './get_alert_summary_rows';
 import { SummaryView } from './summary_view';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const AlertSummaryViewComponent: React.FC<{
   browserFields: BrowserFields;
@@ -21,10 +22,44 @@ const AlertSummaryViewComponent: React.FC<{
   title: string;
   goToTable: () => void;
   isReadOnly?: boolean;
-}> = ({ browserFields, data, eventId, isDraggable, scopeId, title, goToTable, isReadOnly }) => {
+  investigationFields?: string[];
+}> = ({
+  browserFields,
+  data,
+  eventId,
+  isDraggable,
+  scopeId,
+  title,
+  goToTable,
+  isReadOnly,
+  investigationFields,
+}) => {
+  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'sentinelOneManualHostActionsEnabled'
+  );
+
   const summaryRows = useMemo(
-    () => getSummaryRows({ browserFields, data, eventId, isDraggable, scopeId, isReadOnly }),
-    [browserFields, data, eventId, isDraggable, scopeId, isReadOnly]
+    () =>
+      getSummaryRows({
+        browserFields,
+        data,
+        eventId,
+        isDraggable,
+        scopeId,
+        isReadOnly,
+        investigationFields,
+        sentinelOneManualHostActionsEnabled,
+      }),
+    [
+      browserFields,
+      data,
+      eventId,
+      isDraggable,
+      scopeId,
+      isReadOnly,
+      investigationFields,
+      sentinelOneManualHostActionsEnabled,
+    ]
   );
 
   return (

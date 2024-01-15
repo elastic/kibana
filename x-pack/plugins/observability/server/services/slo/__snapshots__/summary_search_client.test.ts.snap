@@ -3,7 +3,7 @@
 exports[`Summary Search Client returns the summary documents without duplicate temporary summary documents 1`] = `
 Array [
   Object {
-    "index": ".slo-observability.summary-v2*",
+    "index": ".slo-observability.summary-v3*",
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -37,6 +37,7 @@ Object {
   "results": Array [
     Object {
       "id": "slo-one",
+      "instanceId": "*",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -50,6 +51,7 @@ Object {
     },
     Object {
       "id": "slo_two",
+      "instanceId": "*",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -63,6 +65,7 @@ Object {
     },
     Object {
       "id": "slo-three",
+      "instanceId": "*",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -76,6 +79,7 @@ Object {
     },
     Object {
       "id": "slo-five",
+      "instanceId": "*",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,
@@ -89,6 +93,7 @@ Object {
     },
     Object {
       "id": "slo-four",
+      "instanceId": "*",
       "summary": Object {
         "errorBudget": Object {
           "consumed": 0.4,

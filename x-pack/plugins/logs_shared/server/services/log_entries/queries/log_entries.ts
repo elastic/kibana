@@ -68,7 +68,7 @@ export const getSortDirection = (
 
 const createSearchAfterClause = (
   cursor: LogEntryBeforeCursor | LogEntryAfterCursor | null | undefined
-): { search_after?: [number, number] } => {
+): { search_after?: [string, number] } => {
   if (logEntryBeforeCursorRT.is(cursor) && cursor.before !== 'last') {
     return {
       search_after: [cursor.before.time, cursor.before.tiebreaker],
@@ -122,7 +122,7 @@ const createHighlightQuery = (
 export const logEntryHitRT = rt.intersection([
   commonHitFieldsRT,
   rt.type({
-    sort: rt.tuple([rt.number, rt.number]),
+    sort: rt.tuple([rt.string, rt.number]),
   }),
   rt.partial({
     fields: rt.record(rt.string, jsonArrayRT),

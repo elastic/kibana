@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseMetricsFeature } from '../../../common/api';
+import { CaseMetricsFeature } from '../../../common/types/api';
 import type { CasesClientMock } from '../mocks';
 import { getCasesMetrics } from './get_cases_metrics';
 import { createMockClientArgs, createMockClient } from './test_utils/client';

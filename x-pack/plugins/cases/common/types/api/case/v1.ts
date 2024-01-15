@@ -19,6 +19,10 @@ import {
   MAX_TAGS_FILTER_LENGTH,
   MAX_CASES_TO_UPDATE,
   MAX_BULK_GET_CASES,
+  MAX_CATEGORY_FILTER_LENGTH,
+  MAX_ASSIGNEES_PER_CASE,
+  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -26,6 +30,7 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
+import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -35,13 +40,33 @@ import {
   RelatedCaseRt,
 } from '../../domain/case/v1';
 import { CaseConnectorRt } from '../../domain/connector/v1';
-import { CaseAssigneesRt, UserRt } from '../../domain/user/v1';
+import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
+
+const CaseCustomFieldTextWithValidationValueRt = limitedStringSchema({
+  fieldName: 'value',
+  min: 1,
+  max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+});
+
+const CaseCustomFieldTextWithValidationRt = rt.strict({
+  key: rt.string,
+  type: CustomFieldTextTypeRt,
+  value: rt.union([CaseCustomFieldTextWithValidationValueRt, rt.null]),
+});
+
+const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);
+
+const CustomFieldsRt = limitedArraySchema({
+  codec: CustomFieldRt,
+  fieldName: 'customFields',
+  min: 0,
+  max: MAX_CUSTOM_FIELDS_PER_CASE,
+});
 
 /**
  * Create case
  */
-
 export const CasePostRequestRt = rt.intersection([
   rt.strict({
     /**
@@ -84,7 +109,12 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The users assigned to the case
        */
-      assignees: CaseAssigneesRt,
+      assignees: limitedArraySchema({
+        codec: CaseUserProfileRt,
+        fieldName: 'assignees',
+        min: 0,
+        max: MAX_ASSIGNEES_PER_CASE,
+      }),
       /**
        * The severity of the case. The severity is
        * default it to "low" if not provided.
@@ -97,9 +127,34 @@ export const CasePostRequestRt = rt.intersection([
         limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
         rt.null,
       ]),
+      /**
+       * The list of custom field values of the case.
+       */
+      customFields: CustomFieldsRt,
     })
   ),
 ]);
+
+/**
+ * Bulk create cases
+ */
+
+const CaseCreateRequestWithOptionalId = rt.intersection([
+  CasePostRequestRt,
+  rt.exact(rt.partial({ id: rt.string })),
+]);
+
+export const BulkCreateCasesRequestRt = rt.strict({
+  cases: rt.array(CaseCreateRequestWithOptionalId),
+});
+
+export const BulkCreateCasesResponseRt = rt.strict({
+  cases: rt.array(CaseRt),
+});
+
+/**
+ * Find cases
+ */
 
 export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
@@ -134,11 +189,11 @@ export const CasesFindRequestRt = rt.intersection([
       /**
        * The status of the case (open, closed, in-progress)
        */
-      status: CaseStatusRt,
+      status: rt.union([CaseStatusRt, rt.array(CaseStatusRt)]),
       /**
        * The severity of the case
        */
-      severity: CaseSeverityRt,
+      severity: rt.union([CaseSeverityRt, rt.array(CaseSeverityRt)]),
       /**
        * The uids of the user profiles to filter by
        */
@@ -214,10 +269,33 @@ export const CasesFindRequestRt = rt.intersection([
       /**
        * The category of the case.
        */
-      category: rt.union([rt.array(rt.string), rt.string]),
+      category: rt.union([
+        limitedArraySchema({
+          codec: rt.string,
+          fieldName: 'category',
+          min: 0,
+          max: MAX_CATEGORY_FILTER_LENGTH,
+        }),
+        rt.string,
+      ]),
     })
   ),
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
+]);
+
+export const CasesSearchRequestRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      /**
+       * custom fields of the case
+       */
+      customFields: rt.record(
+        rt.string,
+        rt.array(rt.union([rt.string, rt.boolean, rt.number, rt.null]))
+      ),
+    })
+  ),
+  CasesFindRequestRt,
 ]);
 
 export const CasesFindResponseRt = rt.intersection([
@@ -330,7 +408,12 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * The users assigned to this case
        */
-      assignees: CaseAssigneesRt,
+      assignees: limitedArraySchema({
+        codec: CaseUserProfileRt,
+        fieldName: 'assignees',
+        min: 0,
+        max: MAX_ASSIGNEES_PER_CASE,
+      }),
       /**
        * The category of the case.
        */
@@ -338,6 +421,10 @@ export const CasePatchRequestRt = rt.intersection([
         limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
         rt.null,
       ]),
+      /**
+       * Custom fields of the case
+       */
+      customFields: CustomFieldsRt,
     })
   ),
   /**
@@ -415,6 +502,7 @@ export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
@@ -428,3 +516,6 @@ export type GetReportersResponse = rt.TypeOf<typeof GetReportersResponseRt>;
 export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
+export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
+export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
+export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;

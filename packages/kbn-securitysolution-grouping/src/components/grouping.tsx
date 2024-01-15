@@ -128,7 +128,7 @@ const GroupingComponent = <T,>({
               groupBucket={groupBucket}
               groupPanelRenderer={
                 groupPanelRenderer &&
-                groupPanelRenderer(selectedGroup, groupBucket, nullGroupMessage)
+                groupPanelRenderer(selectedGroup, groupBucket, nullGroupMessage, isLoading)
               }
               isLoading={isLoading}
               onToggleGroup={(isOpen) => {

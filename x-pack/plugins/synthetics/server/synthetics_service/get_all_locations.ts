@@ -34,7 +34,7 @@ export async function getAllLocations({
       throttling,
       allLocations: [
         ...publicLocations,
-        ...toClientContract({ locations: privateLocations }, agentPolicies).locations,
+        ...toClientContract({ locations: privateLocations }, agentPolicies),
       ],
     };
   } catch (e) {
@@ -47,6 +47,11 @@ const getServicePublicLocations = async (
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
+  if (!syntheticsMonitorClient.syntheticsService.isAllowed) {
+    return {
+      locations: [],
+    };
+  }
   if (syntheticsMonitorClient.syntheticsService.locations.length === 0) {
     return await getServiceLocations(server);
   }

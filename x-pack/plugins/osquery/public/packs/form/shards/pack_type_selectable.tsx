@@ -8,14 +8,14 @@
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { noop } from 'lodash';
+import styled from '@emotion/styled';
 
 const StyledEuiCard = styled(EuiCard)`
   padding: 16px 92px 16px 16px !important;
-  border: ${(props) => {
-    if (props.selectable?.isSelected) {
-      return `1px solid ${props.theme.eui.euiColorPrimary}`;
+  border: ${({ theme, selectable }) => {
+    if (selectable?.isSelected) {
+      return `${theme.euiTheme.border.width.thin} solid ${theme.euiTheme.colors.success}`;
     }
   }};
 
@@ -30,7 +30,7 @@ const StyledEuiCard = styled(EuiCard)`
   .euiText {
     margin-top: 0;
     margin-left: 25px;
-    color: ${(props) => props.theme.eui.EuiTextSubduedColor};
+    color: ${({ theme }) => theme.euiTheme.colors.subduedText};
   }
 
   > button[role='switch'] {

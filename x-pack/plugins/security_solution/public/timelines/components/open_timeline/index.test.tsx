@@ -389,8 +389,11 @@ describe('StatefulOpenTimeline', () => {
           />
         </TestProviders>
       );
-      wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-      wrapper.find('[data-test-subj="delete-timeline"]').first().simulate('click');
+      wrapper
+        .find('button[data-test-subj="euiCollapsedItemActionsButton"]')
+        .first()
+        .simulate('click');
+      wrapper.find('button[data-test-subj="delete-timeline"]').first().simulate('click');
       wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
 
       await waitFor(() => {
@@ -642,7 +645,9 @@ describe('StatefulOpenTimeline', () => {
 
     await waitFor(() => {
       wrapper
-        .find(`[data-test-subj="title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`)
+        .find(
+          `[data-test-subj="timeline-title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`
+        )
         .last()
         .simulate('click');
 
@@ -664,16 +669,16 @@ describe('StatefulOpenTimeline', () => {
         />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="open-duplicate"]').first().simulate('click');
-    await waitFor(() => {
-      wrapper.update();
+    wrapper
+      .find('button[data-test-subj="euiCollapsedItemActionsButton"]')
+      .first()
+      .simulate('click');
+    wrapper.find('button[data-test-subj="open-duplicate"]').first().simulate('click');
 
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
-        mockOpenTimelineQueryResults.timeline[0].savedObjectId
-      );
-      expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
-    });
+    expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(
+      mockOpenTimelineQueryResults.timeline[0].savedObjectId
+    );
+    expect((queryTimelineById as jest.Mock).mock.calls[0][0].duplicate).toEqual(true);
   });
 
   describe('Create rule from timeline', () => {

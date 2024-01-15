@@ -9,31 +9,19 @@ import { cloneDeep } from 'lodash';
 import { getUserRiskIndex } from '../../../../../../../common/search_strategy/security_solution/risk_score/common';
 import { RiskScoreFields } from '../../../../../../../common/search_strategy/security_solution/risk_score/all';
 import { createSingleFieldMatchEnrichment } from '../create_single_field_match_enrichment';
-import type { CreateRiskEnrichment, GetIsRiskScoreAvailable } from '../types';
+import type { CreateRiskEnrichment } from '../types';
 import { getFieldValue } from '../utils/events';
-
-export const getIsUserRiskScoreAvailable: GetIsRiskScoreAvailable = async ({
-  services,
-  spaceId,
-}) => {
-  const isUserRiskScoreIndexExist = await services.scopedClusterClient.asCurrentUser.indices.exists(
-    {
-      index: getUserRiskIndex(spaceId),
-    }
-  );
-
-  return isUserRiskScoreIndexExist;
-};
 
 export const createUserRiskEnrichments: CreateRiskEnrichment = async ({
   services,
   logger,
   events,
   spaceId,
+  isNewRiskScoreModuleInstalled,
 }) => {
   return createSingleFieldMatchEnrichment({
     name: 'User Risk',
-    index: [getUserRiskIndex(spaceId)],
+    index: [getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
     services,
     logger,
     events,

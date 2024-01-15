@@ -287,6 +287,7 @@ export class Execution<
       isSyncColorsEnabled: () => execution.params.syncColors!,
       isSyncCursorEnabled: () => execution.params.syncCursor!,
       isSyncTooltipsEnabled: () => execution.params.syncTooltips!,
+      shouldUseSizeTransitionVeil: () => execution.params.shouldUseSizeTransitionVeil!,
       ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };
@@ -420,18 +421,20 @@ export class Execution<
             : of(resolvedArgs);
 
           return args$.pipe(
-            tap((args) => this.execution.params.debug && Object.assign(head.debug, { args })),
+            tap((args) => this.execution.params.debug && Object.assign(head.debug ?? {}, { args })),
             switchMap((args) => this.invokeFunction(fn, input, args)),
             this.execution.params.partial ? identity : last(),
             switchMap((output) => (getType(output) === 'error' ? throwError(output) : of(output))),
-            tap((output) => this.execution.params.debug && Object.assign(head.debug, { output })),
+            tap(
+              (output) => this.execution.params.debug && Object.assign(head.debug ?? {}, { output })
+            ),
             switchMap((output) => this.invokeChain<ChainOutput>(tail, output)),
             catchError((rawError) => {
               const error = createError(rawError);
               error.error.message = `[${fnName}] > ${error.error.message}`;
 
               if (this.execution.params.debug) {
-                Object.assign(head.debug, { error, rawError, success: false });
+                Object.assign(head.debug ?? {}, { error, rawError, success: false });
               }
 
               return of(error);
@@ -440,7 +443,7 @@ export class Execution<
         }),
         finalize(() => {
           if (this.execution.params.debug) {
-            Object.assign(head.debug, { duration: now() - timeStart });
+            Object.assign(head.debug ?? {}, { duration: now() - timeStart });
           }
         })
       );

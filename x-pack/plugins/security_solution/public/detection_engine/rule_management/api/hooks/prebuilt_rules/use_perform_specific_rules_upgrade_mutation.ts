@@ -14,9 +14,10 @@ import { PERFORM_RULE_UPGRADE_URL } from '../../../../../../common/api/detection
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
-import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings';
+import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings_query';
 import { performUpgradeSpecificRules } from '../../api';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
+import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 
 export const PERFORM_SPECIFIC_RULES_UPGRADE_KEY = [
   'POST',
@@ -38,6 +39,7 @@ export const usePerformSpecificRulesUpgradeMutation = (
   const invalidateFetchPrebuiltRulesUpgradeReview =
     useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
+  const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
 
   return useMutation<PerformRuleUpgradeResponseBody, Error, UpgradeSpecificRulesRequest['rules']>(
     (rulesToUpgrade: UpgradeSpecificRulesRequest['rules']) => {
@@ -54,6 +56,7 @@ export const usePerformSpecificRulesUpgradeMutation = (
 
         invalidateFetchPrebuiltRulesUpgradeReview();
         invalidateRuleStatus();
+        invalidateFetchCoverageOverviewQuery();
 
         if (options?.onSettled) {
           options.onSettled(...args);
