@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
+import { bundlePackage, removeBundledPackages } from './install_bundled';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -23,6 +24,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('EPM - list', async function () {
     skipIfNoDockerRegistry(providerContext);
+    const log = getService('log');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
@@ -30,6 +32,9 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
+    after(async () => {
+      await removeBundledPackages(log);
     });
 
     describe('list api tests', async () => {
@@ -46,6 +51,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('lists all limited packages from the registry', async function () {
+        await bundlePackage('endpoint-8.6.1');
         const fetchLimitedPackageList = async () => {
           const response = await supertest
             .get('/api/fleet/epm/packages/limited')
