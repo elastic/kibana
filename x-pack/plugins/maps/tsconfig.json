@@ -74,6 +74,7 @@
     "@kbn/content-management-table-list-view",
     "@kbn/serverless",
     "@kbn/logging",
+    "@kbn/chart-expressions-common",
     "@kbn/search-errors",
     "@kbn/search-response-warnings",
     "@kbn/calculate-width-from-char-count",

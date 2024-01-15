@@ -24,7 +24,7 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
   ensureSAMLRoleMapping,
   createMockIdpMetadata,
-} from '@kbn/mock-idp-plugin/common';
+} from '@kbn/mock-idp-utils';
 
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
