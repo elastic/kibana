@@ -21,7 +21,7 @@ export const getProcessAlerts = (
   return alerts.reduce((acc: Record<string, AlertsAction>, alert) => {
     const valueFromAlert: number = overwrite ? alert.process?.pid : alert[field];
     const isEntityId = !overwrite && field.includes('entity_id');
-    const key = isEntityId ? 'entity_id' : 'pid';
+    const paramKey = isEntityId ? 'entity_id' : 'pid';
     const { _id, agent } = alert;
     const { id: agentId, name } = agent as AlertAgent;
     const hostName = alert.host?.name;
@@ -29,7 +29,7 @@ export const getProcessAlerts = (
     const currentValue = acc[valueFromAlert];
     const baseFields = {
       alert_ids: [...(currentValue?.alert_ids || []), _id],
-      parameters: { [key]: valueFromAlert || `${field} not found` },
+      parameters: { [paramKey]: valueFromAlert || `${field} not found` },
       endpoint_ids: [...new Set([...(currentValue?.endpoint_ids || []), agentId])],
       hosts: {
         ...currentValue?.hosts,

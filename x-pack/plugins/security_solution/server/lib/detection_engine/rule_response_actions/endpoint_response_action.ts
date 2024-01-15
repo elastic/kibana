@@ -40,17 +40,15 @@ export const endpointResponseAction = (
     ]);
   }
 
-  const createProcessActionFromAlerts = (
-    actionAlerts: Record<string, AlertsAction>,
-    hasErrors: boolean
-  ) => {
+  const createProcessActionFromAlerts = (actionAlerts: Record<string, AlertsAction>) => {
     const createAction = async (alert: AlertsAction) => {
       const { hosts, parameters, error } = alert;
+
       const actionData = {
         hosts,
         endpoint_ids: alert.endpoint_ids,
         alert_ids: alert.alert_ids,
-        error: hasErrors ? error : undefined,
+        error,
         parameters,
         ...commonData,
       };
@@ -66,8 +64,8 @@ export const endpointResponseAction = (
     const foundFields = getProcessAlerts(alerts, responseAction.params.config, false);
     const notFoundFields = getProcessAlerts(alerts, responseAction.params.config, true);
 
-    const processActions = createProcessActionFromAlerts(foundFields, false);
-    const processActionsWithError = createProcessActionFromAlerts(notFoundFields, true);
+    const processActions = createProcessActionFromAlerts(foundFields);
+    const processActionsWithError = createProcessActionFromAlerts(notFoundFields);
 
     return Promise.all([processActions, processActionsWithError]);
   }
