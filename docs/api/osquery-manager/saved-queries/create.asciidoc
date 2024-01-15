@@ -35,7 +35,7 @@ experimental[] Create saved queries.
 
 `version`:: (Optional, string) Uses the Osquery versions greater than or equal to the specified version string.
 
-`interval`:: (Optional, integer) An interval, in seconds, to run the query.
+`interval`:: (Optional, string) An interval, in seconds, to run the query.
 
 `ecs_mapping`:: (Optional, object) Maps Osquery results columns or static values to ECS fields.
 
@@ -61,7 +61,7 @@ $ curl -X POST api/osquery/saved_queries \
   "id": "saved_query_id",
   "description": "Saved query description",
   "query": "select * from uptime;",
-  "interval": 60,
+  "interval": "60",
   "timeout": 120,
   "version": "2.8.0",
   "platform": "linux,darwin",
