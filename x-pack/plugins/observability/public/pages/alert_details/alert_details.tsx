@@ -54,20 +54,20 @@ export function AlertDetails() {
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
-  const [isLoading, alert] = useFetchAlertDetail(alertId);
+  const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const { rule } = useFetchRule({
-    ruleId: alert?.fields[ALERT_RULE_UUID],
+    ruleId: alertDetail?.alert.fields[ALERT_RULE_UUID],
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
 
   useEffect(() => {
-    if (alert) {
-      setRuleTypeModel(ruleTypeRegistry.get(alert?.fields[ALERT_RULE_TYPE_ID]!));
+    if (alertDetail) {
+      setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.alert.fields[ALERT_RULE_TYPE_ID]!));
     }
-  }, [alert, ruleTypeRegistry]);
+  }, [alertDetail, ruleTypeRegistry]);
   useBreadcrumbs([
     {
       href: http.basePath.prepend(paths.observability.alerts),
@@ -77,7 +77,9 @@ export function AlertDetails() {
       deepLinkId: 'observability-overview:alerts',
     },
     {
-      text: alert ? pageTitleContent(alert.fields[ALERT_RULE_CATEGORY]) : defaultBreadcrumb,
+      text: alertDetail
+        ? pageTitleContent(alertDetail.alert.fields[ALERT_RULE_CATEGORY])
+        : defaultBreadcrumb,
     },
   ]);
 
@@ -86,11 +88,11 @@ export function AlertDetails() {
   }
 
   // Redirect to the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (alert && !isAlertDetailsEnabledPerApp(alert, config)) {
+  if (alertDetail && !isAlertDetailsEnabledPerApp(alertDetail.alert, config)) {
     return <PageNotFound />;
   }
 
-  if (!isLoading && !alert)
+  if (!isLoading && !alertDetail)
     return (
       <EuiPanel data-test-subj="alertDetailsError">
         <EuiEmptyPrompt
@@ -120,7 +122,10 @@ export function AlertDetails() {
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: (
-          <PageTitle alert={alert} dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'} />
+          <PageTitle
+            alert={alertDetail?.alert ?? null}
+            dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}
+          />
         ),
         rightSideItems: [
           <CasesContext
@@ -128,7 +133,7 @@ export function AlertDetails() {
             permissions={userCasesPermissions}
             features={{ alerts: { sync: false } }}
           >
-            <HeaderActions alert={alert} />
+            <HeaderActions alert={alertDetail?.alert ?? null} />
           </CasesContext>,
         ],
         bottomBorder: true,
@@ -140,7 +145,7 @@ export function AlertDetails() {
       <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && (
         <AlertDetailsAppSection
-          alert={alert}
+          alert={alertDetail}
           rule={rule}
           timeZone={timeZone}
           setAlertSummaryFields={setSummaryFields}
