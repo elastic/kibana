@@ -9,6 +9,7 @@ import { ALERTS_FEATURE_ID } from './types';
 
 export const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
   'example.always-firing': [ALERTS_FEATURE_ID],
+  'example.people-in-space': [ALERTS_FEATURE_ID],
   transform_health: [ALERTS_FEATURE_ID],
   '.index-threshold': [ALERTS_FEATURE_ID],
   '.geo-containment': [ALERTS_FEATURE_ID],

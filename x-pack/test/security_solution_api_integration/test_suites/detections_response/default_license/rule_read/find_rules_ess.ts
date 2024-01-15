@@ -18,7 +18,6 @@ import {
   createRule,
   createRuleThroughAlertingEndpoint,
   deleteAllRules,
-  getRuleSOById,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
@@ -26,6 +25,7 @@ import {
   removeServerGeneratedProperties,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  checkInvestigationFieldSoValue,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
+  // TODO: add a new service for pulling kibana username, similar to getService('es')
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
@@ -171,24 +171,36 @@ export default ({ getService }: FtrProviderContext): void => {
          * happening just on the response. In this case, change should
          * NOT include a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          {
+            field_names: ['client.address', 'agent.name'],
           },
-        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
-        const {
-          hits: {
-            hits: [{ _source: ruleSO2 }],
+          es,
+          ruleWithLegacyInvestigationField.id
+        );
+        expect(isInvestigationFieldMigratedInSo).to.eql(false);
+
+        const isInvestigationFieldMigratedInSoForRuleWithEmptyArray =
+          await checkInvestigationFieldSoValue(
+            undefined,
+            {
+              field_names: [],
+            },
+            es,
+            ruleWithLegacyInvestigationFieldEmptyArray.id
+          );
+        expect(isInvestigationFieldMigratedInSoForRuleWithEmptyArray).to.eql(false);
+
+        const isInvestigationFieldSoExpectedType = await checkInvestigationFieldSoValue(
+          undefined,
+          {
+            field_names: ['host.name'],
           },
-        } = await getRuleSOById(es, ruleWithLegacyInvestigationFieldEmptyArray.id);
-        expect(ruleSO2?.alert?.params?.investigationFields).to.eql([]);
-        const {
-          hits: {
-            hits: [{ _source: ruleSO3 }],
-          },
-        } = await getRuleSOById(es, ruleWithExpectedTyping.id);
-        expect(ruleSO3?.alert?.params?.investigationFields).to.eql({ field_names: ['host.name'] });
+          es,
+          ruleWithExpectedTyping.id
+        );
+        expect(isInvestigationFieldSoExpectedType).to.eql(true);
       });
     });
   });
