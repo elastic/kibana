@@ -15,7 +15,7 @@ import { apmRouter } from '../../../routing/apm_route_config';
 import * as timeSeriesColor from '../../../shared/charts/helper/get_timeseries_color';
 import * as stories from './service_list.stories';
 
-const { Example, EmptyState } = composeStories(stories);
+const { ServiceListEmptyState, ServiceListWithItems } = composeStories(stories);
 
 const query = {
   rangeFrom: 'now-15m',
@@ -56,13 +56,13 @@ describe('ServiceList', () => {
   });
 
   it('renders empty state', async () => {
-    render(<EmptyState />);
+    render(<ServiceListWithItems />);
 
     expect(await screen.findByRole('table')).toBeInTheDocument();
   });
 
   it('renders with data', async () => {
-    render(<Example />);
+    render(<ServiceListEmptyState />);
 
     expect(await screen.findByRole('table')).toBeInTheDocument();
   });

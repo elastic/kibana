@@ -48,10 +48,10 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = (args) => {
+export const ServiceListWithItems: Story<Args> = (args) => {
   return <ServiceList {...args} />;
 };
-Example.args = {
+ServiceListWithItems.args = {
   isLoading: false,
   items,
   displayHealthStatus: true,
@@ -59,12 +59,13 @@ Example.args = {
   initialSortDirection: 'desc',
   initialPageSize: 25,
   sortFn: (sortItems) => sortItems,
+  onChangeCurrentPage: (page) => {},
 };
 
-export const EmptyState: Story<Args> = (args) => {
+export const ServiceListEmptyState: Story<Args> = (args) => {
   return <ServiceList {...args} />;
 };
-EmptyState.args = {
+ServiceListEmptyState.args = {
   isLoading: false,
   items: [],
   displayHealthStatus: true,
@@ -72,6 +73,7 @@ EmptyState.args = {
   initialSortDirection: 'desc',
   initialPageSize: 25,
   sortFn: (sortItems) => sortItems,
+  onChangeCurrentPage: (page) => {},
 };
 
 export const WithHealthWarnings: Story<Args> = (args) => {
@@ -87,11 +89,11 @@ WithHealthWarnings.args = {
   sortFn: (sortItems) => sortItems,
 };
 
-export const WithOverflowBucket: Story<Args> = (args) => {
+export const ServiceListWithOverflowBucket: Story<Args> = (args) => {
   return <ServiceList {...args} />;
 };
 
-WithOverflowBucket.args = {
+ServiceListWithOverflowBucket.args = {
   isLoading: false,
   items: overflowItems,
   displayHealthStatus: false,
@@ -99,4 +101,5 @@ WithOverflowBucket.args = {
   initialSortDirection: 'desc',
   initialPageSize: 25,
   sortFn: (sortItems) => sortItems,
+  onChangeCurrentPage: (page) => {},
 };
