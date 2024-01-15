@@ -22,7 +22,7 @@ export const getRulePreviewLensAttributes: GetLensAttributes = (
       visualization: {
         title: 'Empty XY chart',
         legend: {
-          isVisible: false,
+          isVisible: extraOptions?.showLegend,
           position: 'right',
         },
         valueLabels: 'hide',

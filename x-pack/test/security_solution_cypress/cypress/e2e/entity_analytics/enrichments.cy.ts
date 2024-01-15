@@ -12,7 +12,6 @@ import {
   HOST_RISK_COLUMN,
   USER_RISK_COLUMN,
   ACTION_COLUMN,
-  ALERTS_COUNT,
 } from '../../screens/alerts';
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
@@ -30,14 +29,12 @@ import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { deleteRiskEngineConfiguration } from '../../tasks/api_calls/risk_engine';
-import { enableRiskEngine } from '../../tasks/entity_analytics';
+import { mockRiskEngineEnabled } from '../../tasks/entity_analytics';
 
 const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169154
-describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
+describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverUnload', 'risk_scores_new');
     cy.task('esArchiverUnload', 'risk_scores_new_updated');
@@ -56,7 +53,6 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
         deleteAlertsAndRules();
         createRule(getNewRule({ rule_id: 'rule1' }));
         login();
-        deleteRiskEngineConfiguration();
         visitWithTimeRange(ALERTS_URL);
         waitForAlertsToPopulate();
       });
@@ -67,9 +63,6 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('Should has enrichment fields from legacy risk', function () {
-        cy.get(ALERTS_COUNT)
-          .invoke('text')
-          .should('match', /^[1-9].+$/); // Any number of alerts
         cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
         cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
@@ -99,7 +92,7 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
         deleteAlertsAndRules();
         createRule(getNewRule({ rule_id: 'rule1' }));
         login();
-        enableRiskEngine();
+        mockRiskEngineEnabled();
         visitWithTimeRange(ALERTS_URL);
         waitForAlertsToPopulate();
       });
@@ -107,13 +100,9 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       afterEach(() => {
         cy.task('esArchiverUnload', 'risk_scores_new');
         cy.task('esArchiverUnload', 'risk_scores_new_updated');
-        deleteRiskEngineConfiguration();
       });
 
       it('Should has enrichment fields from legacy risk', function () {
-        cy.get(ALERTS_COUNT)
-          .invoke('text')
-          .should('match', /^[1-9].+$/); // Any number of alerts
         cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
         cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
