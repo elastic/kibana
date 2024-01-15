@@ -14,7 +14,8 @@ import {
   parseGroupingQuery,
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { LOCAL_STORAGE_FINDINGS_GROUPING_KEY } from '../../../common/constants';
+import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
 import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
@@ -31,6 +32,8 @@ import {
 } from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { getFilters } from '../utils/get_filters';
+import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
+import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 const getTermAggregation = (key: keyof FindingsGroupingAggregation, field: string) => ({
   [key]: {
@@ -122,14 +125,14 @@ export const isFindingsRootGroupingAggregation = (
  * for the findings page
  */
 export const useLatestFindingsGrouping = ({
-  dataView,
   groupPanelRenderer,
   groupStatsRenderer,
 }: {
-  dataView: DataView;
   groupPanelRenderer?: GroupPanelRenderer<FindingsGroupingAggregation>;
   groupStatsRenderer?: GroupStatsRenderer<FindingsGroupingAggregation>;
 }) => {
+  const { dataView } = useDataViewContext();
+
   const {
     activePageIndex,
     grouping,
@@ -152,7 +155,11 @@ export const useLatestFindingsGrouping = ({
     unit: FINDINGS_UNIT,
     groupPanelRenderer,
     groupStatsRenderer,
+    groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
   });
+
+  const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
+  const mutedRulesFilterQuery = rulesStates ? buildMutedRulesFilter(rulesStates) : [];
 
   const groupingQuery = getGroupingQuery({
     additionalFilters: query ? [query] : [],
@@ -184,8 +191,16 @@ export const useLatestFindingsGrouping = ({
     ],
   });
 
+  const filteredGroupingQuery = {
+    ...groupingQuery,
+    query: {
+      ...groupingQuery.query,
+      bool: { ...groupingQuery.query.bool, must_not: mutedRulesFilterQuery },
+    },
+  };
+
   const { data, isFetching } = useGroupedFindings({
-    query: groupingQuery,
+    query: filteredGroupingQuery,
     enabled: !isNoneSelected,
   });
 

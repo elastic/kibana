@@ -39,12 +39,12 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => Promise<void>;
     dataStreamLinkExistsAt: (index: number) => boolean;
-    clickManageContextMenuButton: () => void;
-    clickContextMenuOption: (optionDataTestSubject: string) => void;
-    clickModalConfirm: () => void;
-    clickCreateIndexButton: () => void;
-    clickCreateIndexCancelButton: () => void;
-    clickCreateIndexSaveButton: () => void;
+    clickManageContextMenuButton: () => Promise<void>;
+    clickContextMenuOption: (optionDataTestSubject: string) => Promise<void>;
+    clickModalConfirm: () => Promise<void>;
+    clickCreateIndexButton: () => Promise<void>;
+    clickCreateIndexCancelButton: () => Promise<void>;
+    clickCreateIndexSaveButton: () => Promise<void>;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
