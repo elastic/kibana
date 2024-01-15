@@ -24,6 +24,23 @@ export enum Aggregators {
 }
 
 export const custom_threshold_AIAssistant_log_count = {
+  dataViewParams: {
+    contentTypeId: 'index-pattern',
+    data: {
+      fieldAttrs: '{}',
+      title: ".ds-logs-apm.*",
+      timeFieldName: '@timestamp',
+      sourceFilters: '[]',
+      fields: '[]',
+      fieldFormatMap: '{}',
+      typeMeta: '{}',
+      runtimeFieldMap: '{}',
+      name: "logs_synth",
+    },
+    options: { id: "logs_synth" },
+    version: 1,
+  },
+
   ruleParams: {
     tags: ['observability'],
     consumer: 'logs',
@@ -33,7 +50,7 @@ export const custom_threshold_AIAssistant_log_count = {
       criteria: [
         {
           comparator: Comparator.GT,
-          threshold: [100],
+          threshold: [10],
           timeSize: 2,
           timeUnit: 'h',
           metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
@@ -47,7 +64,7 @@ export const custom_threshold_AIAssistant_log_count = {
           query: '',
           language: 'kuery',
         },
-        index: ".ds-logs-synth*",
+        index: "logs_synth",
       },
     },
     actions: [],

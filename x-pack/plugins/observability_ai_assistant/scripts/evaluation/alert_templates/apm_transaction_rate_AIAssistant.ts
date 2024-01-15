@@ -8,7 +8,7 @@
 export const apm_transaction_rate_AIAssistant = {
   ruleParams: {
     consumer: 'apm',
-    name: 'apm_error_count_AIAssistant',
+    name: 'apm_transaction_rate_AIAssistant',
     rule_type_id: 'apm.transaction_error_rate',
     params: {
       threshold: 10,

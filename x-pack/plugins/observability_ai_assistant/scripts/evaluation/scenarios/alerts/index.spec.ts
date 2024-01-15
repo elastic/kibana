@@ -33,9 +33,23 @@ describe('alert function', () => {
             .transaction('GET /api')
             .timestamp(timestamp)
             .duration(50)
+            .failure()
+            .errors(
+              myServiceInstance.error({ message: "errorMessage", type: 'My Type' }).timestamp(timestamp)
+            )
+        ));
+
+    await synthtraceEsClients.apmSynthtraceEsClient.index(
+      timerange(moment().subtract(15, 'minutes'), moment())
+        .interval('1m')
+        .rate(10)
+        .generator((timestamp) =>
+          myServiceInstance
+            .transaction('GET /api')
+            .timestamp(timestamp)
+            .duration(50)
             .outcome('success')
-        )
-    );
+        ));
 
     let response_apm_rule = await kibanaClient.callKibana("post",
       { pathname: "/api/alerting/rule" },
@@ -43,6 +57,10 @@ describe('alert function', () => {
     )
     rule_ids.push(response_apm_rule.data.id)
 
+    await kibanaClient.callKibana("post",
+      { pathname: "/api/content_management/rpc/create" },
+      custom_threshold_AIAssistant_log_count.dataViewParams,
+    )
     let response_logs_rule = await kibanaClient.callKibana("post",
       { pathname: "/api/alerting/rule" },
       custom_threshold_AIAssistant_log_count.ruleParams,
@@ -89,13 +107,23 @@ describe('alert function', () => {
   });
 
   after(async () => {
-    await synthtraceEsClients.apmSynthtraceEsClient.clean();
+    // await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
-    for (let i in rule_ids) {
-      await kibanaClient.callKibana("delete",
-        { pathname: `/api/alerting/rule/${rule_ids[i]}` },
-      )
-    }
+    // for (let i in rule_ids) {
+    //   await kibanaClient.callKibana("delete",
+    //     { pathname: `/api/alerting/rule/${rule_ids[i]}` },
+    //   )
+    // }
+
+    // await kibanaClient.callKibana("delete",
+    //   { pathname: `/api/content_management/rpc/delete` },
+    //   {
+    //     contentTypeId: 'index-pattern',
+    //     id: custom_threshold_AIAssistant_log_count.dataViewParams.options.id,
+    //     options: { force: true },
+    //     version: 1,
+    //   }
+    // )
 
   })
 });
