@@ -8,11 +8,12 @@
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import {
   Aggregators,
   CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
-import { AdditionalContext, getIntervalInSeconds } from '../utils';
+import { AdditionalContext } from '../utils';
 import { SearchConfigurationType } from '../types';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
