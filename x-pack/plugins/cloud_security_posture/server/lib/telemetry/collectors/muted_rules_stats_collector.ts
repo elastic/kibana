@@ -39,7 +39,7 @@ export const getMutedRulesStats = async (
             name: ruleMetadata.name,
             benchmark_id: ruleMetadata.benchmark.id,
             benchmark_name: ruleMetadata.benchmark.name,
-            benchmark_version: mutedBenchmarkRule.benchmark_version, // state object may include different benchmark version then the latest one.
+            benchmark_version: mutedBenchmarkRule.benchmark_version, // The state object may include different benchmark version then the latest one.
             rule_number: ruleMetadata.benchmark.rule_number,
             posture_type: ruleMetadata.benchmark.posture_type,
             section: ruleMetadata.section,
