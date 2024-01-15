@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo } from 'react';
+import React, { FC, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
 import {
@@ -32,7 +32,7 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
-import { useGetEsIngestPipelines, useGetTransformsPreview } from '../../../../hooks';
+import { useGetEsIngestPipelines, useDestIndexAvailableTimeFields } from '../../../../hooks';
 import {
   isContinuousModeDelay,
   isTransformWizardFrequency,
@@ -86,36 +86,7 @@ export const StepDetailsForm: FC = () => {
   const isFormValid = useIsFormValid(stepDetailsFormSlice.name);
 
   const previewRequest = useWizardSelector((state) => selectPreviewRequest(state, dataView));
-
-  const { error: transformsPreviewError, data: transformPreview } = useGetTransformsPreview(
-    previewRequest,
-    previewRequest !== undefined
-  );
-
-  const destIndexAvailableTimeFields = useMemo<string[]>(() => {
-    if (!transformPreview) return [];
-    const properties = transformPreview.generated_dest_index.mappings.properties;
-    const timeFields: string[] = Object.keys(properties).filter(
-      (col) => properties[col].type === 'date'
-    );
-    return timeFields;
-  }, [transformPreview]);
-
-  useEffect(() => {
-    if (transformsPreviewError !== null) {
-      toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
-          defaultMessage: 'An error occurred fetching the transform preview',
-        }),
-        text: toMountPoint(
-          <ToastNotificationText text={getErrorMessage(transformsPreviewError)} />,
-          { theme, i18n: i18nStart }
-        ),
-      });
-    }
-    // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transformsPreviewError]);
+  const destIndexAvailableTimeFields = useDestIndexAvailableTimeFields(previewRequest);
 
   const { error: esIngestPipelinesError, data: esIngestPipelinesData } = useGetEsIngestPipelines();
   const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
@@ -343,7 +314,10 @@ export const StepDetailsForm: FC = () => {
           </>
         )}
 
-        <TransformRetentionPolicy slice={stepDetailsFormSlice} />
+        <TransformRetentionPolicy
+          slice={stepDetailsFormSlice}
+          destIndexAvailableTimeFields={destIndexAvailableTimeFields}
+        />
 
         <EuiSpacer size="l" />
 

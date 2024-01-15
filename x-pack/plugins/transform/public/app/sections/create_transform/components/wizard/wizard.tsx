@@ -29,7 +29,7 @@ import { WizardSteps } from './wizard_steps';
 const localStorage = new Storage(window.localStorage);
 
 export interface WizardContextValue {
-  config: TransformConfigUnion;
+  config?: TransformConfigUnion;
   searchItems: SearchItems;
 }
 
@@ -43,6 +43,16 @@ export const useWizardContext = () => {
   }
 
   return value;
+};
+
+export const useTransformConfig = () => {
+  const value = useWizardContext();
+
+  if (value.config === undefined) {
+    throw new Error('Transform config in Wizard Context not set');
+  }
+
+  return value.config;
 };
 
 export const useDataView = () => {

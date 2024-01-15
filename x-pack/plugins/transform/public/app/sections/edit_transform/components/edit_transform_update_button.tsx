@@ -18,7 +18,7 @@ import { getErrorMessage } from '../../../../../common/utils/errors';
 
 import { useUpdateTransform } from '../../../hooks';
 
-import { useWizardContext } from '../../create_transform/components/wizard/wizard';
+import { useTransformConfig } from '../../create_transform/components/wizard/wizard';
 import { useUpdatedTransformConfig } from '../state_management/selectors/updated_transform_config';
 import { editTransformFlyoutSlice } from '../state_management/edit_transform_flyout_state';
 import { getDefaultState } from '../state_management/get_default_state';
@@ -28,7 +28,7 @@ interface EditTransformUpdateButtonProps {
 
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
   const dispatch = useDispatch();
-  const { config } = useWizardContext();
+  const config = useTransformConfig();
   const isFormValid = useIsFormValid(editTransformFlyoutSlice.name);
   const isFormTouched = useIsFormTouched(editTransformFlyoutSlice.name, getDefaultState(config));
   const requestConfig = useUpdatedTransformConfig();

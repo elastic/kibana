@@ -72,7 +72,7 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ item }
     }
   }, [searchItems, searchItemsError]);
 
-  const reduxStore = useMemo(getTransformWizardStore, []);
+  const reduxStore = useMemo(() => getTransformWizardStore(), []);
 
   if (errorMessage) {
     return (
