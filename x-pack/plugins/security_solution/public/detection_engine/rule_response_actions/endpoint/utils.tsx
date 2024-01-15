@@ -73,7 +73,7 @@ const useGetCommandText = (
         description: (
           <FormattedMessage
             id="xpack.securitySolution.responseActions.endpoint.killProcessDescription"
-            defaultMessage="Kill process description"
+            defaultMessage="Kill/terminate a process"
           />
         ),
         tooltip: (
@@ -94,7 +94,7 @@ const useGetCommandText = (
         description: (
           <FormattedMessage
             id="xpack.securitySolution.responseActions.endpoint.suspendProcessDescription"
-            defaultMessage="Suspend Process"
+            defaultMessage="Temporarily suspend a process"
           />
         ),
         tooltip: (
