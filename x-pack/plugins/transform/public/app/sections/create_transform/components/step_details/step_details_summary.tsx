@@ -16,7 +16,6 @@ import { useWizardSelector } from '../../state_management/create_transform_store
 export const StepDetailsSummary: FC = () => {
   const {
     continuousModeDateField,
-    createDataView,
     isContinuousModeEnabled,
     isRetentionPolicyEnabled,
     retentionPolicyDateField,
@@ -28,6 +27,9 @@ export const StepDetailsSummary: FC = () => {
     dataViewTimeField,
     valid,
   } = useWizardSelector((s) => s.stepDetails);
+  const createDataView = useWizardSelector(
+    (s) => s.stepDetailsForm.formSections.createDataView.enabled
+  );
   const transformId = useWizardSelector((s) => s.stepDetailsForm.formFields.transformId.value);
   const transformDescription = useWizardSelector(
     (s) => s.stepDetailsForm.formFields.description.value

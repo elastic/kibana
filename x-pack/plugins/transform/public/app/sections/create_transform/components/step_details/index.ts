@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { StepDetailsState, StepDetailsFormFields, StepDetailsFormSections } from './common';
+export type { StepDetailsState } from './common';
 export {
   applyTransformConfigToDetailsState,
   getDefaultStepDetailsState,

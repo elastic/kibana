@@ -23,13 +23,9 @@ export type EsIndexName = string;
 export type EsIngestPipelineName = string;
 export type DataViewTitle = string;
 
-export type StepDetailsFormFields = 'description';
-export type StepDetailsFormSections = 'n/a';
-
 export interface StepDetailsState {
   continuousModeDateField: string;
   continuousModeDelay: string;
-  createDataView: boolean;
   destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
   isRetentionPolicyEnabled: boolean;
@@ -46,7 +42,7 @@ export interface StepDetailsState {
 
 export type StepDetailsFormState = State<
   'description' | 'destinationIndex' | 'transformId',
-  'n/a',
+  'createDataView',
   ValidatorName
 >;
 export function getDefaultStepDetailsFormState(
@@ -68,7 +64,9 @@ export function getDefaultStepDetailsFormState(
       }),
     },
     formSections: {
-      'n/a': initializeFormSection('n/a', 'n/a'),
+      createDataView: initializeFormSection('createDataView', 'n/a', undefined, {
+        defaultEnabled: true,
+      }),
     },
   };
 }
@@ -77,7 +75,6 @@ export function getDefaultStepDetailsState(): StepDetailsState {
   return {
     continuousModeDateField: '',
     continuousModeDelay: DEFAULT_CONTINUOUS_MODE_DELAY,
-    createDataView: true,
     isContinuousModeEnabled: false,
     isRetentionPolicyEnabled: false,
     retentionPolicyDateField: '',

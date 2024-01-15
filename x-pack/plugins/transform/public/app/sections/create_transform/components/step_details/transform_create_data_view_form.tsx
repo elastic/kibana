@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, type FC } from 'react';
+import React, { useCallback, useEffect, useMemo, type FC } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { i18n } from '@kbn/i18n';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
@@ -19,22 +20,27 @@ import { ToastNotificationText } from '../../../../components';
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
+
 import { useDataView } from '../wizard/wizard';
+import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
 
 export const TransformCreateDataViewForm: FC = () => {
+  const dispatch = useDispatch();
   const dataView = useDataView();
 
   const { application, i18n: i18nStart, theme } = useAppDependencies();
   const { capabilities } = application;
   const toastNotifications = useToastNotifications();
 
-  const createDataView = useWizardSelector((s) => s.stepDetails.createDataView);
+  const createDataView = useWizardSelector(
+    (s) => s.stepDetailsForm.formSections.createDataView.enabled
+  );
   const dataViewTimeField = useWizardSelector((s) => s.stepDetails.dataViewTimeField);
   const destinationIndex = useWizardSelector(
     (s) => s.stepDetailsForm.formFields.destinationIndex.value
   );
 
-  const { setDataViewTimeField, setCreateDataView } = useWizardActions();
+  const { setDataViewTimeField } = useWizardActions();
 
   const previewRequest = useWizardSelector((state) => selectPreviewRequest(state, dataView));
 
@@ -98,6 +104,13 @@ export const TransformCreateDataViewForm: FC = () => {
       capabilities.savedObjectsManagement?.edit === true ||
       capabilities.indexPatterns?.save === true,
     [capabilities]
+  );
+
+  const setCreateDataView = useCallback(
+    (enabled: boolean) => {
+      dispatch(stepDetailsFormSlice.actions.setFormSection({ section: 'createDataView', enabled }));
+    },
+    [dispatch]
   );
 
   useEffect(() => {

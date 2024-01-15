@@ -31,9 +31,6 @@ export const stepDetailsSlice = createSlice({
     setDestinationIngestPipeline: (state, action: PayloadAction<string>) => {
       state.destinationIngestPipeline = action.payload;
     },
-    setCreateDataView: (state, action: PayloadAction<boolean>) => {
-      state.createDataView = action.payload;
-    },
     setDataViewTimeField: (state, action: PayloadAction<string | undefined>) => {
       state.dataViewTimeField = action.payload;
     },
