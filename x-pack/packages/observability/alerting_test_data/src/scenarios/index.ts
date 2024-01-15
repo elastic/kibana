@@ -11,3 +11,5 @@ export { scenario3 } from './custom_threshold_log_count_nodata';
 export { scenario4 } from './custom_threshold_metric_avg';
 export { scenario5 } from './custom_threshold_metric_avg_groupby';
 export { scenario6 } from './custom_threshold_metric_avg_nodata';
+export { apm_error_count } from './apm_error_count';
+export { apm_transaction_rate } from './apm_transaction_rate';

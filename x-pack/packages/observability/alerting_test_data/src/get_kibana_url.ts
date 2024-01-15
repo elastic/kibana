@@ -7,7 +7,7 @@
 
 import fetch from 'node-fetch';
 import { format, parse } from 'url';
-import { KIBANA_DEFAULT_URL } from './constants';
+import { KIBANA_DEFAULT_URL, USERNAME, PASSWORD } from './constants';
 
 let kibanaUrl: string;
 
@@ -16,8 +16,12 @@ export async function getKibanaUrl() {
     return kibanaUrl;
   }
 
+  const kibanaURL = new URL(KIBANA_DEFAULT_URL)
+  kibanaURL.username = USERNAME
+  kibanaURL.password = PASSWORD
+
   try {
-    const unredirectedResponse = await fetch(KIBANA_DEFAULT_URL, {
+    const unredirectedResponse = await fetch(kibanaURL, {
       method: 'HEAD',
       follow: 1,
       redirect: 'manual',
@@ -27,9 +31,9 @@ export async function getKibanaUrl() {
       unredirectedResponse.headers
         .get('location')
         ?.replace('/spaces/enter', '')
-        ?.replace('spaces/space_selector', '') || KIBANA_DEFAULT_URL;
+        ?.replace('spaces/space_selector', '') || kibanaURL.toString();
 
-    const parsedTarget = parse(KIBANA_DEFAULT_URL);
+    const parsedTarget = parse(kibanaURL.toString());
 
     const parsedDiscoveredUrl = parse(discoveredKibanaUrl);
 

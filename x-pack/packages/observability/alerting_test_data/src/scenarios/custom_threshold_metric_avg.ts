@@ -19,6 +19,7 @@ export const scenario4 = {
   ruleParams: {
     consumer: 'logs',
     name: 'custom_threshold_metric_avg',
+    rule_type_id: 'observability.rules.custom_threshold',
     params: {
       criteria: [
         {
