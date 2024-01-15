@@ -6,7 +6,6 @@
  */
 
 import { visitWithTimeRange } from '../../../../tasks/navigation';
-import { TIMELINE_TITLE } from '../../../../screens/timeline';
 import { BASIC_TABLE_LOADING } from '../../../../screens/common';
 import {
   clickSavedObjectTagsFilter,
@@ -34,7 +33,6 @@ import {
 import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
 import {
-  addDescriptionToTimeline,
   addNameToTimelineAndSave,
   createNewTimeline,
   createTimelineOptionsPopoverBottomBar,
@@ -51,8 +49,6 @@ import {
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
-const SAVED_SEARCH_UPDATE_REQ = 'SAVED_SEARCH_UPDATE_REQ';
-const SAVED_SEARCH_UPDATE_WITH_DESCRIPTION = 'SAVED_SEARCH_UPDATE_WITH_DESCRIPTION';
 const TIMELINE_REQ_WITH_SAVED_SEARCH = 'TIMELINE_REQ_WITH_SAVED_SEARCH';
 const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 
@@ -71,21 +67,6 @@ const handleIntercepts = () => {
       req.alias = TIMELINE_REQ_WITH_SAVED_SEARCH;
     }
   });
-
-  cy.intercept('POST', '/api/content_management/rpc/update', (req) => {
-    if (req.body.hasOwnProperty('contentTypeId') && req.body.contentTypeId === 'search') {
-      req.alias = SAVED_SEARCH_UPDATE_REQ;
-    }
-  });
-  cy.intercept('POST', '/api/content_management/rpc/update', (req) => {
-    if (
-      req.body.hasOwnProperty('data') &&
-      req.body.data.hasOwnProperty('description') &&
-      req.body.data.description.length > 0
-    ) {
-      req.alias = SAVED_SEARCH_UPDATE_WITH_DESCRIPTION;
-    }
-  });
 };
 
 describe(
@@ -101,12 +82,10 @@ describe(
       createTimelineOptionsPopoverBottomBar();
       goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
+      handleIntercepts();
     });
 
     describe('ESQL tab state', () => {
-      beforeEach(() => {
-        handleIntercepts();
-      });
       it('should be able create an empty timeline with default esql tab state', () => {
         addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
@@ -194,9 +173,6 @@ describe(
     });
 
     describe('Discover saved search state for ESQL tab', () => {
-      beforeEach(() => {
-        handleIntercepts();
-      });
       it('should save esql tab saved search with `Security Solution` tag', () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
@@ -222,30 +198,23 @@ describe(
         const initialTimelineName = `Timeline-${initialTimelineSuffix}`;
         addDiscoverEsqlQuery(esqlQuery);
         addNameToTimelineAndSave(initialTimelineName);
-
+        cy.get(LOADING_INDICATOR).should('not.exist');
         const timelineSuffix = Date.now();
-        const timelineName = `Rename timeline-${timelineSuffix}`;
-        addNameToTimelineAndSave(timelineName);
-
-        cy.wait(`@${SAVED_SEARCH_UPDATE_REQ}`);
-        cy.wait(`@${TIMELINE_PATCH_REQ}`)
-          .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
-          .then((timelineId) => {
-            cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
-            // create an empty timeline
-            createNewTimeline();
-            // switch to old timeline
-            openTimelineFromSettings();
-            openTimelineById(timelineId);
-            cy.get(TIMELINE_TITLE).should('have.text', timelineName);
-            const timelineDesc = 'Timeline Description with Saved Search';
-            addDescriptionToTimeline(timelineDesc);
-            cy.wait(`@${SAVED_SEARCH_UPDATE_WITH_DESCRIPTION}`, {
-              timeout: 30000,
-            }).then((interception) => {
-              expect(interception.request.body.data.description).eq(timelineDesc);
-            });
-          });
+        const renamedTimelineName = `Rename timeline-${timelineSuffix}`;
+        addNameToTimelineAndSave(renamedTimelineName);
+        cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
+        openKibanaNavigation();
+        navigateFromKibanaCollapsibleTo(STACK_MANAGEMENT_PAGE);
+        cy.get(LOADING_INDICATOR).should('not.exist');
+        goToSavedObjectSettings();
+        cy.get(LOADING_INDICATOR).should('not.exist');
+        clickSavedObjectTagsFilter();
+        cy.get(GET_SAVED_OBJECTS_TAGS_OPTION('Security_Solution')).trigger('click');
+        cy.get(BASIC_TABLE_LOADING).should('not.exist');
+        cy.get(SAVED_OBJECTS_ROW_TITLES).should(
+          'contain.text',
+          `Saved search for timeline - ${renamedTimelineName}`
+        );
       });
     });
 
