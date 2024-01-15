@@ -193,7 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule: ThreatMatchRuleCreateProps = {
             ...indicatorMatchRule(id),
             alert_suppression: {
-              group_by: ['host-a'],
+              group_by: ['host.name'],
               duration: {
                 value: 300,
                 unit: 'm',
