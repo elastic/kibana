@@ -75,9 +75,7 @@ describe('useInstalledIntegrations', () => {
       'fetchInstalledIntegrations'
     );
 
-    const { waitForNextUpdate } = render({ skip: true });
-
-    await waitForNextUpdate();
+    render({ skip: true });
 
     expect(fetchInstalledIntegrations).toHaveBeenCalledTimes(0);
   });
