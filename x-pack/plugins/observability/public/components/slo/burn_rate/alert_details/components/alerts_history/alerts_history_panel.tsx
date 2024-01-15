@@ -92,7 +92,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink color="text" href={getAlertsLink()}>
+              <EuiLink color="text" href={getAlertsLink()} data-test-subj="alertsLink">
                 <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
                 <FormattedMessage
                   id="xpack.observability.slo.burnRateRule.alertDetailsAppSection.alertsHistory.alertsLink"
