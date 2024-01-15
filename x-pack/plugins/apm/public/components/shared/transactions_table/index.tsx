@@ -84,7 +84,6 @@ export function TransactionsTable({
   end,
   saveTableOptionsToUrl = false,
 }: Props) {
-  const history = useHistory();
   const { link } = useApmRouter();
 
   const {
@@ -202,19 +201,8 @@ export function TransactionsTable({
       if (shouldFetchServer) {
         setSearchQueryDebounced(q);
       }
-
-      // reset pagination to first page
-      if (tableOptions.page.index !== 0) {
-        history.replace({
-          ...history.location,
-          search: fromQuery({
-            ...toQuery(history.location.search),
-            page: 0,
-          }),
-        });
-      }
     },
-    [history, setSearchQueryDebounced, tableOptions.page.index]
+    [setSearchQueryDebounced]
   );
 
   return (

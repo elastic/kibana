@@ -8,6 +8,7 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
@@ -16,7 +17,7 @@ import {
 } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
@@ -28,7 +29,15 @@ import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
 import { SortFunction } from '../../shared/managed_table';
 
+type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
+
 const INITIAL_PAGE_SIZE = 25;
+const INITIAL_DATA: MainStatisticsApiResponse = {
+  items: [],
+  serviceOverflowCount: 0,
+  maxCountExceeded: false,
+  isSearchSideSearchQueryActive: false,
+};
 
 function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
   const {
@@ -57,7 +66,7 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
 
   const shouldUseDurationSummary = !!preferred?.source?.hasDurationSummaryField;
 
-  const mainStatisticsFetch = useProgressiveFetcher(
+  const { data = INITIAL_DATA, status } = useProgressiveFetcher(
     (callApmApi) => {
       if (preferred) {
         return callApmApi('GET /internal/apm/services', {
@@ -95,9 +104,7 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
     ]
   );
 
-  return {
-    mainStatisticsFetch,
-  };
+  return { mainStatisticsData: data, mainStatisticsStatus: status };
 }
 
 function useServicesDetailedStatisticsFetcher({
@@ -176,19 +183,16 @@ export function ServiceInventory() {
     200
   );
 
-  const { mainStatisticsFetch } =
+  const { mainStatisticsData, mainStatisticsStatus } =
     useServicesMainStatisticsFetcher(debouncedSearchQuery);
 
-  const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
-
-  const displayHealthStatus = mainStatisticsItems.some(
+  const displayHealthStatus = mainStatisticsData.items.some(
     (item) => 'healthStatus' in item
   );
 
-  const serviceOverflowCount =
-    mainStatisticsFetch.data?.serviceOverflowCount ?? 0;
+  const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
-  const displayAlerts = mainStatisticsItems.some(
+  const displayAlerts = mainStatisticsData.items.some(
     (item) => ServiceInventoryFieldName.AlertsCount in item
   );
 
@@ -215,9 +219,6 @@ export function ServiceInventory() {
     !userHasDismissedCallout &&
     shouldDisplayMlCallout(anomalyDetectionSetupState);
 
-  const isLoading = isPending(mainStatisticsFetch.status);
-
-  const isFailure = mainStatisticsFetch.status === FETCH_STATUS.FAILURE;
   const noItemsMessage = useMemo(() => {
     return (
       <EuiEmptyPrompt
@@ -262,9 +263,8 @@ export function ServiceInventory() {
         {displayMlCallout && mlCallout}
         <EuiFlexItem>
           <ServiceList
-            isLoading={isLoading}
-            isFailure={isFailure}
-            items={mainStatisticsItems}
+            status={mainStatisticsStatus}
+            items={mainStatisticsData.items}
             comparisonDataLoading={
               comparisonFetch.status === FETCH_STATUS.LOADING
             }
@@ -279,11 +279,9 @@ export function ServiceInventory() {
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
             isSearchSideSearchQueryActive={
-              mainStatisticsFetch.data?.isSearchSideSearchQueryActive ?? false
+              mainStatisticsData?.isSearchSideSearchQueryActive ?? false
             }
-            maxCountExceeded={
-              mainStatisticsFetch.data?.maxCountExceeded ?? false
-            }
+            maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
             onChangeCurrentPage={setCurrentPage}
           />
         </EuiFlexItem>

@@ -14,7 +14,10 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 const memoizeResult = memoize(
   <T, P extends keyof T>(page: CurrentPage<T>, fieldsToSearch: P[]) => page,
   <T, P extends keyof T>(page: CurrentPage<T>, fieldsToSearch: P[]) => {
-    return JSON.stringify(page.items.map((item) => pick(item, fieldsToSearch)));
+    return (
+      page.items.map((item) => pick(item, fieldsToSearch)).join('__') +
+      `${page.totalCount}`
+    );
   }
 );
 
@@ -28,19 +31,7 @@ export interface CurrentPage<T> {
   totalCount: number;
 }
 
-export function TableSearchBar<T, P extends keyof T & string>({
-  items,
-  fieldsToSearch,
-  isServerSearchQueryActive,
-  maxCountExceeded,
-  onChangeCurrentPage,
-  onChangeSearchQuery,
-  placeholder,
-  tableOptions,
-  isEnabled,
-  sortItems = true,
-  sortFn = defaultSortFn,
-}: {
+export function TableSearchBar<T, P extends keyof T & string>(props: {
   items: T[];
   fieldsToSearch: P[];
   isServerSearchQueryActive: boolean;
@@ -53,6 +44,20 @@ export function TableSearchBar<T, P extends keyof T & string>({
   sortItems?: boolean;
   sortFn?: SortFunction<T, P>;
 }) {
+  const {
+    items,
+    fieldsToSearch,
+    isServerSearchQueryActive,
+    maxCountExceeded,
+    onChangeCurrentPage,
+    onChangeSearchQuery,
+    placeholder,
+    tableOptions,
+    isEnabled,
+    sortItems = true,
+    sortFn = defaultSortFn,
+  } = props;
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const { core } = useApmPluginContext();
@@ -72,7 +77,13 @@ export function TableSearchBar<T, P extends keyof T & string>({
       sortFn,
     });
 
-    return fieldsToSearch.length > 0
+    if (_currentPage.items.includes((item) => item === null)) {
+      console.log('PROBLEMOS!');
+    }
+
+    console.log({ _currentPage });
+
+    return fieldsToSearch.length > 0 && isTableSearchBarEnabled
       ? memoizeResult(_currentPage, fieldsToSearch)
       : _currentPage;
 
@@ -139,21 +150,24 @@ function getCurrentPage<T, P extends keyof T & string>({
   sortItems: boolean;
   sortFn: SortFunction<T, P>;
 }): CurrentPage<T> {
-  if (!searchQuery || maxCountExceeded) {
-    return getPaginatedItems(items, tableOptions, sortItems, sortFn);
-  }
+  const shouldFilterClientSide = searchQuery && !maxCountExceeded;
+  const itemsToPaginate = shouldFilterClientSide
+    ? getItemsFilteredBySearchQuery({
+        items,
+        fieldsToSearch,
+        searchQuery,
+      })
+    : items;
 
-  const itemsFilteredBySearchQuery = getItemsFilteredBySearchQuery({
-    items,
-    fieldsToSearch,
-    searchQuery,
-  });
-  return getPaginatedItems(
-    itemsFilteredBySearchQuery,
-    tableOptions,
-    sortItems,
-    sortFn
-  );
+  return {
+    items: getCurrentPageItems(
+      itemsToPaginate,
+      tableOptions,
+      sortItems,
+      sortFn
+    ),
+    totalCount: itemsToPaginate.length,
+  };
 }
 
 function getItemsFilteredBySearchQuery<T, P extends keyof T>({
@@ -173,22 +187,20 @@ function getItemsFilteredBySearchQuery<T, P extends keyof T>({
   });
 }
 
-function getPaginatedItems<T, P extends keyof T & string>(
+function getCurrentPageItems<T, P extends keyof T & string>(
   items: T[],
   tableOptions: TableOptions<P>,
   sortItems: boolean,
   sortFn: SortFunction<T, P>
-): CurrentPage<T> {
+) {
   const sortedItems = sortItems
     ? sortFn(items, tableOptions.sort.field, tableOptions.sort.direction)
     : items;
 
-  const currentPageItems = sortedItems.slice(
+  return sortedItems.slice(
     tableOptions.page.index * tableOptions.page.size,
     (tableOptions.page.index + 1) * tableOptions.page.size
   );
-
-  return { items: currentPageItems, totalCount: items.length };
 }
 
 function defaultSortFn<T, P extends keyof T & string>(

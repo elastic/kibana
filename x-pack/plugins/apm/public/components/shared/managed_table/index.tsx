@@ -191,19 +191,8 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
       if (shouldFetchServer) {
         tableSearchBar.onChangeSearchQuery(q);
       }
-
-      // reset pagination to first page
-      if (pageIndex !== 0) {
-        history.replace({
-          ...history.location,
-          search: fromQuery({
-            ...toQuery(history.location.search),
-            page: 0,
-          }),
-        });
-      }
     },
-    [history, pageIndex, tableSearchBar]
+    [tableSearchBar]
   );
 
   const onChangeCurrentPage = useCallback(
@@ -213,6 +202,9 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
     },
     [tableSearchBar]
   );
+
+  console.log('items', items);
+  console.log('currentPage items', currentPage.items);
 
   return (
     <>

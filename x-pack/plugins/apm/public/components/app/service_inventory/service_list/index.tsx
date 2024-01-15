@@ -19,6 +19,11 @@ import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
 import React, { useMemo } from 'react';
+import {
+  FETCH_STATUS,
+  isFailure,
+  isPending,
+} from '../../../../hooks/use_fetcher';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   ServiceInventoryFieldName,
@@ -279,12 +284,11 @@ export function getServiceColumns({
 }
 
 interface Props {
+  status: FETCH_STATUS;
   items: ServiceListItem[];
   comparisonDataLoading: boolean;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
-  isLoading: boolean;
-  isFailure?: boolean;
   displayHealthStatus: boolean;
   displayAlerts: boolean;
   initialSortField: ServiceInventoryFieldName;
@@ -298,12 +302,11 @@ interface Props {
   onChangeCurrentPage: (page: CurrentPage<ServiceListItem>) => void;
 }
 export function ServiceList({
+  status,
   items,
   noItemsMessage,
   comparisonDataLoading,
   comparisonData,
-  isLoading,
-  isFailure,
   displayHealthStatus,
   displayAlerts,
   initialSortField,
@@ -431,8 +434,8 @@ export function ServiceList({
 
       <EuiFlexItem>
         <ManagedTable<ServiceListItem>
-          isLoading={isLoading}
-          error={isFailure}
+          isLoading={isPending(status)}
+          error={isFailure(status)}
           columns={serviceColumns}
           items={items}
           noItemsMessage={noItemsMessage}
