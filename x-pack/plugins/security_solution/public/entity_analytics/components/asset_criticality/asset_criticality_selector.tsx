@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
@@ -29,7 +28,10 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { PICK_ASSET_CRITICALITY } from './translations';
-import { AssetCriticalityBadge } from './asset_criticality_badge';
+import {
+  AssetCriticalityBadge,
+  AssetCriticalityBadgeAllowMissing,
+} from './asset_criticality_badge';
 import type { Entity, ModalState, State } from './use_asset_criticality';
 import { useAssetCriticalityData, useCriticalityModal } from './use_asset_criticality';
 import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
@@ -78,18 +80,11 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
           >
             <EuiFlexItem>
               <EuiText size="s">
-                {criticality.status === 'update' && criticality.query.data?.criticality_level ? (
-                  <AssetCriticalityBadge
-                    criticalityLevel={criticality.query.data.criticality_level}
+                {criticality.status === 'update' && (
+                  <AssetCriticalityBadgeAllowMissing
+                    criticalityLevel={criticality.query.data?.criticality_level}
                     dataTestSubj="asset-criticality-level"
                   />
-                ) : (
-                  <EuiHealth color="subdued">
-                    <FormattedMessage
-                      id="xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality"
-                      defaultMessage="No criticality assigned yet"
-                    />
-                  </EuiHealth>
                 )}
               </EuiText>
             </EuiFlexItem>

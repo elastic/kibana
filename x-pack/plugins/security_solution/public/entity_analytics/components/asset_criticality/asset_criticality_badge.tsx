@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CRITICALITY_LEVEL_TITLE, CRITICALITY_LEVEL_DESCRIPTION } from './translations';
 import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 
@@ -47,6 +48,33 @@ export const AssetCriticalityBadge: React.FC<{
       style={style}
     >
       {badgeContent}
+    </EuiHealth>
+  );
+};
+
+export const AssetCriticalityBadgeAllowMissing: React.FC<{
+  criticalityLevel?: CriticalityLevel;
+  withDescription?: boolean;
+  style?: React.CSSProperties;
+  dataTestSubj?: string;
+}> = ({ criticalityLevel, style, dataTestSubj, withDescription }) => {
+  if (criticalityLevel) {
+    return (
+      <AssetCriticalityBadge
+        criticalityLevel={criticalityLevel}
+        dataTestSubj={dataTestSubj}
+        withDescription={withDescription}
+        style={style}
+      />
+    );
+  }
+
+  return (
+    <EuiHealth color="subdued" data-test-subj={dataTestSubj}>
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality"
+        defaultMessage="No criticality assigned"
+      />
     </EuiHealth>
   );
 };

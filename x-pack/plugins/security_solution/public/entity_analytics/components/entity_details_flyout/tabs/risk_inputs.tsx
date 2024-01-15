@@ -6,19 +6,18 @@
  */
 
 import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
-import { EuiHealth, EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import styled from '@emotion/styled';
-import type { CriticalityLevel } from '../../../../../common/entity_analytics/asset_criticality/types';
 import { BasicTable } from '../../../../common/components/ml/tables/basic_table';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { ActionColumn } from '../components/action_column';
 import { RiskInputsUtilityBar } from '../components/utility_bar';
-import { AssetCriticalityBadge } from '../../asset_criticality';
+import { AssetCriticalityBadgeAllowMissing } from '../../asset_criticality';
 import { useRiskContributingAlerts } from '../../../hooks/use_risk_contributing_alerts';
 import { useRiskScore } from '../../../api/hooks/use_risk_score';
 import type { UserRiskScore, HostRiskScore } from '../../../../../common/search_strategy';
@@ -44,28 +43,6 @@ const FieldLabel = styled.span`
   font-weight: ${euiLightVars.euiFontWeightMedium};
   color: ${euiLightVars.euiTitleColor};
 `;
-
-const CriticalityField: React.FC<{ criticalityLevel?: CriticalityLevel }> = ({
-  criticalityLevel,
-}) => {
-  if (criticalityLevel) {
-    return (
-      <AssetCriticalityBadge
-        criticalityLevel={criticalityLevel}
-        dataTestSubj="risk-inputs-asset-criticality-badge"
-      />
-    );
-  }
-
-  return (
-    <EuiHealth color="subdued" data-test-subj="no-criticality">
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.entityDetails.riskInputs.noCriticality"
-        defaultMessage="No criticality assigned"
-      />
-    </EuiHealth>
-  );
-};
 
 const ContextsTable: React.FC<{ riskScore?: UserRiskScore | HostRiskScore; loading: boolean }> = ({
   riskScore,
@@ -109,7 +86,12 @@ const ContextsTable: React.FC<{ riskScore?: UserRiskScore | HostRiskScore; loadi
   const items = [
     {
       label: 'Asset Criticality Level',
-      render: () => <CriticalityField criticalityLevel={criticalityLevel} />,
+      render: () => (
+        <AssetCriticalityBadgeAllowMissing
+          criticalityLevel={criticalityLevel}
+          dataTestSubj="risk-inputs-asset-criticality-badge"
+        />
+      ),
     },
   ];
 
