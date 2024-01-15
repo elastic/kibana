@@ -76,7 +76,7 @@ const computeTotalHits = (
     }
     let rowsCount = 0;
     rows.forEach((r) => {
-      rowsCount += r.rows;
+      rowsCount += r.results;
     });
     return rowsCount;
   } else {
