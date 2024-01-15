@@ -28,7 +28,7 @@ export const initializeFormSection = <T extends string, C>(
 ): FormSection<T> => {
   const defaultEnabled = overloads?.defaultEnabled ?? false;
   const rawEnabled = getNestedProperty(config ?? {}, configFieldName, undefined);
-  const enabled = isDefined(rawEnabled);
+  const enabled = isDefined(rawEnabled) || defaultEnabled;
 
   return {
     formSectionName,
