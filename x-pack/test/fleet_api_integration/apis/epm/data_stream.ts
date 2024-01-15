@@ -269,8 +269,9 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          // Datastream should have been rolled over
+          // Write a doc to trigger lazy rollover
           await writeLogsDoc('default');
+          // Datastream should have been rolled over
           expect(await getLogsDefaultBackingIndicesLength()).to.be(2);
         });
 
