@@ -1502,11 +1502,11 @@ describe('helpers', () => {
 
     test('it posts the result', async () => {
       const result = { meta: {}, rollup: {} } as unknown as ResultData;
-
       await postResult({
         httpFetch: fetch,
         result,
         abortController: new AbortController(),
+        onError: jest.fn(),
       });
 
       expect(fetch).toHaveBeenCalledWith(
@@ -1516,6 +1516,19 @@ describe('helpers', () => {
           body: JSON.stringify(result),
         })
       );
+    });
+
+    test('it throws error', async () => {
+      const result = { meta: {}, rollup: {} } as unknown as ResultData;
+      fetch.mockRejectedValueOnce('test-error');
+      const onError = jest.fn();
+      await postResult({
+        httpFetch: fetch,
+        result,
+        abortController: new AbortController(),
+        onError,
+      });
+      expect(onError).toHaveBeenCalledWith('test-error');
     });
   });
 
@@ -1530,6 +1543,7 @@ describe('helpers', () => {
         httpFetch: fetch,
         abortController: new AbortController(),
         patterns: ['auditbeat-*', 'packetbeat-*'],
+        onError: jest.fn(),
       });
 
       expect(fetch).toHaveBeenCalledWith(
@@ -1539,6 +1553,21 @@ describe('helpers', () => {
           query: { patterns: 'auditbeat-*,packetbeat-*' },
         })
       );
+    });
+
+    it('should catch error', async () => {
+      fetch.mockRejectedValueOnce('test-error');
+      const onError = jest.fn();
+
+      const results = await getResults({
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        patterns: ['auditbeat-*', 'packetbeat-*'],
+        onError,
+      });
+
+      expect(onError).toHaveBeenCalledWith('test-error');
+      expect(results).toEqual([]);
     });
   });
 });

@@ -15,6 +15,7 @@ import type { Result, ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { createResultFromDocument } from './parser';
+import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 
 const getQuery = (patterns: string) => ({
   size: 0,
@@ -53,8 +54,18 @@ export const getResultsRoute = (
         const { getResultsIndexName } = dataQualityDashboard;
         const resp = buildResponse(response);
 
+        let index: string;
         try {
-          const index = await getResultsIndexName();
+          index = await getResultsIndexName();
+        } catch (err) {
+          logger.error(JSON.stringify(err));
+          return resp.error({
+            body: `${API_RESULTS_INDEX_NOT_AVAILABLE}: ${err.message}`,
+            statusCode: 503,
+          });
+        }
+
+        try {
           const query = { index, ...getQuery(request.query.patterns) };
           const esClient = (await context.core).elasticsearch.client.asInternalUser;
 

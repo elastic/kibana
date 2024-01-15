@@ -457,32 +457,46 @@ export async function postResult({
   abortController,
   httpFetch,
   result,
+  onError,
 }: {
   abortController: AbortController;
   httpFetch: HttpHandler;
   result: ResultData;
+  onError: (error: Error) => void;
 }): Promise<void> {
-  return httpFetch<void>(RESULTS_API_ROUTE, {
-    method: 'POST',
-    signal: abortController.signal,
-    version: INTERNAL_API_VERSION,
-    body: JSON.stringify(result),
-  });
+  try {
+    await httpFetch<void>(RESULTS_API_ROUTE, {
+      method: 'POST',
+      signal: abortController.signal,
+      version: INTERNAL_API_VERSION,
+      body: JSON.stringify(result),
+    });
+  } catch (err) {
+    onError(err);
+  }
 }
 
 export async function getResults({
   abortController,
   httpFetch,
   patterns,
+  onError,
 }: {
   abortController: AbortController;
   httpFetch: HttpHandler;
   patterns: string[];
+  onError: (error: Error) => void;
 }): Promise<ResultData[]> {
-  return httpFetch<ResultData[]>(RESULTS_API_ROUTE, {
-    method: 'GET',
-    signal: abortController.signal,
-    version: INTERNAL_API_VERSION,
-    query: { patterns: patterns.join(',') },
-  });
+  try {
+    const results = await httpFetch<ResultData[]>(RESULTS_API_ROUTE, {
+      method: 'GET',
+      signal: abortController.signal,
+      version: INTERNAL_API_VERSION,
+      query: { patterns: patterns.join(',') },
+    });
+    return results;
+  } catch (err) {
+    onError(err);
+    return [];
+  }
 }

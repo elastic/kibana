@@ -35,6 +35,7 @@ import {
   getIncompatibleValuesFields,
   getSameFamilyFields,
 } from '../data_quality_panel/tabs/incompatible_tab/helpers';
+import { GET_RESULTS_ERROR_TITLE, POST_RESULT_ERROR_TITLE } from '../translations';
 
 interface Props {
   ilmPhases: string[];
@@ -61,32 +62,38 @@ interface UseResultsRollup {
 }
 
 const useStoredPatternRollups = (patterns: string[]) => {
-  const { httpFetch } = useDataQualityContext();
+  const { httpFetch, toasts } = useDataQualityContext();
   const [storedRollups, setStoredRollups] = useState<Record<string, PatternRollup>>({});
 
   useEffect(() => {
     const abortController = new AbortController();
-    let ignore = false;
 
     const fetchStoredRollups = async () => {
-      const results = await getResults({ httpFetch, abortController, patterns });
-      if (results?.length && !ignore) {
+      const results = await getResults({
+        httpFetch,
+        abortController,
+        patterns,
+        onError: (err: Error) => {
+          toasts.addError(err, { title: GET_RESULTS_ERROR_TITLE });
+        },
+      });
+      if (results?.length && !abortController.signal.aborted) {
         setStoredRollups(Object.fromEntries(results.map(({ rollup }) => [rollup.pattern, rollup])));
       }
     };
 
     fetchStoredRollups();
     return () => {
-      ignore = true;
       abortController.abort();
     };
-  }, [httpFetch, patterns]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patterns]);
 
   return storedRollups;
 };
 
 export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRollup => {
-  const { httpFetch } = useDataQualityContext();
+  const { httpFetch, toasts } = useDataQualityContext();
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
 
@@ -203,6 +210,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
               meta: metadata,
               rollup: updatedRollup,
             },
+            onError: (err: Error) => toasts.addError(err, { title: POST_RESULT_ERROR_TITLE }),
           });
         }
 
@@ -223,7 +231,7 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
         return updatedRollups;
       });
     },
-    [httpFetch, isILMAvailable, telemetryEvents]
+    [httpFetch, isILMAvailable, telemetryEvents, toasts]
   );
 
   useEffect(() => {
