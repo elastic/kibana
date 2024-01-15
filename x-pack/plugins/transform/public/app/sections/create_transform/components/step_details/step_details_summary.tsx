@@ -24,7 +24,6 @@ export const StepDetailsSummary: FC = () => {
     transformFrequency,
     transformSettingsMaxPageSearchSize,
     transformSettingsNumFailureRetries,
-    destinationIndex,
     destinationIngestPipeline,
     dataViewTimeField,
     valid,
@@ -32,6 +31,9 @@ export const StepDetailsSummary: FC = () => {
   const transformId = useWizardSelector((s) => s.stepDetailsForm.formFields.transformId.value);
   const transformDescription = useWizardSelector(
     (s) => s.stepDetailsForm.formFields.description.value
+  );
+  const destinationIndex = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.destinationIndex.value
   );
 
   if (!valid) return null;

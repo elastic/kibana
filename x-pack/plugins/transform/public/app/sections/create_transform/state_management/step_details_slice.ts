@@ -11,7 +11,6 @@ import { createFormSlice } from '@kbn/ml-form-utils/form_slice';
 
 import { validators } from '../../edit_transform/state_management/validators';
 
-import type { EsIndexName } from '../components/step_details/common';
 import {
   getDefaultStepDetailsState,
   getDefaultStepDetailsFormState,
@@ -29,9 +28,6 @@ export const stepDetailsSlice = createSlice({
   initialState: getDefaultStepDetailsState(),
   reducers: {
     setStepDetailsState: (_, action: PayloadAction<StepDetailsState>) => action.payload,
-    setDestinationIndex: (state, action: PayloadAction<EsIndexName>) => {
-      state.destinationIndex = action.payload;
-    },
     setDestinationIngestPipeline: (state, action: PayloadAction<string>) => {
       state.destinationIngestPipeline = action.payload;
     },

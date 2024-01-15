@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, type FC } from 'react';
+import React, { useCallback, useEffect, useState, type FC } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { i18n } from '@kbn/i18n';
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
@@ -18,9 +19,11 @@ import { useDocumentationLinks, useGetEsIndices } from '../../../../hooks';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardSelector } from '../../state_management/create_transform_store';
+import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
 
 export const TransformDestinationIndexForm: FC = () => {
+  const dispatch = useDispatch();
   const { i18n: i18nStart, theme } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const { esIndicesCreateIndex } = useDocumentationLinks();
@@ -29,8 +32,9 @@ export const TransformDestinationIndexForm: FC = () => {
   const transformIdValid = useWizardSelector(
     (s) => s.stepDetailsForm.formFields.transformId.errorMessages.length === 0
   );
-  const destinationIndex = useWizardSelector((s) => s.stepDetails.destinationIndex);
-  const { setDestinationIndex } = useWizardActions();
+  const destinationIndex = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.destinationIndex.value
+  );
 
   const { error: esIndicesError, data: esIndicesData } = useGetEsIndices();
   const indexNames = esIndicesData?.map((index) => index.name) ?? [];
@@ -58,6 +62,12 @@ export const TransformDestinationIndexForm: FC = () => {
 
   const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
     destinationIndex !== undefined && destinationIndex === transformId
+  );
+
+  const setDestinationIndex = useCallback(
+    (value: string) =>
+      dispatch(stepDetailsFormSlice.actions.setFormField({ field: 'destinationIndex', value })),
+    [dispatch]
   );
 
   useEffect(() => {

@@ -7,6 +7,7 @@
 
 import {
   frequencyValidator,
+  indexNameValidator,
   integerAboveZeroValidator,
   transformIdValidator,
   transformSettingsNumberOfRetriesValidator,
@@ -17,6 +18,7 @@ import {
 
 export const validators = {
   frequencyValidator,
+  indexNameValidator,
   integerAboveZeroValidator,
   transformIdValidator,
   transformSettingsNumberOfRetriesValidator,

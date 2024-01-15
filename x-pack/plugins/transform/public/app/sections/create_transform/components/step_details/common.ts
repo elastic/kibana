@@ -30,7 +30,6 @@ export interface StepDetailsState {
   continuousModeDateField: string;
   continuousModeDelay: string;
   createDataView: boolean;
-  destinationIndex: EsIndexName;
   destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
   isRetentionPolicyEnabled: boolean;
@@ -46,7 +45,11 @@ export interface StepDetailsState {
   apiErrorMessage?: string;
 }
 
-export type StepDetailsFormState = State<'description' | 'transformId', 'n/a', ValidatorName>;
+export type StepDetailsFormState = State<
+  'description' | 'destinationIndex' | 'transformId',
+  'n/a',
+  ValidatorName
+>;
 export function getDefaultStepDetailsFormState(
   config?: TransformConfigUnion,
   existingTransforms: string[] = []
@@ -55,10 +58,14 @@ export function getDefaultStepDetailsFormState(
     formFields: {
       // top level attributes
       description: initializeFormField('description', 'description', config),
-      transformId: initializeFormField('transformId', 'dest.index', undefined, {
+      transformId: initializeFormField('transformId', '', undefined, {
         isOptional: false,
         validator: 'transformIdValidator',
         reservedValues: existingTransforms,
+      }),
+      destinationIndex: initializeFormField('destinationIndex', 'dest.index', config, {
+        isOptional: false,
+        validator: 'indexNameValidator',
       }),
     },
     formSections: {
@@ -80,7 +87,6 @@ export function getDefaultStepDetailsState(): StepDetailsState {
     transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
     transformSettingsNumFailureRetries: undefined,
-    destinationIndex: '',
     destinationIngestPipeline: '',
     valid: false,
     dataViewTimeField: undefined,

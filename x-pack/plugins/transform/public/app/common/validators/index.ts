@@ -6,6 +6,7 @@
  */
 
 export { frequencyValidator } from './frequency_validator';
+export { indexNameValidator } from './index_name_validator';
 export { integerRangeMinus1To100Validator } from './integer_range_minus_1_to_100_validator';
 export { integerAboveZeroValidator } from './integer_above_zero_validator';
 export { isJsonString } from './is_json_string';

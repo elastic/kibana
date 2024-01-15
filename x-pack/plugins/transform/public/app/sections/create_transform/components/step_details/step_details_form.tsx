@@ -32,7 +32,6 @@ import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_da
 
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/validators/messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
-import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
@@ -70,7 +69,9 @@ export const StepDetailsForm: FC = () => {
   const toastNotifications = useToastNotifications();
   const { esIndicesCreateIndex } = useDocumentationLinks();
 
-  const destinationIndex = useWizardSelector((s) => s.stepDetails.destinationIndex);
+  const destinationIndex = useWizardSelector(
+    (s) => s.stepDetailsForm.formFields.destinationIndex.value
+  );
   const destinationIngestPipeline = useWizardSelector(
     (s) => s.stepDetails.destinationIngestPipeline
   );
@@ -255,8 +256,6 @@ export const StepDetailsForm: FC = () => {
     }
   }, [isRetentionPolicyEnabled, isRetentionPolicyAvailable, destIndexAvailableTimeFields]);
 
-  const indexNameEmpty = destinationIndex === '';
-  const indexNameValid = isValidIndexName(destinationIndex);
   const dataViewTitleExists = dataViewTitles?.some((name) => destinationIndex === name) ?? false;
 
   const isTransformFrequencyValid = isTransformWizardFrequency(transformFrequency);
@@ -276,8 +275,6 @@ export const StepDetailsForm: FC = () => {
     isFormValid &&
     isTransformFrequencyValid &&
     isTransformSettingsMaxPageSearchSizeValid &&
-    !indexNameEmpty &&
-    indexNameValid &&
     (!dataViewTitleExists || !createDataView) &&
     (!isContinuousModeAvailable || (isContinuousModeAvailable && isContinuousModeDelayValid)) &&
     (!isRetentionPolicyAvailable ||
