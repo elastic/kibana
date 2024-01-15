@@ -179,6 +179,7 @@ describe(
         addDiscoverEsqlQuery(esqlQuery);
         addNameToTimelineAndSave(timelineName);
         cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
+        cy.get(LOADING_INDICATOR).should('not.exist');
         openKibanaNavigation();
         navigateFromKibanaCollapsibleTo(STACK_MANAGEMENT_PAGE);
         cy.get(LOADING_INDICATOR).should('not.exist');
