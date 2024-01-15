@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { find } from 'lodash/fp';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import { isInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { getField } from '../utils';
@@ -57,7 +57,7 @@ export const useShowRelatedAlertsByAncestry = ({
   const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
     'insightsRelatedAlertsByProcessAncestry'
   );
-  const hasProcessEntityInfo = isInvestigateInResolverActionEnabled(dataAsNestedObject);
+  const hasProcessEntityInfo = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const originalDocumentId = getField(getFieldsData(ANCESTOR_ID));
 

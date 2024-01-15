@@ -1180,7 +1180,7 @@ Rounds down a date to the closest interval.
 
 \`\`\`
 FROM employees
-| EVAL year_hired = DATE_TRUNC(hire_date, 1 year)
+| EVAL year_hired = DATE_TRUNC(1 year, hire_date)
 | STATS count(emp_no) BY year_hired
 | SORT year_hired
 \`\`\`
@@ -1285,87 +1285,6 @@ ROW a = 10, b = 20
 \`\`\`
 
 Note: when run on \`keyword\` or \`text\` fields, this will return the last string in alphabetical order. When run on \`boolean\` columns this will return \`true\` if any values are \`true\`.
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isFiniteFunction',
-        {
-          defaultMessage: 'IS_FINITE',
-        }
-      ),
-      description: (
-        <Markdown
-          markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isFiniteFunction.markdown',
-            {
-              defaultMessage: `### IS_FINITE
-Returns a boolean that indicates whether its input is a finite number.
-
-\`\`\`
-ROW d = 1.0 
-| EVAL s = IS_FINITE(d/0)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isInfiniteFunction',
-        {
-          defaultMessage: 'IS_INFINITE',
-        }
-      ),
-      description: (
-        <Markdown
-          markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isInfiniteFunction.markdown',
-            {
-              defaultMessage: `### IS_INFINITE
-Returns a boolean that indicates whether its input is infinite.
-
-\`\`\`
-ROW d = 1.0 
-| EVAL s = IS_INFINITE(d/0)
-\`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isNanFunction',
-        {
-          defaultMessage: 'IS_NAN',
-        }
-      ),
-      description: (
-        <Markdown
-          markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.isNanFunction.markdown',
-            {
-              defaultMessage: `### IS_NAN
-Returns a boolean that indicates whether its input is not a number.
-
-\`\`\`
-ROW d = 1.0 
-| EVAL s = IS_NAN(d)
-\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',

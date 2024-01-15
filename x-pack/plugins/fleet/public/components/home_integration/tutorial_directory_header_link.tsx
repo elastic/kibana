@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { TutorialDirectoryHeaderLinkComponent } from '@kbn/home-plugin/public';
 
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { useLink, useStartServices } from '../../hooks';
 
@@ -23,7 +23,11 @@ const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo((
   });
 
   return hasIntegrationsPermissions && noticeState.settingsDataLoaded ? (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('integrations')}>
         <FormattedMessage
           id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"

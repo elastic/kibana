@@ -29,9 +29,9 @@ import {
   createIngestPipelineSchema,
   modelDownloadsQuery,
 } from './schemas/inference_schema';
-import type {
+import {
   PipelineDefinition,
-  TrainedModelConfigResponse,
+  type TrainedModelConfigResponse,
 } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
@@ -39,10 +39,9 @@ import { modelsProvider } from '../models/model_management';
 
 export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
-export function filterForEnabledFeatureModels(
-  models: TrainedModelConfigResponse[] | estypes.MlTrainedModelConfig[],
-  enabledFeatures: MlFeatures
-) {
+export function filterForEnabledFeatureModels<
+  T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
+>(models: T[], enabledFeatures: MlFeatures) {
   let filteredModels = models;
   if (enabledFeatures.nlp === false) {
     filteredModels = filteredModels.filter((m) => m.model_type === 'tree_ensemble');
@@ -191,10 +190,38 @@ export function trainedModelsRoutes(
             mlLog.debug(e);
           }
 
-          const body = filterForEnabledFeatureModels(result, getEnabledFeatures());
+          const filteredModels = filterForEnabledFeatureModels(result, getEnabledFeatures());
+
+          try {
+            const jobIds = filteredModels
+              .map((model) => {
+                const id = model.metadata?.analytics_config?.id;
+                if (id) {
+                  return `${id}*`;
+                }
+              })
+              .filter((id) => id !== undefined);
+
+            if (jobIds.length) {
+              const { data_frame_analytics: jobs } = await mlClient.getDataFrameAnalytics({
+                id: jobIds.join(','),
+                allow_no_match: true,
+              });
+
+              filteredModels.forEach((model) => {
+                const dfaId = model?.metadata?.analytics_config?.id;
+                if (dfaId !== undefined) {
+                  // if this is a dfa model, set origin_job_exists
+                  model.origin_job_exists = jobs.find((job) => job.id === dfaId) !== undefined;
+                }
+              });
+            }
+          } catch (e) {
+            // Swallow error to prevent blocking trained models result
+          }
 
           return response.ok({
-            body,
+            body: filteredModels,
           });
         } catch (e) {
           return response.customError(wrapError(e));

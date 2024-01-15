@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
+import type { CoverageOverviewMitreTechnique } from './mitre_technique';
 import type { CoverageOverviewRule } from './rule';
 
 export interface CoverageOverviewMitreSubTechnique {
@@ -18,3 +20,26 @@ export interface CoverageOverviewMitreSubTechnique {
   disabledRules: CoverageOverviewRule[];
   availableRules: CoverageOverviewRule[];
 }
+
+export const getNumOfCoveredSubtechniques = (
+  technique: CoverageOverviewMitreTechnique,
+  activity?: CoverageOverviewRuleActivity[]
+): number => {
+  const coveredSubtechniques = new Set();
+  for (const subtechnique of technique.subtechniques) {
+    if (
+      (!activity || activity.includes(CoverageOverviewRuleActivity.Enabled)) &&
+      subtechnique.enabledRules.length
+    ) {
+      coveredSubtechniques.add(subtechnique.id);
+    }
+
+    if (
+      (!activity || activity.includes(CoverageOverviewRuleActivity.Disabled)) &&
+      subtechnique.disabledRules.length
+    ) {
+      coveredSubtechniques.add(subtechnique.id);
+    }
+  }
+  return coveredSubtechniques.size;
+};

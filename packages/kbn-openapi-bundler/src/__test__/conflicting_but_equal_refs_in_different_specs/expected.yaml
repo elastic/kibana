@@ -1,0 +1,40 @@
+spec1.schema.yaml:
+  openapi: 3.0.3
+  info:
+    title: Test endpoint
+    version: '2023-10-31'
+  paths:
+    /api/some_api:
+      get:
+        operationId: TestEndpointGet
+        responses:
+          '200':
+            description: Successful response
+            content:
+              application/json:
+                schema:
+                  $ref: './shared_components.schema.yaml#/components/schemas/ConflictTestSchema'
+
+spec2.schema.yaml:
+  openapi: 3.0.3
+  info:
+    title: Another test endpoint
+    version: '2023-10-31'
+  paths:
+    /api/another_api:
+      put:
+        operationId: AnotherTestEndpointPut
+        responses:
+          '200':
+            description: Successful response
+            content:
+              application/json:
+                schema:
+                  $ref: './shared_components.schema.yaml#/components/schemas/ConflictTestSchema'
+
+shared_components.schema.yaml:
+  components:
+    schemas:
+      ConflictTestSchema:
+        type: integer
+        minimum: 1

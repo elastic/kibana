@@ -11,6 +11,7 @@ import { merge, range as lodashRange } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { ComponentTemplateName } from '../lib/apm/client/apm_synthtrace_es_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENTS = ['production', 'development'].map((env) =>
   getSynthtraceEnvironment(__filename, env)
@@ -40,7 +41,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
         }
       );
     },
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const TRANSACTION_TYPES = ['request', 'custom'];
 
       const MIN_DURATION = 10;
@@ -64,36 +65,39 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
 
       const transactionGroupRange = lodashRange(0, numTxGroups);
 
-      return range
-        .interval('1m')
-        .rate(1)
-        .generator((timestamp, timestampIndex) => {
-          return logger.perf(
-            'generate_events_for_timestamp ' + new Date(timestamp).toISOString(),
-            () => {
-              const events = instances.flatMap((instance) =>
-                transactionGroupRange.flatMap((groupId, groupIndex) =>
-                  OUTCOMES.map((outcome) => {
-                    const duration = Math.round(
-                      (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
-                    );
+      return withClient(
+        apmEsClient,
+        range
+          .interval('1m')
+          .rate(1)
+          .generator((timestamp, timestampIndex) => {
+            return logger.perf(
+              'generate_events_for_timestamp ' + new Date(timestamp).toISOString(),
+              () => {
+                const events = instances.flatMap((instance) =>
+                  transactionGroupRange.flatMap((groupId, groupIndex) =>
+                    OUTCOMES.map((outcome) => {
+                      const duration = Math.round(
+                        (timestampIndex % MAX_BUCKETS) * BUCKET_SIZE + MIN_DURATION
+                      );
 
-                    return instance
-                      .transaction(
-                        `transaction-${groupId}`,
-                        TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length]
-                      )
-                      .timestamp(timestamp)
-                      .duration(duration)
-                      .outcome(outcome);
-                  })
-                )
-              );
+                      return instance
+                        .transaction(
+                          `transaction-${groupId}`,
+                          TRANSACTION_TYPES[groupIndex % TRANSACTION_TYPES.length]
+                        )
+                        .timestamp(timestamp)
+                        .duration(duration)
+                        .outcome(outcome);
+                    })
+                  )
+                );
 
-              return events;
-            }
-          );
-        });
+                return events;
+              }
+            );
+          })
+      );
     },
   };
 };

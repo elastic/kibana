@@ -17,6 +17,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -31,6 +32,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -45,6 +47,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -68,6 +71,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -82,6 +86,7 @@ describe('getUICapabilities', () => {
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -105,6 +110,7 @@ describe('getUICapabilities', () => {
         "delete": true,
         "push": true,
         "read": true,
+        "settings": false,
         "update": true,
       }
     `);
@@ -113,22 +119,64 @@ describe('getUICapabilities', () => {
   it('returns false for the all field when cases_connectors is false', () => {
     expect(
       getUICapabilities({
-        create_cases: false,
+        create_cases: true,
         read_cases: true,
         update_cases: true,
         delete_cases: true,
         push_cases: true,
         cases_connectors: false,
+        cases_settings: true,
       })
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
         "connectors": false,
-        "create": false,
+        "create": true,
         "delete": true,
         "push": true,
         "read": true,
+        "settings": true,
         "update": true,
+      }
+    `);
+  });
+
+  it('returns false for the all field when cases_settings is false', () => {
+    expect(
+      getUICapabilities({
+        create_cases: true,
+        read_cases: true,
+        update_cases: true,
+        delete_cases: true,
+        push_cases: true,
+        cases_connectors: true,
+        cases_settings: false,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "all": false,
+        "connectors": true,
+        "create": true,
+        "delete": true,
+        "push": true,
+        "read": true,
+        "settings": false,
+        "update": true,
+      }
+    `);
+  });
+
+  it('returns true for cases_settings when it is set to true in the ui capabilities', () => {
+    expect(getUICapabilities({ cases_settings: true })).toMatchInlineSnapshot(`
+      Object {
+        "all": false,
+        "connectors": false,
+        "create": false,
+        "delete": false,
+        "push": false,
+        "read": false,
+        "settings": true,
+        "update": false,
       }
     `);
   });

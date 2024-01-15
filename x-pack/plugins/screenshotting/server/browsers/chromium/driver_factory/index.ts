@@ -26,13 +26,14 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
+import { PerformanceMetrics } from '../../../../common/types';
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
 import { ConfigType } from '../../../config';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
-import { getMetrics, PerformanceMetrics } from './metrics';
+import { getMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
@@ -455,5 +456,3 @@ export class HeadlessChromiumDriverFactory {
     );
   }
 }
-
-export type { PerformanceMetrics };

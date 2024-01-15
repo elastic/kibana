@@ -9,25 +9,18 @@
 
 import { get } from 'lodash';
 
+import { setupStackServicesUsingCypressConfig } from './common';
 import {
   getLatestActionDoc,
   updateActionDoc,
   waitForNewActionDoc,
 } from '../../../../scripts/endpoint/common/response_actions';
-import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 
 export const responseActionTasks = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
-  const stackServicesPromise = createRuntimeServices({
-    kibanaUrl: config.env.KIBANA_URL,
-    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.KIBANA_USERNAME,
-    password: config.env.KIBANA_PASSWORD,
-    asSuperuser: true,
-  });
+  const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
 
   on('task', {
     getLatestActionDoc: async () => {

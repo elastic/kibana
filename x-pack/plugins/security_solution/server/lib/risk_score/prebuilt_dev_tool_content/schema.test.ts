@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { readConsoleRequestBody } from '../../../../common/api/risk_score';
+import { readConsoleRequestBody } from '../../../../common/api/entity_analytics/risk_score';
 
 describe('ReadConsoleRequestSchema', () => {
   it('should throw error', () => {

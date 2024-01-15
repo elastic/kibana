@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
+import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 
 jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
@@ -37,7 +38,7 @@ describe('bulk action hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+    appMockRender = createAppMockRenderer(AlertsTableQueryContext);
   });
 
   const refresh = jest.fn();

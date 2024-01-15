@@ -128,6 +128,19 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.updateErrors$.asObservable();
   }
 
+  async validateValue(key: string, value: unknown) {
+    try {
+      const resp = await this.api.validate(key, value);
+      const isValid = resp.valid;
+      return isValid
+        ? { successfulValidation: true, valid: true }
+        : { successfulValidation: true, valid: false, errorMessage: resp.errorMessage };
+    } catch (error) {
+      this.updateErrors$.next(error);
+      return { successfulValidation: false };
+    }
+  }
+
   protected assertUpdateAllowed(key: string) {
     if (this.isOverridden(key)) {
       throw new Error(

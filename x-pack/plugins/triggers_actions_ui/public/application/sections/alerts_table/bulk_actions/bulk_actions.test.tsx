@@ -8,7 +8,6 @@ import React, { useMemo, useReducer } from 'react';
 
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { BulkActionsContext } from './context';
 import { AlertsTable } from '../alerts_table';
 import {
   Alerts,
@@ -25,6 +24,7 @@ import { createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
 import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import { createCasesServiceMock } from '../index.mock';
+import { AlertsTableContext, AlertsTableQueryContext } from '../contexts/alerts_table_context';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -244,7 +244,7 @@ describe('AlertsTable.BulkActions', () => {
   const AlertsTableWithBulkActionsContext: React.FunctionComponent<
     AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
   > = (props) => {
-    const renderer = useMemo(() => createAppMockRenderer(), []);
+    const renderer = useMemo(() => createAppMockRenderer(AlertsTableQueryContext), []);
     const AppWrapper = renderer.AppWrapper;
 
     const initialBulkActionsState = useReducer(
@@ -254,9 +254,14 @@ describe('AlertsTable.BulkActions', () => {
 
     return (
       <AppWrapper>
-        <BulkActionsContext.Provider value={initialBulkActionsState}>
+        <AlertsTableContext.Provider
+          value={{
+            mutedAlerts: {},
+            bulkActions: initialBulkActionsState,
+          }}
+        >
           <AlertsTable {...props} />
-        </BulkActionsContext.Provider>
+        </AlertsTableContext.Provider>
       </AppWrapper>
     );
   };
@@ -390,6 +395,10 @@ describe('AlertsTable.BulkActions', () => {
             },
             {
               field: 'kibana.alert.workflow_tags',
+              value: [],
+            },
+            {
+              field: 'kibana.alert.workflow_assignee_ids',
               value: [],
             },
           ],
@@ -639,6 +648,10 @@ describe('AlertsTable.BulkActions', () => {
                   field: 'kibana.alert.workflow_tags',
                   value: [],
                 },
+                {
+                  field: 'kibana.alert.workflow_assignee_ids',
+                  value: [],
+                },
               ],
               ecs: {
                 _id: 'alert1',
@@ -867,6 +880,10 @@ describe('AlertsTable.BulkActions', () => {
                     field: 'kibana.alert.workflow_tags',
                     value: [],
                   },
+                  {
+                    field: 'kibana.alert.workflow_assignee_ids',
+                    value: [],
+                  },
                 ],
                 ecs: {
                   _id: 'alert0',
@@ -891,6 +908,10 @@ describe('AlertsTable.BulkActions', () => {
                   },
                   {
                     field: 'kibana.alert.workflow_tags',
+                    value: [],
+                  },
+                  {
+                    field: 'kibana.alert.workflow_assignee_ids',
                     value: [],
                   },
                 ],

@@ -145,6 +145,7 @@ export async function setAlertsToUntracked({
             },
           },
         },
+        refresh: true,
       });
       if (total === 0 && response.total === 0)
         throw new Error('No active alerts matched the query');

@@ -12,9 +12,9 @@ import { promisify } from 'util';
 
 import del from 'del';
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { comparePngs } from '../lib/compare_pngs';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAsync = promisify(writeFile);

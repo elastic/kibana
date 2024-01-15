@@ -145,7 +145,7 @@ export const BaseActionSchema = z.object({
 });
 
 export type ProcessActionSchemas = z.infer<typeof ProcessActionSchemas>;
-export const ProcessActionSchemas = BaseActionSchema.and(
+export const ProcessActionSchemas = BaseActionSchema.merge(
   z.object({
     parameters: z.union([
       z.object({

@@ -6,18 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { CodeEditorProps } from './code_editor';
-export {
-  CssLang,
-  MarkdownLang,
-  YamlLang,
-  HandlebarsLang,
-  HJsonLang,
-  GrokLang,
-  CodeEditor,
-  CodeEditorField,
-} from './code_editor';
-
 export type { UrlTemplateEditorVariable, UrlTemplateEditorProps } from './url_template_editor';
 export { UrlTemplateEditor } from './url_template_editor';
 
@@ -42,11 +30,9 @@ export {
   useGlobalUiSetting$,
 } from './ui_settings';
 
-export { useExecutionContext } from './use_execution_context';
+export { useDarkMode } from './dark_mode';
 
-export type { ToolbarButtonProps } from './toolbar_button';
-/** @deprecated ToolbarButton - use `ToolbarButton` from `@kbn/shared-ux-button-toolbar` */
-export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
+export { useExecutionContext } from './use_execution_context';
 
 export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';
 
@@ -76,9 +62,6 @@ export { Markdown, MarkdownSimple } from './markdown';
 export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
 
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
-export { RedirectAppLinks } from './app_links';
-
 /** @deprecated Use `KibanaThemeProvider`, `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */
 export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';
 
@@ -86,6 +69,7 @@ export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } fro
 export function plugin() {
   return new (class KibanaReactPlugin {
     setup() {}
+
     start() {}
   })();
 }

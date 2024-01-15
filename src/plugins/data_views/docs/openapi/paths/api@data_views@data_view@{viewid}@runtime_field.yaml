@@ -79,6 +79,8 @@ put:
                 type: object
               fields:
                 type: array
+                items:
+                  type: object
           examples:
             createRuntimeFieldResponse:
               $ref: '../components/examples/create_runtime_field_response.yaml'

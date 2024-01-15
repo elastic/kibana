@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiButton, EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
-import { getRouterLinkProps } from '../../../utils/get_router_link_props';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { DiscoverEsqlUrlProps } from '../../../hooks/use_esql';
 import { technicalPreview, tryEsql } from '../constants';
 

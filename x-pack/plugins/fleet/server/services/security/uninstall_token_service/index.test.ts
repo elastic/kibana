@@ -13,6 +13,10 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 
+import { errors } from '@elastic/elasticsearch';
+
+import { UninstallTokenError } from '../../../../common/errors';
+
 import { SO_SEARCH_LIMIT } from '../../../../common';
 
 import type {
@@ -252,7 +256,7 @@ describe('UninstallTokenService', () => {
           mockCreatePointInTimeFinder(canEncrypt, defaultBuckets);
 
           await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrowError(
-            'Uninstall Token is missing creation date.'
+            'Invalid uninstall token: Saved object is missing creation date.'
           );
         });
 
@@ -264,7 +268,7 @@ describe('UninstallTokenService', () => {
           mockCreatePointInTimeFinder(canEncrypt, defaultBuckets);
 
           await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrowError(
-            'Uninstall Token is missing policy ID.'
+            'Invalid uninstall token: Saved object is missing the policy id attribute.'
           );
         });
       });
@@ -496,6 +500,177 @@ describe('UninstallTokenService', () => {
           const so = getDefaultSO();
           await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
           expect(soClientMock.bulkCreate).not.toBeCalled();
+        });
+      });
+    });
+
+    describe('check validity of tokens', () => {
+      const okaySO = getDefaultSO(canEncrypt);
+
+      const errorWithDecryptionSO2 = {
+        ...getDefaultSO2(canEncrypt),
+        error: new Error('error reason'),
+      };
+      const missingTokenSO2 = {
+        ...getDefaultSO2(canEncrypt),
+        attributes: {
+          ...getDefaultSO2(canEncrypt).attributes,
+          token: undefined,
+          token_plain: undefined,
+        },
+      };
+
+      describe('checkTokenValidityForAllPolicies', () => {
+        it('returns null if all of the tokens are available', async () => {
+          mockCreatePointInTimeFinderAsInternalUser();
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).resolves.toBeNull();
+        });
+
+        describe('avoiding `too_many_nested_clauses` error', () => {
+          it('performs one query if number of policies is smaller than batch size', async () => {
+            mockCreatePointInTimeFinderAsInternalUser();
+            await uninstallTokenService.checkTokenValidityForAllPolicies();
+
+            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(1);
+            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledWith({
+              filter:
+                'fleet-uninstall-tokens.id: "test-so-id" or fleet-uninstall-tokens.id: "test-so-id-two"',
+              perPage: 10000,
+              type: 'fleet-uninstall-tokens',
+            });
+          });
+
+          it('performs multiple queries if number of policies is larger than batch size', async () => {
+            // @ts-ignore
+            appContextService.getConfig().setup = { uninstallTokenVerificationBatchSize: 1 };
+
+            mockCreatePointInTimeFinderAsInternalUser();
+
+            await uninstallTokenService.checkTokenValidityForAllPolicies();
+
+            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(2);
+
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenNthCalledWith(1, {
+              filter: 'fleet-uninstall-tokens.id: "test-so-id"',
+              perPage: 10000,
+              type: 'fleet-uninstall-tokens',
+            });
+
+            expect(
+              esoClientMock.createPointInTimeFinderDecryptedAsInternalUser
+            ).toHaveBeenNthCalledWith(2, {
+              filter: 'fleet-uninstall-tokens.id: "test-so-id-two"',
+              perPage: 10000,
+              type: 'fleet-uninstall-tokens',
+            });
+          });
+        });
+
+        it('returns error if any of the tokens is missing', async () => {
+          mockCreatePointInTimeFinderAsInternalUser([okaySO, missingTokenSO2]);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).resolves.toStrictEqual({
+            error: new UninstallTokenError(
+              'Invalid uninstall token: Saved object is missing the token attribute.'
+            ),
+          });
+        });
+
+        it('returns error if token decryption gives error', async () => {
+          mockCreatePointInTimeFinderAsInternalUser([okaySO, errorWithDecryptionSO2]);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).resolves.toStrictEqual({
+            error: new UninstallTokenError(
+              "Error when reading Uninstall Token with id 'test-so-id-two'."
+            ),
+          });
+        });
+
+        it('throws error in case of unknown error', async () => {
+          esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+            .fn()
+            .mockRejectedValueOnce('some error');
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).rejects.toThrowError('Unknown error happened while checking Uninstall Tokens validity');
+        });
+      });
+
+      describe('checkTokenValidityForPolicy', () => {
+        it('returns empty array if token is available', async () => {
+          mockCreatePointInTimeFinderAsInternalUser();
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForPolicy(okaySO.attributes.policy_id)
+          ).resolves.toBeNull();
+        });
+
+        it('returns error if token is missing', async () => {
+          mockCreatePointInTimeFinderAsInternalUser([okaySO, missingTokenSO2]);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForPolicy(missingTokenSO2.attributes.policy_id)
+          ).resolves.toStrictEqual({
+            error: new UninstallTokenError(
+              'Invalid uninstall token: Saved object is missing the token attribute.'
+            ),
+          });
+        });
+
+        it('returns error if token decryption gives error', async () => {
+          mockCreatePointInTimeFinderAsInternalUser([okaySO, errorWithDecryptionSO2]);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForPolicy(
+              errorWithDecryptionSO2.attributes.policy_id
+            )
+          ).resolves.toStrictEqual({
+            error: new UninstallTokenError(
+              "Error when reading Uninstall Token with id 'test-so-id-two'."
+            ),
+          });
+        });
+
+        it('returns error on `too_many_nested_clauses` error', async () => {
+          // @ts-ignore
+          const responseError = new errors.ResponseError({});
+          responseError.message = 'this is a too_many_nested_clauses error';
+
+          esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+            .fn()
+            .mockRejectedValueOnce(responseError);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).resolves.toStrictEqual({
+            error: new UninstallTokenError(
+              'Failed to validate uninstall tokens: `too_many_nested_clauses` error received. ' +
+                'Setting/decreasing the value of `xpack.fleet.setup.uninstallTokenVerificationBatchSize` in your kibana.yml should help. ' +
+                `Current value is 500.`
+            ),
+          });
+        });
+
+        it('throws error in case of unknown error', async () => {
+          esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+            .fn()
+            .mockRejectedValueOnce('some error');
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForPolicy(
+              errorWithDecryptionSO2.attributes.policy_id
+            )
+          ).rejects.toThrowError('Unknown error happened while checking Uninstall Tokens validity');
         });
       });
     });

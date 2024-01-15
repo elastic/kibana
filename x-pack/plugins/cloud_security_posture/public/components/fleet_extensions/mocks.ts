@@ -6,7 +6,7 @@
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
-import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createNewPackagePolicyMock, createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
@@ -15,7 +15,7 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VULN_MGMT_AWS,
 } from '../../../common/constants';
-import type { PostureInput } from '../../../common/types';
+import type { PostureInput } from '../../../common/types_old';
 
 export const getMockPolicyAWS = () => getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws');
 export const getMockPolicyGCP = () => getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp');
@@ -24,6 +24,9 @@ export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', '
 export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks');
 export const getMockPolicyVulnMgmtAWS = () =>
   getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
+export const getMockAgentlessAgentPolicy = () => {
+  return createAgentPolicyMock({ id: 'agentless' });
+};
 
 export const getMockPackageInfoVulnMgmtAWS = () => {
   return {
@@ -162,8 +165,15 @@ const getPolicyMock = (
   };
 
   const azureVarsMock = {
+    'azure.credentials.type': { value: 'arm_template', type: 'text' },
     'azure.account_type': { type: 'text' },
-    'azure.credentials.type': { type: 'text' },
+    'azure.credentials.tenant_id': { type: 'text' },
+    'azure.credentials.client_id': { type: 'text' },
+    'azure.credentials.client_secret': { type: 'text' },
+    'azure.credentials.client_certificate_path': { type: 'text' },
+    'azure.credentials.client_certificate_password': { type: 'text' },
+    'azure.credentials.client_username': { type: 'text' },
+    'azure.credentials.client_password': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_security_posture.findings' };

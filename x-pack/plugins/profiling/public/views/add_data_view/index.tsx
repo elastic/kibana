@@ -272,15 +272,15 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
               <EuiCodeBlock paddingSize="s" isCopyable>
                 {`sudo rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
       cat <<EOF > /etc/yum.repos.d/elastic.repo
-      [elastic-${majorVersion}.x]
-      name=Elastic repository for ${majorVersion}.x packages
-      baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
-      gpgcheck=1
-      gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-      enabled=1
-      autorefresh=1
-      type=rpm-md
-      EOF`}
+[elastic-${majorVersion}.x]
+name=Elastic repository for ${majorVersion}.x packages
+baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+EOF`}
               </EuiCodeBlock>
             ),
           },
@@ -541,7 +541,7 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
             title={
               <FormattedMessage
                 id="xpack.profiling.tabs.debWarning"
-                defaultMessage="Due to a {linuxLink} which impacts stability, the profiling agent will refuse to run on kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running such a kernel with a backported fix, please refer to {advancedLink} for instructions to override the precautionary measure."
+                defaultMessage="Due to a {linuxLink} bug which impacts stability, the Universal Profiling agent will not run on unpatched kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running an affected kernel, the Universal Profiling agent dynamically checks for the patch. Refer to {advancedLink} for instructions on overriding this check."
                 values={{
                   versionFrom: (
                     <strong>

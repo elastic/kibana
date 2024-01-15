@@ -11,6 +11,7 @@ export {
   ruleExecutionStatusValues,
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
+  filterStateStore,
 } from './constants/latest';
 
 export type {
@@ -19,6 +20,7 @@ export type {
   RuleExecutionStatusValues,
   RuleExecutionStatusErrorReason,
   RuleExecutionStatusWarningReason,
+  FilterStateStore,
 } from './constants/latest';
 
 export {
@@ -27,6 +29,7 @@ export {
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
   ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
+  filterStateStore as filterStateStoreV1,
 } from './constants/v1';
 
 export type {
@@ -35,4 +38,5 @@ export type {
   RuleExecutionStatusValues as RuleExecutionStatusValuesV1,
   RuleExecutionStatusErrorReason as RuleExecutionStatusErrorReasonV1,
   RuleExecutionStatusWarningReason as RuleExecutionStatusWarningReasonV1,
+  FilterStateStore as FilterStateStoreV1,
 } from './constants/v1';

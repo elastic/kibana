@@ -29,39 +29,47 @@ import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
 
 interface Props {
-  isRoot: boolean;
-  label: string;
-  countInclusive: number;
-  countExclusive: number;
-  totalSamples: number;
-  totalSeconds: number;
+  annualCO2KgsInclusive: number;
+  annualCostsUSDInclusive: number;
   baselineScaleFactor?: number;
-  comparisonScaleFactor?: number;
-  comparisonCountInclusive?: number;
+  comparisonAnnualCO2KgsInclusive?: number;
+  comparisonAnnualCostsUSDInclusive?: number;
   comparisonCountExclusive?: number;
+  comparisonCountInclusive?: number;
+  comparisonScaleFactor?: number;
   comparisonTotalSamples?: number;
   comparisonTotalSeconds?: number;
-  onShowMoreClick?: () => void;
+  countExclusive: number;
+  countInclusive: number;
   inline: boolean;
+  isRoot: boolean;
+  label: string;
+  onShowMoreClick?: () => void;
   parentLabel?: string;
+  totalSamples: number;
+  totalSeconds: number;
 }
 
 export function FlameGraphTooltip({
-  isRoot,
-  label,
-  countInclusive,
-  countExclusive,
-  totalSamples,
-  totalSeconds,
+  annualCO2KgsInclusive,
+  annualCostsUSDInclusive,
   baselineScaleFactor,
-  comparisonScaleFactor,
-  comparisonCountInclusive,
+  comparisonAnnualCO2KgsInclusive,
+  comparisonAnnualCostsUSDInclusive,
   comparisonCountExclusive,
+  comparisonCountInclusive,
+  comparisonScaleFactor,
   comparisonTotalSamples,
   comparisonTotalSeconds,
-  onShowMoreClick,
+  countExclusive,
+  countInclusive,
   inline,
+  isRoot,
+  label,
+  onShowMoreClick,
   parentLabel,
+  totalSamples,
+  totalSeconds,
 }: Props) {
   const theme = useEuiTheme();
   const calculateImpactEstimates = useCalculateImpactEstimate();
@@ -170,9 +178,9 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
               defaultMessage: `Annualized CO2`,
             })}
-            value={impactEstimates.totalCPU.annualizedCo2}
-            comparison={comparisonImpactEstimates?.totalCPU.annualizedCo2}
-            formatValue={asWeight}
+            value={annualCO2KgsInclusive}
+            comparison={comparisonAnnualCO2KgsInclusive}
+            formatValue={(value) => asWeight(value, 'kgs')}
             showDifference
             formatDifferenceAsPercentage={false}
           />
@@ -180,8 +188,8 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
               defaultMessage: `Annualized dollar cost`,
             })}
-            value={impactEstimates.totalCPU.annualizedDollarCost}
-            comparison={comparisonImpactEstimates?.totalCPU.annualizedDollarCost}
+            value={annualCostsUSDInclusive}
+            comparison={comparisonAnnualCostsUSDInclusive}
             formatValue={asCost}
             showDifference
             formatDifferenceAsPercentage={false}

@@ -97,6 +97,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
           )}
         >
           <EuiFieldText
+            data-test-subj="serverlessSearchDeleteConnectorModalFieldText"
             onChange={(e) => setInputConnectorName(e.target.value)}
             value={inputConnectorName}
           />

@@ -7,11 +7,12 @@
 
 import { hostsReducer } from '../../explore/hosts/store';
 import { networkReducer } from '../../explore/network/store';
-import { usersReducer } from '../../explore/users/store';
-import { timelineReducer } from '../../timelines/store/timeline/reducer';
+import { makeUsersReducer } from '../../explore/users/store';
+import { timelineReducer } from '../../timelines/store/reducer';
 import { managementReducer } from '../../management/store/reducer';
 import type { ManagementPluginReducer } from '../../management';
 import type { SubPluginsInitReducer } from '../store';
+import { createSecuritySolutionStorageMock } from './mock_local_storage';
 
 type GlobalThis = typeof globalThis;
 interface Global extends GlobalThis {
@@ -23,10 +24,12 @@ interface Global extends GlobalThis {
 
 export const globalNode: Global = global;
 
+const { storage } = createSecuritySolutionStorageMock();
+
 export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
   hosts: hostsReducer,
   network: networkReducer,
-  users: usersReducer,
+  users: makeUsersReducer(storage),
   timeline: timelineReducer,
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,

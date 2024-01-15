@@ -66,13 +66,18 @@ export const EditConnector: React.FC = () => {
           title={
             <h1>
               {i18n.translate('xpack.serverlessSearch.connectors.notFound', {
-                defaultMessage: 'Could not find a connector with id {id}',
+                defaultMessage: 'Could not find connector {id}',
                 values: { id },
               })}
             </h1>
           }
           actions={
-            <EuiButton color="primary" fill onClick={() => navigateToUrl(`./`)}>
+            <EuiButton
+              data-test-subj="serverlessSearchEditConnectorGoBackButton"
+              color="primary"
+              fill
+              onClick={() => navigateToUrl(`./`)}
+            >
               {i18n.translate('xpack.serverlessSearch.connectors.goBack', {
                 defaultMessage: 'Go back',
               })}
@@ -107,6 +112,7 @@ export const EditConnector: React.FC = () => {
                 id={'connectorMenu'}
                 button={
                   <EuiButtonIcon
+                    data-test-subj="serverlessSearchEditConnectorButton"
                     aria-label={i18n.translate('xpack.serverlessSearch.connectors.openMenuLabel', {
                       defaultMessage: 'Open menu',
                     })}

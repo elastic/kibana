@@ -22,6 +22,7 @@ export function useCreateDataView({ indexPatternString }: UseCreateDataViewProps
   useEffect(() => {
     const createDataView = () =>
       dataViews.create({
+        id: `${indexPatternString}-id`,
         title: indexPatternString,
         allowNoIndex: true,
       });

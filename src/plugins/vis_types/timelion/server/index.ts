@@ -8,7 +8,6 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { configSchema, TimelionConfig } from '../config';
-import { TimelionPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<TimelionConfig> = {
   exposeToBrowser: {
@@ -18,5 +17,7 @@ export const config: PluginConfigDescriptor<TimelionConfig> = {
   deprecations: ({ unused }) => [unused('graphiteUrls', { level: 'warning' })],
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new TimelionPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { TimelionPlugin } = await import('./plugin');
+  return new TimelionPlugin(initializerContext);
+};

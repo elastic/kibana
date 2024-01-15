@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
+import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
   ruleNotifyWhen as ruleNotifyWhenV1,
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
@@ -40,18 +41,7 @@ const actionFrequencySchema = schema.object({
 });
 
 const actionAlertsFilterSchema = schema.object({
-  query: schema.maybe(
-    schema.object({
-      kql: schema.string(),
-      filters: schema.arrayOf(
-        schema.object({
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          meta: schema.recordOf(schema.string(), schema.any()),
-          state$: schema.maybe(schema.object({ store: schema.string() })),
-        })
-      ),
-    })
-  ),
+  query: schema.maybe(alertsFilterQuerySchemaV1),
   timeframe: schema.maybe(
     schema.object({
       days: schema.arrayOf(

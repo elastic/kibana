@@ -1,7 +1,11 @@
 fields:
-  description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
-  nullable: true
-  type: object
+  description: >
+    An object containing the connector fields.
+    To create a case without a connector, specify null.
+    If you want to omit any individual field, specify null as its value.
+  type:
+    - "object"
+    - "null"
   properties:
     caseId:
       description: The case identifier for Swimlane connectors.
@@ -11,8 +15,9 @@ fields:
       type: string
     destIp:
       description: Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
-      type: boolean
-      nullable: true
+      type:
+        - "boolean"
+        - "null"
     impact:
       description: The effect an incident had on business for ServiceNow ITSM connectors.
       type: string
@@ -26,12 +31,14 @@ fields:
         type: string
     malwareHash:
       description: Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors. 
-      type: boolean
-      nullable: true
+      type:
+        - "boolean"
+        - "null"
     malwareUrl:
       description: Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors. 
-      type: boolean
-      nullable: true
+      type:
+        - "boolean"
+        - "null"
     parent:
       description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
       type: string
@@ -46,22 +53,26 @@ fields:
       type: string
     sourceIp:
       description: Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
-      type: boolean
-      nullable: true
+      type:
+        - "boolean"
+        - "null"
     subcategory:
       description: The subcategory of the incident for ServiceNow ITSM connectors.
       type: string
     urgency:
       description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
       type: string
-  example: null
+  examples:
+    - null
 id:
   description: The identifier for the connector. To create a case without a connector, use `none`.
   type: string
-  example: none
+  examples:
+    - none
 name:
   description: The name of the connector. To create a case without a connector, use `none`.
   type: string
-  example: none
+  examples:
+    - none
 type:
   $ref: 'connector_types.yaml'

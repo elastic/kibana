@@ -6,23 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
-import { useNavigation } from './navigation';
+import { type FC } from 'react';
 
 export interface Props {
-  children?: React.ReactNode;
+  children?: JSX.Element[];
 }
 
-function NavigationFooterComp({ children }: Props) {
-  const { updateFooterChildren } = useNavigation();
-
-  useEffect(() => {
-    if (children) {
-      updateFooterChildren(children);
-    }
-  }, [children, updateFooterChildren]);
-
+// Note: this component is only used to detect which children are part of the body and which
+// are part of the footer. See the "childrenParsed" value of the <Navigation /> component.
+export const NavigationFooter: FC<Props> = () => {
   return null;
-}
-
-export const NavigationFooter = React.memo(NavigationFooterComp);
+};

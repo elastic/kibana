@@ -16,9 +16,19 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../hooks';
-import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
-
-const HIDDEN_FIELDS = [`${AGENTS_PREFIX}.actions`, '_id', '_index'];
+import {
+  INDEX_NAME,
+  AGENTS_PREFIX,
+  FLEET_ENROLLMENT_API_PREFIX,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+} from '../constants';
+import {
+  AGENT_POLICY_MAPPINGS,
+  PACKAGE_POLICIES_MAPPINGS,
+  AGENT_MAPPINGS,
+  ENROLLMENT_API_KEY_MAPPINGS,
+} from '../../../../common/constants';
 
 const NoWrapQueryStringInput = styled(QueryStringInput)`
   .kbnQueryBar__textarea {
@@ -35,39 +45,69 @@ interface Props {
   dataTestSubj?: string;
 }
 
-/** Exported for testing only **/
-export const filterAndConvertFields = (
-  fields: FieldSpec[],
-  indexPattern?: string,
-  fieldPrefix?: string
-) => {
-  if (!fields) return {};
-  let filteredFields: FieldSpec[] = [];
-
-  if (fieldPrefix) {
-    // exclude fields from different indices
-    if (indexPattern === INDEX_NAME) {
-      filteredFields = fields.filter((field) => field.name.startsWith(fieldPrefix));
-    } else {
-      // filter out fields that have names to be hidden
-      filteredFields = fields.filter((field) => {
-        for (const hiddenField of HIDDEN_FIELDS) {
-          if (field.name.includes(hiddenField)) {
-            return false;
-          }
-        }
-        return true;
-      });
-    }
-  } else {
-    filteredFields = fields;
+const getMappings = (indexPattern: string) => {
+  switch (indexPattern) {
+    case `.${AGENTS_PREFIX}`:
+      return AGENT_MAPPINGS;
+    case `.${AGENT_POLICY_SAVED_OBJECT_TYPE}`:
+      return AGENT_POLICY_MAPPINGS;
+    case `.${PACKAGE_POLICY_SAVED_OBJECT_TYPE}`:
+      return PACKAGE_POLICIES_MAPPINGS;
+    case `.${FLEET_ENROLLMENT_API_PREFIX}`:
+      return ENROLLMENT_API_KEY_MAPPINGS;
+    default:
+      return {};
   }
+};
 
-  const fieldsMap = filteredFields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
-    acc[curr.name] = curr;
-    return acc;
-  }, {});
-  return fieldsMap;
+const getType = (type: string) => {
+  switch (type) {
+    case 'keyword':
+      return 'string';
+    case 'text':
+      return 'string';
+    case 'version':
+      return 'string';
+    case 'integer':
+      return 'number';
+    case 'double':
+      return 'number';
+    default:
+      return type;
+  }
+};
+
+const concatKeys = (obj: any, parentKey = '') => {
+  let result: string[] = [];
+  for (const key in obj) {
+    if (typeof obj[key] === 'object') {
+      result = result.concat(concatKeys(obj[key], `${parentKey}${key}.`));
+    } else {
+      result.push(`${parentKey}${key}:${obj[key]}`);
+    }
+  }
+  return result;
+};
+/** Exported for testing only **/
+export const getFieldSpecs = (indexPattern: string) => {
+  const mapping = getMappings(indexPattern);
+  // @ts-ignore-next-line
+  const rawFields = concatKeys(mapping?.properties) || [];
+  const fields = rawFields
+    .map((field) => field.replaceAll(/.properties/g, ''))
+    .map((field) => field.replace(/.type/g, ''))
+    .map((field) => field.split(':'));
+
+  const fieldSpecs: FieldSpec[] = fields.map((field) => {
+    return {
+      name: field[0],
+      type: getType(field[1]),
+      searchable: true,
+      aggregatable: true,
+      esTypes: [field[1]],
+    };
+  });
+  return fieldSpecs;
 };
 
 export const SearchBar: React.FunctionComponent<Props> = ({
@@ -108,16 +148,11 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
-          pattern: indexPattern,
-        });
-        const fieldsMap = filterAndConvertFields(fields, indexPattern, fieldPrefix);
-        // Refetch only if fieldsMap is empty
-        const skipFetchField = !!fieldsMap;
-
+        const fieldSpecs = getFieldSpecs(indexPattern);
+        const fieldsMap = data.dataViews.fieldArrayToMap(fieldSpecs);
         const newDataView = await data.dataViews.create(
           { title: indexPattern, fields: fieldsMap },
-          skipFetchField
+          true
         );
         setDataView(newDataView);
       } catch (err) {

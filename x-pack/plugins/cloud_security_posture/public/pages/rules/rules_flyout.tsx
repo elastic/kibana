@@ -18,14 +18,15 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CspRuleTemplate, CspRuleTemplateMetadata } from '../../../common/schemas';
+
+import { CspBenchmarkRule, CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  rule: CspRuleTemplate;
+  rule: CspBenchmarkRule;
 }
 
 const tabs = [
@@ -85,7 +86,7 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
   );
 };
 
-const RuleOverviewTab = ({ rule }: { rule: CspRuleTemplateMetadata }) => (
+const RuleOverviewTab = ({ rule }: { rule: CspBenchmarkRuleMetadata }) => (
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <EuiDescriptionList listItems={getRuleList(rule)} />

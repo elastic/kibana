@@ -9,7 +9,6 @@ import { sum } from 'lodash';
 import objectHash from 'object-hash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
@@ -28,10 +27,13 @@ import {
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { NodeType } from '../../../../common/connections';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';
 
+const MAX_ITEMS = 1500;
 export const getStats = async ({
   apmEventClient,
   start,
@@ -53,9 +55,92 @@ export const getStats = async ({
     offset,
   });
 
-  const response = await apmEventClient.search('get_connection_stats', {
+  const response = await getConnectionStats({
+    apmEventClient,
+    startWithOffset,
+    endWithOffset,
+    filter,
+    numBuckets,
+  });
+
+  return (
+    response.aggregations?.connections.buckets.map((bucket) => {
+      const sample = bucket.sample.top[0].metrics;
+      const serviceName = bucket.key.serviceName as string;
+      const dependencyName = bucket.key.dependencyName as string;
+
+      return {
+        from: {
+          id: objectHash({ serviceName }),
+          serviceName,
+          environment: (sample[SERVICE_ENVIRONMENT] ||
+            ENVIRONMENT_NOT_DEFINED.value) as string,
+          agentName: sample[AGENT_NAME] as AgentName,
+          type: NodeType.service as const,
+        },
+        to: {
+          id: objectHash({ dependencyName }),
+          dependencyName,
+          spanType: sample[SPAN_TYPE] as string,
+          spanSubtype: (sample[SPAN_SUBTYPE] || '') as string,
+          type: NodeType.dependency as const,
+        },
+        value: {
+          count: sum(
+            bucket.timeseries.buckets.map(
+              (dateBucket) => dateBucket.count.value ?? 0
+            )
+          ),
+          latency_sum: sum(
+            bucket.timeseries.buckets.map(
+              (dateBucket) => dateBucket.latency_sum.value ?? 0
+            )
+          ),
+          error_count: sum(
+            bucket.timeseries.buckets.flatMap(
+              (dateBucket) =>
+                dateBucket[EVENT_OUTCOME].buckets.find(
+                  (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+                )?.count.value ?? 0
+            )
+          ),
+        },
+        timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
+          x: dateBucket.key + offsetInMs,
+          count: dateBucket.count.value ?? 0,
+          latency_sum: dateBucket.latency_sum.value ?? 0,
+          error_count:
+            dateBucket[EVENT_OUTCOME].buckets.find(
+              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+            )?.count.value ?? 0,
+        })),
+      };
+    }) ?? []
+  );
+};
+
+async function getConnectionStats({
+  apmEventClient,
+  startWithOffset,
+  endWithOffset,
+  filter,
+  numBuckets,
+}: {
+  apmEventClient: APMEventClient;
+  startWithOffset: number;
+  endWithOffset: number;
+  filter: QueryDslQueryContainer[];
+  numBuckets: number;
+  after?: { serviceName: string | number; dependencyName: string | number };
+}) {
+  return apmEventClient.search('get_connection_stats', {
     apm: {
-      events: [ProcessorEvent.metric],
+      sources: [
+        {
+          documentType: ApmDocumentType.ServiceDestinationMetric,
+          rollupInterval: RollupInterval.OneMinute,
+        },
+      ],
     },
     body: {
       track_total_hits: true,
@@ -73,7 +158,7 @@ export const getStats = async ({
       aggs: {
         connections: {
           composite: {
-            size: 10000,
+            size: MAX_ITEMS,
             sources: asMutableArray([
               {
                 serviceName: {
@@ -168,59 +253,4 @@ export const getStats = async ({
       },
     },
   });
-
-  return (
-    response.aggregations?.connections.buckets.map((bucket) => {
-      const sample = bucket.sample.top[0].metrics;
-      const serviceName = bucket.key.serviceName as string;
-      const dependencyName = bucket.key.dependencyName as string;
-
-      return {
-        from: {
-          id: objectHash({ serviceName }),
-          serviceName,
-          environment: (sample[SERVICE_ENVIRONMENT] ||
-            ENVIRONMENT_NOT_DEFINED.value) as string,
-          agentName: sample[AGENT_NAME] as AgentName,
-          type: NodeType.service as const,
-        },
-        to: {
-          id: objectHash({ dependencyName }),
-          dependencyName,
-          spanType: sample[SPAN_TYPE] as string,
-          spanSubtype: (sample[SPAN_SUBTYPE] || '') as string,
-          type: NodeType.dependency as const,
-        },
-        value: {
-          count: sum(
-            bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.count.value ?? 0
-            )
-          ),
-          latency_sum: sum(
-            bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.latency_sum.value ?? 0
-            )
-          ),
-          error_count: sum(
-            bucket.timeseries.buckets.flatMap(
-              (dateBucket) =>
-                dateBucket[EVENT_OUTCOME].buckets.find(
-                  (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-                )?.count.value ?? 0
-            )
-          ),
-        },
-        timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
-          x: dateBucket.key + offsetInMs,
-          count: dateBucket.count.value ?? 0,
-          latency_sum: dateBucket.latency_sum.value ?? 0,
-          error_count:
-            dateBucket[EVENT_OUTCOME].buckets.find(
-              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-            )?.count.value ?? 0,
-        })),
-      };
-    }) ?? []
-  );
-};
+}

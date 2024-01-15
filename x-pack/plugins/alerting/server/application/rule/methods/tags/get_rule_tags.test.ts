@@ -22,6 +22,7 @@ import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 import { RegistryRuleType } from '../../../../rule_type_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -147,7 +148,7 @@ describe('getTags()', () => {
         tags: { terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 10000 } },
       },
       filter: undefined,
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
     });
 
     expect(result.data).toEqual(['a', 'b', 'c']);

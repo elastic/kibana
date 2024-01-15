@@ -5,4 +5,21 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 export * from '../../common/ui';
+
+export type FeatureIdsResponse = estypes.SearchResponse<
+  unknown,
+  {
+    consumer: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+    producer: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+    ruleTypeIds: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+  }
+>;

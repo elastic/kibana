@@ -148,8 +148,6 @@ advanced statistical methods to help you interpret your data and its behavior.
 [[log-rate-analysis]]
 === Log rate analysis
 
-preview::[]
-
 Log rate analysis is a feature that uses advanced statistical methods to 
 identify reasons for increases or decreases in log rates. It makes it easy to 
 find and investigate causes of unusual spikes or drops by using the analysis 

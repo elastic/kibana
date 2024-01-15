@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import './setup_jest_mocks';
-import { type Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { navLinksMock } from '../mocks/src/navlinks';
+import { NavigationServices } from '../types';
 import type { ProjectNavigationTreeDefinition } from '../src/ui/types';
-
 import { getMockFn, renderNavigation, type ProjectNavigationChangeListener } from './utils';
 
 describe('Default navigation', () => {
@@ -22,16 +22,19 @@ describe('Default navigation', () => {
    */
   test('builds the full navigation tree when only the project is provided', async () => {
     const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-    const navLinks$: Observable<ChromeNavLink[]> = of([
-      ...navLinksMock,
-      {
+    const deepLinks$: NavigationServices['deepLinks$'] = of({
+      ...navLinksMock.reduce<Record<string, ChromeNavLink>>((acc, navLink) => {
+        acc[navLink.id] = navLink;
+        return acc;
+      }, {}),
+      item2: {
         id: 'item2',
         title: 'Title from deeplink!',
         baseUrl: '',
         url: '',
         href: '',
       },
-    ]);
+    });
 
     const projectNavigationTree: ProjectNavigationTreeDefinition<any> = [
       {
@@ -62,7 +65,7 @@ describe('Default navigation', () => {
     renderNavigation({
       projectNavigationTree,
       onProjectNavigationChange,
-      services: { navLinks$ },
+      services: { deepLinks$ },
     });
 
     expect(onProjectNavigationChange).toHaveBeenCalled();

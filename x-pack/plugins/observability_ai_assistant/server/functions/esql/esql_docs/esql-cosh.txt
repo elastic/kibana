@@ -1,0 +1,7 @@
+COSH
+
+
+Cosine hyperbolic function.
+ROW a=1.8
+| EVAL cosh=COSH(a)
+Supported types:

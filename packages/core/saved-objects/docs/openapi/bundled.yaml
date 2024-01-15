@@ -208,7 +208,7 @@ paths:
       responses:
         '200':
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
           content:
             application/json:
               schema:
@@ -239,7 +239,7 @@ paths:
       responses:
         '200':
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
           content:
             application/json:
               schema:
@@ -798,7 +798,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
   examples:
     key_rotation_response:
       summary: Encryption key rotation using default parameters.

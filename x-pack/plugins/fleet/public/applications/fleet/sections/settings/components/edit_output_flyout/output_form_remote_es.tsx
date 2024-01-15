@@ -5,21 +5,53 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiCallOut, EuiCodeBlock, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import React, { useEffect } from 'react';
+import { EuiCallOut, EuiCodeBlock, EuiFieldText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { MultiRowInput } from '../multi_row_input';
 
 import type { OutputFormInputsType } from './use_output_form';
+import { SecretFormRow } from './output_form_secret_form_row';
 
 interface Props {
   inputs: OutputFormInputsType;
+  useSecretsStorage: boolean;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
-  const { inputs } = props;
+  const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
+
+  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
+
+  useEffect(() => {
+    if (!isFirstLoad) return;
+    setIsFirstLoad(false);
+    // populate the secret input with the value of the plain input in order to re-save the output with secret storage
+    if (useSecretsStorage) {
+      if (inputs.serviceTokenInput.value && !inputs.serviceTokenSecretInput.value) {
+        inputs.serviceTokenSecretInput.setValue(inputs.serviceTokenInput.value);
+        inputs.serviceTokenInput.clear();
+      }
+    }
+  }, [
+    useSecretsStorage,
+    inputs.serviceTokenInput,
+    inputs.serviceTokenSecretInput,
+    isFirstLoad,
+    setIsFirstLoad,
+  ]);
+
+  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.serviceTokenInput.clear();
+    } else {
+      inputs.serviceTokenSecretInput.setValue('');
+    }
+    onToggleSecretStorage(secretEnabled);
+  };
 
   return (
     <>
@@ -38,27 +70,55 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         isUrl
       />
       <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.serviceTokenLabel"
-            defaultMessage="Service Token"
-          />
-        }
-        {...inputs.serviceTokenInput.formRowProps}
-      >
-        <EuiFieldText
+      {!useSecretsStorage ? (
+        <SecretFormRow
           fullWidth
-          {...inputs.serviceTokenInput.props}
-          placeholder={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
-            {
-              defaultMessage: 'Specify service token',
-            }
-          )}
-        />
-      </EuiFormRow>
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.serviceTokenLabel"
+              defaultMessage="Service Token"
+            />
+          }
+          {...inputs.serviceTokenInput.formRowProps}
+          useSecretsStorage={useSecretsStorage}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
+        >
+          <EuiFieldText
+            fullWidth
+            data-test-subj="serviceTokenSecretInput"
+            {...inputs.serviceTokenInput.props}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
+              {
+                defaultMessage: 'Specify service token',
+              }
+            )}
+          />
+        </SecretFormRow>
+      ) : (
+        <SecretFormRow
+          fullWidth
+          title={i18n.translate('xpack.fleet.settings.editOutputFlyout.serviceTokenLabel', {
+            defaultMessage: 'Service Token',
+          })}
+          {...inputs.serviceTokenSecretInput.formRowProps}
+          cancelEdit={inputs.serviceTokenSecretInput.cancelEdit}
+          useSecretsStorage={useSecretsStorage}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
+        >
+          <EuiFieldText
+            data-test-subj="serviceTokenSecretInput"
+            fullWidth
+            {...inputs.serviceTokenSecretInput.props}
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder',
+              {
+                defaultMessage: 'Specify service token',
+              }
+            )}
+          />
+        </SecretFormRow>
+      )}
       <EuiSpacer size="m" />
       <EuiCallOut
         title={

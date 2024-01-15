@@ -11,6 +11,7 @@ import type { CoreEditor, Position, Token } from '../../types';
 enum Move {
   ForwardOneCharacter = 1,
   ForwardOneToken, // the column position may jump to the next token by autocomplete
+  ForwardTwoTokens, // the column position could jump two tokens due to autocomplete
 }
 
 const knownTypingInTokenTypes = new Map<Move, Map<string, Set<string>>>([
@@ -42,6 +43,10 @@ const knownTypingInTokenTypes = new Map<Move, Map<string, Set<string>>>([
       ['url.value', new Set(['url.amp'])],
       ['whitespace', new Set(['url.comma', 'url.questionmark', 'url.slash'])],
     ]),
+  ],
+  [
+    Move.ForwardTwoTokens,
+    new Map<string, Set<string>>([['url.part', new Set(['url.param', 'url.part'])]]),
   ],
 ]);
 
@@ -75,14 +80,16 @@ export const looksLikeTypingIn = (
     currentToken.value.length === 1 &&
     getOneCharacterNextOnTheRight(currentToken.position, coreEditor) === ''
   ) {
-    const move =
+    const moves =
       lastEvaluatedToken.position.column + 1 === currentToken.position.column
-        ? Move.ForwardOneCharacter
-        : Move.ForwardOneToken;
-    const tokenTypesPairs = knownTypingInTokenTypes.get(move) ?? new Map<string, Set<string>>();
-    const currentTokenTypes = tokenTypesPairs.get(lastEvaluatedToken.type) ?? new Set<string>();
-    if (currentTokenTypes.has(currentToken.type)) {
-      return true;
+        ? [Move.ForwardOneCharacter]
+        : [Move.ForwardOneToken, Move.ForwardTwoTokens];
+    for (const move of moves) {
+      const tokenTypesPairs = knownTypingInTokenTypes.get(move) ?? new Map<string, Set<string>>();
+      const currentTokenTypes = tokenTypesPairs.get(lastEvaluatedToken.type) ?? new Set<string>();
+      if (currentTokenTypes.has(currentToken.type)) {
+        return true;
+      }
     }
   }
 

@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { min, max, sum, isNumber } from 'lodash';
-import { MetricsExplorerSeries } from '../../../../common/custom_threshold_rule/metrics_explorer';
-import { MetricsExplorerOptionsMetric } from '../../../../common/custom_threshold_rule/types';
-import { getMetricId } from './get_metric_id';
+import { min, max, isNumber } from 'lodash';
+import { MetricsExplorerSeries } from '../types';
 
 const getMin = (values: Array<number | null>) => {
   const minValue = min(values);
@@ -20,24 +18,7 @@ const getMax = (values: Array<number | null>) => {
   return isNumber(maxValue) && Number.isFinite(maxValue) ? maxValue : undefined;
 };
 
-export const calculateDomain = (
-  series: MetricsExplorerSeries,
-  metrics: MetricsExplorerOptionsMetric[],
-  stacked = false
-): { min: number; max: number } => {
-  const values = series.rows
-    .reduce((acc, row) => {
-      const rowValues = metrics
-        .map((m, index) => {
-          return (row[getMetricId(m, index)] as number) || null;
-        })
-        .filter((v) => isNumber(v));
-      const minValue = getMin(rowValues);
-      // For stacked domains we want to add 10% head room so the charts have
-      // enough room to draw the 2 pixel line as well.
-      const maxValue = stacked ? sum(rowValues) * 1.1 : getMax(rowValues);
-      return acc.concat([minValue || null, maxValue || null]);
-    }, [] as Array<number | null>)
-    .filter((v) => isNumber(v));
+export const calculateDomain = (series: MetricsExplorerSeries): { min: number; max: number } => {
+  const values = series.rows.map((row) => row.metric_0 as number | null).filter((v) => isNumber(v));
   return { min: getMin(values) || 0, max: getMax(values) || 0 };
 };

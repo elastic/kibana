@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('addFilter')).to.be(true);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
+        expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
+        expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
     describe('errors', () => {
-      it('should error messages for syntax errors in query', async function () {
+      it('should show error messages for syntax errors in query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         const brokenQueries = [
           'from logstash-* | limit 10*',
@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
           // error in fetching documents because of the invalid query
-          await testSubjects.existOrFail('discoverNoResultsError');
+          await PageObjects.discover.showsErrorCallout();
           const message = await testSubjects.getVisibleText('discoverErrorCalloutMessage');
           expect(message).to.contain(
             "[esql] > Couldn't parse Elasticsearch ES|QL query. Check your query and try again."

@@ -145,9 +145,10 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     order,
     priority,
     version,
-    dataStream,
+    enableDataStream,
+    lifecycle,
     allowAutoCreate,
-  }: Partial<TemplateDeserialized> = {}) => {
+  }: Partial<TemplateDeserialized> & { enableDataStream?: boolean } = {}) => {
     const { component, form, find } = testBed;
 
     if (name) {
@@ -173,7 +174,12 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
         form.setInputValue('orderField.input', JSON.stringify(order));
       }
 
-      if (dataStream) {
+      // Deal with toggling the data stream switch
+      const isDataStreamEnabled = find('dataStreamField.input').props().checked;
+
+      if (enableDataStream && !isDataStreamEnabled) {
+        form.toggleEuiSwitch('dataStreamField.input');
+      } else if (!enableDataStream && isDataStreamEnabled) {
         form.toggleEuiSwitch('dataStreamField.input');
       }
 
@@ -188,7 +194,19 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
       if (allowAutoCreate) {
         form.toggleEuiSwitch('allowAutoCreateField.input');
       }
+    });
+    component.update();
 
+    if (lifecycle && lifecycle.enabled) {
+      await act(async () => {
+        form.toggleEuiSwitch('dataRetentionToggle.input');
+      });
+      component.update();
+
+      form.setInputValue('valueDataRetentionField', String(lifecycle.value));
+    }
+
+    await act(async () => {
       clickNextButton();
     });
 
@@ -215,7 +233,6 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
 
     await act(async () => {
       clickNextButton();
-      jest.advanceTimersByTime(0);
     });
 
     component.update();
@@ -337,6 +354,7 @@ export type TestSubjects =
   | 'orderField.input'
   | 'priorityField.input'
   | 'dataStreamField.input'
+  | 'dataRetentionToggle.input'
   | 'allowAutoCreateField.input'
   | 'pageTitle'
   | 'previewTab'
@@ -361,6 +379,9 @@ export type TestSubjects =
   | 'aliasesEditor'
   | 'settingsEditor'
   | 'versionField.input'
+  | 'valueDataRetentionField'
+  | 'formWizardStep-5'
+  | 'lifecycleValue'
   | 'mappingsEditor.formTab'
   | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle'
   | 'previewIndexTemplate';

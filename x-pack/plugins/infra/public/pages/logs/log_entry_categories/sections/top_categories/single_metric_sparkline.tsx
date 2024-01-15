@@ -6,12 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { Chart, Settings, AreaSeries, ScaleType, TooltipType, Tooltip } from '@elastic/charts';
 import {
-  EUI_CHARTS_THEME_LIGHT,
-  EUI_SPARKLINE_THEME_PARTIAL,
-  EUI_CHARTS_THEME_DARK,
-} from '@elastic/eui/dist/eui_charts_theme';
+  Chart,
+  Settings,
+  AreaSeries,
+  ScaleType,
+  TooltipType,
+  Tooltip,
+  LIGHT_THEME,
+  DARK_THEME,
+} from '@elastic/charts';
+import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import { i18n } from '@kbn/i18n';
 import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 import { useKibanaTimeZoneSetting } from '../../../../../hooks/use_kibana_time_zone_setting';
@@ -35,15 +40,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
 }> = ({ metric, timeRange }) => {
   const isDarkMode = useIsDarkMode();
   const timeZone = useKibanaTimeZoneSetting();
-
-  const theme = useMemo(
-    () => [
-      // localThemeOverride,
-      EUI_SPARKLINE_THEME_PARTIAL,
-      isDarkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
-    ],
-    [isDarkMode]
-  );
+  const baseTheme = useMemo(() => (isDarkMode ? DARK_THEME : LIGHT_THEME), [isDarkMode]);
 
   const xDomain = useMemo(
     () => ({
@@ -56,7 +53,13 @@ export const SingleMetricSparkline: React.FunctionComponent<{
   return (
     <Chart size={sparklineSize}>
       <Tooltip type={TooltipType.None} />
-      <Settings showLegend={false} theme={theme} xDomain={xDomain} locale={i18n.getLocale()} />
+      <Settings
+        showLegend={false}
+        theme={EUI_SPARKLINE_THEME_PARTIAL}
+        baseTheme={baseTheme}
+        xDomain={xDomain}
+        locale={i18n.getLocale()}
+      />
       <AreaSeries
         id="metric"
         data={metric}

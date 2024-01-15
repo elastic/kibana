@@ -30,6 +30,7 @@ import {
 } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type * as CSS from 'csstype';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -37,8 +38,9 @@ import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 import { APP_STATE_STORAGE_KEY } from './edit_index_pattern_state_container';
 
-const codeStyle = {
+const codeStyle: CSS.Properties = {
   marginLeft: '8px',
+  overflowWrap: 'anywhere',
 };
 
 export interface EditIndexPatternProps extends RouteComponentProps {

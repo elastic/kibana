@@ -29,7 +29,6 @@ import type {
   PackagePolicy,
 } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 import {
   useInstallPackage,
   useGetPackageInstallStatus,
@@ -37,12 +36,13 @@ import {
   useAuthz,
   useLink,
   useUpgradePackagePoliciesMutation,
-  useGetAgentPoliciesQuery,
+  useBulkGetAgentPoliciesQuery,
 } from '../../../../../hooks';
 
 interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
   packagePolicyIds?: string[];
+  agentPolicyIds: string[];
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
   theme$: Observable<CoreTheme>;
@@ -73,6 +73,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   isUpgradingPackagePolicies = false,
   name,
   packagePolicyIds = [],
+  agentPolicyIds = [],
   setIsUpgradingPackagePolicies = () => {},
   title,
   version,
@@ -92,16 +93,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false);
   const [upgradePackagePolicies, setUpgradePackagePolicies] = useState<boolean>(true);
 
-  const { data: agentPolicyData } = useGetAgentPoliciesQuery({
-    perPage: SO_SEARCH_LIMIT,
-    page: 1,
-    // Fetch all agent policies that include one of the eligible package policies
-    kuery: packagePolicyIds.length
-      ? `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
-          .map((id) => `"${id}"`)
-          .join(' or ')}`
-      : '',
-  });
+  const { data: agentPolicyData } = useBulkGetAgentPoliciesQuery(agentPolicyIds, { full: true });
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
 

@@ -30,8 +30,8 @@ import {
   testIndexStats,
 } from './mocks';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -500,6 +500,28 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
       });
+    });
+
+    it('renders the content set via the extensions service', async () => {
+      const mappingsContent = 'test mappings extension';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _indexMappingsContent: {
+                  renderContent: () => mappingsContent,
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toContain(mappingsContent);
     });
   });
 

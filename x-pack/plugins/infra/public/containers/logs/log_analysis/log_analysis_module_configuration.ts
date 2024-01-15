@@ -7,14 +7,15 @@
 
 import { useMemo } from 'react';
 import equal from 'fast-deep-equal';
+import { JobType } from '../../../../common/http_api/latest';
 import { JobSummary } from './api/ml_get_jobs_summary_api';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
-export const useLogAnalysisModuleConfiguration = <JobType extends string>({
+export const useLogAnalysisModuleConfiguration = <T extends JobType>({
   moduleDescriptor,
   sourceConfiguration,
 }: {
-  moduleDescriptor: ModuleDescriptor<JobType>;
+  moduleDescriptor: ModuleDescriptor<T>;
   sourceConfiguration: ModuleSourceConfiguration;
 }) => {
   const getIsJobConfigurationOutdated = useMemo(
@@ -28,8 +29,8 @@ export const useLogAnalysisModuleConfiguration = <JobType extends string>({
 };
 
 export const isJobConfigurationOutdated =
-  <JobType extends string>(
-    { bucketSpan }: ModuleDescriptor<JobType>,
+  <T extends JobType>(
+    { bucketSpan }: ModuleDescriptor<T>,
     currentSourceConfiguration: ModuleSourceConfiguration
   ) =>
   (jobSummary: JobSummary): boolean => {

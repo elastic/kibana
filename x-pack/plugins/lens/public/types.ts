@@ -42,6 +42,7 @@ import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -198,6 +199,8 @@ export interface TableSuggestion {
    * The change type indicates what was changed in this table compared to the currently active table of this layer.
    */
   changeType: TableChangeType;
+
+  notAssignedMetrics?: boolean;
 }
 
 /**
@@ -460,7 +463,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getUserMessages: (
     state: T,
     deps: {
-      frame: FrameDatasourceAPI;
+      frame: FramePublicAPI;
       setState: StateSetter<T>;
       visualizationInfo?: VisualizationInfo;
     }
@@ -513,7 +516,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
 export interface DatasourceFixAction<T> {
   label: string;
-  newState: (frame: FrameDatasourceAPI) => Promise<T>;
+  newState: (frame: FramePublicAPI) => Promise<T>;
 }
 
 /**
@@ -746,6 +749,7 @@ export interface OperationMetadata {
 export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
   hasReducedTimeRange: boolean;
+  inMetricDimension?: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -882,6 +886,7 @@ export interface SuggestionRequest<T = unknown> {
   subVisualizationId?: string;
   activeData?: Record<string, Datatable>;
   allowMixed?: boolean;
+  datasourceId?: string;
 }
 
 /**
@@ -925,6 +930,8 @@ export interface VisualizationSuggestion<T = unknown> {
 export type DatasourceLayers = Partial<Record<string, DatasourcePublicAPI>>;
 
 export interface FramePublicAPI {
+  query: Query;
+  filters: Filter[];
   datasourceLayers: DatasourceLayers;
   dateRange: DateRange;
   /**
@@ -934,11 +941,6 @@ export interface FramePublicAPI {
    */
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
-}
-
-export interface FrameDatasourceAPI extends FramePublicAPI {
-  query: Query;
-  filters: Filter[];
 }
 
 /**
@@ -1390,6 +1392,7 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
       | BrushTriggerEvent
       | LensEditEvent<LensEditSupportedActions>
       | LensTableRowContextMenuEvent
+      | ChartSizeEvent
   ) => void;
 }
 
@@ -1419,6 +1422,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
 export interface LensCellValueAction {
   id: string;
   iconType: string;
+  type?: string;
   displayName: string;
   execute: (data: CellValueContext['data']) => void;
 }

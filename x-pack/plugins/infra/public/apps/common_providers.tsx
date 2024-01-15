@@ -9,14 +9,15 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  ObservabilityAIAssistantProvider,
-  ObservabilityAIAssistantPluginStart,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-shared-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
+import {
+  type KibanaEnvContext,
+  useKibanaContextForPluginProvider,
+  useKibanaEnvironmentContextProvider,
+} from '../hooks/use_kibana';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
@@ -32,7 +33,7 @@ export const CommonInfraProviders: React.FC<{
 }> = ({
   children,
   triggersActionsUI,
-  observabilityAIAssistant,
+  observabilityAIAssistant: { service: observabilityAIAssistantService },
   setHeaderActionMenu,
   appName,
   storage,
@@ -44,11 +45,9 @@ export const CommonInfraProviders: React.FC<{
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
-          <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
-            <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-              <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
-            </HeaderActionMenuProvider>
-          </ObservabilityAIAssistantProvider>
+          <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+            <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
+          </HeaderActionMenuProvider>
         </DataUIProviders>
       </EuiThemeProvider>
     </TriggersActionsProvider>
@@ -60,6 +59,7 @@ export interface CoreProvidersProps {
   pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;
   theme$: AppMountParameters['theme$'];
+  kibanaEnvironment?: KibanaEnvContext;
 }
 
 export const CoreProviders: React.FC<CoreProvidersProps> = ({
@@ -68,6 +68,7 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
   pluginStart,
   plugins,
   theme$,
+  kibanaEnvironment,
 }) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
@@ -75,11 +76,15 @@ export const CoreProviders: React.FC<CoreProvidersProps> = ({
     pluginStart
   );
 
+  const KibanaEnvContextForPluginProvider = useKibanaEnvironmentContextProvider(kibanaEnvironment);
+
   return (
     <KibanaContextProviderForPlugin services={{ ...core, ...plugins, ...pluginStart }}>
-      <core.i18n.Context>
-        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
-      </core.i18n.Context>
+      <KibanaEnvContextForPluginProvider kibanaEnv={kibanaEnvironment}>
+        <core.i18n.Context>
+          <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+        </core.i18n.Context>
+      </KibanaEnvContextForPluginProvider>
     </KibanaContextProviderForPlugin>
   );
 };

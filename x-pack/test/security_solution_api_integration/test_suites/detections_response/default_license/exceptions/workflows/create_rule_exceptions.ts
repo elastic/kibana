@@ -17,7 +17,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import {
-  getRule,
+  fetchRule,
   createRule,
   getSimpleRule,
   createAlertsIndex,
@@ -27,11 +27,12 @@ import {
   getRuleSOById,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
+  checkInvestigationFieldSoValue,
 } from '../../../utils';
 import {
   deleteAllExceptions,
   removeExceptionListItemServerGeneratedProperties,
-} from '../../../../../../lists_api_integration/utils';
+} from '../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
@@ -78,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      const udpatedRule = await getRule(supertest, log, rule.rule_id);
+      const udpatedRule = await fetchRule(supertest, { ruleId: rule.rule_id });
       const defaultList = udpatedRule.exceptions_list.find((list) => list.type === 'rule_default');
 
       const itemsWithoutServerGeneratedValues = items.map(
@@ -134,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         })
         .expect(200);
 
-      const udpatedRule = await getRule(supertest, log, rule.rule_id);
+      const udpatedRule = await fetchRule(supertest, { ruleId: rule.rule_id });
       const defaultList = udpatedRule.exceptions_list.find((list) => list.type === 'rule_default');
 
       const itemsWithoutServerGeneratedValues = items.map(
@@ -290,10 +291,14 @@ export default ({ getService }: FtrProviderContext) => {
             hits: [{ _source: ruleSO }],
           },
         } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(ruleSO, {
+          field_names: ['client.address', 'agent.name'],
+        });
+
         expect(
           ruleSO?.alert.params.exceptionsList.some((list) => list.type === 'rule_default')
         ).to.eql(true);
-        expect(ruleSO?.alert.params.investigationFields).to.eql(['client.address', 'agent.name']);
+        expect(isInvestigationFieldMigratedInSo).to.eql(false);
       });
     });
   });

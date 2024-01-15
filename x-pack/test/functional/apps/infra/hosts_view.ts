@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { parse } from 'url';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   DATES,
@@ -122,7 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await retry.waitFor(
       'wait for table and KPI charts to load',
       async () =>
-        (await pageObjects.infraHostsView.isHostTableLoading()) &&
+        (await pageObjects.infraHostsView.isHostTableLoaded()) &&
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
@@ -192,7 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpuUsage', value: '13.9%' },
             { metric: 'normalizedLoad1m', value: '18.8%' },
             { metric: 'memoryUsage', value: '94.9%' },
-            { metric: 'diskSpaceUsage', value: 'N/A' },
+            { metric: 'diskUsage', value: 'N/A' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.try(async () => {
@@ -397,7 +397,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'cpuUsage', value: '0.8%' },
           { metric: 'normalizedLoad1m', value: '0.3%' },
           { metric: 'memoryUsage', value: '16.8%' },
-          { metric: 'diskSpaceUsage', value: '17.1%' },
+          { metric: 'diskUsage', value: '17.1%' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
@@ -424,7 +424,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should have an option to open the chart in lens', async () => {
-          await pageObjects.infraHostsView.clickAndValidateMetriChartActionOptions();
+          await retry.try(async () => {
+            await pageObjects.infraHostsView.clickAndValidateMetricChartActionOptions();
+          });
         });
       });
 
@@ -552,7 +554,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'cpuUsage', value: '0.8%' },
               { metric: 'normalizedLoad1m', value: '0.2%' },
               { metric: 'memoryUsage', value: '16.3%' },
-              { metric: 'diskSpaceUsage', value: '16.9%' },
+              { metric: 'diskUsage', value: '16.9%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
                 const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);

@@ -71,13 +71,18 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
       }};
     }
   }
-  div .euiDataGridRowCell__contentWrapper {
+  div .euiDataGridRowCell {
     display: flex;
     align-items: center;
   }
-  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__content {
-    flex-grow: 0;
+  div .euiDataGridRowCell > [data-focus-lock-disabled] {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
     width: 100%;
+  }
+  div .euiDataGridRowCell__content {
+    flex-grow: 1;
   }
   div .siemEventsTable__trSupplement--summary {
     display: block;
@@ -269,6 +274,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
       },
+      dynamicRowHeight: isEventRenderedView,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,

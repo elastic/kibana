@@ -11,7 +11,7 @@ import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
-import { omitBy, isUndefined, compact } from 'lodash';
+import { omitBy, isUndefined, compact, uniq } from 'lodash';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -681,14 +681,39 @@ export class ActionsClient {
   }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
     ActionTypeExecutorResult<unknown>
   > {
+    const log = this.context.logger;
+
     if (
       (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
       const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
+      let actionTypeId: string | undefined;
+
+      try {
+        if (this.isPreconfigured(actionId)) {
+          const connector = this.context.inMemoryConnectors.find(
+            (inMemoryConnector) => inMemoryConnector.id === actionId
+          );
+
+          actionTypeId = connector?.actionTypeId;
+        } else {
+          // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
+          const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+            'action',
+            actionId
+          );
+
+          actionTypeId = attributes.actionTypeId;
+        }
+      } catch (err) {
+        log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
+      }
+
       await this.context.authorization.ensureAuthorized({
         operation: 'execute',
         additionalPrivileges,
+        actionTypeId,
       });
     } else {
       trackLegacyRBACExemption('execute', this.context.usageCounter);
@@ -723,6 +748,11 @@ export class ActionsClient {
        * inside the ActionExecutor at execution time
        */
       await this.context.authorization.ensureAuthorized({ operation: 'execute' });
+      await Promise.all(
+        uniq(options.map((o) => o.actionTypeId)).map((actionTypeId) =>
+          this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
+        )
+      );
     }
     if (authModes[AuthorizationMode.Legacy] > 0) {
       trackLegacyRBACExemption(
@@ -740,7 +770,10 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
+      await this.context.authorization.ensureAuthorized({
+        operation: 'execute',
+        actionTypeId: options.actionTypeId,
+      });
     } else {
       trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.context.usageCounter);
     }

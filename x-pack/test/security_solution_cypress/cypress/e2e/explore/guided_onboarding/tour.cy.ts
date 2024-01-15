@@ -68,45 +68,37 @@ describe('Guided onboarding tour', { tags: ['@ess'] }, () => {
     assertTourStepExist(AlertsCasesTourSteps.pointToAlertName);
   });
 
-  describe.skip(
-    'persists tour steps in flyout on flyout toggle',
-    { tags: ['@ess', '@brokenInServerless'] },
-    () => {
-      const stepsInAlertsFlyout = [
-        AlertsCasesTourSteps.reviewAlertDetailsFlyout,
-        AlertsCasesTourSteps.addAlertToCase,
-        AlertsCasesTourSteps.viewCase,
-      ];
+  describe('persists tour steps in flyout on flyout toggle', () => {
+    const stepsInAlertsFlyout = [
+      AlertsCasesTourSteps.reviewAlertDetailsFlyout,
+      AlertsCasesTourSteps.addAlertToCase,
+      AlertsCasesTourSteps.viewCase,
+    ];
 
-      const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
+    const stepsInCasesFlyout = [AlertsCasesTourSteps.createCase, AlertsCasesTourSteps.submitCase];
 
-      stepsInAlertsFlyout.forEach((step) => {
-        it(`step: ${step}, resets to ${step}`, { tags: ['@ess', '@brokenInServerless'] }, () => {
-          startTour();
-          goToStep(step);
-          assertTourStepExist(step);
-          closeAlertFlyout();
-          assertTourStepNotExist(step);
-          expandFirstAlert();
-          assertTourStepExist(step);
-        });
+    stepsInAlertsFlyout.forEach((step) => {
+      it(`step: ${step}, resets to ${step}`, () => {
+        startTour();
+        goToStep(step);
+        assertTourStepExist(step);
+        closeAlertFlyout();
+        assertTourStepNotExist(step);
+        expandFirstAlert();
+        assertTourStepExist(step);
       });
+    });
 
-      stepsInCasesFlyout.forEach((step) => {
-        it(
-          `step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`,
-          { tags: ['@ess', '@brokenInServerless'] },
-          () => {
-            startTour();
-            goToStep(step);
-            assertTourStepExist(step);
-            closeCreateCaseFlyout();
-            assertTourStepNotExist(step);
-            addToCase();
-            assertTourStepExist(AlertsCasesTourSteps.createCase);
-          }
-        );
+    stepsInCasesFlyout.forEach((step) => {
+      it(`step: ${step}, resets to ${AlertsCasesTourSteps.createCase}`, () => {
+        startTour();
+        goToStep(step);
+        assertTourStepExist(step);
+        closeCreateCaseFlyout();
+        assertTourStepNotExist(step);
+        addToCase();
+        assertTourStepExist(AlertsCasesTourSteps.createCase);
       });
-    }
-  );
+    });
+  });
 });

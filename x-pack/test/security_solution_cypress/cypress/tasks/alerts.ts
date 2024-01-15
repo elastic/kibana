@@ -51,6 +51,7 @@ import {
   ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION,
   HOVER_ACTIONS_CONTAINER,
   ALERT_TABLE_GRID_VIEW_OPTION,
+  TOOLTIP,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -75,6 +76,7 @@ import {
   OPTION_LIST_VALUES,
   OPTION_LIST_CLEAR_BTN,
   OPTION_SELECTABLE,
+  CONTROL_GROUP,
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
@@ -145,6 +147,14 @@ export const expandFirstAlert = () => {
   cy.get(EXPAND_ALERT_BTN).first().click();
 };
 
+export const hideMessageTooltip = () => {
+  cy.get('body').then(($body) => {
+    if ($body.find(TOOLTIP).length > 0) {
+      cy.get(TOOLTIP).first().invoke('hide');
+    }
+  });
+};
+
 export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
 
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
@@ -189,7 +199,7 @@ export const closePageFilterPopover = (filterIndex: number) => {
 };
 
 export const clearAllSelections = (filterIndex: number) => {
-  cy.scrollTo('top');
+  cy.get(CONTROL_GROUP).scrollIntoView();
   recurse(
     () => {
       cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();
@@ -272,7 +282,7 @@ export const selectCountTable = () => {
 };
 
 export const selectAlertsHistogram = () => {
-  cy.get(SELECT_HISTOGRAM).click({ force: true });
+  cy.get(SELECT_HISTOGRAM).click();
 };
 
 export const goToAcknowledgedAlerts = () => {
@@ -340,8 +350,17 @@ export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
 };
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
-  cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
-  cy.get(actionSelector).first().click({ force: true });
+  recurse(
+    () => {
+      // To clear focus
+      cy.get('body').type('{esc}');
+      cy.get(propertySelector).eq(rowIndex).realHover();
+      return cy.get(actionSelector).first();
+    },
+    ($el) => $el.is(':visible')
+  );
+
+  cy.get(actionSelector).first().click();
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
@@ -355,9 +374,19 @@ export const filterForAlertProperty = (propertySelector: string, rowIndex: numbe
 export const filterOutAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, CELL_FILTER_OUT_BUTTON);
 };
+
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
-  clickExpandActions(propertySelector, rowIndex);
-  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
+  recurse(
+    () => {
+      clickExpandActions(propertySelector, rowIndex);
+      return cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first();
+    },
+    ($el) => $el.is(':visible')
+  );
+
+  hideMessageTooltip();
+
+  cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().should('be.visible').click();
 };
 
 export const waitForAlerts = () => {

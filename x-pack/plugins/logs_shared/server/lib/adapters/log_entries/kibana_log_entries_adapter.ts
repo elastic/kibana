@@ -62,7 +62,11 @@ export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
       : {};
 
     const sort = {
-      [TIMESTAMP_FIELD]: sortDirection,
+      [TIMESTAMP_FIELD]: {
+        order: sortDirection,
+        format: 'strict_date_optional_time_nanos',
+        numeric_type: 'date_nanos',
+      },
       [TIEBREAKER_FIELD]: sortDirection,
     };
 
@@ -155,7 +159,16 @@ export class LogsSharedKibanaLogEntriesAdapter implements LogEntriesAdapter {
               top_hits_by_key: {
                 top_hits: {
                   size: 1,
-                  sort: [{ [TIMESTAMP_FIELD]: 'asc' }, { [TIEBREAKER_FIELD]: 'asc' }],
+                  sort: [
+                    {
+                      [TIMESTAMP_FIELD]: {
+                        order: 'asc',
+                        format: 'strict_date_optional_time_nanos',
+                        numeric_type: 'date_nanos',
+                      },
+                    },
+                    { [TIEBREAKER_FIELD]: 'asc' },
+                  ],
                   _source: false,
                 },
               },
@@ -265,7 +278,7 @@ const createQueryFilterClauses = (filterQuery: LogEntryQuery | undefined) =>
 
 function processCursor(cursor: LogEntriesParams['cursor']): {
   sortDirection: 'asc' | 'desc';
-  searchAfterClause: { search_after?: readonly [number, number] };
+  searchAfterClause: { search_after?: readonly [string, number] };
 } {
   if (cursor) {
     if ('before' in cursor) {
@@ -295,7 +308,7 @@ const LogSummaryDateRangeBucketRuntimeType = runtimeTypes.intersection([
       hits: runtimeTypes.type({
         hits: runtimeTypes.array(
           runtimeTypes.type({
-            sort: runtimeTypes.tuple([runtimeTypes.number, runtimeTypes.number]),
+            sort: runtimeTypes.tuple([runtimeTypes.string, runtimeTypes.number]),
           })
         ),
       }),

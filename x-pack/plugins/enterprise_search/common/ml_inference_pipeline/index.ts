@@ -202,10 +202,18 @@ export const parseModelStateFromStats = (
     modelTypes?.includes(TRAINED_MODEL_TYPE.LANG_IDENT)
   )
     return TrainedModelState.Started;
-  switch (model?.deployment_stats?.state) {
+
+  return parseModelState(model?.deployment_stats?.state);
+};
+
+export const parseModelState = (state?: string) => {
+  switch (state) {
     case 'started':
+    case 'fully_allocated':
       return TrainedModelState.Started;
     case 'starting':
+    case 'downloading':
+    case 'downloaded':
       return TrainedModelState.Starting;
     case 'stopping':
       return TrainedModelState.Stopping;

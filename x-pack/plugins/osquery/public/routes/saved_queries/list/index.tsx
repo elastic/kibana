@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { QUERY_TIMEOUT } from '../../../../common/constants';
 import { Direction } from '../../../../common/search_strategy';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
@@ -34,6 +35,7 @@ export interface SavedQuerySO {
   saved_object_id: string;
   description?: string;
   query: string;
+  timeout?: number;
   ecs_mapping: ECSMapping;
   updated_at: string;
   prebuilt?: boolean;
@@ -55,6 +57,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
           savedQueryId: savedQuery.id,
           query: savedQuery.query,
           ecs_mapping: savedQuery.ecs_mapping,
+          timeout: savedQuery.timeout ?? QUERY_TIMEOUT.DEFAULT,
         },
       }),
     [push, savedQuery]

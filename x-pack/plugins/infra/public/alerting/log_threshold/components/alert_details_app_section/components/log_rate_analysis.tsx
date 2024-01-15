@@ -19,12 +19,7 @@ import {
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { TopAlert } from '@kbn/observability-plugin/public';
-import {
-  ContextualInsight,
-  useObservabilityAIAssistant,
-  type Message,
-  MessageRole,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { ALERT_END } from '@kbn/rule-data-utils';
@@ -54,7 +49,11 @@ interface SignificantFieldValue {
 
 export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ rule, alert }) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews, logsShared } = services;
+  const {
+    dataViews,
+    logsShared,
+    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+  } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logRateAnalysisParams, setLogRateAnalysisParams] = useState<
@@ -162,7 +161,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
   const onAnalysisCompleted = (analysisResults: LogRateAnalysisResultsData | undefined) => {
     const significantFieldValues = orderBy(
-      analysisResults?.significantTerms?.map((item) => ({
+      analysisResults?.significantItems?.map((item) => ({
         field: item.fieldName,
         value: item.fieldValue,
         docCount: item.doc_count,
@@ -179,8 +178,6 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         : undefined
     );
   };
-
-  const aiAssistant = useObservabilityAIAssistant();
 
   const messages = useMemo<Message[] | undefined>(() => {
     const hasLogRateAnalysisParams =
@@ -290,9 +287,12 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {aiAssistant.isEnabled() && messages ? (
+        {ObservabilityAIAssistantContextualInsight && messages ? (
           <EuiFlexItem grow={false}>
-            <ContextualInsight title={logRateAnalysisTitle} messages={messages} />
+            <ObservabilityAIAssistantContextualInsight
+              title={logRateAnalysisTitle}
+              messages={messages}
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

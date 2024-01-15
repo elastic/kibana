@@ -422,6 +422,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     alertWithSuppression,
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
+                    experimentalFeatures,
                   },
                 });
 

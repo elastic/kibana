@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
 import { notifyWhenSchemaV1 } from '../../../response';
+import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean(),
@@ -16,19 +17,7 @@ export const actionFrequencySchema = schema.object({
 });
 
 export const actionAlertsFilterSchema = schema.object({
-  query: schema.maybe(
-    schema.object({
-      kql: schema.string(),
-      filters: schema.arrayOf(
-        schema.object({
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          meta: schema.recordOf(schema.string(), schema.any()),
-          state$: schema.maybe(schema.object({ store: schema.string() })),
-        })
-      ),
-      dsl: schema.maybe(schema.string()),
-    })
-  ),
+  query: schema.maybe(alertsFilterQuerySchemaV1),
   timeframe: schema.maybe(
     schema.object({
       days: schema.arrayOf(
@@ -63,6 +52,7 @@ export const actionSchema = schema.object({
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
   frequency: schema.maybe(actionFrequencySchema),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
+  use_alert_data_for_template: schema.maybe(schema.boolean()),
 });
 
 export const createBodySchema = schema.object({

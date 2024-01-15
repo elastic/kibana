@@ -983,32 +983,33 @@ export default function ({
     context.urlTokenPath = ret.urlTokenPath;
 
     const components = getTopLevelUrlCompleteComponents(context.method);
-    const { tokenPath, predicate } = (() => {
-      const lastUrlTokenPath =
-        Array.isArray(context.urlTokenPath) && context.urlTokenPath.length !== 0
-          ? context.urlTokenPath[context.urlTokenPath.length - 1]
-          : null;
-      // Checking the last chunk of path like 'c,d,' of 'GET /a/b/c,d,'
-      if (
-        Array.isArray(lastUrlTokenPath) &&
-        // true if neither c nor d equals to every ConstantComponent's name (such as _search)
-        !_.find(
-          components,
-          (c) => c instanceof ConstantComponent && _.find(lastUrlTokenPath, (p) => c.name === p)
-        )
-      ) {
-        // will simulate autocomplete on 'GET /a/b/' with a filter by index
-        return {
-          tokenPath: context.urlTokenPath?.slice(0, -1),
-          predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => term.meta === 'index',
-        };
-      } else {
-        // will do nothing special
-        return { tokenPath: context.urlTokenPath, predicate: () => true };
-      }
-    })();
+    let urlTokenPath = context.urlTokenPath;
+    let predicate: (term: ReturnType<typeof addMetaToTermsList>[0]) => boolean = () => true;
 
-    populateContext(tokenPath, context, editor, true, components);
+    const tokenIter = createTokenIterator({ editor, position: pos });
+    const currentTokenType = tokenIter.getCurrentToken()?.type;
+    const previousTokenType = tokenIter.stepBackward()?.type;
+    if (!Array.isArray(urlTokenPath)) {
+      // skip checks for url.comma
+    } else if (previousTokenType === 'url.comma' && currentTokenType === 'url.comma') {
+      predicate = () => false; // two consecutive commas empty the autocomplete
+    } else if (
+      (previousTokenType === 'url.part' && currentTokenType === 'url.comma') ||
+      (previousTokenType === 'url.slash' && currentTokenType === 'url.comma') ||
+      (previousTokenType === 'url.comma' && currentTokenType === 'url.part')
+    ) {
+      const lastUrlTokenPath = _.last(urlTokenPath) || []; // ['c', 'd'] from 'GET /a/b/c,d,'
+      const constantComponents = _.filter(components, (c) => c instanceof ConstantComponent);
+      const constantComponentNames = _.map(constantComponents, 'name');
+
+      // check if neither 'c' nor 'd' is a constant component name such as '_search'
+      if (_.every(lastUrlTokenPath, (token) => !_.includes(constantComponentNames, token))) {
+        urlTokenPath = urlTokenPath.slice(0, -1); // drop the last 'c,d,' part from the url path
+        predicate = (term) => term.meta === 'index'; // limit the autocomplete to indices only
+      }
+    }
+
+    populateContext(urlTokenPath, context, editor, true, components);
     context.autoCompleteSet = _.filter(
       addMetaToTermsList(context.autoCompleteSet!, 'endpoint'),
       predicate

@@ -6,7 +6,6 @@
  */
 
 import { Dataset } from '../datasets';
-import { encodeDatasetSelection } from './encoding';
 import { DatasetSelectionStrategy, SingleDatasetSelectionPayload } from './types';
 
 export class SingleDatasetSelection implements DatasetSelectionStrategy {
@@ -29,16 +28,11 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
   }
 
   toDataviewSpec() {
-    const { name, title } = this.selection.dataset.toDataviewSpec();
-    return {
-      id: this.toURLSelectionId(),
-      name,
-      title,
-    };
+    return this.selection.dataset.toDataviewSpec();
   }
 
-  toURLSelectionId() {
-    return encodeDatasetSelection({
+  toPlainSelection() {
+    return {
       selectionType: this.selectionType,
       selection: {
         name: this.selection.name,
@@ -46,7 +40,7 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
         version: this.selection.version,
         dataset: this.selection.dataset.toPlain(),
       },
-    });
+    };
   }
 
   public static fromSelection(selection: SingleDatasetSelectionPayload) {

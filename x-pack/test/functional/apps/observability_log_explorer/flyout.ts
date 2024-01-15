@@ -49,14 +49,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.observabilityLogExplorer.navigateTo({
-        from: new Date(NOW - 60_000).toISOString(),
-        to: new Date(NOW + 60_000).toISOString(),
+        pageState: {
+          time: {
+            from: new Date(NOW - 60_000).toISOString(),
+            to: new Date(NOW + 60_000).toISOString(),
+            mode: 'absolute',
+          },
+        },
       });
     });
 
-    after('clean up archives', async () => {
+    after('clean up DataStream', async () => {
       if (cleanupDataStreamSetup) {
-        cleanupDataStreamSetup();
+        await cleanupDataStreamSetup();
       }
     });
 

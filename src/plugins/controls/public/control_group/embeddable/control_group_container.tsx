@@ -5,19 +5,34 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { isEqual } from 'lodash';
+import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
-import React, { createContext, useContext } from 'react';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs/operators';
 
 import { OverlayRef } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
+import { pluginServices } from '../../services';
+import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
+import { ControlGroup } from '../component/control_group_component';
+import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
+import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
+import {
+  getDataControlPanelState,
+  getOptionsListPanelState,
+  getRangeSliderPanelState,
+  getTimeSliderPanelState,
+  type AddDataControlProps,
+  type AddOptionsListControlProps,
+  type AddRangeSliderControlProps,
+} from '../external_api/control_group_input_builder';
+import { controlGroupReducers } from '../state/control_group_reducers';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -33,22 +48,7 @@ import {
   ControlGroupChainingSystems,
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
-import {
-  type AddDataControlProps,
-  type AddOptionsListControlProps,
-  type AddRangeSliderControlProps,
-  getDataControlPanelState,
-  getOptionsListPanelState,
-  getRangeSliderPanelState,
-  getTimeSliderPanelState,
-} from '../external_api/control_group_input_builder';
-import { pluginServices } from '../../services';
 import { getNextPanelOrder } from './control_group_helpers';
-import { ControlGroup } from '../component/control_group_component';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
-import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
-import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -382,7 +382,7 @@ export class ControlGroupContainer extends Container<
     }
     this.domNode = dom;
     ReactDOM.render(
-      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
         <Provider store={this.store}>
           <ControlGroupContainerContext.Provider value={this}>
             <ControlGroup />

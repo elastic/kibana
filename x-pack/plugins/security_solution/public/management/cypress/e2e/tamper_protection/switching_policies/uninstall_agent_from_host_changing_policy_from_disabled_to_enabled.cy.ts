@@ -14,7 +14,7 @@ import {
   createAgentPolicyTask,
   enableAgentTamperProtectionFeatureFlagInPolicy,
   getUninstallToken,
-  changeAgentPolicy,
+  reAssignFleetAgentToPolicy,
   isAgentAndEndpointUninstalledFromHost,
   uninstallAgentFromHost,
 } from '../../../tasks/fleet';
@@ -24,8 +24,7 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170794
-describe.skip(
+describe(
   'Uninstall agent from host changing agent policy when agent tamper protection is disabled but then is switched to a policy with it enabled',
   { tags: ['@ess'] },
   () => {
@@ -83,10 +82,9 @@ describe.skip(
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
 
       // Change agent policy and wait for action to be completed
-      changeAgentPolicy(
+      reAssignFleetAgentToPolicy(
         createdHost.agentId,
-        policyWithAgentTamperProtectionEnabled.policy_id,
-        3
+        policyWithAgentTamperProtectionEnabled.policy_id
       ).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
 

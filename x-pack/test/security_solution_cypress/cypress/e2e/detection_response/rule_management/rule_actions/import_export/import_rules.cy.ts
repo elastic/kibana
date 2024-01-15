@@ -11,7 +11,7 @@ import {
   importRules,
   importRulesWithOverwriteAll,
 } from '../../../../../tasks/alerts_detection_rules';
-import { deleteAlertsAndRules } from '../../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { deleteExceptionList } from '../../../../../tasks/api_calls/exceptions';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';

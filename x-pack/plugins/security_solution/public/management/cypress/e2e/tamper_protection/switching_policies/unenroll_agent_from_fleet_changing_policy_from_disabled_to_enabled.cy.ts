@@ -14,7 +14,7 @@ import {
   createAgentPolicyTask,
   enableAgentTamperProtectionFeatureFlagInPolicy,
   unenrollAgent,
-  changeAgentPolicy,
+  reAssignFleetAgentToPolicy,
 } from '../../../tasks/fleet';
 
 import { login } from '../../../tasks/login';
@@ -22,8 +22,7 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170811
-describe.skip(
+describe(
   'Unenroll agent from fleet when agent tamper protection is disabled but then is switched to a policy with it enabled',
   { tags: ['@ess'] },
   () => {
@@ -80,10 +79,9 @@ describe.skip(
     it('should unenroll from fleet without issues', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       // Change agent policy and wait for action to be completed
-      changeAgentPolicy(
+      reAssignFleetAgentToPolicy(
         createdHost.agentId,
-        policyWithAgentTamperProtectionEnabled.policy_id,
-        3
+        policyWithAgentTamperProtectionEnabled.policy_id
       ).then((hasChanged) => {
         expect(hasChanged).to.eql(true);
         unenrollAgent(createdHost.agentId).then((isUnenrolled) => {

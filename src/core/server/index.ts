@@ -184,6 +184,7 @@ export type {
   ICspConfig,
   IExternalUrlConfig,
   IBasePath,
+  IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,

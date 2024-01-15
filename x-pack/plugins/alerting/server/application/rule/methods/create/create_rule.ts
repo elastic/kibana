@@ -8,6 +8,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
@@ -23,7 +24,7 @@ import {
 } from '../../../../rules_client/lib';
 import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
+import { RulesClientContext, NormalizedAlertAction } from '../../../../rules_client/types';
 import { RuleDomain, RuleParams } from '../../types';
 import { SanitizedRule } from '../../../../types';
 import {
@@ -55,7 +56,11 @@ export async function createRule<Params extends RuleParams = never>(
 ): Promise<SanitizedRule<Params>> {
   const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
 
-  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
+  // TODO (http-versioning): Remove this cast when we fix addGeneratedActionValues
+  const data = {
+    ...initialData,
+    actions: addGeneratedActionValues(initialData.actions as NormalizedAlertAction[]),
+  };
 
   const id = options?.id || SavedObjectsUtils.generateId();
 
@@ -97,7 +102,7 @@ export async function createRule<Params extends RuleParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );

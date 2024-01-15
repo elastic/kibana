@@ -7,7 +7,7 @@
  */
 
 export { MetricLayer, type MetricLayerOptions, type MetricLayerConfig } from './metric_layer';
-export { XYDataLayer, type XYLayerOptions, type XYLayerConfig } from './xy_data_layer';
+export { XYDataLayer, type XYLayerOptions, type XYDataLayerConfig } from './xy_data_layer';
 export {
   XYReferenceLinesLayer,
   type XYReferenceLinesLayerConfig,
