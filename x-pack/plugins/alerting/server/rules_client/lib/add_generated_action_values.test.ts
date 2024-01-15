@@ -113,21 +113,20 @@ describe('addGeneratedActionValues()', () => {
   });
 
   test('throws error if KQL is not valid', async () => {
-    expect(
-      async () =>
-        await addGeneratedActionValues(
-          [
-            {
-              ...mockAction,
-              alertsFilter: { query: { kql: 'foo:bar:1', filters: [] } },
-            },
-          ],
+    expect(async () =>
+      addGeneratedActionValues(
+        [
           {
-            ...rulesClientParams,
-            fieldsToExcludeFromPublicApi: [],
-            minimumScheduleIntervalInMs: 0,
-          }
-        )
-    ).toThrowErrorMatchingInlineSnapshot('"Error creating DSL query: invalid KQL"');
+            ...mockAction,
+            alertsFilter: { query: { kql: 'foo:bar:1', filters: [] } },
+          },
+        ],
+        {
+          ...rulesClientParams,
+          fieldsToExcludeFromPublicApi: [],
+          minimumScheduleIntervalInMs: 0,
+        }
+      )
+    ).rejects.toThrowErrorMatchingSnapshot('"Error creating DSL query: invalid KQL"');
   });
 });
