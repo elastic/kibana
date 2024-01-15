@@ -77,7 +77,7 @@ Object {
         },
         Object {
           "x": 1627974360000,
-          "y": null,
+          "y": 0,
         },
         Object {
           "x": 1627974420000,
@@ -133,7 +133,7 @@ Object {
         },
         Object {
           "x": 1627975200000,
-          "y": null,
+          "y": 0,
         },
       ],
       "latency": Array [
@@ -468,7 +468,7 @@ Object {
         },
         Object {
           "x": 1627975200000,
-          "y": null,
+          "y": 0,
         },
       ],
       "latency": Array [
@@ -872,7 +872,7 @@ Object {
         },
         Object {
           "x": 1627974360000,
-          "y": null,
+          "y": 0,
         },
         Object {
           "x": 1627974420000,
@@ -928,7 +928,7 @@ Object {
         },
         Object {
           "x": 1627975200000,
-          "y": null,
+          "y": 0,
         },
       ],
       "latency": Array [
