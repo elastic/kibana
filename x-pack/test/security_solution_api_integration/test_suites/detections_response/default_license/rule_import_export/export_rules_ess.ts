@@ -26,9 +26,9 @@ import {
   removeServerGeneratedProperties,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
-  getRuleSOById,
   updateUsername,
   createRuleThroughAlertingEndpoint,
+  checkInvestigationFieldSoValue,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
+  // TODO: add a new service for pulling kibana username, similar to getService('es')
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
@@ -417,21 +417,20 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(exportedRule.investigation_fields).toEqual({
           field_names: ['client.address', 'agent.name'],
         });
+
         /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
          * NOT include a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, ruleWithLegacyInvestigationField.id);
-        expect(ruleSO?.alert?.params?.investigationFields).toEqual([
-          'client.address',
-          'agent.name',
-        ]);
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          { field_names: ['client.address', 'agent.name'] },
+          es,
+          ruleWithLegacyInvestigationField.id
+        );
+        expect(isInvestigationFieldMigratedInSo).toEqual(false);
       });
 
       it('exports a rule that has a legacy investigation field set to empty array and unsets field in response', async () => {
@@ -455,12 +454,13 @@ export default ({ getService }: FtrProviderContext): void => {
          * happening just on the response. In this case, change should
          * NOT include a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, ruleWithLegacyInvestigationFieldEmptyArray.id);
-        expect(ruleSO?.alert?.params?.investigationFields).toEqual([]);
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          { field_names: [] },
+          es,
+          ruleWithLegacyInvestigationFieldEmptyArray.id
+        );
+        expect(isInvestigationFieldMigratedInSo).toEqual(false);
       });
 
       it('exports rule with investigation fields as intended object type', async () => {
@@ -484,12 +484,14 @@ export default ({ getService }: FtrProviderContext): void => {
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
          * NOT include a migration on SO.
-         */ const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, exportedRule.id);
-        expect(ruleSO?.alert?.params?.investigationFields).toEqual({ field_names: ['host.name'] });
+         */
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          { field_names: ['host.name'] },
+          es,
+          exportedRule.id
+        );
+        expect(isInvestigationFieldMigratedInSo).toEqual(true);
       });
     });
   });

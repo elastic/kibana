@@ -170,9 +170,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('Update API key');
 
-        // Verify name input box are disabled
-        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
-        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+        // Verify name input box is not present
+        expect(await pageObjects.apiKeys.isApiKeyNamePresent()).to.be(false);
 
         // Status should be displayed
         const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
@@ -278,9 +277,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
 
-        // Verify name input box are disabled
-        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
-        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+        // Verify name input box is not present
+        expect(await pageObjects.apiKeys.isApiKeyNamePresent()).to.be(false);
 
         // Status should be displayed
         const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
@@ -324,9 +322,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
 
-        // Verify name input box are disabled
-        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
-        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+        // Verify name input box is not present
+        expect(await pageObjects.apiKeys.isApiKeyNamePresent()).to.be(false);
 
         // Status should be displayed
         const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
@@ -365,9 +362,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await browser.getCurrentUrl()).to.contain('app/management/security/api_keys');
         expect(await pageObjects.apiKeys.getFlyoutTitleText()).to.be('API key details');
 
-        // Verify name input box are disabled
-        const apiKeyNameInput = await pageObjects.apiKeys.getApiKeyName();
-        expect(await apiKeyNameInput.isEnabled()).to.be(false);
+        // Verify name input box is not present
+        expect(await pageObjects.apiKeys.isApiKeyNamePresent()).to.be(false);
 
         // Status should be displayed
         const apiKeyStatus = await pageObjects.apiKeys.getFlyoutApiKeyStatus();
