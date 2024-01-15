@@ -1527,6 +1527,10 @@ export class Embeddable
   }
 
   public getIsEditable() {
+    // for ES|QL, editing is allowed only if the advanced setting is on
+    if (Boolean(this.isTextBasedLanguage()) && !this.deps.uiSettings.get('discover:enableESQL')) {
+      return false;
+    }
     return (
       this.deps.capabilities.canSaveVisualizations ||
       (!this.inputIsRefType(this.getInput()) &&

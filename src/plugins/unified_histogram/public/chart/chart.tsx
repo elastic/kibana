@@ -8,29 +8,20 @@
 
 import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
 import type { Observable } from 'rxjs';
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiToolTip,
-  EuiProgress,
-} from '@elastic/eui';
+import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
   Suggestion,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
-import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { LensAttributes } from '@kbn/lens-embeddable-utils';
-import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
-import { useChartPanels } from './hooks/use_chart_panels';
 import type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -44,6 +35,7 @@ import type {
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { SuggestionSelector } from './suggestion_selector';
+import { TimeIntervalSelector } from './time_interval_selector';
 import { useTotalHits } from './hooks/use_total_hits';
 import { useRequestParams } from './hooks/use_request_params';
 import { useChartStyles } from './hooks/use_chart_styles';
@@ -54,6 +46,8 @@ import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 
 export interface ChartProps {
+  isChartAvailable: boolean;
+  hiddenPanel?: boolean;
   className?: string;
   services: UnifiedHistogramServices;
   dataView: DataView;
@@ -68,7 +62,7 @@ export interface ChartProps {
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
   breakdown?: UnifiedHistogramBreakdownContext;
-  appendHitsCounter?: ReactElement;
+  renderCustomChartToggleActions?: () => ReactElement | undefined;
   appendHistogram?: ReactElement;
   disableAutoFetching?: boolean;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
@@ -79,7 +73,6 @@ export interface ChartProps {
   isOnHistogramMode?: boolean;
   histogramQuery?: AggregateQuery;
   isChartLoading?: boolean;
-  onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
@@ -94,6 +87,7 @@ export interface ChartProps {
 const HistogramMemoized = memo(Histogram);
 
 export function Chart({
+  isChartAvailable,
   className,
   services,
   dataView,
@@ -108,7 +102,7 @@ export function Chart({
   currentSuggestion,
   allSuggestions,
   isPlainRecord,
-  appendHitsCounter,
+  renderCustomChartToggleActions,
   appendHistogram,
   disableAutoFetching,
   disableTriggers,
@@ -119,7 +113,6 @@ export function Chart({
   isOnHistogramMode,
   histogramQuery,
   isChartLoading,
-  onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
   onSuggestionChange,
@@ -132,33 +125,12 @@ export function Chart({
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const {
-    showChartOptionsPopover,
-    chartRef,
-    toggleChartOptions,
-    closeChartOptions,
-    toggleHideChart,
-  } = useChartActions({
+  const { chartRef, toggleHideChart } = useChartActions({
     chart,
     onChartHiddenChange,
   });
 
-  const panels = useChartPanels({
-    chart,
-    toggleHideChart,
-    onTimeIntervalChange,
-    closePopover: closeChartOptions,
-    onResetChartHeight,
-    isPlainRecord,
-  });
-
-  const chartVisible = !!(
-    chart &&
-    !chart.hidden &&
-    dataView.id &&
-    dataView.type !== DataViewType.ROLLUP &&
-    (isPlainRecord || (!isPlainRecord && dataView.isTimeBased()))
-  );
+  const chartVisible = isChartAvailable && !!chart && !chart.hidden;
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -202,17 +174,7 @@ export function Chart({
     isPlainRecord,
   });
 
-  const {
-    resultCountCss,
-    resultCountInnerCss,
-    resultCountTitleCss,
-    resultCountToggleCss,
-    histogramCss,
-    breakdownFieldSelectorGroupCss,
-    breakdownFieldSelectorItemCss,
-    suggestionsSelectorItemCss,
-    chartToolButtonCss,
-  } = useChartStyles(chartVisible);
+  const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
   const lensAttributesContext = useMemo(
     () =>
@@ -259,27 +221,52 @@ export function Chart({
     lensAttributes: lensAttributesContext.attributes,
     isPlainRecord,
   });
+
+  const a11yCommonProps = {
+    id: 'unifiedHistogramCollapsablePanel',
+  };
+
+  if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
+    return <div {...a11yCommonProps} data-test-subj="unifiedHistogramChartPanelHidden" />;
+  }
+
   const LensSaveModalComponent = services.lens.SaveModalComponent;
   const canSaveVisualization =
     chartVisible && currentSuggestion && services.capabilities.dashboard?.showWriteControls;
-
-  const renderEditButton = useMemo(
-    () => (
-      <EuiButtonIcon
-        size="xs"
-        iconType="pencil"
-        onClick={() => setIsFlyoutVisible(true)}
-        data-test-subj="unifiedHistogramEditFlyoutVisualization"
-        aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
-          defaultMessage: 'Edit visualization',
-        })}
-        disabled={isFlyoutVisible}
-      />
-    ),
-    [isFlyoutVisible]
-  );
-
   const canEditVisualizationOnTheFly = currentSuggestion && chartVisible;
+
+  const actions: IconButtonGroupProps['buttons'] = [];
+
+  if (canEditVisualizationOnTheFly) {
+    actions.push({
+      label: i18n.translate('unifiedHistogram.editVisualizationButton', {
+        defaultMessage: 'Edit visualization',
+      }),
+      iconType: 'pencil',
+      isDisabled: isFlyoutVisible,
+      'data-test-subj': 'unifiedHistogramEditFlyoutVisualization',
+      onClick: () => setIsFlyoutVisible(true),
+    });
+  } else if (onEditVisualization) {
+    actions.push({
+      label: i18n.translate('unifiedHistogram.editVisualizationButton', {
+        defaultMessage: 'Edit visualization',
+      }),
+      iconType: 'lensApp',
+      'data-test-subj': 'unifiedHistogramEditVisualization',
+      onClick: onEditVisualization,
+    });
+  }
+  if (canSaveVisualization) {
+    actions.push({
+      label: i18n.translate('unifiedHistogram.saveVisualizationButton', {
+        defaultMessage: 'Save visualization',
+      }),
+      iconType: 'save',
+      'data-test-subj': 'unifiedHistogramSaveVisualization',
+      onClick: () => setIsSaveModalVisible(true),
+    });
+  }
 
   const removeTables = (attributes: LensAttributes) => {
     const layers = attributes.state.datasourceStates.textBased?.layers;
@@ -312,138 +299,86 @@ export function Chart({
 
   return (
     <EuiFlexGroup
+      {...a11yCommonProps}
       className={className}
       direction="column"
       alignItems="stretch"
       gutterSize="none"
       responsive={false}
     >
-      <EuiFlexItem grow={false} css={resultCountCss}>
+      <EuiFlexItem grow={false} css={chartToolbarCss}>
         <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="none"
+          direction="row"
+          gutterSize="s"
           responsive={false}
-          css={resultCountInnerCss}
+          alignItems="center"
+          justifyContent="spaceBetween"
         >
-          <EuiFlexItem
-            grow={false}
-            className="eui-textTruncate eui-textNoWrap"
-            css={resultCountTitleCss}
-          >
-            {hits && <HitsCounter hits={hits} append={appendHitsCounter} />}
-          </EuiFlexItem>
-          {chart && (
-            <EuiFlexItem css={resultCountToggleCss}>
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="none"
-                responsive={false}
-                justifyContent="flexEnd"
-                css={breakdownFieldSelectorGroupCss}
-              >
-                {chartVisible && breakdown && (
-                  <EuiFlexItem css={breakdownFieldSelectorItemCss}>
+          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+            <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                {renderCustomChartToggleActions ? (
+                  renderCustomChartToggleActions()
+                ) : (
+                  <IconButtonGroup
+                    legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
+                      defaultMessage: 'Chart visibility',
+                    })}
+                    buttonSize="s"
+                    buttons={[
+                      {
+                        label: chartVisible
+                          ? i18n.translate('unifiedHistogram.hideChartButton', {
+                              defaultMessage: 'Hide chart',
+                            })
+                          : i18n.translate('unifiedHistogram.showChartButton', {
+                              defaultMessage: 'Show chart',
+                            }),
+                        iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
+                        'data-test-subj': 'unifiedHistogramToggleChartButton',
+                        onClick: toggleHideChart,
+                      },
+                    ]}
+                  />
+                )}
+              </EuiFlexItem>
+              {chartVisible && !isPlainRecord && !!onTimeIntervalChange && (
+                <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                  <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                <div>
+                  {chartVisible && breakdown && (
                     <BreakdownFieldSelector
                       dataView={dataView}
                       breakdown={breakdown}
                       onBreakdownFieldChange={onBreakdownFieldChange}
                     />
-                  </EuiFlexItem>
-                )}
-                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
-                  <EuiFlexItem css={suggestionsSelectorItemCss}>
-                    <SuggestionSelector
-                      suggestions={allSuggestions}
-                      activeSuggestion={currentSuggestion}
-                      onSuggestionChange={onSuggestionSelectorChange}
-                    />
-                  </EuiFlexItem>
-                )}
-                {canSaveVisualization && (
-                  <>
-                    <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                      <EuiToolTip
-                        content={i18n.translate('unifiedHistogram.saveVisualizationButton', {
-                          defaultMessage: 'Save visualization',
-                        })}
-                      >
-                        <EuiButtonIcon
-                          size="xs"
-                          iconType="save"
-                          onClick={() => setIsSaveModalVisible(true)}
-                          data-test-subj="unifiedHistogramSaveVisualization"
-                          aria-label={i18n.translate('unifiedHistogram.saveVisualizationButton', {
-                            defaultMessage: 'Save visualization',
-                          })}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  </>
-                )}
-                {canEditVisualizationOnTheFly && (
-                  <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                    {!isFlyoutVisible ? (
-                      <EuiToolTip
-                        content={i18n.translate('unifiedHistogram.editVisualizationButton', {
-                          defaultMessage: 'Edit visualization',
-                        })}
-                      >
-                        {renderEditButton}
-                      </EuiToolTip>
-                    ) : (
-                      renderEditButton
-                    )}
-                  </EuiFlexItem>
-                )}
-                {onEditVisualization && (
-                  <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                    <EuiToolTip
-                      content={i18n.translate('unifiedHistogram.editVisualizationButton', {
-                        defaultMessage: 'Edit visualization',
-                      })}
-                    >
-                      <EuiButtonIcon
-                        size="xs"
-                        iconType="lensApp"
-                        onClick={onEditVisualization}
-                        data-test-subj="unifiedHistogramEditVisualization"
-                        aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
-                          defaultMessage: 'Edit visualization',
-                        })}
+                  )}
+                  {chartVisible &&
+                    currentSuggestion &&
+                    allSuggestions &&
+                    allSuggestions?.length > 1 && (
+                      <SuggestionSelector
+                        suggestions={allSuggestions}
+                        activeSuggestion={currentSuggestion}
+                        onSuggestionChange={onSuggestionSelectorChange}
                       />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                  <EuiPopover
-                    id="unifiedHistogramChartOptions"
-                    button={
-                      <EuiToolTip
-                        content={i18n.translate('unifiedHistogram.chartOptionsButton', {
-                          defaultMessage: 'Chart options',
-                        })}
-                      >
-                        <EuiButtonIcon
-                          size="xs"
-                          iconType="gear"
-                          onClick={toggleChartOptions}
-                          data-test-subj="unifiedHistogramChartOptionsToggle"
-                          aria-label={i18n.translate('unifiedHistogram.chartOptionsButton', {
-                            defaultMessage: 'Chart options',
-                          })}
-                        />
-                      </EuiToolTip>
-                    }
-                    isOpen={showChartOptionsPopover}
-                    closePopover={closeChartOptions}
-                    panelPaddingSize="none"
-                    anchorPosition="downLeft"
-                  >
-                    <EuiContextMenu initialPanelId={0} panels={panels} />
-                  </EuiPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                    )}
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {chartVisible && actions.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <IconButtonGroup
+                legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
+                  defaultMessage: 'Chart actions',
+                })}
+                buttonSize="s"
+                buttons={actions}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -457,6 +392,7 @@ export function Chart({
               defaultMessage: 'Histogram of found documents',
             })}
             css={histogramCss}
+            data-test-subj="unifiedHistogramRendered"
           >
             {isChartLoading && (
               <EuiProgress

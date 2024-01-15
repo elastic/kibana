@@ -56,7 +56,7 @@ export type UnifiedHistogramContainerProps = {
   | 'relativeTimeRange'
   | 'columns'
   | 'container'
-  | 'appendHitsCounter'
+  | 'renderCustomChartToggleActions'
   | 'children'
   | 'onBrushEnd'
   | 'onFilter'

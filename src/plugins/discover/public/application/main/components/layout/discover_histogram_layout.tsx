@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -28,6 +28,7 @@ export const DiscoverHistogramLayout = ({
   dataView,
   stateContainer,
   container,
+  panelsToggle,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
   const { dataState } = stateContainer;
@@ -41,6 +42,13 @@ export const DiscoverHistogramLayout = ({
   });
 
   const datatable = useObservable(dataState.data$.documents$);
+  const renderCustomChartToggleActions = useCallback(
+    () =>
+      React.isValidElement(panelsToggle)
+        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
+        : panelsToggle,
+    [panelsToggle]
+  );
 
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
@@ -65,15 +73,14 @@ export const DiscoverHistogramLayout = ({
       table={table}
       container={container}
       css={histogramLayoutCss}
+      renderCustomChartToggleActions={renderCustomChartToggleActions}
     >
       <DiscoverMainContent
         {...mainContentProps}
         stateContainer={stateContainer}
         dataView={dataView}
         isPlainRecord={isPlainRecord}
-        // The documents grid doesn't rerender when the chart visibility changes
-        // which causes it to render blank space, so we need to force a rerender
-        key={`docKey${hideChart}`}
+        panelsToggle={panelsToggle}
       />
     </UnifiedHistogramContainer>
   );
