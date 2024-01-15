@@ -45,18 +45,64 @@ describe('getAlertCountsTool', () => {
     await tool.func('');
 
     expect(esClient.search).toHaveBeenCalledWith({
-      aggs: { statusBySeverity: { terms: { field: 'kibana.alert.severity' } } },
+      aggs: {
+        kibanaAlertSeverity: {
+          terms: {
+            field: 'kibana.alert.severity',
+          },
+          aggs: {
+            kibanaAlertWorkflowStatus: {
+              terms: {
+                field: 'kibana.alert.workflow_status',
+              },
+            },
+          },
+        },
+      },
       index: ['alerts-index'],
       query: {
         bool: {
           filter: [
             {
               bool: {
-                filter: [{ match_phrase: { 'kibana.alert.workflow_status': 'open' } }],
-                must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
+                filter: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          match_phrase: {
+                            'kibana.alert.workflow_status': 'open',
+                          },
+                        },
+                        {
+                          match_phrase: {
+                            'kibana.alert.workflow_status': 'acknowledged',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+                should: [],
+                must: [],
+                must_not: [
+                  {
+                    exists: {
+                      field: 'kibana.alert.building_block_type',
+                    },
+                  },
+                ],
               },
             },
-            { range: { '@timestamp': { gte: 'now/d', lte: 'now/d' } } },
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-24h',
+                  lte: 'now',
+                },
+              },
+            },
           ],
         },
       },

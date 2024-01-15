@@ -44,12 +44,10 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
-  private licenseHasDownloadCsv: boolean = false;
-  private capabilityHasDownloadCsv: boolean = false;
-  private notifications: NotificationsSetup;
-  private apiClient: ReportingAPIClient;
-  private startServices$: Params['startServices$'];
-  private usesUiCapabilities: any;
+  private readonly notifications: NotificationsSetup;
+  private readonly apiClient: ReportingAPIClient;
+  private readonly startServices$: Params['startServices$'];
+  private readonly usesUiCapabilities: boolean;
 
   constructor({ core, apiClient, startServices$, usesUiCapabilities }: Params) {
     this.isDownloading = false;
@@ -78,31 +76,20 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public isCompatible = async (context: ActionContext) => {
-    await new Promise<void>((resolve) => {
-      this.startServices$.subscribe(([{ application }, { licensing }]) => {
-        licensing.license$.subscribe((license) => {
-          const results = license.check('reporting', 'basic');
-          const { showLinks } = checkLicense(results);
-          this.licenseHasDownloadCsv = showLinks;
-        });
-
-        if (this.usesUiCapabilities) {
-          this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
-        } else {
-          this.capabilityHasDownloadCsv = true; // deprecated
-        }
-
-        resolve();
-      });
-    });
-
-    if (!this.licenseHasDownloadCsv || !this.capabilityHasDownloadCsv) {
-      return false;
-    }
-
     const { embeddable } = context;
 
     if (embeddable.type !== 'search') {
+      return false;
+    }
+
+    const [{ application }, { licensing }] = await firstValueFrom(this.startServices$);
+    const license = await firstValueFrom(licensing.license$);
+    const licenseHasDownloadCsv = checkLicense(license.check('reporting', 'basic')).showLinks;
+    const capabilityHasDownloadCsv = this.usesUiCapabilities
+      ? application.capabilities.dashboard?.downloadCsv === true
+      : true; // deprecated
+
+    if (!licenseHasDownloadCsv || !capabilityHasDownloadCsv) {
       return false;
     }
 

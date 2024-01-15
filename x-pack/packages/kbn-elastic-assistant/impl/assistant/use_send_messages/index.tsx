@@ -37,7 +37,6 @@ export const useSendMessages = (): UseSendMessages => {
     assistantStreamingEnabled,
     defaultAllow,
     defaultAllowReplacement,
-    ragOnAlerts,
     knowledgeBase,
   } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +55,6 @@ export const useSendMessages = (): UseSendMessages => {
           assistantLangChain: knowledgeBase.assistantLangChain,
           assistantStreamingEnabled,
           http,
-          ragOnAlerts, // feature flag
           replacements,
           messages,
           size: knowledgeBase.latestAlerts,
@@ -74,7 +72,6 @@ export const useSendMessages = (): UseSendMessages => {
       knowledgeBase.alerts,
       knowledgeBase.assistantLangChain,
       knowledgeBase.latestAlerts,
-      ragOnAlerts,
     ]
   );
 

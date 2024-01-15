@@ -37,5 +37,6 @@
     "@kbn/fleet-plugin",
     "@kbn/repo-info",
     "@kbn/securitysolution-es-utils",
+    "@kbn/ftr-common-functional-services",
   ]
 }

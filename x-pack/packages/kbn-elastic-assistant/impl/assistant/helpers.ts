@@ -101,7 +101,6 @@ export const getOptionalRequestParams = ({
   alertsIndexPattern,
   allow,
   allowReplacement,
-  ragOnAlerts,
   replacements,
   size,
 }: {
@@ -109,7 +108,6 @@ export const getOptionalRequestParams = ({
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  ragOnAlerts: boolean;
   replacements?: Record<string, string>;
   size?: number;
 }): OptionalRequestParams => {
@@ -119,10 +117,8 @@ export const getOptionalRequestParams = ({
   const optionalReplacements = replacements ? { replacements } : undefined;
   const optionalSize = size ? { size } : undefined;
 
-  if (
-    !ragOnAlerts || // the feature flag must be enabled
-    !alerts // the settings toggle must also be enabled
-  ) {
+  // the settings toggle must be enabled:
+  if (!alerts) {
     return {}; // don't send any optional params
   }
 
@@ -138,9 +134,7 @@ export const getOptionalRequestParams = ({
 export const hasParsableResponse = ({
   alerts,
   assistantLangChain,
-  ragOnAlerts,
 }: {
   alerts: boolean;
   assistantLangChain: boolean;
-  ragOnAlerts: boolean;
-}): boolean => assistantLangChain || (ragOnAlerts && alerts);
+}): boolean => assistantLangChain || alerts;

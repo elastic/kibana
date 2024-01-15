@@ -27,7 +27,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const unzipPromisify = promisify(unzip);
 
-  describe('Endpoint Exceptions', function () {
+  // Flaky: https://github.com/elastic/kibana/issues/173684
+  // Flaky: https://github.com/elastic/kibana/issues/173685
+  describe.skip('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(10 * 60_000);

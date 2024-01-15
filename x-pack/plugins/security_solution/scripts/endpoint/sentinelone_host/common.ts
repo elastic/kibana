@@ -14,7 +14,7 @@ import type {
   S1AgentPackage,
   S1AgentPackageListApiResponse,
 } from './types';
-import { catchAxiosErrorFormatAndThrow } from '../common/format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import type { HostVm } from '../common/types';
 
 interface S1ClientOptions {

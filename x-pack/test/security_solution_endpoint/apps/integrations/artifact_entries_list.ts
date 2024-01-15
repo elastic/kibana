@@ -51,19 +51,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  // Several flaky tests from this file in serverless, hence @skipInServerless
-  // - https://github.com/elastic/kibana/issues?q=is%3Aissue+is%3Aopen+X-pack+endpoint+integrations++artifact+entries+list
-  // https://github.com/elastic/kibana/issues/171475
-  // https://github.com/elastic/kibana/issues/171476
-  // https://github.com/elastic/kibana/issues/171477
-  // https://github.com/elastic/kibana/issues/171478
-  // https://github.com/elastic/kibana/issues/171487
-  // https://github.com/elastic/kibana/issues/171488
-  // https://github.com/elastic/kibana/issues/171489
-  // https://github.com/elastic/kibana/issues/171491
-  // https://github.com/elastic/kibana/issues/171492
   describe('For each artifact list under management', function () {
-    targetTags(this, ['@ess', '@serverless', '@skipInServerless']);
+    targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(60_000 * 5);
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -225,9 +214,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     for (const testData of getArtifactsListTestsData()) {
-      // FLAKY: https://github.com/elastic/kibana/issues/171489
-      // FLAKY: https://github.com/elastic/kibana/issues/171475
-      describe.skip(`When on the ${testData.title} entries list`, function () {
+      describe(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
           await removeAllArtifacts();
@@ -313,8 +300,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     }
 
-    // FLAKY: https://github.com/elastic/kibana/issues/171476
-    describe.skip('Should check artifacts are correctly generated when multiple entries', function () {
+    describe('Should check artifacts are correctly generated when multiple entries', function () {
       let firstPolicy: PolicyTestResourceInfo;
       let secondPolicy: PolicyTestResourceInfo;
 

@@ -17,6 +17,7 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
 import { ProfilingLinks } from './profiling_links';
+import { EmptyDataPrompt } from './empty_data_prompt';
 
 export function Flamegraph() {
   const { services } = useKibanaContextForPlugin();
@@ -45,6 +46,10 @@ export function Flamegraph() {
 
   if (error !== null) {
     return <ErrorPrompt />;
+  }
+
+  if (!loading && response?.TotalSamples === 0) {
+    return <EmptyDataPrompt />;
   }
 
   return (

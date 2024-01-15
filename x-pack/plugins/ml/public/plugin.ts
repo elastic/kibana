@@ -69,6 +69,7 @@ import {
 } from '../common/constants/app';
 import type { MlCapabilities } from './shared';
 import { ElasticModels } from './application/services/elastic_models_service';
+import type { MlApiServices } from './application/services/ml_api_service';
 
 export interface MlStartDependencies {
   cases?: CasesUiStart;
@@ -232,6 +233,19 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             } = await import('./register_helper');
             registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, !this.isServerless);
 
+            if (
+              pluginsSetup.triggersActionsUi &&
+              ((fullLicense && mlCapabilities.canUseMlAlerts && mlCapabilities.canGetJobs) ||
+                // Register rules for basic license to show them in the UI as disabled
+                !fullLicense)
+            ) {
+              registerMlAlerts(
+                pluginsSetup.triggersActionsUi,
+                core.getStartServices,
+                pluginsSetup.alerting
+              );
+            }
+
             if (fullLicense) {
               registerMlUiActions(pluginsSetup.uiActions, core);
 
@@ -240,18 +254,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
                 if (pluginsSetup.cases) {
                   registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
-                }
-
-                if (
-                  pluginsSetup.triggersActionsUi &&
-                  mlCapabilities.canUseMlAlerts &&
-                  mlCapabilities.canGetJobs
-                ) {
-                  registerMlAlerts(
-                    pluginsSetup.triggersActionsUi,
-                    core.getStartServices,
-                    pluginsSetup.alerting
-                  );
                 }
 
                 if (pluginsSetup.maps) {
@@ -282,7 +284,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   start(
     core: CoreStart,
     deps: MlStartDependencies
-  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
+  ): {
+    locator?: LocatorPublic<MlLocatorParams>;
+    elasticModels?: ElasticModels;
+    mlApi?: MlApiServices;
+  } {
     setDependencyCache({
       docLinks: core.docLinks!,
       basePath: core.http.basePath,
@@ -294,6 +300,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     return {
       locator: this.locator,
       elasticModels: this.sharedMlServices?.elasticModels,
+      mlApi: this.sharedMlServices?.mlApiServices,
     };
   }
 

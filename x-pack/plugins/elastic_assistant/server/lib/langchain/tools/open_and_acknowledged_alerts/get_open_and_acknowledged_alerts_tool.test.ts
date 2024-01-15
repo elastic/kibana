@@ -95,8 +95,8 @@ describe('getOpenAndAcknowledgedAlertsTool', () => {
                       range: {
                         '@timestamp': {
                           format: 'strict_date_optional_time',
-                          gte: 'now-1d/d',
-                          lte: 'now/d',
+                          gte: 'now-24h',
+                          lte: 'now',
                         },
                       },
                     },
