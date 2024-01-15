@@ -7,7 +7,6 @@
 
 import { AggregationsMultiBucketBase } from '@elastic/elasticsearch/lib/api/types';
 import { CspStatusCode } from '../../../../common/types_old';
-import { CspBenchmarkRuleMetadata } from '../../../../common/types/latest';
 
 export type CloudSecurityUsageCollectorType =
   | 'Indices'
@@ -217,13 +216,15 @@ export interface AccountEntity {
     pods_count: Value;
   };
 }
-export type MutedRulesStats = Pick<
-  CspBenchmarkRuleMetadata,
-  'id' | 'name' | 'section' | 'version'
-> & {
+
+export interface MutedRulesStats {
+  id: string;
+  name: string;
+  section: string;
+  version: string;
   benchmark_id: string;
   benchmark_name: string;
-  rule_number: string;
-  posture_type: string;
   benchmark_version: string;
-};
+  posture_type: string;
+  rule_number: string;
+}
