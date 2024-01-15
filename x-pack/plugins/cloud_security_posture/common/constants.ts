@@ -52,8 +52,7 @@ export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findin
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
 
-// TODO: revert to hours before merge
-export const LATEST_FINDINGS_RETENTION_POLICY = '26d';
+export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
