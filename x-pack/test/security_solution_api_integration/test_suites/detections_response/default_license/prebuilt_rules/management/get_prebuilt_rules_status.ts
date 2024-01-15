@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInQA Prebuilt Rules status', () => {
     describe('get_prebuilt_rules_status', () => {
       beforeEach(async () => {
-        await deleteAllPrebuiltRuleAssets(es);
+        await deleteAllPrebuiltRuleAssets(es, log);
         await deleteAllRules(supertest, log);
       });
 
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
@@ -130,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
@@ -152,7 +152,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Recreate the rules without bumping any versions
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
 
@@ -238,7 +238,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Delete the previous versions of rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
 
           // Add a new rule version
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
@@ -261,7 +261,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Delete the previous versions of rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
 
           // Add a new rule version
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
@@ -286,7 +286,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('get_prebuilt_rules_status - legacy', () => {
       beforeEach(async () => {
-        await deleteAllPrebuiltRuleAssets(es);
+        await deleteAllPrebuiltRuleAssets(es, log);
         await deleteAllRules(supertest, log);
       });
 
@@ -367,7 +367,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
@@ -387,7 +387,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Recreate the rules without bumping any versions
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
 
@@ -473,7 +473,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
 
           // Delete the previous versions of rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
 
           // Add a new rule version
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
