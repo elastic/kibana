@@ -659,11 +659,14 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertTransformIdInputExists() {
-      await testSubjects.existOrFail('transformIdInput');
+      await testSubjects.existOrFail('stepDetailsFormTransformIdInput');
     },
 
     async assertTransformIdValue(expectedValue: string) {
-      const actualTransformId = await testSubjects.getAttribute('transformIdInput', 'value');
+      const actualTransformId = await testSubjects.getAttribute(
+        'stepDetailsFormTransformIdInput',
+        'value'
+      );
       expect(actualTransformId).to.eql(
         expectedValue,
         `Transform id input text should be '${expectedValue}' (got '${actualTransformId}')`
@@ -671,7 +674,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformId(transformId: string) {
-      await ml.commonUI.setValueWithChecks('transformIdInput', transformId, {
+      await ml.commonUI.setValueWithChecks('stepDetailsFormTransformIdInput', transformId, {
         clearWithKeyboard: true,
         enforceDataTestSubj: true,
       });
@@ -679,12 +682,12 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertTransformDescriptionInputExists() {
-      await testSubjects.existOrFail('transformDescriptionInput');
+      await testSubjects.existOrFail('stepDetailsFormDescriptionInput');
     },
 
     async assertTransformDescriptionValue(expectedValue: string) {
       const actualTransformDescription = await testSubjects.getAttribute(
-        'transformDescriptionInput',
+        'stepDetailsFormDescriptionInput',
         'value'
       );
       expect(actualTransformDescription).to.eql(
@@ -694,9 +697,13 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformDescription(transformDescription: string) {
-      await ml.commonUI.setValueWithChecks('transformDescriptionInput', transformDescription, {
-        clearWithKeyboard: true,
-      });
+      await ml.commonUI.setValueWithChecks(
+        'stepDetailsFormDescriptionInput',
+        transformDescription,
+        {
+          clearWithKeyboard: true,
+        }
+      );
       await this.assertTransformDescriptionValue(transformDescription);
     },
 
@@ -868,14 +875,14 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertRetentionPolicyMaxAgeInputExists() {
-      await testSubjects.existOrFail(`transformRetentionPolicyMaxAgeInput`, {
+      await testSubjects.existOrFail(`stepDetailsFormRetentionPolicyMaxAgeInput`, {
         allowHidden: true,
       });
     },
 
     async assertRetentionsPolicyMaxAgeValue(expectedValue: string) {
       const actualValue = await testSubjects.getAttribute(
-        'transformRetentionPolicyMaxAgeInput',
+        'stepDetailsFormRetentionPolicyMaxAgeInput',
         'value'
       );
       expect(actualValue).to.eql(

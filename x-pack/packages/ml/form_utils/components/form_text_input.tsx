@@ -43,10 +43,10 @@ export const FormTextInput = <
       error={errorMessages}
     >
       <EuiFieldText
-        data-test-subj={`transformEditFlyout${upperCaseField}Input`}
+        data-test-subj={`${slice.name}${upperCaseField}Input`}
         placeholder={
           placeHolder
-            ? i18n.translate('xpack.transform.transformList.editFlyoutFormPlaceholderText', {
+            ? i18n.translate('xpack.ml.formUtils.formTextInputPlaceholderText', {
                 defaultMessage: 'Default: {defaultValue}',
                 values: { defaultValue },
               })
