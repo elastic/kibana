@@ -14,10 +14,18 @@ import type {
   InjectionParameter,
 } from './types';
 
-export function serviceId<T = unknown>(id: ServiceIdentifier<T>): ByIdInjection<T> {
+export function serviceId<T = unknown>(
+  id: ServiceIdentifier<T>,
+  {
+    optional = false,
+  }: {
+    optional?: boolean;
+  } = {}
+): ByIdInjection<T> {
   return {
     type: 'serviceId',
     serviceId: id,
+    optional,
   };
 }
 

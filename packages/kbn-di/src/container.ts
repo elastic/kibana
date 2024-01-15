@@ -38,7 +38,7 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
 
   protected readonly serviceMetadata: ServiceMetadataRegistry = new Map();
   protected readonly serviceByLabelMap: Map<ServiceLabel, ServiceIdentifier[]> = new Map();
-  protected readonly serviceMap = new Map();
+  protected readonly serviceMap: Map<ServiceIdentifier, unknown> = new Map();
 
   constructor({ containerId, parent, context }: InjectionContainerConstructorOptions<Ctx>) {
     this.containerId = containerId;
@@ -69,7 +69,11 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
   }
 
   get<T = unknown>(identifier: ServiceIdentifier<T>): T {
-    return this._resolveService(identifier, []);
+    return this._resolveService({
+      serviceId: identifier,
+      resolveChainIds: [],
+      optional: false,
+    })!;
   }
 
   createChild<ChildCtx = unknown>({
@@ -110,49 +114,61 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
     }
   }
 
-  protected _resolveService<T>(
-    identifier: ServiceIdentifier<T>,
-    identifierChain: ServiceIdentifier[]
-  ): T {
-    const cycle = getCycle(identifier, identifierChain);
+  protected _resolveService<T>({
+    serviceId,
+    resolveChainIds,
+    optional,
+  }: {
+    serviceId: ServiceIdentifier<T>;
+    resolveChainIds: ServiceIdentifier[];
+    optional: boolean;
+  }): T | undefined {
+    const cycle = getCycle(serviceId, resolveChainIds);
     if (cycle) {
       throw new Error(`Cyclic dependency detected: ${cycle.join('->')}`);
     }
 
+    // TODO: very naive for now
+    // We gonna want to check on the parents too depending on the meta
     const registry = this.root.getServiceMetadata();
-    // TODO: we will want to check on the parents too
-    const metadata = registry.get(identifier);
+    const metadata = registry.get(serviceId);
 
     if (!metadata) {
-      throw new Error(
-        `Service ${String(identifier)} not found in container chain starting at id ${
-          this.containerId
-        }`
-      );
+      if (optional) {
+        return undefined;
+      } else {
+        throw new Error(
+          `Service '${String(serviceId)}' not found in container chain starting at id '${
+            this.containerId
+          }'`
+        );
+      }
     }
 
     const scope = metadata.scope;
     const owningContainer = scope === 'global' ? this.root : this;
 
-    let instance: T = owningContainer.serviceMap.get(identifier);
+    let instance: T = owningContainer.serviceMap.get(serviceId) as T;
     if (instance) {
       return instance;
     }
 
-    const resolveParameter = (parameter: InjectionParameter): unknown => {
+    const resolveInjectedParameterValue = (parameter: InjectionParameter): unknown => {
       if (isServiceIdParam(parameter)) {
-        return owningContainer._resolveService(parameter.serviceId, [
-          ...identifierChain,
-          identifier,
-        ]);
+        return owningContainer._resolveService({
+          serviceId: parameter.serviceId,
+          resolveChainIds: [...resolveChainIds, serviceId],
+          optional: parameter.optional,
+        });
       } else if (isServiceLabelParam(parameter)) {
         const ids = owningContainer._resolveIdsForLabel(parameter.serviceLabel);
         const services: unknown[] = [];
-        ids.forEach((serviceId) => {
-          const resolvedService = owningContainer._resolveService(serviceId, [
-            ...identifierChain,
-            identifier,
-          ]);
+        ids.forEach((byLabelServiceId) => {
+          const resolvedService = owningContainer._resolveService({
+            serviceId: byLabelServiceId,
+            resolveChainIds: [...resolveChainIds, serviceId],
+            optional: false,
+          });
           services.push(resolvedService);
         });
         return services;
@@ -163,15 +179,15 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
 
     const parameters: unknown[] = [];
     for (const parameter of metadata.factory.params) {
-      parameters.push(resolveParameter(parameter));
+      parameters.push(resolveInjectedParameterValue(parameter));
     }
     try {
       instance = metadata.factory.fn(...parameters) as T;
     } catch (e) {
-      throw new Error(`Error calling factory for service ${String(identifier)}: ${e.message}`);
+      throw new Error(`Error calling factory for service ${String(serviceId)}: ${e.message}`);
     }
 
-    owningContainer.serviceMap.set(identifier, instance);
+    owningContainer.serviceMap.set(serviceId, instance);
 
     return instance;
   }

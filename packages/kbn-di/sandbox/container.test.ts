@@ -350,6 +350,65 @@ describe('InjectionContainerImpl', () => {
     });
   });
 
+  describe('Optional injection', () => {
+    it('does not throw when resolving an optional parameter is not present', () => {
+      const container = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      container.register<number>({
+        id: 'someNumber',
+        scope: 'global',
+        instance: 42,
+      });
+
+      const serviceFactory = jest.fn();
+      container.register<{ getNumber: () => number }>({
+        id: 'service',
+        scope: 'global',
+        factory: {
+          fn: serviceFactory,
+          params: [serviceId('notPresent', { optional: true }), serviceId('someNumber')],
+        },
+      });
+
+      expect(() => container.get<unknown>('service')).not.toThrow();
+
+      expect(serviceFactory).toHaveBeenCalledTimes(1);
+      expect(serviceFactory).toHaveBeenCalledWith(undefined, 42);
+    });
+
+    it('throws when an optional dependency is present but has an unresolved required dependency', () => {
+      const container = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      container.register<unknown>({
+        id: 'serviceA',
+        scope: 'global',
+        factory: {
+          fn: jest.fn(),
+          params: [serviceId('notPresent', { optional: false })],
+        },
+      });
+
+      container.register<unknown>({
+        id: 'serviceB',
+        scope: 'global',
+        factory: {
+          fn: jest.fn(),
+          params: [serviceId('serviceA', { optional: true })],
+        },
+      });
+
+      expect(() => container.get<unknown>('serviceB')).toThrowErrorMatchingInlineSnapshot(
+        `"Service 'notPresent' not found in container chain starting at id 'root'"`
+      );
+    });
+  });
+
   describe('Cyclic dependencies', () => {
     it('detects direct graphs', () => {
       const root = new InjectionContainerImpl({
