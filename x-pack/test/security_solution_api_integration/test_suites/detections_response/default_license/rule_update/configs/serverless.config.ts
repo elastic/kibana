@@ -9,6 +9,7 @@ import { createTestConfig } from '../../../../../config/serverless/config.base';
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'Rule Management API Integration Tests - Serverless - Rule Update logic',
+    reportName:
+      'Detection Engine - Rule Update Integration Tests - Serverless Env - Complete License',
   },
 });
