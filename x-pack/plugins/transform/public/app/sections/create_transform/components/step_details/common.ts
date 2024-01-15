@@ -57,12 +57,13 @@ export function getDefaultStepDetailsFormState(
         validator: 'transformIdValidator',
         reservedValues: existingTransforms,
       }),
-      destinationIndex: initializeFormField('destinationIndex', 'dest.index', config, {
+      destinationIndex: initializeFormField('destinationIndex', 'dest.index', undefined, {
         isOptional: false,
         validator: 'indexNameValidator',
       }),
       dataViewTimeField: initializeFormField('dataViewTimeField', 'n/a', config, {
         validator: 'stringValidator',
+        section: 'createDataView',
       }),
     },
     formSections: {
