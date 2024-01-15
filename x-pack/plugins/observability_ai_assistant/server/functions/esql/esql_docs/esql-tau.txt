@@ -2,4 +2,6 @@ TAU
 
 
 The ratio of a circle’s circumference to its radius.
+```esql
 ROW TAU()
+```
