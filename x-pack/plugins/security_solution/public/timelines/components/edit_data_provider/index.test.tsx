@@ -168,7 +168,7 @@ describe('StatefulEditDataProvider', () => {
     );
 
     const fieldWrapper = screen.getByTestId('operator');
-    expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue('is one of');
+    expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue('one of');
   });
 
   test('it renders the negated "is one of" operator in a humanized format when isExcluded is true', () => {

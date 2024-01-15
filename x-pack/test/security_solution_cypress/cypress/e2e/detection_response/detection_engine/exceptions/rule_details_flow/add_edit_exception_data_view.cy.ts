@@ -90,7 +90,7 @@ describe(
       addFirstExceptionFromRuleDetails(
         {
           field: 'agent.name',
-          operator: 'is one of',
+          operator: 'one of',
           values: ['foo', 'FOO', 'bar'],
         },
         ITEM_NAME
@@ -142,7 +142,7 @@ describe(
       addFirstExceptionFromRuleDetails(
         {
           field: ITEM_FIELD,
-          operator: 'is',
+          operator: 'equals',
           values: ['foo'],
         },
         ITEM_NAME

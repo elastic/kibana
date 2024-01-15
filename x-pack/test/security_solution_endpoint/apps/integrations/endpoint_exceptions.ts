@@ -214,7 +214,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('exceptionFlyoutNameInput', 'test exception');
       await setLastEntry({ field: 'file.path', operator: 'matches', value: '*/cheese/*' });
       await testSubjects.click('exceptionsAndButton');
-      await setLastEntry({ field: 'process.executable', operator: 'is', value: 'something' });
+      await setLastEntry({ field: 'process.executable', operator: 'equals', value: 'something' });
 
       await testSubjects.click('addExceptionConfirmButton');
       await pageObjects.common.closeToast();

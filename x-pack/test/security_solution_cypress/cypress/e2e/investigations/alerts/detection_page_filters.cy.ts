@@ -335,7 +335,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
       openAddFilterPopover();
       fillAddFilterForm({
         key: 'kibana.alert.workflow_status',
-        operator: 'is',
+        operator: 'equals',
         value: 'invalid',
       });
       waitForPageFilters();

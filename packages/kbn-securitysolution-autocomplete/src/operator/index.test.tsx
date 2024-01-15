@@ -112,7 +112,7 @@ describe('operator', () => {
         label: 'is not',
       },
       {
-        label: 'is one of',
+        label: 'one of',
       },
       {
         label: 'is not one of',
@@ -220,7 +220,7 @@ describe('operator', () => {
     ).toEqual([
       { label: 'is' },
       { label: 'is not' },
-      { label: 'is one of' },
+      { label: 'one of' },
       { label: 'is not one of' },
       { label: 'matches' },
       { label: 'does not match' },

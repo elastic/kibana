@@ -109,7 +109,7 @@ describe('Add endpoint exception from rule details', { tags: ['@ess', '@serverle
       // add exception item conditions
       addExceptionConditions({
         field: 'event.code',
-        operator: 'is',
+        operator: 'equals',
         values: ['foo'],
       });
 

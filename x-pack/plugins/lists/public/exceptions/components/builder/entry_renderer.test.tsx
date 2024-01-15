@@ -347,7 +347,7 @@ describe('BuilderEntryItem', () => {
     ).toEqual('ip');
     expect(
       wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
-    ).toEqual('is one of');
+    ).toEqual('one of');
     expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').first().text()).toEqual(
       '1234'
     );
