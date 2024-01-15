@@ -96,11 +96,11 @@ export function generateHostsData({
     .generator((timestamp, index) =>
       hosts.flatMap((host) => [
         host.cpu().timestamp(timestamp),
-        host.memory().timestamp(timestamp + 1),
-        host.network().timestamp(timestamp + 2),
-        host.load().timestamp(timestamp + 3),
-        host.filesystem().timestamp(timestamp + 4),
-        host.diskio().timestamp(timestamp + 5),
+        host.memory().timestamp(timestamp),
+        host.network().timestamp(timestamp),
+        host.load().timestamp(timestamp),
+        host.filesystem().timestamp(timestamp),
+        host.diskio().timestamp(timestamp),
       ])
     );
 }
