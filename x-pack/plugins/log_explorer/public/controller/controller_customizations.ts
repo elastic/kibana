@@ -29,6 +29,8 @@ export interface LogDocument extends DataTableRecord {
     '@timestamp': string;
     'log.level'?: [string];
     message?: [string];
+    'error.message'?: string;
+    'event.original'?: string;
 
     'host.name'?: string;
     'service.name'?: string;
@@ -51,6 +53,8 @@ export interface FlyoutDoc {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
+  'error.message'?: string;
+  'event.original'?: string;
 
   'host.name'?: string;
   'service.name'?: string;
