@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useChangeCspRuleStatus } from './change_csp_rule_status';
+import { RuleStateAttributesWithoutStatus, useChangeCspRuleStatus } from './change_csp_rule_status';
 import { CspBenchmarkRulesWithStatus } from './rules_container';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
@@ -48,7 +48,7 @@ interface RulesTableToolbarProps {
   isSearching: boolean;
   pageSize: number;
   selectedRules: CspBenchmarkRulesWithStatus[];
-  refetchRulesStatus: () => void;
+  refetchRulesStates: () => void;
   setEnabledDisabledItemsFilter: (filterState: string) => void;
   currentEnabledDisabledItemsFilterState: string;
   setSelectAllRules: () => void;
@@ -59,7 +59,7 @@ interface RuleTableCount {
   pageSize: number;
   total: number;
   selectedRules: CspBenchmarkRulesWithStatus[];
-  refetchRulesStatus: () => void;
+  refetchRulesStates: () => void;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStatus[]) => void;
 }
@@ -75,7 +75,7 @@ export const RulesTableHeader = ({
   sectionSelectOptions,
   ruleNumberSelectOptions,
   selectedRules,
-  refetchRulesStatus,
+  refetchRulesStates,
   setEnabledDisabledItemsFilter,
   currentEnabledDisabledItemsFilterState,
   setSelectAllRules,
@@ -124,7 +124,7 @@ export const RulesTableHeader = ({
           totalRulesCount={totalRulesCount}
           pageSize={pageSize}
           selectedRules={selectedRules}
-          refetchRulesStatus={refetchRulesStatus}
+          refetchRulesStates={refetchRulesStates}
           setSelectAllRules={setSelectAllRules}
           setSelectedRules={setSelectedRules}
         />
@@ -219,7 +219,7 @@ const SearchField = ({
   totalRulesCount,
   pageSize,
   selectedRules,
-  refetchRulesStatus,
+  refetchRulesStates,
   setSelectAllRules,
   setSelectedRules,
 }: Pick<
@@ -230,7 +230,7 @@ const SearchField = ({
   | 'totalRulesCount'
   | 'pageSize'
   | 'selectedRules'
-  | 'refetchRulesStatus'
+  | 'refetchRulesStates'
   | 'setSelectAllRules'
   | 'setSelectedRules'
 >) => {
@@ -256,7 +256,7 @@ const SearchField = ({
         pageSize={pageSize}
         total={totalRulesCount}
         selectedRules={selectedRules}
-        refetchRulesStatus={refetchRulesStatus}
+        refetchRulesStates={refetchRulesStates}
         setSelectAllRules={setSelectAllRules}
         setSelectedRules={setSelectedRules}
       />
@@ -268,7 +268,7 @@ const CurrentPageOfTotal = ({
   pageSize,
   total,
   selectedRules,
-  refetchRulesStatus,
+  refetchRulesStates,
   setSelectAllRules,
   setSelectedRules,
 }: RuleTableCount) => {
@@ -280,15 +280,20 @@ const CurrentPageOfTotal = ({
   const postRequestChangeRulesStatus = useChangeCspRuleStatus();
   const closePopover = () => setIsPopoverOpen(false);
   const changeRulesStatus = async (status: 'mute' | 'unmute') => {
-    const bulkSelectedRules = selectedRules.map((e: CspBenchmarkRulesWithStatus) => ({
-      benchmark_id: e?.metadata?.benchmark.id,
-      benchmark_version: e?.metadata.benchmark.version,
-      rule_number: e?.metadata.benchmark.rule_number || 'Unknown',
-      rule_id: e?.metadata.id,
-    }));
-    await postRequestChangeRulesStatus(status, bulkSelectedRules);
-    await refetchRulesStatus();
-    await closePopover();
+    const bulkSelectedRules: RuleStateAttributesWithoutStatus[] = selectedRules.map(
+      (e: CspBenchmarkRulesWithStatus) => ({
+        benchmark_id: e?.metadata?.benchmark.id,
+        benchmark_version: e?.metadata.benchmark.version,
+        rule_number: e?.metadata.benchmark?.rule_number,
+        rule_id: e?.metadata.id,
+      })
+    );
+    // Only do the API Call IF there are no undefined value for rule number in the selected rules
+    if (!bulkSelectedRules.some((e) => e.rule_number === undefined)) {
+      await postRequestChangeRulesStatus(status, bulkSelectedRules);
+      await refetchRulesStates();
+      await closePopover();
+    }
   };
   const changeCspRuleStatusMute = async () => {
     changeRulesStatus('mute');

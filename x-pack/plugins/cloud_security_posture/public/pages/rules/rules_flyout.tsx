@@ -31,7 +31,7 @@ import { CspBenchmarkRulesWithStatus } from './rules_container';
 interface RuleFlyoutProps {
   onClose(): void;
   rule: CspBenchmarkRulesWithStatus;
-  refetchRulesStatus: () => void;
+  refetchRulesStates: () => void;
 }
 
 const tabs = [
@@ -53,21 +53,23 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, refetchRulesStatus }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
   const postRequestChangeRulesStatus = useChangeCspRuleStatus();
   const isRuleMuted = rule?.status === 'muted';
 
   const switchRuleStatus = async () => {
-    const rulesObjectRequest = {
-      benchmark_id: rule.metadata.benchmark.id,
-      benchmark_version: rule.metadata.benchmark.version,
-      rule_number: rule.metadata.benchmark.rule_number || '',
-      rule_id: rule.metadata.id,
-    };
-    const nextRuleStatus = isRuleMuted ? 'unmute' : 'mute';
-    await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
-    await refetchRulesStatus();
+    if (rule.metadata.benchmark.rule_number) {
+      const rulesObjectRequest = {
+        benchmark_id: rule.metadata.benchmark.id,
+        benchmark_version: rule.metadata.benchmark.version,
+        rule_number: rule.metadata.benchmark.rule_number,
+        rule_id: rule.metadata.id,
+      };
+      const nextRuleStatus = isRuleMuted ? 'unmute' : 'mute';
+      await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
+      await refetchRulesStates();
+    }
   };
   return (
     <EuiFlyout

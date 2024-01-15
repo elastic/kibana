@@ -31,14 +31,14 @@ type RulesTableProps = Pick<
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   setSelectedRuleId(id: string | null): void;
   selectedRuleId: string | null;
-  refetchRulesStatus: () => void;
+  refetchRulesStates: () => void;
   selectedRules: CspBenchmarkRulesWithStatus[];
   setSelectedRules: (e: CspBenchmarkRulesWithStatus[]) => void;
 };
 
 type GetColumnProps = Pick<
   RulesTableProps,
-  'setSelectedRuleId' | 'refetchRulesStatus' | 'selectedRules' | 'setSelectedRules'
+  'setSelectedRuleId' | 'refetchRulesStates' | 'selectedRules' | 'setSelectedRules'
 > & {
   postRequestChangeRulesStatus: (actionOnRule: 'mute' | 'unmute', ruleIds: any[]) => void;
   items: CspBenchmarkRulesWithStatus[];
@@ -60,7 +60,7 @@ export const RulesTable = ({
   loading,
   error,
   selectedRuleId,
-  refetchRulesStatus,
+  refetchRulesStates,
   selectedRules,
   setSelectedRules,
 }: RulesTableProps) => {
@@ -110,7 +110,7 @@ export const RulesTable = ({
     () =>
       getColumns({
         setSelectedRuleId,
-        refetchRulesStatus,
+        refetchRulesStates,
         postRequestChangeRulesStatus,
         selectedRules,
         setSelectedRules,
@@ -121,7 +121,7 @@ export const RulesTable = ({
       }),
     [
       setSelectedRuleId,
-      refetchRulesStatus,
+      refetchRulesStates,
       postRequestChangeRulesStatus,
       selectedRules,
       setSelectedRules,
@@ -150,7 +150,7 @@ export const RulesTable = ({
 
 const getColumns = ({
   setSelectedRuleId,
-  refetchRulesStatus,
+  refetchRulesStates,
   postRequestChangeRulesStatus,
   selectedRules,
   setSelectedRules,
@@ -264,8 +264,10 @@ const getColumns = ({
       const nextRuleStatus = isRuleMuted ? 'unmute' : 'mute';
 
       const useChangeCspRuleStatusFn = async () => {
-        await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
-        await refetchRulesStatus();
+        if (rule?.metadata.benchmark.rule_number) {
+          await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
+          await refetchRulesStates();
+        }
       };
       return (
         <EuiSwitch

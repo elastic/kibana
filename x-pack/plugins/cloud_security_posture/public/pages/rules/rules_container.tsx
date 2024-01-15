@@ -7,6 +7,7 @@
 import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
+import { buildRuleKey } from '../../../common/utils/rules_states';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
@@ -109,7 +110,11 @@ export const RulesContainer = () => {
     if (!data) return [];
 
     return data.items.map((rule) => {
-      const rulesKey = `${rule.metadata.benchmark.id};${rule.metadata.benchmark.version};${rule.metadata.benchmark.rule_number}`;
+      const rulesKey = buildRuleKey(
+        rule.metadata.benchmark.id,
+        rule.metadata.benchmark.version,
+        rule.metadata.benchmark.rule_number
+      );
 
       const match = rulesStates?.data?.[rulesKey];
       const rulesStatus = match?.muted ? 'muted' : 'unmuted';
@@ -134,7 +139,9 @@ export const RulesContainer = () => {
     () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
     [allRules.data]
   );
-  const cleanedSectionList = [...new Set(sectionList)].sort();
+  const cleanedSectionList = [...new Set(sectionList)].sort((a, b) => {
+    return a.localeCompare(b, 'en', { sensitivity: 'base' });
+  });
   const cleanedRuleNumberList = [...new Set(ruleNumberList)];
 
   const rulesPageData = useMemo(
@@ -176,7 +183,7 @@ export const RulesContainer = () => {
           pageSize={rulesPageData.rules_page.length}
           isSearching={status === 'loading'}
           selectedRules={selectedRules}
-          refetchRulesStatus={rulesStates.refetch}
+          refetchRulesStates={rulesStates.refetch}
           setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
           currentEnabledDisabledItemsFilterState={enabledDisabledItemsFilter}
           setSelectAllRules={setSelectAllRules}
@@ -196,7 +203,7 @@ export const RulesContainer = () => {
           }}
           setSelectedRuleId={setSelectedRuleId}
           selectedRuleId={selectedRuleId}
-          refetchRulesStatus={rulesStates.refetch}
+          refetchRulesStates={rulesStates.refetch}
           selectedRules={selectedRules}
           setSelectedRules={setSelectedRules}
         />
@@ -205,7 +212,7 @@ export const RulesContainer = () => {
         <RuleFlyout
           rule={rulesFlyoutData}
           onClose={() => setSelectedRuleId(null)}
-          refetchRulesStatus={rulesStates.refetch}
+          refetchRulesStates={rulesStates.refetch}
         />
       )}
     </div>

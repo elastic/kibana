@@ -116,7 +116,7 @@ export const rulesToUpdate = schema.arrayOf(
     rule_id: schema.string(),
     benchmark_id: schema.string(),
     benchmark_version: schema.string(),
-    rule_number: schema.string(),
+    rule_number: schema.maybe(schema.string()),
   })
 );
 
@@ -141,7 +141,7 @@ const ruleStateAttributes = schema.object({
   muted: schema.boolean(),
   benchmark_id: schema.string(),
   benchmark_version: schema.string(),
-  rule_number: schema.string(),
+  rule_number: schema.maybe(schema.string()),
   rule_id: schema.string(),
 });
 
