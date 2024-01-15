@@ -7,7 +7,7 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type {
