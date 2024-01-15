@@ -33,7 +33,7 @@ import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
+import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import { ChatActionClickType } from './types';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
@@ -133,6 +133,18 @@ export function ChatBody({
       state === ChatState.Loading ||
       conversation.loading
   );
+
+  let title = conversation.value?.conversation.title || initialTitle;
+
+  if (!title) {
+    if (!connectors.selectedConnector) {
+      title = ASSISTANT_SETUP_TITLE;
+    } else if (!hasCorrectLicense && !initialConversationId) {
+      title = UPGRADE_LICENSE_TITLE;
+    } else {
+      title = EMPTY_CONVERSATION_TITLE;
+    }
+  }
 
   const containerClassName = css`
     max-height: 100%;
@@ -391,12 +403,9 @@ export function ChatBody({
               ? conversation.value.conversation.id
               : undefined
           }
-          connectorsManagementHref={connectorsManagementHref}
-          knowledgeBase={knowledgeBase}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
-          startedFrom={startedFrom}
-          title={conversation.value?.conversation.title || initialTitle || EMPTY_CONVERSATION_TITLE}
+          title={title}
           onCopyConversation={handleCopyConversation}
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
