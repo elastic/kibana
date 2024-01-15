@@ -14,7 +14,11 @@ import { getCreateTransformRequestBody } from '../../../common';
 import { selectPreviewRequest } from './step_define_selectors';
 
 export const selectCreateTransformRequestBody = createSelector(
-  [selectPreviewRequest, (state: StoreState) => state.stepDetails],
-  (previewRequest, stepDetailsState) =>
-    getCreateTransformRequestBody(previewRequest, stepDetailsState)
+  [
+    selectPreviewRequest,
+    (state: StoreState) => state.stepDetails,
+    (state: StoreState) => state.stepDetailsForm,
+  ],
+  (previewRequest, stepDetailsState, stepDetailsForm) =>
+    getCreateTransformRequestBody(previewRequest, stepDetailsState, stepDetailsForm)
 );

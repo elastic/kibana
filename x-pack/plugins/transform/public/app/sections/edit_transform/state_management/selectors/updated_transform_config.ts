@@ -15,7 +15,7 @@ import { createSelectFormSections } from '@kbn/ml-form-utils/use_form_section';
 
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-import { useWizardContext } from '../../../create_transform/components/wizard/wizard';
+import { useTransformConfig } from '../../../create_transform/components/wizard/wizard';
 
 import { editTransformFlyoutSlice } from '../edit_transform_flyout_state';
 
@@ -27,7 +27,7 @@ const createSelectTransformConfig = (originalConfig: TransformConfigUnion) =>
   );
 
 export const useUpdatedTransformConfig = () => {
-  const { config } = useWizardContext();
+  const config = useTransformConfig();
   const selectTransformConfig = useMemo(() => createSelectTransformConfig(config), [config]);
   return useSelector(selectTransformConfig);
 };

@@ -6,9 +6,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+import { applyFormStateToConfig } from '@kbn/ml-form-utils/apply_form_state_to_config';
 
 import type { PivotConfigDefinition } from '../../../common/types/transform';
 import type { LatestFunctionConfig } from '../../../common/api_schemas/transforms';
@@ -29,7 +31,10 @@ import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineState } from '../sections/create_transform/components/step_define';
-import type { StepDetailsState } from '../sections/create_transform/components/step_details';
+import type {
+  StepDetailsState,
+  StepDetailsFormState,
+} from '../sections/create_transform/components/step_details';
 
 import {
   getEsAggFromAggConfig,
@@ -239,53 +244,49 @@ export const getCreateTransformSettingsRequestBody = (
 
 export const getCreateTransformRequestBody = (
   previewRequest: PostTransformsPreviewRequestSchema,
-  transformDetailsState: StepDetailsState
-): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
-  ...previewRequest,
-  // conditionally add optional description
-  ...(transformDetailsState.transformDescription !== ''
-    ? { description: transformDetailsState.transformDescription }
-    : {}),
-  // conditionally add optional frequency, skip if default value
-  ...(transformDetailsState.transformFrequency !== '' &&
-  transformDetailsState.transformFrequency !== DEFAULT_TRANSFORM_FREQUENCY
-    ? { frequency: transformDetailsState.transformFrequency }
-    : {}),
-  dest: {
-    index: transformDetailsState.destinationIndex,
-    // conditionally add optional ingest pipeline
-    ...(transformDetailsState.destinationIngestPipeline !== ''
-      ? { pipeline: transformDetailsState.destinationIngestPipeline }
+  transformDetailsState: StepDetailsState,
+  transformDetailsFormState: StepDetailsFormState
+): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => {
+  const config = {
+    ...previewRequest,
+    // conditionally add optional frequency, skip if default value
+    ...(transformDetailsState.transformFrequency !== '' &&
+    transformDetailsState.transformFrequency !== DEFAULT_TRANSFORM_FREQUENCY
+      ? { frequency: transformDetailsState.transformFrequency }
       : {}),
-  },
-  // conditionally add continuous mode config
-  ...(transformDetailsState.isContinuousModeEnabled
-    ? {
-        sync: {
-          time: {
-            // conditionally add continuous mode delay, skip if default value
-            ...(transformDetailsState.continuousModeDelay !== DEFAULT_CONTINUOUS_MODE_DELAY
-              ? { delay: transformDetailsState.continuousModeDelay }
-              : {}),
-            field: transformDetailsState.continuousModeDateField,
+    dest: {
+      // conditionally add optional ingest pipeline
+      ...(transformDetailsState.destinationIngestPipeline !== ''
+        ? { pipeline: transformDetailsState.destinationIngestPipeline }
+        : {}),
+    },
+    // conditionally add continuous mode config
+    ...(transformDetailsState.isContinuousModeEnabled
+      ? {
+          sync: {
+            time: {
+              // conditionally add continuous mode delay, skip if default value
+              ...(transformDetailsState.continuousModeDelay !== DEFAULT_CONTINUOUS_MODE_DELAY
+                ? { delay: transformDetailsState.continuousModeDelay }
+                : {}),
+              field: transformDetailsState.continuousModeDateField,
+            },
           },
-        },
-      }
-    : {}),
-  // conditionally add retention policy settings
-  ...(transformDetailsState.isRetentionPolicyEnabled &&
-  transformDetailsState.retentionPolicyDateField !== '' &&
-  transformDetailsState.retentionPolicyMaxAge !== ''
-    ? {
-        retention_policy: {
-          time: {
-            field: transformDetailsState.retentionPolicyDateField,
-            max_age: transformDetailsState.retentionPolicyMaxAge,
-          },
-        },
-      }
-    : {}),
-  ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
-  // conditionally add additional settings
-  ...getCreateTransformSettingsRequestBody(transformDetailsState),
-});
+        }
+      : {}),
+    ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
+    // conditionally add additional settings
+    ...getCreateTransformSettingsRequestBody(transformDetailsState),
+  };
+
+  const configWithAppliedFormState = applyFormStateToConfig(
+    config,
+    transformDetailsFormState.formFields,
+    transformDetailsFormState.formSections,
+    true
+  );
+
+  console.log('configWithAppliedFormState', configWithAppliedFormState);
+
+  return configWithAppliedFormState;
+};

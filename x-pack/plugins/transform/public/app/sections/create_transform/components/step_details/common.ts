@@ -54,7 +54,7 @@ export function getDefaultStepDetailsFormState(
     formFields: {
       // top level attributes
       description: initializeFormField('description', 'description', config),
-      transformId: initializeFormField('transformId', 'n/a', undefined, {
+      transformId: initializeFormField('transformId', undefined, undefined, {
         isOptional: false,
         validator: 'transformIdValidator',
         reservedValues: existingTransforms,
@@ -65,7 +65,7 @@ export function getDefaultStepDetailsFormState(
         isOptional: false,
         validator: 'indexNameValidator',
       }),
-      dataViewTimeField: initializeFormField('dataViewTimeField', 'n/a', config, {
+      dataViewTimeField: initializeFormField('dataViewTimeField', undefined, config, {
         validator: 'stringValidator',
         section: 'createDataView',
       }),
@@ -97,7 +97,7 @@ export function getDefaultStepDetailsFormState(
       ),
     },
     formSections: {
-      createDataView: initializeFormSection('createDataView', 'n/a', undefined, {
+      createDataView: initializeFormSection('createDataView', undefined, undefined, {
         defaultEnabled: true,
       }),
       retentionPolicy: initializeFormSection('retentionPolicy', 'retention_policy', config),

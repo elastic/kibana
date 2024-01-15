@@ -13,7 +13,7 @@ import { getNestedProperty } from '@kbn/ml-nested-property';
 
 export interface FormSection<T extends string> {
   formSectionName: T;
-  configFieldName: string;
+  configFieldName: string | undefined;
   defaultEnabled: boolean;
   enabled: boolean;
 }
@@ -22,12 +22,12 @@ export type FormSectionsState<FS extends string> = Record<FS, FormSection<FS>>;
 
 export const initializeFormSection = <T extends string, C>(
   formSectionName: T,
-  configFieldName: string,
+  configFieldName?: string,
   config?: C,
   overloads?: Partial<FormSection<T>>
 ): FormSection<T> => {
   const defaultEnabled = overloads?.defaultEnabled ?? false;
-  const rawEnabled = getNestedProperty(config ?? {}, configFieldName, undefined);
+  const rawEnabled = configFieldName && getNestedProperty(config ?? {}, configFieldName, undefined);
   const enabled = isDefined(rawEnabled) || defaultEnabled;
 
   return {
