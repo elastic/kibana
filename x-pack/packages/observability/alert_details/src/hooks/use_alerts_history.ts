@@ -5,25 +5,23 @@
  * 2.0.
  */
 
+import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type HttpSetup } from '@kbn/core/public';
 import {
   ALERT_DURATION,
-  ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
   ValidFeatureId,
 } from '@kbn/rule-data-utils';
-import { type HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface Props {
   http: HttpSetup | undefined;
   featureIds: ValidFeatureId[];
   ruleId: string;
-  instanceId?: string;
   dateRange: {
     from: string;
     to: string;
@@ -47,13 +45,7 @@ export const EMPTY_ALERTS_HISTORY = {
   histogramTriggeredAlerts: [] as AggregationsDateHistogramBucketKeys[],
   avgTimeToRecoverUS: 0,
 };
-export function useAlertsHistory({
-  featureIds,
-  ruleId,
-  dateRange,
-  instanceId,
-  http,
-}: Props): UseAlertsHistory {
+export function useAlertsHistory({ featureIds, ruleId, dateRange, http }: Props): UseAlertsHistory {
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
     queryFn: async ({ signal }) => {
@@ -64,7 +56,6 @@ export function useAlertsHistory({
         featureIds,
         http,
         ruleId,
-        instanceId,
         dateRange,
         signal,
       });
@@ -100,7 +91,6 @@ export async function fetchTriggeredAlertsHistory({
   featureIds,
   http,
   ruleId,
-  instanceId,
   dateRange,
   signal,
 }: {
@@ -111,7 +101,6 @@ export async function fetchTriggeredAlertsHistory({
     from: string;
     to: string;
   };
-  instanceId?: string;
   signal?: AbortSignal;
 }): Promise<FetchAlertsHistory> {
   try {
@@ -128,15 +117,6 @@ export async function fetchTriggeredAlertsHistory({
                   [ALERT_RULE_UUID]: ruleId,
                 },
               },
-              ...(instanceId && instanceId !== '*'
-                ? [
-                    {
-                      term: {
-                        [ALERT_INSTANCE_ID]: instanceId,
-                      },
-                    },
-                  ]
-                : []),
               {
                 range: {
                   [ALERT_TIME_RANGE]: dateRange,
