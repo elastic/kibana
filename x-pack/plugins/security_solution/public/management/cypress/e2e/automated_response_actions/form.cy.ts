@@ -23,10 +23,7 @@ export const RESPONSE_ACTIONS_ERRORS = 'response-actions-error';
 describe(
   'Form',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-    ],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     // FLAKY: https://github.com/elastic/kibana/issues/169334
