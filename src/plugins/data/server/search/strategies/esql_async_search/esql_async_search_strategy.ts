@@ -9,7 +9,7 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { SqlGetAsyncRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -24,7 +24,7 @@ export const esqlAsyncSearchStrategyProvider = (
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<
-  IKibanaSearchRequest<SqlGetAsyncRequest>,
+  IKibanaSearchRequest<SqlQueryRequest['body']>,
   IKibanaSearchResponse<SqlGetAsyncResponse>
 > => {
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
@@ -43,7 +43,7 @@ export const esqlAsyncSearchStrategyProvider = (
   }
 
   function asyncSearch(
-    { id, ...request }: IKibanaSearchRequest<SqlGetAsyncRequest>,
+    { id, ...request }: IKibanaSearchRequest<SqlQueryRequest['body']>,
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
