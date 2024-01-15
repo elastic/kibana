@@ -105,6 +105,22 @@
 #  layout:
 #    type: json
 
+# Example with size based log rotation
+#logging.appenders.default:
+#  type: rolling-file
+#  fileName: /var/logs/kibana.log
+#  policy:
+#    type: time-interval
+#    interval: 24h
+#  policy:
+#    type: size-limit
+#    size: 256mb
+#  strategy:
+#    type: numeric
+#    max: 10
+#  layout:
+#    type: json
+
 # Logs queries sent to Elasticsearch.
 #logging.loggers:
 #  - name: elasticsearch.query
