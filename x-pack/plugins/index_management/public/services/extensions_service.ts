@@ -29,6 +29,7 @@ export interface IndexBadge {
 
 export interface EmptyListContent {
   renderContent: (args: {
+    // the button to open the "create index" modal
     createIndexButton: ReturnType<FunctionComponent>;
   }) => ReturnType<FunctionComponent>;
 }
