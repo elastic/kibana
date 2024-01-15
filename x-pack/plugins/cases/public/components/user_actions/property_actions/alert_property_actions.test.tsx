@@ -56,10 +56,6 @@ describe('AlertPropertyActions', () => {
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(
-      await screen.findByTestId('property-actions-user-action-minusInCircle')
-    ).toBeInTheDocument();
-
     userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
@@ -76,10 +72,6 @@ describe('AlertPropertyActions', () => {
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
-    expect(
-      await screen.findByTestId('property-actions-user-action-minusInCircle')
-    ).toBeInTheDocument();
-
     userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
@@ -95,10 +87,6 @@ describe('AlertPropertyActions', () => {
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
-
-    expect(
-      await screen.findByTestId('property-actions-user-action-minusInCircle')
-    ).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
