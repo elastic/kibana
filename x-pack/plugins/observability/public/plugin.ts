@@ -106,9 +106,6 @@ export interface ConfigSchema {
       observability: {
         enabled: boolean;
       };
-      slo: {
-        enabled: boolean;
-      };
     };
     thresholdRule?: {
       enabled: boolean;

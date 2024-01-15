@@ -35,7 +35,6 @@ const defaultConfig: ConfigSchema = {
       metrics: { enabled: false },
       uptime: { enabled: false },
       observability: { enabled: false },
-      slo: { enabled: false },
     },
   },
 };

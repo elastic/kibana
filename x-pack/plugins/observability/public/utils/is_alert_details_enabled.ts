@@ -9,7 +9,11 @@ import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { ConfigSchema } from '../plugin';
 import type { TopAlert } from '../typings/alerts';
 
-const ALLOWED_RULE_TYPES = ['apm.transaction_duration', 'logs.alert.document.count'];
+const ALLOWED_RULE_TYPES = [
+  'apm.transaction_duration',
+  'logs.alert.document.count',
+  'slo.rules.burnRate',
+];
 
 const isUnsafeAlertDetailsFlag = (
   subject: string
