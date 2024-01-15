@@ -9,24 +9,23 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { EsqlAsyncSearchResponse, IAsyncSearchRequestParams } from './types';
+import { SqlGetAsyncRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
-import type { IAsyncSearchOptions, IEsSearchRequest, IEsSearchResponse } from '../../../../common';
-import { pollSearch } from '../../../../common';
+import type { IAsyncSearchOptions } from '../../../../common';
+import { IKibanaSearchRequest, IKibanaSearchResponse, pollSearch } from '../../../../common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import { SearchConfigSchema } from '../../../../config';
 
 export const esqlAsyncSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger,
-  usage?: SearchUsage,
   useInternalUser: boolean = false
 ): ISearchStrategy<
-  IEsSearchRequest<IAsyncSearchRequestParams>,
-  IEsSearchResponse<EsqlAsyncSearchResponse>
+  IKibanaSearchRequest<SqlGetAsyncRequest>,
+  IKibanaSearchResponse<SqlGetAsyncResponse>
 > => {
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
@@ -44,7 +43,7 @@ export const esqlAsyncSearchStrategyProvider = (
   }
 
   function asyncSearch(
-    { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
+    { id, ...request }: IKibanaSearchRequest<SqlGetAsyncRequest>,
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
@@ -74,7 +73,7 @@ export const esqlAsyncSearchStrategyProvider = (
           );
 
       const finalResponse = toAsyncKibanaSearchResponse(
-        body as EsqlAsyncSearchResponse,
+        body as SqlGetAsyncResponse,
         headers?.warning,
         // do not return requestParams on polling calls
         id ? undefined : meta?.request?.params
@@ -95,12 +94,11 @@ export const esqlAsyncSearchStrategyProvider = (
       }
     };
 
-    return pollSearch<IEsSearchResponse<EsqlAsyncSearchResponse>>(search, cancel, {
+    return pollSearch(search, cancel, {
       pollInterval: searchConfig.asyncSearch.pollInterval,
       ...options,
     }).pipe(
       tap((response) => (id = response.id)),
-      tap(searchUsageObserver(logger, usage)),
       catchError((e) => {
         throw getKbnSearchError(e);
       })
@@ -116,7 +114,7 @@ export const esqlAsyncSearchStrategyProvider = (
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
-      logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
+      logger.debug(`search ${JSON.stringify(request) || request.id}`);
 
       return asyncSearch(request, options, deps);
     },

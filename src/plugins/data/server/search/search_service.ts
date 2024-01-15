@@ -183,11 +183,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     this.registerSearchStrategy(ESQL_SEARCH_STRATEGY, esqlSearchStrategyProvider(this.logger));
     this.registerSearchStrategy(
       ESQL_ASYNC_SEARCH_STRATEGY,
-      esqlAsyncSearchStrategyProvider(
-        this.initializerContext.config.get().search,
-        this.logger,
-        usage
-      )
+      esqlAsyncSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
     );
 
     // We don't want to register this because we don't want the client to be able to access this

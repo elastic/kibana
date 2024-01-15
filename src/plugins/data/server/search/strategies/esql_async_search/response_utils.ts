@@ -7,14 +7,15 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
-import type { EsqlAsyncSearchResponse } from './types';
+import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IKibanaSearchResponse } from '../../../../common';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**
  * Get the Kibana representation of an async search response (see `IKibanaSearchResponse`).
  */
 export function toAsyncKibanaSearchResponse(
-  response: EsqlAsyncSearchResponse,
+  response: SqlGetAsyncResponse,
   warning?: string,
   requestParams?: ConnectionRequestParams
 ) {
@@ -22,14 +23,10 @@ export function toAsyncKibanaSearchResponse(
     id: response.id,
     rawResponse: {
       ...response,
-      took: 0,
-      timed_out: false,
-      _shards: { failed: 0, successful: 0, total: 0 },
-      hits: { hits: [{ _index: '', _id: '' }] },
     },
     isPartial: response.is_partial,
     isRunning: response.is_running,
     ...(warning ? { warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
-  };
+  } as IKibanaSearchResponse<SqlGetAsyncResponse>;
 }
