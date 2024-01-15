@@ -9,7 +9,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { InjectionContainerImpl, CONTEXT_SERVICE_KEY } from '../src/container';
-import { serviceId } from '../src/service';
+import { serviceId, serviceLabel } from '../src/service';
 
 interface TestInterfaceA {
   foo: string;
@@ -99,6 +99,62 @@ describe('InjectionContainerImpl', () => {
       const instanceB = container.get<ClassB>('ClassB');
 
       expect(instanceB.getB()).toEqual(`value from B: A`);
+    });
+
+    it('injects by labels', () => {
+      const container = new InjectionContainerImpl({
+        containerId: 'root',
+        context: {},
+      });
+
+      container.register<string>({
+        id: 'strA',
+        scope: 'global',
+        factory: {
+          fn: () => 'strA',
+          params: [],
+        },
+        labels: ['strService'],
+      });
+
+      container.register<string>({
+        id: 'strB',
+        scope: 'global',
+        factory: {
+          fn: () => 'strB',
+          params: [],
+        },
+        labels: ['strService'],
+      });
+
+      container.register<string>({
+        id: 'badLabel',
+        scope: 'global',
+        factory: {
+          fn: () => 'badLabel',
+          params: [],
+        },
+        labels: ['anotherLabel'],
+      });
+
+      container.register<{ getAll: () => string[] }>({
+        id: 'service',
+        scope: 'global',
+        factory: {
+          fn: (strServices: string[]) => {
+            return {
+              getAll: () => strServices,
+            };
+          },
+          params: [serviceLabel<string>('strService')],
+        },
+      });
+
+      const service = container.get<{ getAll: () => string[] }>('service');
+      const strings = service.getAll();
+      expect(strings).toHaveLength(2);
+      expect(strings).toContain('strA');
+      expect(strings).toContain('strB');
     });
 
     it('only calls a factory once for a given container', () => {

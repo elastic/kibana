@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { ServiceIdentifier } from './service';
+export type { ServiceIdentifier, ServiceLabel, ServiceScope } from './service';
 export type { ServiceConstructor, Constructable } from './service_contructor';
 export type { ServiceFactory, FactoryFunction } from './service_factory';
 export type {
@@ -16,3 +16,4 @@ export type {
   ServiceRegistration,
 } from './service_registration';
 export type { InjectionContainer, CreateChildOptions } from './container';
+export type { ByIdInjection, ByLabelInjection, InjectionParameter } from './injection_parameters';

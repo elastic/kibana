@@ -8,16 +8,16 @@
 
 import type { ServiceFactory } from './service_factory';
 import type { ServiceConstructor } from './service_contructor';
-import type { ServiceIdentifier, ServiceScope } from '../service';
+import type { ServiceIdentifier, ServiceLabel, ServiceScope } from './service';
 
 export interface ServiceRegistrationBase<T> {
   id: ServiceIdentifier<T>;
   scope: ServiceScope; // TODO: | ContainerPredicate ff specified, the service will be instantiated at the closest level
+  labels?: ServiceLabel[];
   // TODO: implement. If specified, the service will be register at provided container / level
   // Defaults to `root`
   // Note that is specified, can't be
   // registerAt?: 'root' | 'container' | ContainerPredicate;
-  // TODO: markers for injectMany
 }
 
 export interface ServiceFactoryRegistration<T> extends ServiceRegistrationBase<T> {

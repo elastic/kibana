@@ -6,22 +6,23 @@
  * Side Public License, v 1.
  */
 
-import {
-  ServiceScope,
-  InjectionParameter,
-  isServiceIdParam,
-  isServiceMarkerParam,
-} from './service';
+import { isServiceIdParam, isServiceLabelParam } from './service';
 import type {
   InjectionContainer,
   CreateChildOptions,
   ServiceIdentifier,
+  ServiceScope,
+  ServiceLabel,
   ServiceFactory,
   ServiceConstructor,
   ServiceRegistration,
+  InjectionParameter,
 } from './types';
 import { isConstructorRegistration, isFactoryRegistration, getContainerRoot } from './helpers';
 
+/**
+ * @internal
+ */
 interface ServiceMetadata<T = unknown> {
   /**
    * The identifier of the service
@@ -31,6 +32,10 @@ interface ServiceMetadata<T = unknown> {
    * The scope for this service
    */
   scope: ServiceScope;
+  /**
+   * The labels defined for this service
+   */
+  labels: ServiceLabel[];
 
   /**
    * The type of provider that was used to define this service
@@ -71,6 +76,7 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
   protected readonly childMap: Map<string, InjectionContainerImpl> = new Map();
 
   protected readonly serviceMetadata: ServiceMetadataRegistry = new Map();
+  protected readonly serviceByLabelMap: Map<ServiceLabel, ServiceIdentifier[]> = new Map();
   protected readonly serviceMap = new Map();
 
   constructor({ containerId, parent, context }: InjectionContainerConstructorOptions<Ctx>) {
@@ -133,6 +139,7 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
       registry.set(registration.id, {
         id: registration.id,
         scope: registration.scope,
+        labels: registration.labels ?? [],
         providerType: 'factory',
         factory: registration.factory,
       });
@@ -141,12 +148,23 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
       registry.set(registration.id, {
         id: registration.id,
         scope: registration.scope,
+        labels: registration.labels ?? [],
         providerType: 'constructor',
         service: registration.service,
       });
     } else {
       // TODO later
       throw new Error('unsupported for now');
+    }
+
+    if (registration.labels) {
+      registration.labels.forEach((label) => {
+        if (this.serviceByLabelMap.has(label)) {
+          this.serviceByLabelMap.get(label)!.push(registration.id);
+        } else {
+          this.serviceByLabelMap.set(label, [registration.id]);
+        }
+      });
     }
   }
 
@@ -185,8 +203,17 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
           ...identifierChain,
           identifier,
         ]);
-      } else if (isServiceMarkerParam(parameter)) {
-        // TODO: inject all
+      } else if (isServiceLabelParam(parameter)) {
+        const ids = owningContainer._resolveIdsForLabel(parameter.serviceLabel);
+        const services: unknown[] = [];
+        ids.forEach((serviceId) => {
+          const resolvedService = owningContainer._resolveService(serviceId, [
+            ...identifierChain,
+            identifier,
+          ]);
+          services.push(resolvedService);
+        });
+        return services;
       } else {
         throw new Error(`unsupported injection parameter type: ${parameter}`);
       }
@@ -222,6 +249,20 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
     return instance;
   }
 
+  private _resolveIdsForLabel(label: ServiceLabel): ServiceIdentifier[] {
+    const identifiers: Set<ServiceIdentifier> = new Set();
+
+    let container: InjectionContainerImpl | undefined = this;
+    while (container) {
+      const ids = container.serviceByLabelMap.get(label) ?? [];
+      ids.forEach((id) => {
+        identifiers.add(id);
+      });
+      container = container.parent;
+    }
+    return [...identifiers];
+  }
+
   private _registerBuiltInService() {
     // register the container's context
     this.serviceMap.set(CONTEXT_SERVICE_KEY, this.context);
@@ -229,6 +270,7 @@ export class InjectionContainerImpl<Ctx = unknown> implements InjectionContainer
       id: CONTEXT_SERVICE_KEY,
       scope: 'container',
       providerType: 'factory', // TODO: need to change to instance
+      labels: [],
     });
   }
 }

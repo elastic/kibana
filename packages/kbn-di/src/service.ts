@@ -6,48 +6,32 @@
  * Side Public License, v 1.
  */
 
-import type { ServiceIdentifier } from './types';
+import type {
+  ServiceIdentifier,
+  ServiceLabel,
+  ByIdInjection,
+  ByLabelInjection,
+  InjectionParameter,
+} from './types';
 
-export type ServiceScope = 'global' | 'container';
-
-/**
- *
- * Use the `serviceId` helper function to build
- */
-interface ServiceIdParameter<T = unknown> {
-  type: 'serviceId';
-  serviceId: ServiceIdentifier<T>;
-}
-
-/**
- *
- * Use the `serviceMarker` helper function to build
- */
-interface ServiceMarkerParameter {
-  type: 'serviceMarker';
-  serviceMarker: string;
-}
-
-export type InjectionParameter = ServiceIdParameter | ServiceMarkerParameter;
-
-export function serviceId<T = unknown>(id: ServiceIdentifier<T>): ServiceIdParameter<T> {
+export function serviceId<T = unknown>(id: ServiceIdentifier<T>): ByIdInjection<T> {
   return {
     type: 'serviceId',
     serviceId: id,
   };
 }
 
-export function serviceMarker(marker: string): ServiceMarkerParameter {
+export function serviceLabel<T = unknown>(label: ServiceLabel<T>): ByLabelInjection {
   return {
-    type: 'serviceMarker',
-    serviceMarker: marker,
+    type: 'serviceLabel',
+    serviceLabel: label,
   };
 }
 
-export function isServiceIdParam(param: InjectionParameter): param is ServiceIdParameter {
+export function isServiceIdParam(param: InjectionParameter): param is ByIdInjection {
   return param.type === 'serviceId';
 }
 
-export function isServiceMarkerParam(param: InjectionParameter): param is ServiceMarkerParameter {
-  return param.type === 'serviceMarker';
+export function isServiceLabelParam(param: InjectionParameter): param is ByLabelInjection {
+  return param.type === 'serviceLabel';
 }
