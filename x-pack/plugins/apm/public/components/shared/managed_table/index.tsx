@@ -203,9 +203,6 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
     [tableSearchBar]
   );
 
-  console.log('items', items);
-  console.log('currentPage items', currentPage.items);
-
   return (
     <>
       <TableSearchBar

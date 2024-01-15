@@ -77,12 +77,6 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
       sortFn,
     });
 
-    if (_currentPage.items.includes((item) => item === null)) {
-      console.log('PROBLEMOS!');
-    }
-
-    console.log({ _currentPage });
-
     return fieldsToSearch.length > 0 && isTableSearchBarEnabled
       ? memoizeResult(_currentPage, fieldsToSearch)
       : _currentPage;

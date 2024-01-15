@@ -8,6 +8,7 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
+import { compact } from 'lodash';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -135,7 +136,11 @@ function useServicesDetailedStatisticsFetcher({
 
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
-      if (start && end && currentPageItems.length > 0 && dataSourceOptions) {
+      const serviceNames = compact(
+        currentPageItems.map(({ serviceName }) => serviceName)
+      );
+
+      if (start && end && serviceNames.length > 0 && dataSourceOptions) {
         return callApmApi('POST /internal/apm/services/detailed_statistics', {
           params: {
             query: {
@@ -152,12 +157,8 @@ function useServicesDetailedStatisticsFetcher({
               bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
             },
             body: {
-              serviceNames: JSON.stringify(
-                currentPageItems
-                  .map(({ serviceName }) => serviceName)
-                  // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
-                  .sort()
-              ),
+              // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
+              serviceNames: JSON.stringify(serviceNames.sort()),
             },
           },
         });

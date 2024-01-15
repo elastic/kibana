@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { merge } from 'lodash';
+import { compact, merge } from 'lodash';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
@@ -408,13 +408,16 @@ function useTableData({
   const { data: detailedStatistics, status: detailedStatisticsStatus } =
     useFetcher(
       (callApmApi) => {
+        const transactionNames = compact(
+          currentPageItems.map(({ name }) => name)
+        );
         if (
           start &&
           end &&
           transactionType &&
           latencyAggregationType &&
           preferredDataSource &&
-          currentPageItems.length > 0
+          transactionNames.length > 0
         ) {
           return callApmApi(
             'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
@@ -433,9 +436,7 @@ function useTableData({
                   useDurationSummary: !!shouldUseDurationSummary,
                   latencyAggregationType:
                     latencyAggregationType as LatencyAggregationType,
-                  transactionNames: JSON.stringify(
-                    currentPageItems.map(({ name }) => name).sort()
-                  ),
+                  transactionNames: JSON.stringify(transactionNames.sort()),
                   offset:
                     comparisonEnabled && isTimeComparison(offset)
                       ? offset
