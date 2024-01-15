@@ -11,6 +11,9 @@ export const X_MAX = 50 as const;
 export const Y_MAX = 50 as const;
 export const MAX_BOUNDS_MIN: [number, number] = [X_MIN, Y_MIN];
 export const MAX_BOUNDS_MAX: [number, number] = [X_MAX, Y_MAX];
+export const MAX_BOUNDS_EXTENDED: [number, number, number, number] = [
+  -90, -90, 90, 90,
+];
 
 export const BACKGROUND_SOURCE_ID = 'background-source';
 export const BACKGROUND_LAYER_ID = 'background-layer';

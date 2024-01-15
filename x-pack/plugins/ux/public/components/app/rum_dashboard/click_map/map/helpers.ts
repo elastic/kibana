@@ -76,7 +76,7 @@ export function getRelativeFactorForWidthAndHeight(
   width: number,
   height: number
 ) {
-  fitMapContent(map);
+  // fitMapToMaxBounds(map);
   const bounds = map.getBounds();
 
   // Project the bounds to pixel coordinates
@@ -87,12 +87,13 @@ export function getRelativeFactorForWidthAndHeight(
   const physicalWidth = bottomRight.x - topLeft.x;
   const physicalHeight = bottomRight.y - topLeft.y;
 
-  const isLandscape = width > height;
-  const largerDim = isLandscape ? width : height;
+  // const isLandscape = width > height;
+  // const largerDim = isLandscape ? width : height;
+  //
+  // const factor = (isLandscape ? physicalWidth : physicalHeight) / largerDim;
+  const factorX = physicalWidth / width;
 
-  const factor = (isLandscape ? physicalWidth : physicalHeight) / largerDim;
-
-  return { factor, physicalWidth, physicalHeight };
+  return { factor: factorX, physicalWidth, physicalHeight };
 }
 
 export function getMaxBoundsForPixelWidthHeight(
@@ -100,7 +101,7 @@ export function getMaxBoundsForPixelWidthHeight(
   width: number,
   height: number
 ): FlatBounds {
-  fitMapToMaxBounds(map);
+  // fitMapToMaxBounds(map);
 
   const { factor, physicalWidth, physicalHeight } =
     getRelativeFactorForWidthAndHeight(map, width, height);

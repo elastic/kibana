@@ -17,7 +17,11 @@ import { addClicksFeatureLayer } from './clicks_feature_layer';
 import { MLMap, paintMapWithBackgroundColor } from './helpers';
 import { useKibanaServices } from '../../../../../hooks/use_kibana_services';
 
-import { MAX_BOUNDS_MIN, MAX_BOUNDS_MAX } from './constants';
+import {
+  MAX_BOUNDS_MIN,
+  MAX_BOUNDS_MAX,
+  MAX_BOUNDS_EXTENDED,
+} from './constants';
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -127,7 +131,7 @@ export function EmbeddedMapComponent({
           'https://openmaptiles.github.io/osm-bright-gl-style/style-cdn.json',
         center: [0, 0], // Initial center in pixels
         zoom: 2, // Initial zoom level
-        // maxBounds: [MAX_BOUNDS_MIN, MAX_BOUNDS_MAX],
+        maxBounds: MAX_BOUNDS_EXTENDED,
       });
       // @ts-ignore
       mapRef.current = map;
