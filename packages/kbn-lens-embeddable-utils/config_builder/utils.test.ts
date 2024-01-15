@@ -13,6 +13,7 @@ import {
   getDatasetIndex,
   addLayerColumn,
   isFormulaDataset,
+  mapToFormula,
 } from './utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
@@ -211,6 +212,44 @@ describe('buildDatasourceStates', () => {
             },
           },
         },
+      }
+    `);
+  });
+});
+
+describe('mapToFormula', () => {
+  test('map LensBaseLayer to FormulaConfigValue', () => {
+    const formulaConfig = mapToFormula({
+      label: 'iowait',
+      value: 'average(system.cpu.iowait.pct) / max(system.cpu.cores)',
+    });
+    expect(formulaConfig).toMatchInlineSnapshot(`
+      Object {
+        "format": undefined,
+        "formula": "average(system.cpu.iowait.pct) / max(system.cpu.cores)",
+        "label": "iowait",
+        "timeScale": undefined,
+      }
+    `);
+  });
+  test('map LensBaseLayer to FormulaConfigValue with format', () => {
+    const formulaConfig = mapToFormula({
+      label: 'iowait',
+      value: 'average(system.cpu.iowait.pct) / max(system.cpu.cores)',
+      format: 'percent',
+      decimals: 1,
+    });
+    expect(formulaConfig).toMatchInlineSnapshot(`
+      Object {
+        "format": Object {
+          "id": "percent",
+          "params": Object {
+            "decimals": 1,
+          },
+        },
+        "formula": "average(system.cpu.iowait.pct) / max(system.cpu.cores)",
+        "label": "iowait",
+        "timeScale": undefined,
       }
     `);
   });
