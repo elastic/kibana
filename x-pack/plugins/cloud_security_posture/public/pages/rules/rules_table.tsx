@@ -22,6 +22,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleStatus } from './change_csp_rule_status';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
+export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
 
 type RulesTableProps = Pick<
   RulesState,
@@ -30,15 +31,24 @@ type RulesTableProps = Pick<
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   setSelectedRuleId(id: string | null): void;
   selectedRuleId: string | null;
-  refetchStatus: () => void;
+  refetchRulesStatus: () => void;
   selectedRules: CspBenchmarkRulesWithStatus[];
   setSelectedRules: (e: CspBenchmarkRulesWithStatus[]) => void;
 };
 
 type GetColumnProps = Pick<
   RulesTableProps,
-  'setSelectedRuleId' | 'refetchStatus' | 'selectedRules'
->;
+  'setSelectedRuleId' | 'refetchRulesStatus' | 'selectedRules' | 'setSelectedRules'
+> & {
+  postRequestChangeRulesStatus: (actionOnRule: 'mute' | 'unmute', ruleIds: any[]) => void;
+  items: CspBenchmarkRulesWithStatus[];
+  setSelectAllRulesThisPage: (e: boolean) => void;
+  selectAllRulesThisPage: boolean;
+  isArraySubset: (
+    smallArr: CspBenchmarkRulesWithStatus[],
+    bigArr: CspBenchmarkRulesWithStatus[]
+  ) => boolean;
+};
 
 export const RulesTable = ({
   setPagination,
@@ -50,7 +60,7 @@ export const RulesTable = ({
   loading,
   error,
   selectedRuleId,
-  refetchStatus,
+  refetchRulesStatus,
   selectedRules,
   setSelectedRules,
 }: RulesTableProps) => {
@@ -100,7 +110,7 @@ export const RulesTable = ({
     () =>
       getColumns({
         setSelectedRuleId,
-        refetchStatus,
+        refetchRulesStatus,
         postRequestChangeRulesStatus,
         selectedRules,
         setSelectedRules,
@@ -111,7 +121,7 @@ export const RulesTable = ({
       }),
     [
       setSelectedRuleId,
-      refetchStatus,
+      refetchRulesStatus,
       postRequestChangeRulesStatus,
       selectedRules,
       setSelectedRules,
@@ -140,29 +150,26 @@ export const RulesTable = ({
 
 const getColumns = ({
   setSelectedRuleId,
-  refetchStatus,
+  refetchRulesStatus,
   postRequestChangeRulesStatus,
   selectedRules,
   setSelectedRules,
   items,
-  setSelectAllRulesThisPage,
   selectAllRulesThisPage,
   isArraySubset,
-}: GetColumnProps & any): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStatus>> => [
+}: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStatus>> => [
   {
     field: 'action',
     name: (
       <EuiCheckbox
-        id={`cloud-security-fields-selector-item-all`}
+        id={RULES_ROW_SELECT_ALL_CURRENT_PAGE}
         checked={isArraySubset(items, selectedRules) && selectAllRulesThisPage}
         onChange={(e) => {
           const uniqueSelectedRules = uniqBy([...selectedRules, ...items], 'metadata.id');
           const onChangeSelectAllThisPageFn = () => {
-            setSelectAllRulesThisPage(true);
             setSelectedRules(uniqueSelectedRules);
           };
           const onChangeDeselectAllThisPageFn = () => {
-            setSelectAllRulesThisPage(false);
             setSelectedRules(
               selectedRules.filter(
                 (element: CspBenchmarkRulesWithStatus) =>
@@ -253,16 +260,17 @@ const getColumns = ({
         rule_number: rule?.metadata.benchmark.rule_number,
         rule_id: rule?.metadata.id,
       };
-      const nextRuleStatus = rule?.status === 'muted' ? 'unmute' : 'mute';
+      const isRuleMuted = rule?.status === 'muted';
+      const nextRuleStatus = isRuleMuted ? 'unmute' : 'mute';
 
       const useChangeCspRuleStatusFn = async () => {
         await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
-        await refetchStatus();
+        await refetchRulesStatus();
       };
       return (
         <EuiSwitch
           className="eui-textTruncate"
-          checked={rule?.status === 'muted' ? true : false}
+          checked={isRuleMuted ? true : false}
           onChange={useChangeCspRuleStatusFn}
           data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
           label=""

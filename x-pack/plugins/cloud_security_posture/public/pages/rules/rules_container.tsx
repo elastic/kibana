@@ -15,7 +15,11 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import type { CspBenchmarkRule, PageUrlParams } from '../../../common/types/latest';
+import type {
+  CspBenchmarkRule,
+  PageUrlParams,
+  RuleStateAttributes,
+} from '../../../common/types/latest';
 import { useCspGetRulesStates } from './use_csp_rules_state';
 
 export interface CspBenchmarkRulesWithStatus {
@@ -40,15 +44,13 @@ const getRulesPage = (
   error: unknown,
   query: RulesQuery
 ): RulesPageData => {
-  const rules = data || ([] as CspBenchmarkRule[]);
-
-  const page = getPage(rules, query);
+  const page = getPage(data, query);
 
   return {
     loading: status === 'loading',
     error: error ? extractErrorMessage(error) : undefined,
-    all_rules: rules,
-    rules_map: new Map(rules.map((rule) => [rule.metadata.id, rule])),
+    all_rules: data,
+    rules_map: new Map(data.map((rule) => [rule.metadata.id, rule])),
     rules_page: page,
     total: data?.length || 0,
   };
@@ -95,41 +97,32 @@ export const RulesContainer = () => {
   );
 
   const rulesStates = useCspGetRulesStates();
-  const arrayRulesStates = Object.values(rulesStates.data || {});
-  const filteredRulesStates: any[] = arrayRulesStates.filter(
+  const arrayRulesStates: RuleStateAttributes[] = Object.values(rulesStates.data || {});
+  const filteredRulesStates: RuleStateAttributes[] = arrayRulesStates.filter(
     (e: any) =>
       e.benchmark_id === params.benchmarkId && e.benchmark_version === 'v' + params.benchmarkVersion
   );
 
-  const allNewRulesItems: CspBenchmarkRulesWithStatus[] = useMemo(() => {
-    if (data === undefined) return [];
-    return data?.items.reduce((res: any[], obj1) => {
-      const rulesKey =
-        obj1.metadata.benchmark.id +
-        ';' +
-        obj1.metadata.benchmark.version +
-        ';' +
-        obj1.metadata.benchmark.rule_number;
+  const rulesWithStatus: CspBenchmarkRulesWithStatus[] = useMemo(() => {
+    if (!data) return [];
+
+    return data.items.map((rule) => {
+      const rulesKey = `${rule.metadata.benchmark.id};${rule.metadata.benchmark.version};${rule.metadata.benchmark.rule_number}`;
+
       const match = rulesStates?.data?.[rulesKey];
-      if (match) {
-        res.push({
-          ...obj1,
-          ...{ status: rulesStates?.data?.[rulesKey].muted === true ? 'muted' : 'unmuted' },
-        });
-      } else {
-        res.push({ ...obj1, ...{ status: 'unmuted' } });
-      }
-      return res;
-    }, []);
+      const rulesStatus = match?.muted ? 'muted' : 'unmuted';
+
+      return { ...rule, status: rulesStatus || 'unmuted' };
+    });
   }, [data, rulesStates?.data]);
 
-  const filteredAllNewRulesItems: CspBenchmarkRulesWithStatus[] = useMemo(() => {
+  const filteredRulesWithStatuses: CspBenchmarkRulesWithStatus[] = useMemo(() => {
     if (enabledDisabledItemsFilter === 'enabled')
-      return allNewRulesItems?.filter((e) => e?.status === 'muted');
+      return rulesWithStatus?.filter((e) => e?.status === 'muted');
     else if (enabledDisabledItemsFilter === 'disabled')
-      return allNewRulesItems?.filter((e) => e?.status === 'unmuted');
-    else return allNewRulesItems;
-  }, [allNewRulesItems, enabledDisabledItemsFilter]);
+      return rulesWithStatus?.filter((e) => e?.status === 'unmuted');
+    else return rulesWithStatus;
+  }, [rulesWithStatus, enabledDisabledItemsFilter]);
 
   const sectionList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.section),
@@ -139,18 +132,28 @@ export const RulesContainer = () => {
     () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
     [allRules.data]
   );
-  const cleanedSectionList = [...new Set(sectionList?.sort())];
+  const cleanedSectionList = [...new Set(sectionList)].sort();
   const cleanedRuleNumberList = [...new Set(ruleNumberList)];
 
   const rulesPageData = useMemo(
-    () => getRulesPage(filteredAllNewRulesItems, status, error, rulesQuery),
-    [filteredAllNewRulesItems, status, error, rulesQuery]
+    () => getRulesPage(filteredRulesWithStatuses, status, error, rulesQuery),
+    [filteredRulesWithStatuses, status, error, rulesQuery]
   );
 
   const [selectedRules, setSelectedRules] = useState<CspBenchmarkRulesWithStatus[]>([]);
 
   const setSelectAllRules = () => {
     setSelectedRules(rulesPageData.all_rules);
+  };
+
+  const rulesFlyoutData: CspBenchmarkRulesWithStatus = {
+    ...{
+      status:
+        filteredRulesStates.find((e) => e.rule_id === selectedRuleId)?.muted === true
+          ? 'muted'
+          : 'unmuted',
+    },
+    ...{ metadata: rulesPageData.rules_map.get(selectedRuleId!)?.metadata! },
   };
 
   return (
@@ -171,7 +174,7 @@ export const RulesContainer = () => {
           pageSize={rulesPageData.rules_page.length}
           isSearching={status === 'loading'}
           selectedRules={selectedRules}
-          refetchStatus={rulesStates.refetch}
+          refetchRulesStatus={rulesStates.refetch}
           setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
           currentEnabledDisabledItemsFilterState={enabledDisabledItemsFilter}
           setSelectAllRules={setSelectAllRules}
@@ -191,24 +194,16 @@ export const RulesContainer = () => {
           }}
           setSelectedRuleId={setSelectedRuleId}
           selectedRuleId={selectedRuleId}
-          refetchStatus={rulesStates.refetch}
+          refetchRulesStatus={rulesStates.refetch}
           selectedRules={selectedRules}
           setSelectedRules={setSelectedRules}
         />
       </EuiPanel>
       {selectedRuleId && (
         <RuleFlyout
-          rule={{
-            ...{
-              status:
-                filteredRulesStates.find((e) => e.rule_id === selectedRuleId)?.muted === true
-                  ? 'muted'
-                  : 'unmuted',
-            },
-            ...{ metadata: rulesPageData.rules_map.get(selectedRuleId!)?.metadata! },
-          }}
+          rule={rulesFlyoutData}
           onClose={() => setSelectedRuleId(null)}
-          refetchStatus={rulesStates.refetch}
+          refetchRulesStatus={rulesStates.refetch}
         />
       )}
     </div>

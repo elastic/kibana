@@ -48,7 +48,7 @@ interface RulesTableToolbarProps {
   isSearching: boolean;
   pageSize: number;
   selectedRules: CspBenchmarkRulesWithStatus[];
-  refetchStatus: () => void;
+  refetchRulesStatus: () => void;
   setEnabledDisabledItemsFilter: (filterState: string) => void;
   currentEnabledDisabledItemsFilterState: string;
   setSelectAllRules: () => void;
@@ -59,7 +59,7 @@ interface RuleTableCount {
   pageSize: number;
   total: number;
   selectedRules: CspBenchmarkRulesWithStatus[];
-  refetchStatus: () => void;
+  refetchRulesStatus: () => void;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStatus[]) => void;
 }
@@ -75,7 +75,7 @@ export const RulesTableHeader = ({
   sectionSelectOptions,
   ruleNumberSelectOptions,
   selectedRules,
-  refetchStatus,
+  refetchRulesStatus,
   setEnabledDisabledItemsFilter,
   currentEnabledDisabledItemsFilterState,
   setSelectAllRules,
@@ -124,7 +124,7 @@ export const RulesTableHeader = ({
           totalRulesCount={totalRulesCount}
           pageSize={pageSize}
           selectedRules={selectedRules}
-          refetchStatus={refetchStatus}
+          refetchRulesStatus={refetchRulesStatus}
           setSelectAllRules={setSelectAllRules}
           setSelectedRules={setSelectedRules}
         />
@@ -219,7 +219,7 @@ const SearchField = ({
   totalRulesCount,
   pageSize,
   selectedRules,
-  refetchStatus,
+  refetchRulesStatus,
   setSelectAllRules,
   setSelectedRules,
 }: Pick<
@@ -230,7 +230,7 @@ const SearchField = ({
   | 'totalRulesCount'
   | 'pageSize'
   | 'selectedRules'
-  | 'refetchStatus'
+  | 'refetchRulesStatus'
   | 'setSelectAllRules'
   | 'setSelectedRules'
 >) => {
@@ -256,7 +256,7 @@ const SearchField = ({
         pageSize={pageSize}
         total={totalRulesCount}
         selectedRules={selectedRules}
-        refetchStatus={refetchStatus}
+        refetchRulesStatus={refetchRulesStatus}
         setSelectAllRules={setSelectAllRules}
         setSelectedRules={setSelectedRules}
       />
@@ -268,7 +268,7 @@ const CurrentPageOfTotal = ({
   pageSize,
   total,
   selectedRules,
-  refetchStatus,
+  refetchRulesStatus,
   setSelectAllRules,
   setSelectedRules,
 }: RuleTableCount) => {
@@ -283,11 +283,11 @@ const CurrentPageOfTotal = ({
     const bulkSelectedRules = selectedRules.map((e: CspBenchmarkRulesWithStatus) => ({
       benchmark_id: e?.metadata?.benchmark.id,
       benchmark_version: e?.metadata.benchmark.version,
-      rule_number: e?.metadata.benchmark.rule_number,
+      rule_number: e?.metadata.benchmark.rule_number || 'Unknown',
       rule_id: e?.metadata.id,
     }));
     await postRequestChangeRulesStatus(status, bulkSelectedRules);
-    await refetchStatus();
+    await refetchRulesStatus();
     await closePopover();
   };
   const changeCspRuleStatusMute = async () => {

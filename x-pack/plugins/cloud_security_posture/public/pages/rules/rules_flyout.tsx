@@ -19,6 +19,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
@@ -30,7 +31,7 @@ import { CspBenchmarkRulesWithStatus } from './rules_container';
 interface RuleFlyoutProps {
   onClose(): void;
   rule: CspBenchmarkRulesWithStatus;
-  refetchStatus: () => void;
+  refetchRulesStatus: () => void;
 }
 
 const tabs = [
@@ -52,20 +53,21 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, refetchStatus }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule, refetchRulesStatus }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
   const postRequestChangeRulesStatus = useChangeCspRuleStatus();
+  const isRuleMuted = rule?.status === 'muted';
 
   const switchRuleStatus = async () => {
     const rulesObjectRequest = {
-      benchmark_id: rule?.metadata.benchmark.id,
-      benchmark_version: rule?.metadata.benchmark.version,
-      rule_number: rule?.metadata.benchmark.rule_number,
-      rule_id: rule?.metadata.id,
+      benchmark_id: rule.metadata.benchmark.id,
+      benchmark_version: rule.metadata.benchmark.version,
+      rule_number: rule.metadata.benchmark.rule_number || '',
+      rule_id: rule.metadata.id,
     };
-    const nextRuleStatus = rule?.status === 'muted' ? 'unmute' : 'mute';
+    const nextRuleStatus = isRuleMuted ? 'unmute' : 'mute';
     await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
-    await refetchStatus();
+    await refetchRulesStatus();
   };
   return (
     <EuiFlyout
@@ -81,10 +83,22 @@ export const RuleFlyout = ({ onClose, rule, refetchStatus }: RuleFlyoutProps) =>
         <EuiSpacer />
         <EuiSwitch
           className="eui-textTruncate"
-          checked={rule?.status === 'muted' ? true : false}
+          checked={isRuleMuted}
           onChange={switchRuleStatus}
           data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
-          label={rule.status === 'muted' ? 'Enabled' : 'Disabled'}
+          label={
+            rule.status === 'muted' ? (
+              <FormattedMessage
+                id="xpack.csp.rules.ruleFlyout.ruleFlyoutEnabledText"
+                defaultMessage="Enabled"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.csp.rules.ruleFlyout.ruleFlyoutDisabledText"
+                defaultMessage="Disabled"
+              />
+            )
+          }
         />
         <EuiSpacer />
         <EuiTabs>

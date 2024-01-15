@@ -6,12 +6,14 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { RuleStateAttributes } from '../../../common/types/latest';
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
 
+export type RuleStateAttributesWithoutStatus = Omit<RuleStateAttributes, 'muted'>;
 export const useChangeCspRuleStatus = () => {
   const { http } = useKibana().services;
 
-  const res = async (actionOnRule: 'mute' | 'unmute', ruleIds: any[]) => {
+  return async (actionOnRule: 'mute' | 'unmute', ruleIds: RuleStateAttributesWithoutStatus[]) => {
     const query = {
       action: actionOnRule,
       rules: ruleIds,
@@ -21,6 +23,4 @@ export const useChangeCspRuleStatus = () => {
       body: JSON.stringify(query),
     });
   };
-
-  return res;
 };
