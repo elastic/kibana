@@ -15,6 +15,7 @@ import {
   getCreateSavedQueryRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
   getCreateThresholdRulesSchemaMock,
+  getCreateEqlRuleSchemaMock,
 } from './rule_request_schema.mock';
 import type { SavedQueryRuleCreateProps } from './rule_schemas.gen';
 import { RuleCreateProps } from './rule_schemas.gen';
@@ -1259,6 +1260,81 @@ describe('rules schema', () => {
       expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
         `"alert_suppression.duration: Required"`
       );
+    });
+    // behaviour common for multiple rule types
+    const cases = [
+      { ruleType: 'eql', ruleMock: getCreateEqlRuleSchemaMock() },
+      { ruleType: 'threat_match', ruleMock: getCreateThreatMatchRulesSchemaMock() },
+    ];
+
+    cases.forEach(({ ruleType, ruleMock }) => {
+      test(`should validate suppression fields for "${ruleType}" rule type`, () => {
+        const payload = {
+          ...ruleMock,
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: { value: 5, unit: 'm' },
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        const result = RuleCreateProps.safeParse(payload);
+        expectParseSuccess(result);
+        expect(result.data).toEqual(payload);
+      });
+
+      test(`should throw error if suppression fields not valid for "${ruleType}" rule`, () => {
+        const payload = {
+          ...ruleMock,
+          alert_suppression: {
+            group_by: 'not an array',
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        const result = RuleCreateProps.safeParse(payload);
+        expectParseError(result);
+        expect(stringifyZodError(result.error)).toEqual(
+          'alert_suppression.group_by: Expected array, received string'
+        );
+      });
+
+      test(`should throw error if suppression required field is missing for "${ruleType}" rule`, () => {
+        const payload = {
+          ...ruleMock,
+          alert_suppression: {
+            duration: { value: 5, unit: 'm' },
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        const result = RuleCreateProps.safeParse(payload);
+        expectParseError(result);
+        expect(stringifyZodError(result.error)).toEqual('alert_suppression.group_by: Required');
+      });
+
+      test(`should drop fields that are not in suppression schema for "${ruleType}" rule`, () => {
+        const payload = {
+          ...ruleMock,
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: { value: 5, unit: 'm' },
+            missing_fields_strategy: 'suppress',
+            random_field: 1,
+          },
+        };
+
+        const result = RuleCreateProps.safeParse(payload);
+        expectParseSuccess(result);
+        expect(result.data).toEqual({
+          ...ruleMock,
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: { value: 5, unit: 'm' },
+            missing_fields_strategy: 'suppress',
+          },
+        });
+      });
     });
   });
 });
