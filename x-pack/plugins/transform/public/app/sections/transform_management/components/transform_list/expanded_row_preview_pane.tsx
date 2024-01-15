@@ -72,14 +72,14 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ item }
     }
   }, [searchItems, searchItemsError]);
 
-  const reduxStore = useMemo(() => getTransformWizardStore(), []);
+  const reduxStore = useMemo(getTransformWizardStore, []);
 
   if (errorMessage) {
     return (
       <>
         <EuiCallOut
           title={i18n.translate('xpack.transform.clone.errorPromptTitle', {
-            defaultMessage: 'An error occurred getting the transform preview.',
+            defaultMessage: 'An error occurred getting the data view for the transform config.',
           })}
           color="danger"
           iconType="warning"
@@ -93,7 +93,7 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ item }
   if (searchItems === undefined || !isInitialized) return null;
 
   return (
-    <WizardContext.Provider value={{ cloneConfig: item.config, searchItems }}>
+    <WizardContext.Provider value={{ config: item.config, searchItems }}>
       <ReduxProvider store={reduxStore}>
         <ExpandedRowPreviewPaneDataGrid />
       </ReduxProvider>

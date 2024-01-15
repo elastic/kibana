@@ -14,6 +14,7 @@ import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
+import { useFormField } from '@kbn/ml-form-utils/use_form_field';
 import { useFormSections } from '@kbn/ml-form-utils/use_form_sections';
 import { createFormSlice, type State } from '@kbn/ml-form-utils/form_slice';
 
@@ -25,8 +26,7 @@ import { useAppDependencies, useToastNotifications } from '../../../app_dependen
 import { useGetTransformsPreview } from '../../../hooks';
 import { ToastNotificationText } from '../../../components';
 
-import { useEditTransformFlyoutContext } from '../state_management/edit_transform_flyout_state';
-import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
+import { useWizardContext, useDataView } from '../../create_transform/components/wizard/wizard';
 
 export const TransformRetentionPolicy = <
   FF extends string,
@@ -43,9 +43,11 @@ export const TransformRetentionPolicy = <
 
   const toastNotifications = useToastNotifications();
 
-  const { config, dataViewId } = useEditTransformFlyoutContext();
+  const { config } = useWizardContext();
+  const dataView = useDataView();
+  const dataViewId = dataView.id;
   const formSections = useFormSections(slice.name);
-  const retentionPolicyField = useRetentionPolicyField();
+  const retentionPolicyField = useFormField(slice.name, 'retentionPolicyField');
 
   const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
     return {

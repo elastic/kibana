@@ -28,9 +28,9 @@ import { WizardSteps } from './wizard_steps';
 
 const localStorage = new Storage(window.localStorage);
 
-interface WizardContextValue {
+export interface WizardContextValue {
+  config: TransformConfigUnion;
   searchItems: SearchItems;
-  cloneConfig?: TransformConfigUnion;
 }
 
 export const WizardContext = createContext<WizardContextValue | null>(null);

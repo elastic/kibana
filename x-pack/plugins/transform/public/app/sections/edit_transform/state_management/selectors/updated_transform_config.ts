@@ -15,17 +15,19 @@ import { createSelectFormSections } from '@kbn/ml-form-utils/use_form_section';
 
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-import { useEditTransformFlyoutContext } from '../edit_transform_flyout_state';
+import { useWizardContext } from '../../../create_transform/components/wizard/wizard';
+
+import { editTransformFlyoutSlice } from '../edit_transform_flyout_state';
 
 const createSelectTransformConfig = (originalConfig: TransformConfigUnion) =>
   createSelector(
-    createSelectFormFields('editTransformForm'),
-    createSelectFormSections('editTransformForm'),
+    createSelectFormFields(editTransformFlyoutSlice.name),
+    createSelectFormSections(editTransformFlyoutSlice.name),
     (formFields, formSections) => applyFormStateToConfig(originalConfig, formFields, formSections)
   );
 
 export const useUpdatedTransformConfig = () => {
-  const { config } = useEditTransformFlyoutContext();
+  const { config } = useWizardContext();
   const selectTransformConfig = useMemo(() => createSelectTransformConfig(config), [config]);
   return useSelector(selectTransformConfig);
 };

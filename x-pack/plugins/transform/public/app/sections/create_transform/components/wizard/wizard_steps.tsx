@@ -42,7 +42,7 @@ import { useWizardContext } from './wizard';
 
 export const useInitializeTransformWizardState = () => {
   const dispatch = useDispatch();
-  const { searchItems, cloneConfig } = useWizardContext();
+  const { searchItems, config } = useWizardContext();
   const { dataView } = searchItems;
   const { i18n: i18nStart, theme } = useAppDependencies();
   const toastNotifications = useToastNotifications();
@@ -82,16 +82,16 @@ export const useInitializeTransformWizardState = () => {
 
     const initialStepDefineState = applyTransformConfigToDefineState(
       getDefaultStepDefineState(searchItems),
-      cloneConfig,
+      config,
       dataView
     );
 
     setRuntimeMappings(
       // apply runtime fields from both the index pattern and inline configurations
-      getCombinedRuntimeMappings(dataView, cloneConfig?.source?.runtime_mappings)
+      getCombinedRuntimeMappings(dataView, config?.source?.runtime_mappings)
     );
 
-    const query = cloneConfig?.source?.query;
+    const query = config?.source?.query;
     if (query !== undefined && !isEqual(query, matchAllQuery)) {
       setAdvancedSourceEditorEnabled(true);
       setSourceConfigUpdated(true);
@@ -99,14 +99,10 @@ export const useInitializeTransformWizardState = () => {
 
     setStepDefineState(initialStepDefineState);
 
-    setStepDetailsState(
-      applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
-    );
+    setStepDetailsState(applyTransformConfigToDetailsState(getDefaultStepDetailsState(), config));
 
     dispatch(
-      stepDetailsFormSlice.actions.initialize(
-        getDefaultStepDetailsFormState(cloneConfig, transformIds)
-      )
+      stepDetailsFormSlice.actions.initialize(getDefaultStepDetailsFormState(config, transformIds))
     );
 
     // custom comparison

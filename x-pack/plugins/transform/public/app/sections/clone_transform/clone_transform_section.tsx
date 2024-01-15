@@ -151,7 +151,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
         ) : null}
 
         {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
-          <WizardContext.Provider value={{ cloneConfig: transformConfig, searchItems }}>
+          <WizardContext.Provider value={{ config: transformConfig, searchItems }}>
             <Wizard />
           </WizardContext.Provider>
         )}
