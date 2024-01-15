@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import React from 'react';
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
@@ -26,3 +27,27 @@ export type MakeOverridesSerializable<T> = {
     ? MakeOverridesSerializable<T[KeyType]>
     : NonNullable<T[KeyType]>;
 };
+
+export interface ChartSizeEvent extends ExpressionRendererEvent {
+  name: 'chartSize';
+  data: ChartSizeSpec;
+}
+
+export type ChartSizeUnit = 'pixels' | 'percentage';
+
+interface ChartSizeDimensions {
+  x?: { value: number; unit: ChartSizeUnit };
+  y?: { value: number; unit: ChartSizeUnit };
+}
+
+export interface ChartSizeSpec {
+  // if maxDimensions are provided, the aspect ratio will be computed from them
+  maxDimensions?: ChartSizeDimensions;
+  minDimensions?: ChartSizeDimensions;
+  aspectRatio?: { x: number; y: number };
+}
+
+export function isChartSizeEvent(event: ExpressionRendererEvent): event is ChartSizeEvent {
+  const expectedName: ChartSizeEvent['name'] = 'chartSize';
+  return event.name === expectedName;
+}
