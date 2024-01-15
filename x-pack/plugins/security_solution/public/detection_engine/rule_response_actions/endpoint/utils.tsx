@@ -73,7 +73,7 @@ const useGetCommandText = (
         description: (
           <FormattedMessage
             id="xpack.securitySolution.responseActions.endpoint.killProcessDescription"
-            defaultMessage="Kill process description"
+            defaultMessage="Kill/terminate a process"
           />
         ),
         tooltip: (
@@ -94,13 +94,55 @@ const useGetCommandText = (
         description: (
           <FormattedMessage
             id="xpack.securitySolution.responseActions.endpoint.suspendProcessDescription"
-            defaultMessage="Suspend Process"
+            defaultMessage="Temporarily suspend a process"
           />
         ),
         tooltip: (
           <FormattedMessage
             id="xpack.securitySolution.responseActions.endpoint.suspendProcessTooltip"
             defaultMessage="Insufficient privileges to supend process. Contact your Kibana administrator if you think you should have this permission."
+          />
+        ),
+      };
+    case 'get-file':
+      return {
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.getFile"
+            defaultMessage="Get File"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.getFileDescription"
+            defaultMessage="Retrieve a file from the host"
+          />
+        ),
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.getFileTooltip"
+            defaultMessage="Insufficient privileges to get file. Contact your Kibana administrator if you think you should have this permission."
+          />
+        ),
+      };
+    case 'execute':
+      return {
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.execute"
+            defaultMessage="Execute"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.executeDescription"
+            defaultMessage="Execute a command on the host"
+          />
+        ),
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.executeTooltip"
+            defaultMessage="Insufficient privileges to execute. Contact your Kibana administrator if you think you should have this permission."
           />
         ),
       };

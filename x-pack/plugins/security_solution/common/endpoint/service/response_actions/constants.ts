@@ -34,6 +34,8 @@ export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
   'isolate',
+  'get-file',
+  'execute',
 ];
 
 if (allowedExperimentalValues.automatedProcessActionsEnabled) {
