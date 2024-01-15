@@ -24,11 +24,6 @@ export enum Aggregators {
 }
 
 export const custom_threshold_AIAssistant_log_count = {
-  dataView: {
-    indexPattern: '.ds-logs-synth*',
-    id: 'data-view-id-logs',
-    shouldCreate: true,
-  },
   ruleParams: {
     tags: ['observability'],
     consumer: 'logs',

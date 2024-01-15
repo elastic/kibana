@@ -24,11 +24,6 @@ export enum Aggregators {
 }
 
 export const custom_threshold_AIAssistant_metric_avg = {
-  dataView: {
-    indexPattern: '.ds-metrics-apm.app.synth*',
-    id: 'data-view-id-metrics',
-    shouldCreate: true,
-  },
   ruleParams: {
     consumer: 'logs',
     name: 'metric_synth',
