@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { Query } from '@kbn/data-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { queryClient } from '@kbn/osquery-plugin/public/query_client';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -15,7 +17,7 @@ import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/t
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import Expressions from './custom_threshold_rule_expression';
-import { CustomThresholdPrefillOptions } from './types';
+import { AlertParams, CustomThresholdPrefillOptions } from './types';
 
 jest.mock('../../utils/kibana_react');
 jest.mock('./components/preview_chart/preview_chart', () => ({
@@ -42,7 +44,7 @@ describe('Expression', () => {
     currentOptions?: CustomThresholdPrefillOptions,
     customRuleParams?: Record<string, unknown>
   ) {
-    const ruleParams = {
+    const ruleParams: RuleTypeParams & AlertParams = {
       criteria: [],
       groupBy: undefined,
       sourceId: 'default',
@@ -161,9 +163,15 @@ describe('Expression', () => {
   it('should prefill the rule using the context metadata', async () => {
     const index = 'changedMockedIndex';
     const currentOptions: CustomThresholdPrefillOptions = {
+      alertOnGroupDisappear: false,
       groupBy: ['host.hostname'],
-      filterQuery: 'foo',
-      searchConfiguration: { index },
+      searchConfiguration: {
+        index,
+        query: {
+          query: 'foo',
+          language: 'kuery',
+        },
+      },
       criteria: [
         {
           metrics: [
@@ -180,8 +188,9 @@ describe('Expression', () => {
 
     const { ruleParams } = await setup(currentOptions, { searchConfiguration: undefined });
 
+    expect(ruleParams.alertOnGroupDisappear).toEqual(false);
     expect(ruleParams.groupBy).toEqual(['host.hostname']);
-    expect(ruleParams.searchConfiguration.query.query).toBe('foo');
+    expect((ruleParams.searchConfiguration.query as Query).query).toBe('foo');
     expect(ruleParams.searchConfiguration.index).toBe(index);
     expect(ruleParams.criteria).toEqual([
       {
