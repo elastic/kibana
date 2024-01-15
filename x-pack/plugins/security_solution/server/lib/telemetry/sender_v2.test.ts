@@ -5,13 +5,8 @@
  * 2.0.
  */
 import axios from 'axios';
-import { cloneDeep } from 'lodash';
 
-import type {
-  TelemetryEventSenderConfig,
-  QueueConfig,
-  ITelemetryEventsSenderV2,
-} from './sender_v2.types';
+import type { QueueConfig, ITelemetryEventsSenderV2, RetryConfig } from './sender_v2.types';
 import { TelemetryEventsSenderV2 } from './sender_v2';
 import { TelemetryChannel, TelemetryCounter } from './types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -47,17 +42,11 @@ describe('TelemetryEventsSenderV2', () => {
     inflightEventsThreshold: 10,
     maxPayloadSizeBytes: 10_000,
   };
-  const defaultConfig: TelemetryEventSenderConfig = {
-    retryConfig: {
-      retryCount: 3,
-      retryDelayMillis: 100,
-    },
-    queues: new Map<TelemetryChannel, QueueConfig>([
-      [ch1, ch1Config],
-      [ch2, ch2Config],
-      [ch3, ch3Config],
-    ]),
+  const retryConfig: RetryConfig = {
+    retryCount: 3,
+    retryDelayMillis: 100,
   };
+  const defaultQueueConfig: QueueConfig = ch1Config;
 
   let service: ITelemetryEventsSenderV2;
 
@@ -75,7 +64,7 @@ describe('TelemetryEventsSenderV2', () => {
 
   describe('initialization', () => {
     it('does not lose data during startup', async () => {
-      service.setup(defaultConfig, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
 
       const events = ['e1', 'e2', 'e3'];
       const expectedBody = events.map((e) => JSON.stringify(e)).join('\n');
@@ -108,7 +97,7 @@ describe('TelemetryEventsSenderV2', () => {
     });
 
     it('should not start twice', () => {
-      service.setup(defaultConfig, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
 
       service.start();
 
@@ -138,10 +127,8 @@ describe('TelemetryEventsSenderV2', () => {
           .join('\n'),
       ];
 
-      const config = updateQueueConfig(ch1, {
-        maxPayloadSizeBytes: 10,
-      });
-      service.setup(config, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.updateConfig(ch1, { ...ch1Config, maxPayloadSizeBytes: 10 });
       service.start();
 
       // at most 10 bytes per payload (after serialized to JSON): it should send
@@ -162,10 +149,8 @@ describe('TelemetryEventsSenderV2', () => {
     });
 
     it('should chunk events by size, even if one event is bigger than `maxTelemetryPayloadSizeBytes`', async () => {
-      const config = updateQueueConfig(ch1, {
-        maxPayloadSizeBytes: 3,
-      });
-      service.setup(config, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.updateConfig(ch1, { ...ch1Config, maxPayloadSizeBytes: 3 });
       service.start();
 
       // at most 10 bytes per payload (after serialized to JSON): it should
@@ -204,8 +189,8 @@ describe('TelemetryEventsSenderV2', () => {
     it('should buffer for a specific time period', async () => {
       const bufferTimeSpanMillis = 2000;
 
-      const config = updateQueueConfig(ch1, { bufferTimeSpanMillis });
-      service.setup(config, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
       service.start();
 
       const events = ['a', 'b', 'c'];
@@ -247,26 +232,23 @@ describe('TelemetryEventsSenderV2', () => {
 
       const bufferTimeSpanMillis = 3;
 
-      const config = updateQueueConfig(ch1, { bufferTimeSpanMillis });
-
-      service.setup(config, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
       service.start();
 
       // send some events
       service.send(ch1, ['a']);
 
       // advance time by more than the retry delay for all the retries
-      await jest.advanceTimersByTimeAsync(
-        config.retryConfig.retryCount * config.retryConfig.retryDelayMillis
-      );
+      await jest.advanceTimersByTimeAsync(retryConfig.retryCount * retryConfig.retryDelayMillis);
 
       // check that the events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(config.retryConfig.retryCount);
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(retryConfig.retryCount);
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(config.retryConfig.retryCount);
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(retryConfig.retryCount);
     });
 
     it('retries runtime errors', async () => {
@@ -276,34 +258,32 @@ describe('TelemetryEventsSenderV2', () => {
         .mockReturnValue(Promise.resolve({ status: 201 }));
 
       const bufferTimeSpanMillis = 3;
-      const config = updateQueueConfig(ch1, { bufferTimeSpanMillis });
 
-      service.setup(config, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
       service.start();
 
       // send some events
       service.send(ch1, ['a']);
 
       // advance time by more than the retry delay for all the retries
-      await jest.advanceTimersByTimeAsync(
-        config.retryConfig.retryCount * config.retryConfig.retryDelayMillis
-      );
+      await jest.advanceTimersByTimeAsync(retryConfig.retryCount * retryConfig.retryDelayMillis);
 
       // check that the events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(config.retryConfig.retryCount);
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(retryConfig.retryCount);
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(config.retryConfig.retryCount);
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(retryConfig.retryCount);
     });
 
     it('only retries `retryCount` times', async () => {
       mockedAxiosPost.mockReturnValue(Promise.resolve({ status: 500 }));
       const bufferTimeSpanMillis = 100;
-      const config = updateQueueConfig(ch1, { bufferTimeSpanMillis });
 
-      service.setup(config, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
       service.start();
 
       // send some events
@@ -311,16 +291,16 @@ describe('TelemetryEventsSenderV2', () => {
 
       // advance time by more than the buffer time span
       await jest.advanceTimersByTimeAsync(
-        (config.retryConfig.retryCount + 1) * config.retryConfig.retryDelayMillis * 1.2
+        (retryConfig.retryCount + 1) * retryConfig.retryDelayMillis * 1.2
       );
 
       // check that the events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(config.retryConfig.retryCount + 1);
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(retryConfig.retryCount + 1);
 
       await service.stop();
 
       // check that no more events are sent
-      expect(mockedAxiosPost).toHaveBeenCalledTimes(config.retryConfig.retryCount + 1);
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(retryConfig.retryCount + 1);
     });
   });
 
@@ -328,12 +308,9 @@ describe('TelemetryEventsSenderV2', () => {
     it('drop events above inflightEventsThreshold', async () => {
       const inflightEventsThreshold = 3;
       const bufferTimeSpanMillis = 2000;
-      const config = updateQueueConfig(ch1, {
-        bufferTimeSpanMillis,
-        inflightEventsThreshold,
-      });
 
-      service.setup(config, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis, inflightEventsThreshold });
       service.start();
 
       // send five events
@@ -364,12 +341,8 @@ describe('TelemetryEventsSenderV2', () => {
       const inflightEventsThreshold = 3;
       const bufferTimeSpanMillis = 2000;
 
-      const config = updateQueueConfig(ch1, {
-        bufferTimeSpanMillis,
-        inflightEventsThreshold,
-      });
-
-      service.setup(config, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis, inflightEventsThreshold });
 
       service.start();
 
@@ -409,7 +382,7 @@ describe('TelemetryEventsSenderV2', () => {
       const ch2Events = ['med-a', 'med-b', 'med-c', 'med-d'];
       const ch3Events = ['low-a', 'low-b', 'low-c', 'low-d'];
 
-      service.setup(defaultConfig, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
       service.updateConfig(ch1, ch1Config);
       service.updateConfig(ch2, ch2Config);
       service.updateConfig(ch3, ch3Config);
@@ -472,7 +445,7 @@ describe('TelemetryEventsSenderV2', () => {
     });
 
     it('discard events when inflightEventsThreshold is reached and process other queues', async () => {
-      service.setup(defaultConfig, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
       service.updateConfig(ch2, ch2Config);
       service.updateConfig(ch3, ch3Config);
       service.start();
@@ -521,7 +494,7 @@ describe('TelemetryEventsSenderV2', () => {
     });
 
     it('should manage queue priorities and channels', async () => {
-      service.setup(defaultConfig, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
       service.updateConfig(ch2, ch2Config);
       service.updateConfig(ch3, ch3Config);
       service.start();
@@ -602,7 +575,7 @@ describe('TelemetryEventsSenderV2', () => {
         bufferTimeSpanMillis: 5001,
       };
 
-      service.setup(defaultConfig, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
       service.updateConfig(channel, detectionAlertsBefore);
       service.start();
 
@@ -659,7 +632,7 @@ describe('TelemetryEventsSenderV2', () => {
         maxPayloadSizeBytes: 10_000,
       };
 
-      service.setup(defaultConfig, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
       service.updateConfig(channel, detectionAlertsBefore);
       service.start();
 
@@ -695,15 +668,24 @@ describe('TelemetryEventsSenderV2', () => {
 
       await service.stop();
     });
+
+    it('should configure a new queue', async () => {});
   });
 
   describe('usage counter', () => {
     it('should increment the counter when sending events ok', async () => {
-      service.setup(defaultConfig, receiver, telemetryPluginSetup, telemetryUsageCounter);
+      service.setup(
+        retryConfig,
+        defaultQueueConfig,
+        receiver,
+        telemetryPluginSetup,
+        telemetryUsageCounter
+      );
       service.start();
 
       service.send(ch1, ['a', 'b', 'c']);
       await service.stop();
+      await jest.advanceTimersByTimeAsync(10000);
 
       expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
       const [param] = telemetryUsageCounter.incrementCounter.mock.calls[0];
@@ -714,7 +696,16 @@ describe('TelemetryEventsSenderV2', () => {
     it('should increment the counter when sending events with errors', async () => {
       mockedAxiosPost.mockReturnValue(Promise.resolve({ status: 500 }));
 
-      service.setup(defaultConfig, receiver, telemetryPluginSetup, telemetryUsageCounter);
+      service.setup(
+        retryConfig,
+        defaultQueueConfig,
+        receiver,
+        telemetryPluginSetup,
+        telemetryUsageCounter
+      );
+      service.updateConfig(ch1, ch1Config);
+      service.updateConfig(ch2, ch2Config);
+      service.updateConfig(ch3, ch3Config);
       service.start();
 
       service.send(ch1, ['a', 'b', 'c']);
@@ -734,7 +725,16 @@ describe('TelemetryEventsSenderV2', () => {
         .mockReturnValueOnce(Promise.resolve({ status: 500 }))
         .mockReturnValueOnce(Promise.resolve({ status: 500 }));
 
-      service.setup(defaultConfig, receiver, telemetryPluginSetup, telemetryUsageCounter);
+      service.setup(
+        retryConfig,
+        defaultQueueConfig,
+        receiver,
+        telemetryPluginSetup,
+        telemetryUsageCounter
+      );
+      service.updateConfig(ch1, ch1Config);
+      service.updateConfig(ch2, ch2Config);
+      service.updateConfig(ch3, ch3Config);
       service.start();
 
       service.send(ch1, ['a', 'b', 'c']);
@@ -752,32 +752,4 @@ describe('TelemetryEventsSenderV2', () => {
       expect(param.incrementBy).toBe(2);
     });
   });
-
-  interface QueueValues {
-    bufferTimeSpanMillis?: number;
-    inflightEventsThreshold?: number;
-    maxPayloadSizeBytes?: number;
-  }
-
-  const updateQueueConfig = (
-    channel: TelemetryChannel,
-    values: QueueValues
-  ): TelemetryEventSenderConfig => {
-    const getConfigFor = (queues: Map<TelemetryChannel, QueueConfig>): QueueConfig => {
-      const config = queues?.get(channel);
-      if (config === undefined) throw new Error(`No queue config found for channel "${channel}"`);
-      return config;
-    };
-
-    const config = cloneDeep(defaultConfig);
-    const queueConfig: QueueConfig = getConfigFor(config.queues, channel);
-    config.queues.set(channel, {
-      ...queueConfig,
-      bufferTimeSpanMillis: values.bufferTimeSpanMillis ?? queueConfig.bufferTimeSpanMillis,
-      inflightEventsThreshold:
-        values.inflightEventsThreshold ?? queueConfig.inflightEventsThreshold,
-      maxPayloadSizeBytes: values.maxPayloadSizeBytes ?? queueConfig.maxPayloadSizeBytes,
-    });
-    return config;
-  };
 });

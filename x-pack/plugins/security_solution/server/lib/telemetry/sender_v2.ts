@@ -16,9 +16,8 @@ import {
   type ITelemetryEventsSenderV2,
   type QueueConfig,
   type RetryConfig,
-  type TelemetryEventSenderConfig,
 } from './sender_v2.types';
-import { type TelemetryChannel, TelemetryCounter } from './types';
+import { TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
@@ -26,6 +25,7 @@ import { newTelemetryLogger, type TelemetryLogger } from './helpers';
 
 export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   private retryConfig: RetryConfig | undefined;
+  private defaultQueueConfig: QueueConfig | undefined;
   private queues: Map<TelemetryChannel, QueueConfig> | undefined;
 
   private readonly events$ = new rx.Subject<Event>();
@@ -44,15 +44,17 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   }
 
   public setup(
-    config: TelemetryEventSenderConfig,
+    retryConfig: RetryConfig,
+    defaultQueueConfig: QueueConfig,
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     telemetryUsageCounter?: IUsageCounter
   ): void {
     this.ensureStatus(ServiceStatus.CREATED);
 
-    this.retryConfig = config.retryConfig;
-    this.queues = config.queues;
+    this.retryConfig = retryConfig;
+    this.defaultQueueConfig = defaultQueueConfig;
+    this.queues = new Map<TelemetryChannel, QueueConfig>();
     this.cache = new CachedSubject<Event>(this.events$);
 
     this.senderUtils = new SenderUtils(telemetrySetup, telemetryReceiver, telemetryUsageCounter);
@@ -67,7 +69,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     this.events$
       .pipe(
         rx.connect((shared$) => {
-          const queues$ = [...this.getQueues().keys()].map((channel) =>
+          const queues$ = Object.values(TelemetryChannel).map((channel) =>
             this.queue$(shared$, channel)
           );
           return rx.merge(...queues$);
@@ -120,20 +122,12 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   public send(channel: TelemetryChannel, events: unknown[]): void {
     this.ensureStatus(ServiceStatus.CONFIGURED, ServiceStatus.STARTED);
 
-    if (!this.existsQueueConfig(channel)) {
-      throw new Error(`${channel}: channel not configured`);
-    }
-
     events.forEach((event) => {
       this.events$.next({ channel, payload: event });
     });
   }
 
   public updateConfig(channel: TelemetryChannel, config: QueueConfig): void {
-    if (!this.getQueues().has(channel)) {
-      throw new Error(`Channel "${channel}" was not configured`);
-    }
-
     this.getQueues().set(channel, cloneDeep(config));
   }
 
@@ -249,7 +243,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   }
 
   private getConfigFor(channel: TelemetryChannel): QueueConfig {
-    const config = this.queues?.get(channel);
+    const config = this.queues?.get(channel) ?? this.defaultQueueConfig;
     if (config === undefined) throw new Error(`No queue config found for channel "${channel}"`);
     return config;
   }
@@ -262,10 +256,6 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   private getRetryConfig(): RetryConfig {
     if (this.retryConfig === undefined) throw new Error('Service not initialized');
     return this.retryConfig;
-  }
-
-  private existsQueueConfig(channel: TelemetryChannel): boolean {
-    return this.getQueues().has(channel);
   }
 
   private ensureStatus(...expected: ServiceStatus[]): void {
