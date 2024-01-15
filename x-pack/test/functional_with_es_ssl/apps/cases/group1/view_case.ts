@@ -46,7 +46,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('should show the case view page correctly', async () => {
         await testSubjects.existOrFail('case-view-title');
         await testSubjects.existOrFail('header-page-supplements');
+        await testSubjects.existOrFail('case-action-bar-wrapper');
 
+        await testSubjects.existOrFail('case-view-tabs');
+        await testSubjects.existOrFail('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-title-files');
         await testSubjects.existOrFail('description');
@@ -75,7 +78,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         // wait for backend response
         await retry.tryForTime(5000, async () => {
-          const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
+          const title = await find.byCssSelector('[]');
           expect(await title.getVisibleText()).equal(newTitle);
         });
 
