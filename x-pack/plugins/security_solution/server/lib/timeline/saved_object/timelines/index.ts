@@ -38,6 +38,7 @@ import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../comm
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
+import { deleteSearchByTimelineId } from '../saved_search';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
@@ -572,18 +573,23 @@ export const resetTimeline = async (
   return response;
 };
 
-export const deleteTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+export const deleteTimeline = async (
+  request: FrameworkRequest,
+  timelineIds: string[],
+  searchIds?: string[]
+) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
-  await Promise.all(
-    timelineIds.map((timelineId) =>
+  await Promise.all([
+    ...timelineIds.map((timelineId) =>
       Promise.all([
         savedObjectsClient.delete(timelineSavedObjectType, timelineId),
         note.deleteNoteByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
       ])
-    )
-  );
+    ),
+    deleteSearchByTimelineId(request, searchIds),
+  ]);
 };
 
 export const copyTimeline = async (
