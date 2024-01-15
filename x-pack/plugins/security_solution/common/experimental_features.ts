@@ -173,7 +173,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Automated Endpoint Process actions
    *
    */
-  automatedProcessActionsEnabled: true,
+  automatedProcessActionsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
