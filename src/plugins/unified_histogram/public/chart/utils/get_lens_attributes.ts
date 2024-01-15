@@ -21,6 +21,7 @@ import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
 import type { ExternalVisContext, LensAttributesContext, LensSuggestion } from '../../types';
+import { isSuggestionAndVisContextCompatible } from '../../utils/external_vis_context';
 
 export const getLensAttributes = ({
   title,
@@ -50,17 +51,20 @@ export const getLensAttributes = ({
     breakdownField: breakdownField?.name,
   };
 
+  let shouldUpdateVisContextDueToIncompatibleSuggestion = false;
+
   if (externalVisContext) {
     if (
       isEqual(
         externalVisContext.attributes?.state?.query,
         query
-        // TODO: check that's compatible
-      ) /* && isEqual(externalVisContext.requestData, requestData) */
+        // TODO: check that's compatible based on suggestion deps
+      ) /* && isEqual(externalVisContext.requestData, requestData) */ &&
+      isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
     ) {
       return externalVisContext;
     } else {
-      onVisContextChanged?.(undefined);
+      shouldUpdateVisContextDueToIncompatibleSuggestion = true;
     }
   }
 
@@ -235,8 +239,14 @@ export const getLensAttributes = ({
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   } as TypedLensByValueInput['attributes'];
 
-  return {
+  const lensAttributesContext = {
     attributes,
     requestData,
   };
+
+  if (shouldUpdateVisContextDueToIncompatibleSuggestion) {
+    onVisContextChanged?.(lensAttributesContext);
+  }
+
+  return lensAttributesContext;
 };

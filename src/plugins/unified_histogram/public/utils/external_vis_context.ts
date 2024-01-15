@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { ExternalVisContext } from '../types';
 
 export const toExternalVisContextJSONString = (
@@ -42,4 +43,20 @@ export const fromExternalVisContextJSONString = (
   console.log('parsed custom vis context', visContext);
 
   return visContext;
+};
+
+export const isSuggestionAndVisContextCompatible = (
+  suggestion: Suggestion | undefined,
+  externalVisContext: ExternalVisContext | undefined
+): boolean => {
+  if (!suggestion && !externalVisContext) {
+    return true;
+  }
+  return (
+    suggestion?.visualizationId === externalVisContext?.attributes?.visualizationType &&
+    // @ts-expect-error visualization state has different structure between vis types
+    suggestion?.visualizationState?.shape ===
+      // @ts-expect-error visualization state has different structure between vis types
+      externalVisContext?.attributes?.state?.visualization?.shape
+  );
 };

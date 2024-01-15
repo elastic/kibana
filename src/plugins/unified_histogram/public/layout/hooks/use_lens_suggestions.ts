@@ -20,8 +20,8 @@ import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { computeInterval } from './compute_interval';
-import type { LensSuggestion } from '../../types';
-import { ExternalVisContext } from '../../types';
+import type { LensSuggestion, ExternalVisContext } from '../../types';
+import { isSuggestionAndVisContextCompatible } from '../../utils/external_vis_context';
 
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
@@ -68,13 +68,8 @@ export const useLensSuggestions = ({
   let currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
 
   if (externalVisContext) {
-    const matchingSuggestion = allSuggestions.find(
-      (suggestion) =>
-        suggestion.visualizationId === externalVisContext.attributes?.visualizationType &&
-        // @ts-expect-error visualization state has different structure between vis types
-        suggestion.visualizationState?.shape ===
-          // @ts-expect-error visualization state has different structure between vis types
-          externalVisContext.attributes?.state?.visualization?.shape
+    const matchingSuggestion = allSuggestions.find((suggestion) =>
+      isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
     );
 
     currentSuggestion = matchingSuggestion || currentSuggestion;

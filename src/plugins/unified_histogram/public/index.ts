@@ -32,9 +32,8 @@ export type {
 } from './types';
 export { UnifiedHistogramFetchStatus } from './types';
 export {
-  extractExternalCustomVisualizationFromSuggestion,
   toExternalVisContextJSONString,
   fromExternalVisContextJSONString,
-} from './utils/external_custom_visualization';
+} from './utils/external_vis_context';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();
