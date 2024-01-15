@@ -21,11 +21,11 @@ import {
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
-  getRuleSOById,
   updateUsername,
   getRuleSavedObjectWithLegacyInvestigationFields,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  checkInvestigationFieldSoValue,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
+  // TODO: add a new service for pulling kibana username, similar to getService('es')
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
@@ -164,12 +164,15 @@ export default ({ getService }: FtrProviderContext) => {
          * happening just on the response. In this case, change should
          * just be a transform on read, not a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          {
+            field_names: ['client.address', 'agent.name'],
           },
-        } = await getRuleSOById(es, body.id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql(['client.address', 'agent.name']);
+          es,
+          body.id
+        );
+        expect(isInvestigationFieldMigratedInSo).to.eql(false);
       });
 
       it('should be able to read a rule with a legacy investigation field - empty array', async () => {
@@ -190,12 +193,15 @@ export default ({ getService }: FtrProviderContext) => {
          * happening just on the response. In this case, change should
          * just be a transform on read, not a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          {
+            field_names: [],
           },
-        } = await getRuleSOById(es, body.id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql([]);
+          es,
+          body.id
+        );
+        expect(isInvestigationFieldMigratedInSo).to.eql(false);
       });
 
       it('does not migrate investigation fields when intended object type', async () => {
@@ -214,12 +220,13 @@ export default ({ getService }: FtrProviderContext) => {
          * happening just on the response. In this case, change should
          * just be a transform on read, not a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, body.id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql({ field_names: ['host.name'] });
+        const isInvestigationFieldIntendedTypeInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          { field_names: ['host.name'] },
+          es,
+          body.id
+        );
+        expect(isInvestigationFieldIntendedTypeInSo).to.eql(true);
       });
     });
   });

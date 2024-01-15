@@ -6,7 +6,6 @@
  */
 import React, { useState, useMemo } from 'react';
 import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
-import { type DataView } from '@kbn/data-views-plugin/common';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
@@ -22,6 +21,7 @@ import { EmptyState } from '../empty_state';
 import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
+import { useDataViewContext } from '../../common/contexts/data_view_context';
 
 export interface CloudSecurityDefaultColumn {
   id: string;
@@ -41,7 +41,6 @@ const useNewFieldsApi = true;
 const controlColumnIds = ['openDetails'];
 
 export interface CloudSecurityDataTableProps {
-  dataView: DataView;
   isLoading: boolean;
   defaultColumns: CloudSecurityDefaultColumn[];
   rows: DataTableRecord[];
@@ -77,21 +76,10 @@ export interface CloudSecurityDataTableProps {
   /**
    * Height override for the data grid.
    */
-  height?: number;
-  /**
-   * Callback Function when the DataView field is edited.
-   * Required to enable editing of the field in the data grid.
-   */
-  dataViewRefetch?: () => void;
-  /**
-   * Flag to indicate if the data view is refetching.
-   * Required for smoothing re-rendering the DataTable columns.
-   */
-  dataViewIsRefetching?: boolean;
+  height?: number | string;
 }
 
 export const CloudSecurityDataTable = ({
-  dataView,
   isLoading,
   defaultColumns,
   rows,
@@ -103,8 +91,6 @@ export const CloudSecurityDataTable = ({
   customCellRenderer,
   groupSelectorComponent,
   height,
-  dataViewRefetch,
-  dataViewIsRefetching,
   ...rest
 }: CloudSecurityDataTableProps) => {
   const {
@@ -132,6 +118,8 @@ export const CloudSecurityDataTable = ({
       }, {} as UnifiedDataTableSettings['columns']),
     }
   );
+
+  const { dataView, dataViewIsRefetching, dataViewRefetch } = useDataViewContext();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
@@ -245,7 +233,7 @@ export const CloudSecurityDataTable = ({
     // Change the height of the grid to fit the page
     // If there are filters, leave space for the filter bar
     // Todo: Replace this component with EuiAutoSizer
-    height: height ?? `calc(100vh - ${filters?.length > 0 ? 443 : 403}px)`,
+    height: height ?? `calc(100vh - ${filters?.length > 0 ? 454 : 414}px)`,
   };
 
   const rowHeightState = 0;
