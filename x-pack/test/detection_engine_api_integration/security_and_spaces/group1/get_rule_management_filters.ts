@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('when there are installed prebuilt rules', () => {
       beforeEach(async () => {
-        await deleteAllPrebuiltRuleAssets(es, log);
+        await deleteAllPrebuiltRuleAssets(es);
         await installMockPrebuiltRules(supertest, es);
       });
 
