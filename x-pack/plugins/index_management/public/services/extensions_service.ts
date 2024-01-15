@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, ReactNode } from 'react';
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { EuiBadgeProps } from '@elastic/eui';
 import type { IndexDetailsTab } from '../../common/constants';
@@ -38,7 +38,7 @@ export interface IndicesListColumn {
   fieldName: string;
   label: string;
   order: number;
-  render: (index: Index) => ReturnType<FunctionComponent>;
+  render?: (index: Index) => ReactNode;
 }
 
 export interface ExtensionsSetup {
