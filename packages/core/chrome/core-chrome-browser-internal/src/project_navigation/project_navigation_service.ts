@@ -28,6 +28,9 @@ import {
   distinctUntilChanged,
   skipWhile,
   filter,
+  catchError,
+  of,
+  throwError,
 } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -38,6 +41,8 @@ import {
   CloudURLs,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser/src';
+import type { Logger } from '@kbn/logging';
+
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
@@ -47,9 +52,11 @@ interface StartDeps {
   navLinksService: ChromeNavLinks;
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  logger: Logger;
 }
 
 export class ProjectNavigationService {
+  private logger: Logger | undefined;
   private customProjectSideNavComponent$ = new BehaviorSubject<{
     current: SideNavComponent | null;
   }>({ current: null });
@@ -75,9 +82,10 @@ export class ProjectNavigationService {
   private http?: InternalHttpStart;
   private unlistenHistory?: () => void;
 
-  public start({ application, navLinksService, http, chromeBreadcrumbs$ }: StartDeps) {
+  public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
     this.application = application;
     this.http = http;
+    this.logger = logger;
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
@@ -210,17 +218,27 @@ export class ProjectNavigationService {
         this.setActiveProjectNavigationNodes();
       });
 
-    combineLatest([navTreeDefinition.pipe(takeUntil(this.stop$)), deepLinksMap$]).subscribe(
-      ([def, deepLinksMap]) => {
-        const { navigationTree, navigationTreeUI } = parseNavigationTree(def, {
-          deepLinks: deepLinksMap,
-          cloudLinks,
-        });
-
-        this.setProjectNavigation(navigationTree);
-        this.navigationTreeUi$.next(navigationTreeUI);
-      }
-    );
+    combineLatest([navTreeDefinition.pipe(takeUntil(this.stop$)), deepLinksMap$])
+      .pipe(
+        map(([def, deepLinksMap]) => {
+          return parseNavigationTree(def, {
+            deepLinks: deepLinksMap,
+            cloudLinks,
+          });
+        }),
+        catchError((e) => {
+          return throwError(() => e);
+        })
+      )
+      .subscribe({
+        next: ({ navigationTree, navigationTreeUI }) => {
+          this.setProjectNavigation(navigationTree);
+          this.navigationTreeUi$.next(navigationTreeUI);
+        },
+        error: (err) => {
+          this.logger?.error(err);
+        },
+      });
   }
 
   private setProjectNavigation(navigationTree: ChromeProjectNavigationNode[]) {

@@ -10,6 +10,7 @@ import { createMemoryHistory } from 'history';
 import { firstValueFrom, lastValueFrom, take, BehaviorSubject, of } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type {
   ChromeNavLinks,
   ChromeNavLink,
@@ -44,6 +45,8 @@ const getNavLinksService = (ids: Readonly<string[]> = []) => {
   return navLinksMock;
 };
 
+const logger = loggerMock.create();
+
 const setup = ({
   locationPathName = '/',
   navLinkIds,
@@ -63,16 +66,26 @@ const setup = ({
     navLinksService,
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
+    logger,
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$ };
 };
 
 describe('initNavigation()', () => {
-  describe('setup nodes', () => {
+  const setupInitNavigation = () => {
     const { projectNavigation } = setup({
       navLinkIds: ['foo', 'bar', 'discover', 'dashboards', 'visualize'],
     });
+
+    const getNavigationTree = () =>
+      lastValueFrom(projectNavigation.getNavigationTreeUi$().pipe(take(1)));
+
+    return { projectNavigation, getNavigationTree };
+  };
+
+  describe('setup nodes', () => {
+    const { projectNavigation, getNavigationTree } = setupInitNavigation();
 
     beforeAll(() => {
       projectNavigation.initNavigation<any>(
@@ -120,26 +133,20 @@ describe('initNavigation()', () => {
     });
 
     test('should convert link to deepLink and filter out unknown deepLinks', async () => {
-      const treeDefinition = await lastValueFrom(
-        projectNavigation.getNavigationTreeUi$().pipe(take(1))
-      );
+      const treeDefinition = await getNavigationTree();
       const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
       expect(node?.children?.length).toBe(2);
     });
 
     test('should read the title from prop or deeplink', async () => {
-      const treeDefinition = await lastValueFrom(
-        projectNavigation.getNavigationTreeUi$().pipe(take(1))
-      );
+      const treeDefinition = await getNavigationTree();
       const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
       expect(node.children![0].title).toBe('FOO');
       expect(node.children![1].title).toBe('Custom title');
     });
 
     test('should add metadata to node (title, path, href, sideNavStatus...)', async () => {
-      const treeDefinition = await lastValueFrom(
-        projectNavigation.getNavigationTreeUi$().pipe(take(1))
-      );
+      const treeDefinition = await getNavigationTree();
       const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
       expect(node.children![0]).toEqual({
         id: 'foo',
@@ -153,10 +160,59 @@ describe('initNavigation()', () => {
       expect(node.children![0].href).toBe(node.children![0]!.deepLink!.href);
     });
 
-    test('should auto generate IDs for groups that dont have one', async () => {
-      const treeDefinition = await lastValueFrom(
-        projectNavigation.getNavigationTreeUi$().pipe(take(1))
+    test('should allow href for absolute links', async () => {
+      const { projectNavigation: projNavigation, getNavigationTree: getNavTree } =
+        setupInitNavigation();
+      projNavigation.initNavigation<any>(
+        of({
+          body: [
+            {
+              id: 'group1',
+              type: 'navGroup',
+              children: [
+                {
+                  id: 'foo',
+                  href: 'https://elastic.co',
+                },
+              ],
+            },
+          ],
+        }),
+        { cloudUrls: {} }
       );
+      const treeDefinition = await getNavTree();
+      const [node] = treeDefinition.body as [ChromeProjectNavigationNode];
+      expect(node.children?.[0].href).toBe('https://elastic.co');
+    });
+
+    test('should throw if href is not an absolute links', async () => {
+      const { projectNavigation: projNavigation } = setupInitNavigation();
+
+      projNavigation.initNavigation<any>(
+        of({
+          body: [
+            {
+              id: 'group1',
+              type: 'navGroup',
+              children: [
+                {
+                  id: 'foo',
+                  href: '../dashboards',
+                },
+              ],
+            },
+          ],
+        }),
+        { cloudUrls: {} }
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        new Error('href must be an absolute URL. Node id [foo].')
+      );
+    });
+
+    test('should auto generate IDs for groups that dont have one', async () => {
+      const treeDefinition = await getNavigationTree();
       const nodesBody = treeDefinition.body as ChromeProjectNavigationNode[];
       expect(nodesBody[1]).toEqual({
         id: 'node-1', // auto generated
@@ -225,9 +281,7 @@ describe('initNavigation()', () => {
     });
 
     test('should leave "recentlyAccessed" as is', async () => {
-      const treeDefinition = await lastValueFrom(
-        projectNavigation.getNavigationTreeUi$().pipe(take(1))
-      );
+      const treeDefinition = await getNavigationTree();
       const nodes = treeDefinition.body as ChromeProjectNavigationNode[];
       expect(nodes[2]).toEqual({
         type: 'recentlyAccessed',
@@ -235,10 +289,9 @@ describe('initNavigation()', () => {
     });
 
     test('should load preset', async () => {
-      const treeDefinition = await lastValueFrom(
-        projectNavigation.getNavigationTreeUi$().pipe(take(1))
-      );
+      const treeDefinition = await getNavigationTree();
       const nodes = treeDefinition.body as ChromeProjectNavigationNode[];
+
       expect(nodes[3]).toMatchInlineSnapshot(`
         Object {
           "children": Array [
@@ -350,10 +403,10 @@ describe('initNavigation()', () => {
       }),
       {
         cloudUrls: {
-          usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles',
-          performanceUrl: 'https://cloud.elastic.co/performance',
-          billingUrl: 'https://cloud.elastic.co/billing',
-          deploymentUrl: 'https://cloud.elastic.co/deployment',
+          usersAndRolesUrl: 'https://cloud.elastic.co/userAndRoles/', // trailing slash should be removed!
+          performanceUrl: 'https://cloud.elastic.co/performance/',
+          billingUrl: 'https://cloud.elastic.co/billing/',
+          deploymentUrl: 'https://cloud.elastic.co/deployment/',
         },
       }
     );

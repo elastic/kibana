@@ -13,6 +13,8 @@ import { mergeMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+
+import type { CoreContext, CoreStart } from '@kbn/core/public';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { type DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -39,6 +41,7 @@ import type {
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
 
+import { Logger } from '@kbn/logging';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
@@ -68,6 +71,7 @@ export interface StartDeps {
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
   customBranding: CustomBrandingStart;
+  core: CoreContext;
 }
 
 /** @internal */
@@ -82,6 +86,7 @@ export class ChromeService {
   private readonly projectNavigation = new ProjectNavigationService();
   private mutationObserver: MutationObserver | undefined;
   private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
+  private logger: Logger;
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -176,7 +181,9 @@ export class ChromeService {
     injectedMetadata,
     notifications,
     customBranding,
+    core,
   }: StartDeps): Promise<InternalChromeStart> {
+    this.logger = core.logger.get('chrome-browser');
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
 
@@ -229,6 +236,7 @@ export class ChromeService {
       navLinksService: navLinks,
       http,
       chromeBreadcrumbs$: breadcrumbs$,
+      logger: this.logger,
     });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
