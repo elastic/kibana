@@ -7035,6 +7035,10 @@
                 "path": "src/plugins/vis_types/timelion/server/routes/run.ts"
               },
               {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
