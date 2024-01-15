@@ -144,6 +144,14 @@ describe('Description', () => {
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
   });
 
+  it('should display description when case is loading', async () => {
+    appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} isLoadingDescription={true} />
+    );
+
+    expect(await screen.findByTestId('description')).toBeInTheDocument();
+  });
+
   describe('draft message', () => {
     const draftStorageKey = `cases.testAppId.basic-case-id.description.markdownEditor`;
 

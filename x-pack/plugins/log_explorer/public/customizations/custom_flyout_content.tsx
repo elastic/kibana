@@ -12,7 +12,7 @@ import { FlyoutDetail } from '../components/flyout_detail/flyout_detail';
 import { LogExplorerFlyoutContentProps } from '../components/flyout_detail';
 import { LogDocument, useLogExplorerControllerContext } from '../controller';
 
-export const CustomFlyoutContent = ({
+const CustomFlyoutContent = ({
   filter,
   onAddColumn,
   onRemoveColumn,
