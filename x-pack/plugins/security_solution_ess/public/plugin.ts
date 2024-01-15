@@ -6,9 +6,15 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  AddIntegrationsSteps,
+  EnablePrebuiltRulesSteps,
+  OverviewSteps,
+  ViewAlertsSteps,
+  ViewDashboardSteps,
+} from '@kbn/security-solution-plugin/public';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { createServices } from './common/services';
-import { getSecurityGetStartedComponent } from './get_started';
 import { registerUpsellings } from './upselling/register_upsellings';
 import type {
   SecuritySolutionEssPluginSetup,
@@ -44,9 +50,13 @@ export class SecuritySolutionEssPlugin
       registerUpsellings(securitySolution.getUpselling(), license, services);
     });
 
-    securitySolution.setComponents({
-      GetStarted: getSecurityGetStartedComponent(services),
-    });
+    securitySolution.setAvailableSteps([
+      OverviewSteps.getToKnowElasticSecurity,
+      AddIntegrationsSteps.connectToDataSources,
+      ViewDashboardSteps.analyzeData,
+      EnablePrebuiltRulesSteps.enablePrebuiltRules,
+      ViewAlertsSteps.viewAlerts,
+    ]);
 
     subscribeBreadcrumbs(services);
 

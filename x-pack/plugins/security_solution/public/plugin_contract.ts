@@ -15,6 +15,8 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
+import type { SecurityProductTypes } from './common/components/landing_page/get_started/configs';
+import type { StepId } from './common/components/landing_page/get_started/types';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
@@ -22,9 +24,18 @@ export class PluginContract {
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
+  public productTypes$: BehaviorSubject<SecurityProductTypes | undefined>;
+  public projectsUrl$: BehaviorSubject<string | undefined>;
+  public projectFeaturesUrl$: BehaviorSubject<string | undefined>;
+  public availableSteps$: BehaviorSubject<StepId[]>;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
+    this.productTypes$ = new BehaviorSubject<SecurityProductTypes | undefined>(undefined);
+    this.projectsUrl$ = new BehaviorSubject<string | undefined>(undefined);
+    this.projectFeaturesUrl$ = new BehaviorSubject<string | undefined>(undefined);
+    this.availableSteps$ = new BehaviorSubject<StepId[]>([]);
+
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
@@ -33,6 +44,10 @@ export class PluginContract {
   public getStartServices(): ContractStartServices {
     return {
       extraRoutes$: this.extraRoutes$.asObservable(),
+      productTypes$: this.productTypes$.asObservable(),
+      projectsUrl$: this.projectsUrl$.asObservable(),
+      projectFeaturesUrl$: this.projectFeaturesUrl$.asObservable(),
+      availableSteps$: this.availableSteps$.asObservable(),
       getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
       upselling: this.upsellingService,
     };
@@ -53,6 +68,18 @@ export class PluginContract {
 
   public getStartContract(): PluginStart {
     return {
+      setProductTypes: (productTypes) => {
+        this.productTypes$.next(productTypes);
+      },
+      setProjectFeaturesUrl: (projectFeaturesUrl) => {
+        this.projectFeaturesUrl$.next(projectFeaturesUrl);
+      },
+      setProjectsUrl: (projectsUrl) => {
+        this.projectsUrl$.next(projectsUrl);
+      },
+      setAvailableSteps: (availableSteps) => {
+        this.availableSteps$.next(availableSteps);
+      },
       getNavLinks$: () => navLinks$,
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setComponents: (components) => {

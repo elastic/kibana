@@ -7,7 +7,14 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { getSecurityGetStartedComponent } from './get_started';
+import {
+  AddIntegrationsSteps,
+  CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
+  OverviewSteps,
+  ViewAlertsSteps,
+  ViewDashboardSteps,
+} from '@kbn/security-solution-plugin/public';
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
   SecuritySolutionServerlessPluginSetup,
@@ -24,6 +31,7 @@ import {
   parseExperimentalConfigValue,
   type ExperimentalFeatures,
 } from '../common/experimental_features';
+import { getProjectFeaturesUrl } from './navigation/links/util';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -69,10 +77,19 @@ export class SecuritySolutionServerlessPlugin
     registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
     securitySolution.setComponents({
-      GetStarted: getSecurityGetStartedComponent(services, productTypes),
+      // GetStarted: getSecurityGetStartedComponent(services, productTypes),
       DashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
-
+    securitySolution.setProductTypes(productTypes);
+    securitySolution.setProjectFeaturesUrl(getProjectFeaturesUrl(services.cloud));
+    securitySolution.setAvailableSteps([
+      CreateProjectSteps.createFirstProject,
+      OverviewSteps.getToKnowElasticSecurity,
+      AddIntegrationsSteps.connectToDataSources,
+      ViewDashboardSteps.analyzeData,
+      EnablePrebuiltRulesSteps.enablePrebuiltRules,
+      ViewAlertsSteps.viewAlerts,
+    ]);
     startNavigation(services);
     setRoutes(services);
 
