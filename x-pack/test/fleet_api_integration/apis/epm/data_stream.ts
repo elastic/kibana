@@ -144,7 +144,11 @@ export default function (providerContext: FtrProviderContext) {
 
       it('after update, it should have rolled over logs datastream because mappings are not compatible and not metrics', async function () {
         await installPackage(pkgName, pkgUpdateVersion);
+
         await asyncForEach(namespaces, async (namespace) => {
+          // write doc as rollover is lazy
+          await writeLogsDoc(namespace);
+          await writeMetricsDoc(namespace);
           const resLogsDatastream = await es.transport.request<any>(
             {
               method: 'GET',
