@@ -5,24 +5,32 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const commonScreenshots = getService('commonScreenshots');
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['common', 'header', 'svlCommonPage']);
+  const svlCommonScreenshots = getService('svlCommonScreenshots');
+  const screenshotDirectories = ['response_ops_docs', 'observability_maintenace_windows'];
   const find = getService('find');
-  const pageObjects = getPageObjects(['common', 'header']);
-  const screenshotDirectories = ['response_ops_docs', 'maintenance_windows'];
   const testSubjects = getService('testSubjects');
 
-  describe('create maintenance window', function () {
-    it('create window screenshot', async () => {
+  describe('create window', function () {
+    beforeEach(async () => {
+      await pageObjects.svlCommonPage.login();
+    });
+
+    after(async () => {
+      await pageObjects.svlCommonPage.forceLogout();
+    });
+
+    it('create maintenance window screenshot', async () => {
       await pageObjects.common.navigateToApp('maintenanceWindows');
       await pageObjects.header.waitUntilLoadingHasFinished();
       const createButton = await find.byCssSelector(
         '[data-test-subj="mw-empty-prompt"] .euiButton'
       );
       await createButton.click();
-      await commonScreenshots.takeScreenshot(
+      await svlCommonScreenshots.takeScreenshot(
         'create-maintenance-window',
         screenshotDirectories,
         1400,
@@ -32,7 +40,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '[data-test-subj="maintenanceWindowScopedQuerySwitch"] .euiSwitch__button'
       );
       await filterAlerts.click();
-      await commonScreenshots.takeScreenshot(
+      const radioGroup = await testSubjects.find('maintenanceWindowCategorySelectionRadioGroup');
+      const label = await radioGroup.findByCssSelector(`label[for="observability"]`);
+      await label.click();
+      await testSubjects.setValue('queryInput', 'kibana.alert.rule.name: custom-threshold-rule-1');
+      await svlCommonScreenshots.takeScreenshot(
         'create-maintenance-window-filter',
         screenshotDirectories,
         1400,
