@@ -34,7 +34,6 @@ describe('workspace_panel_wrapper', () => {
       <>
         <WorkspacePanelWrapper
           framePublicAPI={mockFrameAPI}
-          visualizationState={{ internalState: 123 }}
           visualizationId="myVis"
           visualizationMap={{
             myVis: { ...mockVisualization, ToolbarComponent: ToolbarComponentMock },
@@ -45,6 +44,7 @@ describe('workspace_panel_wrapper', () => {
           lensInspector={{} as unknown as LensInspector}
           getUserMessages={() => []}
           children={<span />}
+          displayOptions={undefined}
           {...propsOverrides}
         />
         <SettingsMenu
