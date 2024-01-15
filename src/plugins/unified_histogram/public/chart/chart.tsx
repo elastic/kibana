@@ -182,7 +182,7 @@ export function Chart({
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
   const getLensAttributesCallback = useCallback(
-    (suggestion: LensSuggestion | undefined) =>
+    (suggestion: LensSuggestion | undefined, visContext: ExternalVisContext | undefined) =>
       getLensAttributes({
         title: chart?.title,
         filters,
@@ -191,7 +191,7 @@ export function Chart({
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
         suggestion,
-        externalVisContext,
+        externalVisContext: visContext,
         onVisContextChanged,
       }),
     [
@@ -202,20 +202,19 @@ export function Chart({
       filters,
       query,
       histogramQuery,
-      externalVisContext,
       onVisContextChanged,
     ]
   );
 
   const lensAttributesContext = useMemo(
-    () => getLensAttributesCallback(currentSuggestion),
-    [getLensAttributesCallback, currentSuggestion]
+    () => getLensAttributesCallback(currentSuggestion, externalVisContext),
+    [getLensAttributesCallback, currentSuggestion, externalVisContext]
   );
 
   const onSuggestionSelectorChange = useCallback(
     (s: LensSuggestion | undefined) => {
       onSuggestionChange?.(s);
-      onVisContextChanged?.(s ? getLensAttributesCallback(s) : undefined);
+      onVisContextChanged?.(s ? getLensAttributesCallback(s, undefined) : undefined);
     },
     [onSuggestionChange, onVisContextChanged, getLensAttributesCallback]
   );
