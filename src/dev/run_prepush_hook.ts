@@ -32,6 +32,10 @@ function getDefaults(taskName: string) {
   };
 }
 
+function nonNullable<T>(value: T): value is NonNullable<T> {
+  return value != null;
+}
+
 run(
   async ({ log, flags }) => {
     const toolingLog = new ToolingLog({
@@ -44,6 +48,18 @@ run(
 
     process.env.IS_KIBANA_PREPUSH_HOOK = 'true';
 
+    const git = simpleGit(REPO_ROOT);
+
+    if (!(await git.branchLocal().status()).isClean()) {
+      reportTime(runStartTime, 'total', {
+        success: false,
+      });
+
+      throw new Error(
+        'Local files have changes that are not committed yet. Skipping preflight checks.'
+      );
+    }
+
     const checkTypes = ['i18n', 'tsc', 'eslint', 'jest', 'fileCasing'] as const;
 
     const checks = checkTypes.reduce((acc, check) => {
@@ -53,8 +69,6 @@ run(
 
       return acc;
     }, {} as Record<typeof checkTypes[number], { files: Array<{ path: string; file: File }> }>);
-
-    const git = simpleGit(REPO_ROOT);
 
     const { current } = await git.branchLocal();
 
@@ -72,6 +86,8 @@ run(
       .filter(Boolean)
       .map((file) => {
         const path = String(file.split(' b/')[1]).split('\n')[0];
+        if (!existsSync(path)) return undefined;
+
         const [firstHash, secondHash] = String(file.split('index ')[1]).split('\n')[0].split('..');
         const hunk = file.split(/@@ -[0-9]+,[0-9]+ \+[0-9]+,[0-9]+ @@/g)[1];
 
@@ -84,7 +100,6 @@ run(
 
         filesChangedSummaryTable.push([
           path,
-
           mode === 'new' ? chalk.green(mode) : mode === 'deleted' ? chalk.red(mode) : mode,
         ]);
 
@@ -95,7 +110,8 @@ run(
           added: hunk?.split('\n').filter((line) => line.startsWith('+')),
           removed: hunk?.split('\n').filter((line) => line.startsWith('-')),
         };
-      });
+      })
+      .filter(nonNullable);
 
     log.info(`${filesChangedSummaryTable.toString()}\n\n`);
 
@@ -240,87 +256,12 @@ run(
 
       throw new Error('preflight checks failed.');
     } else {
-      log.info('All preflight checks passed! ✨\n');
-
       reportTime(runStartTime, 'total', {
         success: true,
       });
+
+      log.info('All preflight checks passed! ✨\n');
     }
-    // checkResponses.forEach((logEntry) => {
-    //   if (logEntry.length) {
-    //     logEntry.forEach((line) => {
-    //       if (line) {
-    //         toolingLog.error(line);
-    //       }
-    //     });
-    //   }
-    // });
-
-    // const tasks = new Listr(
-    //   [
-    //     {
-    //       title: 'Running unit tests in changed files...',
-    //       task: async (_, task) => {},
-    //     },
-    //     {
-    //       title: 'Checking file casing...',
-    //       task: async () => {
-    //         await checkFileCasing(
-    //           log,
-    //           checks.fileCasing.files.map(({ file }) => file)
-    //         );
-    //       },
-    //     },
-    //     {
-    //       title: 'Checking i18n status...',
-    //       skip: checks.i18n.files.length === 0,
-    //       task: async (ctx, task) => {},
-    //     },
-    //     {
-    //       title: 'Running ESLint for changed files...',
-    //       task: async (_, task) => {
-    //         const errors = [];
-    //         try {
-    //           await Eslint.lintFiles(
-    //             log,
-    //             checks.eslint.files.map(({ file }) => file),
-    //             {
-    //               fix: Boolean(flags.fix),
-    //             }
-    //           );
-    //         } catch (error) {
-    //           errors.push(error);
-    //         }
-
-    //         if (errors.length) {
-    //           throw new Error('EsLint failed');
-    //         }
-    //       },
-    //     },
-    //     {
-    //       title: 'Running TSC for changed files...',
-    //       task: async (ctx, task) => {
-    //         try {
-    //           await checkTypescriptFiles(checks.tsc.files);
-    //         } catch (error) {
-    //           throw new Error('TSC failed');
-    //         }
-    //       },
-    //     },
-    //   ],
-    //   {
-    //     exitOnError: true,
-    //     collectErrors: 'full',
-    //     concurrent: true,
-    //   }
-    // );
-
-    // try {
-    //   await tasks.run();
-    // } catch (e) {
-    //   log.error('POOP', e);
-    //   throw new Error('test');
-    // }
   },
   {
     description: `Run checks on files that have been changed in your branch compared to upstream.`,

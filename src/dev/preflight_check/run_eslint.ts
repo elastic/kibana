@@ -19,8 +19,8 @@ export async function esLintFiles(
   const logs = [];
 
   for (const { path, file } of files) {
-    bar?.increment();
-    bar?.update({ filename: path });
+    bar.increment();
+    bar.update({ filename: path });
 
     const eslint = new ESLint({
       cache: true,
