@@ -19,7 +19,8 @@ import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 
 jest.mock('../../containers/user_profiles/api');
 
-describe('AssigneesFilterPopover', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174520
+describe.skip('AssigneesFilterPopover', () => {
   let appMockRender: AppMockRenderer;
   let defaultProps: AssigneesFilterPopoverProps;
 

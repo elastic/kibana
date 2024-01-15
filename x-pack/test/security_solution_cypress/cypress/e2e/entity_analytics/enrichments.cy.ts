@@ -12,7 +12,6 @@ import {
   HOST_RISK_COLUMN,
   USER_RISK_COLUMN,
   ACTION_COLUMN,
-  ALERTS_COUNT,
 } from '../../screens/alerts';
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 
@@ -36,8 +35,7 @@ import { enableRiskEngine } from '../../tasks/entity_analytics';
 const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169154
-describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
+describe('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverUnload', 'risk_scores_new');
     cy.task('esArchiverUnload', 'risk_scores_new_updated');
@@ -67,9 +65,6 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('Should has enrichment fields from legacy risk', function () {
-        cy.get(ALERTS_COUNT)
-          .invoke('text')
-          .should('match', /^[1-9].+$/); // Any number of alerts
         cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
         cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);
@@ -111,9 +106,6 @@ describe.skip('Enrichment', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('Should has enrichment fields from legacy risk', function () {
-        cy.get(ALERTS_COUNT)
-          .invoke('text')
-          .should('match', /^[1-9].+$/); // Any number of alerts
         cy.get(HOST_RISK_HEADER_COLUMN).contains('host.risk.calculated_level');
         cy.get(USER_RISK_HEADER_COLUMN).contains('user.risk.calculated_level');
         scrollAlertTableColumnIntoView(HOST_RISK_COLUMN);

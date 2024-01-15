@@ -10,7 +10,7 @@ import { EuiCallOut } from '@elastic/eui';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import { useForm, UseField } from '../../../../../../shared_imports';
-import { PickTimeline } from '../../../../../../detections/components/rules/pick_timeline';
+import { PickTimeline } from '../../../../../rule_creation/components/pick_timeline';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 

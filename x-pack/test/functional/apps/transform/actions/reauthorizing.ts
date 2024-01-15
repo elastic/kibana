@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
             await transform.table.assertTransformRowActionMissing(transformId, 'Reauthorize');
           } else {
             await transform.testExecution.logTestStep('should show disabled action menu button');
-            await transform.table.assertTransformRowActionsButtonEnabled(transformId, false);
+            await transform.table.assertTransformRowActionsEnabled(transformId, false);
           }
           await transform.table.clearSearchString(testDataList.length);
         });

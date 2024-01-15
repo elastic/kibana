@@ -69,6 +69,7 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const ObservabilityUptimeAlertRequired = rt.type({
 });
+// prettier-ignore
 const ObservabilityUptimeAlertOptional = rt.partial({
   'agent.name': schemaString,
   'anomaly.bucket_span.minutes': schemaString,
