@@ -21,17 +21,20 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInQA install_large_prebuilt_rules_package', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     afterEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     it('should install a package containing 15000 prebuilt rules without crashing', async () => {
       // Verify that status is empty before package installation
-      const statusBeforePackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
+      const statusBeforePackageInstallation = await getPrebuiltRulesAndTimelinesStatus(
+        es,
+        supertest
+      );
       expect(statusBeforePackageInstallation.rules_installed).toBe(0);
       expect(statusBeforePackageInstallation.rules_not_installed).toBe(0);
       expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
@@ -40,7 +43,10 @@ export default ({ getService }: FtrProviderContext): void => {
       await installPrebuiltRulesAndTimelines(es, supertest);
 
       // Verify that status is updated after package installation
-      const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(supertest);
+      const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(
+        es,
+        supertest
+      );
       expect(statusAfterPackageInstallation.rules_installed).toBe(750);
       expect(statusAfterPackageInstallation.rules_not_installed).toBe(0);
       expect(statusAfterPackageInstallation.rules_not_updated).toBe(0);
