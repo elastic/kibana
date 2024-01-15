@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
+export type { CreateSAMLResponseParams } from './plugin';
 export { plugin } from './plugin';
