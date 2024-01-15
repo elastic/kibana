@@ -35,11 +35,12 @@ export const useInspect = ({
 
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const { loading, inspect, selectedInspectIndex, isInspected } = useDeepEqualSelector((state) =>
-    inputId === InputsModelId.global
-      ? getGlobalQuery(state, queryId)
-      : getTimelineQuery(state, queryId)
-  );
+  const { loading, inspect, selectedInspectIndex, isInspected, searchSessionId } =
+    useDeepEqualSelector((state) =>
+      inputId === InputsModelId.global
+        ? getGlobalQuery(state, queryId)
+        : getTimelineQuery(state, queryId)
+    );
 
   const handleClick = useCallback(() => {
     if (onClick) {
@@ -51,9 +52,10 @@ export const useInspect = ({
         inputId,
         isInspected: true,
         selectedInspectIndex: inspectIndex,
+        searchSessionId,
       })
     );
-  }, [onClick, dispatch, queryId, inputId, inspectIndex]);
+  }, [onClick, dispatch, queryId, inputId, inspectIndex, searchSessionId]);
 
   const handleCloseModal = useCallback(() => {
     if (onCloseInspect != null) {
@@ -65,9 +67,10 @@ export const useInspect = ({
         inputId,
         isInspected: false,
         selectedInspectIndex: inspectIndex,
+        searchSessionId,
       })
     );
-  }, [onCloseInspect, dispatch, queryId, inputId, inspectIndex]);
+  }, [onCloseInspect, dispatch, queryId, inputId, inspectIndex, searchSessionId]);
 
   let request: string | null = null;
   let additionalRequests: string[] | null = null;
