@@ -8,47 +8,47 @@
 
 import { ApmFields, Instance } from '@kbn/apm-synthtrace-client';
 import { service } from '@kbn/apm-synthtrace-client/src/lib/apm/service';
+import { random, times } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
-const MAX_DEPENDENCIES = 10000;
-const MAX_DEPENDENCIES_PER_SERVICE = 500;
-const MAX_SERVICES = 20;
+const NUMBER_OF_DEPENDENCIES_PER_SERVICE = 2000;
+const NUMBER_OF_SERVICES = 1;
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
-      const javaInstances = Array.from({ length: MAX_SERVICES }).map((_, index) =>
+      const instances = times(NUMBER_OF_SERVICES).map((index) =>
         service(`opbeans-java-${index}`, ENVIRONMENT, 'java').instance(`java-instance-${index}`)
       );
 
-      const instanceDependencies = (instance: Instance, startIndex: number) => {
-        const rate = range.ratePerMinute(60);
+      const instanceDependencies = (instance: Instance, id: string) => {
+        const throughput = random(1, 60);
+        const childLatency = random(10, 100_000);
+        const parentLatency = childLatency + random(10, 10_000);
 
-        return rate.generator((timestamp, index) => {
-          const currentIndex = index % MAX_DEPENDENCIES_PER_SERVICE;
-          const destination = (startIndex + currentIndex) % MAX_DEPENDENCIES;
+        const failureRate = random(0, 100);
+
+        return range.ratePerMinute(throughput).generator((timestamp) => {
+          const child = instance
+            .span({
+              spanName: 'GET apm-*/_search',
+              spanType: 'db',
+              spanSubtype: 'elasticsearch',
+            })
+            .destination(`elasticsearch/${id}`)
+            .timestamp(timestamp)
+            .duration(childLatency);
 
           const span = instance
             .transaction({ transactionName: 'GET /java' })
             .timestamp(timestamp)
-            .duration(400)
+            .duration(parentLatency)
             .success()
-            .children(
-              instance
-                .span({
-                  spanName: 'GET apm-*/_search',
-                  spanType: 'db',
-                  spanSubtype: 'elasticsearch',
-                })
-                .destination(`elasticsearch/${destination}`)
-                .timestamp(timestamp)
-                .duration(200)
-                .success()
-            );
+            .children(Math.random() * 100 > failureRate ? child.success() : child.failure());
 
           return span;
         });
@@ -56,8 +56,10 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
       return withClient(
         apmEsClient,
-        javaInstances.map((instance, index) =>
-          instanceDependencies(instance, (index * MAX_DEPENDENCIES_PER_SERVICE) % MAX_DEPENDENCIES)
+        instances.flatMap((instance, i) =>
+          times(NUMBER_OF_DEPENDENCIES_PER_SERVICE)
+            .map((j) => instanceDependencies(instance, `${i + 1}.${j + 1}`))
+            .flat()
         )
       );
     },
