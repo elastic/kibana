@@ -30,7 +30,22 @@ describe('Configure ', () => {
     expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
   });
 
-  it('updates field options correctly', async () => {
+  it('updates field options correctly when not required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Configure />
+      </FormTestComponent>
+    );
+
+    userEvent.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith({}, true);
+    });
+  });
+
+  it('updates field options correctly when required', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Configure />

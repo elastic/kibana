@@ -42,22 +42,6 @@ describe('CustomFieldFlyout ', () => {
     expect(await screen.findByTestId('custom-field-flyout-save')).toBeInTheDocument();
   });
 
-  it('calls onSaveField with correct params on clicking Save', async () => {
-    appMockRender.render(<CustomFieldFlyout {...props} />);
-
-    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-    userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
-
-    await waitFor(() => {
-      expect(props.onSaveField).toBeCalledWith({
-        key: expect.anything(),
-        label: 'Summary',
-        required: false,
-        type: 'text',
-      });
-    });
-  });
-
   it('shows error if field label is too long', async () => {
     appMockRender.render(<CustomFieldFlyout {...props} />);
 
@@ -105,6 +89,22 @@ describe('CustomFieldFlyout ', () => {
   });
 
   describe('Text custom field', () => {
+    it('calls onSaveField with correct params when a custom field is NOT required', async () => {
+      appMockRender.render(<CustomFieldFlyout {...props} />);
+
+      userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+      userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
+
+      await waitFor(() => {
+        expect(props.onSaveField).toBeCalledWith({
+          key: expect.anything(),
+          label: 'Summary',
+          required: false,
+          type: CustomFieldTypes.TEXT,
+        });
+      });
+    });
+
     it('calls onSaveField with the correct params when a custom field is required', async () => {
       appMockRender.render(<CustomFieldFlyout {...props} />);
 
@@ -155,6 +155,26 @@ describe('CustomFieldFlyout ', () => {
   });
 
   describe('Toggle custom field', () => {
+    it('calls onSaveField with correct params when a custom field is NOT required', async () => {
+      appMockRender.render(<CustomFieldFlyout {...props} />);
+
+      fireEvent.change(await screen.findByTestId('custom-field-type-selector'), {
+        target: { value: CustomFieldTypes.TOGGLE },
+      });
+
+      userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+      userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
+
+      await waitFor(() => {
+        expect(props.onSaveField).toBeCalledWith({
+          key: expect.anything(),
+          label: 'Summary',
+          required: false,
+          type: CustomFieldTypes.TOGGLE,
+        });
+      });
+    });
+
     it('calls onSaveField with the correct default value when a custom field is required', async () => {
       appMockRender.render(<CustomFieldFlyout {...props} />);
 
