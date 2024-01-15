@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import type { AlertAgent, AlertWithAgent, AlertsAction } from './types';
 import type { EndpointParams } from '../../../../common/api/detection_engine';
 
 export const getProcessAlerts = (
   alerts: AlertWithAgent[],
-  config?: EndpointParams['config'],
-  checkErrors?: boolean
+  config: EndpointParams['config'],
+  checkErrors: boolean
 ) => {
   if (!config) {
     return {};
@@ -19,17 +20,19 @@ export const getProcessAlerts = (
   const { overwrite, field } = config;
 
   return alerts.reduce((acc: Record<string, AlertsAction>, alert) => {
-    const valueFromAlert: number = overwrite ? alert.process?.pid : alert[field];
+    const valueFromAlert: number = overwrite ? alert.process?.pid : get(alert, field);
     const isEntityId = !overwrite && field.includes('entity_id');
     const paramKey = isEntityId ? 'entity_id' : 'pid';
     const { _id, agent } = alert;
     const { id: agentId, name } = agent as AlertAgent;
     const hostName = alert.host?.name;
 
-    const currentValue = acc[valueFromAlert];
+    const errorField = overwrite ? 'process.pid' : field;
+    const currentValue = acc[checkErrors ? errorField : valueFromAlert];
+
     const baseFields = {
       alert_ids: [...(currentValue?.alert_ids || []), _id],
-      parameters: { [paramKey]: valueFromAlert || `${field} not found` },
+      parameters: { [paramKey]: valueFromAlert || `${field || 'process.pid'} not found` },
       endpoint_ids: [...new Set([...(currentValue?.endpoint_ids || []), agentId])],
       hosts: {
         ...currentValue?.hosts,
@@ -43,7 +46,6 @@ export const getProcessAlerts = (
         [valueFromAlert]: baseFields,
       };
     } else if (!valueFromAlert && checkErrors) {
-      const errorField = overwrite ? 'process.pid' : field;
       return {
         ...acc,
         [errorField]: { ...baseFields, error: errorField },
