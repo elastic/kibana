@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { mapKeys, snakeCase } from 'lodash/fp';
 import type { Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
 import {
   DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
   LEGACY_NOTIFICATIONS_ID,
@@ -15,12 +17,12 @@ import {
 } from '../../../../../../common/constants';
 
 // eslint-disable-next-line no-restricted-imports
-import type { LegacyNotificationAlertTypeDefinition } from './legacy_types';
+import type { LegacyNotificationRuleTypeDefinition } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRulesNotificationParams } from './legacy_types';
 import type { AlertAttributes } from '../../../rule_types/types';
 import { siemRuleActionGroups } from '../../../rule_types/utils/siem_rule_action_groups';
-import { scheduleNotificationActions } from './schedule_notification_actions';
+import { formatAlertsForNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
 import { getSignals } from './get_signals';
 // eslint-disable-next-line no-restricted-imports
@@ -31,11 +33,11 @@ import { legacyInjectReferences } from './legacy_saved_object_references/legacy_
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const legacyRulesNotificationAlertType = ({
+export const legacyRulesNotificationRuleType = ({
   logger,
 }: {
   logger: Logger;
-}): LegacyNotificationAlertTypeDefinition => ({
+}): LegacyNotificationRuleTypeDefinition => ({
   id: LEGACY_NOTIFICATIONS_ID,
   name: 'Security Solution notification (Legacy)',
   actionGroups: siemRuleActionGroups,
@@ -52,6 +54,7 @@ export const legacyRulesNotificationAlertType = ({
   },
   minimumLicenseRequired: 'basic',
   isExportable: false,
+  alerts: DEFAULT_AAD_CONFIG,
   async executor({
     startedAt,
     previousStartedAt,
@@ -60,6 +63,11 @@ export const legacyRulesNotificationAlertType = ({
     params,
     spaceId,
   }) {
+    const { alertsClient } = services;
+    if (!alertsClient) {
+      throw new AlertsClientError();
+    }
+
     const ruleAlertSavedObject = await services.savedObjectsClient.get<AlertAttributes>(
       'alert',
       params.ruleAlertId
@@ -127,13 +135,17 @@ export const legacyRulesNotificationAlertType = ({
     );
 
     if (signalsCount !== 0) {
-      const alertInstance = services.alertFactory.create(ruleId);
-      scheduleNotificationActions({
-        alertInstance,
-        signalsCount,
-        resultsLink,
-        ruleParams,
-        signals,
+      alertsClient.report({
+        id: ruleId,
+        actionGroup: 'default',
+        state: {
+          signals_count: signalsCount,
+        },
+        context: {
+          results_link: resultsLink,
+          rule: mapKeys(snakeCase, ruleParams),
+          alerts: formatAlertsForNotificationActions(signals),
+        },
       });
     }
   },
