@@ -9,12 +9,14 @@ import { buildEsQuery as kbnBuildEsQuery, TimeRange, Query, EsQueryConfig } from
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
 import { getTime } from '@kbn/data-plugin/common';
 
-export function buildEsQuery(
-  timeRange: TimeRange,
-  kuery?: string,
-  queries: Query[] = [],
-  config: EsQueryConfig = {}
-) {
+interface BuildEsQueryArgs {
+  timeRange?: TimeRange;
+  kuery?: string;
+  queries?: Query[];
+  config?: EsQueryConfig;
+}
+
+export function buildEsQuery({ timeRange, kuery, queries = [], config = {} }: BuildEsQueryArgs) {
   const timeFilter =
     timeRange &&
     getTime(undefined, timeRange, {

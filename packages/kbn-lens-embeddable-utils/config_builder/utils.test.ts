@@ -199,9 +199,6 @@ describe('buildDatasourceStates', () => {
     );
     expect(results).toMatchInlineSnapshot(`
       Object {
-        "formBased": Object {
-          "layers": Object {},
-        },
         "textBased": Object {
           "layers": Object {
             "layer_0": Object {

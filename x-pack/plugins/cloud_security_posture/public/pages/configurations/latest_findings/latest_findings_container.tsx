@@ -4,34 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
+import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../../common/constants';
 import { EmptyState } from '../../../components/empty_state';
 import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
-import type { FindingsBaseProps } from '../../../common/types';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
-import { DEFAULT_TABLE_HEIGHT } from './constants';
 import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
 import { LatestFindingsTable } from './latest_findings_table';
 import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_renderer';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
 
-export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-  const renderChildComponent = useCallback(
-    (groupFilters: Filter[]) => {
-      return (
-        <LatestFindingsTable
-          dataView={dataView}
-          nonPersistedFilters={groupFilters}
-          height={DEFAULT_TABLE_HEIGHT}
-          showDistributionBar={false}
-        />
-      );
-    },
-    [dataView]
-  );
+export const LatestFindingsContainer = () => {
+  const renderChildComponent = (groupFilters: Filter[]) => {
+    return (
+      <LatestFindingsTable
+        nonPersistedFilters={groupFilters}
+        height={DEFAULT_GROUPING_TABLE_HEIGHT}
+        showDistributionBar={false}
+      />
+    );
+  };
 
   const {
     isGroupSelected,
@@ -51,12 +46,12 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     onDistributionBarClick,
     totalFailedFindings,
     isEmptyResults,
-  } = useLatestFindingsGrouping({ dataView, groupPanelRenderer, groupStatsRenderer });
+  } = useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
 
   if (error || isEmptyResults) {
     return (
       <>
-        <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
@@ -66,7 +61,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   if (isGroupSelected) {
     return (
       <>
-        <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
         <div>
           <EuiSpacer size="m" />
           <FindingsDistributionBar
@@ -93,8 +88,8 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
 
   return (
     <>
-      <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
-      <LatestFindingsTable dataView={dataView} groupSelectorComponent={grouping.groupSelector} />
+      <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+      <LatestFindingsTable groupSelectorComponent={grouping.groupSelector} />
     </>
   );
 };

@@ -48,6 +48,7 @@ export interface UsageStats {
   'observability:enableInfrastructureHostsView': boolean;
   'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:apmAgentExplorerView': boolean;
+  'observability:apmEnableTableSearchBar': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
   'visualization:useLegacyTimeAxis': boolean;
@@ -160,7 +161,6 @@ export interface UsageStats {
   'observability:profilingPervCPUWattArm64': number;
   'observability:profilingCo2PerKWH': number;
   'observability:profilingDatacenterPUE': number;
-  'observability:profilingUseLegacyCo2Calculation': boolean;
   'observability:profilingCostPervCPUPerHour': number;
   'observability:profilingAWSCostDiscountRate': number;
 }

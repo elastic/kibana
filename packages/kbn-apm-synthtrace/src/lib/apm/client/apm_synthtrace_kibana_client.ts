@@ -9,6 +9,7 @@
 import fetch from 'node-fetch';
 import pRetry from 'p-retry';
 import { Logger } from '../../utils/create_logger';
+import { kibanaHeaders } from '../../shared/client_headers';
 
 export class ApmSynthtraceKibanaClient {
   private readonly logger: Logger;
@@ -62,13 +63,4 @@ export class ApmSynthtraceKibanaClient {
 
     this.logger.info(`Installed APM package ${packageVersion}`);
   }
-}
-
-function kibanaHeaders() {
-  return {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'kbn-xsrf': 'kibana',
-    'elastic-api-version': '2023-10-31',
-  };
 }

@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ApmRuleType,
   ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -89,6 +90,7 @@ const o11yRuleTypes = [
   SLO_BURN_RATE_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   ...Object.values(ApmRuleType),
 ];
@@ -187,7 +189,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         },
         {
           name: i18n.translate('xpack.observability.featureRegistry.casesSettingsSubFeatureName', {
-            defaultMessage: 'Case Settings',
+            defaultMessage: 'Case settings',
           }),
           privilegeGroups: [
             {
@@ -198,7 +200,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                   name: i18n.translate(
                     'xpack.observability.featureRegistry.casesSettingsSubFeatureDetails',
                     {
-                      defaultMessage: 'Edit Case Settings',
+                      defaultMessage: 'Edit case settings',
                     }
                   ),
                   includeIn: 'all',

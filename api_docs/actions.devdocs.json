@@ -5272,13 +5272,28 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GenerativeAIConnectorFeatureId",
+        "id": "def-common.GenerativeAIForObservabilityConnectorFeatureId",
         "type": "string",
         "tags": [],
-        "label": "GenerativeAIConnectorFeatureId",
+        "label": "GenerativeAIForObservabilityConnectorFeatureId",
         "description": [],
         "signature": [
-          "\"generativeAI\""
+          "\"generativeAIForObservability\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForSecurityConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "GenerativeAIForSecurityConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"generativeAIForSecurity\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5612,10 +5627,10 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GenerativeAIFeature",
+        "id": "def-common.GenerativeAIForObservabilityFeature",
         "type": "Object",
         "tags": [],
-        "label": "GenerativeAIFeature",
+        "label": "GenerativeAIForObservabilityFeature",
         "description": [],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5623,7 +5638,7 @@
         "children": [
           {
             "parentPluginId": "actions",
-            "id": "def-common.GenerativeAIFeature.id",
+            "id": "def-common.GenerativeAIForObservabilityFeature.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -5634,7 +5649,7 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GenerativeAIFeature.name",
+            "id": "def-common.GenerativeAIForObservabilityFeature.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -5645,7 +5660,54 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GenerativeAIFeature.compatibility",
+            "id": "def-common.GenerativeAIForObservabilityFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForSecurityFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "GenerativeAIForSecurityFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",
