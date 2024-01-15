@@ -109,8 +109,8 @@ export function IntegrationPanel({ integration }: { integration: Integration }) 
                     integration: integration.metadata.integration_name,
                     dataset: logStream.dataset,
                     timeRange: {
-                      to: start,
-                      from: end,
+                      from: start,
+                      to: end,
                     },
                   })}
                 >
