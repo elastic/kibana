@@ -53,7 +53,9 @@ export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width })
   return (
     <div
       style={{ width, height }}
-      data-test-subj={`mlEventRateChart ${eventRateChartData.length ? 'withData' : 'empty'}`}
+      data-test-subj={`dataVisualizerEventRateChart ${
+        eventRateChartData.length ? 'withData' : 'empty'
+      }`}
     >
       <Chart>
         <Axes />
