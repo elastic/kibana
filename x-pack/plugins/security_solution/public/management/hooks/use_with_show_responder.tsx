@@ -138,6 +138,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [endpointPrivileges, consoleManager]
+    [endpointPrivileges, isEnterpriseLicense, consoleManager]
   );
 };
