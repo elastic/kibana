@@ -27,7 +27,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
-  // TODO: add a new service
+  // TODO: add a new service for pulling kibana username, similar to getService('es')
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
