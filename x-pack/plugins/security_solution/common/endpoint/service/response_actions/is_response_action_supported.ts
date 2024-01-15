@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getRbacControl, getUiCommand } from './utils';
+import type { EndpointPrivileges } from '../../types';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
@@ -17,87 +19,41 @@ type SupportMap = Record<
 >;
 
 /** @private */
-const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
-  isolate: {
-    automated: {
-      endpoint: true,
-      sentinel_one: false,
+const getResponseActionsSupportMap = ({
+  agentType,
+  actionName,
+  actionType,
+  privileges,
+}: {
+  agentType: ResponseActionAgentType;
+  actionName: ResponseActionsApiCommandNames;
+  actionType: ResponseActionType;
+  privileges: EndpointPrivileges;
+}): boolean => {
+  const commandName = getUiCommand(actionName);
+  const RESPONSE_ACTIONS_SUPPORT_MAP = {
+    [actionName]: {
+      automated: {
+        [agentType]:
+          agentType === 'endpoint'
+            ? getRbacControl({
+                commandName,
+                privileges,
+              })
+            : false,
+      },
+      manual: {
+        [agentType]:
+          agentType === 'endpoint'
+            ? getRbacControl({
+                commandName,
+                privileges,
+              })
+            : actionName === 'isolate' || actionName === 'unisolate',
+      },
     },
-    manual: {
-      endpoint: true,
-      sentinel_one: true,
-    },
-  },
-  unisolate: {
-    automated: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-    manual: {
-      endpoint: true,
-      sentinel_one: true,
-    },
-  },
-  upload: {
-    automated: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-    manual: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-  },
-  'get-file': {
-    automated: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-    manual: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-  },
-  'kill-process': {
-    automated: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-    manual: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-  },
-  execute: {
-    automated: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-    manual: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-  },
-  'suspend-process': {
-    automated: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-    manual: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-  },
-  'running-processes': {
-    automated: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-    manual: {
-      endpoint: true,
-      sentinel_one: false,
-    },
-  },
+  } as SupportMap;
+  return RESPONSE_ACTIONS_SUPPORT_MAP[actionName][actionType][agentType];
 };
 
 /**
@@ -105,11 +61,18 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
  * @param agentType
  * @param actionName
  * @param actionType
+ * @param privileges
  */
 export const isResponseActionSupported = (
   agentType: ResponseActionAgentType,
   actionName: ResponseActionsApiCommandNames,
-  actionType: ResponseActionType
+  actionType: ResponseActionType,
+  privileges: EndpointPrivileges
 ): boolean => {
-  return RESPONSE_ACTIONS_SUPPORT_MAP[actionName][actionType][agentType];
+  return getResponseActionsSupportMap({
+    privileges,
+    actionName,
+    actionType,
+    agentType,
+  });
 };

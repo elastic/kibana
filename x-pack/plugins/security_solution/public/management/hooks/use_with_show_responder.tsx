@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { getCommandKey } from '../../../common/endpoint/service/response_actions/utils';
 import { useLicense } from '../../common/hooks/use_license';
 import type { ImmutableArray } from '../../../common/endpoint/types';
 import type {
@@ -25,7 +26,6 @@ import {
 import { useConsoleManager } from '../components/console';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 import { RESPONDER_PAGE_TITLE } from './translations';
-import { getCommandKey } from '../components/endpoint_response_actions_list/components/hooks';
 
 type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 
@@ -83,7 +83,8 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
                 helpHidden: !isResponseActionSupported(
                   agentType,
                   getCommandKey(command.name as ConsoleResponseActionCommands),
-                  'manual'
+                  'manual',
+                  endpointPrivileges
                 ),
               };
             } else if (agentType !== 'endpoint') {

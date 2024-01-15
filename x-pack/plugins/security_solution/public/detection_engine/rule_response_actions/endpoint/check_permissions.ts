@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
-import { getRbacControl } from '../../../management/components/endpoint_responder/lib/console_commands_definition';
-import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
+import type { RuleResponseAction } from '../../../../common/api/detection_engine';
+import {
+  getRbacControl,
+  getUiCommand,
+} from '../../../../common/endpoint/service/response_actions/utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export const useCheckEndpointPermissions = (action: RuleResponseAction) => {

@@ -34,7 +34,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { OUTPUT_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { getUiCommand } from '../components/hooks';
+import { getUiCommand } from '../../../../../common/endpoint/service/response_actions/utils';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
 

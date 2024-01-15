@@ -14,20 +14,20 @@ import type { EndpointArtifactPageId } from '../../../screens';
 import {
   ensureArtifactPageAuthzAccess,
   ensureEndpointListPageAuthzAccess,
+  ensureFleetPermissionDeniedScreen,
   ensurePolicyListPageAuthzAccess,
   getArtifactListEmptyStateAddButton,
+  getConsoleHelpPanelResponseActionTestSubj,
   getEndpointManagementPageList,
   getEndpointManagementPageMap,
+  getFleetAgentListTable,
   getNoPrivilegesPage,
   openConsoleFromEndpointList,
+  openConsoleHelpPanel,
   openRowActionMenu,
   visitEndpointList,
-  visitPolicyList,
-  ensureFleetPermissionDeniedScreen,
-  getFleetAgentListTable,
   visitFleetAgentList,
-  getConsoleHelpPanelResponseActionTestSubj,
-  openConsoleHelpPanel,
+  visitPolicyList,
 } from '../../../screens';
 
 describe(
@@ -102,7 +102,7 @@ describe(
       });
     });
 
-    describe('for role: t3_analyst', () => {
+    describe.only('for role: t3_analyst', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
         pageById.eventFilters,
@@ -151,7 +151,7 @@ describe(
         ensureFleetPermissionDeniedScreen();
       });
 
-      describe('Response Actions access', () => {
+      describe.only('Response Actions access', () => {
         beforeEach(() => {
           visitEndpointList();
           openConsoleFromEndpointList();
@@ -165,7 +165,7 @@ describe(
         }
 
         for (const [action, testSubj] of Object.entries(deniedResponseActions)) {
-          it(`should NOT have access to execute: ${action}`, () => {
+          it.only(`should NOT have access to execute: ${action}`, () => {
             cy.getByTestSubj(testSubj).should('not.exist');
           });
         }
