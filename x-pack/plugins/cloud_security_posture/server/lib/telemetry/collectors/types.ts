@@ -7,6 +7,7 @@
 
 import { AggregationsMultiBucketBase } from '@elastic/elasticsearch/lib/api/types';
 import { CspStatusCode } from '../../../../common/types_old';
+import { CspBenchmarkRuleMetadata } from '../../../../common/types/latest';
 
 export type CloudSecurityUsageCollectorType =
   | 'Indices'
@@ -15,7 +16,8 @@ export type CloudSecurityUsageCollectorType =
   | 'Rules'
   | 'Installation'
   | 'Alerts'
-  | 'Cloud Accounts';
+  | 'Cloud Accounts'
+  | 'Muted Rules';
 
 export type CloudProviderKey = 'cis_eks' | 'cis_gke' | 'cis_k8s' | 'cis_ake';
 export type CloudbeatConfigKeyType =
@@ -32,11 +34,31 @@ export interface CspmUsage {
   installation_stats: CloudSecurityInstallationStats[];
   alerts_stats: CloudSecurityAlertsStats[];
   cloud_account_stats: CloudSecurityAccountsStats[];
+  muted_rules_stats: MutedRulesStats[];
 }
+
+export type MutedRulesStats = Pick<
+  CspBenchmarkRuleMetadata,
+  'id' | 'name' | 'section' | 'version'
+> & {
+  benchmark_id: string;
+  benchmark_name: string;
+  rule_number: string;
+  posture_type: string;
+  benchmark_version: string;
+};
 
 export interface PackageSetupStatus {
   status: CspStatusCode;
   installedPackagePolicies: number;
+  healthyAgents: number;
+}
+export interface BenchmarkMutedRule {
+  id: string;
+  name: string;
+  section: string;
+  tags: string;
+  benchmark: CspStatusCode;
   healthyAgents: number;
 }
 
