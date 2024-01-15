@@ -92,7 +92,6 @@ export function ChatBody({
   initialConversationId,
   connectors,
   knowledgeBase,
-  connectorsManagementHref,
   currentUser,
   startedFrom,
   onConversationUpdate,
@@ -102,7 +101,6 @@ export function ChatBody({
   initialConversationId?: string;
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
-  connectorsManagementHref: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;

@@ -61,7 +61,6 @@ const defaultProps: ComponentStoryObj<typeof Component> = {
       selectConnector: () => {},
       reloadConnectors: () => {},
     },
-    connectorsManagementHref: '',
     currentUser: {
       username: 'elastic',
     },

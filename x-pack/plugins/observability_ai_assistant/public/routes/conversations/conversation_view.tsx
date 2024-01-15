@@ -25,7 +25,6 @@ import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_as
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
-import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 
 const containerClassName = css`
   max-width: 100%;
@@ -51,7 +50,7 @@ export function ConversationView() {
   const { path } = useObservabilityAIAssistantParams('/conversations/*');
 
   const {
-    services: { http, notifications },
+    services: { notifications },
   } = useKibana();
 
   const { element: confirmDeleteElement, confirm: confirmDeleteFunction } = useConfirmModal({
@@ -227,7 +226,6 @@ export function ConversationView() {
               key={chatBodyKeyRef.current}
               currentUser={currentUser}
               connectors={connectors}
-              connectorsManagementHref={getConnectorsManagementHref(http)}
               initialConversationId={conversationId}
               knowledgeBase={knowledgeBase}
               startedFrom="conversationView"
