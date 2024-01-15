@@ -17,6 +17,7 @@ import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174285
+// FLAKY: https://github.com/elastic/kibana/issues/174286
 describe.skip('CustomFieldFlyout ', () => {
   let appMockRender: AppMockRenderer;
 
