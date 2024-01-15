@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
-import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
@@ -50,17 +50,10 @@ type ServiceInstanceTransactionStatistics<T> = T extends true
   : ServiceInstanceTransactionPrimaryStatistics;
 
 export function getOrderInstructions(
-  sortField: InstancesSortField,
+  sortField: Exclude<InstancesSortField, 'errorRate'>,
   sortDirection: 'asc' | 'desc'
 ): Record<string, 'asc' | 'desc'> {
   switch (sortField) {
-    case 'errorRate':
-      // To correct order by error rate we need to combine both the 'failures._count' and 'terms._count' fields.
-      // Docs with high failure._count and low terms._count have a high failure rate.
-      return {
-        failures: sortDirection,
-        _count: sortDirection === 'desc' ? 'asc' : 'desc',
-      };
     case 'latency':
       return { latency: sortDirection };
     case 'serviceNodeName':
@@ -126,13 +119,32 @@ export async function getServiceInstancesTransactionStatistics<
 
   const subAggs = {
     ...getLatencyAggregation(latencyAggregationType, field),
-    failures: {
-      filter: {
-        term: {
-          [EVENT_OUTCOME]: EventOutcome.failure,
+    eventOutcomes: {
+      terms: { field: EVENT_OUTCOME },
+    },
+    errorRate: {
+      bucket_script: {
+        gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
+        buckets_path: {
+          success: "eventOutcomes['success']._count",
+          failure: "eventOutcomes['failure']._count",
         },
+        script: `
+          def success = params.success ?: 0;
+          def failure = params.failure ?: 0;
+          return (success + failure) > 0 ? failure / (success + failure) : 0;
+        `,
       },
     },
+    ...(sortField === 'errorRate'
+      ? {
+          errorRateSort: {
+            bucket_sort: {
+              sort: [{ errorRate: { order: sortDirection } }],
+            },
+          },
+        }
+      : {}),
   };
 
   const query = {
@@ -163,7 +175,7 @@ export async function getServiceInstancesTransactionStatistics<
         missing: SERVICE_NODE_NAME_MISSING,
         ...(size ? { size } : {}),
         ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
-        ...(sortField
+        ...(sortField && sortField !== 'errorRate'
           ? { order: getOrderInstructions(sortField, sortDirection) }
           : {}),
       },
@@ -210,7 +222,7 @@ export async function getServiceInstancesTransactionStatistics<
             serviceNodeName,
             errorRate: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: dateBucket.failures.doc_count / dateBucket.doc_count,
+              y: dateBucket.errorRate.value,
             })),
             throughput: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
@@ -225,10 +237,10 @@ export async function getServiceInstancesTransactionStatistics<
             })),
           };
         } else {
-          const { failures, latency } = serviceNodeBucket;
+          const { latency, errorRate } = serviceNodeBucket;
           return {
             serviceNodeName,
-            errorRate: failures.doc_count / count,
+            errorRate: errorRate.value,
             latency: getLatencyValue({
               aggregation: latency,
               latencyAggregationType,

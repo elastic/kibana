@@ -11,16 +11,6 @@ describe('getOrderInstructions', () => {
   (
     [
       {
-        field: 'errorRate',
-        direction: 'asc',
-        expectValue: { failures: 'asc', _count: 'desc' },
-      },
-      {
-        field: 'errorRate',
-        direction: 'desc',
-        expectValue: { failures: 'desc', _count: 'asc' },
-      },
-      {
         field: 'latency',
         direction: 'asc',
         expectValue: { latency: 'asc' },
@@ -51,7 +41,7 @@ describe('getOrderInstructions', () => {
         expectValue: { _count: 'desc' },
       },
     ] as Array<{
-      field: InstancesSortField;
+      field: Exclude<InstancesSortField, 'errorRate'>;
       direction: 'asc' | 'desc';
       expectValue: Record<string, 'asc' | 'desc'>;
     }>

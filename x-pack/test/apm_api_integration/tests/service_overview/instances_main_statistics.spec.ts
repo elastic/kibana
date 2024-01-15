@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtrace = getService('synthtraceEsClient');
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
-  const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+  const end = new Date('2021-01-01T00:10:00.000Z').getTime();
 
   async function getServiceOverviewInstancesMainStatistics({
     serviceName,
@@ -76,6 +76,188 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Instances main statistics when data is loaded',
     { config: 'basic', archives: [] },
     () => {
+      describe('Order by error rate', () => {
+        const serviceName = 'synth-node-1';
+        before(async () => {
+          const range = timerange(start, end);
+          const transactionName = 'foo';
+          /**
+           * Instance A
+           * 90 transactions = Success
+           * 10 transactions = Failure
+           * Error rate: 10%
+           */
+          const instanceA = apm
+            .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+            .instance('instance-A');
+          const instanceASuccessfulTraceEvents = range
+            .interval('1m')
+            .rate(10)
+            .generator((timestamp, index) =>
+              index < 10
+                ? instanceA
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(1000)
+                    .failure()
+                    .errors(
+                      instanceA
+                        .error({ message: '[ResponseError] index_not_found_exception' })
+                        .timestamp(timestamp + 50)
+                    )
+                : instanceA
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(1000)
+                    .success()
+            );
+          /**
+           * Instance B
+           * 1 transactions = Success
+           * 9 transactions = Failure
+           * Error rate: 90%
+           */
+          const instanceB = apm
+            .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+            .instance('instance-B');
+          const instanceBSuccessfulTraceEvents = range
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp, index) =>
+              index === 0
+                ? instanceB
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(1000)
+                    .success()
+                : instanceB
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(1000)
+                    .failure()
+                    .errors(
+                      instanceB
+                        .error({ message: '[ResponseError] index_not_found_exception' })
+                        .timestamp(timestamp + 50)
+                    )
+            );
+          /**
+           * Instance C
+           * 2 transactions = Success
+           * 8 transactions = Failure
+           * Error rate: 80%
+           */
+          const instanceC = apm
+            .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+            .instance('instance-C');
+          const instanceCSuccessfulTraceEvents = range
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp, index) =>
+              index < 2
+                ? instanceC
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(1000)
+                    .success()
+                : instanceC
+                    .transaction({ transactionName })
+                    .timestamp(timestamp)
+                    .duration(1000)
+                    .failure()
+                    .errors(
+                      instanceC
+                        .error({ message: '[ResponseError] index_not_found_exception' })
+                        .timestamp(timestamp + 50)
+                    )
+            );
+          /**
+           * Instance D
+           * 0 transactions = Success
+           * 10 transactions = Failure
+           * Error rate: 100%
+           */
+          const instanceD = apm
+            .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+            .instance('instance-D');
+          const instanceDSuccessfulTraceEvents = range
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) =>
+              instanceD
+                .transaction({ transactionName })
+                .timestamp(timestamp)
+                .duration(1000)
+                .failure()
+                .errors(
+                  instanceD
+                    .error({ message: '[ResponseError] index_not_found_exception' })
+                    .timestamp(timestamp + 50)
+                )
+            );
+          /**
+           * Instance E
+           * 10 transactions = Success
+           * 0 transactions = Failure
+           * Error rate: 0%
+           */
+          const instanceE = apm
+            .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+            .instance('instance-E');
+          const instanceESuccessfulTraceEvents = range
+            .interval('1m')
+            .rate(1)
+            .generator((timestamp) =>
+              instanceE
+                .transaction({ transactionName })
+                .timestamp(timestamp)
+                .duration(1000)
+                .success()
+            );
+          return synthtrace.index([
+            instanceASuccessfulTraceEvents,
+            instanceBSuccessfulTraceEvents,
+            instanceCSuccessfulTraceEvents,
+            instanceDSuccessfulTraceEvents,
+            instanceESuccessfulTraceEvents,
+          ]);
+        });
+
+        after(() => {
+          return synthtrace.clean();
+        });
+        describe('sort by error rate asc', () => {
+          let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+          before(async () => {
+            instancesMainStats = await getServiceOverviewInstancesMainStatistics({
+              serviceName,
+              sortField: 'errorRate',
+              sortDirection: 'asc',
+            });
+          });
+          it('returns instances sorted asc', () => {
+            expect(instancesMainStats.map((item) => roundNumber(item.errorRate))).to.eql([
+              0, 0.1, 0.8, 0.9, 1,
+            ]);
+          });
+        });
+        describe('sort by error rate desc', () => {
+          let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+          before(async () => {
+            instancesMainStats = await getServiceOverviewInstancesMainStatistics({
+              serviceName,
+              sortField: 'errorRate',
+              sortDirection: 'desc',
+            });
+          });
+          it('returns instances sorted desc', () => {
+            expect(instancesMainStats.map((item) => roundNumber(item.errorRate))).to.eql([
+              1, 0.9, 0.8, 0.1, 0,
+            ]);
+          });
+        });
+      });
+
       describe('with transactions and system metrics', () => {
         const serviceName = 'synth-node-1';
         before(async () => {
@@ -170,18 +352,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 direction: 'desc',
                 expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
                 expectedValues: [3000000, 2000000, 1000000],
-              },
-              {
-                field: 'errorRate',
-                direction: 'asc',
-                expectedServiceNodeNames: ['instance-3', 'instance-2', 'instance-1'],
-                expectedValues: [0.1429, 0.2, 0.3333],
-              },
-              {
-                field: 'errorRate',
-                direction: 'desc',
-                expectedServiceNodeNames: ['instance-1', 'instance-2', 'instance-3'],
-                expectedValues: [0.3333, 0.2, 0.1429],
               },
               {
                 field: 'serviceNodeName',
