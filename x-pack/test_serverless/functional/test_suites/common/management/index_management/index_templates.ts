@@ -16,8 +16,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const es = getService('es');
   const retry = getService('retry');
+  const log = getService('log');
 
   const TEST_TEMPLATE = 'a_test_template';
+  const INDEX_PATTERN = `index_pattern_${Math.random()}`;
 
   describe('Index Templates', function () {
     before(async () => {
@@ -32,6 +34,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      log.debug('Cleaning up created template');
+
+      try {
+        await es.indices.deleteIndexTemplate({ name: TEST_TEMPLATE }, { ignore: [404] });
+      } catch (e) {
+        log.debug('[Setup error] Error creating test policy');
+        throw e;
+      }
+
       await pageObjects.svlCommonPage.forceLogout();
     });
 
@@ -45,7 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.indices.putIndexTemplate({
           name: TEST_TEMPLATE,
           body: {
-            index_patterns: ['test*'],
+            index_patterns: [INDEX_PATTERN],
           },
         });
       });
@@ -85,7 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('createTemplateButton');
 
         await testSubjects.setValue('nameField', TEST_TEMPLATE_NAME);
-        await testSubjects.setValue('indexPatternsField', 'test*');
+        await testSubjects.setValue('indexPatternsField', INDEX_PATTERN);
 
         // Click form summary step and then the submit button
         await testSubjects.click('formWizardStep-5');
