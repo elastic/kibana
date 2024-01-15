@@ -77,8 +77,6 @@ export const groupingTitle = i18n.translate('xpack.csp.findings.latestFindings.g
   defaultMessage: 'Group findings by',
 });
 
-export const DEFAULT_TABLE_HEIGHT = 512;
-
 export const getDefaultQuery = ({
   query,
   filters,
