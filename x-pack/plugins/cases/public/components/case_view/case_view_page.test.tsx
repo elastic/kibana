@@ -71,65 +71,63 @@ describe('CaseViewPage', () => {
     appMockRenderer = createAppMockRenderer();
   });
 
-  for (let index = 0; index < 100; index++) {
-    it('shows the header section', async () => {
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+  it('shows the header section', async () => {
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      expect(await screen.findByTestId('test-case-view-header')).toBeInTheDocument();
+    expect(await screen.findByTestId('test-case-view-header')).toBeInTheDocument();
+  });
+
+  it('shows the metrics section', async () => {
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+    expect(await screen.findByTestId('test-case-view-metrics')).toBeInTheDocument();
+  });
+
+  it('shows the activity section', async () => {
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+    expect(await screen.findByTestId('test-case-view-activity')).toBeInTheDocument();
+  });
+
+  it('should set the breadcrumbs correctly', async () => {
+    const onComponentInitialized = jest.fn();
+
+    appMockRenderer.render(
+      <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
+    );
+
+    await waitFor(() => {
+      expect(useCasesTitleBreadcrumbsMock).toHaveBeenCalledWith(caseProps.caseData.title);
+    });
+  });
+
+  it('should call onComponentInitialized on mount', async () => {
+    const onComponentInitialized = jest.fn();
+
+    appMockRenderer.render(
+      <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
+    );
+
+    await waitFor(() => {
+      expect(onComponentInitialized).toHaveBeenCalled();
+    });
+  });
+
+  it('should call onComponentInitialized only once', async () => {
+    const onComponentInitialized = jest.fn();
+
+    const { rerender } = appMockRenderer.render(
+      <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
+    );
+
+    await waitFor(() => {
+      expect(onComponentInitialized).toHaveBeenCalled();
     });
 
-    it('shows the metrics section', async () => {
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+    rerender(<CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />);
 
-      expect(await screen.findByTestId('test-case-view-metrics')).toBeInTheDocument();
-    });
+    await waitForComponentToUpdate();
 
-    it('shows the activity section', async () => {
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      expect(await screen.findByTestId('test-case-view-activity')).toBeInTheDocument();
-    });
-
-    it('should set the breadcrumbs correctly', async () => {
-      const onComponentInitialized = jest.fn();
-
-      appMockRenderer.render(
-        <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
-      );
-
-      await waitFor(() => {
-        expect(useCasesTitleBreadcrumbsMock).toHaveBeenCalledWith(caseProps.caseData.title);
-      });
-    });
-
-    it('should call onComponentInitialized on mount', async () => {
-      const onComponentInitialized = jest.fn();
-
-      appMockRenderer.render(
-        <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
-      );
-
-      await waitFor(() => {
-        expect(onComponentInitialized).toHaveBeenCalled();
-      });
-    });
-
-    it('should call onComponentInitialized only once', async () => {
-      const onComponentInitialized = jest.fn();
-
-      const { rerender } = appMockRenderer.render(
-        <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
-      );
-
-      await waitFor(() => {
-        expect(onComponentInitialized).toHaveBeenCalled();
-      });
-
-      rerender(<CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />);
-
-      await waitForComponentToUpdate();
-
-      expect(onComponentInitialized).toBeCalledTimes(1);
-    });
-  }
+    expect(onComponentInitialized).toBeCalledTimes(1);
+  });
 });
