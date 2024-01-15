@@ -15,18 +15,6 @@ module.exports = () => ({
       plugins: [
         require.resolve('babel-plugin-add-module-exports'),
 
-        // required for class decorators
-        require.resolve('@babel/plugin-transform-class-static-block'),
-
-        // require.resolve('babel-plugin-transform-typescript-metadata'),
-        // Decorators proposal is stage 3 (https://github.com/tc39/proposal-decorators)
-        [
-          require.resolve('@babel/plugin-proposal-decorators'),
-          {
-            version: '2023-05',
-          },
-        ],
-
         // The class properties proposal was merged with the private fields proposal
         // into the "class fields" proposal. Babel doesn't support this combined
         // proposal yet, which includes private field, so this transform is
@@ -34,8 +22,6 @@ module.exports = () => ({
         //
         // See https://github.com/babel/proposals/issues/12 for progress
         require.resolve('@babel/plugin-proposal-class-properties'),
-
-        require.resolve('babel-plugin-parameter-decorator'),
 
         // Optional Chaining proposal is stage 4 (https://github.com/tc39/proposal-optional-chaining)
         // Need this since we are using TypeScript 3.7+
@@ -70,7 +56,6 @@ module.exports = () => ({
       {
         allowNamespaces: true,
         allowDeclareFields: true,
-        onlyRemoveTypeImports: true,
       },
     ],
   ],
