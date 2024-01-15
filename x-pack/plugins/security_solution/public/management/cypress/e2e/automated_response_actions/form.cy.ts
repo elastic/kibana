@@ -24,6 +24,15 @@ describe(
   'Form',
   {
     tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'automatedProcessActionsEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
     // FLAKY: https://github.com/elastic/kibana/issues/169334
