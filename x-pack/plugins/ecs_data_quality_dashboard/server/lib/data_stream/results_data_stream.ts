@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { Subject } from 'rxjs';
+import type { InstallParams } from '@kbn/data-stream-adapter';
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { ecsFieldMap } from '@kbn/data-stream-adapter/ecs';
 import { resultsFieldMap } from './results_field_map';
@@ -29,7 +28,6 @@ export class ResultsDataStream {
       kibanaVersion,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
     });
-
     this.dataStream.setComponentTemplate({
       name: ECS_COMPONENT_TEMPLATE_NAME,
       fieldMap: ecsFieldMap,
@@ -45,11 +43,7 @@ export class ResultsDataStream {
     });
   }
 
-  async install(params: {
-    esClient: Promise<ElasticsearchClient>;
-    logger: Logger;
-    pluginStop$: Subject<void>;
-  }) {
+  async install(params: InstallParams) {
     try {
       this.installPromise = this.dataStream.install(params);
       await this.installPromise;

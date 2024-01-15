@@ -70,7 +70,7 @@ const useStoredPatternRollups = (patterns: string[]) => {
 
     const fetchStoredRollups = async () => {
       const results = await getResults({ httpFetch, abortController, patterns });
-      if (!ignore) {
+      if (results?.length && !ignore) {
         setStoredRollups(Object.fromEntries(results.map(({ rollup }) => [rollup.pattern, rollup])));
       }
     };
