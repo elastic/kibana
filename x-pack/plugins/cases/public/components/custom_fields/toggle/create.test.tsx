@@ -22,7 +22,7 @@ describe('Create ', () => {
 
   const customFieldConfiguration = customFieldsConfigurationMock[1];
 
-  it('renders correctly', async () => {
+  it('renders correctly with required and defaultValue', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create isLoading={false} customFieldConfiguration={customFieldConfiguration} />
@@ -33,7 +33,7 @@ describe('Create ', () => {
     expect(
       await screen.findByTestId(`${customFieldConfiguration.key}-toggle-create-custom-field`)
     ).toBeInTheDocument();
-    expect(await screen.findByRole('switch')).not.toBeChecked();
+    expect(await screen.findByRole('switch')).toBeChecked(); // defaultValue true
   });
 
   it('updates the value correctly', async () => {
@@ -51,7 +51,7 @@ describe('Create ', () => {
       expect(onSubmit).toHaveBeenCalledWith(
         {
           customFields: {
-            [customFieldConfiguration.key]: true,
+            [customFieldConfiguration.key]: false,
           },
         },
         true
@@ -59,12 +59,17 @@ describe('Create ', () => {
     });
   });
 
-  it('sets value to false by default', async () => {
+  it('sets value to false by default when there is no defaultValue configured', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create
           isLoading={false}
-          customFieldConfiguration={{ ...customFieldConfiguration, required: true }}
+          customFieldConfiguration={{
+            key: customFieldConfiguration.key,
+            type: customFieldConfiguration.type,
+            label: customFieldConfiguration.label,
+            required: false,
+          }}
         />
       </FormTestComponent>
     );
