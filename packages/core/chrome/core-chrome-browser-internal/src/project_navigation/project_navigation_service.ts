@@ -32,7 +32,12 @@ import {
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
 
-import { ChromeNavLink, CloudURLs, NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser/src';
+import {
+  AppDeepLinkId,
+  ChromeNavLink,
+  CloudURLs,
+  NavigationTreeDefinitionUI,
+} from '@kbn/core-chrome-browser/src';
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
@@ -118,8 +123,8 @@ export class ProjectNavigationService {
       setProjectUrl: (projectUrl: string) => {
         this.projectUrl$.next(projectUrl);
       },
-      initNavigation: (
-        navTreeDefinition: Observable<NavigationTreeDefinition>,
+      initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
+        navTreeDefinition: Observable<NavigationTreeDefinition<LinkId>>,
         { cloudUrls }: { cloudUrls: CloudURLs }
       ) => {
         this.initNavigation(navTreeDefinition, { navLinksService, cloudUrls });
@@ -195,11 +200,15 @@ export class ProjectNavigationService {
 
     const cloudLinks = getCloudLinks(cloudUrls);
 
-    this.navigationTree$.pipe(takeUntil(this.stop$)).subscribe((navTree) => {
-      if (!navTree) return;
-      this.projectNavigationNavTreeFlattened = flattenNav(navTree);
-      this.setActiveProjectNavigationNodes();
-    });
+    this.navigationTree$
+      .pipe(
+        takeUntil(this.stop$),
+        filter((navTree): navTree is ChromeProjectNavigationNode[] => Boolean(navTree))
+      )
+      .subscribe((navTree) => {
+        this.projectNavigationNavTreeFlattened = flattenNav(navTree);
+        this.setActiveProjectNavigationNodes();
+      });
 
     combineLatest([navTreeDefinition.pipe(takeUntil(this.stop$)), deepLinksMap$]).subscribe(
       ([def, deepLinksMap]) => {

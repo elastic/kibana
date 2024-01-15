@@ -436,18 +436,19 @@ export const parseNavigationTree = (
 
   const parseNodesArray = (
     nodes?: RootNavigationItemDefinition[],
-    section: 'body' | 'footer' = 'body'
+    section: 'body' | 'footer' = 'body',
+    startIndex = 0
   ): void => {
     if (!nodes) return;
 
-    nodes.forEach((node) => {
-      const navNode = initNodeAndChildren(node);
+    nodes.forEach((node, i) => {
+      const navNode = initNodeAndChildren(node, { index: startIndex + i });
       onNodeInitiated(navNode, section);
     });
   };
 
   parseNodesArray(navigationTreeDef.body, 'body');
-  parseNodesArray(navigationTreeDef.footer, 'footer');
+  parseNodesArray(navigationTreeDef.footer, 'footer', navigationTreeDef.body?.length ?? 0);
 
   return { navigationTree, navigationTreeUI };
 };
