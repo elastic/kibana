@@ -130,7 +130,6 @@ export class ControlGroupContainer extends Container<
     );
 
     this.recalculateFilters$ = new Subject();
-    this.onFiltersUpdated$ = new Subject<null>();
     this.onFiltersPublished$ = new Subject<Filter[]>();
     this.onControlRemoved$ = new Subject<string>();
 
@@ -161,6 +160,7 @@ export class ControlGroupContainer extends Container<
     this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
       this.recalculateFilters();
+      this.publishFilters();
       this.setupSubscriptions();
       this.initialized$.next(true);
     });
@@ -180,9 +180,25 @@ export class ControlGroupContainer extends Container<
         )
         .subscribe((input) => {
           this.recalculateDataViews();
-          this.recalculateFilters();
+          this.recalculateFilters$.next(null);
           const childOrderCache = cachedChildEmbeddableOrder(input.panels);
           childOrderCache.idsInOrder.forEach((id) => this.getChild(id)?.refreshInputFromParent());
+        })
+    );
+
+    /**
+     * recalculate filters when `showApplySelections` value changes to keep state clean
+     */
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(
+          skip(1),
+          distinctUntilChanged(
+            (a, b) => Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
+          )
+        )
+        .subscribe(() => {
+          this.recalculateFilters$.next(null);
         })
     );
 
