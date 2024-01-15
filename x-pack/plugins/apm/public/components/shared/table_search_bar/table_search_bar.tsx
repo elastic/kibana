@@ -6,8 +6,8 @@
  */
 
 import { EuiFieldSearch } from '@elastic/eui';
-import { debounce, memoize, orderBy, pick } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { memoize, orderBy, pick } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
@@ -61,12 +61,6 @@ export function TableSearchBar<T, P extends keyof T & string>({
     false
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onChangeDebouncedCurrentPage = useCallback(
-    debounce(onChangeCurrentPage, 20),
-    [onChangeCurrentPage]
-  );
-
   const currentPage = useMemo(() => {
     const _currentPage = getCurrentPage({
       items,
@@ -96,8 +90,8 @@ export function TableSearchBar<T, P extends keyof T & string>({
   ]);
 
   useEffect(() => {
-    onChangeDebouncedCurrentPage(currentPage);
-  }, [currentPage, onChangeDebouncedCurrentPage]);
+    onChangeCurrentPage(currentPage);
+  }, [currentPage, onChangeCurrentPage]);
 
   const MINIMUM_NUMBER_OF_ITEMS_FOR_SEARCH_BAR_TO_SHOW = 10;
   if (
