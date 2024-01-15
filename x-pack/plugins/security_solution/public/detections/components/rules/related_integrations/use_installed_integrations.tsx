@@ -33,9 +33,6 @@ export const useInstalledIntegrations = ({
       },
     ],
     async ({ signal }) => {
-      if (skip) {
-        return [];
-      }
       const integrations = await fleetIntegrationsApi.fetchInstalledIntegrations({
         packages,
         signal,
@@ -45,6 +42,7 @@ export const useInstalledIntegrations = ({
     {
       keepPreviousData: true,
       staleTime: ONE_MINUTE * 5,
+      enabled: !skip,
       onError: (e) => {
         // Suppressing for now to prevent excessive errors when fleet isn't configured
         // addError(e, { title: i18n.INTEGRATIONS_FETCH_FAILURE });
