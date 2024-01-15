@@ -114,7 +114,7 @@ describe('ExceptionBuilderComponent', () => {
     ).toEqual('ip');
     expect(
       wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
-    ).toEqual('is one of');
+    ).toEqual('one of');
     expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').at(0).text()).toEqual(
       'some ip'
     );
@@ -388,7 +388,7 @@ describe('ExceptionBuilderComponent', () => {
     ).toEqual('ip');
     expect(
       wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
-    ).toEqual('is one of');
+    ).toEqual('one of');
     expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').at(0).text()).toEqual(
       'some ip'
     );

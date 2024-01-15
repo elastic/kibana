@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('carries over all filters from source dashboard', async () => {
           // add a new unrelated filter.
-          await filterBar.addFilter({ field: 'machine.os', operation: 'is', value: 'ios' });
+          await filterBar.addFilter({ field: 'machine.os', operation: 'equals', value: 'ios' });
 
           await openContextMenuFromPieSlice();
 

@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await filterBar.addFilter({
         field: PINNED_FILTER.key,
-        operation: 'is',
+        operation: 'equals',
         value: PINNED_FILTER.value,
       });
       await filterBar.toggleFilterPinned(PINNED_FILTER.key);
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} adds a pinned filter`);
       await filterBar.addFilter({
         field: PINNED_FILTER.key,
-        operation: 'is',
+        operation: 'equals',
         value: PINNED_FILTER.value,
       });
       await filterBar.toggleFilterPinned(PINNED_FILTER.key);

@@ -99,7 +99,7 @@ export const CONDITION_OPERATOR_TYPE_NESTED = i18n.translate(
 export const CONDITION_OPERATOR_TYPE_MATCH_ANY = i18n.translate(
   'exceptionList-components.exceptions.exceptionItem.card.conditions.matchAnyOperator',
   {
-    defaultMessage: 'is one of',
+    defaultMessage: 'one of',
   }
 );
 

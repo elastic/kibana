@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('visualizesaveAndReturnButton');
       await dashboard.waitForRenderComplete();
       // define a filter
-      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
+      await filterBar.addFilter({ field: 'geo.src', operation: 'equals', value: 'CN' });
       await dashboard.waitForRenderComplete();
       expect(await dashboard.isNotificationExists(0)).to.be(true);
     });
@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboardAddPanel.clickAggBasedVisualizations();
       await dashboardAddPanel.clickVisType('histogram');
       await testSubjects.click('savedObjectTitlelogstash-*');
-      await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'CN' });
+      await filterBar.addFilter({ field: 'geo.src', operation: 'equals', value: 'CN' });
       await testSubjects.exists('visualizesaveAndReturnButton');
       await testSubjects.click('visualizesaveAndReturnButton');
       await dashboard.waitForRenderComplete();

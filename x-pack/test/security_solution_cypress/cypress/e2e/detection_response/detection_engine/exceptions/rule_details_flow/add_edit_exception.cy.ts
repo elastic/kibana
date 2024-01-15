@@ -276,7 +276,7 @@ describe(
         // add exception item conditions
         addExceptionConditions({
           field: 'agent.name',
-          operator: 'is one of',
+          operator: 'one of',
           values: ['foo', 'FOO', 'bar'],
         });
 

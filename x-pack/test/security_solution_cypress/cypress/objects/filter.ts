@@ -7,12 +7,12 @@
 
 export interface SearchBarFilter {
   key: string;
-  operator: 'is' | 'is not' | 'is one of' | 'is not one of' | 'exists' | 'does not exist';
+  operator: 'equals' | 'does not equal' | 'one of' | 'not one of' | 'exists' | 'does not exist';
   value?: string;
 }
 
 export const getHostIpFilter = (): SearchBarFilter => ({
   key: 'host.ip',
-  operator: 'is',
+  operator: 'equals',
   value: '1.1.1.1',
 });

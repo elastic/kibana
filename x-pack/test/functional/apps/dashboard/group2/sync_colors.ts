@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         palette: { mode: 'legacy', id: 'default' },
       });
 
-      await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });
+      await filterBar.addFilter({ field: 'geo.src', operation: 'does not equal', value: 'CN' });
 
       await PageObjects.lens.save('vis2', false, true);
       await PageObjects.dashboard.openSettingsFlyout();

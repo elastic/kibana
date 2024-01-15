@@ -101,14 +101,14 @@ export default function ({ getPageObjects, getService }) {
     it('should apply new container state (time, query, filters) to embeddable', async () => {
       await filterBar.addFilterAndSelectDataView('logstash-*', {
         field: 'machine.os',
-        operation: 'is',
+        operation: 'equals',
         value: 'win 8',
       });
       await PageObjects.maps.waitForLayersToLoad();
 
       await filterBar.addFilterAndSelectDataView('meta_for_geo_shapes*', {
         field: 'shape_name',
-        operation: 'is',
+        operation: 'equals',
         value: 'alpha',
       });
       await PageObjects.maps.waitForLayersToLoad();
@@ -134,7 +134,7 @@ export default function ({ getPageObjects, getService }) {
       await dashboardPanelActions.editPanelByTitle('geo grid vector grid example');
       await PageObjects.maps.waitForLayersToLoad();
 
-      await filterBar.addFilter({ field: 'machine.os', operation: 'is', value: 'ios' });
+      await filterBar.addFilter({ field: 'machine.os', operation: 'equals', value: 'ios' });
       await PageObjects.maps.waitForLayersToLoad();
       await testSubjects.click('mapSaveAndReturnButton');
       const { rawResponse: gridResponse } = await PageObjects.maps.getResponseFromDashboardPanel(

@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should convert a by value TSVB viz to a Lens viz', async () => {
       await visualBuilder.resetPage();
       // adds filters
-      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'css' });
+      await filterBar.addFilter({ field: 'extension', operation: 'equals', value: 'css' });
       await header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('visualizeSaveButton');

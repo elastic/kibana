@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
-import { existsOperator, isOneOfOperator } from '../../filter_bar/filter_editor';
+import { existsOperator, oneOfOperator } from '../../filter_bar/filter_editor';
 import { strings } from '../i18n';
 
 const FilterValue = ({ value }: { value: string | number }) => {
@@ -71,7 +71,7 @@ export function FilterContent({ filter, valueLabel, fieldLabel, hideAlias }: Fil
       return (
         <>
           <FilterField filter={filter} fieldLabel={fieldLabel} />
-          <FilterValue value={`${isOneOfOperator.message} ${valueLabel}`} />
+          <FilterValue value={`${oneOfOperator.message} ${valueLabel}`} />
         </>
       );
     case FILTERS.QUERY_STRING:

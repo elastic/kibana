@@ -220,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ruleId = value;
     }
 
-    await filterBar.addFilter({ field: 'rule_id', operation: 'is', value: ruleId });
+    await filterBar.addFilter({ field: 'rule_id', operation: 'equals', value: ruleId });
     await PageObjects.discover.waitUntilSearchingHasFinished();
 
     const link = await getResultsLink();
@@ -409,7 +409,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // change rule configuration
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
-      await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
+      await filterBar.addFilter({ field: 'message.keyword', operation: 'equals', value: 'msg-1' });
 
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput', '1');

@@ -225,7 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should correctly filter for applied time filter on the main timefield', async () => {
       await filterBar.addFilter({
         field: '@timestamp',
-        operation: 'is between',
+        operation: 'between',
         value: { from: '2015-09-19', to: '2015-09-21' },
       });
       await PageObjects.visChart.waitForVisualizationRenderingStabilized();

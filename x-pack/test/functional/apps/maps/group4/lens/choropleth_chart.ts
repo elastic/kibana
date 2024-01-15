@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add filter to force data fetch to set activeData
       await filterBar.addFilter({
         field: 'bytes',
-        operation: 'is between',
+        operation: 'between',
         value: { from: '200', to: '10000' },
       });
 

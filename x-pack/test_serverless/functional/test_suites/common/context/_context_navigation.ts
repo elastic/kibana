@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await filterBar.addFilter({ field: columnName, operation: 'is', value });
+        await filterBar.addFilter({ field: columnName, operation: 'equals', value });
       }
       // TODO: Serverless sidebar causes the grid to be hidden, so set a larger window size
       await browser.setWindowSize(1920, 1080);

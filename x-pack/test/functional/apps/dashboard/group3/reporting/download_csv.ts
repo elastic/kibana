@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
 
         // add a filter
-        await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
+        await filterBar.addFilter({ field: 'category', operation: 'equals', value: `Men's Shoes` });
 
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
@@ -187,7 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.common.sleep(1000);
-        await filterBar.addFilter({ field: 'name.keyword', operation: 'is', value: 'Fethany' });
+        await filterBar.addFilter({ field: 'name.keyword', operation: 'equals', value: 'Fethany' });
         await PageObjects.common.sleep(1000);
       });
 

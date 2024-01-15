@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Can mark multiple selections invalid with Filter', async () => {
-        await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
+        await filterBar.addFilter({ field: 'sound.keyword', operation: 'equals', value: 'hiss' });
         await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Does not mark multiple selections invalid with Filter', async () => {
-        await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
+        await filterBar.addFilter({ field: 'sound.keyword', operation: 'equals', value: 'hiss' });
         await dashboard.waitForRenderComplete();
         await header.waitUntilLoadingHasFinished();
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {

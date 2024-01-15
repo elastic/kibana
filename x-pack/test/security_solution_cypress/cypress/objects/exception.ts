@@ -54,7 +54,7 @@ export const getExceptionList = (): ExceptionList => ({
 
 export const getException = (): Exception => ({
   field: 'agent.name',
-  operator: 'is',
+  operator: 'equals',
   values: ['foo'],
 });
 

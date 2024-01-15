@@ -34,7 +34,7 @@ export const IS = i18n.translate('xpack.securitySolution.editDataProvider.isLabe
 });
 
 export const IS_ONE_OF = i18n.translate('xpack.securitySolution.editDataProvider.isOneOfLabel', {
-  defaultMessage: 'is one of',
+  defaultMessage: 'one of',
 });
 
 export const IS_NOT = i18n.translate('xpack.securitySolution.editDataProvider.isNotLabel', {

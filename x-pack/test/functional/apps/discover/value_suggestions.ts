@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
           // Apply filter in context view
-          await filterBar.addFilter({ field: 'geo.dest', operation: 'is', value: 'US' });
+          await filterBar.addFilter({ field: 'geo.dest', operation: 'equals', value: 'US' });
         });
       });
     });

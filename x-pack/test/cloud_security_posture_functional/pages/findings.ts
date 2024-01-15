@@ -153,7 +153,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe.skip('SearchBar', () => {
       it('add filter', async () => {
         // Filter bar uses the field's customLabel in the DataView
-        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
+        await filterBar.addFilter({ field: 'Rule Name', operation: 'equals', value: ruleName1 });
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
         expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);

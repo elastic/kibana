@@ -11,26 +11,31 @@ import {
   EVENT_FILTERS_OPERATORS,
   ALL_OPERATORS,
   existsOperator,
-  isNotOperator,
-  isOperator,
+  doesNotEqualOperator,
+  equalsOperator,
 } from '@kbn/securitysolution-list-utils';
 import { getOperators } from '.';
 import { getField } from '../fields/index.mock';
 
 describe('#getOperators', () => {
-  test('it returns "isOperator" if passed in field is "undefined"', () => {
+  test('it returns "equalsOperator" if passed in field is "undefined"', () => {
     const operator = getOperators(undefined);
 
-    expect(operator).toEqual([isOperator]);
+    expect(operator).toEqual([equalsOperator]);
   });
 
   test('it returns expected operators when field type is "boolean"', () => {
     const operator = getOperators(getField('ssl'));
 
-    expect(operator).toEqual([isOperator, isNotOperator, existsOperator, doesNotExistOperator]);
+    expect(operator).toEqual([
+      equalsOperator,
+      doesNotEqualOperator,
+      existsOperator,
+      doesNotExistOperator,
+    ]);
   });
 
-  test('it returns "isOperator" when field type is "nested"', () => {
+  test('it returns "equalsOperator" when field type is "nested"', () => {
     const operator = getOperators({
       name: 'nestedField',
       scripted: false,
@@ -38,7 +43,7 @@ describe('#getOperators', () => {
       type: 'nested',
     });
 
-    expect(operator).toEqual([isOperator]);
+    expect(operator).toEqual([equalsOperator]);
   });
 
   test('it includes a "matches" operator when field is "file.path.text"', () => {

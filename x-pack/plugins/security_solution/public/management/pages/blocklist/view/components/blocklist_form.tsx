@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
-import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
+import { oneOfOperator } from '@kbn/securitysolution-list-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { uniq } from 'lodash';
 
@@ -521,7 +521,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiFormRow label={OPERATOR_LABEL} fullWidth>
-                <EuiFieldText name="operator" value={isOneOfOperator.message} readOnly />
+                <EuiFieldText name="operator" value={oneOfOperator.message} readOnly />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={2} />

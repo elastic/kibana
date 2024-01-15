@@ -177,7 +177,7 @@ describe('helpers', () => {
           ],
           selectedOperator: [
             {
-              label: 'is one of',
+              label: 'one of',
             },
           ],
           type: DataProviderType.default,
@@ -234,7 +234,7 @@ describe('helpers', () => {
           ],
           selectedOperator: [
             {
-              label: 'is one of',
+              label: 'one of',
             },
           ],
           type: DataProviderType.template,

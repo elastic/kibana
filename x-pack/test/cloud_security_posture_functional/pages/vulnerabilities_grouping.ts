@@ -91,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({
           field: 'Resource Name',
-          operation: 'is',
+          operation: 'equals',
           value: resourceName1,
         });
         expect(await filterBar.hasFilter('resource.name', resourceName1)).to.be(true);

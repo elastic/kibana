@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await filterBar.addFilter({
           field: 'extension.raw',
-          operation: 'is one of',
+          operation: 'one of',
           value: ['jpg', 'css'],
         });
         await filterBar.toggleFilterPinned('extension.raw');

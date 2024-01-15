@@ -12,27 +12,27 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
 export const strings = {
-  getIsOperatorOptionLabel: () =>
-    i18n.translate('unifiedSearch.filter.filterEditor.isOperatorOptionLabel', {
-      defaultMessage: 'is',
+  getEqualsOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.equalsOperatorOptionLabel', {
+      defaultMessage: 'equals',
     }),
-  getIsNotOperatorOptionLabel: () =>
-    i18n.translate('unifiedSearch.filter.filterEditor.isNotOperatorOptionLabel', {
-      defaultMessage: 'is not',
+  getDoesNotEqualOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.doesNotEqualOperatorOptionLabel', {
+      defaultMessage: 'does not equal',
     }),
-  getIsOneOfOperatorOptionLabel: () =>
-    i18n.translate('unifiedSearch.filter.filterEditor.isOneOfOperatorOptionLabel', {
-      defaultMessage: 'is one of',
+  getOneOfOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.oneOfOperatorOptionLabel', {
+      defaultMessage: 'one of',
     }),
-  getIsNotOneOfOperatorOptionLabel: () =>
-    i18n.translate('unifiedSearch.filter.filterEditor.isNotOneOfOperatorOptionLabel', {
-      defaultMessage: 'is not one of',
+  getNotOneOfOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.notOneOfOperatorOptionLabel', {
+      defaultMessage: 'not one of',
     }),
-  getIsBetweenOperatorOptionLabel: () =>
-    i18n.translate('unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel', {
-      defaultMessage: 'is between',
+  getBetweenOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.betweenOperatorOptionLabel', {
+      defaultMessage: 'between',
     }),
-  getIsGreaterOrEqualOperatorOptionLabel: () =>
+  getGreaterOrEqualOperatorOptionLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.greaterThanOrEqualOptionLabel', {
       defaultMessage: 'greater or equal',
     }),
@@ -40,9 +40,9 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.filterEditor.lessThanOrEqualOptionLabel', {
       defaultMessage: 'less than',
     }),
-  getIsNotBetweenOperatorOptionLabel: () =>
-    i18n.translate('unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
-      defaultMessage: 'is not between',
+  getNotBetweenOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.notBetweenOperatorOptionLabel', {
+      defaultMessage: 'not between',
     }),
   getExistsOperatorOptionLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.existsOperatorOptionLabel', {
@@ -58,11 +58,11 @@ export enum OPERATORS {
   LESS = 'less',
   GREATER_OR_EQUAL = 'greater_or_equal',
   BETWEEN = 'between',
-  IS = 'is',
+  EQUALS = 'equals',
   NOT_BETWEEN = 'not_between',
-  IS_NOT = 'is_not',
-  IS_ONE_OF = 'is_one_of',
-  IS_NOT_ONE_OF = 'is_not_one_of',
+  DOES_NOT_EQUAL = 'does_not_equal',
+  ONE_OF = 'one_of',
+  NOT_ONE_OF = 'not_one_of',
   EXISTS = 'exists',
   DOES_NOT_EXIST = 'does_not_exist',
 }
@@ -85,34 +85,34 @@ export interface Operator {
   field?: (field: DataViewField) => boolean;
 }
 
-export const isOperator = {
-  message: strings.getIsOperatorOptionLabel(),
+export const equalsOperator = {
+  message: strings.getEqualsOperatorOptionLabel(),
   type: FILTERS.PHRASE,
   negate: false,
-  id: OPERATORS.IS,
+  id: OPERATORS.EQUALS,
 };
 
-export const isNotOperator = {
-  message: strings.getIsNotOperatorOptionLabel(),
+export const doesNotEqualOperator = {
+  message: strings.getDoesNotEqualOperatorOptionLabel(),
   type: FILTERS.PHRASE,
   negate: true,
-  id: OPERATORS.IS_NOT,
+  id: OPERATORS.DOES_NOT_EQUAL,
 };
 
-export const isOneOfOperator = {
-  message: strings.getIsOneOfOperatorOptionLabel(),
+export const oneOfOperator = {
+  message: strings.getOneOfOperatorOptionLabel(),
   type: FILTERS.PHRASES,
   negate: false,
   fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
-  id: OPERATORS.IS_ONE_OF,
+  id: OPERATORS.ONE_OF,
 };
 
-export const isNotOneOfOperator = {
-  message: strings.getIsNotOneOfOperatorOptionLabel(),
+export const notOneOfOperator = {
+  message: strings.getNotOneOfOperatorOptionLabel(),
   type: FILTERS.PHRASES,
   negate: true,
   fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
-  id: OPERATORS.IS_NOT_ONE_OF,
+  id: OPERATORS.NOT_ONE_OF,
 };
 
 const rangeOperatorsSharedProps = {
@@ -127,30 +127,30 @@ const rangeOperatorsSharedProps = {
   },
 };
 
-export const isBetweenOperator = {
+export const betweenOperator = {
   ...rangeOperatorsSharedProps,
-  message: strings.getIsBetweenOperatorOptionLabel(),
+  message: strings.getBetweenOperatorOptionLabel(),
   id: OPERATORS.BETWEEN,
   negate: false,
 };
 
-export const isLessThanOperator = {
+export const lessThanOperator = {
   ...rangeOperatorsSharedProps,
   message: strings.getLessThanOperatorOptionLabel(),
   id: OPERATORS.LESS,
   negate: false,
 };
 
-export const isGreaterOrEqualOperator = {
+export const greaterOrEqualOperator = {
   ...rangeOperatorsSharedProps,
-  message: strings.getIsGreaterOrEqualOperatorOptionLabel(),
+  message: strings.getGreaterOrEqualOperatorOptionLabel(),
   id: OPERATORS.GREATER_OR_EQUAL,
   negate: false,
 };
 
-export const isNotBetweenOperator = {
+export const notBetweenOperator = {
   ...rangeOperatorsSharedProps,
-  message: strings.getIsNotBetweenOperatorOptionLabel(),
+  message: strings.getNotBetweenOperatorOptionLabel(),
   negate: true,
   id: OPERATORS.NOT_BETWEEN,
 };
@@ -170,14 +170,14 @@ export const doesNotExistOperator = {
 };
 
 export const FILTER_OPERATORS: Operator[] = [
-  isOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isNotOneOfOperator,
-  isGreaterOrEqualOperator,
-  isLessThanOperator,
-  isBetweenOperator,
-  isNotBetweenOperator,
+  equalsOperator,
+  doesNotEqualOperator,
+  oneOfOperator,
+  notOneOfOperator,
+  greaterOrEqualOperator,
+  lessThanOperator,
+  betweenOperator,
+  notBetweenOperator,
   existsOperator,
   doesNotExistOperator,
 ];

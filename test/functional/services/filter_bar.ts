@@ -10,12 +10,14 @@ import { $Values } from '@kbn/utility-types';
 import { FtrService } from '../ftr_provider_context';
 
 export const Operation = {
-  IS: 'is',
-  IS_NOT: 'is not',
-  IS_ONE_OF: 'is one of',
-  IS_NOT_ONE_OF: 'is not one of',
-  IS_BETWEEN: 'is between',
-  IS_NOT_BETWEEN: 'is not between',
+  EQUALS: 'equals',
+  DOES_NOT_EQUAL: 'does not equal',
+  ONE_OF: 'one of',
+  NOT_ONE_OF: 'not one of',
+  BETWEEN: 'between',
+  NOT_BETWEEN: 'not between',
+  LESS_THAN: 'less than',
+  GREATER_OR_EQUAL: 'greater or equal',
   EXISTS: 'exists',
   DOES_NOT_EXIST: 'does not exist',
 } as const;
@@ -32,17 +34,17 @@ interface BasicFilter {
 }
 
 interface FilterWithMultipleValues extends BasicFilter {
-  operation: typeof Operation.IS_ONE_OF | typeof Operation.IS_NOT_ONE_OF;
+  operation: typeof Operation.ONE_OF | typeof Operation.NOT_ONE_OF;
   value: string[] | string;
 }
 
 interface FilterWithRange extends BasicFilter {
-  operation: typeof Operation.IS_BETWEEN | typeof Operation.IS_NOT_BETWEEN;
+  operation: typeof Operation.BETWEEN | typeof Operation.NOT_BETWEEN;
   value: { from: string | undefined; to: string | undefined };
 }
 
 interface FilterWithSingleValue extends BasicFilter {
-  operation: typeof Operation.IS | typeof Operation.IS_NOT;
+  operation: typeof Operation.EQUALS | typeof Operation.DOES_NOT_EQUAL;
   value: string;
 }
 

@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.initTests();
         await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.common.navigateToApp('discover');
-        await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'jpg' });
+        await filterBar.addFilter({ field: 'extension.raw', operation: 'equals', value: 'jpg' });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.saveSearch(savedSearchName);
         discoverSavedSearchUrlPath = (await browser.getCurrentUrl()).split('?')[0];
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should allow adding filters while having a linked saved search', async () => {
         await filterBar.addFilter({
           field: 'bytes',
-          operation: 'is between',
+          operation: 'between',
           value: { from: '100', to: '3000' },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();

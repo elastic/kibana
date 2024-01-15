@@ -13,40 +13,40 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatorOption } from '../types';
 
-export const isOperator: OperatorOption = {
-  message: i18n.translate('lists.exceptions.isOperatorLabel', {
-    defaultMessage: 'is',
+export const equalsOperator: OperatorOption = {
+  message: i18n.translate('lists.exceptions.equalsOperatorLabel', {
+    defaultMessage: 'equals',
   }),
   operator: OperatorEnum.INCLUDED,
   type: OperatorTypeEnum.MATCH,
-  value: 'is',
+  value: 'equals',
 };
 
-export const isNotOperator: OperatorOption = {
-  message: i18n.translate('lists.exceptions.isNotOperatorLabel', {
-    defaultMessage: 'is not',
+export const doesNotEqualOperator: OperatorOption = {
+  message: i18n.translate('lists.exceptions.doesNotEqualOperatorLabel', {
+    defaultMessage: 'does not equal',
   }),
   operator: OperatorEnum.EXCLUDED,
   type: OperatorTypeEnum.MATCH,
   value: 'is_not',
 };
 
-export const isOneOfOperator: OperatorOption = {
-  message: i18n.translate('lists.exceptions.isOneOfOperatorLabel', {
-    defaultMessage: 'is one of',
+export const oneOfOperator: OperatorOption = {
+  message: i18n.translate('lists.exceptions.oneOfOperatorLabel', {
+    defaultMessage: 'one of',
   }),
   operator: OperatorEnum.INCLUDED,
   type: OperatorTypeEnum.MATCH_ANY,
   value: 'is_one_of',
 };
 
-export const isNotOneOfOperator: OperatorOption = {
-  message: i18n.translate('lists.exceptions.isNotOneOfOperatorLabel', {
-    defaultMessage: 'is not one of',
+export const notOneOfOperator: OperatorOption = {
+  message: i18n.translate('lists.exceptions.notOneOfOperatorLabel', {
+    defaultMessage: 'not one of',
   }),
   operator: OperatorEnum.EXCLUDED,
   type: OperatorTypeEnum.MATCH_ANY,
-  value: 'is_not_one_of',
+  value: 'not_one_of',
 };
 
 export const existsOperator: OperatorOption = {
@@ -104,10 +104,10 @@ export const doesNotMatchOperator: OperatorOption = {
 };
 
 export const EVENT_FILTERS_OPERATORS: OperatorOption[] = [
-  isOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isNotOneOfOperator,
+  equalsOperator,
+  doesNotEqualOperator,
+  oneOfOperator,
+  notOneOfOperator,
   matchesOperator,
   doesNotMatchOperator,
 ];
@@ -117,10 +117,10 @@ export const EVENT_FILTERS_OPERATORS: OperatorOption[] = [
  * supported by the detection engine.
  */
 export const DETECTION_ENGINE_EXCEPTION_OPERATORS: OperatorOption[] = [
-  isOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isNotOneOfOperator,
+  equalsOperator,
+  doesNotEqualOperator,
+  oneOfOperator,
+  notOneOfOperator,
   existsOperator,
   doesNotExistOperator,
   isInListOperator,
@@ -130,10 +130,10 @@ export const DETECTION_ENGINE_EXCEPTION_OPERATORS: OperatorOption[] = [
 ];
 
 export const ALL_OPERATORS: OperatorOption[] = [
-  isOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isNotOneOfOperator,
+  equalsOperator,
+  doesNotEqualOperator,
+  oneOfOperator,
+  notOneOfOperator,
   existsOperator,
   doesNotExistOperator,
   isInListOperator,
@@ -143,10 +143,10 @@ export const ALL_OPERATORS: OperatorOption[] = [
 ];
 
 export const EXCEPTION_OPERATORS_SANS_LISTS: OperatorOption[] = [
-  isOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isNotOneOfOperator,
+  equalsOperator,
+  doesNotEqualOperator,
+  oneOfOperator,
+  notOneOfOperator,
   existsOperator,
   doesNotExistOperator,
   matchesOperator,

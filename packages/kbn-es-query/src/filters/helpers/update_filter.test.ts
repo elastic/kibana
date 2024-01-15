@@ -223,7 +223,7 @@ describe('updateFilter', () => {
       }),
     };
     const operator = {
-      message: 'is one of',
+      message: 'one of',
       type: 'phrases',
       negate: true,
     };

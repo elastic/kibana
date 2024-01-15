@@ -156,7 +156,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addFilter');
       await testSubjects.click('filterFieldSuggestionList');
       await comboBox.set('filterFieldSuggestionList', '_id');
-      await comboBox.set('filterOperatorList', 'is not');
+      await comboBox.set('filterOperatorList', 'does not exist');
       await testSubjects.setValue('filterParams', 'fake-rule-id');
       await testSubjects.click('saveFilter');
       await testSubjects.setValue('queryInput', '_id: *');
