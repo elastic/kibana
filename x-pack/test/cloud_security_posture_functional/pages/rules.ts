@@ -130,13 +130,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {
         await rule.rulePage.clickFilterButton('enabled');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) > 1).to.be(true);
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
       });
 
       it('Should only display Disabled rules when Disabled Rules filter is ON', async () => {
         await rule.rulePage.clickFilterButton('disabled');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) > 1).to.be(true);
       });
     });
   });
