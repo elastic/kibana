@@ -18,6 +18,17 @@ import type {
   VisualizationEmbeddableProps,
 } from '../../../common/components/visualization_actions/types';
 
+const mockContributingAlerts = Array(6).fill({});
+const expectedRiskInputsLength = mockContributingAlerts.length;
+
+const mockUseRiskContributingAlerts = jest
+  .fn()
+  .mockReturnValue({ loading: false, data: mockContributingAlerts });
+
+jest.mock('../../hooks/use_risk_contributing_alerts', () => ({
+  useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
+}));
+
 const mockVisualizationEmbeddable = jest
   .fn()
   .mockReturnValue(<div data-test-subj="visualization-embeddable" />);
@@ -44,7 +55,9 @@ describe('RiskSummary', () => {
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-    expect(getByTestId('risk-summary-table')).toHaveTextContent('Inputs1');
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `Inputs${expectedRiskInputsLength}`
+    );
     expect(getByTestId('risk-summary-table')).toHaveTextContent('CategoryAlerts');
   });
 
