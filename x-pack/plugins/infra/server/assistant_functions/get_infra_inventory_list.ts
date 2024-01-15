@@ -63,7 +63,6 @@ export function registerGetInfraInventoryListFunction({
             { type: 'cpu' },
             { type: 'diskSpaceUsage' },
             { type: 'memory' },
-            { type: 'memoryFree' },
             { type: 'normalizedLoad1m' },
             { type: 'rx' },
             { type: 'tx' },

@@ -48,9 +48,13 @@ export function registerAssistantFunctions(libs: InfraBackendLibs): ChatRegistra
       There is an important fields in Infrastructure:
       - host.name: the name of the host
 
-      Hosts have following metrics: cpu, disk space usage, memory, memory free, normalized load for 1m (normalized load for the last minute), rx (Inbound network traffic), tx (Outbound network traffic).
-      tx and rx are measured in bytes per second.
-      normalized load for 1m must be formatted to percent.
+      Hosts have following metrics: 
+      - cpu (percentage), 
+      - disk space usage (percentage), 
+      - memory (percentage), 
+      - normalized load for 1m (percentage), 
+      - rx (in bits/second. Format it to bytes/second), 
+      - tx (in bits/scond. Format it to bytes/second).
 
       For the metrics analysis, you will use the Saturation indicator from the SRE Golden Signals. Saturation, also known as "utilization," 
       measures the capacity or usage level of resources in the system. It helps ensure that resources are not overly utilized, leading to performance degradation or outages.
