@@ -18,7 +18,7 @@ export type FormFieldsState<FF extends string, FS extends string, VN extends str
 
 export interface FormField<FF extends string, FS extends string, VN extends string> {
   formFieldName: FF;
-  configFieldName: string;
+  configFieldName: string | undefined;
   defaultValue: string;
   dependsOn: FF[];
   errorMessages: string[];
@@ -34,12 +34,12 @@ export interface FormField<FF extends string, FS extends string, VN extends stri
 
 export const initializeFormField = <FF extends string, FS extends string, VN extends string, C>(
   formFieldName: FF,
-  configFieldName: string,
+  configFieldName?: string,
   config?: C,
   overloads?: Partial<FormField<FF, FS, VN>>
 ): FormField<FF, FS, VN> => {
   const defaultValue = overloads?.defaultValue !== undefined ? overloads.defaultValue : '';
-  const rawValue = getNestedProperty(config ?? {}, configFieldName, undefined);
+  const rawValue = configFieldName && getNestedProperty(config ?? {}, configFieldName, undefined);
   const value = rawValue !== null && rawValue !== undefined ? rawValue.toString() : '';
 
   return {

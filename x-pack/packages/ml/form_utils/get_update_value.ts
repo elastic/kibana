@@ -30,6 +30,9 @@ export const getUpdateValue = <
   enforceFormValue = false
 ) => {
   const formStateAttribute = formFields[attribute];
+
+  if (formStateAttribute.configFieldName === undefined) return {};
+
   const fallbackValue = formStateAttribute.isNullable ? null : formStateAttribute.defaultValue;
 
   const enabledBasedOnSection =
@@ -67,11 +70,11 @@ export const getUpdateValue = <
   // If the resettable section the form field belongs to is disabled,
   // the whole section will be set to `null` to do the actual reset.
   if (formStateAttribute.section !== undefined && !enabledBasedOnSection) {
-    return setNestedProperty(
-      dependsOnConfig,
-      formSections[formStateAttribute.section].configFieldName,
-      null
-    );
+    const section = formSections[formStateAttribute.section];
+
+    if (section.configFieldName !== undefined) {
+      return setNestedProperty(dependsOnConfig, section.configFieldName, null);
+    }
   }
 
   return enabledBasedOnSection && (formValue !== configValue || enforceFormValue)
