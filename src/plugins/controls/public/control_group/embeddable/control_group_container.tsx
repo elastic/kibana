@@ -93,6 +93,9 @@ export class ControlGroupContainer extends Container<
   private lastUsedDataViewId?: string;
   public diffingSubscription: Subscription = new Subscription();
 
+  private currentFilters: Filter[] = [];
+  private currentTimeslice: [number, number] | undefined;
+
   // state management
   public select: ControlGroupReduxEmbeddableTools['select'];
   public getState: ControlGroupReduxEmbeddableTools['getState'];
@@ -103,7 +106,7 @@ export class ControlGroupContainer extends Container<
 
   private cleanupStateTools: () => void;
 
-  public onFiltersPublished$: Subject<{ filters: Filter[]; timeslice?: [number, number] }>;
+  public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
 
   /** This currently reports the **entire** persistable control group input on unsaved changes */
@@ -127,7 +130,8 @@ export class ControlGroupContainer extends Container<
     );
 
     this.recalculateFilters$ = new Subject();
-    this.onFiltersPublished$ = new Subject<{ filters: Filter[]; timeslice?: [number, number] }>();
+    this.onFiltersUpdated$ = new Subject<null>();
+    this.onFiltersPublished$ = new Subject<Filter[]>();
     this.onControlRemoved$ = new Subject<string>();
 
     // start diffing control group state
@@ -207,21 +211,18 @@ export class ControlGroupContainer extends Container<
           !compareFilters(this.output.filters ?? [], filters ?? [], COMPARE_ALL_OPTIONS) ||
           !isEqual(this.output.timeslice, timeslice)
         ) {
-          this.dispatch.setApplyButtonEnabled(true);
+          this.currentFilters = filters;
+          this.currentTimeslice = timeslice;
+
           const autoApplyFilters = !Boolean(this.getState().explicitInput.showApplySelections);
           if (autoApplyFilters) {
-            this.onFiltersPublished$.next({ filters, timeslice });
+            this.publishFilters();
+          } else {
+            this.dispatch.setApplyButtonEnabled(true);
           }
         } else {
           this.dispatch.setApplyButtonEnabled(false);
         }
-      })
-    );
-
-    this.subscriptions.add(
-      this.onFiltersPublished$.pipe(debounceTime(10)).subscribe(({ filters, timeslice }) => {
-        this.dispatch.setApplyButtonEnabled(false);
-        this.updateOutput({ filters: uniqFilters(filters), timeslice });
       })
     );
   };
@@ -326,8 +327,12 @@ export class ControlGroupContainer extends Container<
   };
 
   public publishFilters = () => {
-    const { filters, timeslice } = this.recalculateFilters();
-    this.onFiltersPublished$.next({ filters, timeslice });
+    this.updateOutput({
+      filters: uniqFilters(this.currentFilters),
+      timeslice: this.currentTimeslice,
+    });
+    this.onFiltersPublished$.next(this.currentFilters);
+    this.dispatch.setApplyButtonEnabled(false);
   };
 
   private recalculateDataViews = () => {
