@@ -34,6 +34,7 @@ import {
   EuiTableRowCellCheckbox,
   EuiText,
 } from '@elastic/eui';
+import { get } from 'lodash';
 
 import {
   PageLoading,
@@ -346,8 +347,7 @@ export class IndexTable extends Component {
     if (columnConfig.render) {
       return columnConfig.render(index);
     }
-    console.log({ value: index[columnConfig.fieldName] });
-    return index[columnConfig.fieldName];
+    return get(index, columnConfig.fieldName);
   }
 
   buildRowCells(index, columnConfigs) {
