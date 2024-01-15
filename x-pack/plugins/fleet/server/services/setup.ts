@@ -369,6 +369,7 @@ export async function ensureFleetDirectories() {
 
   try {
     await fs.stat(bundledPackageLocation);
+    logger.debug(`Bundled package directory ${bundledPackageLocation} exists`);
   } catch (error) {
     logger.warn(
       `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`
