@@ -5127,14 +5127,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-common.UnifiedFieldListSidebarContainerApi.isSidebarCollapsed$",
+            "id": "def-common.UnifiedFieldListSidebarContainerApi.sidebarVisibility",
             "type": "Object",
             "tags": [],
-            "label": "isSidebarCollapsed$",
+            "label": "sidebarVisibility",
             "description": [],
             "signature": [
-              "Observable",
-              "<boolean>"
+              "SidebarVisibility"
             ],
             "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
             "deprecated": false,
