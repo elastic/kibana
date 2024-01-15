@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-ls -la .es/
-
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/build_kibana.sh
 .buildkite/scripts/build_kibana_plugins.sh
