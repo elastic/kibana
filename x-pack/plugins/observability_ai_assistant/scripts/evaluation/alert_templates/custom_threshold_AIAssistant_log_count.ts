@@ -5,36 +5,54 @@
  * 2.0.
  */
 
-import {
-  Aggregators,
-  Comparator,
-} from '@kbn/observability-plugin/common/custom_threshold_rule/types';
+export enum Comparator {
+  GT = '>',
+  LT = '<',
+  GT_OR_EQ = '>=',
+  LT_OR_EQ = '<=',
+  BETWEEN = 'between',
+  OUTSIDE_RANGE = 'outside',
+}
 
-export const custom_threshold_AIAssistant_metric_avg = {
+export enum Aggregators {
+  COUNT = 'count',
+  AVERAGE = 'avg',
+  SUM = 'sum',
+  MIN = 'min',
+  MAX = 'max',
+  CARDINALITY = 'cardinality',
+}
+
+export const custom_threshold_AIAssistant_log_count = {
   dataView: {
-    indexPattern: '.ds-metrics-apm.app.synth*',
-    id: 'data-view-id-metrics',
+    indexPattern: '.ds-logs-synth*',
+    id: 'data-view-id-logs',
     shouldCreate: true,
   },
   ruleParams: {
+    tags: ['observability'],
     consumer: 'logs',
-    name: 'metric_synth',
+    name: 'logs_synth',
     rule_type_id: 'observability.rules.custom_threshold',
     params: {
       criteria: [
         {
           comparator: Comparator.GT,
-          threshold: [0.5],
+          threshold: [100],
           timeSize: 2,
           timeUnit: 'h',
-          metrics: [{ name: 'A', field: 'system.cpu.total.norm.pct', aggType: Aggregators.AVERAGE }],
+          metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
         },
       ],
       groupBy: ['service.name'],
+      alertOnNoData: true,
+      alertOnGroupDisappear: true,
       searchConfiguration: {
         query: {
           query: '',
+          language: 'kuery',
         },
+        index: ".ds-logs-synth*",
       },
     },
     actions: [],

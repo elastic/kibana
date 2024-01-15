@@ -11,16 +11,14 @@ import {
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FIRED_ACTIONS_ID } from './constants';
-import { createRule } from './manage_rule';
+import { createRule } from './create_rule';
 
 export const createCustomThresholdRule = async (
-  kibanaUrl: string,
   actionId: string,
   dataViewId: string,
   ruleParams: {
     consumer?: string;
     name?: string;
-    rule_type_id?: string;
     params?: {
       criteria: any[];
       groupBy?: string[];
@@ -36,7 +34,7 @@ export const createCustomThresholdRule = async (
     tags: ['observability'],
     consumer: ruleParams.consumer || 'logs',
     name: ruleParams.name || 'Default custom threshold rule name',
-    rule_type_id: ruleParams.rule_type_id || OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+    rule_type_id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     params: {
       criteria: ruleParams.params?.criteria || [
         {
@@ -86,5 +84,5 @@ export const createCustomThresholdRule = async (
     },
   };
 
-  return createRule(kibanaUrl, customThresholdRuleParams);
+  return createRule(customThresholdRuleParams);
 };

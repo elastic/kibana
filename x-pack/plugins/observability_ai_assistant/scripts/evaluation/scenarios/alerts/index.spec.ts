@@ -10,12 +10,11 @@
 
 import expect from '@kbn/expect';
 import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
+import { apm_transaction_rate_AIAssistant, custom_threshold_AIAssistant_log_count } from '../../alert_templates';
 import { MessageRole } from '../../../../common';
 
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { apm_transaction_rate_AIAssistant, custom_threshold_AIAssistant_log_count } from '@kbn/observability-alerting-test-data'
-
 
 
 describe('alert function', () => {

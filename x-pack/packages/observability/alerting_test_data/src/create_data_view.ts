@@ -6,16 +6,17 @@
  */
 
 import axios from 'axios';
-import { HEADERS } from './constants';
+import { HEADERS, PASSWORD, USERNAME } from './constants';
+import { getKibanaUrl } from './get_kibana_url';
 
-export const createDataView = async (kibanaUrl: string, {
+export const createDataView = async ({
   indexPattern,
   id,
 }: {
   indexPattern: string;
   id: string;
 }) => {
-  const DATA_VIEW_CREATION_API = `${kibanaUrl}/api/content_management/rpc/create`;
+  const DATA_VIEW_CREATION_API = `${await getKibanaUrl()}/api/content_management/rpc/create`;
   const dataViewParams = {
     contentTypeId: 'index-pattern',
     data: {
@@ -27,7 +28,7 @@ export const createDataView = async (kibanaUrl: string, {
       fieldFormatMap: '{}',
       typeMeta: '{}',
       runtimeFieldMap: '{}',
-      name: id,
+      name: indexPattern,
     },
     options: { id },
     version: 1,
@@ -35,27 +36,9 @@ export const createDataView = async (kibanaUrl: string, {
 
   return axios.post(DATA_VIEW_CREATION_API, dataViewParams, {
     headers: HEADERS,
-    validateStatus: () => true
-  });
-};
-
-export const deleteDataView = async (kibanaUrl: string, {
-  indexPattern,
-  id,
-}: {
-  indexPattern: string;
-  id: string;
-}) => {
-  const DATA_VIEW_DELETE_API = `${kibanaUrl}/api/content_management/rpc/delete`;
-  const dataViewParams = {
-    contentTypeId: 'index-pattern',
-    id: id,
-    options: { force: true },
-    version: 1,
-  };
-
-  return axios.post(DATA_VIEW_DELETE_API, dataViewParams, {
-    headers: HEADERS,
-    validateStatus: () => true
+    auth: {
+      username: USERNAME,
+      password: PASSWORD,
+    },
   });
 };
