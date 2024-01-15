@@ -258,15 +258,22 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               name,
               meta: { type: normalizeType(type) },
             })) ?? [];
-          const nullColumns =
-            body.null_columns?.map(({ name, type }) => ({
+
+          const difference =
+            body.all_columns?.filter((col1) => {
+              return !body.columns.some((col2) => {
+                return col1.name === col2.name;
+              });
+            }) ?? [];
+          const emptyColumns =
+            difference?.map(({ name, type }) => ({
               id: name,
               name,
               meta: { type: normalizeType(type) },
               isNull: true,
             })) ?? [];
 
-          const allColumns = [...columns, ...nullColumns];
+          const allColumns = [...columns, ...emptyColumns];
           const columnNames = allColumns.map(({ name }) => name);
           const rows = body.values.map((row) => zipObject(columnNames, row));
 
