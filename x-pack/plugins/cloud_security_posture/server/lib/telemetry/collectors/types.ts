@@ -37,28 +37,9 @@ export interface CspmUsage {
   muted_rules_stats: MutedRulesStats[];
 }
 
-export type MutedRulesStats = Pick<
-  CspBenchmarkRuleMetadata,
-  'id' | 'name' | 'section' | 'version'
-> & {
-  benchmark_id: string;
-  benchmark_name: string;
-  rule_number: string;
-  posture_type: string;
-  benchmark_version: string;
-};
-
 export interface PackageSetupStatus {
   status: CspStatusCode;
   installedPackagePolicies: number;
-  healthyAgents: number;
-}
-export interface BenchmarkMutedRule {
-  id: string;
-  name: string;
-  section: string;
-  tags: string;
-  benchmark: CspStatusCode;
   healthyAgents: number;
 }
 
@@ -236,3 +217,13 @@ export interface AccountEntity {
     pods_count: Value;
   };
 }
+export type MutedRulesStats = Pick<
+  CspBenchmarkRuleMetadata,
+  'id' | 'name' | 'section' | 'version'
+> & {
+  benchmark_id: string;
+  benchmark_name: string;
+  rule_number: string;
+  posture_type: string;
+  benchmark_version: string;
+};

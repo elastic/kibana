@@ -23,7 +23,7 @@ export const getMutedRulesStats = async (
   try {
     const benchmarkRulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
     const mutedBenchmarkRules = Object.fromEntries(
-      Object.entries(benchmarkRulesStates).filter(([key, value]) => value.muted === true)
+      Object.entries(benchmarkRulesStates).filter(([_, value]) => value.muted === true)
     );
 
     const mutedRulesStats = await Promise.all(
