@@ -12,10 +12,9 @@ import type { ValueParserName } from './value_parsers';
 // The form state defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final config object will be nested.
 
-export type FormFieldsState<FF extends string, FS extends string, VN extends string> = Record<
-  FF,
-  FormField<FF, FS, VN>
->;
+export type FormFieldsState<FF extends string, FS extends string, VN extends string> = {
+  [key in FF]: FormField<FF, FS, VN>;
+};
 
 export interface FormField<FF extends string, FS extends string, VN extends string> {
   formFieldName: FF;
@@ -26,6 +25,7 @@ export interface FormField<FF extends string, FS extends string, VN extends stri
   isNullable: boolean;
   isOptional: boolean;
   isOptionalInSection?: boolean;
+  reservedValues?: string[];
   section?: FS;
   validator: VN;
   value: string;

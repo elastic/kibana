@@ -6,18 +6,15 @@
  */
 
 import React, { createContext, useContext, useMemo, type FC, type PropsWithChildren } from 'react';
-import { configureStore, createSlice } from '@reduxjs/toolkit';
-import { useDispatch, Provider } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import useMount from 'react-use/lib/useMount';
+import { configureStore } from '@reduxjs/toolkit';
+import { Provider } from 'react-redux';
 
-import type { FormFieldsState } from '@kbn/ml-form-utils/form_field';
-import type { FormSectionsState } from '@kbn/ml-form-utils/form_section';
-import { getFormActions } from '@kbn/ml-form-utils/redux_actions';
+import type { State } from '@kbn/ml-form-utils/form_slice';
+import { createFormSlice } from '@kbn/ml-form-utils/form_slice';
 
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
-import { initialize, setApiError } from './actions';
 import type { FormFields } from './form_field';
 import { validators, type ValidatorName } from './validators';
 import type { FormSections } from './form_section';
@@ -34,34 +31,23 @@ export interface ProviderProps {
   dataViewId?: string;
 }
 
-export interface State {
-  apiErrorMessage?: string;
-  formFields: FormFieldsState<FormFields, FormSections, ValidatorName>;
-  formSections: FormSectionsState<FormSections>;
-}
-
-const { setFormField, setFormSection } = getFormActions<
-  FormFields,
-  FormSections,
-  ValidatorName,
-  State
->(validators);
-
-const editTransformFlyoutSlice = createSlice({
-  name: 'editTransformFlyout',
-  initialState: getDefaultState(),
-  reducers: {
-    initialize,
-    setApiError,
-    setFormField,
-    setFormSection,
-  },
-});
+export type EditTransformFlyoutState = State<FormFields, FormSections, ValidatorName>;
+export const editTransformFlyoutSlice = createFormSlice(
+  'editTransformFlyout',
+  getDefaultState,
+  validators
+);
 
 const getReduxStore = () =>
   configureStore({
-    reducer: editTransformFlyoutSlice.reducer,
+    reducer: {
+      [editTransformFlyoutSlice.name]: editTransformFlyoutSlice.reducer,
+    },
   });
+
+// Because we get the redux store with a factory function we need to
+// use these nested ReturnTypes to dynamically get the StoreState.
+export type StoreState = ReturnType<ReturnType<typeof getReduxStore>['getState']>;
 
 const EditTransformFlyoutContext = createContext<ProviderProps | null>(null);
 
@@ -73,7 +59,7 @@ export const EditTransformFlyoutProvider: FC<PropsWithChildren<ProviderProps>> =
 
   // Apply original transform config to redux form state.
   useMount(() => {
-    store.dispatch(editTransformFlyoutSlice.actions.initialize(props));
+    store.dispatch(editTransformFlyoutSlice.actions.initialize(getDefaultState(props.config)));
   });
 
   return (
@@ -87,9 +73,4 @@ export const useEditTransformFlyoutContext = () => {
   const c = useContext(EditTransformFlyoutContext);
   if (c === null) throw new Error('EditTransformFlyoutContext not set.');
   return c;
-};
-
-export const useEditTransformFlyoutActions = () => {
-  const dispatch = useDispatch();
-  return useMemo(() => bindActionCreators(editTransformFlyoutSlice.actions, dispatch), [dispatch]);
 };

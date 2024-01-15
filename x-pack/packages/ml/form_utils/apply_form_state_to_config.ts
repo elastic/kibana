@@ -20,13 +20,7 @@ import type { FormSectionsState } from './form_section';
 // The code is also able to identify relationships/dependencies between form fields.
 // For example, if the `pipeline` field was changed, it's necessary to make the `index`
 // field part of the request, otherwise the update would fail.
-export const applyFormStateToConfig = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  C,
-  RC extends any
->(
+export const applyFormStateToConfig = <FF extends string, FS extends string, VN extends string, C>(
   config: C,
   formFields: FormFieldsState<FF, FS, VN>,
   formSections: FormSectionsState<FS>
@@ -37,4 +31,4 @@ export const applyFormStateToConfig = <
     (updateConfig, field) =>
       merge({ ...updateConfig }, getUpdateValue(field, config, formFields, formSections)),
     {}
-  ) as RC;
+  );

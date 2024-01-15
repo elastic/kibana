@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
-
-import type { State } from '../edit_transform_flyout_state';
-
-export const selectFormSections = (s: State) => s.formSections;
-export const useFormSections = () => {
-  return useSelector(selectFormSections);
-};
+export function foo() {
+  return 'hello world';
+}
