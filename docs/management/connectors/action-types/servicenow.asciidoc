@@ -32,7 +32,7 @@ image::management/connectors/images/servicenow-connector-oauth.png[ServiceNow co
 [[servicenow-connector-configuration]]
 ==== Connector configuration
 
-{sn-itsm} connectors have a name and the following configuration properties:
+{sn-itsm} connectors have the following configuration properties:
 
 Client ID::
 The client identifier assigned to your OAuth application.
@@ -73,6 +73,8 @@ Additional comments::
 Additional information for the client, such as how to troubleshoot the issue.
 Category::
 The category of the incident.
+Correlation display::
+A descriptive label of the alert for correlation purposes in {sn}.
 Correlation ID::
 Connectors using the same correlation ID will be associated with the same {sn} incident. 
 This value determines whether a new {sn} incident will be created or an existing one is updated.
@@ -83,8 +85,6 @@ The maximum character length for this value is 100 characters.
 NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that {sn} will create a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, {sn} creates and continually updates a single incident record for the alert.
 --
 
-Correlation display::
-A descriptive label of the alert for correlation purposes in {sn}.
 Description::
 The details about the incident.
 Impact::
@@ -135,34 +135,40 @@ from the {sn} store.
 ==== Assign cross-scope privileges
 
 The Elastic for ITSM app requires specific cross-scope privilege records to run successfully.
-In particular, you must have a privilege record for the `Elastic for ITSM` application and source scope with a `global` target scope for each of the following targets:
+In particular, you must have a privilege record for the `Elastic for ITSM` application with the status set to `Allowed` for each of the following targets:
 
 |===
-|Target name, type|Operation|Status
+|Target scope|Name|Type|Operation
 
-|GlideRecord.insert, Scriptable
+|Global
+|GlideRecord.insert
+|Scriptable
 |Execute API
-|Allowed
 
-|GlideRecord.setValue, Scriptable
+|Global
+|GlideRecord.setValue
+|Scriptable
 |Execute API
-|Allowed
 
-|GlideRecordSecure.getValue, Scriptable
+|Global
+|GlideRecordSecure.getValue
+|Scriptable
 |Execute API
-|Allowed
 
-|Incident, Table
+|Global
+|Incident
+|Table
 |Read
-|Allowed
 
-|ScriptableServiceResultBuilder.setBody, Scriptable
+|Global
+|ScriptableServiceResultBuilder.setBody
+|Scriptable
 |Execute API
-|Allowed
 
-|ScopedGlideElement, Scriptable
+|Global
+|ScopedGlideElement
+|Scriptable
 |Execute API
-|Allowed
 |===
 
 To access the cross scope privileges table:

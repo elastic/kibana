@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '../../common/constants';
+import {
+  CASES_ATTACHMENT_CHANGE_POINT_CHART,
+  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+} from '../../common/constants';
 import { getEmbeddableChangePointChart } from '../embeddable/embeddable_change_point_chart_component';
 import { AiopsPluginStartDeps } from '../types';
 
@@ -19,7 +22,11 @@ export function registerChangePointChartsAttachment(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
 ) {
-  const EmbeddableComponent = getEmbeddableChangePointChart(coreStart, pluginStart);
+  const EmbeddableComponent = getEmbeddableChangePointChart(
+    EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+    coreStart,
+    pluginStart
+  );
 
   cases.attachmentFramework.registerPersistableState({
     id: CASES_ATTACHMENT_CHANGE_POINT_CHART,
