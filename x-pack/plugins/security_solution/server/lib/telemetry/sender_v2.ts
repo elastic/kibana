@@ -23,9 +23,15 @@ import { CachedSubject, retryOnError$ } from './rxjs_helpers';
 import { SenderUtils } from './sender_helpers';
 import { newTelemetryLogger, type TelemetryLogger } from './helpers';
 
+export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
+  bufferTimeSpanMillis: 60 * 1_000,
+  inflightEventsThreshold: 1_000,
+  maxPayloadSizeBytes: 1024 * 1024, // 1MiB
+};
+
 export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   private retryConfig: RetryConfig | undefined;
-  private defaultQueueConfig: QueueConfig | undefined;
+  private fallbackQueueConfig: QueueConfig | undefined;
   private queues: Map<TelemetryChannel, QueueConfig> | undefined;
 
   private readonly events$ = new rx.Subject<Event>();
@@ -45,7 +51,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
 
   public setup(
     retryConfig: RetryConfig,
-    defaultQueueConfig: QueueConfig,
+    fallbackQueueConfig: QueueConfig,
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     telemetryUsageCounter?: IUsageCounter
@@ -53,7 +59,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     this.ensureStatus(ServiceStatus.CREATED);
 
     this.retryConfig = retryConfig;
-    this.defaultQueueConfig = defaultQueueConfig;
+    this.fallbackQueueConfig = fallbackQueueConfig;
     this.queues = new Map<TelemetryChannel, QueueConfig>();
     this.cache = new CachedSubject<Event>(this.events$);
 
@@ -127,8 +133,12 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     });
   }
 
-  public updateConfig(channel: TelemetryChannel, config: QueueConfig): void {
+  public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {
     this.getQueues().set(channel, cloneDeep(config));
+  }
+
+  public updateDefaultQueueConfig(config: QueueConfig): void {
+    this.fallbackQueueConfig = cloneDeep(config);
   }
 
   // internal methods
@@ -243,7 +253,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   }
 
   private getConfigFor(channel: TelemetryChannel): QueueConfig {
-    const config = this.queues?.get(channel) ?? this.defaultQueueConfig;
+    const config = this.queues?.get(channel) ?? this.fallbackQueueConfig;
     if (config === undefined) throw new Error(`No queue config found for channel "${channel}"`);
     return config;
   }

@@ -17,7 +17,7 @@ import type { ITelemetryReceiver } from './receiver';
 export interface ITelemetryEventsSenderV2 {
   setup: (
     retryConfig: RetryConfig,
-    defaultQueueConfig: QueueConfig,
+    fallbackQueueConfig: QueueConfig,
     telemetryReceiver: ITelemetryReceiver,
     telemetrySetup?: TelemetryPluginSetup,
     telemetryUsageCounter?: IUsageCounter
@@ -25,7 +25,8 @@ export interface ITelemetryEventsSenderV2 {
   start: () => void;
   stop: () => Promise<void>;
   send: (channel: TelemetryChannel, events: unknown[]) => void;
-  updateConfig: (channel: TelemetryChannel, config: QueueConfig) => void;
+  updateQueueConfig: (channel: TelemetryChannel, config: QueueConfig) => void;
+  updateDefaultQueueConfig: (config: QueueConfig) => void;
 }
 
 /**

@@ -7,7 +7,7 @@
 import axios from 'axios';
 
 import type { QueueConfig, ITelemetryEventsSenderV2, RetryConfig } from './sender_v2.types';
-import { TelemetryEventsSenderV2 } from './sender_v2';
+import { DEFAULT_QUEUE_CONFIG, TelemetryEventsSenderV2 } from './sender_v2';
 import { TelemetryChannel, TelemetryCounter } from './types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -46,7 +46,6 @@ describe('TelemetryEventsSenderV2', () => {
     retryCount: 3,
     retryDelayMillis: 100,
   };
-  const defaultQueueConfig: QueueConfig = ch1Config;
 
   let service: ITelemetryEventsSenderV2;
 
@@ -63,21 +62,42 @@ describe('TelemetryEventsSenderV2', () => {
   });
 
   describe('initialization', () => {
+    it('uses default configu', async () => {
+      const events = ['e1', 'e2', 'e3'];
+      const expectedBody = events.map((e) => JSON.stringify(e)).join('\n');
+
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.start();
+
+      service.send(ch1, events);
+      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect.anything(),
+        expectedBody,
+        expect.anything()
+      );
+
+      await service.stop();
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+    });
+
     it('does not lose data during startup', async () => {
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
 
       const events = ['e1', 'e2', 'e3'];
       const expectedBody = events.map((e) => JSON.stringify(e)).join('\n');
 
       service.send(ch1, events);
 
-      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
+      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
 
       service.start();
 
-      await jest.advanceTimersByTimeAsync(10000);
+      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
       expect(mockedAxiosPost).toHaveBeenCalledWith(
@@ -97,7 +117,7 @@ describe('TelemetryEventsSenderV2', () => {
     });
 
     it('should not start twice', () => {
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
 
       service.start();
 
@@ -127,8 +147,8 @@ describe('TelemetryEventsSenderV2', () => {
           .join('\n'),
       ];
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch1, { ...ch1Config, maxPayloadSizeBytes: 10 });
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, { ...ch1Config, maxPayloadSizeBytes: 10 });
       service.start();
 
       // at most 10 bytes per payload (after serialized to JSON): it should send
@@ -149,8 +169,8 @@ describe('TelemetryEventsSenderV2', () => {
     });
 
     it('should chunk events by size, even if one event is bigger than `maxTelemetryPayloadSizeBytes`', async () => {
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch1, { ...ch1Config, maxPayloadSizeBytes: 3 });
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, { ...ch1Config, maxPayloadSizeBytes: 3 });
       service.start();
 
       // at most 10 bytes per payload (after serialized to JSON): it should
@@ -189,8 +209,8 @@ describe('TelemetryEventsSenderV2', () => {
     it('should buffer for a specific time period', async () => {
       const bufferTimeSpanMillis = 2000;
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
       service.start();
 
       const events = ['a', 'b', 'c'];
@@ -232,8 +252,8 @@ describe('TelemetryEventsSenderV2', () => {
 
       const bufferTimeSpanMillis = 3;
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
       service.start();
 
       // send some events
@@ -259,8 +279,8 @@ describe('TelemetryEventsSenderV2', () => {
 
       const bufferTimeSpanMillis = 3;
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
       service.start();
 
       // send some events
@@ -282,8 +302,8 @@ describe('TelemetryEventsSenderV2', () => {
       mockedAxiosPost.mockReturnValue(Promise.resolve({ status: 500 }));
       const bufferTimeSpanMillis = 100;
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
       service.start();
 
       // send some events
@@ -309,8 +329,12 @@ describe('TelemetryEventsSenderV2', () => {
       const inflightEventsThreshold = 3;
       const bufferTimeSpanMillis = 2000;
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis, inflightEventsThreshold });
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, {
+        ...ch1Config,
+        bufferTimeSpanMillis,
+        inflightEventsThreshold,
+      });
       service.start();
 
       // send five events
@@ -341,8 +365,12 @@ describe('TelemetryEventsSenderV2', () => {
       const inflightEventsThreshold = 3;
       const bufferTimeSpanMillis = 2000;
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch1, { ...ch1Config, bufferTimeSpanMillis, inflightEventsThreshold });
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, {
+        ...ch1Config,
+        bufferTimeSpanMillis,
+        inflightEventsThreshold,
+      });
 
       service.start();
 
@@ -382,10 +410,10 @@ describe('TelemetryEventsSenderV2', () => {
       const ch2Events = ['med-a', 'med-b', 'med-c', 'med-d'];
       const ch3Events = ['low-a', 'low-b', 'low-c', 'low-d'];
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch1, ch1Config);
-      service.updateConfig(ch2, ch2Config);
-      service.updateConfig(ch3, ch3Config);
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, ch1Config);
+      service.updateQueueConfig(ch2, ch2Config);
+      service.updateQueueConfig(ch3, ch3Config);
       service.start();
 
       // send low-priority events
@@ -445,9 +473,9 @@ describe('TelemetryEventsSenderV2', () => {
     });
 
     it('discard events when inflightEventsThreshold is reached and process other queues', async () => {
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch2, ch2Config);
-      service.updateConfig(ch3, ch3Config);
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch2, ch2Config);
+      service.updateQueueConfig(ch3, ch3Config);
       service.start();
 
       const ch2Events = Array.from(
@@ -494,9 +522,9 @@ describe('TelemetryEventsSenderV2', () => {
     });
 
     it('should manage queue priorities and channels', async () => {
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(ch2, ch2Config);
-      service.updateConfig(ch3, ch3Config);
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch2, ch2Config);
+      service.updateQueueConfig(ch3, ch3Config);
       service.start();
 
       const cases = [
@@ -563,6 +591,38 @@ describe('TelemetryEventsSenderV2', () => {
   });
 
   describe('dynamic configuration', () => {
+    it('should update default queue config', async () => {
+      const initialTimeSpan = DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis;
+      const bufferTimeSpanMillis = initialTimeSpan * 10;
+      const events = ['e1', 'e2', 'e3'];
+      const expectedBody = events.map((e) => JSON.stringify(e)).join('\n');
+
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.start();
+
+      service.updateDefaultQueueConfig({ ...DEFAULT_QUEUE_CONFIG, bufferTimeSpanMillis });
+
+      // wait a while to finish the current buffer time
+      await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
+
+      // send data and wait the initial time span
+      service.send(ch1, events);
+      await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+
+      // wait the new timespan, now we should have data
+      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect.anything(),
+        expectedBody,
+        expect.anything()
+      );
+
+      await service.stop();
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+    });
+
     it('should update buffer time config dinamically', async () => {
       const channel = TelemetryChannel.DETECTION_ALERTS;
       const detectionAlertsBefore = {
@@ -575,8 +635,8 @@ describe('TelemetryEventsSenderV2', () => {
         bufferTimeSpanMillis: 5001,
       };
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(channel, detectionAlertsBefore);
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(channel, detectionAlertsBefore);
       service.start();
 
       service.send(channel, ['a', 'b', 'c']);
@@ -593,7 +653,7 @@ describe('TelemetryEventsSenderV2', () => {
         );
       });
 
-      service.updateConfig(channel, detectionAlertsAfter);
+      service.updateQueueConfig(channel, detectionAlertsAfter);
 
       // wait until the current buffer time expires
       await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.01);
@@ -632,8 +692,8 @@ describe('TelemetryEventsSenderV2', () => {
         maxPayloadSizeBytes: 10_000,
       };
 
-      service.setup(retryConfig, defaultQueueConfig, receiver, telemetryPluginSetup);
-      service.updateConfig(channel, detectionAlertsBefore);
+      service.setup(retryConfig, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(channel, detectionAlertsBefore);
       service.start();
 
       service.send(channel, ['aaaaa', 'b', 'c']);
@@ -650,7 +710,7 @@ describe('TelemetryEventsSenderV2', () => {
         );
       });
 
-      service.updateConfig(channel, detectionAlertsAfter);
+      service.updateQueueConfig(channel, detectionAlertsAfter);
 
       service.send(channel, ['aaaaa', 'b', 'c']);
       expectedBodies = ['"aaaaa"\n"b"\n"c"'];
@@ -676,7 +736,7 @@ describe('TelemetryEventsSenderV2', () => {
     it('should increment the counter when sending events ok', async () => {
       service.setup(
         retryConfig,
-        defaultQueueConfig,
+        DEFAULT_QUEUE_CONFIG,
         receiver,
         telemetryPluginSetup,
         telemetryUsageCounter
@@ -698,14 +758,14 @@ describe('TelemetryEventsSenderV2', () => {
 
       service.setup(
         retryConfig,
-        defaultQueueConfig,
+        DEFAULT_QUEUE_CONFIG,
         receiver,
         telemetryPluginSetup,
         telemetryUsageCounter
       );
-      service.updateConfig(ch1, ch1Config);
-      service.updateConfig(ch2, ch2Config);
-      service.updateConfig(ch3, ch3Config);
+      service.updateQueueConfig(ch1, ch1Config);
+      service.updateQueueConfig(ch2, ch2Config);
+      service.updateQueueConfig(ch3, ch3Config);
       service.start();
 
       service.send(ch1, ['a', 'b', 'c']);
@@ -727,14 +787,14 @@ describe('TelemetryEventsSenderV2', () => {
 
       service.setup(
         retryConfig,
-        defaultQueueConfig,
+        DEFAULT_QUEUE_CONFIG,
         receiver,
         telemetryPluginSetup,
         telemetryUsageCounter
       );
-      service.updateConfig(ch1, ch1Config);
-      service.updateConfig(ch2, ch2Config);
-      service.updateConfig(ch3, ch3Config);
+      service.updateQueueConfig(ch1, ch1Config);
+      service.updateQueueConfig(ch2, ch2Config);
+      service.updateQueueConfig(ch3, ch3Config);
       service.start();
 
       service.send(ch1, ['a', 'b', 'c']);
