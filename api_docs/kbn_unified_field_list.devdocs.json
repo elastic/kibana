@@ -31,7 +31,7 @@
           "\nField list item component"
         ],
         "signature": [
-          "({\n  field,\n  fieldSearchHighlight,\n  isSelected,\n  isActive,\n  isEmpty,\n  infoIcon,\n  className,\n  getCustomFieldType,\n  dataTestSubj,\n  size,\n  onClick,\n  shouldAlwaysShowAction,\n  buttonAddFieldToWorkspaceProps,\n  buttonRemoveFieldFromWorkspaceProps,\n  onAddFieldToWorkspace,\n  onRemoveFieldFromWorkspace,\n  ...otherProps\n}: ",
+          "({\n  field,\n  fieldSearchHighlight,\n  isSelected,\n  isActive,\n  isEmpty,\n  infoIcon,\n  className,\n  getCustomFieldType,\n  dataTestSubj,\n  size,\n  withDragIcon,\n  onClick,\n  shouldAlwaysShowAction,\n  buttonAddFieldToWorkspaceProps,\n  buttonRemoveFieldFromWorkspaceProps,\n  onAddFieldToWorkspace,\n  onRemoveFieldFromWorkspace,\n  ...otherProps\n}: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "common",
@@ -50,7 +50,7 @@
             "id": "def-common.FieldItemButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  field,\n  fieldSearchHighlight,\n  isSelected,\n  isActive,\n  isEmpty,\n  infoIcon,\n  className,\n  getCustomFieldType,\n  dataTestSubj,\n  size,\n  onClick,\n  shouldAlwaysShowAction,\n  buttonAddFieldToWorkspaceProps,\n  buttonRemoveFieldFromWorkspaceProps,\n  onAddFieldToWorkspace,\n  onRemoveFieldFromWorkspace,\n  ...otherProps\n}",
+            "label": "{\n  field,\n  fieldSearchHighlight,\n  isSelected,\n  isActive,\n  isEmpty,\n  infoIcon,\n  className,\n  getCustomFieldType,\n  dataTestSubj,\n  size,\n  withDragIcon,\n  onClick,\n  shouldAlwaysShowAction,\n  buttonAddFieldToWorkspaceProps,\n  buttonRemoveFieldFromWorkspaceProps,\n  onAddFieldToWorkspace,\n  onRemoveFieldFromWorkspace,\n  ...otherProps\n}",
             "description": [],
             "signature": [
               {
@@ -883,7 +883,15 @@
         "label": "loadFieldExisting",
         "description": [],
         "signature": [
-          "(params: FetchFieldExistenceParams) => Promise<{ existingFieldNames: string[]; indexPatternTitle: string; }>"
+          "(params: FetchFieldExistenceParams) => Promise<{ existingFieldNames: string[]; indexPatternTitle: string; newFields?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[] | undefined; }>"
         ],
         "path": "packages/kbn-unified-field-list/src/services/field_existing/index.ts",
         "deprecated": false,
@@ -1403,7 +1411,15 @@
             "section": "def-common.ExistenceFetchStatus",
             "text": "ExistenceFetchStatus"
           },
-          "; isFieldsExistenceInfoUnavailable: (dataViewId: string) => boolean; }"
+          "; isFieldsExistenceInfoUnavailable: (dataViewId: string) => boolean; getNewFields: (dataViewId: string) => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]; }"
         ],
         "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
         "deprecated": false,
@@ -1478,7 +1494,7 @@
         "label": "useGroupedFields",
         "description": [],
         "signature": [
-          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n}: ",
+          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n}: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "common",
@@ -1505,7 +1521,7 @@
             "id": "def-common.useGroupedFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n}",
+            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n}",
             "description": [],
             "signature": [
               {
@@ -1923,6 +1939,27 @@
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.ExistingFieldsInfo.newFields",
+            "type": "Array",
+            "tags": [],
+            "label": "newFields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
             "id": "def-common.ExistingFieldsInfo.numberOfFetches",
             "type": "number",
             "tags": [],
@@ -2063,6 +2100,46 @@
               {
                 "parentPluginId": "@kbn/unified-field-list",
                 "id": "def-common.ExistingFieldsReader.isFieldsExistenceInfoUnavailable.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dataViewId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.ExistingFieldsReader.getNewFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getNewFields",
+            "description": [],
+            "signature": [
+              "(dataViewId: string) => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-field-list",
+                "id": "def-common.ExistingFieldsReader.getNewFields.$1",
                 "type": "string",
                 "tags": [],
                 "label": "dataViewId",
@@ -2417,13 +2494,13 @@
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-common.FieldItemButtonProps.dragHandle",
-            "type": "Object",
+            "id": "def-common.FieldItemButtonProps.withDragIcon",
+            "type": "CompoundType",
             "tags": [],
-            "label": "dragHandle",
+            "label": "withDragIcon",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "boolean | undefined"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
@@ -4585,6 +4662,36 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.GroupedFieldsParams.getNewFieldsBySpec",
+            "type": "Function",
+            "tags": [],
+            "label": "getNewFieldsBySpec",
+            "description": [],
+            "signature": [
+              "((fields: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[], dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | null) => T[]) | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4657,6 +4764,31 @@
               },
               "; fieldsExistInIndex: boolean; screenReaderDescriptionId?: string | undefined; }"
             ],
+            "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.GroupedFieldsResult.allFieldsModified",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allFieldsModified",
+            "description": [],
+            "signature": [
+              "T[] | null"
+            ],
+            "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-common.GroupedFieldsResult.hasNewFields",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNewFields",
+            "description": [],
             "path": "packages/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4995,14 +5127,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-common.UnifiedFieldListSidebarContainerApi.isSidebarCollapsed$",
+            "id": "def-common.UnifiedFieldListSidebarContainerApi.sidebarVisibility",
             "type": "Object",
             "tags": [],
-            "label": "isSidebarCollapsed$",
+            "label": "sidebarVisibility",
             "description": [],
             "signature": [
-              "Observable",
-              "<boolean>"
+              "SidebarVisibility"
             ],
             "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
             "deprecated": false,

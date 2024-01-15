@@ -9,6 +9,11 @@ import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { map } from 'lodash';
+import {
+  isExecuteAction,
+  isGetFileAction,
+  isUploadAction,
+} from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
@@ -18,10 +23,6 @@ import { ResponseActionFileDownloadLink } from '../../response_action_file_downl
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
-import type {
-  ResponseActionUploadOutputContent,
-  ResponseActionUploadParameters,
-} from '../../../../../common/endpoint/types';
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
 
 const emptyValue = getEmptyValue();
@@ -80,12 +81,6 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
   overflow-y: auto;
 `;
 
-const isUploadAction = (
-  action: MaybeImmutable<ActionDetails>
-): action is ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters> => {
-  return action.command === 'upload';
-};
-
 const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-subj'?: string }>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -122,7 +117,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       return <>{OUTPUT_MESSAGES.hasFailed(command)}</>;
     }
 
-    if (command === 'get-file') {
+    if (isGetFileAction(action)) {
       return (
         <>
           {OUTPUT_MESSAGES.wasSuccessful(command)}
@@ -136,7 +131,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       );
     }
 
-    if (command === 'execute') {
+    if (isExecuteAction(action)) {
       return (
         <EuiFlexGroup direction="column" data-test-subj={getTestId('executeDetails')}>
           {action.agents.map((agentId) => (
