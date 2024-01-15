@@ -16,6 +16,7 @@ import type {
 
 export interface FleetConfigType {
   enabled: boolean;
+  isAirGapped?: boolean;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
@@ -39,6 +40,7 @@ export interface FleetConfigType {
   };
   setup?: {
     agentPolicySchemaUpgradeBatchSize?: number;
+    uninstallTokenVerificationBatchSize?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;

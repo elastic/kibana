@@ -246,7 +246,7 @@ export class Config {
     return getPackages(this.repoRoot).filter(
       (p) =>
         (this.pluginSelector.testPlugins || !p.isDevOnly()) &&
-        (!p.isPlugin() || this.pluginFilter(p))
+        (!p.isPlugin() || (this.pluginFilter(p) && !p.isDevOnly()))
     );
   }
 

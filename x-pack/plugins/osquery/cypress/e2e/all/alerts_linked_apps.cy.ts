@@ -89,7 +89,7 @@ describe(
         cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
       });
       cy.contains('Cancel').click();
-      cy.getBySel('flyoutBottomBar').within(() => {
+      cy.getBySel('timeline-bottom-bar').within(() => {
         cy.contains(TIMELINE_NAME).click();
       });
       cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');

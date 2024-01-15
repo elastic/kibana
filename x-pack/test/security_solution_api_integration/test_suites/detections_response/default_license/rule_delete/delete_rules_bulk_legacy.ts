@@ -176,7 +176,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Test to ensure that we have exactly 0 legacy actions by querying the Alerting client REST API directly
         // See: https://www.elastic.co/guide/en/kibana/current/find-rules-api.html
-        // Note: We specifically query for both the filter of type "siem.notifications" and the "has_reference" to keep it very specific
+        // Note: We specifically filter for both the type "siem.notifications" and the "has_reference" field to ensure we only retrieve legacy actions
         const { body: bodyAfterDelete } = await supertest
           .get(`${BASE_ALERTING_API_PATH}/rules/_find`)
           .query({

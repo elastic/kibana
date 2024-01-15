@@ -37,6 +37,7 @@ export const LogExplorerTopNavMenu = () => {
 
 const ServerlessTopNav = () => {
   const { services } = useKibanaContextForPlugin();
+  const { ObservabilityAIAssistantActionMenuItem } = services.observabilityAIAssistant;
 
   return (
     <EuiHeader data-test-subj="logExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
@@ -63,9 +64,13 @@ const ServerlessTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
+            <VerticalRule />
             <FeedbackLink />
+            <VerticalRule />
+            {ObservabilityAIAssistantActionMenuItem ? (
+              <ObservabilityAIAssistantActionMenuItem />
+            ) : null}
           </EuiHeaderLinks>
-          <VerticalRule />
         </EuiHeaderSectionItem>
         <EuiHeaderSectionItem>
           <ConnectedOnboardingLink />
@@ -79,6 +84,7 @@ const StatefulTopNav = () => {
   const {
     services: {
       appParams: { setHeaderActionMenu },
+      observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
       chrome,
       i18n,
       theme,
@@ -136,6 +142,10 @@ const StatefulTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
+            <VerticalRule />
+            {ObservabilityAIAssistantActionMenuItem ? (
+              <ObservabilityAIAssistantActionMenuItem />
+            ) : null}
             <ConnectedOnboardingLink />
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
