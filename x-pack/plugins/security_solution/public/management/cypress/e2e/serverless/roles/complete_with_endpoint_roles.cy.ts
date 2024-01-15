@@ -102,7 +102,7 @@ describe(
       });
     });
 
-    describe.only('for role: t3_analyst', () => {
+    describe('for role: t3_analyst', () => {
       const artifactPagesFullAccess = [
         pageById.trustedApps,
         pageById.eventFilters,
@@ -151,7 +151,7 @@ describe(
         ensureFleetPermissionDeniedScreen();
       });
 
-      describe.only('Response Actions access', () => {
+      describe('Response Actions access', () => {
         beforeEach(() => {
           visitEndpointList();
           openConsoleFromEndpointList();
@@ -165,7 +165,7 @@ describe(
         }
 
         for (const [action, testSubj] of Object.entries(deniedResponseActions)) {
-          it.only(`should NOT have access to execute: ${action}`, () => {
+          it(`should NOT have access to execute: ${action}`, () => {
             cy.getByTestSubj(testSubj).should('not.exist');
           });
         }
