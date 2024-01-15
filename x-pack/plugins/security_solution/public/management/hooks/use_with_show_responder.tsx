@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useLicense } from '../../common/hooks/use_license';
 import type { ImmutableArray } from '../../../common/endpoint/types';
 import type {
   ConsoleResponseActionCommands,
@@ -48,12 +49,18 @@ type ResponderInfoProps =
 export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const consoleManager = useConsoleManager();
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
+  const isEnterpriseLicense = useLicense().isEnterprise();
 
   return useCallback(
     (props: ResponderInfoProps) => {
       const { agentId, agentType, capabilities, hostName } = props;
       // If no authz, just exit and log something to the console
-      if (!endpointPrivileges.canAccessResponseConsole) {
+      if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
+        window.console.error(new Error(`Access denied to ${agentType} response actions console`));
+        return;
+      }
+
+      if (agentType === 'sentinel_one' && !isEnterpriseLicense) {
         window.console.error(new Error(`Access denied to ${agentType} response actions console`));
         return;
       }
