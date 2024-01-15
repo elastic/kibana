@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
 import { AggregationType } from './apm_rule_types';
 
 export const searchConfigurationSchema = schema.object({
@@ -50,6 +51,12 @@ export const transactionDurationParamsSchema = schema.object({
   searchConfiguration: schema.maybe(searchConfigurationSchema),
 });
 
+const detectorsSchema = schema.oneOf([
+  schema.literal(AnomalyDetectorType.txLatency),
+  schema.literal(AnomalyDetectorType.txThroughput),
+  schema.literal(AnomalyDetectorType.txFailureRate),
+]);
+
 export const anomalyParamsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
   transactionType: schema.maybe(schema.string()),
@@ -62,6 +69,7 @@ export const anomalyParamsSchema = schema.object({
     schema.literal(ML_ANOMALY_SEVERITY.MINOR),
     schema.literal(ML_ANOMALY_SEVERITY.WARNING),
   ]),
+  anomalyDetectorTypes: schema.arrayOf(detectorsSchema, { minSize: 1 }),
 });
 
 export const transactionErrorRateParamsSchema = schema.object({
