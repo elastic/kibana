@@ -9,16 +9,16 @@ import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
+  doesNotEqualOperator,
   doesNotExistOperator,
   doesNotMatchOperator,
+  equalsOperator,
   existsOperator,
   isInListOperator,
   isNotInListOperator,
-  isNotOneOfOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isOperator,
   matchesOperator,
+  notOneOfOperator,
+  oneOfOperator,
 } from '@kbn/securitysolution-list-utils';
 import { validatePotentialWildcardInput } from '@kbn/securitysolution-utils';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
@@ -68,7 +68,7 @@ describe('BuilderEntryItem', () => {
           field: undefined,
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: undefined,
         }}
@@ -100,7 +100,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: '1234',
         }}
@@ -137,7 +137,7 @@ describe('BuilderEntryItem', () => {
           field: getField('nestedField.child'),
           id: '64ce5d11-2076-4369-859a-297832a426d0',
           nested: 'parent',
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: undefined,
         }}
@@ -172,7 +172,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: '1234',
         }}
@@ -208,7 +208,7 @@ describe('BuilderEntryItem', () => {
           field,
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: '1234',
         }}
@@ -236,7 +236,7 @@ describe('BuilderEntryItem', () => {
     });
   });
 
-  test('it renders field values correctly when operator is "isOperator"', () => {
+  test('it renders field values correctly when operator is "equalsOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -246,7 +246,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: '1234',
         }}
@@ -275,7 +275,7 @@ describe('BuilderEntryItem', () => {
     ).toEqual('1234');
   });
 
-  test('it renders field values correctly when operator is "isNotOperator"', () => {
+  test('it renders field values correctly when operator is "doesNotEqualOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -285,7 +285,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isNotOperator,
+          operator: doesNotEqualOperator,
           parent: undefined,
           value: '1234',
         }}
@@ -308,13 +308,13 @@ describe('BuilderEntryItem', () => {
     ).toEqual('ip');
     expect(
       wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
-    ).toEqual('does not exist');
+    ).toEqual('does not equal');
     expect(
       wrapper.find('[data-test-subj="valuesAutocompleteMatchLabel"] input').props().value
     ).toEqual('1234');
   });
 
-  test('it renders field values correctly when operator is "isOneOfOperator"', () => {
+  test('it renders field values correctly when operator is "oneOfOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -324,7 +324,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isOneOfOperator,
+          operator: oneOfOperator,
           parent: undefined,
           value: ['1234'],
         }}
@@ -353,7 +353,7 @@ describe('BuilderEntryItem', () => {
     );
   });
 
-  test('it renders field values correctly when operator is "isNotOneOfOperator"', () => {
+  test('it renders field values correctly when operator is "notOneOfOperator"', () => {
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -363,7 +363,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isNotOneOfOperator,
+          operator: notOneOfOperator,
           parent: undefined,
           value: ['1234'],
         }}
@@ -706,7 +706,7 @@ describe('BuilderEntryItem', () => {
           field,
           id: '123',
           nested: undefined,
-          operator: isOneOfOperator,
+          operator: oneOfOperator,
           parent: undefined,
           value: ['1234'],
         }}
@@ -749,7 +749,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: '1234',
         }}
@@ -790,7 +790,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: '1234',
         }}
@@ -831,7 +831,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isNotOperator,
+          operator: doesNotEqualOperator,
           parent: undefined,
           value: '1234',
         }}
@@ -872,7 +872,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isOneOfOperator,
+          operator: oneOfOperator,
           parent: undefined,
           value: '1234',
         }}
@@ -1001,7 +1001,7 @@ describe('BuilderEntryItem', () => {
           field: getField('bytes'),
           id: '123',
           nested: undefined,
-          operator: isOneOfOperator,
+          operator: oneOfOperator,
           parent: undefined,
           value: '',
         }}
@@ -1041,7 +1041,7 @@ describe('BuilderEntryItem', () => {
           field: getField('bytes'),
           id: '123',
           nested: undefined,
-          operator: isOneOfOperator,
+          operator: oneOfOperator,
           parent: undefined,
           value: '',
         }}
@@ -1185,7 +1185,7 @@ describe('BuilderEntryItem', () => {
           field: getField('ip'),
           id: '123',
           nested: undefined,
-          operator: isOneOfOperator,
+          operator: oneOfOperator,
           parent: undefined,
           value: ['1234'],
         }}

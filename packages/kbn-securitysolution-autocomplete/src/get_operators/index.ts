@@ -14,8 +14,8 @@ import {
   OperatorOption,
   doesNotExistOperator,
   existsOperator,
-  isNotOperator,
-  isOperator,
+  doesNotEqualOperator,
+  equalsOperator,
 } from '@kbn/securitysolution-list-utils';
 
 /**
@@ -26,11 +26,11 @@ import {
  */
 export const getOperators = (field: DataViewFieldBase | undefined): OperatorOption[] => {
   if (field == null) {
-    return [isOperator];
+    return [equalsOperator];
   } else if (field.type === 'boolean') {
-    return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
+    return [equalsOperator, doesNotEqualOperator, existsOperator, doesNotExistOperator];
   } else if (field.type === 'nested') {
-    return [isOperator];
+    return [equalsOperator];
   } else if (field.name === 'file.path.text') {
     return EVENT_FILTERS_OPERATORS;
   } else {

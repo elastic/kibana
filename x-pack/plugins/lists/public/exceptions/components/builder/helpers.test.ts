@@ -24,6 +24,7 @@ import {
   ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
   OperatorOption,
+  doesNotEqualOperator,
   doesNotExistOperator,
   doesNotMatchOperator,
   existsOperator,
@@ -47,11 +48,10 @@ import {
   isEntryNested,
   isInListOperator,
   isNotInListOperator,
-  isNotOneOfOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isOperator,
+  notOneOfOperator,
+  equalsOperator,
   matchesOperator,
+  oneOfOperator,
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
@@ -104,7 +104,7 @@ const getMockBuilderEntry = (): FormattedBuilderEntry => ({
   field: getField('ip'),
   id: '123',
   nested: undefined,
-  operator: isOperator,
+  operator: equalsOperator,
   parent: undefined,
   value: 'some value',
 });
@@ -115,7 +115,7 @@ const getMockNestedBuilderEntry = (): FormattedBuilderEntry => ({
   field: getField('nestedField.child'),
   id: '123',
   nested: 'child',
-  operator: isOperator,
+  operator: equalsOperator,
   parent: {
     parent: {
       ...getEntryNestedWithIdMock(),
@@ -137,7 +137,7 @@ const getMockNestedParentBuilderEntry = (): FormattedBuilderEntry => ({
   } as FieldSpec,
   id: '123',
   nested: 'parent',
-  operator: isOperator,
+  operator: equalsOperator,
   parent: undefined,
   value: undefined,
 });
@@ -244,7 +244,7 @@ describe('Exception builder helpers', () => {
           field: getEndpointField('file.Ext.code_signature.status'),
           id: '123',
           nested: 'child',
-          operator: isOperator,
+          operator: equalsOperator,
           parent: {
             parent: {
               ...getEntryNestedWithIdMock(),
@@ -322,7 +322,7 @@ describe('Exception builder helpers', () => {
 
   describe('#getEntryFromOperator', () => {
     test('it returns current value when switching from "is" to "is not"', () => {
-      const payloadOperator: OperatorOption = isNotOperator;
+      const payloadOperator: OperatorOption = doesNotEqualOperator;
       const payloadEntry: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
         value: 'I should stay the same',
@@ -339,10 +339,10 @@ describe('Exception builder helpers', () => {
     });
 
     test('it returns current value when switching from "is not" to "is"', () => {
-      const payloadOperator: OperatorOption = isOperator;
+      const payloadOperator: OperatorOption = equalsOperator;
       const payloadEntry: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
-        operator: isNotOperator,
+        operator: doesNotEqualOperator,
         value: 'I should stay the same',
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
@@ -357,10 +357,10 @@ describe('Exception builder helpers', () => {
     });
 
     test('it returns empty value when switching operator types to "match"', () => {
-      const payloadOperator: OperatorOption = isOperator;
+      const payloadOperator: OperatorOption = equalsOperator;
       const payloadEntry: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
-        operator: isNotOneOfOperator,
+        operator: notOneOfOperator,
         value: ['I should stay the same'],
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
@@ -375,10 +375,10 @@ describe('Exception builder helpers', () => {
     });
 
     test('it returns current value when switching from "is one of" to "is not one of"', () => {
-      const payloadOperator: OperatorOption = isNotOneOfOperator;
+      const payloadOperator: OperatorOption = notOneOfOperator;
       const payloadEntry: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
-        operator: isOneOfOperator,
+        operator: oneOfOperator,
         value: ['I should stay the same'],
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
@@ -393,10 +393,10 @@ describe('Exception builder helpers', () => {
     });
 
     test('it returns current value when switching from "is not one of" to "is one of"', () => {
-      const payloadOperator: OperatorOption = isOneOfOperator;
+      const payloadOperator: OperatorOption = oneOfOperator;
       const payloadEntry: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
-        operator: isNotOneOfOperator,
+        operator: notOneOfOperator,
         value: ['I should stay the same'],
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
@@ -411,10 +411,10 @@ describe('Exception builder helpers', () => {
     });
 
     test('it returns empty value when switching operator types to "match_any"', () => {
-      const payloadOperator: OperatorOption = isOneOfOperator;
+      const payloadOperator: OperatorOption = oneOfOperator;
       const payloadEntry: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
-        operator: isOperator,
+        operator: equalsOperator,
         value: 'I should stay the same',
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
@@ -464,7 +464,7 @@ describe('Exception builder helpers', () => {
       const payloadOperator: OperatorOption = existsOperator;
       const payloadEntry: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
-        operator: isOperator,
+        operator: equalsOperator,
         value: 'I should stay the same',
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
@@ -481,7 +481,7 @@ describe('Exception builder helpers', () => {
       const payloadOperator: OperatorOption = isInListOperator;
       const payloadEntry: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
-        operator: isOperator,
+        operator: equalsOperator,
         value: 'I should stay the same',
       };
       const output = getEntryFromOperator(payloadOperator, payloadEntry);
@@ -497,17 +497,17 @@ describe('Exception builder helpers', () => {
   });
 
   describe('#getOperatorOptions', () => {
-    test('it returns "isOperator" when field type is nested but field itself has not yet been selected', () => {
+    test('it returns "equalsOperator" when field type is nested but field itself has not yet been selected', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedParentBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'endpoint', false);
-      const expected: OperatorOption[] = [isOperator];
+      const expected: OperatorOption[] = [equalsOperator];
       expect(output).toEqual(expected);
     });
 
-    test('it returns "isOperator" if no field selected', () => {
+    test('it returns "equalsOperator" if no field selected', () => {
       const payloadItem: FormattedBuilderEntry = { ...getMockBuilderEntry(), field: undefined };
       const output = getOperatorOptions(payloadItem, 'endpoint', false);
-      const expected: OperatorOption[] = [isOperator];
+      const expected: OperatorOption[] = [equalsOperator];
       expect(output).toEqual(expected);
     });
 
@@ -516,8 +516,8 @@ describe('Exception builder helpers', () => {
         const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
         const output = getOperatorOptions(payloadItem, 'endpoint', false);
         const expected: OperatorOption[] = [
-          isOperator,
-          isOneOfOperator,
+          equalsOperator,
+          oneOfOperator,
           matchesOperator,
           doesNotMatchOperator,
         ];
@@ -530,7 +530,7 @@ describe('Exception builder helpers', () => {
           field: getField('ip'),
         };
         const output = getOperatorOptions(payloadItem, 'endpoint', false);
-        const expected: OperatorOption[] = [isOperator, isOneOfOperator];
+        const expected: OperatorOption[] = [equalsOperator, oneOfOperator];
         expect(output).toEqual(expected);
       });
 
@@ -541,49 +541,49 @@ describe('Exception builder helpers', () => {
         };
         const output = getOperatorOptions(payloadItem, 'endpoint', false);
         const expected: OperatorOption[] = [
-          isOperator,
-          isOneOfOperator,
+          equalsOperator,
+          oneOfOperator,
           matchesOperator,
           doesNotMatchOperator,
         ];
         expect(output).toEqual(expected);
       });
 
-      test('it returns "isOperator" and "isOneOfOperator" if field does not support "matches"', () => {
+      test('it returns "equalsOperator" and "oneOfOperator" if field does not support "matches"', () => {
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
         const output = getOperatorOptions(payloadItem, 'endpoint', false);
-        const expected: OperatorOption[] = [isOperator, isOneOfOperator];
+        const expected: OperatorOption[] = [equalsOperator, oneOfOperator];
         expect(output).toEqual(expected);
       });
 
-      test('it returns "isOperator" and field type is boolean', () => {
+      test('it returns "equalsOperator" and field type is boolean', () => {
         const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
         const output = getOperatorOptions(payloadItem, 'endpoint', true);
-        const expected: OperatorOption[] = [isOperator];
+        const expected: OperatorOption[] = [equalsOperator];
         expect(output).toEqual(expected);
       });
     });
 
-    test('it returns "isOperator", "isOneOfOperator", and "existsOperator" if item is nested and "listType" is "detection"', () => {
+    test('it returns "equalsOperator", "oneOfOperator", and "existsOperator" if item is nested and "listType" is "detection"', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', false);
-      const expected: OperatorOption[] = [isOperator, isOneOfOperator, existsOperator];
+      const expected: OperatorOption[] = [equalsOperator, oneOfOperator, existsOperator];
       expect(output).toEqual(expected);
     });
 
-    test('it returns "isOperator" and "existsOperator" if item is nested, "listType" is "detection", and field type is boolean', () => {
+    test('it returns "equalsOperator" and "existsOperator" if item is nested, "listType" is "detection", and field type is boolean', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', true);
-      const expected: OperatorOption[] = [isOperator, existsOperator];
+      const expected: OperatorOption[] = [equalsOperator, existsOperator];
       expect(output).toEqual(expected);
     });
 
-    test('it returns "isOperator", "isNotOperator", "doesNotExistOperator" and "existsOperator" if field type is boolean', () => {
+    test('it returns "equalsOperator", "doesNotEqualOperator", "doesNotExistOperator" and "existsOperator" if field type is boolean', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', true);
       const expected: OperatorOption[] = [
-        isOperator,
-        isNotOperator,
+        equalsOperator,
+        doesNotEqualOperator,
         existsOperator,
         doesNotExistOperator,
       ];
@@ -625,10 +625,10 @@ describe('Exception builder helpers', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
       const output = getOperatorOptions(payloadItem, 'detection', false, true);
       const expected: OperatorOption[] = [
-        isOperator,
-        isNotOperator,
-        isOneOfOperator,
-        isNotOneOfOperator,
+        equalsOperator,
+        doesNotEqualOperator,
+        oneOfOperator,
+        notOneOfOperator,
         existsOperator,
         doesNotExistOperator,
         isInListOperator,
@@ -722,7 +722,7 @@ describe('Exception builder helpers', () => {
   describe('#getEntryOnOperatorChange', () => {
     test('it returns updated subentry preserving its value when entry is not switching operator types', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const payloadOperator: OperatorOption = isNotOperator;
+      const payloadOperator: OperatorOption = doesNotEqualOperator;
       const output = getEntryOnOperatorChange(payloadItem, payloadOperator);
       const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
@@ -739,7 +739,7 @@ describe('Exception builder helpers', () => {
 
     test('it returns updated subentry resetting its value when entry is switching operator types', () => {
       const payloadItem: FormattedBuilderEntry = getMockBuilderEntry();
-      const payloadOperator: OperatorOption = isOneOfOperator;
+      const payloadOperator: OperatorOption = oneOfOperator;
       const output = getEntryOnOperatorChange(payloadItem, payloadOperator);
       const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
@@ -756,7 +756,7 @@ describe('Exception builder helpers', () => {
 
     test('it returns updated subentry preserving its value when entry is nested and not switching operator types', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-      const payloadOperator: OperatorOption = isNotOperator;
+      const payloadOperator: OperatorOption = doesNotEqualOperator;
       const output = getEntryOnOperatorChange(payloadItem, payloadOperator);
       const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
@@ -780,7 +780,7 @@ describe('Exception builder helpers', () => {
 
     test('it returns updated subentry resetting its value when entry is nested and switching operator types', () => {
       const payloadItem: FormattedBuilderEntry = getMockNestedBuilderEntry();
-      const payloadOperator: OperatorOption = isOneOfOperator;
+      const payloadOperator: OperatorOption = oneOfOperator;
       const output = getEntryOnOperatorChange(payloadItem, payloadOperator);
       const expected: { updatedEntry: BuilderEntry & { id?: string }; index: number } = {
         index: 0,
@@ -887,7 +887,7 @@ describe('Exception builder helpers', () => {
     test('it returns entry with updated value', () => {
       const payload: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
-        operator: isOneOfOperator,
+        operator: oneOfOperator,
         value: ['some value'],
       };
       const output = getEntryOnMatchAnyChange(payload, ['jibber jabber']);
@@ -908,7 +908,7 @@ describe('Exception builder helpers', () => {
       const payload: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
         field: undefined,
-        operator: isOneOfOperator,
+        operator: oneOfOperator,
         value: ['some value'],
       };
       const output = getEntryOnMatchAnyChange(payload, ['jibber jabber']);
@@ -997,7 +997,7 @@ describe('Exception builder helpers', () => {
     test('it returns entry with updated value', () => {
       const payload: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
-        operator: isOneOfOperator,
+        operator: oneOfOperator,
         value: '1234',
       };
       const output = getEntryOnListChange(payload, getListResponseMock());
@@ -1018,7 +1018,7 @@ describe('Exception builder helpers', () => {
       const payload: FormattedBuilderEntry = {
         ...getMockBuilderEntry(),
         field: undefined,
-        operator: isOneOfOperator,
+        operator: oneOfOperator,
         value: '1234',
       };
       const output = getEntryOnListChange(payload, getListResponseMock());
@@ -1048,7 +1048,7 @@ describe('Exception builder helpers', () => {
           field: undefined,
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: 'some host name',
         },
@@ -1070,7 +1070,7 @@ describe('Exception builder helpers', () => {
           },
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: 'some host name',
         },
@@ -1112,7 +1112,7 @@ describe('Exception builder helpers', () => {
           field: field1,
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: 'some ip',
         },
@@ -1122,7 +1122,7 @@ describe('Exception builder helpers', () => {
           field: field2,
           id: '123',
           nested: undefined,
-          operator: isOneOfOperator,
+          operator: oneOfOperator,
           parent: undefined,
           value: ['some extension'],
         },
@@ -1182,7 +1182,7 @@ describe('Exception builder helpers', () => {
           field: field1,
           id: '123',
           nested: undefined,
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: 'some ip',
         },
@@ -1192,7 +1192,7 @@ describe('Exception builder helpers', () => {
           field: field2,
           id: '123',
           nested: 'parent',
-          operator: isOperator,
+          operator: equalsOperator,
           parent: undefined,
           value: undefined,
         },
@@ -1202,7 +1202,7 @@ describe('Exception builder helpers', () => {
           field: field3,
           id: '123',
           nested: 'child',
-          operator: isOperator,
+          operator: equalsOperator,
           parent: {
             parent: {
               entries: [
@@ -1335,7 +1335,7 @@ describe('Exception builder helpers', () => {
         field,
         id: '123',
         nested: undefined,
-        operator: isOperator,
+        operator: equalsOperator,
         parent: undefined,
         value: 'some os',
       };
@@ -1378,7 +1378,7 @@ describe('Exception builder helpers', () => {
         field: undefined,
         id: '123',
         nested: undefined,
-        operator: isOperator,
+        operator: equalsOperator,
         parent: undefined,
         value: 'some os',
       };
@@ -1424,7 +1424,7 @@ describe('Exception builder helpers', () => {
         },
         id: '123',
         nested: undefined,
-        operator: isOperator,
+        operator: equalsOperator,
         parent: undefined,
         value: 'some os',
       };
@@ -1468,7 +1468,7 @@ describe('Exception builder helpers', () => {
         field,
         id: '123',
         nested: 'child',
-        operator: isOperator,
+        operator: equalsOperator,
         parent: {
           parent: {
             entries: [{ ...payloadItem }],
@@ -1514,7 +1514,7 @@ describe('Exception builder helpers', () => {
         field,
         id: '123',
         nested: undefined,
-        operator: isOperator,
+        operator: equalsOperator,
         parent: undefined,
         value: 'some ip',
       };
@@ -1607,34 +1607,34 @@ describe('Exception builder helpers', () => {
   });
 
   describe('#getExceptionOperatorSelect', () => {
-    test('it returns "isOperator" when "operator" is "included" and operator type is "match"', () => {
+    test('it returns "equalsOperator" when "operator" is "included" and operator type is "match"', () => {
       const payload = getEntryMatchMock();
       const result = getExceptionOperatorSelect(payload);
 
-      expect(result).toEqual(isOperator);
+      expect(result).toEqual(equalsOperator);
     });
 
-    test('it returns "isNotOperator" when "operator" is "excluded" and operator type is "match"', () => {
+    test('it returns "doesNotEqualOperator" when "operator" is "excluded" and operator type is "match"', () => {
       const payload = getEntryMatchMock();
       payload.operator = 'excluded';
       const result = getExceptionOperatorSelect(payload);
 
-      expect(result).toEqual(isNotOperator);
+      expect(result).toEqual(doesNotEqualOperator);
     });
 
-    test('it returns "isOneOfOperator" when "operator" is "included" and operator type is "match_any"', () => {
+    test('it returns "oneOfOperator" when "operator" is "included" and operator type is "match_any"', () => {
       const payload = getEntryMatchAnyMock();
       const result = getExceptionOperatorSelect(payload);
 
-      expect(result).toEqual(isOneOfOperator);
+      expect(result).toEqual(oneOfOperator);
     });
 
-    test('it returns "isNotOneOfOperator" when "operator" is "excluded" and operator type is "match_any"', () => {
+    test('it returns "notOneOfOperator" when "operator" is "excluded" and operator type is "match_any"', () => {
       const payload = getEntryMatchAnyMock();
       payload.operator = 'excluded';
       const result = getExceptionOperatorSelect(payload);
 
-      expect(result).toEqual(isNotOneOfOperator);
+      expect(result).toEqual(notOneOfOperator);
     });
 
     test('it returns "existsOperator" when "operator" is "included" and no operator type is provided', () => {

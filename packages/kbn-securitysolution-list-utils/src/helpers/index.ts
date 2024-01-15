@@ -41,11 +41,11 @@ import {
   EXCEPTION_OPERATORS_SANS_LISTS,
   doesNotExistOperator,
   existsOperator,
-  isNotOperator,
-  isOneOfOperator,
-  isOperator,
+  doesNotEqualOperator,
+  oneOfOperator,
+  equalsOperator,
   DETECTION_ENGINE_EXCEPTION_OPERATORS,
-  isNotOneOfOperator,
+  notOneOfOperator,
   isInListOperator,
   isNotInListOperator,
   matchesOperator,
@@ -200,14 +200,14 @@ export const getOperatorType = (item: BuilderEntry): OperatorTypeEnum => {
  */
 export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption => {
   if (item.type === 'nested') {
-    return isOperator;
+    return equalsOperator;
   } else {
     const operatorType = getOperatorType(item);
     const foundOperator = ALL_OPERATORS.find((operatorOption) => {
       return item.operator === operatorOption.operator && operatorType === operatorOption.type;
     });
 
-    return foundOperator != null ? foundOperator : isOperator;
+    return foundOperator != null ? foundOperator : equalsOperator;
   }
 };
 
@@ -367,7 +367,7 @@ export const getEntryOnFieldChange = (
         entries: [
           addIdToItem({
             field: newChildFieldValue != null ? newChildFieldValue : '',
-            operator: isOperator.operator,
+            operator: equalsOperator.operator,
             type: OperatorTypeEnum.MATCH,
             value: '',
           }),
@@ -387,7 +387,7 @@ export const getEntryOnFieldChange = (
           {
             field: newChildFieldValue != null ? newChildFieldValue : '',
             id: item.id,
-            operator: isOperator.operator,
+            operator: equalsOperator.operator,
             type: OperatorTypeEnum.MATCH,
             value: '',
           },
@@ -401,7 +401,7 @@ export const getEntryOnFieldChange = (
       updatedEntry: {
         field: newField != null ? newField.name : '',
         id: item.id,
-        operator: isOperator.operator,
+        operator: equalsOperator.operator,
         type: OperatorTypeEnum.MATCH,
         value: '',
       },
@@ -697,27 +697,27 @@ export const getOperatorOptions = (
   includeValueListOperators = true
 ): OperatorOption[] => {
   if (item.nested === 'parent' || item.field == null) {
-    return [isOperator];
+    return [equalsOperator];
   } else if (listType === 'endpoint') {
     if (isBoolean) {
-      return [isOperator];
+      return [equalsOperator];
     } else {
       return fieldSupportsMatches(item.field)
-        ? [isOperator, isOneOfOperator, matchesOperator, doesNotMatchOperator]
-        : [isOperator, isOneOfOperator];
+        ? [equalsOperator, oneOfOperator, matchesOperator, doesNotMatchOperator]
+        : [equalsOperator, oneOfOperator];
     }
   } else if (item.nested != null && listType === 'detection') {
-    return isBoolean ? [isOperator, existsOperator] : [isOperator, isOneOfOperator, existsOperator];
+    return isBoolean ? [equalsOperator, existsOperator] : [equalsOperator, oneOfOperator, existsOperator];
   } else if (isBoolean) {
-    return [isOperator, isNotOperator, existsOperator, doesNotExistOperator];
+    return [equalsOperator, doesNotEqualOperator, existsOperator, doesNotExistOperator];
   } else if (!includeValueListOperators) {
     return fieldSupportsMatches(item.field)
       ? EXCEPTION_OPERATORS_SANS_LISTS
       : [
-          isOperator,
-          isNotOperator,
-          isOneOfOperator,
-          isNotOneOfOperator,
+          equalsOperator,
+          doesNotEqualOperator,
+          oneOfOperator,
+          notOneOfOperator,
           existsOperator,
           doesNotExistOperator,
         ];
@@ -726,10 +726,10 @@ export const getOperatorOptions = (
       ? fieldSupportsMatches(item.field)
         ? DETECTION_ENGINE_EXCEPTION_OPERATORS
         : [
-            isOperator,
-            isNotOperator,
-            isOneOfOperator,
-            isNotOneOfOperator,
+            equalsOperator,
+            doesNotEqualOperator,
+            oneOfOperator,
+            notOneOfOperator,
             existsOperator,
             doesNotExistOperator,
             isInListOperator,
@@ -878,7 +878,7 @@ export const getFormattedBuilderEntries = (
             } as DataViewFieldBase),
         id: item.id != null ? item.id : `${index}`,
         nested: 'parent',
-        operator: isOperator,
+        operator: equalsOperator,
         parent: undefined,
         value: undefined,
       };

@@ -9,7 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { isNotOperator, isOperator } from '@kbn/securitysolution-list-utils';
+import { doesNotEqualOperator, equalsOperator } from '@kbn/securitysolution-list-utils';
 
 import { OperatorComponent } from '.';
 import { getField } from '../fields/index.mock';
@@ -22,7 +22,7 @@ describe('operator', () => {
         isDisabled={true}
         isLoading={false}
         onChange={jest.fn()}
-        operator={isOperator}
+        operator={equalsOperator}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -40,7 +40,7 @@ describe('operator', () => {
         isDisabled={false}
         isLoading={true}
         onChange={jest.fn()}
-        operator={isOperator}
+        operator={equalsOperator}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -60,7 +60,7 @@ describe('operator', () => {
         isDisabled={false}
         isLoading={false}
         onChange={jest.fn()}
-        operator={isOperator}
+        operator={equalsOperator}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -76,8 +76,8 @@ describe('operator', () => {
         isDisabled={false}
         isLoading={false}
         onChange={jest.fn()}
-        operator={isOperator}
-        operatorOptions={[isNotOperator]}
+        operator={equalsOperator}
+        operatorOptions={[doesNotEqualOperator]}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -95,7 +95,7 @@ describe('operator', () => {
         isDisabled={false}
         isLoading={false}
         onChange={jest.fn()}
-        operator={isOperator}
+        operator={equalsOperator}
         operatorOptions={[]}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
@@ -145,7 +145,7 @@ describe('operator', () => {
         isDisabled={false}
         isLoading={false}
         onChange={jest.fn()}
-        operator={isOperator}
+        operator={equalsOperator}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
@@ -163,7 +163,7 @@ describe('operator', () => {
         isDisabled={false}
         isLoading={false}
         onChange={jest.fn()}
-        operator={isOperator}
+        operator={equalsOperator}
         placeholder="Placeholder text"
         selectedField={{
           name: 'nestedField',
@@ -186,7 +186,7 @@ describe('operator', () => {
         isDisabled={false}
         isLoading={false}
         onChange={jest.fn()}
-        operator={isOperator}
+        operator={equalsOperator}
         placeholder="Placeholder text"
         selectedField={getField('ssl')}
       />
@@ -209,7 +209,7 @@ describe('operator', () => {
         isDisabled={false}
         isLoading={false}
         onChange={jest.fn()}
-        operator={isOperator}
+        operator={equalsOperator}
         placeholder="Placeholder text"
         selectedField={getField('file.path.text')}
       />
@@ -235,7 +235,7 @@ describe('operator', () => {
         isDisabled={false}
         isLoading={false}
         onChange={mockOnChange}
-        operator={isOperator}
+        operator={equalsOperator}
         placeholder="Placeholder text"
         selectedField={getField('machine.os.raw')}
       />
