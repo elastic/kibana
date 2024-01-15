@@ -12,6 +12,5 @@ require('@babel/register')({
 });
 
 var run = require('@kbn/observability-alerting-test-data').run;
-var clean = require('@kbn/observability-alerting-test-data').clean;
 
 run();
