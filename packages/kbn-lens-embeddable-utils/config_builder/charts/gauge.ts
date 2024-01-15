@@ -16,9 +16,9 @@ import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensGaugeConfig } 
 import {
   addLayerFormulaColumns,
   buildDatasourceStates,
+  buildFormula,
   buildReferences,
   getAdhocDataviews,
-  isFormulaValue,
 } from '../utils';
 import { getFormulaColumn, getValueColumn } from '../columns';
 
@@ -67,12 +67,7 @@ function buildFormulaLayer(
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(
-        ACCESSOR,
-        isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
-        dataView,
-        formulaAPI
-      ),
+      ...getFormulaColumn(ACCESSOR, buildFormula(layer), dataView, formulaAPI),
     },
   };
 
@@ -82,9 +77,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('goal');
     const formulaColumn = getFormulaColumn(
       columnName,
-      isFormulaValue(layer.queryGoalValue)
-        ? layer.queryGoalValue
-        : { formula: layer.queryGoalValue },
+      { formula: layer.queryGoalValue },
       dataView,
       formulaAPI
     );
@@ -96,7 +89,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('min');
     const formulaColumn = getFormulaColumn(
       columnName,
-      isFormulaValue(layer.queryMinValue) ? layer.queryMinValue : { formula: layer.queryMinValue },
+      { formula: layer.queryMinValue },
       dataView,
       formulaAPI
     );
@@ -108,7 +101,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('max');
     const formulaColumn = getFormulaColumn(
       columnName,
-      isFormulaValue(layer.queryMaxValue) ? layer.queryMaxValue : { formula: layer.queryMaxValue },
+      { formula: layer.queryMaxValue },
       dataView,
       formulaAPI
     );
@@ -121,32 +114,13 @@ function buildFormulaLayer(
 
 function getValueColumns(layer: LensGaugeConfig) {
   return [
-    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.formula : layer.value),
-    ...(layer.queryMaxValue
-      ? [
-          getValueColumn(
-            getAccessorName('max'),
-            isFormulaValue(layer.queryMaxValue) ? layer.queryMaxValue.formula : layer.queryMaxValue
-          ),
-        ]
-      : []),
+    getValueColumn(ACCESSOR, layer.value),
+    ...(layer.queryMaxValue ? [getValueColumn(getAccessorName('max'), layer.queryMaxValue)] : []),
     ...(layer.queryMinValue
-      ? [
-          getValueColumn(
-            getAccessorName('secondary'),
-            isFormulaValue(layer.queryMinValue) ? layer.queryMinValue.formula : layer.queryMinValue
-          ),
-        ]
+      ? [getValueColumn(getAccessorName('secondary'), layer.queryMinValue)]
       : []),
     ...(layer.queryGoalValue
-      ? [
-          getValueColumn(
-            getAccessorName('secondary'),
-            isFormulaValue(layer.queryGoalValue)
-              ? layer.queryGoalValue.formula
-              : layer.queryGoalValue
-          ),
-        ]
+      ? [getValueColumn(getAccessorName('secondary'), layer.queryGoalValue)]
       : []),
   ];
 }

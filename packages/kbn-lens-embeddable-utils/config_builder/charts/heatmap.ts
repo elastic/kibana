@@ -16,9 +16,9 @@ import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensHeatmapConfig 
 import {
   addLayerColumn,
   buildDatasourceStates,
+  buildFormula,
   buildReferences,
   getAdhocDataviews,
-  isFormulaValue,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
@@ -70,12 +70,7 @@ function buildFormulaLayer(
   formulaAPI: FormulaPublicApi
 ): FormBasedPersistedState['layers'][0] {
   const defaultLayer = {
-    ...getFormulaColumn(
-      ACCESSOR,
-      isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
-      dataView,
-      formulaAPI
-    ),
+    ...getFormulaColumn(ACCESSOR, buildFormula(layer), dataView, formulaAPI),
   };
 
   if (layer.xAxis) {
@@ -109,7 +104,7 @@ function getValueColumns(layer: LensHeatmapConfig) {
   return [
     ...(layer.breakdown ? [getValueColumn(getAccessorName('y'), layer.breakdown as string)] : []),
     getValueColumn(getAccessorName('x'), layer.xAxis as string),
-    getValueColumn(ACCESSOR, isFormulaValue(layer.value) ? layer.value.formula : layer.value),
+    getValueColumn(ACCESSOR, layer.value),
   ];
 }
 

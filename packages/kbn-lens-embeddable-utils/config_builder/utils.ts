@@ -34,6 +34,11 @@ import {
   LensESQLDataset,
 } from './types';
 
+type DataSourceStateLayer =
+  | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
+  | PersistedIndexPatternLayer
+  | TextBasedPersistedState['layers'][0];
+
 export const getDefaultReferences = (
   index: string,
   dataLayerId: string
@@ -46,6 +51,27 @@ export const getDefaultReferences = (
     },
   ];
 };
+
+export function buildFormula(layer: LensBaseLayer): FormulaValueConfig {
+  const { label, decimals, format, compactValues: compact, normalizeByUnit, value } = layer;
+
+  const formulaFormat: FormulaValueConfig['format'] | undefined = format
+    ? {
+        id: format,
+        params: {
+          decimals: decimals ?? 2,
+          ...(!!compact ? { compact } : undefined),
+        },
+      }
+    : undefined;
+
+  return {
+    formula: value,
+    label,
+    timeScale: normalizeByUnit,
+    format: formulaFormat,
+  };
+}
 
 export function buildReferences(dataviews: Record<string, DataView>) {
   const references = [];
@@ -77,15 +103,8 @@ export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
   return adHocDataViews;
 };
 
-export function isFormulaValue(value: unknown): value is FormulaValueConfig {
-  if (value && typeof value === 'object' && 'formula' in value) {
-    return true;
-  }
-  return false;
-}
-
-export function isPersistedStateLayer(
-  layer: unknown
+export function isSingleLayer(
+  layer: DataSourceStateLayer
 ): layer is PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] {
   if (layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer)) {
     return true;
@@ -245,7 +264,7 @@ export const buildDatasourceStates = async (
         layers = {
           ...layers,
           [type]: {
-            layers: isPersistedStateLayer(layerConfig)
+            layers: isSingleLayer(layerConfig)
               ? { ...layers[type]?.layers, [layerId]: layerConfig }
               : // metric chart can return 2 layers (one for the metric and one for the trendline)
                 { ...layerConfig },

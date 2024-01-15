@@ -22,7 +22,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
-  isFormulaValue,
+  buildFormula,
 } from '../utils';
 import {
   BuildDependencies,
@@ -152,11 +152,7 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
     getValueColumn(`x_${ACCESSOR}${i}`, layer.xAxis as string),
-    getValueColumn(
-      `${ACCESSOR}${i}`,
-      isFormulaValue(layer.value) ? layer.value.formula : layer.value,
-      'number'
-    ),
+    getValueColumn(`${ACCESSOR}${i}`, layer.value, 'number'),
   ];
 }
 
@@ -168,12 +164,7 @@ function buildFormulaLayer(
 ): FormBasedPersistedState['layers'][0] {
   if (layer.type === 'series') {
     const resultLayer = {
-      ...getFormulaColumn(
-        `${ACCESSOR}${i}`,
-        isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
-        dataView,
-        formulaAPI
-      ),
+      ...getFormulaColumn(`${ACCESSOR}${i}`, buildFormula(layer), dataView, formulaAPI),
     };
 
     if (layer.xAxis) {
@@ -199,12 +190,7 @@ function buildFormulaLayer(
     // nothing ?
   } else if (layer.type === 'reference') {
     return {
-      ...getFormulaColumn(
-        `${ACCESSOR}${i}`,
-        isFormulaValue(layer.value) ? layer.value : { formula: layer.value },
-        dataView,
-        formulaAPI
-      ),
+      ...getFormulaColumn(`${ACCESSOR}${i}`, buildFormula(layer), dataView, formulaAPI),
     };
   }
 
