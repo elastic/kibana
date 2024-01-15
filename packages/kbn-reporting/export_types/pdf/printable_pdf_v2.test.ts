@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
-import type { Writable } from 'stream';
+import * as Rx from 'rxjs';
+import { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
@@ -15,12 +15,8 @@ import type { LocatorParams } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
-import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-
+import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { PdfExportType } from '.';
-import { generatePdfObservableV2 } from './generate_pdf_v2';
-
-jest.mock('./generate_pdf_v2');
 
 let content: string;
 let mockPdfExportType: PdfExportType;
@@ -34,7 +30,11 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
 };
+let encryptedHeaders: string;
 
+const screenshottingMock = createMockScreenshottingStart();
+const getScreenshotsSpy = jest.spyOn(screenshottingMock, 'getScreenshots');
+const testContent = 'raw string from get_screenhots';
 const getBasePayload = (baseObj: any) =>
   ({
     params: { forceNow: 'test' },
@@ -50,8 +50,10 @@ beforeEach(async () => {
 
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
-  mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
 
+  encryptedHeaders = await encryptHeaders({});
+
+  mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
   mockPdfExportType.setup({
     basePath: { set: jest.fn() },
   });
@@ -59,21 +61,26 @@ beforeEach(async () => {
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
-    screenshotting: {} as unknown as ScreenshottingStart,
+    screenshotting: screenshottingMock,
+  });
+
+  getScreenshotsSpy.mockImplementation(() => {
+    return Rx.of({
+      metrics: { cpu: 0, pages: 1 },
+      data: Buffer.from(testContent),
+      errors: [],
+      renderErrors: [],
+    });
   });
 });
 
-afterEach(() => (generatePdfObservableV2 as jest.Mock).mockReset());
-
 test(`passes browserTimezone to generatePdf`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
-  (generatePdfObservableV2 as jest.Mock).mockReturnValue(of(Buffer.from('')));
-
   const browserTimezone = 'UTC';
   await mockPdfExportType.runTask(
     'pdfJobId',
     getBasePayload({
       forceNow: 'test',
+      layout: { dimensions: {} },
       title: 'PDF Params Timezone Test',
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       browserTimezone,
@@ -83,24 +90,30 @@ test(`passes browserTimezone to generatePdf`, async () => {
     stream
   );
 
-  expect(generatePdfObservableV2).toHaveBeenCalledWith(
-    expect.anything(),
-    expect.anything(),
-    expect.anything(),
-    expect.anything(),
-    expect.anything(),
-    expect.objectContaining({ browserTimezone: 'UTC' })
-  );
+  expect(getScreenshotsSpy).toHaveBeenCalledWith({
+    browserTimezone: 'UTC',
+    format: 'pdf',
+    headers: {},
+    layout: { dimensions: {} },
+    logo: false,
+    title: 'PDF Params Timezone Test',
+    urls: [
+      [
+        'http://localhost:80/mock-server-basepath/app/reportingRedirect?forceNow=test',
+        { __REPORTING_REDIRECT_LOCATOR_STORE_KEY__: { id: 'test', version: 'test' } },
+      ],
+    ],
+  });
 });
 
 test(`returns content_type of application/pdf`, async () => {
-  const encryptedHeaders = await encryptHeaders({});
-
-  (generatePdfObservableV2 as jest.Mock).mockReturnValue(of({ buffer: Buffer.from('') }));
-
   const { content_type: contentType } = await mockPdfExportType.runTask(
     'pdfJobId',
-    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
+    getBasePayload({
+      layout: { dimensions: {} },
+      locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
+      headers: encryptedHeaders,
+    }),
     cancellationToken,
     stream
   );
@@ -108,13 +121,13 @@ test(`returns content_type of application/pdf`, async () => {
 });
 
 test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
-  const testContent = 'test content';
-  (generatePdfObservableV2 as jest.Mock).mockReturnValue(of({ buffer: Buffer.from(testContent) }));
-
-  const encryptedHeaders = await encryptHeaders({});
   await mockPdfExportType.runTask(
     'pdfJobId',
-    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
+    getBasePayload({
+      layout: { dimensions: {} },
+      locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
+      headers: encryptedHeaders,
+    }),
     cancellationToken,
     stream
   );
