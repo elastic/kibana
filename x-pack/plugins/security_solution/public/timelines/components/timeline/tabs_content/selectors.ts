@@ -8,7 +8,7 @@
 import { createSelector } from 'reselect';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { selectNotesById } from '../../../../common/store/app/selectors';
-import { selectTimeline } from '../../../store/timeline/selectors';
+import { selectTimeline } from '../../../store/selectors';
 
 export const getActiveTabSelector = () =>
   createSelector(selectTimeline, (timeline) => timeline?.activeTab ?? TimelineTabs.query);

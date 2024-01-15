@@ -34,6 +34,8 @@ import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
+import { isDefined } from '@kbn/ml-is-defined';
+import { escapeQuotes } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { mlJobService } from '../../services/job_service';
 import { findMessageField, getDataViewIdFromName } from '../../util/index_utils';
@@ -265,12 +267,19 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       if (record.influencers) {
         kqlQuery = record.influencers
-          .map(
-            (influencer) =>
-              `"${influencer.influencer_field_name}":"${
-                influencer.influencer_field_values[0] ?? ''
-              }"`
-          )
+          .filter((influencer) => isDefined(influencer))
+          .map((influencer) => {
+            const values = influencer.influencer_field_values;
+
+            if (values.length > 0) {
+              const fieldName = escapeQuotes(influencer.influencer_field_name);
+              const escapedVals = values
+                .filter((value) => isDefined(value))
+                .map((value) => `"${fieldName}":"${escapeQuotes(value)}"`);
+              // Ensure there's enclosing () if there are multiple field values,
+              return escapedVals.length > 1 ? `(${escapedVals.join(' OR ')})` : escapedVals[0];
+            }
+          })
           .join(' AND ');
       }
 

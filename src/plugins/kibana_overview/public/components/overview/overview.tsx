@@ -27,10 +27,6 @@ import {
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
-import {
   RedirectAppLinksContainer as RedirectAppLinks,
   RedirectAppLinksKibanaProvider,
 } from '@kbn/shared-ux-link-redirect-app';
@@ -40,6 +36,7 @@ import {
   FeatureCatalogueSolution,
   FeatureCatalogueCategory,
 } from '@kbn/home-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
@@ -201,6 +198,22 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       },
       dataViewEditor,
     };
+
+    const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+    const AnalyticsNoDataPageKibanaProvider = withSuspense(
+      React.lazy(() =>
+        importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+          return { default: NoDataProvider };
+        })
+      )
+    );
+    const AnalyticsNoDataPage = withSuspense(
+      React.lazy(() =>
+        importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+          return { default: NoDataPage };
+        })
+      )
+    );
 
     return (
       <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>

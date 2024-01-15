@@ -25,7 +25,7 @@ import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
 import {
   useTimeZone,
-  useChartTheme,
+  useChartThemes,
   useFetcher,
   FETCH_STATUS,
 } from '@kbn/observability-shared-plugin/public';
@@ -45,7 +45,7 @@ interface Props {
 
 export function UptimeSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
@@ -146,7 +146,7 @@ export function UptimeSection({ bucketSize }: Props) {
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
           onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
-          theme={chartTheme}
+          {...chartThemes}
           showLegend={false}
           legendPosition={Position.Right}
           xDomain={{ min, max }}

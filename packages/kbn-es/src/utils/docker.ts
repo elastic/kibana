@@ -24,7 +24,7 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
   ensureSAMLRoleMapping,
   createMockIdpMetadata,
-} from '@kbn/mock-idp-plugin/common';
+} from '@kbn/mock-idp-utils';
 
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
@@ -542,12 +542,19 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
   log.indent(4);
 
-  if (clean && fs.existsSync(objectStorePath)) {
+  let exists = null;
+  try {
+    await Fsp.access(objectStorePath);
+    exists = true;
+  } catch (e) {
+    exists = false;
+  }
+  if (clean && exists) {
     log.info('Cleaning existing object store.');
     await Fsp.rm(objectStorePath, { recursive: true, force: true });
   }
 
-  if (clean || !fs.existsSync(objectStorePath)) {
+  if (clean || !exists) {
     await Fsp.mkdir(objectStorePath, { recursive: true }).then(() =>
       log.info('Created new object store.')
     );

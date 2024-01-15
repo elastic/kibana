@@ -47,6 +47,7 @@ export const getColumns: ColumnsProvider = ({
         <strong>{i18n.FIELD}</strong>
       </EuiText>
     ),
+    width: '30%',
     render: (field, data) => {
       return (
         <FieldNameCell data={data as EventFieldsData} field={field} fieldMapping={undefined} />
@@ -60,6 +61,7 @@ export const getColumns: ColumnsProvider = ({
         <strong>{i18n.VALUE}</strong>
       </EuiText>
     ),
+    width: '70%',
     render: (values, data) => {
       const fieldFromBrowserField = getFieldFromBrowserField(
         [data.category as string, 'fields', data.field],

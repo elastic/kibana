@@ -21,7 +21,6 @@ export const allowedExperimentalValues = Object.freeze({
   kubernetesEnabled: true,
   chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -72,6 +71,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionUploadEnabled: true,
 
   /**
+   * Enables the ability to send Response actions to SentinelOne
+   */
+  responseActionsSentinelOneV1Enabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
@@ -82,7 +86,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables expandable flyout in create rule page, alert preview
    */
-  expandableFlyoutInCreateRuleEnabled: false,
+  expandableFlyoutInCreateRuleEnabled: true,
   /*
    * Enables new Set of filters on the Alerts page.
    *
@@ -94,16 +98,24 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
-  /**
-   * Enables Retrieval Augmented Generation (RAG) on Alerts in the assistant
-   */
-  assistantRagOnAlerts: false,
-
   /*
-   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   * Enables the new user details flyout displayed on the Alerts table.
    *
    **/
   newUserDetailsFlyout: false,
+
+  /*
+   * Enables the Managed User section inside the new user details flyout.
+   * To see this section you also need newUserDetailsFlyout flag enabled.
+   *
+   **/
+  newUserDetailsFlyoutManagedUser: false,
+
+  /*
+   * Enables the new host details flyout displayed on the Alerts table.
+   *
+   **/
+  newHostDetailsFlyout: false,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
@@ -124,11 +136,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables Protection Updates tab in the Endpoint Policy Details page
    */
   protectionUpdatesEnabled: true,
-
-  /**
-   * Enables alerts suppression for threshold rules
-   */
-  alertSuppressionForThresholdRuleEnabled: false,
 
   /**
    * Disables the timeline save tour.
@@ -162,7 +169,12 @@ export const allowedExperimentalValues = Object.freeze({
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
    */
-  jsonPrebuiltRulesDiffingEnabled: false,
+  jsonPrebuiltRulesDiffingEnabled: true,
+  /*
+   * Disables discover esql tab within timeline
+   *
+   */
+  timelineEsqlTabDisabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

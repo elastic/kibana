@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-export const datasetStatRt = rt.intersection([
+export const dataStreamStatRt = rt.intersection([
   rt.type({
     name: rt.string,
   }),
@@ -18,6 +18,8 @@ export const datasetStatRt = rt.intersection([
     integration: rt.string,
   }),
 ]);
+
+export type DataStreamStat = rt.TypeOf<typeof dataStreamStatRt>;
 
 export const integrationIconRt = rt.intersection([
   rt.type({
@@ -39,20 +41,23 @@ export const integrationRt = rt.intersection([
     title: rt.string,
     version: rt.string,
     icons: rt.array(integrationIconRt),
+    datasets: rt.record(rt.string, rt.string),
   }),
 ]);
 
-export const malformedDocsRt = rt.type({
+export type Integration = rt.TypeOf<typeof integrationRt>;
+
+export const degradedDocsRt = rt.type({
   dataset: rt.string,
   percentage: rt.number,
 });
 
-export type MalformedDocs = rt.TypeOf<typeof malformedDocsRt>;
+export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
 export const getDataStreamsStatsResponseRt = rt.exact(
   rt.intersection([
     rt.type({
-      dataStreamsStats: rt.array(datasetStatRt),
+      dataStreamsStats: rt.array(dataStreamStatRt),
     }),
     rt.type({
       integrations: rt.array(integrationRt),
@@ -60,8 +65,8 @@ export const getDataStreamsStatsResponseRt = rt.exact(
   ])
 );
 
-export const getDataStreamsMalformedDocsStatsResponseRt = rt.exact(
+export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
   rt.type({
-    malformedDocs: rt.array(malformedDocsRt),
+    degradedDocs: rt.array(degradedDocsRt),
   })
 );

@@ -7,16 +7,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextTruncate } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { ValuesType } from 'utility-types';
+import { dynamic } from '../../../utils/dynamic';
 import { HoverActionPopover } from './hover_popover_action';
-import { LogDocument } from '../types';
+
+const HighlightFieldDescription = dynamic(() => import('./highlight_field_description'));
 
 interface HighlightFieldProps {
   field: string;
   formattedValue: string;
   icon?: ReactNode;
   label: string | ReactNode;
-  value: ValuesType<LogDocument['flattened']>;
+  value?: string;
   width: number;
 }
 
@@ -29,15 +30,22 @@ export function HighlightField({
   width,
   ...props
 }: HighlightFieldProps) {
-  return formattedValue ? (
+  return formattedValue && value ? (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
-        <EuiText color="subdued" size="xs">
-          {label}
-        </EuiText>
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="xs">
+              {label}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <HighlightFieldDescription fieldName={field} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <HoverActionPopover title={value as string} value={value} field={field}>
+        <HoverActionPopover title={value} value={value} field={field}>
           <EuiFlexGroup
             responsive={false}
             alignItems="center"

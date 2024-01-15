@@ -59,7 +59,7 @@ journey('INP', async ({ page, params }) => {
   });
 
   step('Check INP Values', async () => {
-    expect(await page.$('text=Interaction to Next Paint'));
+    expect(await page.$('text=Interaction to next paint'));
     await page.waitForSelector('[data-test-subj=inp-core-vital] > .euiTitle');
     await page.waitForSelector('text=381 ms');
   });

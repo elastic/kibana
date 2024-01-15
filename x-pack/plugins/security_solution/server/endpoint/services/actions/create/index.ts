@@ -13,22 +13,12 @@ import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
   HostMetadata,
+  EndpointActionResponseDataOutput,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
-import type { FeatureKeys } from '../../feature_usage';
 import { getActionDetailsById } from '..';
 import type { ActionCreateService, CreateActionMetadata, CreateActionPayload } from './types';
 import { writeActionToIndices } from './write_action_to_indices';
-
-const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
-  ['isolate', 'HOST_ISOLATION'],
-  ['unisolate', 'HOST_ISOLATION'],
-  ['kill-process', 'KILL_PROCESS'],
-  ['suspend-process', 'SUSPEND_PROCESS'],
-  ['running-processes', 'RUNNING_PROCESSES'],
-  ['get-file', 'GET_FILE'],
-  ['execute', 'EXECUTE'],
-]);
 
 const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
 
@@ -37,16 +27,18 @@ export const actionCreateService = (
   endpointContext: EndpointAppContext
 ): ActionCreateService => {
   const createAction = async <
-    TOutputContent extends object = object,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     payload: CreateActionPayload,
     agents: string[],
     { minimumLicenseRequired = 'basic' }: CreateActionMetadata = {}
   ): Promise<ActionDetails<TOutputContent, TParameters>> => {
-    const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
+    const usageService = endpointContext.service.getFeatureUsageService();
+    const featureKey = usageService.getResponseActionFeatureKey(payload.command);
+
     if (featureKey) {
-      endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
+      usageService.notifyUsage(featureKey);
     }
 
     // create an Action ID and use that to dispatch action to ES & Fleet Server

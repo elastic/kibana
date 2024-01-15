@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
@@ -21,6 +21,7 @@ export interface Props {
 export function SloList({ autoRefresh }: Props) {
   const { state, store: storeState } = useUrlSearchState();
   const [page, setPage] = useState(state.page);
+  const [perPage, setPerPage] = useState(state.perPage);
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
   const [direction] = useState<SortDirection>(state.sort.direction);
@@ -33,6 +34,7 @@ export function SloList({ autoRefresh }: Props) {
     isError,
     data: sloList,
   } = useFetchSloList({
+    perPage,
     page: page + 1,
     kqlQuery: query,
     sortBy: sort,
@@ -40,7 +42,7 @@ export function SloList({ autoRefresh }: Props) {
     shouldRefetch: autoRefresh,
   });
 
-  const { results = [], total = 0, perPage = 0 } = sloList ?? {};
+  const { results = [], total = 0 } = sloList ?? {};
 
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
@@ -103,15 +105,17 @@ export function SloList({ autoRefresh }: Props) {
 
       {total > 0 ? (
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
-            <EuiFlexItem>
-              <EuiPagination
-                pageCount={Math.ceil(total / perPage)}
-                activePage={page}
-                onPageClick={handlePageClick}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTablePagination
+            pageCount={Math.ceil(total / perPage)}
+            activePage={page}
+            onChangePage={handlePageClick}
+            itemsPerPage={perPage}
+            itemsPerPageOptions={[10, 25, 50, 100]}
+            onChangeItemsPerPage={(newPerPage) => {
+              setPerPage(newPerPage);
+              storeState({ perPage: newPerPage });
+            }}
+          />
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>

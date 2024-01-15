@@ -15,7 +15,7 @@ import { ALERTS_URL } from '../../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
   alertsTableShowsAssigneesForAlert,
-  updateAssigneesForAlert,
+  updateAssigneesForFirstAlert,
   bulkRemoveAllAssignees,
   loadPageAs,
 } from '../../../../../tasks/alert_assignments';
@@ -78,7 +78,7 @@ describe.skip(
           bulkRemoveAllAssignees();
           refreshAlertPageFilter();
 
-          updateAssigneesForAlert([role]);
+          updateAssigneesForFirstAlert([role]);
 
           // Assignees should appear in the alerts table
           alertsTableShowsAssigneesForAlert([role]);

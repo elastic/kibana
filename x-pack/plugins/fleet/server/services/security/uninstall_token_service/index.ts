@@ -23,9 +23,14 @@ import type {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { asyncForEach } from '@kbn/std';
+import { asyncForEach, asyncMap } from '@kbn/std';
 
-import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  AggregationsTermsInclude,
+  AggregationsTermsExclude,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import { isResponseError } from '@kbn/es-errors';
 
 import { UninstallTokenError } from '../../../../common/errors';
 
@@ -74,12 +79,14 @@ export interface UninstallTokenServiceInterface {
    * @param policyIdFilter a string for partial matching the policyId
    * @param page
    * @param perPage
+   * @param excludePolicyIds
    * @returns Uninstall Tokens Metadata Response
    */
   getTokenMetadata(
     policyIdFilter?: string,
     page?: number,
-    perPage?: number
+    perPage?: number,
+    excludePolicyIds?: string[]
   ): Promise<GetUninstallTokensMetadataResponse>;
 
   /**
@@ -170,11 +177,12 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   public async getTokenMetadata(
     policyIdFilter?: string,
     page = 1,
-    perPage = 20
+    perPage = 20,
+    excludePolicyIds?: string[]
   ): Promise<GetUninstallTokensMetadataResponse> {
     const includeFilter = policyIdFilter ? `.*${policyIdFilter}.*` : undefined;
 
-    const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter);
+    const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter, excludePolicyIds);
 
     const items: UninstallTokenMetadata[] = tokenObjects
       .slice((page - 1) * perPage, page * perPage)
@@ -199,14 +207,30 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       return [];
     }
 
-    const filter: string = tokenObjectHits
-      .map(({ _id }) => {
-        return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${_id}"`;
-      })
-      .join(' or ');
+    const filterEntries: string[] = tokenObjectHits.map(
+      ({ _id }) => `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${_id}"`
+    );
 
-    return this.getDecryptedTokens({ filter });
+    const uninstallTokenChunks: UninstallToken[][] = await asyncMap(
+      chunk(filterEntries, this.getUninstallTokenVerificationBatchSize()),
+      (entries) => {
+        const filter = entries.join(' or ');
+        return this.getDecryptedTokens({ filter });
+      }
+    );
+
+    return uninstallTokenChunks.flat();
   }
+
+  private getUninstallTokenVerificationBatchSize = () => {
+    /** If `uninstallTokenVerificationBatchSize` is too large, we get an error of `too_many_nested_clauses`.
+     *  Assuming that `max_clause_count` >= 1024, and experiencing that batch size should be less than half
+     *  than `max_clause_count` with our current query, batch size below 512 should be okay on every env.
+     */
+    const config = appContextService.getConfig();
+
+    return config?.setup?.uninstallTokenVerificationBatchSize ?? 500;
+  };
 
   private getDecryptedTokens = async (
     options: Partial<SavedObjectsCreatePointInTimeFinderOptions>
@@ -250,7 +274,8 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   };
 
   private async getTokenObjectsByIncludeFilter(
-    include?: AggregationsTermsInclude
+    include?: AggregationsTermsInclude,
+    exclude?: AggregationsTermsExclude
   ): Promise<Array<SearchHit<any>>> {
     const bucketSize = 10000;
 
@@ -263,7 +288,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
             field: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id`,
             size: bucketSize,
             include,
-            exclude: 'policy-elastic-agent-on-cloud', // todo: find a better way to not return or even generate token for managed policies
+            exclude,
           },
           aggs: {
             latest: {
@@ -513,6 +538,16 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       if (error instanceof UninstallTokenError) {
         // known errors are considered non-fatal
         return { error };
+      } else if (isResponseError(error) && error.message.includes('too_many_nested_clauses')) {
+        // `too_many_nested_clauses` is considered non-fatal
+        const errorMessage =
+          'Failed to validate uninstall tokens: `too_many_nested_clauses` error received. ' +
+          'Setting/decreasing the value of `xpack.fleet.setup.uninstallTokenVerificationBatchSize` in your kibana.yml should help. ' +
+          `Current value is ${this.getUninstallTokenVerificationBatchSize()}.`;
+
+        appContextService.getLogger().warn(`${errorMessage}: '${error}'`);
+
+        return { error: new UninstallTokenError(errorMessage) };
       } else {
         const errorMessage = 'Unknown error happened while checking Uninstall Tokens validity';
         appContextService.getLogger().error(`${errorMessage}: '${error}'`);

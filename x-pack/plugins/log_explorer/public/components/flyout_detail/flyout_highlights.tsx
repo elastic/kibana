@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { FlyoutContentActions } from '@kbn/discover-plugin/public';
 import { AgentIcon, CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { useMeasure } from 'react-use/lib';
 import { AgentName } from '@kbn/elastic-agent-utils';
@@ -32,7 +31,7 @@ import {
   infraAccordionTitle,
   otherAccordionTitle,
   serviceAccordionTitle,
-} from './translations';
+} from '../common/translations';
 import { HighlightSection } from './sub_components/highlight_section';
 import { HighlightContainer } from './sub_components/highlight_container';
 import { useFlyoutColumnWidth } from '../../hooks/use_flyouot_column_width';
@@ -40,11 +39,9 @@ import { useFlyoutColumnWidth } from '../../hooks/use_flyouot_column_width';
 export function FlyoutHighlights({
   formattedDoc,
   flattenedDoc,
-  actions,
 }: {
   formattedDoc: FlyoutDoc;
   flattenedDoc: LogDocument['flattened'];
-  actions: FlyoutContentActions;
 }) {
   const [ref, dimensions] = useMeasure<HTMLDivElement>();
   const { columns, fieldWidth } = useFlyoutColumnWidth(dimensions.width);

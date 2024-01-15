@@ -53,7 +53,6 @@ export const FilterPopover = ({
   return (
     <EuiPopover
       data-test-subj="indexPattern-filters-existingFilterContainer"
-      anchorClassName="eui-fullWidth"
       panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
       isOpen={isOpen}
       ownFocus

@@ -17,6 +17,7 @@ import { SlosWelcomePage } from './slos_welcome';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { paths } from '../../../common/locators/paths';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
@@ -33,16 +34,19 @@ const useGlobalDiagnosisMock = useFetchSloGlobalDiagnosis as jest.Mock;
 
 const mockNavigate = jest.fn();
 
+const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
-      theme: {},
       application: { navigateToUrl: mockNavigate },
+      theme: {},
       http: {
         basePath: {
           prepend: (url: string) => url,
         },
       },
+      observabilityAIAssistant: mockObservabilityAIAssistant,
     },
   });
 };

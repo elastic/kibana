@@ -8,7 +8,10 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
-export type { SharePluginSetup, SharePluginStart } from './plugin';
+export type {
+  SharePublicSetup as SharePluginSetup,
+  SharePublicStart as SharePluginStart,
+} from './plugin';
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 

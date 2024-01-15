@@ -125,7 +125,6 @@ async function createSetupSideEffects(
       esClient,
       getPreconfiguredOutputFromConfig(appContextService.getConfig())
     ),
-
     settingsService.settingsSetup(soClient),
   ]);
 
@@ -228,7 +227,7 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
-  logger.debug('Setting up Fleet enrollment keys');
+  logger.debug('Setting up Fleet enrollment keys for preconfigured policies');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
   stepSpan?.end();
 
@@ -370,6 +369,7 @@ export async function ensureFleetDirectories() {
 
   try {
     await fs.stat(bundledPackageLocation);
+    logger.debug(`Bundled package directory ${bundledPackageLocation} exists`);
   } catch (error) {
     logger.warn(
       `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`

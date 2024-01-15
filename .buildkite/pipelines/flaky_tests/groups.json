@@ -1,12 +1,12 @@
 {
   "groups": [
     {
-      "key": "cypress/security_solution",
-      "name": "Security Solution - Cypress"
+      "key": "cypress/security_solution_entity_analytics",
+      "name": "Security Solution Entity Analytics - Cypress"
     },
     {
-      "key": "cypress/security_serverless",
-      "name": "[Serverless] Security Solution - Cypress"
+      "key": "cypress/security_serverless_entity_analytics",
+      "name": "[Serverless] Security Solution Entity Analytics - Cypress"
     },
     {
       "key": "cypress/security_solution_investigations",
@@ -32,7 +32,6 @@
       "key": "cypress/security_serverless_rule_management",
       "name": "[Serverless] Security Solution Rule Management - Cypress"
     },
-
     {
       "key": "cypress/security_solution_rule_management_prebuilt_rules",
       "name": "Security Solution Rule Management - Prebuilt Rules - Cypress"

@@ -45,12 +45,7 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
       locations: Record<string, ManifestLocation>;
     }>(server.config.service!.manifestUrl!);
 
-    const availableLocations =
-      server.isDev || server.config.service?.showExperimentalLocations
-        ? Object.entries(data.locations)
-        : Object.entries(data.locations).filter(([_, location]) => {
-            return location.status === LocationStatus.GA;
-          });
+    const availableLocations = Object.entries(data.locations);
 
     availableLocations.forEach(([locationId, location]) => {
       locations.push({
