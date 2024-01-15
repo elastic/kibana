@@ -89,7 +89,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       value,
     }: {
       field: string;
-      operator: 'matches' | 'is';
+      operator: 'matches' | 'equals';
       value: string;
     }) => {
       await setLastFieldsValue({ testSubj: 'fieldAutocompleteComboBox', value: field });
