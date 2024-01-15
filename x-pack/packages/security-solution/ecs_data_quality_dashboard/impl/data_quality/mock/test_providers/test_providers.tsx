@@ -13,6 +13,7 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DataQualityProvider } from '../../data_quality_panel/data_quality_context';
 
 interface Props {
@@ -39,38 +40,52 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
     hasConnectorsReadPrivilege: true,
     isAssistantEnabled: true,
   };
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+    logger: {
+      log: jest.fn(),
+      warn: jest.fn(),
+      error: () => {},
+    },
+  });
 
   return (
     <I18nProvider>
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <AssistantProvider
-          actionTypeRegistry={actionTypeRegistry}
-          assistantAvailability={mockAssistantAvailability}
-          augmentMessageCodeBlocks={jest.fn()}
-          baseAllow={[]}
-          baseAllowReplacement={[]}
-          basePath={'https://localhost:5601/kbn'}
-          defaultAllow={[]}
-          defaultAllowReplacement={[]}
-          docLinks={{
-            ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-            DOC_LINK_VERSION: 'current',
-          }}
-          getComments={mockGetComments}
-          getInitialConversations={mockGetInitialConversations}
-          setConversations={jest.fn()}
-          setDefaultAllow={jest.fn()}
-          setDefaultAllowReplacement={jest.fn()}
-          http={mockHttp}
-        >
-          <DataQualityProvider
-            httpFetch={http.fetch}
-            isILMAvailable={isILMAvailable}
-            telemetryEvents={mockTelemetryEvents}
+        <QueryClientProvider client={queryClient}>
+          <AssistantProvider
+            actionTypeRegistry={actionTypeRegistry}
+            assistantAvailability={mockAssistantAvailability}
+            augmentMessageCodeBlocks={jest.fn()}
+            baseAllow={[]}
+            baseAllowReplacement={[]}
+            basePath={'https://localhost:5601/kbn'}
+            defaultAllow={[]}
+            defaultAllowReplacement={[]}
+            docLinks={{
+              ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+              DOC_LINK_VERSION: 'current',
+            }}
+            getComments={mockGetComments}
+            getInitialConversations={mockGetInitialConversations}
+            setConversations={jest.fn()}
+            setDefaultAllow={jest.fn()}
+            setDefaultAllowReplacement={jest.fn()}
+            http={mockHttp}
           >
-            {children}
-          </DataQualityProvider>
-        </AssistantProvider>
+            <DataQualityProvider
+              httpFetch={http.fetch}
+              isILMAvailable={isILMAvailable}
+              telemetryEvents={mockTelemetryEvents}
+            >
+              {children}
+            </DataQualityProvider>
+          </AssistantProvider>
+        </QueryClientProvider>
       </ThemeProvider>
     </I18nProvider>
   );
