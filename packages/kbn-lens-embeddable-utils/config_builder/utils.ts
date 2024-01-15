@@ -29,6 +29,7 @@ import {
   LensAttributes,
   LensBaseConfig,
   LensBaseLayer,
+  LensBaseXYLayer,
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
@@ -52,7 +53,7 @@ export const getDefaultReferences = (
   ];
 };
 
-export function buildFormula(layer: LensBaseLayer): FormulaValueConfig {
+export function mapToFormula(layer: LensBaseLayer): FormulaValueConfig {
   const { label, decimals, format, compactValues: compact, normalizeByUnit, value } = layer;
 
   const formulaFormat: FormulaValueConfig['format'] | undefined = format
@@ -106,10 +107,7 @@ export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
 export function isSingleLayer(
   layer: DataSourceStateLayer
 ): layer is PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] {
-  if (layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer)) {
-    return true;
-  }
-  return false;
+  return layer && typeof layer === 'object' && ('columnOrder' in layer || 'columns' in layer);
 }
 
 export function isFormulaDataset(dataset?: LensDataset) {
@@ -163,7 +161,7 @@ export function getDatasetIndex(dataset?: LensDataset) {
 }
 
 function buildDatasourceStatesLayer(
-  layer: LensBaseLayer,
+  layer: LensBaseLayer | LensBaseXYLayer,
   i: number,
   dataset: LensDataset,
   dataView: DataView | undefined,
@@ -173,16 +171,10 @@ function buildDatasourceStatesLayer(
     dataView: DataView
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
-): [
-  'textBased' | 'formBased',
-  (
-    | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
-    | PersistedIndexPatternLayer
-    | TextBasedPersistedState['layers'][0]
-    | undefined
-  )
-] {
-  function buildValueLayer(config: LensBaseLayer): TextBasedPersistedState['layers'][0] {
+): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
+  function buildValueLayer(
+    config: LensBaseLayer | LensBaseXYLayer
+  ): TextBasedPersistedState['layers'][0] {
     const table = dataset as LensDatatableDataset;
     const newLayer = {
       table,
@@ -202,7 +194,9 @@ function buildDatasourceStatesLayer(
     return newLayer;
   }
 
-  function buildESQLLayer(config: LensBaseLayer): TextBasedPersistedState['layers'][0] {
+  function buildESQLLayer(
+    config: LensBaseLayer | LensBaseXYLayer
+  ): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(layer, i);
 
     const newLayer = {
@@ -223,7 +217,7 @@ function buildDatasourceStatesLayer(
   return ['formBased', buildFormulaLayers(layer, i, dataView!)];
 }
 export const buildDatasourceStates = async (
-  config: (LensBaseConfig & { layers: LensBaseLayer[] }) | (LensBaseLayer & LensBaseConfig),
+  config: (LensBaseConfig & { layers: LensBaseXYLayer[] }) | (LensBaseLayer & LensBaseConfig),
   dataviews: Record<string, DataView>,
   buildFormulaLayers: (
     config: unknown,

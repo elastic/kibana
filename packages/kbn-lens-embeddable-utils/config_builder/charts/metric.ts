@@ -18,9 +18,9 @@ import {
   addLayerColumn,
   addLayerFormulaColumns,
   buildDatasourceStates,
-  buildFormula,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import {
   getBreakdownColumn,
@@ -121,7 +121,7 @@ function buildFormulaLayer(
     layer_0_trendline?: PersistedIndexPatternLayer;
   } = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, buildFormula(layer), dataView, formulaAPI),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
     },
     ...(layer.trendLine
       ? {
@@ -129,7 +129,7 @@ function buildFormulaLayer(
             linkToLayers: [DEFAULT_LAYER_ID],
             ...getFormulaColumn(
               `${ACCESSOR}_trendline`,
-              buildFormula(layer),
+              mapToFormula(layer),
               dataView,
               formulaAPI,
               baseLayer
