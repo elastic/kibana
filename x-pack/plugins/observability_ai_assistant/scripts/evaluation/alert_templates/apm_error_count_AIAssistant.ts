@@ -16,7 +16,7 @@ export const apm_error_count_AIAssistant = {
       windowUnit: 'h',
       transactionType: undefined,
       serviceName: undefined,
-      environment: 'production',
+      environment: 'test',
       searchConfiguration: {
         query: {
           query: ``,

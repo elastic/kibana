@@ -107,23 +107,23 @@ describe('alert function', () => {
   });
 
   after(async () => {
-    // await synthtraceEsClients.apmSynthtraceEsClient.clean();
+    await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
-    // for (let i in rule_ids) {
-    //   await kibanaClient.callKibana("delete",
-    //     { pathname: `/api/alerting/rule/${rule_ids[i]}` },
-    //   )
-    // }
+    for (let i in rule_ids) {
+      await kibanaClient.callKibana("delete",
+        { pathname: `/api/alerting/rule/${rule_ids[i]}` },
+      )
+    }
 
-    // await kibanaClient.callKibana("delete",
-    //   { pathname: `/api/content_management/rpc/delete` },
-    //   {
-    //     contentTypeId: 'index-pattern',
-    //     id: custom_threshold_AIAssistant_log_count.dataViewParams.options.id,
-    //     options: { force: true },
-    //     version: 1,
-    //   }
-    // )
+    await kibanaClient.callKibana("post",
+      { pathname: `/api/content_management/rpc/delete` },
+      {
+        contentTypeId: 'index-pattern',
+        id: custom_threshold_AIAssistant_log_count.dataViewParams.options.id,
+        options: { force: true },
+        version: 1,
+      }
+    )
 
   })
 });
