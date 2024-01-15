@@ -137,6 +137,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
       <EuiSpacer size="m" />
 
       <ExpandablePanel
+        data-test-subj="riskInputs"
         header={{
           title: (
             <FormattedMessage

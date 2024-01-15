@@ -10,7 +10,7 @@ import { TestProviders } from '../../../common/mock';
 import { useAlertHistogramCount } from './use_alert_histogram_count';
 
 jest.mock('../../../common/components/visualization_actions/use_visualization_response', () => ({
-  useVisualizationResponse: jest.fn().mockReturnValue([{ hits: { total: 100 } }]),
+  useVisualizationResponse: jest.fn().mockReturnValue({ responses: [{ hits: { total: 100 } }] }),
 }));
 
 describe('useAlertHistogramCount', () => {

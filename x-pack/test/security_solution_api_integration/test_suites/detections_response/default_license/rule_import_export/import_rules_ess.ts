@@ -22,9 +22,9 @@ import {
   getLegacyActionSO,
   createRule,
   fetchRule,
-  getRuleSOById,
   getWebHookAction,
   getSimpleRuleAsNdjson,
+  checkInvestigationFieldSoValue,
 } from '../../utils';
 import {
   createUserAndRole,
@@ -308,18 +308,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
         expect(rule.investigation_fields).to.eql({ field_names: ['foo', 'bar'] });
+
         /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
          * include a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, rule.id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql({ field_names: ['foo', 'bar'] });
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          { field_names: ['foo', 'bar'] },
+          es,
+          rule.id
+        );
+        expect(isInvestigationFieldMigratedInSo).to.eql(true);
       });
 
       it('imports rule with investigation fields as empty array', async () => {
@@ -342,18 +344,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = await fetchRule(supertest, { ruleId: 'rule-1' });
         expect(rule.investigation_fields).to.eql(undefined);
+
         /**
          * Confirm type on SO so that it's clear in the tests whether it's expected that
          * the SO itself is migrated to the inteded object type, or if the transformation is
          * happening just on the response. In this case, change should
          * include a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, rule.id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
+        const isInvestigationFieldMigratedInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          undefined,
+          es,
+          rule.id
+        );
+        expect(isInvestigationFieldMigratedInSo).to.eql(true);
       });
 
       it('imports rule with investigation fields as intended object type', async () => {
@@ -381,12 +385,13 @@ export default ({ getService }: FtrProviderContext): void => {
          * happening just on the response. In this case, change should
          * include a migration on SO.
          */
-        const {
-          hits: {
-            hits: [{ _source: ruleSO }],
-          },
-        } = await getRuleSOById(es, rule.id);
-        expect(ruleSO?.alert?.params?.investigationFields).to.eql({ field_names: ['foo'] });
+        const isInvestigationFieldIntendedTypeInSo = await checkInvestigationFieldSoValue(
+          undefined,
+          { field_names: ['foo'] },
+          es,
+          rule.id
+        );
+        expect(isInvestigationFieldIntendedTypeInSo).to.eql(true);
       });
     });
   });
