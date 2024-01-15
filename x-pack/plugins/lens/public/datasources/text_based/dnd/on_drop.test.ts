@@ -16,7 +16,7 @@ import { addColumnsToCache } from '../fieldlist_cache';
 describe('onDrop', () => {
   addColumnsToCache(
     {
-      esql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
+      esql: 'FROM "kibana_sample_data_ecommerce"',
     },
     fieldList.map((f) => {
       return {
