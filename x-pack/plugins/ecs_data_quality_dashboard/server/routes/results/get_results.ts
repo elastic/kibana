@@ -11,19 +11,19 @@ import { RESULTS_ROUTE_PATH, INTERNAL_API_VERSION } from '../../../common/consta
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { GetResultQuery } from '../../schemas/result';
-import type { GetResultMode, Result, ResultDocument } from '../../schemas/result';
+import type { Result, ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { createResultFromDocument } from './parser';
 
-const getQuery = (mode: GetResultMode) => ({
+const getQuery = (patterns: string) => ({
   size: 0,
+  query: {
+    bool: { filter: [{ terms: { 'rollup.pattern': patterns.split(',') } }] },
+  },
   aggs: {
     latest: {
-      terms: {
-        field: mode === 'patterns_latest' ? 'rollup.pattern' : 'meta.indexName',
-        size: 1000000, // some big number to get all the indexes/patterns
-      },
+      terms: { field: 'rollup.pattern', size: 1000000 }, // big enough to get all patterns
       aggs: { latest_doc: { top_hits: { size: 1, sort: [{ '@timestamp': { order: 'desc' } }] } } },
     },
   },
@@ -55,7 +55,7 @@ export const getResultsRoute = (
 
         try {
           const index = await getResultsIndexName();
-          const query = { index, ...getQuery(request.query.mode) };
+          const query = { index, ...getQuery(request.query.patterns) };
           const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
           const { aggregations } = await esClient.search<

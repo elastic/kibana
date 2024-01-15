@@ -23,12 +23,18 @@ export class DataStreamSpacesAdapter extends DataStreamAdapter {
     this.installedSpaceDataStreamName = new Map();
   }
 
-  public async install({ logger, esClient, pluginStop$, tasksTimeoutMs }: InstallParams) {
+  public async install({
+    logger,
+    esClient: esClientToResolve,
+    pluginStop$,
+    tasksTimeoutMs,
+  }: InstallParams) {
     if (this.installed) {
       throw new Error('Cannot re-install data stream');
     }
     this.installed = true;
 
+    const esClient = await esClientToResolve;
     const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });
 
     // Install component templates in parallel

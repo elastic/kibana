@@ -7,7 +7,6 @@
 
 import type { HttpHandler } from '@kbn/core-http-browser';
 import type {
-  IndicesGetMappingIndexMappingRecord,
   IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -449,7 +448,7 @@ export const getErrorSummaries = (
 
 export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
 
-export interface PostResultBody {
+export interface ResultData {
   meta: DataQualityIndexCheckedParams;
   rollup: PatternRollup;
 }
@@ -461,12 +460,29 @@ export async function postResult({
 }: {
   abortController: AbortController;
   httpFetch: HttpHandler;
-  result: PostResultBody;
-}): Promise<Record<string, IndicesGetMappingIndexMappingRecord>> {
-  return httpFetch<Record<string, IndicesGetMappingIndexMappingRecord>>(RESULTS_API_ROUTE, {
+  result: ResultData;
+}): Promise<void> {
+  return httpFetch<void>(RESULTS_API_ROUTE, {
     method: 'POST',
     signal: abortController.signal,
     version: INTERNAL_API_VERSION,
     body: JSON.stringify(result),
+  });
+}
+
+export async function getResults({
+  abortController,
+  httpFetch,
+  patterns,
+}: {
+  abortController: AbortController;
+  httpFetch: HttpHandler;
+  patterns: string[];
+}): Promise<ResultData[]> {
+  return httpFetch<ResultData[]>(RESULTS_API_ROUTE, {
+    method: 'GET',
+    signal: abortController.signal,
+    version: INTERNAL_API_VERSION,
+    query: { patterns: patterns.join(',') },
   });
 }

@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EcsVersion } from '@kbn/ecs';
 
+import { isEmpty } from 'lodash';
 import {
   getTotalDocsCount,
   getTotalIncompatible,
@@ -22,6 +23,7 @@ import type { OnCheckCompleted, PatternRollup } from '../types';
 import {
   getDocsCount,
   getIndexId,
+  getResults,
   getSizeInBytes,
   getTotalPatternSameFamily,
   postResult,
@@ -58,10 +60,43 @@ interface UseResultsRollup {
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
+const useStoredPatternRollups = (patterns: string[]) => {
+  const { httpFetch } = useDataQualityContext();
+  const [storedRollups, setStoredRollups] = useState<Record<string, PatternRollup>>({});
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    let ignore = false;
+
+    const fetchStoredRollups = async () => {
+      const results = await getResults({ httpFetch, abortController, patterns });
+      if (!ignore) {
+        setStoredRollups(Object.fromEntries(results.map(({ rollup }) => [rollup.pattern, rollup])));
+      }
+    };
+
+    fetchStoredRollups();
+    return () => {
+      ignore = true;
+      abortController.abort();
+    };
+  }, [httpFetch, patterns]);
+
+  return storedRollups;
+};
+
 export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRollup => {
   const { httpFetch } = useDataQualityContext();
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
+
+  const storedPatternsRollups = useStoredPatternRollups(patterns);
+
+  useEffect(() => {
+    if (!isEmpty(storedPatternsRollups)) {
+      setPatternRollups((current) => ({ ...current, ...storedPatternsRollups }));
+    }
+  }, [storedPatternsRollups]);
 
   const updatePatternRollups = useCallback(
     (updateRollups: (current: Record<string, PatternRollup>) => Record<string, PatternRollup>) => {

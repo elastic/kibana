@@ -40,7 +40,7 @@ describe('getResultsRoute route', () => {
   const req = requestMock.create({
     method: 'get',
     path: RESULTS_ROUTE_PATH,
-    query: { mode: 'patterns_latest' },
+    query: { patterns: 'logs-*,alerts-*' },
   });
 
   beforeEach(() => {
@@ -89,7 +89,7 @@ describe('request validation', () => {
     const req = requestMock.create({
       method: 'get',
       path: RESULTS_ROUTE_PATH,
-      query: { mode: 'invalid-value' },
+      query: {},
     });
     const result = server.validate(req);
 

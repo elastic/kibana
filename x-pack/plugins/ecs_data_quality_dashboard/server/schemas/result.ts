@@ -61,10 +61,7 @@ export type ResultDocument = Omit<Result, 'rollup'> & {
 
 // Routes validation schemas
 
-export const GetResultMode = t.union([t.literal('patterns_latest'), t.literal('indices_latest')]);
-export const GetResultQuery = t.type({ mode: GetResultMode });
-
+export const GetResultQuery = t.type({ patterns: t.string });
 export type GetResultQuery = t.TypeOf<typeof GetResultQuery>;
-export type GetResultMode = t.TypeOf<typeof GetResultMode>;
 
 export const PostResultBody = Result;

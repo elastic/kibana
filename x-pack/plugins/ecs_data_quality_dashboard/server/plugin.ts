@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 
 import { ReplaySubject, type Subject } from 'rxjs';
-import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type {
   EcsDataQualityDashboardPluginSetup,
@@ -29,19 +28,19 @@ import {
   getUnallowedFieldValuesRoute,
   resultsRoutes,
 } from './routes';
-import { createResultsDataStream } from './lib/data_stream/results_data_stream';
+import { ResultsDataStream } from './lib/data_stream/results_data_stream';
 
 export class EcsDataQualityDashboardPlugin
   implements Plugin<EcsDataQualityDashboardPluginSetup, EcsDataQualityDashboardPluginStart>
 {
   private readonly logger: Logger;
-  private readonly resultsDataStream: DataStreamSpacesAdapter;
+  private readonly resultsDataStream: ResultsDataStream;
   private pluginStop$: Subject<void>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.pluginStop$ = new ReplaySubject(1);
-    this.resultsDataStream = createResultsDataStream({
+    this.resultsDataStream = new ResultsDataStream({
       kibanaVersion: initializerContext.env.packageInfo.version,
     });
   }
@@ -49,12 +48,12 @@ export class EcsDataQualityDashboardPlugin
   public setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     this.logger.debug('ecsDataQualityDashboard: Setup');
 
-    core.getStartServices().then(([{ elasticsearch }]) => {
-      this.resultsDataStream.install({
-        esClient: elasticsearch.client.asInternalUser,
-        logger: this.logger,
-        pluginStop$: this.pluginStop$,
-      });
+    this.resultsDataStream.install({
+      esClient: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      logger: this.logger,
+      pluginStop$: this.pluginStop$,
     });
 
     core.http.registerRouteHandlerContext<
@@ -62,16 +61,10 @@ export class EcsDataQualityDashboardPlugin
       'dataQualityDashboard'
     >('dataQualityDashboard', (_context, request) => {
       const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-      return {
-        spaceId,
-        getResultsIndexName: async (): Promise<string> => {
-          let indexName = await this.resultsDataStream.getSpaceIndexName(spaceId);
-          if (!indexName) {
-            indexName = await this.resultsDataStream.installSpace(spaceId);
-          }
-          return indexName;
-        },
-      };
+      const getResultsIndexName = async (): Promise<string> =>
+        this.resultsDataStream.getSpaceIndexName(spaceId);
+
+      return { spaceId, getResultsIndexName };
     });
 
     const router = core.http.createRouter<DataQualityDashboardRequestHandlerContext>();

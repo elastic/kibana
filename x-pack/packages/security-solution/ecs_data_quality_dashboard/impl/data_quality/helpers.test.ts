@@ -35,6 +35,9 @@ import {
   getTotalSizeInBytes,
   hasValidTimestampMapping,
   isMappingCompatible,
+  postResult,
+  getResults,
+  ResultData,
 } from './helpers';
 import {
   hostNameWithTextMapping,
@@ -77,6 +80,7 @@ import {
   PatternRollup,
   UnallowedValueCount,
 } from './types';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
 
@@ -1487,6 +1491,54 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
         },
       ]);
+    });
+  });
+
+  describe('postResult', () => {
+    const { fetch } = httpServiceMock.createStartContract();
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('it posts the result', async () => {
+      const result = { meta: {}, rollup: {} } as unknown as ResultData;
+
+      await postResult({
+        httpFetch: fetch,
+        result,
+        abortController: new AbortController(),
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/ecs_data_quality_dashboard/results',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify(result),
+        })
+      );
+    });
+  });
+
+  describe('getResults', () => {
+    const { fetch } = httpServiceMock.createStartContract();
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('it gets the results', async () => {
+      await getResults({
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        patterns: ['auditbeat-*', 'packetbeat-*'],
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/ecs_data_quality_dashboard/results',
+        expect.objectContaining({
+          method: 'GET',
+          query: { patterns: 'auditbeat-*,packetbeat-*' },
+        })
+      );
     });
   });
 });
