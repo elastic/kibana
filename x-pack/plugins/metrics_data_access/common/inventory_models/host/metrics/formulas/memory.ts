@@ -6,69 +6,50 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 
-export const memoryCache: FormulaValueConfig = {
+export const memoryCache: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.metric.label.cache', {
     defaultMessage: 'cache',
   }),
-  formula: 'average(system.memory.used.bytes) - average(system.memory.actual.used.bytes)',
-  format: {
-    id: 'bytes',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.memory.used.bytes) - average(system.memory.actual.used.bytes)',
+  format: 'bytes',
+  decimals: 1,
 };
 
-export const memoryFree: FormulaValueConfig = {
+export const memoryFree: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.memoryFree', {
     defaultMessage: 'Memory Free',
   }),
-  formula: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
-  format: {
-    id: 'bytes',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
+  format: 'bytes',
+  decimals: 1,
 };
 
-export const memoryFreeExcludingCache: FormulaValueConfig = {
+export const memoryFreeExcludingCache: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.metric.label.free', {
     defaultMessage: 'free',
   }),
-  formula: 'average(system.memory.free)',
-  format: {
-    id: 'bytes',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.memory.free)',
+  format: 'bytes',
+  decimals: 1,
 };
 
-export const memoryUsage: FormulaValueConfig = {
+export const memoryUsage: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.memoryUsage', {
     defaultMessage: 'Memory Usage',
   }),
-  formula: 'average(system.memory.actual.used.pct)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 0,
-    },
-  },
+  value: 'average(system.memory.actual.used.pct)',
+  format: 'percent',
+
+  decimals: 0,
 };
 
-export const memoryUsed: FormulaValueConfig = {
+export const memoryUsed: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.metric.label.used', {
     defaultMessage: 'used',
   }),
-  formula: 'average(system.memory.actual.used.bytes)',
-  format: {
-    id: 'bytes',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.memory.actual.used.bytes)',
+  format: 'bytes',
+  decimals: 1,
 };

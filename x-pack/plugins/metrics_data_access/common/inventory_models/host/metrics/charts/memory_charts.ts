@@ -40,7 +40,7 @@ export const memoryUsageBreakdown = {
       seriesType: 'area',
       type: 'series',
       xAxis: '@timestamp',
-      value: formula,
+      ...formula,
     })),
     emphasizeFitting: true,
     fittingFunction: 'Linear',

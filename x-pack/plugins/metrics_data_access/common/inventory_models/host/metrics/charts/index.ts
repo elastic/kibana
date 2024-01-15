@@ -32,7 +32,6 @@ export const createBasicCharts = <T extends ChartType>({
       ...chartConfig,
       id: curr,
       title: formulas[curr].label ?? chartConfig.title ?? '',
-      value: formulas[curr],
     } as LensConfigWithId;
 
     if (chartType === 'xy') {
@@ -56,7 +55,7 @@ export const createBasicCharts = <T extends ChartType>({
               seriesType: 'line',
               type: 'series',
               xAxis: '@timestamp',
-              value: formulas[curr],
+              ...formulas[curr],
               ...layerConfig,
             },
           ],
@@ -68,6 +67,7 @@ export const createBasicCharts = <T extends ChartType>({
       ...acc,
       [curr]: {
         ...baseConfig,
+        ...formulas[curr],
         chartType,
       },
     };

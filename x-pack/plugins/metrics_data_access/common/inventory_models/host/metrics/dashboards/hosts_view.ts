@@ -9,7 +9,7 @@ import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts, normalizedLoad1m } from '../charts';
 
 export const hostsView = {
-  get: ({ metricsDataViewId = '' }: { metricsDataViewId?: string }) => {
+  get: ({ metricsDataViewId }: { metricsDataViewId?: string }) => {
     const {
       memoryUsage,
       memoryFree,

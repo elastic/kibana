@@ -5,11 +5,32 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import type { LensXYConfigBase } from '@kbn/lens-embeddable-utils/config_builder';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { formulas } from '../../../kubernetes/node/metrics';
 
 export const assetDetailsKubernetesNode = {
   get: ({ metricsDataViewId }: { metricsDataViewId?: string }) => {
+    const baseConfig: Partial<LensXYConfigBase> = {
+      emphasizeFitting: true,
+      fittingFunction: 'Linear',
+      axisTitleVisibility: {
+        showXAxisTitle: false,
+        showYAxisTitle: false,
+      },
+      legend: {
+        show: true,
+        position: 'bottom',
+      },
+      ...(metricsDataViewId
+        ? {
+            dataset: {
+              index: metricsDataViewId,
+            },
+          }
+        : {}),
+    };
+
     return createDashboardModel({
       dependsOn: ['kubernetes.node'],
       charts: [
@@ -26,21 +47,9 @@ export const assetDetailsKubernetesNode = {
             seriesType: 'area',
             type: 'series',
             xAxis: '@timestamp',
-            value: formula,
+            ...formula,
           })),
-          emphasizeFitting: true,
-          fittingFunction: 'Linear',
-          legend: {
-            show: true,
-            position: 'bottom',
-          },
-          ...(metricsDataViewId
-            ? {
-                dataset: {
-                  index: metricsDataViewId,
-                },
-              }
-            : {}),
+          ...baseConfig,
         },
         {
           id: 'nodeMemoryCapacity',
@@ -55,21 +64,9 @@ export const assetDetailsKubernetesNode = {
             seriesType: 'area',
             type: 'series',
             xAxis: '@timestamp',
-            value: formula,
+            ...formula,
           })),
-          emphasizeFitting: true,
-          fittingFunction: 'Linear',
-          legend: {
-            show: true,
-            position: 'bottom',
-          },
-          ...(metricsDataViewId
-            ? {
-                dataset: {
-                  index: metricsDataViewId,
-                },
-              }
-            : {}),
+          ...baseConfig,
         },
         {
           id: 'nodeDiskCapacity',
@@ -84,21 +81,9 @@ export const assetDetailsKubernetesNode = {
             seriesType: 'area',
             type: 'series',
             xAxis: '@timestamp',
-            value: formula,
+            ...formula,
           })),
-          emphasizeFitting: true,
-          fittingFunction: 'Linear',
-          legend: {
-            show: true,
-            position: 'bottom',
-          },
-          ...(metricsDataViewId
-            ? {
-                dataset: {
-                  index: metricsDataViewId,
-                },
-              }
-            : {}),
+          ...baseConfig,
         },
         {
           id: 'nodePodCapacity',
@@ -113,21 +98,9 @@ export const assetDetailsKubernetesNode = {
             seriesType: 'area',
             type: 'series',
             xAxis: '@timestamp',
-            value: formula,
+            ...formula,
           })),
-          emphasizeFitting: true,
-          fittingFunction: 'Linear',
-          legend: {
-            show: true,
-            position: 'bottom',
-          },
-          ...(metricsDataViewId
-            ? {
-                dataset: {
-                  index: metricsDataViewId,
-                },
-              }
-            : {}),
+          ...baseConfig,
         },
       ],
     });

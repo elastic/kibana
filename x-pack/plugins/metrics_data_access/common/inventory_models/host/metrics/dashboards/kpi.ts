@@ -15,7 +15,7 @@ const AVERAGE = i18n.translate('xpack.metricsData.assetDetails.overview.kpi.subt
 
 export const kpi = {
   get: ({
-    metricsDataViewId = '',
+    metricsDataViewId,
     options,
   }: {
     metricsDataViewId?: string;
@@ -41,20 +41,7 @@ export const kpi = {
     return createDashboardModel({
       charts: [cpuUsage, diskUsage, memoryUsage, normalizedLoad1m].map((p) => ({
         ...p,
-        value:
-          typeof p.value === 'string'
-            ? p.value
-            : {
-                ...p.value,
-                format: p.value.format
-                  ? {
-                      ...p.value.format,
-                      params: {
-                        decimals: 1,
-                      },
-                    }
-                  : undefined,
-              },
+        decimals: 1,
       })),
     });
   },

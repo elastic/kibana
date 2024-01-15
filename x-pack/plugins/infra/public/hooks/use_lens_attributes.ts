@@ -28,7 +28,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
 
   const { value: attributes, error } = useAsync(async () => {
     const { formula: formulaAPI } = await lens.stateHelperApi();
-    if (!dataViews || !formulaAPI) {
+    if (!dataViews || !formulaAPI || !params.dataset) {
       return undefined;
     }
 
@@ -108,12 +108,10 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
 
   const getFormula = () => {
     if (params.chartType === 'xy') {
-      return typeof params.layers[0].value === 'string'
-        ? params.layers[0].value
-        : params.layers[0].value.formula;
+      return params.layers[0].value;
     }
 
-    return typeof params.value === 'string' ? params.value : params.value.formula;
+    return params.value;
   };
 
   return {

@@ -6,99 +6,71 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 
-export const diskIORead: FormulaValueConfig = {
+export const diskIORead: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskIORead', {
     defaultMessage: 'Disk Read IOPS',
   }),
-  formula: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
-  format: {
-    id: 'number',
-    params: {
-      decimals: 0,
-    },
-  },
-  timeScale: 's',
+  value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+  format: 'number',
+  decimals: 0,
+  normalizeByUnit: 's',
 };
 
-export const diskReadThroughput: FormulaValueConfig = {
+export const diskReadThroughput: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskReadThroughput', {
     defaultMessage: 'Disk Read Throughput',
   }),
-  formula: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
-  format: {
-    id: 'bytes',
-    params: {
-      decimals: 1,
-    },
-  },
-  timeScale: 's',
+  value: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",
+  format: 'bytes',
+  decimals: 1,
+  normalizeByUnit: 's',
 };
 
-export const diskSpaceAvailable: FormulaValueConfig = {
+export const diskSpaceAvailable: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskSpaceAvailable', {
     defaultMessage: 'Disk Space Available',
   }),
-  formula: 'average(system.filesystem.free)',
-  format: {
-    id: 'bytes',
-    params: {
-      decimals: 0,
-    },
-  },
+  value: 'average(system.filesystem.free)',
+  format: 'bytes',
+  decimals: 0,
 };
 
-export const diskSpaceAvailability: FormulaValueConfig = {
+export const diskSpaceAvailability: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskSpaceAvailability', {
     defaultMessage: 'Disk Space Availability',
   }),
-  formula: '1 - average(system.filesystem.used.pct)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 0,
-    },
-  },
+  value: '1 - average(system.filesystem.used.pct)',
+  format: 'percent',
+  decimals: 0,
 };
 
-export const diskUsage: FormulaValueConfig = {
+export const diskUsage: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskUsage', {
     defaultMessage: 'Disk Usage',
   }),
-  formula: 'average(system.filesystem.used.pct)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 0,
-    },
-  },
+  value: 'average(system.filesystem.used.pct)',
+  format: 'percent',
+  decimals: 0,
 };
 
-export const diskIOWrite: FormulaValueConfig = {
+export const diskIOWrite: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskIOWrite', {
     defaultMessage: 'Disk Write IOPS',
   }),
-  formula: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
-  format: {
-    id: 'number',
-    params: {
-      decimals: 0,
-    },
-  },
-  timeScale: 's',
+  value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+  format: 'number',
+  decimals: 0,
+  normalizeByUnit: 's',
 };
 
-export const diskWriteThroughput: FormulaValueConfig = {
+export const diskWriteThroughput: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskWriteThroughput', {
     defaultMessage: 'Disk Write Throughput',
   }),
-  formula: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
-  format: {
-    id: 'bytes',
-    params: {
-      decimals: 1,
-    },
-  },
-  timeScale: 's',
+  value: "counter_rate(max(system.diskio.write.bytes), kql='system.diskio.write.bytes: *')",
+  format: 'bytes',
+  decimals: 1,
+  normalizeByUnit: 's',
 };

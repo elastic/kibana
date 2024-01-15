@@ -6,32 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 
-export const nodeCpuCapacity: FormulaValueConfig = {
+export const nodeCpuCapacity: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.capacity', {
     defaultMessage: 'Capacity',
   }),
-  formula: 'max(kubernetes.node.cpu.allocatable.cores) * 1000000000',
-  format: {
-    id: 'number',
-    params: {
-      decimals: 1,
-      compact: true,
-    },
-  },
+  value: 'max(kubernetes.node.cpu.allocatable.cores) * 1000000000',
+  format: 'number',
+  decimals: 1,
+  compactValues: true,
 };
 
-export const nodeCpuUsed: FormulaValueConfig = {
+export const nodeCpuUsed: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.used', {
     defaultMessage: 'Used',
   }),
-  formula: 'average(kubernetes.node.cpu.usage.nanocores)',
-  format: {
-    id: 'number',
-    params: {
-      decimals: 1,
-      compact: true,
-    },
-  },
+  value: 'average(kubernetes.node.cpu.usage.nanocores)',
+  format: 'number',
+  decimals: 1,
+  compactValues: true,
 };

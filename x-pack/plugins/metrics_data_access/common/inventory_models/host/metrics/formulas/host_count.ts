@@ -6,17 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 
-export const hostCount: FormulaValueConfig = {
+export const hostCount: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.hostCount.hostsLabel', {
     defaultMessage: 'Hosts',
   }),
-  formula: 'unique_count(host.name)',
-  format: {
-    id: 'number',
-    params: {
-      decimals: 0,
-    },
-  },
+  value: 'unique_count(host.name)',
+  format: 'number',
+  decimals: 0,
 };

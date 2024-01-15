@@ -6,109 +6,76 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 
-export const cpuUsageIowait: FormulaValueConfig = {
+export const cpuUsageIowait: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.iowaitLabel', {
     defaultMessage: 'iowait',
   }),
-  formula: 'average(system.cpu.iowait.pct) / max(system.cpu.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.cpu.iowait.pct) / max(system.cpu.cores)',
+  format: 'percent',
+  decimals: 1,
 };
 
-export const cpuUsageIrq: FormulaValueConfig = {
+export const cpuUsageIrq: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.irqLabel', {
     defaultMessage: 'irq',
   }),
-  formula: 'average(system.cpu.irq.pct) / max(system.cpu.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.cpu.irq.pct) / max(system.cpu.cores)',
+  format: 'percent',
+  decimals: 1,
 };
 
-export const cpuUsageNice: FormulaValueConfig = {
+export const cpuUsageNice: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.niceLabel', {
     defaultMessage: 'nice',
   }),
-  formula: 'average(system.cpu.nice.norm.pct) / max(system.cpu.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.cpu.nice.norm.pct) / max(system.cpu.cores)',
+  format: 'percent',
+  decimals: 1,
 };
 
-export const cpuUsageSoftirq: FormulaValueConfig = {
+export const cpuUsageSoftirq: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.softirqLabel', {
     defaultMessage: 'softirq',
   }),
-  formula: 'average(system.cpu.softirq.pct) / max(system.cpu.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.cpu.softirq.pct) / max(system.cpu.cores)',
+  format: 'percent',
+  decimals: 1,
 };
 
-export const cpuUsageSteal: FormulaValueConfig = {
+export const cpuUsageSteal: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.stealLabel', {
     defaultMessage: 'steal',
   }),
-  formula: 'average(system.cpu.steal.pct) / max(system.cpu.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.cpu.steal.pct) / max(system.cpu.cores)',
+  format: 'percent',
+  decimals: 1,
 };
 
-export const cpuUsageSystem: FormulaValueConfig = {
+export const cpuUsageSystem: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.systemLabel', {
     defaultMessage: 'system',
   }),
-  formula: 'average(system.cpu.system.pct) / max(system.cpu.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.cpu.system.pct) / max(system.cpu.cores)',
+  format: 'percent',
+  decimals: 1,
 };
 
-export const cpuUsageUser: FormulaValueConfig = {
+export const cpuUsageUser: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.userLabel', {
     defaultMessage: 'user',
   }),
-  formula: 'average(system.cpu.user.pct) / max(system.cpu.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 1,
-    },
-  },
+  value: 'average(system.cpu.user.pct) / max(system.cpu.cores)',
+  format: 'percent',
+  decimals: 1,
 };
 
-export const cpuUsage: FormulaValueConfig = {
+export const cpuUsage: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage', {
     defaultMessage: 'CPU Usage',
   }),
-  formula:
-    '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 0,
-    },
-  },
+  value: '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
+  format: 'percent',
+  decimals: 0,
 };
