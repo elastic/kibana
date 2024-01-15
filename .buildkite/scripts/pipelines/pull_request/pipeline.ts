@@ -298,11 +298,17 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (
       (await doAnyChangesMatch([
-        /^package.json/,
+        /^src\/plugins\/controls/,
         /^packages\/kbn-securitysolution-.*/,
-        /^x-pack\/plugins\/osquery/,
-        /^x-pack\/packages\/security-solution/,
+        /^x-pack\/plugins\/lists/,
+        /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
+        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/alerts_table/,
+        /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/connectors_context\.tsx/,
+        /^x-pack\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
+        /^fleet_packages\.json/, // It contains reference to prebuilt detection rules, we want to run security solution tests if it changes
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
