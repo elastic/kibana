@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 import { checkTimeRangeRT } from './common';
 
 export const checkPlanRT = rt.strict({
+  data_stream: rt.string,
   time_range: checkTimeRangeRT,
   checks: rt.array(rt.string),
 });

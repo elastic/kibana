@@ -58,6 +58,7 @@ export const registerDataStreamQualityChecksRoute = ({
         return res.ok<GetDatastreamChecksResponsePayload>({
           body: getDatastreamChecksResponsePayloadRT.encode({
             plan: {
+              data_stream: dataStream,
               time_range: timeRange,
               checks,
             },

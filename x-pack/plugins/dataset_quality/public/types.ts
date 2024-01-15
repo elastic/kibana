@@ -9,6 +9,7 @@ import { ComponentType } from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { type DataStreamQualityServiceStart } from './services/data_stream_quality';
+import { DataStreamQualityCheckerProps } from './components/dataset_quality_checker';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginSetup {}
@@ -16,6 +17,7 @@ export interface DatasetQualityPluginSetup {}
 export interface DatasetQualityPluginStart {
   DatasetQuality: ComponentType;
   dataStreamQualityService: DataStreamQualityServiceStart;
+  DataStreamQualityChecker: ComponentType<DataStreamQualityCheckerProps>;
 }
 
 export interface DatasetQualityStartDeps {

@@ -23,6 +23,7 @@ export {
 export type {
   CheckPlan,
   CheckResult,
+  CheckTimeRange,
   DataStreamQualityCheckArguments,
   DataStreamQualityCheckExecution,
   FailReason,

@@ -6,7 +6,7 @@
  */
 
 import { createMachine, assign, ActionTypes } from 'xstate';
-import { CheckPlan, DataStreamQualityCheckExecution } from '../../../common';
+import { CheckPlan, CheckTimeRange, DataStreamQualityCheckExecution } from '../../../common';
 
 export const createPureDataStreamQualityChecksStateMachine = (
   initialContext: DataStreamQualityChecksContext
@@ -17,7 +17,7 @@ export const createPureDataStreamQualityChecksStateMachine = (
     DataStreamQualityChecksTypeState
   >(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAwgBZgDGA1gHSkB2Vv6VSlQBekAMQBtAAwBdRKAAOAe1g0qS7vJAAPRAEYATAHYOBqQDYALHvMG71owE5LAGhC1EBgMx6OlywCsAV4AHI4h-gYBRgEAvrFuaJg4+ERkQnRMrJwKFKjcvNxQYhAaYBx8AG5KbOUw6FnsAAp53NJySCDKqgIaWroIRiY2Rl7BRvZ6Tq7uiIGWHEZSlo7mMebRPlJG8YkY2HgEJOTUmczsHLn5hcVguLhKuJd56ABmj4Qc9Y1sLfntWm6aj6nQGlikvj0XmW5ghQ0ceikBjcHgQXnRHER0McUgsMSc6N2ICSB1SxwyDHOnB4VwK4lpAM6QN6mlBcwCviRiPxQ2MHJRngMjg4ziC6OiAWsOPMRJJKSO6VOlOyz2u9Lu71whD+dIgP1gjMUKmBrNAA2ipi8RjWej0IQMtomIQFCHMYQ4AXMduizhCMSkIVl+3laRONGVFxYVL4xVK3HKVRq5QUGo+AEEKBR9YausaWf1EBsOBDbVC1hEQnpJS7nAZiwFHAYQhD0eijHog8lDqGKT8OFHsjGxHcHk8rm8PpdU1qM1mqQbZIC8+pTTpEKEQiKjFKomYHQ6jC7m3XlsFHM5wbZHJ3SQqw2cVTwB+x6a0c8yVwXXRyOCEvQEhVGSs-QCF0G18N0NgdcJlhbG8Q3JJU+yfKl1VwTVtVaeM9Xnd9lxBM112bD0mwREJm0lMJD1mV13U9O1vEMLxHE9a8EmJYNu0Q8M+2fNghz4gAxPgqFgZgIDwnpPzZBBSI4cwxlPDYvAMcxVhrKZfxU9tNicOwZXYuUuMVHiqX7VCIDEFN0I+HVsOzRcmXw1cBgAWimKRTEsZipHPUjm3Mcwa3BD0G28NSG0sKwvHg4z7wjTg+Nff5HKNKSCLXBBXN3D0-20lj7SiNYwIReS-wAvQYPBKF4nY7glAgOAtCMskTIfdgl3SlzEFc6FPICPLjAKuxPRmVE3VMdtLHIxwrSkHxYta+LkMKNQhFECBOpNL9EV8dFGzMbYOSFeaXSrAJFh021Ak9AMNkWu9ezM2kbi2-MZL0BZLCiKt4XosI-xdHwTHtVYljdb7wIMvYuyWp6VReyA3ukwiEFLUxgiFQxJmmEqIPK4I1h8WaO0Mzi4aQsyaSwpGnK6r8vWFT1RimDlW1moHoV-IVAqmEIAl8iEHp7SmVT4mNkYytzhVWSVpqcGwpm8MbECMP9Lsq61PpG89he49rEosyXurR20MZU5wNntP9qNRRELQhc9HCcNW9MsPW2oSrhuCSza6e2mSvXMEUwjMYmvDdKRQJopxhV5ea3UbcsdlqoA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAwgBZgDGA1gHSkB2Vv6VSlQBekAMQBtAAwBdRKAAOAe1g0qS7vJAAPRAEYATAHYOBqQDYALHvMG71owE5LAGhC1EBgMx6OlywCsAV4AHI4h-gYBRgEAvrFuaJg4+ERkQnRMrJwKFKjcvNxQYhAaYBx8AG5KbOUw6FnsAAp53NJySCDKqgIaWroIRiY2Rl7BRvZ6Tq7uiIGWHEZSlo7mMebRPlJG8YkY2HgEJOTUmczsHLn5hcVguLhKuJd56ABmj4Qc9Y1sLfntWm6aj6nQGlikvj0XmW5ghQ0ceikBjcHgQXnRHER0McUgsMSc6N2ICSB1SxwyDHOOVa3HECju71whD+BUgP1gAM6QN6mlBiGipi8RjWej0IQMoomIRRiHMYQ4AXMYuizhCMSkISJJJSR3Sp0p2S43CurIgYhNnMUKmBvNAYICviRiPxQ2MDplCDsjg4ziC6OiAWsOPMWv2OrSJxoBouLCpfGKpVpFW41VqlwZHwAghQKOzLV1rTz+rKAhwIaKoWsIiE9IGPc4DGWAo4DCEIej0UY9KHkocIxSfhxY9l42I7g8nlc3h907hGYRs7mqRzZIDC+pbTpEKEQj6jEGomYJRKjB6243lsFHM5wbZHD3SbrI2dDcP2KO32wAGJ8KiwZgQPm3IbsWnryuYYyXhsXgGOYqz1lMHAhDBXabE4dghgkxJhn25L6oOn50hmTIsrSEB5quXLriCdqIAAtFMUimJYXg4terbhBY5j1uCCrNt4cHNpYVheA+4Z4VGBFUnSrRAdRm4DHRh4KiEEHGI4ATilEawes2vhyhsEqceCUJibheqSVSRqEWaFqUVaPQgXyCAbL4qm1gYjijDWaoBLpCIcAZARGW2JmiVh2rmc+0acDwNnmsRzI0myy5yY5NFbmibYKhxYptoGYSnrMLnyoqYreIYrGKveRLcEoEBwFokVkhZL7sGu6UKfR0JMZpalOJpdiKjMqJyqYqGVuYcH5QYZktdFg48L+AhCKIEAdTaoGIr46ItmY2wOp5UheB6talkMtaioEioahsc1PgOVkmjcG1Fs5egLJYUS1vCZVhKpHo+CY4qrEscpfXpmF7L282PYaz2QK9Tm0QgFamMEnmGJM0z+fpql+msPiOD4939vhVk8Aj61UZ1oFKt6iqjFMDodsTgPQkhnlTVMIQBFIOLdhFOGw+Tr5xkUSMZYp3qrIGlhqgiSoTF4I2IEYqmLF2XlKl9UTXqTEltZwNmS11qOiujMHOBs4qqUVqKIgKELXl5XkKwYlgG61MXWdJ1MOZtzlKuYPphGYRNeHKUh+cVTjeq6x1yi2VY7PEsRAA */
       context: initialContext,
       predictableActionArguments: true,
       id: 'DataStreamQualityCheck',
@@ -66,16 +66,10 @@ export const createPureDataStreamQualityChecksStateMachine = (
             id: 'performAllChecks',
             onDone: 'checked',
 
-            onError: [
-              {
-                target: 'unchecked',
-                actions: 'storeCheckingError',
-              },
-              {
-                target: 'checking',
-                internal: true,
-              },
-            ],
+            onError: {
+              target: 'unchecked',
+              actions: 'storeCheckingError',
+            },
           },
 
           on: {
@@ -156,34 +150,50 @@ export const createPureDataStreamQualityChecksStateMachine = (
     }
   );
 
+export interface DataStreamQualityChecksStateMachineArguments {
+  initialParameters: WithParameters['parameters'];
+}
+
+export const createDataStreamQualityChecksStateMachine = ({
+  initialParameters,
+}: DataStreamQualityChecksStateMachineArguments) =>
+  createPureDataStreamQualityChecksStateMachine({
+    parameters: initialParameters,
+  }).withConfig({
+    services: {},
+  });
+
 type DataStreamQualityChecksTypeState =
   | {
       value: 'uninitialized';
-      context: WithDataStream;
+      context: WithParameters;
     }
   | {
       value: 'planning';
-      context: WithDataStream;
+      context: WithParameters;
     }
   | {
       value: 'planned';
-      context: WithDataStream & WithPlan;
+      context: WithParameters & WithPlan;
     }
   | {
       value: 'unplanned';
-      context: WithDataStream & WithPlanningError;
+      context: WithParameters & WithPlanningError;
     }
   | {
       value: 'checking';
-      context: WithDataStream & WithPlan & WithCheckProgress;
+      context: WithParameters & WithPlan & WithCheckProgress;
     }
   | {
       value: 'unchecked';
-      context: WithDataStream & WithPlan & WithCheckingError;
+      context: WithParameters & WithPlan & WithCheckingError;
     };
 
-interface WithDataStream {
-  dataStream: string;
+interface WithParameters {
+  parameters: {
+    dataStream: string;
+    timeRange: CheckTimeRange;
+  };
 }
 
 interface WithPlan {

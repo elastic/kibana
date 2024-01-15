@@ -11,6 +11,7 @@ import { DatasetQualityPlugin } from './plugin';
 
 export type { DatasetQualityPluginSetup, DatasetQualityPluginStart } from './types';
 export type { DataStreamQualityServiceStart } from './services/data_stream_quality';
+export type { DataStreamQualityCheckerProps } from './components/dataset_quality_checker';
 
 export function plugin(context: PluginInitializerContext<DatasetQualityConfig>) {
   return new DatasetQualityPlugin(context);

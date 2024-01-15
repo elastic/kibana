@@ -12,3 +12,5 @@ export const checkTimeRangeRT = rt.strict({
   start: DateFromStringOrNumber,
   end: DateFromStringOrNumber,
 });
+
+export type CheckTimeRange = rt.TypeOf<typeof checkTimeRangeRT>;

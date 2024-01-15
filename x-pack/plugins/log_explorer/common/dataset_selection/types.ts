@@ -44,6 +44,7 @@ export const singleDatasetSelectionPlainRT = rt.type({
   selectionType: rt.literal('single'),
   selection: singleDatasetSelectionPayloadRT,
 });
+export type SingleDatasetSelectionPlain = rt.TypeOf<typeof singleDatasetSelectionPlainRT>;
 
 export const unresolvedDatasetSelectionPlainRT = rt.type({
   selectionType: rt.literal('unresolved'),
