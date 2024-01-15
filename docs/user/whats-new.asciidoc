@@ -128,13 +128,8 @@ image::images/alerts.png[A screenshot of details of the alerts]
 
 [discrete]
 ==== Maintenance windows
-Schedule single or recurring maintenance windows to reduce alert noise and suppress notifications. For example, if you have a planned outage or event, a maintenance window prevents false alarms during this period.  WIth this release users will be able to create and define windows based on time and alert query. 
-For example, as a user I want to suppress alerts on each Monday morning 9am to 10am and just for alerts that match this query: 
 
-[source, bash]
-----
-App: “Billing” and cluster: “X123” and project: “Prod”.
-----
+In 8.12 you can add KQL filters to your <<maintenance-windows,maintenance windows>> to further refine their scope.
 
 [role="screenshot"]
 image::images/maintenance-window.png[A screenshot of the create maintenance window UI]
