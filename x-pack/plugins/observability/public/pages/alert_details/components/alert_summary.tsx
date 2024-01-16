@@ -18,7 +18,7 @@ interface AlertSummaryProps {
 
 export function AlertSummary({ alertSummaryFields }: AlertSummaryProps) {
   return (
-    <EuiFlexGroup data-test-subj="alert-summary-container">
+    <EuiFlexGroup data-test-subj="alert-summary-container" gutterSize="xl">
       {alertSummaryFields?.map((field, idx) => {
         return (
           <EuiFlexItem key={idx} grow={false}>
