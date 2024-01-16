@@ -113,7 +113,7 @@ export function createScenarios(
   };
   const tryDiscoverCsvNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-CSVDownload');
+    await testSubjects.missingOrFail('sharePanel-CSVReports');
   };
   const tryDiscoverCsvSuccess = async () => {
     await PageObjects.reporting.openCsvReportingPanel();
@@ -127,15 +127,19 @@ export function createScenarios(
   };
   const tryGeneratePdfNotAvailable = async () => {
     PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail(`sharePanel-imageExports`);
+    await testSubjects.missingOrFail(`sharePanel-PDFReports`);
   };
   const tryGeneratePdfSuccess = async () => {
     await PageObjects.reporting.openImageReportingPanel();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
+  const tryGeneratePngSuccess = async () => {
+    await PageObjects.reporting.openImageReportingPanel();
+    expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
+  };
   const tryReportsNotAvailable = async () => {
     await PageObjects.share.clickShareTopNavButton();
-    await testSubjects.missingOrFail('sharePanel-imageExports');
+    await testSubjects.missingOrFail('sharePanel-Reports');
   };
 
   return {
@@ -153,6 +157,7 @@ export function createScenarios(
     tryGeneratePdfFail,
     tryGeneratePdfNotAvailable,
     tryGeneratePdfSuccess,
+    tryGeneratePngSuccess,
     tryReportsNotAvailable,
     loginDataAnalyst,
     loginReportingUser,
