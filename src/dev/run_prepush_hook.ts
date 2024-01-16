@@ -9,28 +9,15 @@
 import { existsSync } from 'node:fs';
 import { simpleGit } from 'simple-git';
 import cliProgress from 'cli-progress';
-import chalk from 'chalk';
 import Table from 'cli-table3';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
-import { File } from './file';
-import { checkFileCasing } from './preflight_check/check_file_casing';
-import { checkTypescriptFiles } from './preflight_check/run_tsc';
-import { runUnitTests } from './preflight_check/run_unit_tests';
-import { esLintFiles } from './preflight_check/run_eslint';
+import { createTests } from './preflight_check/create_tests';
 
 const HASH_FOR_NULL_OR_DELETED_FILE = '00000000000';
-
-function getDefaults(taskName: string) {
-  const TASK_COL_LENGTH = 10;
-  return {
-    task: chalk.blue(taskName.padEnd(TASK_COL_LENGTH)),
-    filename: '',
-  };
-}
 
 function nonNullable<T>(value: T): value is NonNullable<T> {
   return value != null;
@@ -49,16 +36,6 @@ run(
     process.env.IS_KIBANA_PREPUSH_HOOK = 'true';
 
     const git = simpleGit(REPO_ROOT);
-
-    const checkTypes = ['i18n', 'tsc', 'eslint', 'jest', 'fileCasing'] as const;
-
-    const checks = checkTypes.reduce((acc, check) => {
-      acc[check] = {
-        files: [],
-      };
-
-      return acc;
-    }, {} as Record<typeof checkTypes[number], { files: Array<{ path: string; file: File }> }>);
 
     const { current } = await git.branchLocal();
 
@@ -131,7 +108,7 @@ run(
       });
 
       warning.push([
-        `Preflight checks will be peformed on your files including these changes. 
+        `Preflight checks will be performed on your files including these changes. 
 This might influence the outcome of these tests.
 `,
       ]);
@@ -159,124 +136,33 @@ This might influence the outcome of these tests.
       cliProgress.Presets.shades_grey
     );
 
-    // add bars
-    const barTypescript = multibar.create(0, 0, getDefaults('typescript'));
-    const barUnitTests = multibar.create(0, 0, getDefaults('unit tests'));
-    const barEslint = multibar.create(0, 0, getDefaults('eslint'));
-    const barFilecase = multibar.create(0, 0, getDefaults('file case'));
-    const barI18n = multibar.create(0, 0, getDefaults('i18n'));
-
-    for (const { path, mode, removed = [] } of diffedFiles) {
-      const match = path.match(/^(.+?)((\.test|\.stories)?(\.tsx?|\.jsx?))$/);
-
-      const pathWithoutExt = match ? match[1] : undefined;
-      const ext = match ? match[2] : undefined;
-
-      // If the user added a file with a test, add it to the list of files to test.
-      if (ext === '.test.ts' || ext === '.test.tsx') {
-        checks.jest.files.push({ path, file: new File(path) });
-        barUnitTests.setTotal(barUnitTests.getTotal() + 1);
-      }
-
-      // if a user removed a line that includes i18n.translate, we need to run i18n check.
-      if (
-        removed.find(
-          (line) => line.includes('i18n.translate') || line.includes('<FormattedMessage')
-        )
-      ) {
-        checks.i18n.files.push({ path, file: new File(path) });
-        barI18n.setTotal(barI18n.getTotal() + 1);
-      }
-
-      // If the user has added a ts file, we need to run tsc and eslint on it.
-      if (ext === '.ts' || ext === '.tsx') {
-        checks.tsc.files.push({ path, file: new File(path) });
-        barTypescript.setTotal(barTypescript.getTotal() + 1);
-
-        checks.eslint.files.push({ path, file: new File(path) });
-        barEslint.setTotal(barEslint.getTotal() + 1);
-
-        // Lets see if there is a corresponding Storybook or unit test file
-        // for this file and also add it to the list to be checked.
-        const storiesPath = `${pathWithoutExt}.stories.${ext}`;
-        if (existsSync(storiesPath)) {
-          checks.eslint.files.push({ path: storiesPath, file: new File(storiesPath) });
-          barEslint.setTotal(barEslint.getTotal() + 1);
-
-          checks.tsc.files.push({ path: storiesPath, file: new File(storiesPath) });
-          barTypescript.setTotal(barTypescript.getTotal() + 1);
-        }
-
-        const testPath = `${pathWithoutExt}.test.${ext}`;
-        if (existsSync(testPath)) {
-          checks.eslint.files.push({ path: testPath, file: new File(testPath) });
-          barEslint.setTotal(barEslint.getTotal());
-
-          checks.tsc.files.push({ path: testPath, file: new File(testPath) });
-          barTypescript.setTotal(barTypescript.getTotal() + 1);
-
-          checks.jest.files.push({ path: testPath, file: new File(testPath) });
-          barUnitTests.setTotal(barUnitTests.getTotal() + 1);
-        }
-      }
-
-      if (mode === 'new') {
-        checks.fileCasing.files.push({ path, file: new File(path) });
-        barFilecase.setTotal(barFilecase.getTotal() + 1);
-      }
-    }
-
-    const checkSummaryTable = new Table({
-      head: ['Test', 'Files'],
-      colWidths: [15, 75],
+    const { tsc, eslint, jest, fileCasing } = await createTests({
+      diffedFiles,
+      multibar,
     });
 
-    for (const [check, { files }] of Object.entries(checks)) {
-      if (files.length) {
-        checkSummaryTable.push([check, files.map(({ path }) => path).join(`\n`)]);
-      }
-    }
-
     const checkResponses = await Promise.all([
-      runUnitTests(checks.jest.files, barUnitTests),
-      checkTypescriptFiles(checks.tsc.files, barTypescript),
-      esLintFiles(
-        checks.eslint.files,
-        {
-          fix: Boolean(flags.fix),
-        },
-        barEslint
-      ),
-      checkFileCasing(log, checks.fileCasing.files, barFilecase),
+      tsc.test(tsc.files, tsc.bar),
+      eslint.test(eslint.files, eslint.bar, { fix: Boolean(flags.fix) }),
+      jest.test(jest.files, jest.bar),
+      fileCasing.test(fileCasing.files, fileCasing.bar),
     ]);
 
     multibar.stop();
 
-    if (checkResponses.some((checkResponse) => checkResponse?.length)) {
+    if (checkResponses.some((checkResponse) => checkResponse?.errors.length)) {
       log.info('Results');
-
-      const [unitTestErrors, tscErrors, eslintErrors, fileCasingErrors] = checkResponses;
 
       const resultsSummaryTable = new Table({
         head: ['Check', 'Errors'],
         colWidths: [15, 120],
       });
 
-      unitTestErrors?.forEach((error) => {
-        resultsSummaryTable.push([chalk.blue('jest'), error]);
-      });
-
-      tscErrors?.forEach((error) => {
-        resultsSummaryTable.push([chalk.blue('typescript'), error]);
-      });
-
-      eslintErrors?.forEach((error) => {
-        resultsSummaryTable.push([chalk.blue('eslint'), error]);
-      });
-
-      fileCasingErrors?.forEach((error) => {
-        resultsSummaryTable.push([chalk.blue('fileCasing'), error]);
-      });
+      for (const checkResponse of checkResponses) {
+        if (checkResponse?.errors.length) {
+          resultsSummaryTable.push([checkResponse.test, checkResponse.errors.join('\n')]);
+        }
+      }
 
       log.info(`${resultsSummaryTable.toString()}\n\n`);
 

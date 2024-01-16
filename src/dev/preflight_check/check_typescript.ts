@@ -12,13 +12,15 @@ import { SingleBar } from 'cli-progress';
 import { readFile, unlink, writeFile } from 'fs/promises';
 import { dirname, relative } from 'path';
 import { File } from '../file';
+import { TestResponse } from './create_tests';
 import { findFileUpwards } from './find_file_upwards';
 
-export async function checkTypescriptFiles(
+export async function checkTypescript(
   files: Array<{ path: string; file: File }>,
   bar?: SingleBar
-) {
-  const logs = [];
+): Promise<TestResponse> {
+  const response: TestResponse = { test: 'typescript', errors: [] };
+
   for (const { path } of files) {
     bar?.increment();
     bar?.update({ filename: path });
@@ -48,12 +50,12 @@ export async function checkTypescriptFiles(
     try {
       execSync(`npx tsc -p ${tempTsConfig} --noEmit`);
     } catch (error) {
-      logs.push(`${path} has Typescript errors`);
+      response.errors.push(`${path} has Typescript errors`);
     }
 
     // Cleanup
     await unlink(tempTsConfig);
   }
 
-  return logs;
+  return response;
 }

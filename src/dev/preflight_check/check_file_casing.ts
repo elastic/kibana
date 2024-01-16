@@ -7,10 +7,7 @@
  */
 
 import { relative, basename } from 'path';
-
 import { dim } from 'chalk';
-
-import { ToolingLog } from '@kbn/tooling-log';
 import { SingleBar } from 'cli-progress';
 import { matchesAnyGlob } from '../globs';
 
@@ -21,6 +18,7 @@ import {
   KEBAB_CASE_DIRECTORY_GLOBS,
 } from '../precommit_hook/casing_check_config';
 import { File } from '../file';
+import { TestResponse } from './create_tests';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z \_]/;
@@ -58,11 +56,10 @@ function getPathWithoutIgnoredParents(file: File) {
  * KEBAB_CASE_DIRECTORY_GLOBS and ensure that those directories use
  * keban case
  *
- * @param  {ToolingLog} log
  * @param  {Array<File>} files
  * @return {Promise<undefined>}
  */
-async function checkForKebabCase(log: ToolingLog, files: File[]) {
+async function checkForKebabCase(files: File[]) {
   const errorPaths = files
     .reduce((acc, file) => {
       const parents = file.getRelativeParentDirs();
@@ -96,7 +93,7 @@ async function checkForKebabCase(log: ToolingLog, files: File[]) {
  * @param {Array<File>} files
  * @return {Promise<undefined>}
  */
-async function checkForSnakeCase(log: ToolingLog, files: File[]) {
+async function checkForSnakeCase(files: File[]) {
   const errorPaths: string[] = [];
   const warningPaths: string[] = [];
 
@@ -112,23 +109,16 @@ async function checkForSnakeCase(log: ToolingLog, files: File[]) {
 
     const ignored = matchesAnyGlob(path, IGNORE_FILE_GLOBS);
     if (ignored) {
-      log.debug('[casing] %j ignored', file);
       return;
     }
 
     const pathToValidate = getPathWithoutIgnoredParents(file);
     const invalid = NON_SNAKE_CASE_RE.test(pathToValidate);
-    if (!invalid) {
-      log.debug('[casing] %j uses valid casing', file);
-    } else {
+    if (invalid) {
       const ignoredParent = file.getRelativePath().slice(0, -pathToValidate.length);
       errorPaths.push(`${dim(ignoredParent)}${pathToValidate}`);
     }
   });
-
-  if (warningPaths.length) {
-    log.warning(`Filenames SHOULD be snake_case.\n${listPaths(warningPaths)}`);
-  }
 
   if (errorPaths.length) {
     results.push(`Filenames MUST use snake_case.\n${listPaths(errorPaths)}`);
@@ -138,25 +128,24 @@ async function checkForSnakeCase(log: ToolingLog, files: File[]) {
 }
 
 export async function checkFileCasing(
-  log: ToolingLog,
   files: Array<{ path: string; file: File }>,
   bar?: SingleBar
-) {
+): Promise<TestResponse> {
   const logs = [];
   for (const { path, file } of files) {
     bar?.increment();
     bar?.update({ filename: path });
 
-    const kebabCaseResponse = await checkForKebabCase(log, [file]);
+    const kebabCaseResponse = await checkForKebabCase([file]);
     if (kebabCaseResponse) {
       logs.push(kebabCaseResponse);
     }
 
-    const snakeCaseResponse = await checkForSnakeCase(log, [file]);
+    const snakeCaseResponse = await checkForSnakeCase([file]);
     if (snakeCaseResponse) {
       logs.push(snakeCaseResponse);
     }
   }
 
-  return logs.flatMap((l) => l);
+  return { test: 'fileCasing', errors: logs.flatMap((l) => l) };
 }

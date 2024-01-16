@@ -8,15 +8,16 @@
 
 import { ESLint } from 'eslint';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { SingleBar } from 'cli-progress';
+import type { SingleBar } from 'cli-progress';
 import { File } from '../file';
+import type { TestResponse } from './create_tests';
 
-export async function esLintFiles(
+export async function checkEsLint(
   files: Array<{ path: string; file: File }>,
-  { fix }: { fix?: boolean } = {},
-  bar: SingleBar
-) {
-  const logs = [];
+  bar: SingleBar,
+  { fix }: { fix?: boolean } = {}
+): Promise<TestResponse> {
+  const response: TestResponse = { test: 'eslint', errors: [] };
 
   for (const { path, file } of files) {
     bar.increment();
@@ -51,8 +52,8 @@ export async function esLintFiles(
       const formatter = await eslint.loadFormatter();
       const msg = await formatter.format(reports);
 
-      logs.push(msg);
+      response.errors.push(msg);
     }
   }
-  return logs;
+  return response;
 }

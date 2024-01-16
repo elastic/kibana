@@ -11,9 +11,13 @@ import { SingleBar } from 'cli-progress';
 import { runCLI } from 'jest';
 import { dirname } from 'path';
 import { File } from '../file';
+import { TestResponse } from './create_tests';
 import { findFileUpwards } from './find_file_upwards';
 
-export async function runUnitTests(files: Array<{ path: string; file: File }>, bar?: SingleBar) {
+export async function checkJest(
+  files: Array<{ path: string; file: File }>,
+  bar?: SingleBar
+): Promise<TestResponse> {
   const logs = [];
 
   for (const { path } of files) {
@@ -24,7 +28,7 @@ export async function runUnitTests(files: Array<{ path: string; file: File }>, b
 
     if (!jestConfig) {
       // Could not find jest.config.js for ${path}
-      return;
+      return { test: 'jest', errors: [] };
     }
 
     const jestConfigFile = await import(jestConfig);
@@ -52,5 +56,5 @@ export async function runUnitTests(files: Array<{ path: string; file: File }>, b
       logs.push(`Unit tests failed for ${path}`);
     }
   }
-  return logs;
+  return { test: 'jest', errors: logs };
 }
