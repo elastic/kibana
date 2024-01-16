@@ -19,19 +19,19 @@ import { hostDetailsPagePath } from './types';
 
 const getHostsTabPath = () =>
   `${HOSTS_PATH}/:tabName(` +
+  `${HostsTableType.events}|` +
   `${HostsTableType.hosts}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
-  `${HostsTableType.events}|` +
   `${HostsTableType.risk}|` +
   `${HostsTableType.sessions})`;
 
 const getHostDetailsTabPath = () =>
   `${hostDetailsPagePath}/:tabName(` +
+  `${HostsTableType.events}|` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
-  `${HostsTableType.events}|` +
   `${HostsTableType.risk}|` +
   `${HostsTableType.sessions})`;
 
@@ -77,7 +77,7 @@ export const HostsContainer = React.memo(() => (
       }) => (
         <Redirect
           to={{
-            pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.authentications}`,
+            pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.events}`,
             search,
           }}
         />
@@ -87,7 +87,7 @@ export const HostsContainer = React.memo(() => (
       path={`${HOSTS_PATH}/:detailName/:tabName?`}
       render={({
         match: {
-          params: { detailName, tabName = HostsTableType.authentications },
+          params: { detailName, tabName = HostsTableType.events },
         },
         location: { search = '' },
       }) => (
@@ -102,7 +102,7 @@ export const HostsContainer = React.memo(() => (
     <Route // Redirect to the first tab when tabName is not present.
       path={HOSTS_PATH}
       render={({ location: { search = '' } }) => (
-        <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
+        <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.events}`, search }} />
       )}
     />
   </Routes>
