@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: This needs to be removed and properly typed
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { flow, get, mapValues } from 'lodash';
 import type {
   SavedObjectAttributes,
