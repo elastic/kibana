@@ -626,7 +626,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     artifactService.start(this.telemetryReceiver);
 
-    this.telemetryEventsSenderV2.start();
+    this.telemetryEventsSenderV2.start(plugins.telemetry);
 
     this.telemetryEventsSender.start(
       plugins.telemetry,

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { type TelemetryChannel } from './types';
 import type { ITelemetryReceiver } from './receiver';
@@ -22,7 +22,7 @@ export interface ITelemetryEventsSenderV2 {
     telemetrySetup?: TelemetryPluginSetup,
     telemetryUsageCounter?: IUsageCounter
   ) => void;
-  start: () => void;
+  start: (telemetryStart?: TelemetryPluginStart) => void;
   stop: () => Promise<void>;
   send: (channel: TelemetryChannel, events: unknown[]) => void;
   updateQueueConfig: (channel: TelemetryChannel, config: QueueConfig) => void;

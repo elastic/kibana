@@ -8,7 +8,7 @@
 import { URL } from 'url';
 import moment from 'moment';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver, TelemetryReceiver } from '../receiver';
@@ -76,6 +76,12 @@ export const createMockTelemetryPluginSetup = (): jest.Mocked<TelemetryPluginSet
   return {
     getTelemetryUrl: jest.fn(() => Promise.resolve(new URL('http://localhost/v3/send'))),
   } as unknown as jest.Mocked<TelemetryPluginSetup>;
+};
+
+export const createMockTelemetryPluginStart = (): jest.Mocked<TelemetryPluginStart> => {
+  return {
+    getIsOptedIn: jest.fn(() => Promise.resolve(true)),
+  } as unknown as jest.Mocked<TelemetryPluginStart>;
 };
 
 export const createMockUsageCounter = (): jest.Mocked<IUsageCounter> => {

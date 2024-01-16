@@ -9,7 +9,7 @@ import * as rx from 'rxjs';
 import { cloneDeep } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
-import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
 import {
@@ -47,6 +47,9 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
 
   private readonly logger: TelemetryLogger;
 
+  private telemetryReceiver?: ITelemetryReceiver;
+  private telemetrySetup?: TelemetryPluginSetup;
+  private telemetryUsageCounter?: IUsageCounter;
   private senderUtils: SenderUtils | undefined;
 
   constructor(logger: Logger) {
@@ -68,16 +71,24 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     this.fallbackQueueConfig = fallbackQueueConfig;
     this.queues = new Map<TelemetryChannel, QueueConfig>();
     this.cache = new CachedSubject<Event>(this.events$);
-
-    this.senderUtils = new SenderUtils(telemetrySetup, telemetryReceiver, telemetryUsageCounter);
+    this.telemetryReceiver = telemetryReceiver;
+    this.telemetrySetup = telemetrySetup;
+    this.telemetryUsageCounter = telemetryUsageCounter;
 
     this.updateStatus(ServiceStatus.CONFIGURED);
   }
 
-  public start(): void {
+  public start(telemetryStart?: TelemetryPluginStart): void {
     this.logger.l(`Starting ${TelemetryEventsSenderV2.name}`);
 
     this.ensureStatus(ServiceStatus.CONFIGURED);
+
+    this.senderUtils = new SenderUtils(
+      this.telemetrySetup,
+      telemetryStart,
+      this.telemetryReceiver,
+      this.telemetryUsageCounter
+    );
 
     this.cache?.stop();
     this.events$
@@ -218,10 +229,35 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     ) as rx.Observable<Result>;
   }
 
-  // TODO(sebastian.zaffarano): not fully implemented yet
   private async sendEvents(channel: TelemetryChannel, events: string[]): Promise<Result> {
     try {
       const senderMetadata = await this.getSenderMetadata(channel);
+
+      const isTelemetryOptedIn = await senderMetadata.isTelemetryOptedIn();
+      if (!isTelemetryOptedIn) {
+        this.senderUtils?.incrementCounter(
+          TelemetryCounter.TELEMETRY_OPTED_OUT,
+          events.length,
+          channel
+        );
+
+        this.logger.l('Telemetry is not opted-in.');
+        return Promise.reject(newFailure('Telemetry is not opted-in', channel, events.length));
+      }
+
+      const isElasticTelemetryReachable = await senderMetadata.isTelemetryServicesReachable();
+      if (!isElasticTelemetryReachable) {
+        this.logger.l('Telemetry Services are not reachable.');
+        this.senderUtils?.incrementCounter(
+          TelemetryCounter.TELEMETRY_NOT_REACHABLE,
+          events.length,
+          channel
+        );
+
+        return Promise.reject(
+          newFailure('Telemetry Services are not reachable', channel, events.length)
+        );
+      }
 
       this.logger.l(`Sending ${events.length} telemetry events to ${channel}`);
 

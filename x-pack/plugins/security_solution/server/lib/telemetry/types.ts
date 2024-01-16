@@ -103,6 +103,8 @@ export enum TelemetryCounter {
   HTTP_STATUS = 'http_status',
   RUNTIME_ERROR = 'runtime_error',
   FATAL_ERROR = 'fatal_error',
+  TELEMETRY_OPTED_OUT = 'telemetry_opted_out',
+  TELEMETRY_NOT_REACHABLE = 'telemetry_not_reachable',
 }
 
 // EP Policy Response

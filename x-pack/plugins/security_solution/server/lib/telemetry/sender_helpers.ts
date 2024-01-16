@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import axios from 'axios';
+
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import type { RawAxiosRequestHeaders } from 'axios';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
@@ -16,6 +18,8 @@ export interface SenderMetadata {
   licenseInfo: ESLicense | undefined;
   clusterInfo: ESClusterInfo | undefined;
   telemetryRequestHeaders: () => RawAxiosRequestHeaders;
+  isTelemetryOptedIn(): Promise<boolean>;
+  isTelemetryServicesReachable(): Promise<boolean>;
 }
 
 export class SenderUtils {
@@ -23,6 +27,7 @@ export class SenderUtils {
 
   constructor(
     private readonly telemetrySetup?: TelemetryPluginSetup,
+    private readonly telemetryStart?: TelemetryPluginStart,
     private readonly receiver?: ITelemetryReceiver,
     private readonly telemetryUsageCounter?: IUsageCounter
   ) {}
@@ -33,6 +38,8 @@ export class SenderUtils {
       this.receiver?.fetchLicenseInfo(),
     ]);
     const clusterInfo = this.receiver?.getClusterInfo();
+
+    const isTelemetryOptedIn = async () => (await this.telemetryStart?.getIsOptedIn()) === true;
 
     return {
       telemetryUrl,
@@ -52,6 +59,25 @@ export class SenderUtils {
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         };
       },
+      isTelemetryOptedIn,
+      isTelemetryServicesReachable: async () => {
+        const isOptedIn = await isTelemetryOptedIn();
+        if (!isOptedIn) {
+          return false;
+        }
+
+        try {
+          const telemetryPingUrl = await this.fetchTelemetryPingUrl();
+          const resp = await axios.get(telemetryPingUrl, { timeout: 3000 });
+          if (resp.status === 200) {
+            return true;
+          }
+
+          return false;
+        } catch (_) {
+          return false;
+        }
+      },
     };
   }
 
@@ -70,6 +96,16 @@ export class SenderUtils {
       throw Error("Couldn't get telemetry URL");
     }
     return this.getV3UrlFromV2(telemetryUrl.toString(), channel);
+  }
+
+  private async fetchTelemetryPingUrl(): Promise<string> {
+    const telemetryUrl = await this.telemetrySetup?.getTelemetryUrl();
+    if (!telemetryUrl) {
+      throw Error("Couldn't get telemetry URL");
+    }
+
+    telemetryUrl.pathname = `/ping`;
+    return telemetryUrl.toString();
   }
 
   /**
