@@ -448,4 +448,130 @@ describe('getAlertsForNotification', () => {
       }
     `);
   });
+
+  test('should increment activeCount for all active alerts', () => {
+    const alert1 = new Alert('1', {
+      meta: { activeCount: 1, uuid: 'uuid-1' },
+    });
+    const alert2 = new Alert('2', { meta: { uuid: 'uuid-2' } });
+
+    const { newAlerts, activeAlerts } = getAlertsForNotification(
+      DEFAULT_FLAPPING_SETTINGS,
+      true,
+      'default',
+      {
+        '1': alert1,
+      },
+      {
+        '1': alert1,
+        '2': alert2,
+      },
+      {},
+      {}
+    );
+    expect(newAlerts).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "activeCount": 2,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "pendingRecoveredCount": 0,
+            "uuid": "uuid-1",
+          },
+          "state": Object {},
+        },
+      }
+    `);
+    expect(activeAlerts).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "activeCount": 2,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "pendingRecoveredCount": 0,
+            "uuid": "uuid-1",
+          },
+          "state": Object {},
+        },
+        "2": Object {
+          "meta": Object {
+            "activeCount": 1,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "pendingRecoveredCount": 0,
+            "uuid": "uuid-2",
+          },
+          "state": Object {},
+        },
+      }
+    `);
+  });
+
+  test('should reset activeCount for all recovered alerts', () => {
+    const alert1 = new Alert('1', { meta: { activeCount: 3 } });
+    const alert3 = new Alert('3');
+
+    const { recoveredAlerts, currentRecoveredAlerts } = getAlertsForNotification(
+      DEFAULT_FLAPPING_SETTINGS,
+      true,
+      'default',
+      {},
+      {},
+      {
+        '1': alert1,
+        '3': alert3,
+      },
+      {
+        '1': alert1,
+        '3': alert3,
+      }
+    );
+
+    expect(alertsWithAnyUUID(recoveredAlerts)).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "activeCount": 0,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "uuid": Any<String>,
+          },
+          "state": Object {},
+        },
+        "3": Object {
+          "meta": Object {
+            "activeCount": 0,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "uuid": Any<String>,
+          },
+          "state": Object {},
+        },
+      }
+    `);
+    expect(alertsWithAnyUUID(currentRecoveredAlerts)).toMatchInlineSnapshot(`
+      Object {
+        "1": Object {
+          "meta": Object {
+            "activeCount": 0,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "uuid": Any<String>,
+          },
+          "state": Object {},
+        },
+        "3": Object {
+          "meta": Object {
+            "activeCount": 0,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "uuid": Any<String>,
+          },
+          "state": Object {},
+        },
+      }
+    `);
+  });
 });
