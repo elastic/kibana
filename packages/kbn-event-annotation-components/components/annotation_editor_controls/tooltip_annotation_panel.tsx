@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import fastIsEqual from 'fast-deep-equal';
@@ -25,7 +25,7 @@ import {
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 
-export const MAX_TOOLTIP_FIELDS_SIZE = 2;
+export const MAX_TOOLTIP_FIELDS_SIZE = 3;
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -40,18 +40,29 @@ function removeNewEmptyField(v: string) {
   return v !== '';
 }
 
+const generateId = htmlIdGenerator();
+
+interface LocalFieldEntry {
+  name: string;
+  id: string;
+}
+
 export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInputsProps) {
   const { hasFieldData } = useExistingFieldsReader();
 
-  // This is a local state that is not synced with the global state
-  const [currentFields, _setFields] = useState<string[]>(currentConfig.extraFields ?? []);
+  // This is a local list that governs the state of UI, including empty fields which
+  // are never reported to the parent component.
+  const [currentFields, _setFields] = useState<LocalFieldEntry[]>(
+    (currentConfig.extraFields ?? []).map((field) => ({ name: field, id: generateId() }))
+  );
 
   const setFields = useCallback(
-    (fields: string[]) => {
+    (fields: LocalFieldEntry[]) => {
       _setFields(fields);
 
-      let newExtraFields: QueryPointEventAnnotationConfig['extraFields'] =
-        fields.filter(removeNewEmptyField);
+      let newExtraFields: QueryPointEventAnnotationConfig['extraFields'] = fields
+        .map(({ name }) => name)
+        .filter(removeNewEmptyField);
       newExtraFields = newExtraFields.length ? newExtraFields : undefined;
 
       if (!fastIsEqual(newExtraFields, currentConfig.extraFields)) {
@@ -69,12 +80,12 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
       className="lnsConfigPanelAnnotations__addButton"
       data-test-subj={`lnsXY-annotation-tooltip-add_field`}
       onClick={() => {
-        setFields([...currentFields, '']);
+        setFields([...currentFields, { name: '', id: generateId() }]);
       }}
       label={i18n.translate('eventAnnotationComponents.xyChart.annotation.tooltip.addField', {
         defaultMessage: 'Add field',
       })}
-      isDisabled={currentFields.length > MAX_TOOLTIP_FIELDS_SIZE}
+      isDisabled={currentFields.length >= MAX_TOOLTIP_FIELDS_SIZE}
     />
   );
 
@@ -124,7 +135,7 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
   return (
     <>
       <DragDropBuckets
-        onDragEnd={(updatedFields: string[]) => {
+        onDragEnd={(updatedFields: LocalFieldEntry[]) => {
           setFields(updatedFields);
         }}
         droppableId="ANNOTATION_TOOLTIP_DROPPABLE_AREA"
@@ -132,12 +143,13 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
         bgColor="subdued"
       >
         {currentFields.map((field, index, arrayRef) => {
-          const fieldIsValid = field === '' ? true : Boolean(dataView.getFieldByName(field));
+          const fieldIsValid =
+            field.name === '' ? true : Boolean(dataView.getFieldByName(field.name));
 
           return (
             <DraggableBucketContainer
-              id={field === '' ? 'newField' : field}
-              key={field === '' ? 'newField' : field}
+              id={field.id}
+              key={field.id}
               idx={index}
               onRemoveClick={() => {
                 setFields(arrayRef.filter((_, i) => i !== index));
@@ -156,11 +168,11 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
               <FieldPicker
                 compressed
                 selectedOptions={
-                  field
+                  field.name
                     ? [
                         {
-                          label: field,
-                          value: { type: 'field', field },
+                          label: field.name,
+                          value: { type: 'field', field: field.name },
                         },
                       ]
                     : []
@@ -173,14 +185,14 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
 
                   if (dataView.getFieldByName(choice.field)) {
                     const newFields = [...currentFields];
-                    newFields[index] = choice.field;
+                    newFields[index] = { name: choice.field, id: generateId() };
                     setFields(newFields);
                   }
                 }}
                 fieldIsInvalid={!fieldIsValid}
                 className="lnsConfigPanelAnnotations__fieldPicker"
                 data-test-subj={`lnsXY-annotation-tooltip-field-picker--${index}`}
-                autoFocus={field === ''}
+                autoFocus={field.name === ''}
               />
             </DraggableBucketContainer>
           );
