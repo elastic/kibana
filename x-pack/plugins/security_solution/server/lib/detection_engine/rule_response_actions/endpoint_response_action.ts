@@ -29,15 +29,13 @@ export const endpointResponseAction = (
 
   if (command === 'isolate') {
     const actionPayload = getIsolateAlerts(alerts);
-    return Promise.all([
-      endpointAppContextService.getActionCreateService().createActionFromAlert(
-        {
-          ...actionPayload,
-          ...commonData,
-        },
-        actionPayload.endpoint_ids
-      ),
-    ]);
+    return endpointAppContextService.getActionCreateService().createActionFromAlert(
+      {
+        ...actionPayload,
+        ...commonData,
+      },
+      actionPayload.endpoint_ids
+    );
   }
 
   const createProcessActionFromAlerts = (actionAlerts: Record<string, AlertsAction>) => {
