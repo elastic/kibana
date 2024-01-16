@@ -97,8 +97,8 @@ describe('alert function', () => {
 
 
     const result = await chatClient.evaluate(conversation, [
-      'Uses alerts function to retrieve active alerts for logs_synth, does not use "filter": "service.name:"logs_synth" in the alert function',
-      'Returns at least one or more alerts related to logs_synth',
+      'Uses alerts function to retrieve active alerts for logs_synth, uses "filter": "logs_synth" in the alert function, not service.name or tags',
+      'Returns one or more alerts related to logs_synth, does not return no active alerts related to logs_synth',
       'Uses alerts function to filtering on service.name my-service to retrieve active alerts for that service',
       'Returns one or more alerts related to my-service',
     ]);

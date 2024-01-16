@@ -130,7 +130,7 @@ describe('apm', () => {
     conversation = await chatClient.complete(
       conversation.conversationId!,
       conversation.messages.concat({
-        content: 'What are the downstream dependencies of the ai-assistant-service service?',
+        content: 'What are the downstream dependencies of the ai-assistant-service-front service?',
         role: MessageRole.User
       })
     );
@@ -138,7 +138,7 @@ describe('apm', () => {
 
     const result = await chatClient.evaluate(conversation, [
       'Uses get_apm_service_summary to obtain the status of the ai-assistant-service service',
-      'Executes get_apm_timeseries to obtain the throughput of the services ai-assistant-service for the last 4 hours',
+      'Executes get_apm_timeseries to obtain the throughput of the services ai-assistant-service-front for the last 4 hours',
       'Gives a summary of the throughput stats for ai-assistant-service',
       'Provides the downstream dependencies of ai-assistant-service',
     ]);
@@ -161,7 +161,7 @@ describe('apm', () => {
     conversation = await chatClient.complete(
       conversation.conversationId!,
       conversation.messages.concat({
-        content: 'What are the top 2 most frequent errors in those services in the last hour?',
+        content: 'What are the top 2 most frequent errors in the services in the test environment in the last hour?',
         role: MessageRole.User
       })
     );
