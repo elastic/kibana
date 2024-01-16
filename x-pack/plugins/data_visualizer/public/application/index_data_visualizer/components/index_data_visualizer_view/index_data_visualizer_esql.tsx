@@ -293,6 +293,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   }, [setLastRefresh]);
 
   useEffect(() => {
+    // @TODO: remove
     if (globalState?.time !== undefined) {
       timefilter.setTime({
         from: globalState.time.from,
@@ -316,7 +317,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     return () => {
       timeUpdateSubscription.unsubscribe();
     };
-  });
+  }, []);
 
   useEffect(() => {
     if (globalState?.refreshInterval !== undefined) {
