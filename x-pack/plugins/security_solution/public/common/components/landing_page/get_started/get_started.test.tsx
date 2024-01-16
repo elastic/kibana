@@ -7,10 +7,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { GetStartedComponent } from './get_started';
-import type { SecurityProductTypes } from '../../common/config';
-
+jest.mock('./context/get_started_context');
 jest.mock('./toggle_panel');
-jest.mock('../common/services');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -30,7 +28,7 @@ jest.mock('@elastic/eui', () => {
 jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ hash: '#watch_the_overview_video' }),
 }));
-jest.mock('../common/hooks/use_user_name');
+jest.mock('./hooks/use_user_name');
 jest.mock('@kbn/security-solution-navigation', () => ({
   useNavigateTo: jest.fn().mockReturnValue({ navigateTo: jest.fn() }),
   SecurityPageName: {
@@ -38,15 +36,9 @@ jest.mock('@kbn/security-solution-navigation', () => ({
   },
 }));
 
-const productTypes = [
-  { product_line: 'security', product_tier: 'essentials' },
-  { product_line: 'endpoint', product_tier: 'complete' },
-  { product_line: 'cloud', product_tier: 'complete' },
-] as SecurityProductTypes;
-
 describe('GetStartedComponent', () => {
   it('should render page title, subtitle, and description', () => {
-    const { getByText } = render(<GetStartedComponent productTypes={productTypes} />);
+    const { getByText } = render(<GetStartedComponent indicesExist={true} />);
 
     const pageTitle = getByText('Hi mocked_user_name!');
     const subtitle = getByText(`Get started with Security`);
@@ -60,7 +52,7 @@ describe('GetStartedComponent', () => {
   });
 
   it('should render welcomeHeader and TogglePanel', () => {
-    const { getByTestId } = render(<GetStartedComponent productTypes={productTypes} />);
+    const { getByTestId } = render(<GetStartedComponent indicesExist={true} />);
 
     const welcomeHeader = getByTestId('welcome-header');
     const togglePanel = getByTestId('toggle-panel');

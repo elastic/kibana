@@ -12,16 +12,34 @@ import {
   FINISHED_STEPS_STORAGE_KEY,
   getStartedStorage,
 } from './storage';
-import { CreateProjectSteps, OverviewSteps, QuickStartSectionCardsId, type StepId } from './types';
-import { storage } from '../common/lib/storage';
-import type { MockStorage } from '../common/lib/__mocks__/storage';
-import { ProductLine } from '../../common/product';
-import { defaultFinishedSteps } from './helpers';
+import {
+  AddIntegrationsSteps,
+  CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
+  OverviewSteps,
+  QuickStartSectionCardsId,
+  ViewAlertsSteps,
+  ViewDashboardSteps,
+  type StepId,
+} from './types';
+import { DEFAULT_FINISHED_STEPS } from './helpers';
+import type { MockStorage } from '../../../lib/local_storage/__mocks__';
+import { storage } from '../../../lib/local_storage';
+import { ProductLine } from './configs';
 
-jest.mock('../common/lib/storage');
+jest.mock('../../../lib/local_storage');
 
 describe('useStorage', () => {
   const mockStorage = storage as unknown as MockStorage;
+
+  const getStartedSteps = [
+    CreateProjectSteps.createFirstProject,
+    OverviewSteps.getToKnowElasticSecurity,
+    AddIntegrationsSteps.connectToDataSources,
+    ViewDashboardSteps.analyzeData,
+    EnablePrebuiltRulesSteps.enablePrebuiltRules,
+    ViewAlertsSteps.viewAlerts,
+  ];
   beforeEach(() => {
     // Clear the mocked storage object before each test
     mockStorage.clearMockStorageData();
@@ -73,7 +91,7 @@ describe('useStorage', () => {
   });
 
   it('should return all finished steps from storage', () => {
-    expect(getStartedStorage.getAllFinishedStepsFromStorage()).toEqual(defaultFinishedSteps);
+    expect(getStartedStorage.getAllFinishedStepsFromStorage()).toEqual(DEFAULT_FINISHED_STEPS);
 
     mockStorage.set(FINISHED_STEPS_STORAGE_KEY, {
       [QuickStartSectionCardsId.createFirstProject]: [
@@ -157,13 +175,14 @@ describe('useStorage', () => {
     });
 
     mockStorage.set(FINISHED_STEPS_STORAGE_KEY, {});
-    expect(getStartedStorage.getAllFinishedStepsFromStorage()).toEqual(defaultFinishedSteps);
+    expect(getStartedStorage.getAllFinishedStepsFromStorage()).toEqual(DEFAULT_FINISHED_STEPS);
   });
 
   it('should remove a finished step from storage', () => {
     getStartedStorage.removeFinishedStepFromStorage(
       QuickStartSectionCardsId.createFirstProject,
-      'step2' as StepId
+      'step2' as StepId,
+      getStartedSteps
     );
     expect(mockStorage.set).toHaveBeenCalledWith(FINISHED_STEPS_STORAGE_KEY, {
       [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
@@ -180,7 +199,8 @@ describe('useStorage', () => {
 
     getStartedStorage.removeFinishedStepFromStorage(
       QuickStartSectionCardsId.createFirstProject,
-      CreateProjectSteps.createFirstProject
+      CreateProjectSteps.createFirstProject,
+      getStartedSteps
     );
     expect(mockStorage.get(FINISHED_STEPS_STORAGE_KEY)).toEqual({
       [QuickStartSectionCardsId.createFirstProject]: [

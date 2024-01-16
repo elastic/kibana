@@ -9,7 +9,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ProductSwitch } from './product_switch';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { ProductLine } from '../../common/product';
+import { ProductLine } from './configs';
 
 describe('ProductSwitch', () => {
   const onProductSwitchChangedMock = jest.fn();

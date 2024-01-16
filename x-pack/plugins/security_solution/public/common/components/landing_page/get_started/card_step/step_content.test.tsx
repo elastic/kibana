@@ -11,7 +11,7 @@ import { QuickStartSectionCardsId, SectionId } from '../types';
 import { overviewVideoSteps } from '../sections';
 
 jest.mock('../context/step_context');
-jest.mock('../../common/services');
+jest.mock('../../../../lib/kibana');
 
 describe('StepContent', () => {
   const toggleTaskCompleteStatus = jest.fn();

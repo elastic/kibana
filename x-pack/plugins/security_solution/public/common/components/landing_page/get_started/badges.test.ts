@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ProductLine } from '../../common/product';
 import { analyticsBadge, cloudBadge, edrBadge, getProductBadges } from './badge';
+import { ProductLine } from './configs';
 
 describe('getProductBadges', () => {
   test('should return all badges if no productLineRequired is passed', () => {

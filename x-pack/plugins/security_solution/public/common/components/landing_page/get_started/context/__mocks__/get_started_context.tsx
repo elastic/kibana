@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { ALL_PRODUCT_LINES } from '../../configs';
 import {
   AddIntegrationsSteps,
   CreateProjectSteps,
@@ -20,7 +19,11 @@ export const GetStartedContextProvider = ({ children }: { children: React.ReactE
 );
 
 export const useGetStartedContext = jest.fn(() => ({
-  productTypes: ALL_PRODUCT_LINES,
+  productTypes: [
+    { product_line: 'security', product_tier: 'essentials' },
+    { product_line: 'endpoint', product_tier: 'complete' },
+    { product_line: 'cloud', product_tier: 'complete' },
+  ],
   projectsUrl: 'mockProjectsUrl',
   projectFeaturesUrl: 'mockProjectFeaturesUrl',
   availableSteps: [

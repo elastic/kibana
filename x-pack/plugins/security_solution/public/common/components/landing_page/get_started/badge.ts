@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProductLine } from '../../common/product';
+import { ProductLine } from './configs';
 import { PRODUCT_BADGE_ANALYTICS, PRODUCT_BADGE_CLOUD, PRODUCT_BADGE_EDR } from './translations';
 import type { Badge } from './types';
 import { BadgeId } from './types';

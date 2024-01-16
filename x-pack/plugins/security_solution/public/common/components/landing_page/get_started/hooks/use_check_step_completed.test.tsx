@@ -14,18 +14,7 @@ import {
   SectionId,
 } from '../types';
 
-jest.mock('../../common/services', () => ({
-  useKibana: () => ({
-    services: {
-      http: {},
-      notifications: {
-        toasts: {
-          addError: jest.fn(),
-        },
-      },
-    },
-  }),
-}));
+jest.mock('../../../../lib/kibana');
 
 describe('useCheckStepCompleted', () => {
   it('does nothing when autoCheckIfStepCompleted is not provided', () => {

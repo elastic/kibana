@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ProductTierBadge } from './product_tier_badge';
-import { ProductTier } from '../../../common/product';
+import { ProductTier } from '../configs';
 
 describe('ProductTierBadge', () => {
   it('renders nothing when productTier is undefined', () => {

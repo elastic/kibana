@@ -10,8 +10,7 @@ import { TogglePanel } from './toggle_panel';
 import { useSetUpSections } from './hooks/use_setup_sections';
 import type { ActiveSections } from './types';
 import { QuickStartSectionCardsId, SectionId } from './types';
-
-import { ProductLine } from '../../common/product';
+import { ProductLine } from './configs';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),

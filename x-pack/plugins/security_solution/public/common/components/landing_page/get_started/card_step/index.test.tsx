@@ -28,11 +28,7 @@ jest.mock('./step_content', () => ({
 jest.mock('../context/step_context');
 jest.mock('../apis');
 
-jest.mock('../../common/services');
-
-jest.mock('../../../../..', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
-}));
+jest.mock('../../../../lib/kibana');
 
 jest.mock('@kbn/security-solution-navigation', () => ({
   useNavigateTo: jest.fn().mockReturnValue({ navigateTo: jest.fn() }),
