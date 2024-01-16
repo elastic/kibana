@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.discover.revertUnsavedChanges();
         });
         // clearing the saved search
-        await expectSearches('ese', expectedRequests, async () => {
+        await expectSearches('ese', savedSearchesRequests ?? expectedRequests, async () => {
           await testSubjects.click('discoverNewButton');
           await waitForLoadingToFinish();
         });
@@ -251,7 +251,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectSearches(type, 2, async () => {
           await PageObjects.discover.toggleChartVisibility();
         });
-        await expectSearches(type, 2, async () => {
+        await expectSearches(type, 1, async () => {
           await PageObjects.discover.toggleChartVisibility();
         });
       });
