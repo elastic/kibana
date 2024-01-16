@@ -40,7 +40,7 @@ const GROUP_BY_OPTIONS: Array<Item<GroupByField>> = [
     type: 'ungrouped',
   },
   {
-    label: i18n.translate('xpack.observability.slo.list.sortBy.tags', {
+    label: i18n.translate('xpack.observability.slo.list.groupBy.tags', {
       defaultMessage: 'Tags',
     }),
     type: 'tags',
@@ -77,7 +77,7 @@ export function SloGroupBy({ loading, onChangeGroupBy, initialState }: Props) {
                   onClick={handleToggleGroupByButton}
                   isSelected={isGroupByPopoverOpen}
                 >
-                  {i18n.translate('xpack.observability.slo.list.sortByType', {
+                  {i18n.translate('xpack.observability.slo.list.groupByType', {
                     defaultMessage: 'Group by {type}',
                     values: { type: selectedGroupBy?.label.toLowerCase() ?? '' },
                   })}
@@ -90,7 +90,7 @@ export function SloGroupBy({ loading, onChangeGroupBy, initialState }: Props) {
             >
               <div style={{ width: 250 }}>
                 <EuiPopoverTitle paddingSize="s">
-                  {i18n.translate('xpack.observability.slo.list.sortBy', {
+                  {i18n.translate('xpack.observability.slo.list.groupBy', {
                     defaultMessage: 'Group by',
                   })}
                 </EuiPopoverTitle>
