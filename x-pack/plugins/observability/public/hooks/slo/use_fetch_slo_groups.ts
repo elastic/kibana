@@ -13,6 +13,7 @@ import type { ISearchStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
+import { sloKeys } from './query_key_factory';
 
 interface Aggregation {
   doc_count: number;
@@ -69,7 +70,7 @@ export function useFetchSloGroups() {
   } = useKibana().services;
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['slos'],
+    queryKey: sloKeys.groups(),
     queryFn: async () => {
       const response = await createFetchAggregations(searchService);
       return response.groupByTags.buckets.reduce((acc, bucket) => {
