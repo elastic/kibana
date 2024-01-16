@@ -264,19 +264,7 @@ export function ChatBody({
                   }}
                   onFeedback={handleFeedback}
                   onRegenerate={(message) => {
-                    // Drop messages after and including the one marked for regeneration
-                    const indexOf = messages.indexOf(message);
-                    const previousMessages = messages.slice(0, indexOf);
-
-                    // Go back to the last written user message to fully regenerate function calls
-                    const lastUserMessageIndex = findLastIndex(
-                      previousMessages,
-                      (aMessage: Message) =>
-                        aMessage.message.role === 'user' && !aMessage.message.name
-                    );
-                    const nextMessages = previousMessages.slice(0, lastUserMessageIndex + 1);
-
-                    next(nextMessages);
+                    next(reverseToLastUserMessage(messages, message));
                   }}
                   onSendTelemetry={(eventWithPayload) =>
                     sendEvent(chatService.analytics, eventWithPayload)
@@ -421,4 +409,20 @@ export function ChatBody({
       {footer}
     </EuiFlexGroup>
   );
+}
+
+// Exported for testing only
+export function reverseToLastUserMessage(messages: Message[], message: Message) {
+  // Drop messages after and including the one marked for regeneration
+  const indexOf = messages.indexOf(message);
+  const previousMessages = messages.slice(0, indexOf);
+
+  // Go back to the last written user message to fully regenerate function calls
+  const lastUserMessageIndex = findLastIndex(
+    previousMessages,
+    (aMessage: Message) => aMessage.message.role === 'user' && !aMessage.message.name
+  );
+  const nextMessages = previousMessages.slice(0, lastUserMessageIndex + 1);
+
+  return nextMessages;
 }
