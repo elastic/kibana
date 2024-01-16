@@ -7,8 +7,8 @@
 
 import React from 'react';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, Form, FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { waitFor, fireEvent, screen, render, act } from '@testing-library/react';
+import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { waitFor, fireEvent, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from '../../common/translations';
@@ -16,7 +16,8 @@ import * as i18n from '../../common/translations';
 const { emptyField, maxLengthField } = fieldValidators;
 
 import { EditableMarkdown } from '.';
-import { TestProviders } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
 
@@ -60,36 +61,12 @@ const defaultProps = {
   editorRef,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/171177
-// FLAKY: https://github.com/elastic/kibana/issues/171178
-// FLAKY: https://github.com/elastic/kibana/issues/171179
-// FLAKY: https://github.com/elastic/kibana/issues/171180
-// FLAKY: https://github.com/elastic/kibana/issues/171181
-// FLAKY: https://github.com/elastic/kibana/issues/171182
-// FLAKY: https://github.com/elastic/kibana/issues/171183
-// FLAKY: https://github.com/elastic/kibana/issues/171184
-// FLAKY: https://github.com/elastic/kibana/issues/171185
-describe.skip('EditableMarkdown', () => {
-  const MockHookWrapperComponent: React.FC<{ testProviderProps?: unknown }> = ({
-    children,
-    testProviderProps = {},
-  }) => {
-    const { form } = useForm<{ content: string }>({
-      defaultValue: { content },
-      options: { stripEmptyFields: false },
-      schema: mockSchema,
-    });
-
-    return (
-      // @ts-expect-error ts upgrade v4.7.4
-      <TestProviders {...testProviderProps}>
-        <Form form={form}>{children}</Form>
-      </TestProviders>
-    );
-  };
+describe('EditableMarkdown', () => {
+  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
   });
 
   afterEach(() => {
@@ -97,17 +74,13 @@ describe.skip('EditableMarkdown', () => {
   });
 
   it('Save button click calls onSaveContent and onChangeEditable when text area value changed', async () => {
-    render(
-      <MockHookWrapperComponent>
-        <EditableMarkdown {...defaultProps} />
-      </MockHookWrapperComponent>
-    );
+    appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-    fireEvent.change(screen.getByTestId('euiMarkdownEditorTextArea'), {
+    fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
       target: { value: newValue },
     });
 
-    userEvent.click(screen.getByTestId('editable-save-markdown'));
+    userEvent.click(await screen.findByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onSaveContent).toHaveBeenCalledWith(newValue);
@@ -116,13 +89,9 @@ describe.skip('EditableMarkdown', () => {
   });
 
   it('Does not call onSaveContent if no change from current text', async () => {
-    render(
-      <MockHookWrapperComponent>
-        <EditableMarkdown {...defaultProps} />
-      </MockHookWrapperComponent>
-    );
+    appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('editable-save-markdown'));
+    userEvent.click(await screen.findByTestId('editable-save-markdown'));
 
     await waitFor(() => {
       expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
@@ -131,13 +100,9 @@ describe.skip('EditableMarkdown', () => {
   });
 
   it('Cancel button click calls only onChangeEditable', async () => {
-    render(
-      <MockHookWrapperComponent>
-        <EditableMarkdown {...defaultProps} />
-      </MockHookWrapperComponent>
-    );
+    appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('editable-cancel-markdown'));
+    userEvent.click(await screen.findByTestId('editable-cancel-markdown'));
 
     await waitFor(() => {
       expect(onSaveContent).not.toHaveBeenCalled();
@@ -147,60 +112,40 @@ describe.skip('EditableMarkdown', () => {
 
   describe('errors', () => {
     it('Shows error message and save button disabled if current text is empty', async () => {
-      render(
-        <MockHookWrapperComponent>
-          <EditableMarkdown {...defaultProps} />
-        </MockHookWrapperComponent>
-      );
+      appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+      userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+      userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), '');
 
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
-
-      await waitFor(() => {
-        expect(screen.getByText('Required field')).toBeInTheDocument();
-        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
-      });
+      expect(await screen.findByText('Required field')).toBeInTheDocument();
+      expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
     });
 
     it('Shows error message and save button disabled if current text is of empty characters', async () => {
-      render(
-        <MockHookWrapperComponent>
-          <EditableMarkdown {...defaultProps} />
-        </MockHookWrapperComponent>
-      );
+      appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+      userEvent.clear(await screen.findByTestId('euiMarkdownEditorTextArea'));
+      userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), '  ');
 
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
-
-      await waitFor(() => {
-        expect(screen.getByText('Required field')).toBeInTheDocument();
-        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
-      });
+      expect(await screen.findByText('Required field')).toBeInTheDocument();
+      expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
     });
 
     it('Shows error message and save button disabled if current text is too long', async () => {
       const longComment = 'b'.repeat(maxLength + 1);
 
-      render(
-        <MockHookWrapperComponent>
-          <EditableMarkdown {...defaultProps} />
-        </MockHookWrapperComponent>
-      );
+      appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+      const markdown = await screen.findByTestId('euiMarkdownEditorTextArea');
 
       userEvent.paste(markdown, longComment);
 
-      await waitFor(() => {
-        expect(
-          screen.getByText(
-            `The length of the textarea is too long. The maximum length is ${maxLength} characters.`
-          )
-        ).toBeInTheDocument();
-        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
-      });
+      expect(
+        await screen.findByText(
+          `The length of the textarea is too long. The maximum length is ${maxLength} characters.`
+        )
+      ).toBeInTheDocument();
+      expect(await screen.findByTestId('editable-save-markdown')).toHaveProperty('disabled');
     });
   });
 
@@ -223,13 +168,9 @@ describe.skip('EditableMarkdown', () => {
     });
 
     it('Save button click clears session storage', async () => {
-      const result = render(
-        <MockHookWrapperComponent>
-          <EditableMarkdown {...defaultProps} />
-        </MockHookWrapperComponent>
-      );
+      appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-      fireEvent.change(result.getByTestId('euiMarkdownEditorTextArea'), {
+      fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
         target: { value: newValue },
       });
 
@@ -239,7 +180,7 @@ describe.skip('EditableMarkdown', () => {
 
       expect(sessionStorage.getItem(draftStorageKey)).toBe(newValue);
 
-      fireEvent.click(result.getByTestId(`editable-save-markdown`));
+      fireEvent.click(await screen.findByTestId(`editable-save-markdown`));
 
       await waitFor(() => {
         expect(onSaveContent).toHaveBeenCalledWith(newValue);
@@ -249,15 +190,11 @@ describe.skip('EditableMarkdown', () => {
     });
 
     it('Cancel button click clears session storage', async () => {
-      const result = render(
-        <MockHookWrapperComponent>
-          <EditableMarkdown {...defaultProps} />
-        </MockHookWrapperComponent>
-      );
+      appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
       expect(sessionStorage.getItem(draftStorageKey)).toBe('');
 
-      fireEvent.change(result.getByTestId('euiMarkdownEditorTextArea'), {
+      fireEvent.change(await screen.findByTestId('euiMarkdownEditorTextArea'), {
         target: { value: newValue },
       });
 
@@ -269,7 +206,7 @@ describe.skip('EditableMarkdown', () => {
         expect(sessionStorage.getItem(draftStorageKey)).toBe(newValue);
       });
 
-      fireEvent.click(result.getByTestId('editable-cancel-markdown'));
+      fireEvent.click(await screen.findByTestId('editable-cancel-markdown'));
 
       await waitFor(() => {
         expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
@@ -282,13 +219,9 @@ describe.skip('EditableMarkdown', () => {
       });
 
       it('should have session storage value same as draft comment', async () => {
-        const result = render(
-          <MockHookWrapperComponent>
-            <EditableMarkdown {...defaultProps} />
-          </MockHookWrapperComponent>
-        );
+        appMockRender.render(<EditableMarkdown {...defaultProps} />);
 
-        expect(result.getByText('value set in storage')).toBeInTheDocument();
+        expect(await screen.findByText('value set in storage')).toBeInTheDocument();
       });
     });
   });
