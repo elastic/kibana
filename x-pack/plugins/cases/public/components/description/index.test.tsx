@@ -27,7 +27,13 @@ const defaultProps = {
   isLoadingDescription: false,
 };
 
-describe('Description', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174321
+// FLAKY: https://github.com/elastic/kibana/issues/174322
+// FLAKY: https://github.com/elastic/kibana/issues/174323
+// FLAKY: https://github.com/elastic/kibana/issues/164045
+// FLAKY: https://github.com/elastic/kibana/issues/164048
+// FLAKY: https://github.com/elastic/kibana/issues/164049
+describe.skip('Description', () => {
   const onUpdateField = jest.fn();
   let appMockRender: AppMockRenderer;
 
@@ -142,6 +148,14 @@ describe('Description', () => {
 
     expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
     expect(screen.queryByTestId('description-edit-icon')).not.toBeInTheDocument();
+  });
+
+  it('should display description when case is loading', async () => {
+    appMockRender.render(
+      <Description {...defaultProps} onUpdateField={onUpdateField} isLoadingDescription={true} />
+    );
+
+    expect(await screen.findByTestId('description')).toBeInTheDocument();
   });
 
   describe('draft message', () => {
