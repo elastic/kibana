@@ -354,18 +354,6 @@ export const createTimelineOptionsPopoverBottomBar = () => {
   cy.get(CREATE_NEW_TIMELINE).eq(0).click();
 };
 
-export const createTimelineOptionsPopoverBottomBar = () => {
-  recurse(
-    () => {
-      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').should('be.visible').click();
-      return cy.get(CREATE_NEW_TIMELINE).eq(0);
-    },
-    (sub) => sub.is(':visible')
-  );
-
-  cy.get(CREATE_NEW_TIMELINE).eq(0).should('be.visible').click();
-};
-
 export const createTimelineTemplateOptionsPopoverBottomBar = () => {
   recurse(
     () => {
