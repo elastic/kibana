@@ -38,6 +38,8 @@ export const GLOBAL_SEARCH_BAR_FILTER_ITEM_DELETE = '#popoverFor_filter0 button[
 
 export const GLOBAL_SEARCH_BAR_PINNED_FILTER = '.globalFilterItem-isPinned';
 
+export const GLOBAL_SEARCH_BAR_EDIT_FILTER_MENU_ITEM = '[data-test-subj="editFilter"]';
+
 export const LOCAL_KQL_INPUT = `[data-test-subj="unifiedQueryInput"] textarea`;
 
 export const GLOBAL_KQL_INPUT = `[data-test-subj="filters-global-container"] ${LOCAL_KQL_INPUT}`;

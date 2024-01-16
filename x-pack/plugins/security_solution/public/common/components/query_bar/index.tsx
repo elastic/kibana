@@ -126,7 +126,11 @@ export const QueryBar = memo<QueryBarComponentProps>(
         setDataView(indexPattern);
       } else if (!isEsql) {
         const createDataView = async () => {
-          dv = await data.dataViews.create({ title: indexPattern.title });
+          /**
+           * We set data view id to make sure that in-memory data view has the same id as the one saved in filter
+           * More details in https://github.com/elastic/kibana/issues/174026
+           */
+          dv = await data.dataViews.create({ id: indexPattern.title, title: indexPattern.title });
           setDataView(dv);
         };
         createDataView();
