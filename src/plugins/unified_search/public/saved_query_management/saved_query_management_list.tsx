@@ -344,9 +344,7 @@ export function SavedQueryManagementList({
               </span>
             }
             onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked) as unknown as {
-                value: string;
-              };
+              const choice = choices.find(({ checked }) => checked);
               if (choice) {
                 handleSelect(
                   currentPageQueries.find((savedQuery) => savedQuery.id === choice.value)
