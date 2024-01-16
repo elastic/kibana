@@ -15,13 +15,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
+import chalk from 'chalk';
 import { createTests } from './preflight_check/create_tests';
+import { nonNullable } from './preflight_check/non_nullable';
 
 const HASH_FOR_NULL_OR_DELETED_FILE = '00000000000';
-
-function nonNullable<T>(value: T): value is NonNullable<T> {
-  return value != null;
-}
 
 run(
   async ({ log, flags }) => {
@@ -29,6 +27,11 @@ run(
       level: 'info',
       writeTo: process.stdout,
     });
+
+    log.info(`✅ ${chalk.bold('Preflight Checks')}`);
+    log.info(
+      `This will check files for frequently occuring problems. You can always skip this check by running git push --no-verify.\n`
+    );
 
     const runStartTime = Date.now();
     const reportTime = getTimeReporter(toolingLog, 'scripts/run_prepush_hook');
@@ -81,14 +84,18 @@ run(
       .filter(nonNullable);
 
     if (diffedFiles.length <= Number(flags['max-files'])) {
-      log.info(`${diffedFiles.length} files changed in this PR compared to upstream.\n`);
+      log.info(
+        `🔎 ${chalk.bold.blue(
+          `${diffedFiles.length} committed files changed`
+        )} on this branch compared to upstream.\n`
+      );
     } else {
       reportTime(runStartTime, 'total', {
         success: false,
       });
 
       log.error(
-        `${diffedFiles.length} files changed in this PR compared to upstream and max files is set to ${flags['max-files']}.\n`
+        `❌ ${diffedFiles.length} committed files changed on this branch compared to upstream and max files is set to ${flags['max-files']}.\n`
       );
 
       throw new Error(
@@ -96,7 +103,7 @@ run(
       );
     }
 
-    log.info(`${filesChangedSummaryTable.toString()}\n\n`);
+    log.info(`${filesChangedSummaryTable.toString()}\n`);
 
     if (!(await git.branchLocal().status()).isClean()) {
       const warning = new Table({
@@ -116,13 +123,13 @@ This might influence the outcome of these tests.
       warning.push(['']);
 
       warning.push([
-        'For the best results either commit your changes, stash them, or reset your branch to HEAD before running this script.',
+        'The checks will still run, but for the most accurate results either commit your changes, stash them, or reset your branch to HEAD before running this script.',
       ]);
 
-      log.info(warning.toString());
+      log.warning(`${warning.toString()}\n`);
     }
 
-    log.info('Running preflight checks on your files...\n');
+    log.info('🐎 Running preflight checks on your files...\n');
 
     const multibar = new cliProgress.MultiBar(
       {
@@ -176,7 +183,7 @@ This might influence the outcome of these tests.
         success: true,
       });
 
-      log.info('All preflight checks passed! ✨\n');
+      log.info('🚀 All preflight checks passed! ✨\n');
     }
   },
   {

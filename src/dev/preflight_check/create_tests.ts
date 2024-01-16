@@ -15,6 +15,8 @@ import { checkEsLint } from './check_eslint';
 import { checkTypescript } from './check_typescript';
 import { checkJest } from './check_jest';
 
+const checkTypes = ['i18n', 'typescript', 'eslint', 'jest', 'fileCasing'] as const;
+
 function getDefaults(taskName: string) {
   const TASK_COL_LENGTH = 10;
   return {
@@ -24,7 +26,7 @@ function getDefaults(taskName: string) {
 }
 
 export interface TestResponse {
-  test: string;
+  test: typeof checkTypes[number];
   errors: string[];
 }
 
@@ -43,8 +45,6 @@ export async function createTests({
   diffedFiles: DiffedFile[];
   multibar: MultiBar;
 }) {
-  const checkTypes = ['i18n', 'tsc', 'eslint', 'jest', 'fileCasing'] as const;
-
   const checks = checkTypes.reduce((acc, check) => {
     acc[check] = {
       files: [],
@@ -55,7 +55,7 @@ export async function createTests({
 
   // add bars
   const barTypescript = multibar.create(0, 0, getDefaults('typescript'));
-  const barUnitTests = multibar.create(0, 0, getDefaults('unit tests'));
+  const barJest = multibar.create(0, 0, getDefaults('unit tests'));
   const barEslint = multibar.create(0, 0, getDefaults('eslint'));
   const barFilecase = multibar.create(0, 0, getDefaults('file case'));
   const barI18n = multibar.create(0, 0, getDefaults('i18n'));
@@ -69,7 +69,7 @@ export async function createTests({
     // If the user added a file with a test, add it to the list of files to test.
     if (ext === '.test.ts' || ext === '.test.tsx') {
       checks.jest.files.push({ path, file: new File(path) });
-      barUnitTests.setTotal(barUnitTests.getTotal() + 1);
+      barJest.setTotal(barJest.getTotal() + 1);
     }
 
     // if a user removed a line that includes i18n.translate, we need to run i18n check.
@@ -82,7 +82,7 @@ export async function createTests({
 
     // If the user has added a ts file, we need to run tsc and eslint on it.
     if (ext === '.ts' || ext === '.tsx') {
-      checks.tsc.files.push({ path, file: new File(path) });
+      checks.typescript.files.push({ path, file: new File(path) });
       barTypescript.setTotal(barTypescript.getTotal() + 1);
 
       checks.eslint.files.push({ path, file: new File(path) });
@@ -95,7 +95,7 @@ export async function createTests({
         checks.eslint.files.push({ path: storiesPath, file: new File(storiesPath) });
         barEslint.setTotal(barEslint.getTotal() + 1);
 
-        checks.tsc.files.push({ path: storiesPath, file: new File(storiesPath) });
+        checks.typescript.files.push({ path: storiesPath, file: new File(storiesPath) });
         barTypescript.setTotal(barTypescript.getTotal() + 1);
       }
 
@@ -104,11 +104,11 @@ export async function createTests({
         checks.eslint.files.push({ path: testPath, file: new File(testPath) });
         barEslint.setTotal(barEslint.getTotal());
 
-        checks.tsc.files.push({ path: testPath, file: new File(testPath) });
+        checks.typescript.files.push({ path: testPath, file: new File(testPath) });
         barTypescript.setTotal(barTypescript.getTotal() + 1);
 
         checks.jest.files.push({ path: testPath, file: new File(testPath) });
-        barUnitTests.setTotal(barUnitTests.getTotal() + 1);
+        barJest.setTotal(barJest.getTotal() + 1);
       }
     }
 
@@ -117,11 +117,18 @@ export async function createTests({
       barFilecase.setTotal(barFilecase.getTotal() + 1);
     }
   }
+
+  if (!checks.typescript.files.length) multibar.remove(barTypescript);
+  if (!checks.eslint.files.length) multibar.remove(barEslint);
+  if (!checks.jest.files.length) multibar.remove(barJest);
+  if (!checks.fileCasing.files.length) multibar.remove(barFilecase);
+  if (!checks.i18n.files.length) multibar.remove(barI18n);
+
   return {
-    tsc: { bar: barTypescript, files: checks.tsc.files, test: checkTypescript },
-    eslint: { bar: barEslint, files: checks.eslint.files, test: checkEsLint },
-    jest: { bar: barUnitTests, files: checks.jest.files, test: checkJest },
-    fileCasing: { bar: barFilecase, files: checks.fileCasing.files, test: checkFileCasing },
-    i18n: { bar: barI18n, files: checks.i18n.files },
+    tsc: { test: checkTypescript, files: checks.typescript.files, bar: barTypescript },
+    eslint: { test: checkEsLint, files: checks.eslint.files, bar: barEslint },
+    jest: { test: checkJest, files: checks.jest.files, bar: barJest },
+    fileCasing: { test: checkFileCasing, files: checks.fileCasing.files, bar: barFilecase },
+    i18n: { files: checks.i18n.files, bar: barI18n },
   };
 }
