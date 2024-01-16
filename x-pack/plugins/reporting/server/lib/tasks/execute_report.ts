@@ -354,6 +354,12 @@ export class ExecuteReportTask implements ReportingTask {
     return ({ taskInstance }: RunContext) => {
       let jobId: string;
       const cancellationToken = new CancellationToken();
+      const {
+        attempts: taskAttempts,
+        params: reportTaskParams,
+        retryAt: taskRetryAt,
+        startedAt: taskStartedAt,
+      } = taskInstance;
 
       return {
         /*
@@ -365,10 +371,10 @@ export class ExecuteReportTask implements ReportingTask {
          */
         run: async () => {
           let report: SavedReport | undefined;
-          const isLastAttempt = taskInstance.attempts >= this.getMaxAttempts();
+          const isLastAttempt = taskAttempts >= this.getMaxAttempts();
 
           // find the job in the store and set status to processing
-          const task = taskInstance.params as ReportTaskParams;
+          const task = reportTaskParams as ReportTaskParams;
           jobId = task?.id;
 
           try {
@@ -431,7 +437,12 @@ export class ExecuteReportTask implements ReportingTask {
             eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([
-              this._performJob(task, taskInstance, cancellationToken, stream),
+              this._performJob(
+                task,
+                { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                cancellationToken,
+                stream
+              ),
               this.throwIfKibanaShutsDown(),
             ]);
 
