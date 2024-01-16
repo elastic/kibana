@@ -136,6 +136,7 @@ function runEvaluations() {
           };
 
           const results: EvaluationResult[] = [];
+          let failedScenarios: string[][] = [["Failed Tests", "", ""], ["Scenario, Scores, Reasoning", "", ""]]
 
           chatClient.onResult((result) => {
             results.push(result);
@@ -148,12 +149,11 @@ function runEvaluations() {
               ],
               result.conversationId
                 ? [
-                    `${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${
-                      argv.spaceId ? `s/${argv.spaceId}/` : ''
-                    }app/observabilityAIAssistant/conversations/${result.conversationId}`,
-                    '',
-                    '',
-                  ]
+                  `${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${argv.spaceId ? `s/${argv.spaceId}/` : ''
+                  }app/observabilityAIAssistant/conversations/${result.conversationId}`,
+                  '',
+                  '',
+                ]
                 : ['', '', ''],
               ...header,
             ];
@@ -166,6 +166,18 @@ function runEvaluations() {
               ]);
             });
             log.write(table.table(output, tableConfig));
+
+            let totalResults = result.scores.length;
+            let failedResults = result.scores.filter((score) => score.score < 1).length;
+
+            if (failedResults / totalResults > 0) {
+              let reasoningConcat = result.scores.map(score => score.reasoning).join(' ');
+              failedScenarios.push([
+                result.name,
+                `Failed ${failedResults} tests out of ${totalResults}`,
+                `Reasoning: ${reasoningConcat}`
+              ])
+            }
           });
 
           initServices({
@@ -195,6 +207,7 @@ function runEvaluations() {
           return new Promise((resolve, reject) => {
             mocha.run((failures: any) => {
               if (failures) {
+                log.write(table.table(failedScenarios, tableConfig))
                 reject(new Error(`Some tests failed`));
                 return;
               }
