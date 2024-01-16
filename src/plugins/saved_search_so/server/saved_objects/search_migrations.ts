@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: This needs to be removed and properly typed
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { flow, get, mapValues } from 'lodash';
 import type {
   SavedObjectAttributes,
@@ -18,6 +16,8 @@ import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { DEFAULT_QUERY_LANGUAGE } from '@kbn/data-plugin/server';
 import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { getLensVisContextMigrations } from './search_vis_migrations';
 
 export interface SavedSearchMigrationAttributes extends SavedObjectAttributes {
   kibanaSavedObjectMeta: {
@@ -170,11 +170,18 @@ export const searchMigrations = {
   '7.9.3': flow(migrateMatchAllQuery),
 };
 
-export const getAllMigrations = (
-  searchSourceMigrations: MigrateFunctionsObject
-): SavedObjectMigrationMap => {
+export const getAllMigrations = ({
+  searchSourceMigrations,
+  lensEmbeddableFactory,
+}: {
+  searchSourceMigrations: MigrateFunctionsObject;
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+}): SavedObjectMigrationMap => {
   return mergeSavedObjectMigrationMaps(
-    searchMigrations,
-    getSearchSourceMigrations(searchSourceMigrations) as SavedObjectMigrationMap
+    mergeSavedObjectMigrationMaps(
+      searchMigrations,
+      getSearchSourceMigrations(searchSourceMigrations) as SavedObjectMigrationMap
+    ),
+    getLensVisContextMigrations(lensEmbeddableFactory)
   );
 };

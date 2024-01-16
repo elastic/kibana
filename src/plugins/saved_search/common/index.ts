@@ -6,25 +6,16 @@
  * Side Public License, v 1.
  */
 
+export {
+  VIEW_MODE,
+  MIN_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_SAVED_SEARCH_SAMPLE_SIZE,
+} from '@kbn/saved-search';
+export type { DiscoverGridSettings, DiscoverGridSettingsColumn } from '@kbn/saved-search/types';
 export { getSavedSearchUrl, getSavedSearchFullPathUrl } from './saved_searches_url';
 export { fromSavedSearchAttributes } from './saved_searches_utils';
 
-export type {
-  DiscoverGridSettings,
-  DiscoverGridSettingsColumn,
-  SavedSearch,
-  SavedSearchAttributes,
-} from './types';
+export type { SavedSearch, SavedSearchAttributes } from './types';
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-}
-
-export {
-  SavedSearchType,
-  LATEST_VERSION,
-  MIN_SAVED_SEARCH_SAMPLE_SIZE,
-  MAX_SAVED_SEARCH_SAMPLE_SIZE,
-} from './constants';
+export { SavedSearchType, LATEST_VERSION } from './constants';
 export { getKibanaContextFn } from './expressions/kibana_context';

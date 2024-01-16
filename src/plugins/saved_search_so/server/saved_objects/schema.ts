@@ -11,7 +11,7 @@ import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
   VIEW_MODE,
-} from '../../common';
+} from '@kbn/saved-search';
 
 const SCHEMA_SEARCH_BASE = schema.object({
   // General

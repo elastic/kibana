@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const SavedSearchType = 'search';
-
-export const LATEST_VERSION = 1;
-
-export type SavedSearchContentType = typeof SavedSearchType;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-saved-search'],
+};

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const SavedSearchType = 'search';
-
-export const LATEST_VERSION = 1;
-
-export type SavedSearchContentType = typeof SavedSearchType;
+export const plugin = async () => {
+  const { SavedSearchSOServerPlugin } = await import('./plugin');
+  return new SavedSearchSOServerPlugin();
+};

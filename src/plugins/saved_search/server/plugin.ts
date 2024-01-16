@@ -14,7 +14,6 @@ import type {
 } from '@kbn/data-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { getSavedSearchObjectType } from './saved_objects';
 import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchStorage } from './content_management';
 import { kibanaContext } from '../common/expressions';
@@ -53,11 +52,6 @@ export class SavedSearchServerPlugin
         latest: LATEST_VERSION,
       },
     });
-
-    const searchSource = data.search.searchSource;
-
-    const getSearchSourceMigrations = searchSource.getAllMigrations.bind(searchSource);
-    core.savedObjects.registerType(getSavedSearchObjectType(getSearchSourceMigrations));
 
     expressions.registerType(kibanaContext);
     expressions.registerFunction(

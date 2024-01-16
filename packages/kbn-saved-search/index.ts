@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const SavedSearchType = 'search';
-
-export const LATEST_VERSION = 1;
-
-export type SavedSearchContentType = typeof SavedSearchType;
+export {
+  MIN_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_SAVED_SEARCH_SAMPLE_SIZE,
+  VIEW_MODE,
+} from './src/constants';

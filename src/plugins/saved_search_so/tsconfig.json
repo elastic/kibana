@@ -1,0 +1,26 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/config-schema",
+    "@kbn/core-saved-objects-server",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/lens-plugin",
+    "@kbn/saved-search",
+    "@kbn/logging",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

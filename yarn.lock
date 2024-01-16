@@ -5704,6 +5704,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/saved-search-so-plugin@link:src/plugins/saved_search_so":
+  version "0.0.0"
+  uid ""
+
+"@kbn/saved-search@link:packages/kbn-saved-search":
+  version "0.0.0"
+  uid ""
+
 "@kbn/screenshot-mode-example-plugin@link:examples/screenshot_mode_example":
   version "0.0.0"
   uid ""
