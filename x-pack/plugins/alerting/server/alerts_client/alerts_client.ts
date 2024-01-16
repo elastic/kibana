@@ -243,8 +243,8 @@ export class AlertsClient<
     }
 
     const alertDoc: AlertData | undefined =
-      !alert.payload && !!this.reportedAlerts[alert.id]
-        ? (this.reportedAlerts[alert.id] as AlertData)
+      !alert.payload && !!this.fetchedAlerts.data[alert.id]
+        ? (this.fetchedAlerts.data[alert.id] as AlertData)
         : undefined;
 
     return {
