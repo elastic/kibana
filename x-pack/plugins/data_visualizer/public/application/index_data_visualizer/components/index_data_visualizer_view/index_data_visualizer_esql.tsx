@@ -38,7 +38,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFieldType } from '@kbn/field-utils';
-import { SupportedFieldType } from '../../../../../common/types';
+import type { SupportedFieldType } from '../../../../../common/types';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
@@ -69,6 +69,7 @@ import {
   type AggregatableField,
 } from '../../hooks/use_esql_data';
 import type { NonAggregatableField, OverallStats } from '../../types/overall_stats';
+import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 
 const defaults = getDefaultPageState();
 
@@ -207,7 +208,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
     const tf = timefilter;
 
-    if (!buckets || !tf || query.esql === '') return;
+    if (!buckets || !tf || (isESQLQuery(query) && query.esql === '')) return;
     const activeBounds = tf.getActiveBounds();
 
     let earliest: number | undefined;
@@ -293,7 +294,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   }, [setLastRefresh]);
 
   useEffect(() => {
-    // @TODO: remove
     if (globalState?.time !== undefined) {
       timefilter.setTime({
         from: globalState.time.from,

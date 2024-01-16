@@ -582,7 +582,8 @@ export const useESQLOverallStatsData = (
         }> = [];
         const fields = columns
           // Some field types are not supported by ESQL yet
-          // Temporarily removing null columns because it causes problems with some aggs
+          // Also, temporarily removing null columns because it causes problems with some aggs
+          // See https://github.com/elastic/elasticsearch/issues/104430
           .filter((c) => c.type !== 'unsupported' && c.type !== 'null')
           .map((field) => {
             return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
