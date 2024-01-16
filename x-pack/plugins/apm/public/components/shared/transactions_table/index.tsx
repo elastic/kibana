@@ -184,11 +184,27 @@ export function TransactionsTable({
     [tableOptions.sort]
   );
 
-  const onChangeHandler = useOnChangeTableHandler({
-    tableOptions,
-    setTableOptions,
-    saveTableOptionsToUrl,
-  });
+  const history = useHistory();
+  const onChangeHandler = useCallback(
+    (newTableOptions: Partial<TableOptions<string>>) => {
+      const nextOptions = merge({}, tableOptions, newTableOptions);
+      setTableOptions(nextOptions);
+
+      if (saveTableOptionsToUrl) {
+        history.push({
+          ...history.location,
+          search: fromQuery({
+            ...toQuery(history.location.search),
+            page: newTableOptions.page?.index,
+            pageSize: newTableOptions.page?.size,
+            sortField: newTableOptions.sort?.field,
+            sortDirection: newTableOptions.sort?.direction,
+          }),
+        });
+      }
+    },
+    [setTableOptions, tableOptions, saveTableOptionsToUrl, history]
+  );
 
   const onChangeSearchQuery = useCallback(
     ({
@@ -278,7 +294,7 @@ export function TransactionsTable({
           placeholder={i18n.translate(
             'xpack.apm.transactionsTable.tableSearch.placeholder',
             {
-              defaultMessage: 'Search for transaction name',
+              defaultMessage: 'Search transactions by name',
             }
           )}
         />
@@ -313,7 +329,6 @@ export function TransactionsTable({
             columns={columns}
             pagination={pagination}
             sorting={sorting}
-            // @ts-expect-error
             onChange={onChangeHandler}
           />
         </OverviewTableContainer>
@@ -464,38 +479,6 @@ function useTableData({
 interface TableOptions<F extends string> {
   page: { index: number; size: number };
   sort: { direction: SortDirection; field: F };
-}
-
-function useOnChangeTableHandler<T extends string>({
-  tableOptions,
-  setTableOptions,
-  saveTableOptionsToUrl,
-}: {
-  tableOptions: TableOptions<T>;
-  setTableOptions: (tableOptions: TableOptions<T>) => void;
-  saveTableOptionsToUrl: boolean;
-}) {
-  const history = useHistory();
-
-  return useCallback(
-    (newTableOptions: Partial<TableOptions<T>>) => {
-      setTableOptions(merge(tableOptions, newTableOptions));
-
-      if (saveTableOptionsToUrl) {
-        history.push({
-          ...history.location,
-          search: fromQuery({
-            ...toQuery(history.location.search),
-            page: newTableOptions.page?.index,
-            pageSize: newTableOptions.page?.size,
-            sortField: newTableOptions.sort?.field,
-            sortDirection: newTableOptions.sort?.direction,
-          }),
-        });
-      }
-    },
-    [setTableOptions, tableOptions, saveTableOptionsToUrl, history]
-  );
 }
 
 function useTableOptions<T extends string>({

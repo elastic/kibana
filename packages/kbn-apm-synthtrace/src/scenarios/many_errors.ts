@@ -9,6 +9,7 @@ import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import { getExceptionTypeForIndex } from './helpers/exception_types';
 import { getRandomNameForIndex } from './helpers/random_names';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
@@ -41,7 +42,9 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             .duration(1000)
             .failure()
             .errors(
-              instance.error({ message: errorMessage, type: 'My Type' }).timestamp(timestamp + 50)
+              instance
+                .error({ message: errorMessage, type: getExceptionTypeForIndex(index) })
+                .timestamp(timestamp + 50)
             );
         });
 

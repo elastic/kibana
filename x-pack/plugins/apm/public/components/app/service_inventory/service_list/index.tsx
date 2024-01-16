@@ -366,7 +366,7 @@ export function ServiceList({
       onChangeCurrentPage,
       placeholder: i18n.translate(
         'xpack.apm.servicesTable.filterServicesPlaceholder',
-        { defaultMessage: 'Search for service by name...' }
+        { defaultMessage: 'Search services by name' }
       ),
     };
   }, [

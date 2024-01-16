@@ -8,6 +8,7 @@
 import { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ServiceList } from '.';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
@@ -52,7 +53,7 @@ export const ServiceListWithItems: Story<Args> = (args) => {
   return <ServiceList {...args} />;
 };
 ServiceListWithItems.args = {
-  isLoading: false,
+  status: FETCH_STATUS.SUCCESS,
   items,
   displayHealthStatus: true,
   initialSortField: ServiceInventoryFieldName.HealthStatus,
@@ -66,7 +67,7 @@ export const ServiceListEmptyState: Story<Args> = (args) => {
   return <ServiceList {...args} />;
 };
 ServiceListEmptyState.args = {
-  isLoading: false,
+  status: FETCH_STATUS.SUCCESS,
   items: [],
   displayHealthStatus: true,
   initialSortField: ServiceInventoryFieldName.HealthStatus,
@@ -80,7 +81,7 @@ export const WithHealthWarnings: Story<Args> = (args) => {
   return <ServiceList {...args} />;
 };
 WithHealthWarnings.args = {
-  isLoading: false,
+  status: FETCH_STATUS.SUCCESS,
   initialPageSize: 25,
   items: items.map((item) => ({
     ...item,
@@ -94,7 +95,7 @@ export const ServiceListWithOverflowBucket: Story<Args> = (args) => {
 };
 
 ServiceListWithOverflowBucket.args = {
-  isLoading: false,
+  status: FETCH_STATUS.SUCCESS,
   items: overflowItems,
   displayHealthStatus: false,
   initialSortField: ServiceInventoryFieldName.HealthStatus,

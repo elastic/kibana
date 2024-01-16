@@ -101,7 +101,7 @@ export function ErrorGroupOverview() {
       onChangeCurrentPage: () => {},
       placeholder: i18n.translate(
         'xpack.apm.errorsTable.filterErrorsPlaceholder',
-        { defaultMessage: 'Search for error message and group ID' }
+        { defaultMessage: 'Search errors by message or group ID' }
       ),
     };
   }, [
