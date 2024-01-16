@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { createTestConfig } from '../../../../../config/serverless/config.base';
+import { createTestConfig } from '../../../../../../config/serverless/config.base';
 
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Rule Import And Export Integration Tests - Serverless Env - Complete License',
+      'Rules Management - Rule Import And Export Integration Tests - Serverless Env - Complete Tier',
   },
 });
