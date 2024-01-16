@@ -51,9 +51,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
   const { apiClient, getJobParams, intl, toasts, theme, onClose } = props;
   const isMounted = useMountedState();
   const [createReportingJob, setCreatingReportJob] = useState(false);
-  const [objectType] = useState('discover');
 
-  // issue generating reports with locator params
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
     setCreatingReportJob(true);
@@ -61,7 +59,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       .createReportingJob('csv_searchsource', decoratedJobParams)
       .then(() => {
         toasts.addSuccess({
-          title: intl!.formatMessage(
+          title: intl.formatMessage(
             {
               id: 'xpack.reporting.modalContent.successfullyQueuedReportNotificationTitle',
               defaultMessage: 'Queued report for discover',
@@ -96,7 +94,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       })
       .catch((error) => {
         toasts.addError(error, {
-          title: intl!.formatMessage({
+          title: intl.formatMessage({
             id: 'xpack.reporting.modalContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
@@ -118,7 +116,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-          <EuiCallOut size="s" title={renderDescription(objectType)} iconType="iInCircle" />
+          <EuiCallOut size="s" title={renderDescription(props.objectType)} iconType="iInCircle" />
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>

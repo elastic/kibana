@@ -24,7 +24,6 @@ export const reportingScreenshotShareProvider = ({
   theme,
   overlays,
   i18nStart,
-  intl,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -104,7 +103,6 @@ export const reportingScreenshotShareProvider = ({
             }}
             theme={theme}
             objectType={objectType}
-            intl={intl}
           />,
           { theme, i18n: i18nStart }
         ),

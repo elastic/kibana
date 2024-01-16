@@ -60,11 +60,11 @@ export class SharePageObject extends FtrService {
   }
 
   async createShortUrlExistOrFail() {
-    await this.testSubjects.existOrFail('createShortUrl');
+    await this.testSubjects.existOrFail('useShortUrl');
   }
 
   async createShortUrlMissingOrFail() {
-    await this.testSubjects.missingOrFail('createShortUrl');
+    await this.testSubjects.missingOrFail('useShortUrl');
   }
 
   async checkShortenUrl() {

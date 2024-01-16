@@ -13,7 +13,6 @@ import type {
   ThemeServiceSetup,
   ToastsSetup,
 } from '@kbn/core/public';
-import { InjectedIntl } from '@kbn/i18n-react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
@@ -30,7 +29,6 @@ export interface ExportModalShareOpts {
   theme: ThemeServiceSetup;
   overlays: OverlayStart;
   i18nStart: CoreStart['i18n'];
-  intl: InjectedIntl;
 }
 
 export interface ReportingSharingData {
