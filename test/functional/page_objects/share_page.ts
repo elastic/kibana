@@ -36,10 +36,7 @@ export class SharePageObject extends FtrService {
       // and then re-open the menu
       await this.clickShareTopNavButton();
     }
-    await this.closeShareModal();
-    // const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
-    // await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
-    // await this.testSubjects.waitForDeleted(menuPanel);
+    await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
   }
 
   /**
