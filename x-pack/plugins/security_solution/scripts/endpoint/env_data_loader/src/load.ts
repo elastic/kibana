@@ -7,7 +7,14 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
-import { createTrustedApps } from './create_artifacts';
+import { ExecutionThrottler } from '../../common/execution_throttler';
+import {
+  createBlocklists,
+  createEndpointExceptions,
+  createEventFilters,
+  createHostIsolationExceptions,
+  createTrustedApps,
+} from './create_artifacts';
 import { installOrUpgradeEndpointFleetPackage } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { ProgressReporter } from './progress_reporter';
 import type { ProgressReporterInterface } from './types';
@@ -24,6 +31,7 @@ interface LoadOptions {
   hostIsolationExceptionsCount: number;
   endpointExceptionsCount: number;
   globalArtifactRatio: number;
+  concurrency: number;
 }
 
 export const load = async ({
@@ -36,13 +44,14 @@ export const load = async ({
   hostIsolationExceptionsCount,
   endpointExceptionsCount,
   globalArtifactRatio,
+  concurrency,
 }: LoadOptions) => {
   const reportProgress: ProgressReporterInterface = new ProgressReporter({
     reportStatus: (status) => {
       log.info(status);
     },
   });
-
+  const throttler = new ExecutionThrottler({ log, concurrency });
   const policyReporter = reportProgress.addCategory('policies', policyCount);
   const trustedAppsReporter = reportProgress.addCategory('trusted apps', trustedAppsCount);
   const eventFiltersReporter = reportProgress.addCategory('event filters', eventFiltersCount);
@@ -56,30 +65,78 @@ export const load = async ({
     endpointExceptionsCount
   );
 
-  // DO ==> Log state to a file in case of failure?
-
-  // DO ==> Turn off task `endpoint:user-artifact-packager`
-
+  // Ensure fleet is setup with endpoint (which also creates the DS/Transforms, etc)
   await installOrUpgradeEndpointFleetPackage(kbnClient, log);
 
-  const endpointPolicyIds = await createPolicies({
-    kbnClient,
-    log,
-    count: policyCount,
-    reportProgress: policyReporter,
-  });
+  const endpointPolicyIds = policyCount
+    ? await createPolicies({
+        kbnClient,
+        log,
+        count: policyCount,
+        reportProgress: policyReporter,
+      })
+    : [];
 
   await Promise.all([
-    createTrustedApps({
-      kbnClient,
-      log,
-      reportProgress: trustedAppsReporter,
-      count: trustedAppsCount,
-    }),
+    trustedAppsCount &&
+      createTrustedApps({
+        kbnClient,
+        log,
+        reportProgress: trustedAppsReporter,
+        count: trustedAppsCount,
+        policyIds: endpointPolicyIds,
+        globalArtifactRatio,
+        throttler,
+      }),
+
+    eventFiltersCount &&
+      createEventFilters({
+        kbnClient,
+        log,
+        reportProgress: eventFiltersReporter,
+        count: eventFiltersCount,
+        policyIds: endpointPolicyIds,
+        globalArtifactRatio,
+        throttler,
+      }),
+
+    blocklistsCount &&
+      createBlocklists({
+        kbnClient,
+        log,
+        reportProgress: blocklistsReporter,
+        count: blocklistsCount,
+        policyIds: endpointPolicyIds,
+        globalArtifactRatio,
+        throttler,
+      }),
+
+    hostIsolationExceptionsCount &&
+      createHostIsolationExceptions({
+        kbnClient,
+        log,
+        reportProgress: hostIsolationExceptionsReporter,
+        count: hostIsolationExceptionsCount,
+        policyIds: endpointPolicyIds,
+        globalArtifactRatio,
+        throttler,
+      }),
+
+    endpointExceptionsCount &&
+      createEndpointExceptions({
+        kbnClient,
+        log,
+        reportProgress: endpointExceptionsReporter,
+        count: endpointExceptionsCount,
+        policyIds: endpointPolicyIds,
+        globalArtifactRatio,
+        throttler,
+      }),
   ]);
 
   // DO => re-enable the task
   //
 
+  await throttler.complete();
   reportProgress.stopReporting();
 };

@@ -123,7 +123,7 @@ export class ProgressReporter implements ProgressReporterInterface {
       return Math.max(acc, categoryName.length);
     }, 10);
 
-    return `Overall progress: ${state.prctDone}%
+    return `Overall progress: [ ${state.prctDone}% ]
   ${Object.entries(state.categories).reduce((acc, [categoryName, categoryState]) => {
     let updatedOutput = acc;
 

@@ -24,13 +24,14 @@ export const cli = () => {
       });
 
       const options = {
-        policyCount: Number(cliContext.flags.policyCount) || 10,
-        trustedAppsCount: Number(cliContext.flags.trustedAppsCount) || 10,
-        eventFiltersCount: Number(cliContext.flags.eventFiltersCount) || 10,
-        blocklistsCount: Number(cliContext.flags.blocklistsCount) || 10,
-        hostIsolationExceptionsCount: Number(cliContext.flags.hostIsolationExceptionsCount) || 10,
-        endpointExceptionsCount: Number(cliContext.flags.endpointExceptionsCount) || 10,
-        globalArtifactRatio: Number(cliContext.flags.globalArtifactRatio) || 10,
+        policyCount: Number(cliContext.flags.policyCount),
+        trustedAppsCount: Number(cliContext.flags.trustedAppsCount),
+        eventFiltersCount: Number(cliContext.flags.eventFiltersCount),
+        blocklistsCount: Number(cliContext.flags.blocklistsCount),
+        hostIsolationExceptionsCount: Number(cliContext.flags.hostIsolationExceptionsCount),
+        endpointExceptionsCount: Number(cliContext.flags.endpointExceptionsCount),
+        globalArtifactRatio: Number(cliContext.flags.globalArtifactRatio),
+        concurrency: Number(cliContext.flags.concurrency),
       };
 
       /*
@@ -65,10 +66,12 @@ export const cli = () => {
           policyCount: 10,
           trustedAppsCount: 10,
           eventFiltersCount: 10,
-          blocklists: 10,
+          blocklistsCount: 10,
           hostIsolationExceptions: 10,
           globalArtifactRatio: 50,
+          concurrency: 10,
         },
+        allowUnexpected: false,
         help: `
         --username                      User name to be used for auth against elasticsearch and
                                         kibana (Default: elastic).
@@ -81,6 +84,7 @@ export const cli = () => {
         --hostIsolationExceptionsCount  How many Host Isolation Exceptions to create (Default: 10)
         --globalArtifactRatio           The percentage ratio of all artifacts that should be global
                                         rather than per-policy. (Default: 50)
+        --concurrency                   The max number of request to process in parallel. (Default: 10)
       `,
       },
     }
