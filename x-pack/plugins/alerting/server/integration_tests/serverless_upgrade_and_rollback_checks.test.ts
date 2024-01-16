@@ -5,26 +5,6 @@
  * 2.0.
  */
 
-/**
- * This test is designed to detect changes to rule parameter schemas on any rule type running in serverless.
- *
- * To make this test pass, you will need to update the failing snapshot.
- *
- * node scripts/jest_integration.js x-pack/plugins/alerting/server/integration_tests/serverless_upgrade_and_rollback_checks.test.ts -u
- *
- * Once the snapshot is updated, it will trigger a codeowner review from the Response Ops team.
- * The Response Ops team will be required to review the changes to ensure the change will work in
- * upgrade and rollback scenario so any alerting rule remains running after a rollback.
- *
- * To facilitate a review, describe in the PR the following:
- *   - Details about the change in parameters
- *   - How users leverage the change
- *   - How the system behaves if a user leverages the change and a rollback occurs afterwards
- *
- * Intermediate releases may be necessary so the param and rule executor changes are released
- * prior to users being able to leverage the new capability. This way if we rollback, the application
- * still understands how to run the alerting rule.
- */
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
