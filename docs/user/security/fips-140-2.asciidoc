@@ -30,7 +30,7 @@ TBD
 
 ==== Configuring {kib} for FIPS 140-2
 
-Apart from setting `xpack.security.fips_mode.enabled` to `true` in your {kib} config, a number of security related 
+Apart from setting `xpack.security.fipsMode.enabled` to `true` in your {kib} config, a number of security related 
 settings need to be reviewed and configured in order to run {kib} successfully in a FIPS 140-2 compliant Node.js 
 environment.
 
