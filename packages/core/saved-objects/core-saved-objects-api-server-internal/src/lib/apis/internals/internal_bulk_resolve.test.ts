@@ -368,7 +368,6 @@ describe('internalBulkResolve', () => {
       ]);
     });
 
-    // TODO
     it('migrates and decrypts the resolved objects', async () => {
       const objects = [
         { type: OBJ_TYPE, id: '1' },
