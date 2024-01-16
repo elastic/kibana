@@ -38,8 +38,8 @@ const HIDDEN_PROPERTIES = [
   'revision',
 
   /*
-    This info is not yet exposed by prebuilt rules.
-    Ticket to add support: https://github.com/elastic/detection-rules/issues/2826
+    "updated_at" value is regenerated on every '/upgrade/_review' endpoint run 
+    and will therefore always show a diff. It adds no value to display it to the user.
   */
   'updated_at',
 ];
