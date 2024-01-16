@@ -13,10 +13,12 @@ interface Props {
   isCompact: boolean;
   groupBy: string;
   kqlQuery: string;
+  sloView: string;
 }
 
-export function GroupView({ groupBy, isCompact, kqlQuery }: Props) {
+export function GroupView({ isCompact, kqlQuery, sloView }: Props) {
   const { data, isLoading } = useFetchSloGroups();
+
   if (isLoading) {
     return (
       <div>
@@ -30,7 +32,14 @@ export function GroupView({ groupBy, isCompact, kqlQuery }: Props) {
     <>
       {data &&
         Object.keys(data).map((group) => {
-          return <GroupListView group={group} kqlQuery={kqlQuery} isCompact={isCompact} />;
+          return (
+            <GroupListView
+              sloView={sloView}
+              group={group}
+              kqlQuery={kqlQuery}
+              isCompact={isCompact}
+            />
+          );
         })}
     </>
   );

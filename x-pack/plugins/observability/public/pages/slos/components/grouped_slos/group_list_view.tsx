@@ -6,21 +6,18 @@
  */
 
 import React, { memo, useState } from 'react';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import { EuiPanel, EuiAccordion, EuiTablePagination } from '@elastic/eui';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
-import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
-import { useFetchRulesForSlo } from '../../../../hooks/slo/use_fetch_rules_for_slo';
-
-import { SloListItems } from '../slo_list_items';
+import { SlosView } from '../slos_view';
 
 interface Props {
   isCompact: boolean;
   group: string;
   kqlQuery: string;
+  sloView: string;
 }
 
-export function GroupListView({ isCompact, group, kqlQuery }: Props) {
+export function GroupListView({ isCompact, group, kqlQuery, sloView }: Props) {
   const query = kqlQuery ? `"slo.tags": ${group} and ${kqlQuery}` : `"slo.tags": ${group}`;
   const [page, setPage] = useState(0);
   const ITEMS_PER_PAGE = 10;
@@ -37,14 +34,6 @@ export function GroupListView({ isCompact, group, kqlQuery }: Props) {
   });
   const { results = [], total = 0 } = sloList ?? {};
 
-  const sloIdsAndInstanceIds = results.map(
-    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
-  );
-  const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
-  const { data: rulesBySlo } = useFetchRulesForSlo({
-    sloIds: sloIdsAndInstanceIds.map((item) => item[0]),
-  });
-
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
     // storeState({ page: pageNumber });
@@ -52,16 +41,16 @@ export function GroupListView({ isCompact, group, kqlQuery }: Props) {
 
   return (
     <EuiPanel>
-      <MemoEuiAccordion buttonContent={group} id={group} initialIsOpen={false}>
+      <MemoEuiAccordion buttonContent={group} id={group} initialIsOpen={true}>
         <>
-          <SloListItems
-            activeAlertsBySlo={activeAlertsBySlo}
+          <SlosView
             sloList={results}
             loading={isLoading || isRefetching}
             error={isError}
             isCompact={isCompact}
-            rulesBySlo={rulesBySlo}
+            sloView={sloView}
           />
+
           <EuiTablePagination
             pageCount={Math.ceil(total / ITEMS_PER_PAGE)}
             activePage={page}
