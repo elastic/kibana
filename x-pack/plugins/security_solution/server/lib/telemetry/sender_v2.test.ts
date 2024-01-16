@@ -626,56 +626,49 @@ describe('TelemetryEventsSenderV2', () => {
 
     it('should update buffer time config dinamically', async () => {
       const channel = TelemetryChannel.DETECTION_ALERTS;
-      const detectionAlertsBefore = {
-        bufferTimeSpanMillis: 900,
-        inflightEventsThreshold: 10,
-        maxPayloadSizeBytes: 10_000,
-      };
+      const bufferTimeSpanMillis = 5001;
       const detectionAlertsAfter = {
-        ...detectionAlertsBefore,
-        bufferTimeSpanMillis: 5001,
+        ...ch1Config,
+        bufferTimeSpanMillis,
       };
+      const events = ['a', 'b', 'c'];
+      const expectedBody = events.map((e) => JSON.stringify(e)).join('\n');
 
       service.setup(DEFAULT_RETRY_CONFIG, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
-      service.updateQueueConfig(channel, detectionAlertsBefore);
+      service.updateQueueConfig(channel, ch1Config);
       service.start();
 
-      service.send(channel, ['a', 'b', 'c']);
-      const expectedBodies = ['"a"\n"b"\n"c"'];
+      service.send(channel, events);
 
-      await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
+      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
 
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
-      expectedBodies.forEach((expectedBody) => {
-        expect(mockedAxiosPost).toHaveBeenCalledWith(
-          expect.anything(),
-          expectedBody,
-          expect.anything()
-        );
-      });
+      expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect.anything(),
+        expectedBody,
+        expect.anything()
+      );
 
       service.updateQueueConfig(channel, detectionAlertsAfter);
 
       // wait until the current buffer time expires
-      await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.01);
+      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.01);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
 
-      service.send(channel, ['a', 'b', 'c']);
+      service.send(channel, events);
       // the old buffer time shouldn't trigger a new buffer (we increased it)
-      await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.1);
+      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.1);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
 
       // wait more time...
       await jest.advanceTimersByTimeAsync(detectionAlertsAfter.bufferTimeSpanMillis);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
 
-      expectedBodies.forEach((expectedBody) => {
-        expect(mockedAxiosPost).toHaveBeenCalledWith(
-          expect.anything(),
-          expectedBody,
-          expect.anything()
-        );
-      });
+      expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect.anything(),
+        expectedBody,
+        expect.anything()
+      );
 
       await service.stop();
       expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
@@ -730,7 +723,46 @@ describe('TelemetryEventsSenderV2', () => {
       await service.stop();
     });
 
-    it('should configure a new queue', async () => {});
+    it('should configure a new queue', async () => {
+      const bufferTimeSpanMillis = DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 10;
+      const events = ['a', 'b', 'c'];
+      const expectedBody = events.map((e) => JSON.stringify(e)).join('\n');
+
+      service.setup(DEFAULT_RETRY_CONFIG, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.start();
+
+      service.send(ch1, events);
+
+      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect.anything(),
+        expectedBody,
+        expect.anything()
+      );
+
+      service.updateQueueConfig(ch1, { ...DEFAULT_QUEUE_CONFIG, bufferTimeSpanMillis });
+
+      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+
+      service.send(ch1, events);
+
+      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+
+      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 1.1);
+
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+      expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect.anything(),
+        expectedBody,
+        expect.anything()
+      );
+
+      await service.stop();
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('usage counter', () => {
