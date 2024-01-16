@@ -502,7 +502,13 @@ export type AdHocRuleRunStatus = typeof AdHocRuleRunStatuses[number];
 
 export interface AdHocRuleRunSchedule {
   start: string;
+  status: string;
   end: string;
+}
+
+export interface AdHocRuleRunDependencies {
+  id: string;
+  spaceId?: string;
 }
 export interface SanitizedAdHocRuleRunParams extends Record<string, unknown> {
   apiKeyId: string;
@@ -511,6 +517,7 @@ export interface SanitizedAdHocRuleRunParams extends Record<string, unknown> {
   duration: string;
   enabled: boolean;
   end?: string;
+  dependencies?: AdHocRuleRunDependencies[];
   rule: Pick<
     RuleDomain,
     | 'id'

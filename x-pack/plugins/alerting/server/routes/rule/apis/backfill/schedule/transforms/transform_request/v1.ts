@@ -9,11 +9,20 @@ import { RewriteRequestCase } from '../../../../../../lib';
 import { ScheduleBackfillOptions } from '../../../../../../../application/rule/methods/backfill/schedule/types';
 
 export const transformRequest: RewriteRequestCase<ScheduleBackfillOptions> = ({
-  ids,
+  rule_ids: ruleIds,
   start,
   end,
+  dependencies,
 }) => ({
   start,
-  ids: ids.map(({ rule_id: ruleId, doc_id: docId }) => ({ ruleId, ...(docId ? { docId } : {}) })),
+  ruleIds,
   ...(end ? { end } : {}),
+  ...(dependencies
+    ? {
+        dependencies: dependencies.map(({ space_id: spaceId, id }) => ({
+          id,
+          ...(spaceId ? { spaceId } : {}),
+        })),
+      }
+    : {}),
 });

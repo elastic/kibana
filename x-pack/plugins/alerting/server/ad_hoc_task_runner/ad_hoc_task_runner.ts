@@ -6,7 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ISavedObjectsRepository, KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  ISavedObjectsRepository,
+  KibanaRequest,
+  Logger,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   LoadedIndirectParams,
@@ -23,6 +28,7 @@ import {
   RuleAlertData,
   AlertInstanceState,
   AlertInstanceContext,
+  AdHocRuleRunDependencies,
 } from '../types';
 import type { TaskRunnerContext } from '../task_runner/types';
 import { getFakeKibanaRequest } from '../task_runner/rule_loader';
@@ -88,6 +94,7 @@ export class AdHocTaskRunner {
     string
   >;
   private shouldDeleteTask: boolean = false;
+  private hasDependencies: boolean = false;
   private adHocRuleRunData?: AdHocRuleRunParamResult<AdHocRuleRunData>;
 
   constructor({ context, internalSavedObjectsRepository, taskInstance }: ConstructorOpts) {
@@ -233,6 +240,11 @@ export class AdHocTaskRunner {
     let runMetrics: Result<RuleRunMetrics, Error>;
     try {
       const runParams = await this.prepareToRun();
+
+      // short circuit execution if there are existing dependencies we're waiting on
+      if (runParams == null) {
+        return { state: {}, runAt: new Date(Date.now() + 5 * 60 * 1000) }; // set runAt to 5 minutes in future to give dependency some time to run
+      }
       runMetrics = asOk(await this.runRule(runParams));
     } catch (err) {
       runMetrics = asErr(err);
@@ -274,7 +286,36 @@ export class AdHocTaskRunner {
     this.cancelled = true;
   }
 
-  private async prepareToRun(): Promise<RunRuleParams> {
+  private async hasExistingDependencies(
+    dependencies: AdHocRuleRunDependencies[]
+  ): Promise<boolean> {
+    const depencencyExists: boolean[] = await Promise.all(
+      dependencies.map(async ({ id, spaceId }) => {
+        try {
+          const namespace = this.context.spaceIdToNamespace(spaceId);
+          const d = await this.internalSavedObjectsRepository.get<AdHocRuleRunParams>(
+            'backfill_params',
+            id,
+            {
+              namespace,
+            }
+          );
+          console.log(`dependency still running ${JSON.stringify(d)}`);
+          return true;
+        } catch (error) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+            return false;
+          }
+
+          return true;
+        }
+      })
+    );
+
+    return depencencyExists.some((exists: boolean) => exists === true);
+  }
+
+  private async prepareToRun(): Promise<RunRuleParams | null> {
     return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareToRun, async () => {
       this.runDate = new Date();
 
@@ -287,17 +328,23 @@ export class AdHocTaskRunner {
 
       const adHocRuleRunParams: AdHocRuleRunParams = this.adHocRuleRunData.data.indirectParams;
 
-      const namespace =
-        this.context.spaceIdToNamespace(adHocRuleRunParams.spaceId) ?? DEFAULT_NAMESPACE_STRING;
-      const ruleType = this.ruleTypeRegistry.get(adHocRuleRunParams.rule.alertTypeId);
+      const { rule, spaceId, apiKeyToUse, dependencies } = adHocRuleRunParams;
 
-      const { rule } = adHocRuleRunParams;
+      const hasExistingDependencies = await this.hasExistingDependencies(dependencies ?? []);
+      if (hasExistingDependencies) {
+        return null;
+      } else {
+        console.log(`no existing dependencies`);
+      }
+
+      const namespace = this.context.spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING;
+      const ruleType = this.ruleTypeRegistry.get(rule.alertTypeId);
 
       this.alertingEventLogger.initialize({
         ruleId: rule.id,
         ruleType,
         consumer: rule.consumer,
-        spaceId: adHocRuleRunParams.spaceId,
+        spaceId,
         executionId: this.executionId,
         taskScheduledAt: this.taskInstance.scheduledAt,
         ...(namespace ? { namespace } : {}),
@@ -307,25 +354,18 @@ export class AdHocTaskRunner {
       this.alertingEventLogger.setRuleName(rule.name);
 
       // Generate fake request with API key
-      const fakeRequest = getFakeKibanaRequest(
-        this.context,
-        adHocRuleRunParams.spaceId,
-        adHocRuleRunParams.apiKeyToUse
-      );
+      const fakeRequest = getFakeKibanaRequest(this.context, spaceId, apiKeyToUse);
 
       // these are from validateRule
       try {
-        this.ruleTypeRegistry.ensureRuleTypeEnabled(adHocRuleRunParams.rule.alertTypeId);
+        this.ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
       } catch (err) {
         throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
       }
 
       let validatedParams: RuleTypeParams;
       try {
-        validatedParams = validateRuleTypeParams(
-          adHocRuleRunParams.rule.params,
-          ruleType.validate.params
-        );
+        validatedParams = validateRuleTypeParams(rule.params, ruleType.validate.params);
       } catch (err) {
         throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
       }

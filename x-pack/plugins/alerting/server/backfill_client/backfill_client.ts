@@ -323,6 +323,7 @@ export class BackfillClient {
           duration: rule.schedule.interval,
           enabled: true,
           ...(options.end ? { end: options.end } : {}),
+          ...(options.dependencies ? { dependencies: options.dependencies } : {}),
           rule: {
             id: rule.id,
             name: rule.name,
@@ -356,26 +357,26 @@ export class BackfillClient {
     this.logger.info(`queue response ${JSON.stringify(bulkResponse)}`);
 
     // Bulk schedule the backfill
-    // const taskManager = await this.getTaskManager();
-    // await taskManager.bulkSchedule(
-    //   bulkResponse.saved_objects
-    //     .filter((so) => !so.error)
-    //     .map((so) => {
-    //       const ruleTypeTimeout = ruleTypeRegistry.get(
-    //         so.attributes.rule.alertTypeId
-    //       ).ruleTaskTimeout;
-    //       return {
-    //         id: so.id,
-    //         taskType: this.backfillTaskType,
-    //         ...(ruleTypeTimeout ? { timeoutOverride: ruleTypeTimeout } : {}),
-    //         state: {},
-    //         params: {
-    //           adHocRuleRunParamsId: so.id,
-    //           spaceId,
-    //         },
-    //       };
-    //     })
-    // );
+    const taskManager = await this.getTaskManager();
+    await taskManager.bulkSchedule(
+      bulkResponse.saved_objects
+        .filter((so) => !so.error)
+        .map((so) => {
+          const ruleTypeTimeout = ruleTypeRegistry.get(
+            so.attributes.rule.alertTypeId
+          ).ruleTaskTimeout;
+          return {
+            id: so.id,
+            taskType: this.backfillTaskType,
+            ...(ruleTypeTimeout ? { timeoutOverride: ruleTypeTimeout } : {}),
+            state: {},
+            params: {
+              adHocRuleRunParamsId: so.id,
+              spaceId,
+            },
+          };
+        })
+    );
     // TODO retry errors
     return bulkResponse.saved_objects.map((so, index) => ({
       ruleId: rules[index].id,
@@ -396,7 +397,7 @@ export class BackfillClient {
 }
 
 function calculateExecutionSets(logger: Logger, start: string, duration: string, end?: string) {
-  const executionSet: Array<{ start: string; end: string }> = [];
+  const executionSet: Array<{ start: string; status: string; end: string }> = [];
 
   let currentStart = start;
   let currentEnd;
@@ -407,8 +408,10 @@ function calculateExecutionSets(logger: Logger, start: string, duration: string,
       nowDate: nowDate.toISOString(),
       window: duration,
     });
+    console.log(`dateStart ${dateStart}, dateEnd ${dateEnd}`);
     currentEnd = end && new Date(dateEnd).valueOf() > new Date(end).valueOf() ? end : dateEnd;
-    executionSet.push({ start: dateStart, end: currentEnd });
+    executionSet.push({ start: dateStart, status: 'Pending', end: currentEnd });
+
     currentStart = currentEnd;
   } while (end && currentEnd && new Date(currentEnd).valueOf() < new Date(end).valueOf());
 
