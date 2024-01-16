@@ -13,7 +13,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
-import type { SavedSearch, SavedSearchAttributes } from '../types';
+import type { SavedSearchCommon, SavedSearchAttributes } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
@@ -68,7 +68,7 @@ export const convertToSavedSearch = async (
     savedSearchId: string | undefined;
     attributes: SavedSearchAttributes;
     references: Reference[];
-    sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
+    sharingSavedObjectProps: SavedSearchCommon['sharingSavedObjectProps'];
   },
   { searchSourceCreate, savedObjectsTagging }: GetSavedSearchDependencies
 ) => {
@@ -122,6 +122,6 @@ export const getNewSavedSearch = ({
   searchSource,
 }: {
   searchSource: ISearchStartSearchSource;
-}): SavedSearch => ({
+}): SavedSearchCommon => ({
   searchSource: searchSource.createEmpty(),
 });
