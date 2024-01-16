@@ -13,12 +13,13 @@ import { useSelector } from 'react-redux';
 
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-import type { State } from '../edit_transform_flyout_state';
-
 import type { FormFieldsState } from '../form_field';
 import type { FormSectionsState } from '../form_section';
 import { getDefaultState } from '../get_default_state';
 import { useEditTransformFlyoutContext } from '../edit_transform_flyout_state';
+
+import { selectFormFields } from './form_field';
+import { selectFormSections } from './form_sections';
 
 const getFieldValues = (fields: FormFieldsState) => Object.values(fields).map((f) => f.value);
 const getSectionValues = (sections: FormSectionsState) =>
@@ -37,10 +38,8 @@ const isFormTouched = (
 };
 
 const createSelectIsFormTouched = (originalConfig: TransformConfigUnion) =>
-  createSelector(
-    (state: State) => state.formFields,
-    (state: State) => state.formSections,
-    (formFields, formSections) => isFormTouched(originalConfig, formFields, formSections)
+  createSelector(selectFormFields, selectFormSections, (formFields, formSections) =>
+    isFormTouched(originalConfig, formFields, formSections)
   );
 
 export const useIsFormTouched = () => {

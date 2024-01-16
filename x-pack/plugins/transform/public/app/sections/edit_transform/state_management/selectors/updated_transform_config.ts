@@ -12,14 +12,14 @@ import { useSelector } from 'react-redux';
 import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { applyFormStateToTransformConfig } from '../apply_form_state_to_transform_config';
-import { useEditTransformFlyoutContext, type State } from '../edit_transform_flyout_state';
+import { useEditTransformFlyoutContext } from '../edit_transform_flyout_state';
+
+import { selectFormFields } from './form_field';
+import { selectFormSections } from './form_sections';
 
 const createSelectTransformConfig = (originalConfig: TransformConfigUnion) =>
-  createSelector(
-    (state: State) => state.formFields,
-    (state: State) => state.formSections,
-    (formFields, formSections) =>
-      applyFormStateToTransformConfig(originalConfig, formFields, formSections)
+  createSelector(selectFormFields, selectFormSections, (formFields, formSections) =>
+    applyFormStateToTransformConfig(originalConfig, formFields, formSections)
   );
 
 export const useUpdatedTransformConfig = () => {

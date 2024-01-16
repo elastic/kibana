@@ -10,7 +10,6 @@ import { useSelector } from 'react-redux';
 import type { State } from '../edit_transform_flyout_state';
 
 export const selectRetentionPolicyField = (s: State) => s.formFields.retentionPolicyField;
-
 export const useRetentionPolicyField = () => {
   return useSelector(selectRetentionPolicyField);
 };

@@ -8,13 +8,13 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 
-import type { State } from '../edit_transform_flyout_state';
-
 import type { FormFieldsState } from '../form_field';
+
+import { selectFormFields } from './form_field';
 
 // Checks each form field for error messages to return
 // if the overall form is valid or not.
 const isFormValid = (formFields: FormFieldsState) =>
   Object.values(formFields).every((d) => d.errorMessages.length === 0);
-const selectIsFormValid = createSelector((state: State) => state.formFields, isFormValid);
+const selectIsFormValid = createSelector(selectFormFields, isFormValid);
 export const useIsFormValid = () => useSelector(selectIsFormValid);
