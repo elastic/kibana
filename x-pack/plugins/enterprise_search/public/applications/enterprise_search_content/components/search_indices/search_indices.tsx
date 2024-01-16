@@ -79,13 +79,12 @@ export const SearchIndices: React.FC = () => {
     showHiddenIndices,
   ]);
 
-  const pageTitle = isLoading
-    ? ''
-    : hasNoIndices
-    ? ''
-    : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
-        defaultMessage: 'Elasticsearch indices',
-      });
+  const pageTitle =
+    isLoading || hasNoIndices
+      ? ''
+      : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
+          defaultMessage: 'Elasticsearch indices',
+        });
 
   return (
     <>
@@ -95,8 +94,9 @@ export const SearchIndices: React.FC = () => {
         pageViewTelemetry="Search indices"
         isLoading={isLoading}
         pageHeader={
-          !hasNoIndices
-            ? {
+          hasNoIndices
+            ? undefined
+            : {
                 pageTitle,
                 rightSideItems: isLoading
                   ? []
@@ -118,7 +118,6 @@ export const SearchIndices: React.FC = () => {
                       </EuiLinkTo>,
                     ],
               }
-            : undefined
         }
       >
         {config.host && config.canDeployEntSearch && errorConnectingMessage && (

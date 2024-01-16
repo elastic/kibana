@@ -99,9 +99,7 @@ export const AddContentEmptyPrompt: React.FC = () => {
         <EuiImage
           size="fullWidth"
           src={colorMode === 'LIGHT' ? welcomeGraphicLight : welcomeGraphicDark}
-          alt={i18n.translate('xpack.enterpriseSearch.overview.searchIndices.image.altText', {
-            defaultMessage: 'Search indices illustration',
-          })}
+          alt=""
         />
       }
     />
