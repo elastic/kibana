@@ -5,9 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { AgentIcon, CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
+import { CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { useMeasure } from 'react-use/lib';
-import { AgentName } from '@kbn/elastic-agent-utils';
 import { first } from 'lodash';
 import { FlyoutDoc, LogDocument } from './types';
 import * as constants from '../../../common/constants';
@@ -28,9 +27,8 @@ import {
   flyoutServiceLabel,
   flyoutShipperLabel,
   flyoutTraceLabel,
-  infraAccordionTitle,
   otherAccordionTitle,
-  serviceAccordionTitle,
+  serviceInfraAccordionTitle,
 } from '../common/translations';
 import { HighlightSection } from './sub_components/highlight_section';
 import { HighlightContainer } from './sub_components/highlight_container';
@@ -47,20 +45,25 @@ export function FlyoutHighlights({
   const { columns, fieldWidth } = useFlyoutColumnWidth(dimensions.width);
   return (
     <HighlightContainer ref={ref}>
-      {/* Service highlight */}
-      <HighlightSection title={serviceAccordionTitle} columns={columns}>
+      {/* Service & Infrastructure highlight */}
+      <HighlightSection title={serviceInfraAccordionTitle} columns={columns}>
         {formattedDoc[constants.SERVICE_NAME_FIELD] && (
           <HighlightField
             data-test-subj="logExplorerFlyoutService"
             field={constants.SERVICE_NAME_FIELD}
             formattedValue={formattedDoc[constants.SERVICE_NAME_FIELD]}
-            icon={
-              <AgentIcon
-                agentName={first((flattenedDoc[constants.AGENT_NAME_FIELD] ?? []) as AgentName[])}
-              />
-            }
             label={flyoutServiceLabel}
             value={flattenedDoc[constants.SERVICE_NAME_FIELD]}
+            width={fieldWidth}
+          />
+        )}
+        {formattedDoc[constants.HOST_NAME_FIELD] && (
+          <HighlightField
+            data-test-subj="logExplorerFlyoutHostName"
+            field={constants.HOST_NAME_FIELD}
+            formattedValue={formattedDoc[constants.HOST_NAME_FIELD]}
+            label={flyoutHostNameLabel}
+            value={flattenedDoc[constants.HOST_NAME_FIELD]}
             width={fieldWidth}
           />
         )}
@@ -71,19 +74,6 @@ export function FlyoutHighlights({
             formattedValue={formattedDoc[constants.TRACE_ID_FIELD]}
             label={flyoutTraceLabel}
             value={flattenedDoc[constants.TRACE_ID_FIELD]}
-            width={fieldWidth}
-          />
-        )}
-      </HighlightSection>
-      {/* Infrastructure highlight */}
-      <HighlightSection title={infraAccordionTitle} columns={columns}>
-        {formattedDoc[constants.HOST_NAME_FIELD] && (
-          <HighlightField
-            data-test-subj="logExplorerFlyoutHostName"
-            field={constants.HOST_NAME_FIELD}
-            formattedValue={formattedDoc[constants.HOST_NAME_FIELD]}
-            label={flyoutHostNameLabel}
-            value={flattenedDoc[constants.HOST_NAME_FIELD]}
             width={fieldWidth}
           />
         )}
@@ -180,16 +170,6 @@ export function FlyoutHighlights({
             width={fieldWidth}
           />
         )}
-        {formattedDoc[constants.DATASTREAM_NAMESPACE_FIELD] && (
-          <HighlightField
-            data-test-subj="logExplorerFlyoutNamespace"
-            field={constants.DATASTREAM_NAMESPACE_FIELD}
-            formattedValue={formattedDoc[constants.DATASTREAM_NAMESPACE_FIELD]}
-            label={flyoutNamespaceLabel}
-            value={flattenedDoc[constants.DATASTREAM_NAMESPACE_FIELD]}
-            width={fieldWidth}
-          />
-        )}
         {formattedDoc[constants.DATASTREAM_DATASET_FIELD] && (
           <HighlightField
             data-test-subj="logExplorerFlyoutDataset"
@@ -198,6 +178,17 @@ export function FlyoutHighlights({
             label={flyoutDatasetLabel}
             value={flattenedDoc[constants.DATASTREAM_DATASET_FIELD]}
             width={fieldWidth}
+          />
+        )}
+        {formattedDoc[constants.DATASTREAM_NAMESPACE_FIELD] && (
+          <HighlightField
+            data-test-subj="logExplorerFlyoutNamespace"
+            field={constants.DATASTREAM_NAMESPACE_FIELD}
+            formattedValue={formattedDoc[constants.DATASTREAM_NAMESPACE_FIELD]}
+            label={flyoutNamespaceLabel}
+            value={flattenedDoc[constants.DATASTREAM_NAMESPACE_FIELD]}
+            width={fieldWidth}
+            useBadge
           />
         )}
         {formattedDoc[constants.AGENT_NAME_FIELD] && (
