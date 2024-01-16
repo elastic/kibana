@@ -202,9 +202,7 @@ function updateUnsavedChangesState(
 ) {
   // dispatch has unsaved changes state
   const hasChanges = Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
-  if (this.getState().componentState.hasUnsavedChanges !== hasChanges) {
-    this.dispatch.setHasUnsavedChanges(hasChanges);
-  }
+  this.hasUnsavedChanges.next(hasChanges);
 }
 
 function backupUnsavedChanges(

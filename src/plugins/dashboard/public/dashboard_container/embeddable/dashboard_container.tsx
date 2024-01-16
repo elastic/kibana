@@ -9,7 +9,7 @@
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, Subject, Subscription } from 'rxjs';
 
 import {
   getDefaultControlGroupInput,
@@ -116,6 +116,9 @@ export class DashboardContainer
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
 
+  public hasUnsavedChanges: BehaviorSubject<boolean>;
+  private hasUnsavedChangesSubscription: Subscription;
+
   public searchSessionId?: string;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
 
@@ -176,6 +179,7 @@ export class DashboardContainer
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
+    this.hasUnsavedChanges = new BehaviorSubject(false);
     const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
 
     // build redux embeddable tools
@@ -210,6 +214,12 @@ export class DashboardContainer
         this.expandedPanelId.next(this.getExpandedPanelId());
       })
     );
+
+    this.hasUnsavedChangesSubscription = this.hasUnsavedChanges
+      .pipe(distinctUntilChanged())
+      .subscribe((hasChanges) => {
+        this.dispatch.setHasUnsavedChanges(hasChanges);
+      });
   }
 
   public getAppContext() {
@@ -346,6 +356,7 @@ export class DashboardContainer
     this.diffingSubscription.unsubscribe();
     this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
+    this.hasUnsavedChangesSubscription.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
