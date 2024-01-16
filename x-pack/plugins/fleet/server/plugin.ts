@@ -8,33 +8,32 @@
 import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { take, filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
   ElasticsearchServiceStart,
+  HttpServiceSetup,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
-  SavedObjectsServiceStart,
-  HttpServiceSetup,
-  KibanaRequest,
-  ServiceStatus,
-  ElasticsearchClient,
   SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+  ServiceStatus,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-
-import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
-  EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   AuditLogger,
@@ -55,40 +54,41 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
+import type { AppFeatureKeyType } from '@kbn/security-solution-features';
+
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
-import type { ExperimentalFeatures } from '../common/experimental_features';
-
 import {
-  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INTEGRATIONS_PLUGIN_ID,
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
-  getRouteRequiredAuthz,
-  makeRouterWithFleetAuthz,
   calculateRouteAuthz,
   getAuthzFromRequest,
+  getRouteRequiredAuthz,
+  makeRouterWithFleetAuthz,
   MessageSigningService,
 } from './services/security';
 
 import {
-  PLUGIN_ID,
-  OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  PLUGIN_ID,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from './constants';
-import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
+import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
 
 import type {
@@ -97,25 +97,25 @@ import type {
   FleetRequestHandlerContext,
 } from './types';
 import type {
-  ESIndexPatternService,
-  AgentService,
   AgentPolicyServiceInterface,
+  AgentService,
+  ESIndexPatternService,
   PackageService,
 } from './services';
-import { FleetUsageSender } from './services';
 import {
-  appContextService,
-  licenseService,
-  ESIndexPatternSavedObjectService,
   agentPolicyService,
-  packagePolicyService,
   AgentServiceImpl,
+  appContextService,
+  ESIndexPatternSavedObjectService,
+  FleetUsageSender,
+  licenseService,
+  packagePolicyService,
   PackageServiceImpl,
 } from './services';
 import {
-  registerFleetUsageCollector,
   fetchAgentsUsage,
   fetchFleetUsage,
+  registerFleetUsageCollector,
 } from './collectors/register';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
@@ -245,6 +245,10 @@ export interface FleetStartContract {
   Function exported to allow creating unique ids for saved object tags
    */
   getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
+  appFeatureEnabled: (
+    checkAppFeatureStatus: (appFeatureKey: AppFeatureKeyType) => boolean,
+    appFeatureKey: AppFeatureKeyType
+  ) => void;
 }
 
 export class FleetPlugin
@@ -651,6 +655,10 @@ export class FleetPlugin
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
       getPackageSpecTagId,
+      appFeatureEnabled: (checkAppFeatureStatus, appFeatureKey) => {
+        const isEnabled = checkAppFeatureStatus(appFeatureKey);
+        this.policyWatcher?.checkAppFeature(appFeatureKey, isEnabled);
+      },
     };
   }
 

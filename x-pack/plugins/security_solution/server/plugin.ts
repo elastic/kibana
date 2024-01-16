@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { i18n } from '@kbn/i18n';
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/src/app_features_keys';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
@@ -554,6 +555,11 @@ export class Plugin implements ISecuritySolutionPlugin {
           endpointFleetServicesFactory.asInternalUser(),
           appFeaturesService,
           logger
+        );
+
+        plugins.fleet?.appFeatureEnabled(
+          appFeaturesService.isEnabled.bind(appFeaturesService),
+          AppFeatureSecurityKey.endpointAgentTamperProtection
         );
       });
 

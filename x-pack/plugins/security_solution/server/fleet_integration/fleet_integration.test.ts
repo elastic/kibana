@@ -24,13 +24,15 @@ import {
 } from '../../common/endpoint/models/policy_config';
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
 import {
+  getAgentPolicyCreateCallback,
+  getAgentPolicyUpdateCallback,
   getPackagePolicyCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyPostCreateCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
 import type { KibanaRequest } from '@kbn/core/server';
-import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
+import { ALL_APP_FEATURE_KEYS, AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
 import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
@@ -382,7 +384,122 @@ describe('ingest_integration tests ', () => {
     });
   });
 
-  describe('agent policy update callback (when appFeature is not enabled)', () => {});
+  describe('agent policy update callback', () => {
+    it('AppFeature disabled - returns an error if higher tier features are turned on in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      appFeaturesService = createAppFeaturesServiceMock(
+        ALL_APP_FEATURE_KEYS.filter(
+          (key) => key !== AppFeatureSecurityKey.endpointAgentTamperProtection
+        )
+      );
+      const callback = getAgentPolicyUpdateCallback(logger, appFeaturesService);
+
+      const policyConfig = generator.generateAgentPolicy();
+      policyConfig.is_protected = true;
+
+      await expect(() => callback(policyConfig)).rejects.toThrow(
+        'Agent Tamper Protection requires Complete Endpoint Security tier'
+      );
+    });
+    it('AppFeature disabled - returns agent policy if higher tier features are turned off in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      appFeaturesService = createAppFeaturesServiceMock(
+        ALL_APP_FEATURE_KEYS.filter(
+          (key) => key !== AppFeatureSecurityKey.endpointAgentTamperProtection
+        )
+      );
+      const callback = getAgentPolicyUpdateCallback(logger, appFeaturesService);
+
+      const policyConfig = generator.generateAgentPolicy();
+
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+    it('AppFeature enabled - returns agent policy if higher tier features are turned on in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      const callback = getAgentPolicyUpdateCallback(logger, appFeaturesService);
+
+      const policyConfig = generator.generateAgentPolicy();
+      policyConfig.is_protected = true;
+
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+    it('AppFeature enabled - returns agent policy if higher tier features are turned off in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      const callback = getAgentPolicyUpdateCallback(logger, appFeaturesService);
+      const policyConfig = generator.generateAgentPolicy();
+
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+  });
+
+  describe('agent policy create callback', () => {
+    it('AppFeature disabled - returns an error if higher tier features are turned on in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      appFeaturesService = createAppFeaturesServiceMock(
+        ALL_APP_FEATURE_KEYS.filter(
+          (key) => key !== AppFeatureSecurityKey.endpointAgentTamperProtection
+        )
+      );
+      const callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
+
+      const policyConfig = generator.generateAgentPolicy();
+      policyConfig.is_protected = true;
+
+      await expect(() => callback(policyConfig)).rejects.toThrow(
+        'Agent Tamper Protection requires Complete Endpoint Security tier'
+      );
+    });
+
+    it('AppFeature disabled - returns agent policy if higher tier features are turned off in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      appFeaturesService = createAppFeaturesServiceMock(
+        ALL_APP_FEATURE_KEYS.filter(
+          (key) => key !== AppFeatureSecurityKey.endpointAgentTamperProtection
+        )
+      );
+      const callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
+
+      const policyConfig = generator.generateAgentPolicy();
+
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+    it('AppFeature enabled - returns agent policy if higher tier features are turned on in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      const callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
+
+      const policyConfig = generator.generateAgentPolicy();
+      policyConfig.is_protected = true;
+
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+    it('AppFeature enabled - returns agent policy if higher tier features are turned off in the policy', async () => {
+      const logger = loggingSystemMock.create().get('ingest_integration.test');
+
+      const callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
+      const policyConfig = generator.generateAgentPolicy();
+
+      const updatedPolicyConfig = await callback(policyConfig);
+
+      expect(updatedPolicyConfig).toEqual(policyConfig);
+    });
+  });
 
   describe('package policy update callback (when the license is below platinum)', () => {
     const soClient = savedObjectsClientMock.create();

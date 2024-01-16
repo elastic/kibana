@@ -19,6 +19,14 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { pick } from 'lodash';
 
+import type { AppFeatureKeyType } from '@kbn/security-solution-features';
+
+import { AppFeatureSecurityKey } from '@kbn/security-solution-features/src/app_features_keys';
+
+import pMap from 'p-map';
+
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+
 import type { LicenseService } from '../../common/services/license';
 
 import type { AgentPolicy } from '../../common';
@@ -64,6 +72,87 @@ export class PolicyWatcher {
     return soStart.getScopedClient(fakeRequest, { excludedExtensions: [SECURITY_EXTENSION_ID] });
   }
 
+  private async checkAgentTamperProtectionAppFeature(
+    isEnabled: boolean,
+    appFeature: AppFeatureKeyType
+  ) {
+    const { logger } = this;
+    if (isEnabled) {
+      logger.info(`App feature [${appFeature}] is enabled. Nothing to do!`);
+
+      return;
+    }
+
+    logger.info(
+      `App feature [${appFeature}] is disabled. Checking endpoint integration policies for compliance`
+    );
+
+    const updates: AgentPolicy[] = [];
+    const messages: string[] = [];
+    const perPage = 1000;
+    let hasMoreData = true;
+    let total = 0;
+    let page = 1;
+
+    logger.info(`Checking for policies with ${appFeature} enabled`);
+
+    do {
+      const currentPage = page++;
+      const { items, total: totalPolicies } = await agentPolicyService.list(
+        this.makeInternalSOClient(this.soStart),
+        {
+          page: currentPage,
+          kuery: 'ingest-agent-policies.is_protected: false',
+          perPage,
+        }
+      );
+
+      total = totalPolicies;
+      hasMoreData = currentPage * perPage < total;
+
+      for (const item of items) {
+        messages.push(
+          `Policy [${item.id}][${item.name}] updated to disable agent tamper protection.`
+        );
+
+        updates.push({ ...item, is_protected: false });
+      }
+    } while (hasMoreData);
+
+    if (updates.length > 0) {
+      logger.info(`Found ${updates.length} policies that need updates:\n${messages.join('\n')}`);
+      const policyUpdateErrors: Array<{ id: string; error: Error }> = [];
+      const bulkUpdateResponse = await pMap(updates, async (update) => {
+        try {
+          return await agentPolicyService.bumpRevision(
+            this.makeInternalSOClient(this.soStart),
+            this.esClient,
+            update.id,
+            {
+              user: { username: 'elastic' } as AuthenticatedUser,
+              removeProtection: true,
+            }
+          );
+        } catch (error) {
+          policyUpdateErrors.push({ error, id: update.id });
+        }
+      });
+
+      logger.info(`Bulk update response:\n${JSON.stringify(bulkUpdateResponse, null, 2)}`);
+
+      if (policyUpdateErrors.length > 0) {
+        logger.error(`Done. ${policyUpdateErrors.length} out of ${updates.length}`);
+        policyUpdateErrors.forEach((e) =>
+          logger.error(`Policy [${e.id}] failed to update due to error: ${e.error}`)
+        );
+      } else {
+        logger.info(`Done. All updates applied successfully`);
+      }
+    } else {
+      logger.info(`Done. Checked ${total} policies and no updates needed`);
+    }
+  }
+
   public start(licenseService: LicenseService) {
     this.subscription = licenseService.getLicenseInformation$()?.subscribe(this.watch.bind(this));
   }
@@ -71,6 +160,15 @@ export class PolicyWatcher {
   public stop() {
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+  }
+
+  public checkAppFeature(appFeature: AppFeatureKeyType, isEnabled: boolean) {
+    switch (appFeature) {
+      case AppFeatureSecurityKey.endpointAgentTamperProtection:
+        return this.checkAgentTamperProtectionAppFeature(isEnabled, appFeature);
+      default:
+        return;
     }
   }
 
