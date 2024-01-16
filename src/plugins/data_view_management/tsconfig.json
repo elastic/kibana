@@ -42,7 +42,6 @@
     "@kbn/shared-ux-page-analytics-no-data",
     "@kbn/core-http-browser",
     "@kbn/code-editor",
-    "@kbn/deeplinks-analytics",
     "@kbn/share-plugin",
   ],
   "exclude": [

@@ -9,5 +9,9 @@
   ],
   "exclude": [
     "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/share-plugin",
+    "@kbn/data-views-plugin",
   ]
 }
