@@ -11,7 +11,7 @@ import { DATASET_QUALITY_URL_PREFIX } from './shared';
 
 export const getDataStreamChecksPath = <DataStream extends string>(dataStream: DataStream) =>
   `${DATASET_QUALITY_URL_PREFIX}/data_stream/${dataStream}/checks` as const;
-export const DATA_STREAM_CHECKS_PATH = getDataStreamChecksPath(':dataStream');
+export const DATA_STREAM_CHECKS_PATH = getDataStreamChecksPath('{dataStream}');
 
 export const getDatastreamChecksRequestParamsRT = rt.strict({
   dataStream: rt.string,

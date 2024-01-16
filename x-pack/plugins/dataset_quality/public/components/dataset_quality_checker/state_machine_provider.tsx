@@ -18,7 +18,10 @@ export const useDataStreamQualityChecksState = (
 ) => {
   const ingestPathwaysStateService = useInterpret(
     () => createDataStreamQualityChecksStateMachine(initialArguments),
-    { devTools: getDevToolsOptions() }
+    { devTools: getDevToolsOptions() },
+    (state) => {
+      console.log('state', state);
+    }
   );
 
   return ingestPathwaysStateService;

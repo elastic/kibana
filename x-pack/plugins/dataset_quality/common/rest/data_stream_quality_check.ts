@@ -13,7 +13,7 @@ export const getDataStreamCheckPath = <DataStream extends string, CheckId extend
   dataStream: DataStream,
   checkId: CheckId
 ) => `${DATASET_QUALITY_URL_PREFIX}/data_stream/${dataStream}/checks/${checkId}` as const;
-export const DATA_STREAM_CHECK_PATH = getDataStreamCheckPath(':dataStream', ':checkId');
+export const DATA_STREAM_CHECK_PATH = getDataStreamCheckPath('{dataStream}', '{checkId}');
 
 export const getDatastreamCheckRequestParamsRT = rt.strict({
   dataStream: rt.string,

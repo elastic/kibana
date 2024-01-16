@@ -11,7 +11,7 @@ import { IDataStreamQualityClient } from '../../services/data_stream_quality';
 import { DataStreamQualityChecksStateProvider } from './state_machine_provider';
 
 export interface DataStreamQualityCheckerProps {
-  dataStream: DataStream;
+  dataStream: string;
   timeRange: CheckTimeRange;
 }
 
@@ -22,18 +22,23 @@ export const createDataStreamQualityChecker = ({
 }) =>
   React.memo(({ dataStream, timeRange }: DataStreamQualityCheckerProps) => {
     const [initialParameters] = useState(() => ({
-      dataStream: `${dataStream.type}-${dataStream.dataset}-${dataStream.namespace}`,
+      dataStream,
       timeRange,
+    }));
+
+    const [dependencies] = useState(() => ({
+      dataStreamQualityClient,
     }));
 
     return (
       <DataStreamQualityChecksStateProvider
         key={`${initialParameters.dataStream}-${initialParameters.timeRange.start}-${initialParameters.timeRange.end}`}
         initialParameters={initialParameters}
+        dependencies={dependencies}
       >
         <ConnectedDataStreamQualityCheckerContent />
       </DataStreamQualityChecksStateProvider>
     );
   });
 
-const ConnectedDataStreamQualityCheckerContent = () => null;
+const ConnectedDataStreamQualityCheckerContent = () => <>Content</>;

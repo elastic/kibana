@@ -7,6 +7,7 @@
 
 import { createMachine, assign, ActionTypes } from 'xstate';
 import { CheckPlan, CheckTimeRange, DataStreamQualityCheckExecution } from '../../../common';
+import { IDataStreamQualityClient } from '../../services/data_stream_quality';
 
 export const createPureDataStreamQualityChecksStateMachine = (
   initialContext: DataStreamQualityChecksContext
@@ -152,15 +153,23 @@ export const createPureDataStreamQualityChecksStateMachine = (
 
 export interface DataStreamQualityChecksStateMachineArguments {
   initialParameters: WithParameters['parameters'];
+  dependencies: {
+    dataStreamQualityClient: IDataStreamQualityClient;
+  };
 }
 
 export const createDataStreamQualityChecksStateMachine = ({
   initialParameters,
+  dependencies: { dataStreamQualityClient },
 }: DataStreamQualityChecksStateMachineArguments) =>
   createPureDataStreamQualityChecksStateMachine({
     parameters: initialParameters,
   }).withConfig({
-    services: {},
+    services: {
+      getCheckPlan: async (context, event) => {
+        return await dataStreamQualityClient.getCheckPlan(context.parameters);
+      },
+    },
   });
 
 type DataStreamQualityChecksTypeState =

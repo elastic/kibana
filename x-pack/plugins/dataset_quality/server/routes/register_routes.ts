@@ -15,6 +15,7 @@ import {
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
 import { DatasetQualityRequestHandlerContext } from '../types';
+import { registerDataStreamQualityCheckRoute } from './data_stream_quality_check';
 import { registerDataStreamQualityChecksRoute } from './data_stream_quality_checks';
 import { DatasetQualityRouteHandlerResources } from './types';
 
@@ -28,7 +29,7 @@ interface RegisterRoutes {
 export function registerRoutes({ repository, core, logger, plugins }: RegisterRoutes) {
   const routes = Object.values(repository);
 
-  const router = core.http.createRouter();
+  const router = core.http.createRouter<DatasetQualityRequestHandlerContext>();
 
   routes.forEach((route) => {
     const { endpoint, options, handler, params } = route;
@@ -93,4 +94,5 @@ export function registerRoutes({ repository, core, logger, plugins }: RegisterRo
   });
 
   registerDataStreamQualityChecksRoute({ router });
+  registerDataStreamQualityCheckRoute({ router });
 }

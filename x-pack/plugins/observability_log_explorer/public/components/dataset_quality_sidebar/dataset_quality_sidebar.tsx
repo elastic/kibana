@@ -45,14 +45,6 @@ const InitializedDatasetQualitySidebarContent = React.memo(
       },
     } = useKibanaContextForPlugin();
 
-    const dataStream = useMemo(
-      () => ({
-        type: 'logs' as const,
-        dataset: datasetSelection.selection.dataset.name,
-        namespace: 'default',
-      }),
-      [datasetSelection]
-    );
     const timeRange = useMemo(() => {
       const absoluteTime = getAbsoluteTimeRange(time);
       return {
@@ -61,6 +53,11 @@ const InitializedDatasetQualitySidebarContent = React.memo(
       };
     }, [time]);
 
-    return <DataStreamQualityChecker dataStream={dataStream} timeRange={timeRange} />;
+    return (
+      <DataStreamQualityChecker
+        dataStream={datasetSelection.selection.dataset.name}
+        timeRange={timeRange}
+      />
+    );
   }
 );

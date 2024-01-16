@@ -22,7 +22,7 @@ export const registerDataStreamQualityChecksRoute = ({
   router: IRouter<DatasetQualityRequestHandlerContext>;
 }) => {
   router.versioned
-    .get({
+    .post({
       access: 'internal',
       path: DATA_STREAM_CHECKS_PATH,
     })

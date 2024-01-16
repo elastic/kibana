@@ -27,12 +27,14 @@ export class DataStreamQualityClient implements IDataStreamQualityClient {
     dataStream,
     timeRange,
   }: DataStreamQualityCheckArguments): Promise<CheckPlan> {
-    const response = await this.services.http.get(getDataStreamChecksPath(dataStream), {
+    const requestUrl = getDataStreamChecksPath(dataStream);
+    const response = await this.services.http.post(requestUrl, {
       body: JSON.stringify(
         getDatastreamChecksRequestPayloadRT.encode({
           time_range: timeRange,
         })
       ),
+      version: '1',
     });
 
     return decodeOrThrow(getDatastreamChecksResponsePayloadRT)(response).plan;
@@ -42,12 +44,13 @@ export class DataStreamQualityClient implements IDataStreamQualityClient {
     checkId: string,
     { dataStream, timeRange }: DataStreamQualityCheckArguments
   ): Promise<DataStreamQualityCheckExecution> {
-    const response = await this.services.http.get(getDataStreamCheckPath(dataStream, checkId), {
+    const response = await this.services.http.post(getDataStreamCheckPath(dataStream, checkId), {
       body: JSON.stringify(
         getDatastreamCheckRequestPayloadRT.encode({
           time_range: timeRange,
         })
       ),
+      version: '1',
     });
 
     return decodeOrThrow(getDatastreamCheckResponsePayloadRT)(response).result;
