@@ -2,10 +2,6 @@
   // Addition height will ensure one item is "cutoff" to indicate more below the scroll
   max-height: $euiFormMaxWidth + $euiSize;
   overflow-y: hidden;
-
-  .euiSelectableListItem {
-    border-bottom: 1px solid darken($euiColorLightestShade, 2%);
-  }
 }
 
 .kbnSavedQueryManagement__list {
