@@ -233,7 +233,7 @@ export interface ChromeSetProjectBreadcrumbsParams {
  * "link" to "deepLink" and adding the "path" property for each node.
  */
 export interface NodeDefinition<
-  LinkId extends string = AppDeepLinkId,
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
 > extends NodeDefinitionBase {
@@ -256,7 +256,7 @@ export interface NodeDefinition<
  * deep link and children.
  */
 export type NodeDefinitionWithChildren<
-  LinkId extends string = AppDeepLinkId,
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenID extends string = Id
 > = NodeDefinition<LinkId, Id, ChildrenID> & {

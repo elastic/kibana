@@ -32,6 +32,9 @@ export interface ServerlessPluginStart {
       panelContentProvider?: PanelContentProvider;
     }
   ): void;
+  /**
+   * @deprecated Use {@link ServerlessPluginStart.initNavigation} instead.
+   */
   setSideNavComponentDeprecated: (navigation: SideNavComponent) => void;
   getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
 }
