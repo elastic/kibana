@@ -673,6 +673,13 @@ describe('aggregateEventsBySavedObject', () => {
           ],
         },
       },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
+        },
+      },
     });
   });
 });
@@ -769,6 +776,13 @@ describe('aggregateEventsWithAuthFilter', () => {
               doc_count: 2,
             },
           ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
       },
     });
@@ -917,6 +931,13 @@ describe('aggregateEventsWithAuthFilter', () => {
               doc_count: 2,
             },
           ],
+        },
+      },
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
       },
     });
