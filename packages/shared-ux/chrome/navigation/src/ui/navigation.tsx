@@ -39,7 +39,7 @@ const NavigationContext = createContext<Context>({
   activeNodes: [],
 });
 
-interface Props {
+export interface Props {
   navigationTree$: Observable<NavigationTreeDefinitionUI>;
   dataTestSubj?: string;
   panelContentProvider?: PanelContentProvider;

@@ -9,7 +9,8 @@
 export { NavigationKibanaProvider, NavigationProvider } from './src/services';
 
 export { Navigation } from './src/ui';
+export type { NavigationProps } from './src/ui';
 
 export type { PanelComponentProps, PanelContent, PanelContentProvider } from './src/ui';
 
-export type { NavigationServices } from './src/types';
+export type { NavigationServices, NavigationKibanaDependencies } from './src/types';

@@ -7,6 +7,7 @@
  */
 
 export { Navigation } from './navigation';
+export type { Props as NavigationProps } from './navigation';
 
 export { RecentlyAccessed } from './components';
 

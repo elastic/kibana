@@ -11,11 +11,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
-import { Navigation, NavigationKibanaProvider } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { API_SWITCH_PROJECT as projectChangeAPIUrl } from '../common';
 import { ServerlessConfig } from './config';
+import { SideNavComponent } from './navigation';
 import {
   ServerlessPluginSetup,
   ServerlessPluginSetupDependencies,
@@ -85,17 +85,21 @@ export class ServerlessPlugin
       initNavigation: (navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
         project.initNavigation(navigationTree$, { cloudUrls: cloud });
 
-        project.setSideNavComponent(() => {
-          return (
-            <NavigationKibanaProvider core={core} serverless={{ getActiveNavigationNodes$ }}>
-              <Navigation
-                navigationTree$={navigationTreeUi$}
-                dataTestSubj={dataTestSubj}
-                panelContentProvider={panelContentProvider}
-              />
-            </NavigationKibanaProvider>
-          );
-        });
+        project.setSideNavComponent(() => (
+          <SideNavComponent
+            navProps={{
+              navigationTree$: navigationTreeUi$,
+              dataTestSubj,
+              panelContentProvider,
+            }}
+            deps={{
+              core,
+              serverless: {
+                getActiveNavigationNodes$,
+              },
+            }}
+          />
+        ));
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
