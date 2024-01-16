@@ -17,6 +17,7 @@ export const defaultHandlers: RendererHandlers = {
   isSyncColorsEnabled: () => false,
   isSyncCursorEnabled: () => true,
   isSyncTooltipsEnabled: () => false,
+  shouldUseSizeTransitionVeil: () => false,
   isInteractive: () => true,
   onComplete: (fn) => undefined,
   onEmbeddableDestroyed: action('onEmbeddableDestroyed'),
