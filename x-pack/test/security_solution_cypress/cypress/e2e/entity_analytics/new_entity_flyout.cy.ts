@@ -8,6 +8,8 @@
 import {
   expandFirstAlertHostFlyout,
   expandFirstAlertUserFlyout,
+  selectAssetCriticalityLevel,
+  toggleAssetCriticalityModal,
 } from '../../tasks/asset_criticality/common';
 import { login } from '../../tasks/login';
 import { visitWithTimeRange } from '../../tasks/navigation';
@@ -19,6 +21,12 @@ import { RISK_INPUT_PANEL_HEADER, ASSET_CRITICALITY_BADGE } from '../../screens/
 import { expandRiskInputsFlyoutPanel } from '../../tasks/risk_scores/risk_inputs_flyout_panel';
 import { mockRiskEngineEnabled } from '../../tasks/entity_analytics';
 import { deleteAlertsAndRules } from '../../tasks/api_calls/common';
+import {
+  ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON,
+  ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL,
+  ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE,
+  ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
+} from '../../screens/asset_criticality/flyouts';
 
 const USER_NAME = 'user1';
 const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
@@ -33,6 +41,7 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'newUserDetailsFlyout',
             'newHostDetailsFlyout',
+            'entityAnalyticsAssetCriticalityEnabled',
           ])}`,
         ],
       },
@@ -73,6 +82,35 @@ describe(
         expandRiskInputsFlyoutPanel();
         cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Very important');
       });
+
+      it('should display asset criticality accordion', () => {
+        cy.log('asset criticality');
+        expandFirstAlertUserFlyout();
+        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR).should(
+          'contain.text',
+          'Asset Criticality'
+        );
+
+        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Create');
+      });
+      it('should display asset criticality modal', () => {
+        cy.log('asset criticality modal');
+        expandFirstAlertUserFlyout();
+        toggleAssetCriticalityModal();
+        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE).should(
+          'have.text',
+          'Pick asset criticality level'
+        );
+      });
+
+      it('should update asset criticality state', () => {
+        cy.log('asset criticality update');
+        expandFirstAlertUserFlyout();
+        selectAssetCriticalityLevel('Important');
+        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+          .contains('Important')
+          .should('be.visible');
+      });
     });
 
     describe('Host details', () => {
@@ -88,10 +126,39 @@ describe(
       });
 
       it('should show asset criticality in the risk input panel', () => {
-        waitForAlerts();
         expandFirstAlertHostFlyout();
         expandRiskInputsFlyoutPanel();
         cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Very important');
+      });
+
+      it('should display asset criticality accordion', () => {
+        cy.log('asset criticality');
+        expandFirstAlertHostFlyout();
+        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR).should(
+          'contain.text',
+          'Asset Criticality'
+        );
+
+        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Create');
+      });
+
+      it('should display asset criticality modal', () => {
+        cy.log('asset criticality modal');
+        expandFirstAlertHostFlyout();
+        toggleAssetCriticalityModal();
+        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE).should(
+          'have.text',
+          'Pick asset criticality level'
+        );
+      });
+
+      it('should update asset criticality state', () => {
+        cy.log('asset criticality update');
+        expandFirstAlertHostFlyout();
+        selectAssetCriticalityLevel('Important');
+        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+          .contains('Important')
+          .should('be.visible');
       });
     });
   }
