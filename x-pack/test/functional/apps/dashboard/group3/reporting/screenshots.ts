@@ -92,6 +92,8 @@ export default function ({
       });
 
       it('is available when saved', async () => {
+        await PageObjects.dashboard.navigateToApp();
+        await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
         await PageObjects.reporting.openPdfReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
