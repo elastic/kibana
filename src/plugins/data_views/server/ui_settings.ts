@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { UiSettingsParams } from '@kbn/core/server';
 import { DATA_VIEWS_FIELDS_EXCLUDED_TIERS } from '../common/constants';
+import { DEFAULT_FIELD_CACHE_FRESHNESS } from './constants';
 
 export const dataTiersUiSettingsConfig: Record<string, UiSettingsParams> = {
   [DATA_VIEWS_FIELDS_EXCLUDED_TIERS]: {
@@ -23,5 +24,20 @@ export const dataTiersUiSettingsConfig: Record<string, UiSettingsParams> = {
         'Exclude fields from specified tiers (such as data_frozen) for faster performance.',
     }),
     schema: schema.string(),
+  },
+};
+
+export const cacheMaxAge = {
+  // to do probably use variable from constants
+  'data_views:cache_max_age': {
+    name: i18n.translate('dataViews.advancedSettings.cacheMaxAgeTitle', {
+      defaultMessage: 'Field cache max age (in seconds)',
+    }),
+    value: DEFAULT_FIELD_CACHE_FRESHNESS,
+    description: i18n.translate('dataViews.advancedSettings.cacheMaxAgeText', {
+      defaultMessage:
+        'Sets how long data view fields API requests are cached in seconds. A value of 0 turns off caching. Modifying this value may not take immediate effect, users need to clear browser cache or wait until the current cache expires. To see immediate changes, try a hard reload of Kibana.',
+    }),
+    schema: schema.number(),
   },
 };
