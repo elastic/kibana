@@ -517,7 +517,7 @@
         "label": "findInventoryFields",
         "description": [],
         "signature": [
-          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
+          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -531,7 +531,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
             ],
             "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
@@ -550,7 +550,7 @@
         "label": "findInventoryModel",
         "description": [],
         "signature": [
-          "<T extends \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\">(type: T) => InventoryModels<T>"
+          "<T extends \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\">(type: T) => InventoryModels<T>"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -583,7 +583,7 @@
         "label": "getFieldByType",
         "description": [],
         "signature": [
-          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
+          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -597,7 +597,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
             ],
             "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
@@ -775,7 +775,7 @@
         "label": "InventoryItemType",
         "description": [],
         "signature": [
-          "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+          "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
