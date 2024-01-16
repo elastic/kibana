@@ -241,6 +241,7 @@
     "@kbn/core-deprecations-common": "link:packages/core/deprecations/core-deprecations-common",
     "@kbn/core-deprecations-server": "link:packages/core/deprecations/core-deprecations-server",
     "@kbn/core-deprecations-server-internal": "link:packages/core/deprecations/core-deprecations-server-internal",
+    "@kbn/core-di-common-internal": "link:packages/core/di/core-di-common-internal",
     "@kbn/core-doc-links-browser": "link:packages/core/doc-links/core-doc-links-browser",
     "@kbn/core-doc-links-browser-internal": "link:packages/core/doc-links/core-doc-links-browser-internal",
     "@kbn/core-doc-links-server": "link:packages/core/doc-links/core-doc-links-server",
