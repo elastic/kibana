@@ -110,6 +110,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('saved-query-management-load-button');
       await savedQueryManagementComponent.deleteSavedQuery('test');
       await a11y.testAppSnapshot({
+        // The saved query selectable search input has invalid aria attrs after
+        // the query is deleted and the `emptyMessage` is displayed, and it fails
+        // with this error, likely because the list is replaced by `emptyMessage`:
+        // [aria-valid-attr-value]: Ensures all ARIA attributes have valid values
         excludeTestSubj: ['saved-query-management-search-input'],
       });
     });
