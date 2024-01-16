@@ -105,6 +105,13 @@ export const allowedExperimentalValues = Object.freeze({
   newUserDetailsFlyout: false,
 
   /*
+   * Enables the Managed User section inside the new user details flyout.
+   * To see this section you also need newUserDetailsFlyout flag enabled.
+   *
+   **/
+  newUserDetailsFlyoutManagedUser: false,
+
+  /*
    * Enables the new host details flyout displayed on the Alerts table.
    *
    **/
