@@ -218,7 +218,10 @@ async function updateAlert<Params extends RuleTypeParams>(
   currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
   const { attributes, version } = currentRule;
-  const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
+  const data = {
+    ...initialData,
+    actions: await addGeneratedActionValues(initialData.actions, context),
+  };
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
