@@ -528,7 +528,6 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        dataStream: {},
         allowAutoCreate: true,
       });
       // Component templates
@@ -618,7 +617,6 @@ describe('<TemplateCreate />', () => {
       await testBed.actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        dataStream: {},
         lifecycle: {
           enabled: true,
           value: 1,
