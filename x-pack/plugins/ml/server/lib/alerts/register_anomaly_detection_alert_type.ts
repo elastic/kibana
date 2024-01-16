@@ -57,7 +57,7 @@ export type AnomalyDetectionAlertBaseContext = AlertInstanceContext & {
 // Flattened alert payload for alert-as-data
 export type AnomalyDetectionAlertPayload = {
   job_id: string;
-  anomaly_score?: number;
+  anomaly_score?: number[];
   is_interim?: boolean;
   anomaly_timestamp?: number;
   top_records?: any;
@@ -100,7 +100,7 @@ export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAle
         array: false,
         required: true,
       },
-      [ALERT_ANOMALY_SCORE]: { type: ES_FIELD_TYPES.DOUBLE, array: false, required: false },
+      [ALERT_ANOMALY_SCORE]: { type: ES_FIELD_TYPES.DOUBLE, array: true, required: false },
       [ALERT_ANOMALY_IS_INTERIM]: { type: ES_FIELD_TYPES.BOOLEAN, array: false, required: false },
       [ALERT_ANOMALY_TIMESTAMP]: { type: ES_FIELD_TYPES.DATE, array: false, required: false },
       [ALERT_TOP_RECORDS]: {
@@ -269,22 +269,31 @@ export function registerAnomalyDetectionAlertType({
           actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
         });
 
-        if (alertDoc) {
-          alertsClient.setAlertData({
-            id: name,
-            context,
-            payload: {
-              [ALERT_URL]: payload[ALERT_URL],
-              [ALERT_REASON]: payload[ALERT_REASON],
-              [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
-              [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
-              [ALERT_ANOMALY_IS_INTERIM]: payload.is_interim,
-              [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
-              [ALERT_TOP_RECORDS]: payload.top_records,
-              [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
-            },
-          });
-        }
+        const resultPayload = {
+          [ALERT_URL]: payload[ALERT_URL],
+          [ALERT_REASON]: payload[ALERT_REASON],
+          [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
+          [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
+          [ALERT_ANOMALY_IS_INTERIM]: payload.is_interim,
+          [ALERT_ANOMALY_TIMESTAMP]: payload.anomaly_timestamp,
+          [ALERT_TOP_RECORDS]: payload.top_records,
+          [ALERT_TOP_INFLUENCERS]: payload.top_influencers,
+          [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
+        };
+
+        alertsClient.setAlertData({
+          id: name,
+          context,
+          payload: alertDoc
+            ? {
+                ...resultPayload,
+                [ALERT_ANOMALY_SCORE]: [
+                  ...(alertDoc?.[ALERT_ANOMALY_SCORE] ?? []),
+                  ...payload.anomaly_score,
+                ],
+              }
+            : resultPayload,
+        });
       }
 
       // Set context for recovered alerts
