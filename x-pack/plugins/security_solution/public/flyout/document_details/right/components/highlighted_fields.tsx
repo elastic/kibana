@@ -36,6 +36,10 @@ export interface HighlightedFieldsTableRow {
      */
     field: string;
     /**
+     * Highlighted field's original name, when the field is overridden
+     */
+    originalField?: string;
+    /**
      * Highlighted field value
      */
     values: string[] | null | undefined;
@@ -74,6 +78,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
     width: '70%',
     render: (description: {
       field: string;
+      originalField?: string;
       values: string[] | null | undefined;
       scopeId: string;
       isPreview: boolean;
@@ -94,7 +99,11 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
             : []
         }
       >
-        <HighlightedFieldsCell values={description.values} field={description.field} />
+        <HighlightedFieldsCell
+          values={description.values}
+          field={description.field}
+          originalField={description.originalField}
+        />
       </SecurityCellActions>
     ),
   },

@@ -8,20 +8,7 @@
 import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { CreateAlert } from '.';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import userEvent from '@testing-library/user-event';
-
-const kibanaReactPath = '../../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('CreateAlert', () => {
   const editSubAction = jest.fn();
