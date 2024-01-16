@@ -8,6 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
@@ -45,6 +46,7 @@ export const UserPanelContent = ({
   openDetailsPanel,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
+  const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
 
   return (
     <FlyoutBody>
@@ -68,12 +70,14 @@ export const UserPanelContent = ({
         queryId={OBSERVED_USER_QUERY_ID}
       />
       <EuiHorizontalRule margin="m" />
-      <ManagedUser
-        managedUser={managedUser}
-        contextID={contextID}
-        isDraggable={isDraggable}
-        openDetailsPanel={openDetailsPanel}
-      />
+      {isManagedUserEnable && (
+        <ManagedUser
+          managedUser={managedUser}
+          contextID={contextID}
+          isDraggable={isDraggable}
+          openDetailsPanel={openDetailsPanel}
+        />
+      )}
     </FlyoutBody>
   );
 };
