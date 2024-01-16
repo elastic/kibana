@@ -38,31 +38,25 @@ export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
 
   if (usersAndRolesUrl) {
     links.userAndRoles = {
-      title: i18n.translate(
-        'sharedUXPackages.chrome.sideNavigation.cloudLinks.usersAndRolesLinkText',
-        {
-          defaultMessage: 'Users and roles',
-        }
-      ),
+      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.usersAndRolesLinkText', {
+        defaultMessage: 'Users and roles',
+      }),
       href: usersAndRolesUrl,
     };
   }
 
   if (performanceUrl) {
     links.performance = {
-      title: i18n.translate(
-        'sharedUXPackages.chrome.sideNavigation.cloudLinks.performanceLinkText',
-        {
-          defaultMessage: 'Performance',
-        }
-      ),
+      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.performanceLinkText', {
+        defaultMessage: 'Performance',
+      }),
       href: performanceUrl,
     };
   }
 
   if (billingUrl) {
     links.billingAndSub = {
-      title: i18n.translate('sharedUXPackages.chrome.sideNavigation.cloudLinks.billingLinkText', {
+      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.billingLinkText', {
         defaultMessage: 'Billing and subscription',
       }),
       href: billingUrl,
@@ -71,12 +65,9 @@ export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
 
   if (deploymentUrl) {
     links.deployment = {
-      title: i18n.translate(
-        'sharedUXPackages.chrome.sideNavigation.cloudLinks.deploymentLinkText',
-        {
-          defaultMessage: 'Project',
-        }
-      ),
+      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.deploymentLinkText', {
+        defaultMessage: 'Project',
+      }),
       href: deploymentUrl,
     };
   }
