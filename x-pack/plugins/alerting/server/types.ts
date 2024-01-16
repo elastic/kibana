@@ -292,8 +292,7 @@ export interface RuleType<
     params?:
       | {
           type: 'zod';
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          schema: z.ZodObject<any> | z.ZodIntersection<any, any>;
+          schema: z.ZodObject<z.ZodRawShape> | z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny>;
         }
       | {
           type: 'config-schema';
