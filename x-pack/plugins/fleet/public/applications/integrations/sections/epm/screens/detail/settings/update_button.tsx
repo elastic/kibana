@@ -174,57 +174,51 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       navigateToNewSettingsPage();
     }
 
-    upgradePackagePoliciesMutation.mutate(
-      {
+    try {
+      await upgradePackagePoliciesMutation.mutateAsync({
         packagePolicyIds: packagePolicyIdsToUpdate,
-      },
-      {
-        onSuccess: () => {
-          notifications.toasts.addSuccess({
-            title: toMountPoint(
-              <FormattedMessage
-                id="xpack.fleet.integrations.packageUpdateSuccessTitle"
-                defaultMessage="Updated {title} and upgraded policies"
-                values={{ title }}
-              />,
-              { theme$ }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="xpack.fleet.integrations.packageUpdateSuccessDescription"
-                defaultMessage="Successfully updated {title} and upgraded policies"
-                values={{ title }}
-              />,
-              { theme$ }
-            ),
-          });
+      });
+      notifications.toasts.addSuccess({
+        title: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageUpdateSuccessTitle"
+            defaultMessage="Updated {title} and upgraded policies"
+            values={{ title }}
+          />,
+          { theme$ }
+        ),
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageUpdateSuccessDescription"
+            defaultMessage="Successfully updated {title} and upgraded policies"
+            values={{ title }}
+          />,
+          { theme$ }
+        ),
+      });
 
-          navigateToNewSettingsPage();
-        },
-        onError: (error) => {
-          notifications.toasts.addError(error, {
-            title: i18n.translate(
-              'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.title',
-              {
-                defaultMessage: 'Error updating policies',
-              }
-            ),
-            toastMessage: i18n.translate(
-              'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.message',
-              {
-                defaultMessage:
-                  'Integrations policies, need to be manually updated. \n Error: {error}',
-                values: {
-                  error: error.message,
-                },
-              }
-            ),
-          });
-          setIsUpgradingPackagePolicies(false);
-          navigateToNewSettingsPage();
-        },
-      }
-    );
+      navigateToNewSettingsPage();
+    } catch (error) {
+      notifications.toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.title',
+          {
+            defaultMessage: 'Error updating policies',
+          }
+        ),
+        toastMessage: i18n.translate(
+          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.message',
+          {
+            defaultMessage: 'Integrations policies, need to be manually updated. \n Error: {error}',
+            values: {
+              error: error.message,
+            },
+          }
+        ),
+      });
+      setIsUpgradingPackagePolicies(false);
+      navigateToNewSettingsPage();
+    }
   }, [
     isUpgradingPackagePolicies,
     setIsUpgradingPackagePolicies,
