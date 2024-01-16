@@ -14,6 +14,7 @@ import { toArray } from 'rxjs/operators';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import type { App, PublicAppInfo } from '@kbn/core-application-browser';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -54,6 +55,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     notifications: notificationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
+    core: coreContextMock.create(),
   };
 
   if (availableApps) {

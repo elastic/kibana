@@ -29,7 +29,6 @@ import {
   skipWhile,
   filter,
   catchError,
-  of,
   throwError,
 } from 'rxjs';
 import type { Location } from 'history';

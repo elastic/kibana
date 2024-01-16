@@ -7,15 +7,35 @@
  */
 import React from 'react';
 import { render, type RenderResult } from '@testing-library/react';
+import { BehaviorSubject, of } from 'rxjs';
 import type { Observable } from 'rxjs';
-import type { NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinitionUI,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 import { EuiThemeProvider } from '@elastic/eui';
 
-import { getServicesMock } from '../mocks/src/jest';
 import { NavigationProvider } from '../src/services';
 import { Navigation } from '../src/ui/navigation';
 import type { PanelContentProvider } from '../src/ui';
 import { NavigationServices } from '../src/types';
+
+const activeNodes: ChromeProjectNavigationNode[][] = [];
+
+export const getServicesMock = (): NavigationServices => {
+  const navigateToUrl = jest.fn().mockResolvedValue(undefined);
+  const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
+  const recentlyAccessed$ = new BehaviorSubject([]);
+
+  return {
+    basePath,
+    recentlyAccessed$,
+    navIsOpen: true,
+    navigateToUrl,
+    activeNodes$: of(activeNodes),
+    isSideNavCollapsed: false,
+  };
+};
 
 const services = getServicesMock();
 

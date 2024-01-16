@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
 import { ComponentMeta } from '@storybook/react';
 import React, { EventHandler, FC, MouseEvent, useState, useEffect } from 'react';
 import { of } from 'rxjs';
@@ -21,13 +20,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import type { ChromeNavLink, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { NavigationStorybookMock, navLinksMock } from '../../mocks';
+import type { NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
+import { NavigationStorybookMock } from '../../mocks';
 import mdx from '../../README.mdx';
 import type { NavigationServices } from '../types';
 import { NavigationProvider } from '../services';
 import { Navigation } from './navigation';
-import { getPresets } from './nav_tree_presets';
 import { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
@@ -89,151 +87,141 @@ const NavigationWrapper: FC<Props & Partial<EuiCollapsibleNavBetaProps>> = (prop
   );
 };
 
-const baseDeeplink: ChromeNavLink = {
-  id: 'foo',
-  title: 'Title from deep link',
-  href: 'https://elastic.co',
-  url: '/dashboard-mocked',
-  baseUrl: '',
-};
-
-const createDeepLink = (id: string, title: string = baseDeeplink.title) => {
-  return {
-    ...baseDeeplink,
-    id,
-    title,
-  };
-};
-
-const deepLinks: ChromeNavLink[] = [
-  createDeepLink('item1'),
-  createDeepLink('item2', 'Foo'),
-  createDeepLink('item3'),
-  createDeepLink('group1:item1'),
-  createDeepLink('group1:groupA:groupI:item1'),
-  createDeepLink('group1:groupA', 'Group title from deep link'),
-  createDeepLink('group2', 'Group title from deep link'),
-  createDeepLink('group2:item1'),
-  createDeepLink('group2:item3'),
-  createDeepLink('group:settings.logs'),
-  createDeepLink('group:settings.signals'),
-  createDeepLink('group:settings.tracing'),
-];
-
-const deepLinks$ = of({
-  ...[...navLinksMock, ...deepLinks].reduce<Record<string, ChromeNavLink>>((acc, navLink) => {
-    acc[navLink.id] = navLink;
-    return acc;
-  }, {}),
-});
-
-const groupExamplesNavigationTree: NavigationTreeDefinition<any> = {
+const groupExamplesNavigationTree: NavigationTreeDefinitionUI = {
   body: [
     // My custom project
     {
-      type: 'navGroup',
       id: 'example_projet',
       title: 'Example project',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
+      path: 'example_projet',
       children: [
         {
+          id: 'blockGroup',
+          path: 'example_projet.blockGroup',
           title: 'Block group',
           children: [
             {
               id: 'item1',
-              link: 'item1',
               title: 'Item 1',
+              href: 'https://foo',
+              path: 'group1.item1',
             },
             {
               id: 'item2',
-              link: 'item1',
               title: 'Item 2',
+              href: 'https://foo',
+              path: 'group1.item2',
             },
             {
               id: 'item3',
-              link: 'item1',
+
               title: 'Item 3',
+              href: 'https://foo',
+              path: 'group1.item3',
             },
           ],
         },
         {
+          id: 'accordionGroup',
+          path: 'example_projet.accordionGroup',
           title: 'Accordion group',
           renderAs: 'accordion',
           children: [
             {
               id: 'item1',
-              link: 'item1',
               title: 'Item 1',
+              href: 'https://foo',
+              path: 'group1.item1',
             },
             {
               id: 'item2',
-              link: 'item1',
               title: 'Item 2',
+              href: 'https://foo',
+              path: 'group1.item1',
             },
             {
               id: 'item3',
-              link: 'item1',
               title: 'Item 3',
+              href: 'https://foo',
+              path: 'group1.item1',
             },
           ],
         },
         {
+          id: 'groupWithouTitle',
+          path: 'example_projet.groupWithouTitle',
+          title: '',
           children: [
             {
               id: 'item1',
-              link: 'item1',
               title: 'Block group',
+              href: 'https://foo',
+              path: 'group1.item1',
             },
             {
               id: 'item2',
-              link: 'item1',
               title: 'without',
+              href: 'https://foo',
+              path: 'group1.item1',
             },
             {
               id: 'item3',
-              link: 'item1',
               title: 'title',
+              href: 'https://foo',
+              path: 'group1.item1',
             },
           ],
         },
         {
-          id: 'group:settings',
-          link: 'item1',
+          id: 'panelGroup',
+          href: 'https://foo',
           title: 'Panel group',
+          path: 'example_projet.panelGroup',
           renderAs: 'panelOpener',
           children: [
             {
+              id: 'group1',
               title: 'Group 1',
+              path: 'panelGroup.group1',
               children: [
                 {
-                  link: 'group:settings.logs',
+                  id: 'logs',
+                  href: 'https://foo',
+                  path: 'group1.item1',
                   title: 'Logs',
                 },
                 {
-                  link: 'group:settings.signals',
+                  id: 'signals',
                   title: 'Signals',
+                  href: 'https://foo',
+                  path: 'group1.item1',
                 },
                 {
-                  id: 'group:settings.signals-2',
-                  link: 'group:settings.signals',
+                  id: 'signals-2',
                   title: 'Signals - should NOT appear',
+                  href: 'https://foo',
+                  path: 'group1.item1',
                   sideNavStatus: 'hidden', // Should not appear
                 },
                 {
-                  link: 'group:settings.tracing',
+                  id: 'tracing',
                   title: 'Tracing',
+                  href: 'https://foo',
+                  path: 'group1.item1',
                 },
               ],
             },
             {
-              id: 'group.nestedGroup',
-              link: 'group:settings.tracing',
+              id: 'group2',
               title: 'Group 2',
+              path: 'panelGroup.group2',
               children: [
                 {
                   id: 'item1',
-                  link: 'group:settings.signals',
+                  path: 'panelGroup.group2.item1',
+                  href: 'https://foo',
                   title: 'Some link title',
                 },
               ],
@@ -243,21 +231,11 @@ const groupExamplesNavigationTree: NavigationTreeDefinition<any> = {
       ],
     },
   ],
-  footer: [
-    {
-      type: 'navGroup',
-      ...getPresets('devtools'),
-    },
-  ],
 };
 
 export const GroupsExamples = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    deepLinks$,
-    onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
-    },
     recentlyAccessed$: of([
       { label: 'This is an example', link: '/app/example/39859', id: '39850' },
       { label: 'Another example', link: '/app/example/5235', id: '5235' },
@@ -268,14 +246,14 @@ export const GroupsExamples = (args: NavigationServices) => {
     <NavigationWrapper>
       {({ isCollapsed }) => (
         <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation navigationTree={groupExamplesNavigationTree} />
+          <Navigation navigationTree$={of(groupExamplesNavigationTree)} />
         </NavigationProvider>
       )}
     </NavigationWrapper>
   );
 };
 
-const navigationTree: NavigationTreeDefinition<any> = {
+const navigationTree: NavigationTreeDefinitionUI = {
   body: [
     // My custom project
     {
@@ -296,196 +274,227 @@ const navigationTree: NavigationTreeDefinition<any> = {
       ]),
     },
     {
-      type: 'navGroup',
       id: 'example_projet',
       title: 'Example project',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
+      path: 'example_projet',
       children: [
         {
-          link: 'item1',
+          id: 'item1',
+          href: 'https://foo',
+          path: 'example_projet.item1',
           title: 'Get started',
         },
         {
           title: 'Group 1',
+          id: 'group1',
+          path: 'example_projet.group1',
           children: [
             {
               id: 'item1',
-              link: 'item1',
               title: 'Item 1',
+              href: 'https://foo',
+              path: 'example_projet.group1.item1',
             },
             {
               id: 'item2',
-              link: 'item1',
               title: 'Item 2',
+              href: 'https://foo',
+              path: 'example_projet.group1.item1',
             },
             {
               id: 'item3',
-              link: 'item1',
               title: 'Item 3',
+              href: 'https://foo',
+              path: 'example_projet.group1.item1',
             },
           ],
         },
         {
-          link: 'item2',
+          id: 'item2',
           title: 'Alerts',
+          href: 'https://foo',
+          path: 'example_projet.item2',
         },
         {
           id: 'item2-2',
-          link: 'item2',
           title: 'Item should NOT appear!!',
           sideNavStatus: 'hidden', // Should not appear
+          href: 'https://foo',
+          path: 'example_projet.item2-2',
         },
         {
-          link: 'item3',
+          id: 'item3',
           title: 'Some other node',
+          href: 'https://foo',
+          path: 'example_projet.item3',
         },
         {
-          id: 'group:settings-2',
+          id: 'group:settingsAsNavItem',
           title: 'Settings as nav Item',
-          link: 'item1',
+          href: 'https://foo',
+          path: 'example_projet.group:settingsAsNavItem',
           renderAs: 'item', // Render just like any other item, even if it has children
           children: [
             {
-              link: 'group:settings.logs',
+              id: 'logs',
               title: 'Logs',
+              href: 'https://foo',
+              path: 'example_projet.group:settingsAsNavItem.logs',
             },
             {
-              link: 'group:settings.signals',
+              id: 'signals',
               title: 'Signals',
+              href: 'https://foo',
+              path: 'example_projet.group:settingsAsNavItem.signals',
             },
             {
-              id: 'group:settings.signals2',
-              link: 'group:settings.signals',
+              id: 'signalsHidden',
               title: 'Signals - should NOT appear',
               sideNavStatus: 'hidden', // Should not appear
+              href: 'https://foo',
+              path: 'example_projet.group:settingsAsNavItem.signalsHidden',
             },
             {
-              link: 'group:settings.tracing',
+              id: 'tracing',
               title: 'Tracing',
+              href: 'https://foo',
+              path: 'example_projet.group:settingsAsNavItem.tracing',
             },
           ],
         },
         {
-          id: 'group:settings-panelOpener',
-          link: 'item1',
+          id: 'group:settingsAsPanelOpener',
           title: 'Settings panel opener',
+          path: 'example_projet.group:settingsAsPanelOpener',
           renderAs: 'panelOpener',
           children: [
             {
+              id: 'group1',
               title: 'Group 1',
+              path: 'example_projet.group:settingsAsPanelOpener.group1',
               children: [
                 {
-                  link: 'group:settings.logs',
+                  id: 'logs',
                   title: 'Logs',
+                  href: 'https://foo',
+                  path: 'example_projet.group:settingsAsPanelOpener.group1.logs',
                 },
                 {
-                  link: 'group:settings.signals',
+                  id: 'signals',
                   title: 'Signals',
+                  href: 'https://foo',
+                  path: 'example_projet.group:settingsAsPanelOpener.group1.signals',
                 },
                 {
-                  id: 'group:settings.signals-2',
-                  link: 'group:settings.signals',
+                  id: 'signals-2',
                   title: 'Signals - should NOT appear',
                   sideNavStatus: 'hidden', // Should not appear
+                  href: 'https://foo',
+                  path: 'example_projet.group:settingsAsPanelOpener.group1.signals',
                 },
                 {
-                  link: 'group:settings.tracing',
+                  id: 'tracing',
                   title: 'Tracing',
+                  href: 'https://foo',
+                  path: 'example_projet.group:settingsAsPanelOpener.group1.tracing',
                 },
               ],
             },
             {
+              id: 'group2',
+              title: 'Group 2',
+              path: 'example_projet.group:settingsAsPanelOpener.group2',
               children: [
                 {
-                  id: 'group.nestedGroup',
-                  link: 'group:settings.tracing',
-                  title: 'Group 2',
+                  id: 'nestedGroup',
+                  title: 'Nested group',
                   renderAs: 'item',
+                  path: 'example_projet.group:settingsAsPanelOpener.group2.nestedGroup',
+                  href: 'https://foo',
                   children: [
                     {
                       id: 'item1',
-                      link: 'group:settings.signals',
+                      path: 'example_projet.group:settingsAsPanelOpener.group2.nestedGroup.item1',
                       title: 'Hidden - should NOT appear',
-                      sideNavStatus: 'hidden', // Should not appear
                     },
                   ],
                 },
               ],
             },
             {
+              id: 'group3',
+              title: '',
+              path: 'example_projet.group:settingsAsPanelOpener.group3',
               children: [
                 {
-                  id: 'group.nestedGroup',
-                  link: 'group:settings.tracing',
+                  id: 'nestedGroup',
                   title: 'Just an item in a group',
+                  path: 'example_projet.group:settingsAsPanelOpener.group3.nestedGroup',
+                  href: 'https://foo',
                 },
               ],
             },
           ],
         },
         {
-          id: 'group:settings.hidden',
-          title: 'Settings 1 - should NOT appear', // sideNavStatus is 'hidden'
+          id: 'group:settingsIsHidden',
+          title: 'Settings - should NOT appear', // sideNavStatus is 'hidden'
           sideNavStatus: 'hidden',
+          path: 'example_projet.group:settingsIsHidden',
           children: [
             {
-              link: 'group:settings.logs',
+              id: 'logs',
               title: 'Logs',
+              href: 'https://foo',
+              path: 'example_projet.group:settingsIsHidden.logs',
             },
           ],
         },
         {
-          id: 'group:settings.childrenHidden',
-          link: 'item1',
-          title: 'Settings 2 - should NOT appear', // All children are hidden
+          id: 'group:settingsWithChildrenHidden',
+          title: 'Settings - should NOT appear', // All children are hidden
+          path: 'example_projet.group:settingsWithChildrenHidden',
           children: [
             {
-              link: 'group:settings.logs',
+              id: 'logs',
               title: 'Logs',
               sideNavStatus: 'hidden',
+              href: 'https://foo',
+              path: 'example_projet.group:settingsWithChildrenHidden.logs',
             },
           ],
         },
       ],
     },
-    // Add ml
     {
-      type: 'preset',
-      preset: 'ml',
-    },
-    {
-      type: 'navItem',
+      id: 'linkAtRootLevel',
       title: 'Custom link at root level',
+      href: 'https://foo',
+      path: 'linkAtRootLevel',
     },
     {
-      type: 'navGroup',
-      id: 'test_all_hidden',
+      id: 'groupRenderAsItem',
       title: 'Test group render as Item',
       renderAs: 'item',
-      link: 'item1',
+      href: 'https://foo',
+      path: 'groupRenderAsItem',
       children: [
         {
-          id: 'test.item1',
-          link: 'item1',
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'groupRenderAsItem.item1',
         },
       ],
     },
     {
-      type: 'navItem',
+      id: 'linkAtRootLevelWithIcon',
       icon: 'logoElastic',
-      link: 'ml',
       title: 'Link at root level + icon',
-    },
-    // And specific links from analytics
-    {
-      type: 'navGroup',
-      ...getPresets('analytics'),
-      title: 'My analytics', // Change the title
-      children: getPresets('analytics').children.filter((item) => {
-        // Hide discover and dashboard
-        return item.link !== 'discover' && item.link !== 'dashboards';
-      }),
+      href: 'https://foo',
+      path: 'linkAtRootLevelWithIcon',
     },
   ],
   footer: [
@@ -506,20 +515,12 @@ const navigationTree: NavigationTreeDefinition<any> = {
         },
       ]),
     },
-    {
-      type: 'navGroup',
-      ...getPresets('devtools'),
-    },
   ],
 };
 
 export const ComplexObjectDefinition = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    deepLinks$,
-    onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
-    },
     recentlyAccessed$: of([
       { label: 'This is an example', link: '/app/example/39859', id: '39850' },
       { label: 'Another example', link: '/app/example/5235', id: '5235' },
@@ -530,7 +531,7 @@ export const ComplexObjectDefinition = (args: NavigationServices) => {
     <NavigationWrapper>
       {({ isCollapsed }) => (
         <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation navigationTree={navigationTree} />
+          <Navigation navigationTree$={of(navigationTree)} />
         </NavigationProvider>
       )}
     </NavigationWrapper>
@@ -563,23 +564,27 @@ const panelContentProvider: ContentProvider = (id: string) => {
   }
 };
 
-const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
+const navigationTreeWithPanels: NavigationTreeDefinitionUI = {
   body: [
     // My custom project
     {
-      type: 'navGroup',
       id: 'example_projet',
       title: 'Example project',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
       isCollapsible: false,
+      path: 'example_projet',
       children: [
         {
-          link: 'item1',
+          id: 'item1',
+          href: 'https://foo',
+          path: '',
           title: 'Get started',
         },
         {
-          link: 'item2',
+          id: 'item2',
+          href: 'https://foo',
+          path: '',
           title: 'Alerts',
         },
         {
@@ -588,44 +593,58 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
           id: 'group:openpanel1',
           title: 'Open panel (1)',
           renderAs: 'panelOpener',
-          link: 'item1',
+          href: 'https://foo',
+          path: '',
           children: [
             {
+              id: 'group1',
               title: 'Group 1',
+              path: '',
               children: [
                 {
-                  link: 'group:settings.logs',
+                  id: 'item1',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Logs',
                   icon: 'logoObservability',
                 },
                 {
-                  link: 'group:settings.signals',
+                  id: 'item2',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Signals',
                   openInNewTab: true,
                 },
                 {
-                  link: 'group:settings.tracing',
+                  id: 'item3',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Tracing',
                   withBadge: true, // Default to "Beta" badge
                 },
               ],
             },
             {
+              id: 'group2',
+              path: '',
               title: 'Group 2',
               children: [
                 {
                   id: 'group2:settings.logs',
-                  link: 'group:settings.logs',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Logs',
                 },
                 {
                   id: 'group2:settings.signals',
-                  link: 'group:settings.signals',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Signals',
                 },
                 {
                   id: 'group2:settings.tracing',
-                  link: 'group:settings.tracing',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Tracing',
                 },
               ],
@@ -638,42 +657,56 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
           id: 'group.openpanel2',
           title: 'Open panel (2)',
           renderAs: 'panelOpener',
-          link: 'item1',
+          path: '',
           children: [
             {
+              id: 'group1',
+              path: '',
+              title: '',
               appendHorizontalRule: true, // Add a separator after the group
               children: [
                 {
-                  link: 'group:settings.logs',
+                  id: 'logs',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Logs',
                 },
                 {
-                  link: 'group:settings.signals',
+                  id: 'signals',
                   title: 'Signals',
+                  href: 'https://foo',
+                  path: '',
                 },
                 {
-                  link: 'group:settings.tracing',
+                  id: 'tracing',
                   title: 'Tracing',
+                  href: 'https://foo',
+                  path: '',
                   withBadge: true, // Default to "Beta" badge
                 },
               ],
             },
             {
               id: 'group2',
+              path: '',
+              title: '',
               children: [
                 {
-                  id: 'group2:settings.logs',
-                  link: 'group:settings.logs',
+                  id: 'logs',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Logs',
                 },
                 {
-                  id: 'group2:settings.signals',
-                  link: 'group:settings.signals',
+                  id: 'signals',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Signals',
                 },
                 {
-                  id: 'group2:settings.tracing',
-                  link: 'group:settings.tracing',
+                  id: 'tracing',
+                  href: 'https://foo',
+                  path: '',
                   title: 'Tracing',
                 },
               ],
@@ -686,24 +719,32 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
           id: 'group.openpanel3',
           title: 'Open panel (3)',
           renderAs: 'panelOpener',
-          link: 'item1',
+          path: '',
           children: [
             {
               id: 'group1',
+              title: '',
+              path: '',
               appendHorizontalRule: true,
               children: [
                 {
-                  link: 'group:settings.logs',
+                  id: 'logs',
                   title: 'Logs',
+                  href: 'https://foo',
+                  path: '',
                 },
                 {
-                  link: 'group:settings.signals',
+                  id: 'signals',
                   title: 'Signals',
+                  href: 'https://foo',
+                  path: '',
                 },
                 {
-                  link: 'group:settings.tracing',
+                  id: 'tracing',
                   title: 'Tracing',
                   withBadge: true, // Default to "Beta" badge
+                  href: 'https://foo',
+                  path: '',
                 },
               ],
             },
@@ -712,23 +753,31 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
               id: 'group2',
               title: 'MANAGEMENT',
               renderAs: 'accordion',
+              path: '',
               children: [
                 {
                   id: 'group2-A',
                   title: 'Group 1',
+                  path: '',
                   children: [
                     {
-                      link: 'group:settings.logs',
+                      id: 'logs',
                       title: 'Logs',
+                      href: 'https://foo',
+                      path: '',
                     },
                     {
-                      link: 'group:settings.signals',
+                      id: 'signals',
                       title: 'Signals',
+                      href: 'https://foo',
+                      path: '',
                     },
                     {
-                      link: 'group:settings.tracing',
+                      id: 'tracing',
                       title: 'Tracing',
                       withBadge: true, // Default to "Beta" badge
+                      href: 'https://foo',
+                      path: '',
                     },
                   ],
                 },
@@ -736,20 +785,24 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
                   id: 'group2-B',
                   title: 'Group 2 (marked as collapsible)',
                   renderAs: 'accordion',
+                  path: '',
                   children: [
                     {
-                      id: 'group2:settings.logs',
-                      link: 'group:settings.logs',
+                      id: 'logs',
+                      href: 'https://foo',
+                      path: '',
                       title: 'Logs',
                     },
                     {
-                      id: 'group2:settings.signals',
-                      link: 'group:settings.signals',
+                      id: 'signals',
+                      href: 'https://foo',
+                      path: '',
                       title: 'Signals',
                     },
                     {
-                      id: 'group2:settings.tracing',
-                      link: 'group:settings.tracing',
+                      id: 'tracing',
+                      href: 'https://foo',
+                      path: '',
                       title: 'Tracing',
                     },
                   ],
@@ -757,20 +810,24 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
                 {
                   id: 'group2-C',
                   title: 'Group 3',
+                  path: '',
                   children: [
                     {
-                      id: 'group2:settings.logs',
-                      link: 'group:settings.logs',
+                      id: 'logs',
+                      href: 'https://foo',
+                      path: '',
                       title: 'Logs',
                     },
                     {
-                      id: 'group2:settings.signals',
-                      link: 'group:settings.signals',
+                      id: 'signals',
+                      href: 'https://foo',
+                      path: '',
                       title: 'Signals',
                     },
                     {
-                      id: 'group2:settings.tracing',
-                      link: 'group:settings.tracing',
+                      id: 'tracing',
+                      href: 'https://foo',
+                      path: '',
                       title: 'Tracing',
                     },
                   ],
@@ -784,74 +841,92 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
           id: 'group.openpanel4',
           title: 'Open panel (4) - sideNavStatus',
           renderAs: 'panelOpener',
-          link: 'item1',
+          path: '',
           children: [
             {
               id: 'root',
+              path: '',
+              title: '',
               children: [
                 {
+                  id: 'groupAsItem1',
                   title: 'Group renders as "item" (1)',
-                  link: 'item1',
                   renderAs: 'item',
+                  path: '',
                   children: [
                     {
-                      link: 'group:settings.logs',
+                      id: 'logs',
                       title: 'Logs',
+                      href: 'https://foo',
+                      path: '',
                     },
                     {
-                      link: 'group:settings.signals',
+                      id: 'signals',
                       title: 'Signals',
+                      href: 'https://foo',
+                      path: '',
                     },
                   ],
                 },
                 {
-                  link: 'group:settings.logs',
+                  id: 'logs',
                   title: 'Item 2',
+                  href: 'https://foo',
+                  path: '',
                 },
                 {
-                  link: 'group:settings.logs2',
+                  id: 'logs2',
                   title: 'Item should NOT appear!', // Should not appear
                   sideNavStatus: 'hidden',
+                  href: 'https://foo',
+                  path: '',
                 },
                 {
                   title: 'Group should NOT appear!',
-                  id: 'group:settings.logs3',
-                  link: 'group:settings.logs',
+                  id: 'logs3',
                   sideNavStatus: 'hidden', // This group should not appear
+                  path: '',
                   children: [
                     {
-                      link: 'group:settings.logs',
+                      id: 'logs',
                       title: 'Logs',
+                      href: 'https://foo',
+                      path: '',
                     },
                     {
-                      link: 'group:settings.signals',
+                      id: 'signals',
                       title: 'Signals',
+                      href: 'https://foo',
+                      path: '',
                     },
                   ],
                 },
                 {
                   title: 'Group renders as "item" (2)',
                   id: 'group2.renderAsItem',
-                  link: 'item1',
                   renderAs: 'item',
+                  path: '',
                   children: [
                     {
-                      id: 'group2:settings.logs',
-                      link: 'group:settings.logs',
+                      id: 'logs',
                       title: 'Logs',
                       sideNavStatus: 'hidden',
+                      href: 'https://foo',
+                      path: '',
                     },
                     {
-                      id: 'group2:settings.signals',
-                      link: 'group:settings.signals',
+                      id: 'signals',
                       title: 'Signals',
                       sideNavStatus: 'hidden',
+                      href: 'https://foo',
+                      path: '',
                     },
                     {
-                      id: 'group2:settings.tracing',
-                      link: 'group:settings.tracing',
+                      id: 'tracing',
                       title: 'Tracing',
                       sideNavStatus: 'hidden',
+                      href: 'https://foo',
+                      path: '',
                     },
                   ],
                 },
@@ -862,49 +937,62 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
               id: 'group2',
               title: 'MANAGEMENT',
               renderAs: 'accordion',
+              path: '',
               children: [
                 {
                   id: 'group2-A',
                   title: 'Group 1',
+                  path: '',
                   children: [
                     {
-                      link: 'group:settings.logs',
+                      id: 'logs',
                       title: 'Logs',
+                      href: 'https://foo',
+                      path: '',
                     },
                     {
-                      link: 'group:settings.signals',
+                      id: 'signals',
                       title: 'Signals',
+                      href: 'https://foo',
+                      path: '',
                     },
                     {
-                      link: 'group:settings.tracing',
+                      id: 'tracing',
                       title: 'Tracing',
                       withBadge: true, // Default to "Beta" badge
+                      href: 'https://foo',
+                      path: '',
                     },
                   ],
                 },
                 {
                   id: 'root-groupB',
+                  path: '',
+                  title: '',
                   children: [
                     {
                       id: 'group2-B',
-                      link: 'item1',
                       title: 'Group renders as "item" (3)',
                       renderAs: 'item', // This group renders as a normal item
+                      path: '',
                       children: [
                         {
-                          id: 'group2:settings.logs',
-                          link: 'group:settings.logs',
+                          id: 'logs',
                           title: 'Logs',
+                          href: 'https://foo',
+                          path: '',
                         },
                         {
-                          id: 'group2:settings.signals',
-                          link: 'group:settings.signals',
+                          id: 'signals',
                           title: 'Signals',
+                          href: 'https://foo',
+                          path: '',
                         },
                         {
-                          id: 'group2:settings.tracing',
-                          link: 'group:settings.tracing',
+                          id: 'tracing',
                           title: 'Tracing',
+                          href: 'https://foo',
+                          path: '',
                         },
                       ],
                     },
@@ -913,33 +1001,39 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
                 {
                   id: 'group2-C',
                   title: 'Group 3',
+                  path: '',
                   children: [
                     {
-                      id: 'group2:settings.logs',
-                      link: 'group:settings.logs',
+                      id: 'logs',
                       title: 'Logs',
+                      href: 'https://foo',
+                      path: '',
                     },
                     {
+                      id: 'groupAsItem',
                       title: 'Yet another group as item',
-                      link: 'item1',
                       renderAs: 'item',
+                      path: '',
                       children: [
                         {
-                          id: 'group2:settings.logs',
-                          link: 'group:settings.logs',
+                          id: 'logs',
                           title: 'Logs',
+                          href: 'https://foo',
+                          path: '',
                         },
                         {
-                          id: 'group2:settings.signals',
-                          link: 'group:settings.signals',
+                          id: 'signals',
                           title: 'Signals',
+                          href: 'https://foo',
+                          path: '',
                         },
                       ],
                     },
                     {
-                      id: 'group2:settings.signals',
-                      link: 'group:settings.signals',
+                      id: 'signals',
                       title: 'Signals',
+                      href: 'https://foo',
+                      path: '',
                     },
                   ],
                 },
@@ -953,19 +1047,26 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
           id: 'group.openpanel5',
           title: 'Open panel (5) - all children hidden',
           renderAs: 'panelOpener',
-          link: 'item1',
+          path: '',
           children: [
             {
-              link: 'test1',
+              id: 'test1',
+              title: 'Test 1',
               sideNavStatus: 'hidden',
+              href: 'https://foo',
+              path: '',
             },
             {
+              id: 'test2',
               title: 'Some group',
+              path: '',
               children: [
                 {
-                  link: 'item1',
+                  id: 'item1',
                   title: 'My first group item',
                   sideNavStatus: 'hidden',
+                  href: 'https://foo',
+                  path: '',
                 },
               ],
             },
@@ -975,19 +1076,25 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
           id: 'group.openpanel6',
           title: 'Open panel (custom content)',
           renderAs: 'panelOpener',
-          link: 'item1',
+          path: '',
           children: [
             {
-              link: 'group:settings.logs',
+              id: 'logs',
               title: 'Logs',
+              href: 'https://foo',
+              path: '',
             },
             {
-              link: 'group:settings.signals',
+              id: 'signals',
               title: 'Signals',
+              href: 'https://foo',
+              path: '',
             },
             {
-              link: 'group:settings.tracing',
+              id: 'tracing',
               title: 'Tracing',
+              href: 'https://foo',
+              path: '',
             },
           ],
         },
@@ -995,19 +1102,25 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
           id: 'group.openpanel7',
           title: 'Open panel (custom title)',
           renderAs: 'panelOpener',
-          link: 'item1',
+          path: '',
           children: [
             {
-              link: 'group:settings.logs',
+              id: 'logs',
               title: 'Those links',
+              href: 'https://foo',
+              path: '',
             },
             {
-              link: 'group:settings.signals',
+              id: 'signals',
               title: 'are automatically',
+              href: 'https://foo',
+              path: '',
             },
             {
-              link: 'group:settings.tracing',
+              id: 'tracing',
               title: 'generated',
+              href: 'https://foo',
+              path: '',
             },
           ],
         },
@@ -1019,10 +1132,6 @@ const navigationTreeWithPanels: NavigationTreeDefinition<any> = {
 export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
-    deepLinks$,
-    onProjectNavigationChange: (updated) => {
-      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
-    },
     recentlyAccessed$: of([
       { label: 'This is an example', link: '/app/example/39859', id: '39850' },
       { label: 'Another example', link: '/app/example/5235', id: '5235' },
@@ -1034,7 +1143,7 @@ export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
       {({ isCollapsed }) => (
         <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
           <Navigation
-            navigationTree={navigationTreeWithPanels}
+            navigationTree$={of(navigationTreeWithPanels)}
             panelContentProvider={panelContentProvider}
           />
         </NavigationProvider>

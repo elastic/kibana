@@ -9,13 +9,10 @@
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
 import { BehaviorSubject } from 'rxjs';
-import { NavigationServices } from '../../src/types';
+import { NavigationServices } from '../src/types';
 
 type Arguments = NavigationServices;
-export type Params = Pick<
-  Arguments,
-  'navIsOpen' | 'recentlyAccessed$' | 'activeNodes$' | 'deepLinks$' | 'onProjectNavigationChange'
->;
+export type Params = Pick<Arguments, 'navIsOpen' | 'recentlyAccessed$' | 'activeNodes$'>;
 
 export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices> {
   propArguments = {};
@@ -41,24 +38,8 @@ export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices>
       basePath: { prepend: (suffix: string) => `/basepath${suffix}` },
       navigateToUrl,
       recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
-      deepLinks$: params.deepLinks$ ?? new BehaviorSubject({}),
-      onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
       activeNodes$: params.activeNodes$ ?? new BehaviorSubject([]),
       isSideNavCollapsed: true,
-      cloudLinks: {
-        billingAndSub: {
-          title: 'Billing & Subscriptions',
-          href: 'https://cloud.elastic.co/account/billing',
-        },
-        performance: {
-          title: 'Performance',
-          href: 'https://cloud.elastic.co/deployments/123456789/performance',
-        },
-        userAndRoles: {
-          title: 'Users & Roles',
-          href: 'https://cloud.elastic.co/deployments/123456789/security/users',
-        },
-      },
     };
   }
 

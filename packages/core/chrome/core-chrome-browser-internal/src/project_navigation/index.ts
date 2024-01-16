@@ -7,5 +7,3 @@
  */
 
 export { ProjectNavigationService } from './project_navigation_service';
-
-export type { CloudURLs } from './cloud_links';

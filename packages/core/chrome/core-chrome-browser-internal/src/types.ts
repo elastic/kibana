@@ -15,9 +15,9 @@ import type {
   AppDeepLinkId,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
+  CloudURLs,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
-import type { CloudURLs } from './project_navigation';
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
