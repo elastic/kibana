@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+
 /**
  * Collected performance metrics during a screenshotting session.
  */
@@ -34,17 +36,4 @@ export interface PerformanceMetrics {
  * Timestamp metrics about a running screenshot task
  * which determine the maximum timeouts possible
  */
-export interface TaskInstanceFields {
-  /**
-   * The date and time that this task started execution. This is used to determine
-   * the "real" runAt that ended up running the task. This value is only set
-   * when status is set to "running".
-   */
-  startedAt: Date | null;
-
-  /**
-   * The date and time that this task should re-execute if stuck in "running" / timeout
-   * status. This value is only set when status is set to "running".
-   */
-  retryAt: Date | null;
-}
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'retryAt' | 'startedAt'>;
