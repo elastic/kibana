@@ -20,7 +20,6 @@ const ECS_COMPONENT_TEMPLATE_NAME = '.kibana-dqa-dashboard-ecs-mappings';
 
 export class ResultsDataStream {
   private readonly dataStream: DataStreamSpacesAdapter;
-  // private error: Error | null = null;
   private installPromise?: Promise<void>;
 
   constructor({ kibanaVersion }: { kibanaVersion: string }) {
