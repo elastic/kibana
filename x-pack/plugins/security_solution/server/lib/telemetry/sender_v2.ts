@@ -28,6 +28,10 @@ export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
   inflightEventsThreshold: 1_000,
   maxPayloadSizeBytes: 1024 * 1024, // 1MiB
 };
+export const DEFAULT_RETRY_CONFIG: RetryConfig = {
+  retryCount: 3,
+  retryDelayMillis: 1000,
+};
 
 export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   private retryConfig: RetryConfig | undefined;
@@ -56,6 +60,8 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     telemetrySetup?: TelemetryPluginSetup,
     telemetryUsageCounter?: IUsageCounter
   ): void {
+    this.logger.l(`Setting up ${TelemetryEventsSenderV2.name}`);
+
     this.ensureStatus(ServiceStatus.CREATED);
 
     this.retryConfig = retryConfig;
@@ -69,6 +75,8 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   }
 
   public start(): void {
+    this.logger.l(`Starting ${TelemetryEventsSenderV2.name}`);
+
     this.ensureStatus(ServiceStatus.CONFIGURED);
 
     this.cache?.stop();
@@ -115,6 +123,8 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   }
 
   public async stop(): Promise<void> {
+    this.logger.l(`Stopping ${TelemetryEventsSenderV2.name}`);
+
     this.ensureStatus(ServiceStatus.STARTED);
 
     const finishPromise = rx.firstValueFrom(this.finished$);
