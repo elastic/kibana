@@ -23,6 +23,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
+      // ensure Security Solution is properly initialized
+      await PageObjects.security.login('system_indices_superuser', 'changeme');
+      await PageObjects.detections.navigateToAlerts();
+      await testSubjects.existOrFail('manage-alert-detection-rules');
+
       // todo: way to force an endpoint to be created in isolated mode so we can check that state in the UI
       indexedData = await endpointTestResources.loadEndpointData();
 
