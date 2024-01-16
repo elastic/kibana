@@ -5,6 +5,9 @@
   "plugin": {
     "id": "samlProviderPlugin",
     "server": true,
-    "browser": false
+    "browser": false,
+    "optionalPlugins": [
+      "cloud"
+    ]
   }
 }
