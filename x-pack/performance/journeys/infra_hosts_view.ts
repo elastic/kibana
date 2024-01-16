@@ -14,6 +14,7 @@ import {
 } from '@kbn/apm-synthtrace';
 import { infra, timerange } from '@kbn/apm-synthtrace-client';
 import { subj } from '@kbn/test-subj-selector';
+import { logPerformanceMetrics } from '../services/measure_performance';
 
 export const journey = new Journey({
   beforeSteps: async ({ kbnUrl, auth, es }) => {
@@ -43,17 +44,36 @@ export const journey = new Journey({
       })
     );
   },
-}).step('Navigate to Hosts view and load 500 hosts', async ({ page, kbnUrl, kibanaPage }) => {
-  await page.goto(
-    kbnUrl.get(
-      `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
-    )
-  );
-  // wait for table to be loaded
-  await page.waitForSelector(subj('hostsView-table-loaded'));
-  // wait for metric charts to be loaded
-  await kibanaPage.waitForCharts({ count: 5, timeout: 60000 });
-});
+})
+  .step('Navigate to Hosts view and load 500 hosts', async ({ page, kbnUrl, kibanaPage, log }) => {
+    await page.goto(
+      kbnUrl.get(
+        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
+      )
+    );
+    await logPerformanceMetrics(
+      'Navigate to Hosts view and load 500 hosts',
+      async () => {
+        // wait for table to be loaded
+        await page.waitForSelector(subj('hostsView-table-loaded'));
+        // wait for metric charts to be loaded
+        await kibanaPage.waitForCharts({ count: 5, timeout: 60000 });
+      },
+      page,
+      log
+    );
+  })
+  .step('Go to single host', async ({ page, kbnUrl, kibanaPage }) => {
+    await page.goto(
+      kbnUrl.get(
+        `app/metrics/hosts?_a=(dateRange:(from:now-15m,to:now),filters:!(),limit:500,panelFilters:!(),query:(language:kuery,query:''))`
+      )
+    );
+
+    const singleHost = await page.locator(subj('hostsViewTableEntryTitleLink'));
+    await singleHost.first().click();
+    await kibanaPage.waitForCharts({ count: 4, timeout: 60000 });
+  });
 
 export function generateHostsData({
   from,
