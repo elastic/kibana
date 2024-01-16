@@ -80,6 +80,7 @@ export const reportingCsvShareProvider = ({
             objectId={objectId}
             getJobParams={getJobParams}
             theme={theme}
+            objectType={objectType}
           />,
           { theme, i18n: i18nStart }
         ),

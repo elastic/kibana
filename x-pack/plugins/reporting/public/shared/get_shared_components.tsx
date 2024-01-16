@@ -39,6 +39,7 @@ export interface ApplicationProps {
    * A function to callback when the Reporting panel should be closed
    */
   onClose: () => void;
+  objectType: string;
 }
 
 export interface ReportingPublicComponents {

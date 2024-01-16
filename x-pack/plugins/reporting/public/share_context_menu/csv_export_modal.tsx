@@ -36,9 +36,10 @@ export interface CsvModalProps {
   isDirty?: boolean;
   onClose?: () => void;
   theme: ThemeServiceSetup;
+  objectType: string;
 }
 
-export type Props = CsvModalProps & { intl?: InjectedIntl };
+export type Props = CsvModalProps & { intl: InjectedIntl };
 
 const renderDescription = (objectType: string): string => {
   return objectType === 'dashboard'
@@ -147,5 +148,4 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
   );
 };
 
-// @ts-ignore
 export const CsvModalContent = injectI18n(CsvModalContentUI);
