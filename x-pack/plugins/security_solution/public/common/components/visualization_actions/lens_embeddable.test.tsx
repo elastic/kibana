@@ -66,7 +66,7 @@ describe('LensEmbeddable', () => {
         queries: [
           {
             id: 'testId',
-            inspect: { dsl: [], response: [] },
+            inspect: { dsl: [], response: ['{"mockResponse": "mockResponse"}'] },
             isInspected: false,
             loading: false,
             selectedInspectIndex: 0,

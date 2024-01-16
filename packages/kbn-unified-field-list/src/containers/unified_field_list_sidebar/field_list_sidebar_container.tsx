@@ -18,6 +18,7 @@ import React, {
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import {
   EuiBadge,
@@ -31,13 +32,12 @@ import {
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
-import { BehaviorSubject, Observable } from 'rxjs';
 import {
   useExistingFieldsFetcher,
   type ExistingFieldsFetcher,
 } from '../../hooks/use_existing_fields';
 import { useQuerySubscriber } from '../../hooks/use_query_subscriber';
-import { useSidebarToggle } from '../../hooks/use_sidebar_toggle';
+import { getSidebarVisibility, SidebarVisibility } from './get_sidebar_visibility';
 import {
   UnifiedFieldListSidebar,
   type UnifiedFieldListSidebarCustomizableProps,
@@ -51,7 +51,7 @@ import type {
 } from '../../types';
 
 export interface UnifiedFieldListSidebarContainerApi {
-  isSidebarCollapsed$: Observable<boolean>;
+  sidebarVisibility: SidebarVisibility;
   refetchFieldsExistenceInfo: ExistingFieldsFetcher['refetchFieldsExistenceInfo'];
   closeFieldListFlyout: () => void;
   // no user permission or missing dataViewFieldEditor service will result in `undefined` API methods
@@ -122,8 +122,14 @@ const UnifiedFieldListSidebarContainer = memo(
       );
       const { data, dataViewFieldEditor } = services;
       const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
-      const { isSidebarCollapsed, onToggleSidebar } = useSidebarToggle({ stateService });
-      const [isSidebarCollapsed$] = useState(() => new BehaviorSubject(isSidebarCollapsed));
+      const [sidebarVisibility] = useState(() =>
+        getSidebarVisibility({
+          localStorageKey: stateService.creationOptions.localStorageKeyPrefix
+            ? `${stateService.creationOptions.localStorageKeyPrefix}:sidebarClosed`
+            : undefined,
+        })
+      );
+      const isSidebarCollapsed = useObservable(sidebarVisibility.isCollapsed$, false);
 
       const canEditDataView =
         Boolean(dataViewFieldEditor?.userPermissions.editIndexPattern()) ||
@@ -225,14 +231,10 @@ const UnifiedFieldListSidebarContainer = memo(
         };
       }, []);
 
-      useEffect(() => {
-        isSidebarCollapsed$.next(isSidebarCollapsed);
-      }, [isSidebarCollapsed, isSidebarCollapsed$]);
-
       useImperativeHandle(
         componentRef,
         () => ({
-          isSidebarCollapsed$,
+          sidebarVisibility,
           refetchFieldsExistenceInfo,
           closeFieldListFlyout,
           createField: editField,
@@ -240,7 +242,7 @@ const UnifiedFieldListSidebarContainer = memo(
           deleteField,
         }),
         [
-          isSidebarCollapsed$,
+          sidebarVisibility,
           refetchFieldsExistenceInfo,
           closeFieldListFlyout,
           editField,
@@ -266,7 +268,7 @@ const UnifiedFieldListSidebarContainer = memo(
 
       if (stateService.creationOptions.showSidebarToggleButton) {
         commonSidebarProps.isSidebarCollapsed = isSidebarCollapsed;
-        commonSidebarProps.onToggleSidebar = onToggleSidebar;
+        commonSidebarProps.onToggleSidebar = sidebarVisibility.toggle;
       }
 
       const buttonPropsToTriggerFlyout = stateService.creationOptions.buttonPropsToTriggerFlyout;

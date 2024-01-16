@@ -215,7 +215,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                 content={
                   <FormattedMessage
                     id="xpack.fleet.agentList.cpuTooltip"
-                    defaultMessage="Average CPU usage in the last 5 minutes"
+                    defaultMessage="Average CPU usage in the last 5 minutes. This includes usage from the Agent and the component it supervises. Possible value ranges from 0 to (number of available CPU cores * 100)"
                   />
                 }
               >
