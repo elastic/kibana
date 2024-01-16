@@ -77,14 +77,14 @@ export const RuleResponseOsqueryAction = z.object({
   params: OsqueryParamsCamelCase,
 });
 
-export type IsolateParams = z.infer<typeof IsolateParams>;
-export const IsolateParams = z.object({
-  command: z.literal('isolate'),
+export type DefaultParams = z.infer<typeof DefaultParams>;
+export const DefaultParams = z.object({
+  command: z.enum(['isolate', 'get-file']),
   comment: z.string().optional(),
 });
 
-export type ProcessesParams = z.infer<typeof ProcessesParams>;
-export const ProcessesParams = z.object({
+export type KillProcessParams = z.infer<typeof KillProcessParams>;
+export const KillProcessParams = z.object({
   command: z.enum(['kill-process', 'suspend-process']),
   comment: z.string().optional(),
   config: z.object({
@@ -96,18 +96,6 @@ export const ProcessesParams = z.object({
      * Whether to overwrite field with process.pid
      */
     overwrite: z.boolean().optional().default(true),
-  }),
-});
-
-export type GetFileParams = z.infer<typeof GetFileParams>;
-export const GetFileParams = z.object({
-  command: z.literal('get-file'),
-  comment: z.string().optional(),
-  config: z.object({
-    /**
-     * Path to retrieve a file from the host
-     */
-    path: z.string().min(1),
   }),
 });
 
@@ -130,13 +118,13 @@ export const ExecuteParams = z.object({
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
 export const EndpointResponseAction = z.object({
   action_type_id: z.literal('.endpoint'),
-  params: z.union([IsolateParams, ProcessesParams, GetFileParams, ExecuteParams]),
+  params: z.union([DefaultParams, KillProcessParams, ExecuteParams]),
 });
 
 export type RuleResponseEndpointAction = z.infer<typeof RuleResponseEndpointAction>;
 export const RuleResponseEndpointAction = z.object({
   actionTypeId: z.literal('.endpoint'),
-  params: z.union([IsolateParams, ProcessesParams, GetFileParams, ExecuteParams]),
+  params: z.union([DefaultParams, KillProcessParams, ExecuteParams]),
 });
 
 export type ResponseAction = z.infer<typeof ResponseAction>;

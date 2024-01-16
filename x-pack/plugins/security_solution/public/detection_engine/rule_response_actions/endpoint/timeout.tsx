@@ -8,7 +8,8 @@ import React from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { NumericField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldFormatters } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 interface ActionTypeFieldProps {
   path: string;
@@ -26,6 +27,7 @@ const CONFIG = {
       defaultMessage="TODO: SPECIFY TIMEOUT  DESCRIPTION "
     />
   ),
+  formatters: [fieldFormatters.toInt],
 };
 
 // TODO: TC - change field to be number field
@@ -39,7 +41,7 @@ const TimeoutFieldComponent = ({
     readDefaultValueOnForm={readDefaultValueOnForm}
     config={CONFIG}
     isDisabled={disabled}
-    component={TextField}
+    component={NumericField}
     required={true}
   />
 );

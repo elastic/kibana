@@ -14,10 +14,12 @@ import {
   getIsolateAlerts,
   getErrorProcessAlerts,
   getExecuteAlerts,
+  getGetFileAlerts,
 } from './utils';
 
 import type { ResponseActionAlerts, AlertsAction } from './types';
 import type { ExecuteParams } from '../../../../common/api/detection_engine';
+import type { DefaultParams } from '../../../../common/api/detection_engine';
 
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
@@ -52,8 +54,28 @@ export const endpointResponseAction = (
     return params.command === 'execute';
   };
 
+  const isGetFileAction = (
+    params: RuleResponseEndpointAction['params']
+  ): params is DefaultParams => {
+    return params.command === 'get-file';
+  };
+
   if (isExecuteAction(responseAction.params)) {
     const actionAlerts = getExecuteAlerts(alerts, responseAction.params.config);
+
+    return each(actionAlerts, (actionPayload) => {
+      return endpointAppContextService.getActionCreateService().createActionFromAlert(
+        {
+          ...actionPayload,
+          ...commonData,
+        },
+        actionPayload.endpoint_ids
+      );
+    });
+  }
+
+  if (isGetFileAction(responseAction.params)) {
+    const actionAlerts = getGetFileAlerts(alerts, responseAction.params.config);
 
     return each(actionAlerts, (actionPayload) => {
       return endpointAppContextService.getActionCreateService().createActionFromAlert(

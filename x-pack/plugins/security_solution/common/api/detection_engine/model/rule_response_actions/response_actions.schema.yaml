@@ -113,13 +113,14 @@ components:
         - actionTypeId
         - params
 
-    IsolateParams:
+    DefaultParams:
       type: object
       properties:
         command:
           type: string
           enum:
             - isolate
+            - get-file
         comment:
           type: string
       required:
@@ -147,28 +148,6 @@ components:
               type: boolean
               description: Whether to overwrite field with process.pid
               default: true
-      required:
-        - command
-        - config
-
-    GetFileParams:
-      type: object
-      properties:
-        command:
-          type: string
-          enum:
-            - get-file
-        comment:
-          type: string
-        config:
-          required:
-            - path
-          type: object
-          properties:
-            path:
-              type: string
-              description: Path to retrieve a file from the host
-              minLength: 1  # Minimum length of 1 (non-empty string)
       required:
         - command
         - config
@@ -207,9 +186,8 @@ components:
             - .endpoint
         params:
           oneOf:
-            - $ref: '#/components/schemas/IsolateParams'
+            - $ref: '#/components/schemas/DefaultParams'
             - $ref: '#/components/schemas/KillProcessParams'
-            - $ref: '#/components/schemas/GetFileParams'
             - $ref: '#/components/schemas/ExecuteParams'
       required:
         - action_type_id
@@ -225,9 +203,8 @@ components:
             - .endpoint
         params:
           oneOf:
-            - $ref: '#/components/schemas/IsolateParams'
+            - $ref: '#/components/schemas/DefaultParams'
             - $ref: '#/components/schemas/KillProcessParams'
-            - $ref: '#/components/schemas/GetFileParams'
             - $ref: '#/components/schemas/ExecuteParams'
       required:
         - actionTypeId
