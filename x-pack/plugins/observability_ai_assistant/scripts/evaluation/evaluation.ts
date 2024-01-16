@@ -173,8 +173,9 @@ function runEvaluations() {
             if (failedResults / totalResults > 0) {
               let reasoningConcat = result.scores.map(score => score.reasoning).join(' ');
               failedScenarios.push([
-                result.name,
-                `Failed ${failedResults} tests out of ${totalResults}`,
+                `${result.name} : ${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${argv.spaceId ? `s/${argv.spaceId}/` : ''
+                }app/observabilityAIAssistant/conversations/${result.conversationId}`,
+                `Average score ${Math.round(result.scores.reduce((total, next) => total + next.score, 0) * 100 / totalResults)}. Failed ${failedResults} tests out of ${totalResults}`,
                 `Reasoning: ${reasoningConcat}`
               ])
             }
@@ -207,7 +208,7 @@ function runEvaluations() {
           return new Promise((resolve, reject) => {
             mocha.run((failures: any) => {
               if (failures) {
-                log.write(table.table(failedScenarios, tableConfig))
+                log.write(table.table(failedScenarios, tableConfig)) //.sort((a, b) => a[1].localeCompare(b[1]))
                 reject(new Error(`Some tests failed`));
                 return;
               }
