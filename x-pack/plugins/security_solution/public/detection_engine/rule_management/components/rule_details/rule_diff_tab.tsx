@@ -21,62 +21,6 @@ import type { RuleResponse } from '../../../../../common/api/detection_engine/mo
 import { DiffView } from './json_diff/diff_view';
 import * as i18n from './json_diff/translations';
 
-const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  stringify(jsObject, { space: 2 });
-
-// const PROPERTIES_NOT_PRESENT_IN_PREBUILT_RULES = [
-//   'actions',
-//   'alias_purpose',
-//   'alias_target_id',
-//   'data_view_id',
-//   'execution_summary',
-//   'meta',
-//   'namespace',
-//   'outcome',
-//   'output_index',
-//   'response_actions',
-//   'saved_id',
-//   'saved_id',
-//   'throttle',
-//   'to',
-// ];
-
-// const HIDDEN_PROPERTIES = [
-//   /* Not a user-facing property. Can be confused with "version" by users. */
-//   'revision',
-
-//   /* Generates diff when the rule is enabled/disabled by user */
-//   'enabled',
-
-//   /* Never present in prebuilt rule updates. Generates diff if user adds exceptions to installed rule. Rule's exception list is preseved on rule update. */
-//   'exceptions_list',
-
-//   /* Never present in prebuilt rule updates. Actions are preseved on rule update */
-//   'actions',
-
-//   /* Not used anymore, but gets defaulted to an empty string when the rule is updated */
-//   'output_index',
-
-//   /* Never present in prebuilt rule updates. Gets added to installed rule after execution. */
-//   'execution_summary',
-
-//   /* Never present in prebuilt rule updates. These get added to installed rule once user saves the rule after editing. */
-//   'meta',
-//   'filters',
-//   'timestamp_override_fallback_disabled',
-
-//   /* Not relevant to the upgrade flow until we allow rule customisation. */
-//   'updated_at',
-//   'updated_by',
-//   'created_at',
-//   'created_by',
-
-//   /* Never present in prebuilt rule updates. */
-//   'outcome',
-//   'alias_target_id',
-//   'alias_purpose',
-// ];
-
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES = [
   /*
@@ -99,6 +43,9 @@ const HIDDEN_PROPERTIES = [
   */
   'updated_at',
 ];
+
+const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
+  stringify(jsObject, { space: 2 });
 
 /**
  * Normalizes the representation of the 'from' property in rule responses.
