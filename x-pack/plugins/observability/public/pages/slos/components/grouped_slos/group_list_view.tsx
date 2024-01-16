@@ -49,6 +49,7 @@ export function GroupListView({ isCompact, group, kqlQuery, sloView }: Props) {
             error={isError}
             isCompact={isCompact}
             sloView={sloView}
+            group={group}
           />
 
           <EuiTablePagination

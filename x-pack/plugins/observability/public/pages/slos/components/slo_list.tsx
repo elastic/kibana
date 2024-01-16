@@ -121,6 +121,7 @@ export function SloList({ autoRefresh }: Props) {
           error={isError}
           isCompact={isCompact}
           sloView={view}
+          group="ungrouped"
         />
       )}
 

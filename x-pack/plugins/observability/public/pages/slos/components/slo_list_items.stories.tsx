@@ -26,6 +26,7 @@ const defaultProps: Props = {
   activeAlertsBySlo: new ActiveAlerts(),
   loading: false,
   error: false,
+  group: 'ungrouped',
 };
 
 export const SloListItems = Template.bind({});
