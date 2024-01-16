@@ -30,7 +30,7 @@ jest.mock('../apis');
 
 jest.mock('../../common/services');
 
-jest.mock('@kbn/security-solution-plugin/public', () => ({
+jest.mock('../../../../..', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
 }));
 
