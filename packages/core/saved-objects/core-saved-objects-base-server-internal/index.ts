@@ -41,6 +41,9 @@ export type {
   MigrationResult,
   MigrationStatus,
   MigrateDocumentOptions,
+  IDocumentMigrator,
+  DocumentMigrateOptions,
+  IsDowngradeRequiredOptions,
 } from './src/migration';
 export {
   parseObjectKey,
