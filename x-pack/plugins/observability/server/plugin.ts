@@ -21,6 +21,11 @@ import {
   SavedObjectsClient,
 } from '@kbn/core/server';
 import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -36,7 +41,10 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import {
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -63,24 +71,29 @@ import { threshold } from './saved_objects/threshold';
 import { DefaultResourceInstaller, DefaultSLOInstaller } from './services/slo';
 
 import { uiSettings } from './ui_settings';
+import { registerAssistantFunctions } from './assistant_functions';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
 interface PluginSetup {
   alerting: PluginSetupContract;
   features: FeaturesSetup;
+  taskManager: TaskManagerSetupContract;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
-  taskManager: TaskManagerSetupContract;
 }
 
 interface PluginStart {
   alerting: PluginStartContract;
   taskManager: TaskManagerStartContract;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  dataViews: DataViewsServerPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
   spaces?: SpacesPluginStart;
 }
 
@@ -288,8 +301,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
-    const { ruleDataService } = plugins.ruleRegistry;
-
     const savedObjectTypes = [SO_SLO_TYPE];
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
@@ -343,6 +354,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(threshold);
+    const { ruleDataService } = plugins.ruleRegistry;
 
     registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, ruleDataService, {
       alertsLocator,
@@ -362,10 +374,23 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           spaces: pluginStart.spaces,
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+          getRacClientWithRequest: pluginStart.ruleRegistry.getRacClientWithRequest,
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
       });
+
+      plugins.observabilityAIAssistant.service.register(
+        registerAssistantFunctions({
+          config,
+          coreSetup: core,
+          logger: this.logger.get('assistant'),
+          getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
+          getRacClientWithRequest: pluginStart.ruleRegistry.getRacClientWithRequest,
+          ruleDataService,
+          dataViews: pluginStart.dataViews,
+        })
+      );
 
       const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
 

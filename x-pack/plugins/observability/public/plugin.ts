@@ -459,6 +459,14 @@ export class Plugin
       { app: 'observability', prompt: 'Can you help me set up an SLO?' },
     ]);
 
+    pluginsStart.observabilityAIAssistant.service.register(async ({ registerRenderFunction }) => {
+      const mod = await import('./assistant_functions');
+
+      mod.registerAssistantFunctions({
+        registerRenderFunction,
+      });
+    });
+
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
