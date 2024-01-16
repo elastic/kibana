@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-
 export function GroupCardView({ group }) {}
