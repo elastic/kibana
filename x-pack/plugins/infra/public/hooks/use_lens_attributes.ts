@@ -108,7 +108,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
 
   const getFormula = () => {
     if (params.chartType === 'xy') {
-      return params.layers[0].value;
+      return params.layers[0].yAxis[0].value;
     }
 
     return params.value;

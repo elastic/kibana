@@ -15,7 +15,7 @@ import type { InfraClientStartDeps } from '../types';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
-import type { FormulaValueConfig, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 
@@ -25,15 +25,11 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 jest.mock('@kbn/lens-embeddable-utils/config_builder');
 const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
 
-const normalizedLoad1m: FormulaValueConfig = {
+const normalizedLoad1m: LensBaseLayer = {
   label: 'Normalized Load',
-  formula: 'average(system.load.1) / max(system.load.cores)',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 0,
-    },
-  },
+  value: 'average(system.load.1) / max(system.load.cores)',
+  format: 'percent',
+  decimals: 0,
 };
 
 const lensPluginMockStart = lensPluginMock.createStartContract();
@@ -53,13 +49,17 @@ describe('useLensAttributes hook', () => {
     layers: [
       {
         type: 'series',
-        value: normalizedLoad1m,
+        yAxis: [normalizedLoad1m],
         xAxis: '@timestamp',
         seriesType: 'line',
       },
       {
         type: 'reference',
-        value: '1',
+        yAxis: [
+          {
+            value: '1',
+          },
+        ],
       },
     ],
     title: 'Injected Normalized Load',
