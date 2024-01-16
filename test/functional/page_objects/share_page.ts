@@ -10,7 +10,6 @@ import { FtrService } from '../ftr_provider_context';
 
 export class SharePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
 
   async isShareMenuOpen() {
@@ -37,9 +36,10 @@ export class SharePageObject extends FtrService {
       // and then re-open the menu
       await this.clickShareTopNavButton();
     }
-    const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
-    await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
-    await this.testSubjects.waitForDeleted(menuPanel);
+    await this.closeShareModal();
+    // const menuPanel = await this.find.byCssSelector('div.euiContextMenuPanel');
+    // await this.testSubjects.click(`sharePanel-${itemTitle.replace(' ', '')}`);
+    // await this.testSubjects.waitForDeleted(menuPanel);
   }
 
   /**
