@@ -24,7 +24,7 @@ describe('telemetry.utils.chunked', () => {
   });
 
   it('should chunk with empty list', async () => {
-    const input: unknown = [];
+    const input: unknown[] = [];
     const output = chunked(input, 4);
     expect(output).toEqual([]);
   });
