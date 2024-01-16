@@ -50,16 +50,6 @@ run(
 
     const git = simpleGit(REPO_ROOT);
 
-    if (!(await git.branchLocal().status()).isClean()) {
-      reportTime(runStartTime, 'total', {
-        success: false,
-      });
-
-      throw new Error(
-        'Local files have changes that are not committed yet. Skipping preflight checks.'
-      );
-    }
-
     const checkTypes = ['i18n', 'tsc', 'eslint', 'jest', 'fileCasing'] as const;
 
     const checks = checkTypes.reduce((acc, check) => {
@@ -70,15 +60,14 @@ run(
       return acc;
     }, {} as Record<typeof checkTypes[number], { files: Array<{ path: string; file: File }> }>);
 
-    const { current } = await git.branchLocal();
-
-    const commonAncestor = (await git.raw(['merge-base', 'origin/main', current])).trim();
-
-    const diff = await git.diff([`${commonAncestor}..${current}`]);
+    const diff = await git.diff(['--merge-base', 'main']);
 
     const filesChangedSummaryTable = new Table({
-      head: ['Files changed in this PR compared to upstream:', ''],
+      head: ['Files changed in this PR compared to upstream:', 'Status'],
+      chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
       colWidths: [80, 10],
+      wordWrap: true,
+      wrapOnWordBoundary: false,
     });
 
     const diffedFiles = diff
@@ -98,10 +87,7 @@ run(
             ? 'deleted'
             : 'modified';
 
-        filesChangedSummaryTable.push([
-          path,
-          mode === 'new' ? chalk.green(mode) : mode === 'deleted' ? chalk.red(mode) : mode,
-        ]);
+        filesChangedSummaryTable.push([path, mode]);
 
         return {
           path,
@@ -113,7 +99,42 @@ run(
       })
       .filter(nonNullable);
 
+    if (diffedFiles.length <= Number(flags['max-files'])) {
+      log.info(`${diffedFiles.length} files changed in this PR compared to upstream.\n`);
+    } else {
+      reportTime(runStartTime, 'total', {
+        success: false,
+      });
+
+      log.error(
+        `${diffedFiles.length} files changed in this PR compared to upstream and max files is set to ${flags['max-files']}.\n`
+      );
+
+      throw new Error(
+        'Bailing on preflight checks. You can skip preflight checks by running git push --no-verify.'
+      );
+    }
+
     log.info(`${filesChangedSummaryTable.toString()}\n\n`);
+
+    if (!(await git.branchLocal().status()).isClean()) {
+      const warning = new Table({
+        head: ['Warning'],
+        chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
+        colWidths: [80],
+        wordWrap: true,
+        wrapOnWordBoundary: true,
+      });
+
+      warning.push([
+        `You have changes that are not committed or stashed yet!
+Preflight checks will be peformed on your files including these changes. This might influence the outcome of these tests.
+For the best results either commit your changes, stash them, or reset your branch to HEAD before running this script.
+`,
+      ]);
+
+      log.info(warning.toString());
+    }
 
     log.info('Running preflight checks on your files...\n');
 
@@ -266,12 +287,16 @@ run(
   {
     description: `Run checks on files that have been changed in your branch compared to upstream.`,
     flags: {
-      boolean: ['fix'],
+      boolean: ['fix', 'ci'],
+      string: ['max-files'],
       default: {
         fix: false,
+        'max-files': 30,
+        ci: false,
       },
       help: `
-        --fix              Attempt to autofix problems
+      --fix              Attempt to autofix problems
+      --max-files        Max files number to check against. If exceeded the script will skip the execution
       `,
     },
   }
