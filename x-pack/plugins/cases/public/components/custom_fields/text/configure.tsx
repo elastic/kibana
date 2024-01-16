@@ -13,7 +13,7 @@ import type { CustomFieldType } from '../types';
 import * as i18n from '../translations';
 
 const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = () => {
-  const [{ required }] = useFormData();
+  const [{ required }] = useFormData<{ required: boolean }>();
 
   return (
     <>

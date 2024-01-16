@@ -193,11 +193,10 @@ describe('configure', () => {
       key: 'my_text_custom_field',
       label: 'Text Custom Field',
       type: CustomFieldTypes.TEXT,
-      required: true,
-      defaultValue: 'foobar',
+      required: false,
     };
 
-    it('has expected attributes in request', () => {
+    it('has expected attributes in request with required: false', () => {
       const query = TextCustomFieldConfigurationRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
@@ -206,11 +205,29 @@ describe('configure', () => {
       });
     });
 
+    it('has expected attributes in request with defaultValue and required: true', () => {
+      const query = TextCustomFieldConfigurationRt.decode({
+        ...defaultRequest,
+        required: true,
+        defaultValue: 'foobar',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...defaultRequest,
+          required: true,
+          defaultValue: 'foobar',
+        },
+      });
+    });
+
     it('defaultValue fails if the type is not string', () => {
       expect(
         PathReporter.report(
           TextCustomFieldConfigurationRt.decode({
             ...defaultRequest,
+            required: true,
             defaultValue: false,
           })
         )[0]
@@ -232,17 +249,45 @@ describe('configure', () => {
       key: 'my_toggle_custom_field',
       label: 'Toggle Custom Field',
       type: CustomFieldTypes.TOGGLE,
-      required: true,
-      defaultValue: false,
+      required: false,
     };
 
-    it('has expected attributes in request', () => {
+    it('has expected attributes in request with required: false', () => {
       const query = ToggleCustomFieldConfigurationRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest },
       });
+    });
+
+    it('has expected attributes in request with defaultValue and required: true', () => {
+      const query = ToggleCustomFieldConfigurationRt.decode({
+        ...defaultRequest,
+        required: true,
+        defaultValue: false,
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...defaultRequest,
+          required: true,
+          defaultValue: false,
+        },
+      });
+    });
+
+    it('defaultValue fails if the type is not boolean', () => {
+      expect(
+        PathReporter.report(
+          ToggleCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            required: true,
+            defaultValue: 'foobar',
+          })
+        )[0]
+      ).toContain('Invalid value "foobar" supplied');
     });
 
     it('removes foo:bar attributes from request', () => {
@@ -252,17 +297,6 @@ describe('configure', () => {
         _tag: 'Right',
         right: { ...defaultRequest },
       });
-    });
-
-    it('defaultValue fails if the type is not boolean', () => {
-      expect(
-        PathReporter.report(
-          ToggleCustomFieldConfigurationRt.decode({
-            ...defaultRequest,
-            defaultValue: 'foobar',
-          })
-        )[0]
-      ).toContain('Invalid value "foobar" supplied');
     });
   });
 });

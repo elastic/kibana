@@ -60,7 +60,7 @@ export const FIELD_OPTIONS = i18n.translate('xpack.cases.customFields.fieldOptio
 });
 
 export const DEFAULT_VALUE = i18n.translate('xpack.cases.customFields.defaultValue', {
-  defaultMessage: 'Default Value',
+  defaultMessage: 'Default value',
 });
 
 export const FIELD_OPTION_REQUIRED = i18n.translate(

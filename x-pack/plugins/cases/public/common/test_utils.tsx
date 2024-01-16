@@ -59,7 +59,9 @@ export const FormTestComponent: React.FC<FormTestComponentProps> = ({
   return (
     <Form form={form}>
       {children}
-      <EuiButton onClick={() => form.submit()}>{'Submit'}</EuiButton>
+      <EuiButton onClick={() => form.submit()} data-test-subj="form-test-component-submit-button">
+        {'Submit'}
+      </EuiButton>
     </Form>
   );
 };

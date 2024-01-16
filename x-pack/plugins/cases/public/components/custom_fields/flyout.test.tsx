@@ -110,7 +110,10 @@ describe('CustomFieldFlyout ', () => {
 
       userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
       userEvent.click(await screen.findByTestId('text-custom-field-required'));
-      userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Summary');
+      userEvent.paste(
+        await screen.findByTestId('text-custom-field-default-value'),
+        'Default value'
+      );
       userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
 
       await waitFor(() => {
@@ -119,7 +122,7 @@ describe('CustomFieldFlyout ', () => {
           label: 'Summary',
           required: true,
           type: CustomFieldTypes.TEXT,
-          defaultValue: 'Summary',
+          defaultValue: 'Default value',
         });
       });
     });
@@ -149,7 +152,7 @@ describe('CustomFieldFlyout ', () => {
       userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
 
       await waitFor(() => {
-        expect(screen.getByText('Default Value is required.')).toBeInTheDocument();
+        expect(screen.getByText('Default value is required.')).toBeInTheDocument();
       });
     });
   });

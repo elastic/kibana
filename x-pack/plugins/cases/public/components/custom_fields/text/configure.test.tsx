@@ -10,7 +10,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { FormTestComponent } from '../../../common/test_utils';
-import * as i18n from '../translations';
 import { Configure } from './configure';
 
 describe('Configure ', () => {
@@ -27,7 +26,7 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByText(i18n.FIELD_OPTION_REQUIRED)).toBeInTheDocument();
+    expect(await screen.findByTestId('text-custom-field-required')).toBeInTheDocument();
   });
 
   it('updates field options correctly when not required', async () => {
@@ -37,7 +36,7 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
@@ -52,14 +51,16 @@ describe('Configure ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText(i18n.FIELD_OPTION_REQUIRED));
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
+    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith(
         {
           required: true,
+          defaultValue: 'Default value',
         },
         true
       );

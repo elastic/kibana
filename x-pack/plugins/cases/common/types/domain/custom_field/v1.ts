@@ -14,8 +14,6 @@ export enum CustomFieldTypes {
 export const CustomFieldTextTypeRt = rt.literal(CustomFieldTypes.TEXT);
 export const CustomFieldToggleTypeRt = rt.literal(CustomFieldTypes.TOGGLE);
 
-export const CustomFieldActualTypes = rt.union([CustomFieldTextTypeRt, CustomFieldToggleTypeRt]);
-
 const CaseCustomFieldTextRt = rt.strict({
   key: rt.string,
   type: CustomFieldTextTypeRt,

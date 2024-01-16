@@ -119,7 +119,7 @@ describe('CustomFieldsForm ', () => {
     });
   });
 
-  it('deserializes the data correctly if required is selected', async () => {
+  it('deserializes the "type: text" custom field data correctly', async () => {
     let formState: CustomFieldFormState;
 
     const onChangeState = (state: CustomFieldFormState) => (formState = state);
@@ -151,7 +151,7 @@ describe('CustomFieldsForm ', () => {
     });
   });
 
-  it('deserializes the data correctly if required not selected', async () => {
+  it('deserializes the "type: toggle" custom field data correctly', async () => {
     let formState: CustomFieldFormState;
 
     const onChangeState = (state: CustomFieldFormState) => (formState = state);
