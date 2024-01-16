@@ -19,13 +19,13 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntryColumnContent } from './log_entry_column';
 
-interface LogEntryContextMenuItem {
+export interface LogEntryContextMenuItem {
   label: string;
   onClick: (e: React.MouseEvent) => void;
   href?: string;
 }
 
-interface LogEntryContextMenuProps {
+export interface LogEntryContextMenuProps {
   'aria-label'?: string;
   isOpen: boolean;
   onOpen: () => void;
