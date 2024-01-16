@@ -20,7 +20,7 @@ import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 jest.mock('../../containers/user_profiles/api');
 
 // FLAKY: https://github.com/elastic/kibana/issues/174520
-describe.skip('AssigneesFilterPopover', () => {
+describe('AssigneesFilterPopover', () => {
   let appMockRender: AppMockRenderer;
   let defaultProps: AssigneesFilterPopoverProps;
 
@@ -37,7 +37,7 @@ describe.skip('AssigneesFilterPopover', () => {
     };
   });
 
-  it('calls onSelectionChange when 1 user is selected', async () => {
+  it.only('ORIGINAL calls onSelectionChange when 1 user is selected', async () => {
     const onSelectionChange = jest.fn();
     const props = { ...defaultProps, onSelectionChange };
     appMockRender.render(<AssigneesFilterPopover {...props} />);
@@ -59,6 +59,29 @@ describe.skip('AssigneesFilterPopover', () => {
         ],
       }
     `);
+  });
+
+  it.only('NEW calls onSelectionChange when 1 user is selected 2 ', async () => {
+    const onSelectionChange = jest.fn();
+    const props = { ...defaultProps, onSelectionChange };
+    appMockRender.render(<AssigneesFilterPopover {...props} />);
+
+    userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
+    expect(await screen.findByPlaceholderText('Search users')).toBeInTheDocument();
+
+    await waitForEuiPopoverOpen();
+
+    fireEvent.change(await screen.findByPlaceholderText('Search users'), {
+      target: { value: 'dingo' },
+    });
+    userEvent.click(await screen.findByText('WD'), undefined, { skipPointerEventsCheck: true });
+
+    await waitFor(() => {
+      expect(onSelectionChange).toHaveBeenCalledWith({
+        filterId: 'assignees',
+        selectedOptionKeys: ['u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0'],
+      });
+    });
   });
 
   it('calls onSelectionChange with a single user when different users are selected', async () => {
