@@ -1,0 +1,6 @@
+NOW
+
+Returns current date and time.
+```esql
+ROW current_date = NOW()
+```

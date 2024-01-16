@@ -9,7 +9,11 @@
 // focus states in Kibana.
 :focus {
   &:not([class^='eui']):not(.kbn-resetFocusState) {
-    @include euiFocusRing;
+    // The focus policy causes double focus rings to appear on EuiSelectableList
+    // since the focusable element does not contain a class starting with "eui".
+    &:not(.euiSelectableList__list > ul) {
+      @include euiFocusRing;
+    }
   }
 }
 
