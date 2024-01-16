@@ -17,10 +17,12 @@ import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
 import type { SecurityProductTypes } from './common/components/landing_page/get_started/configs';
 import type { StepId } from './common/components/landing_page/get_started/types';
+import { GetStartedPageService } from './contract_get_started_page';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
+  public getStartedPageService: GetStartedPageService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
@@ -35,7 +37,7 @@ export class PluginContract {
     this.projectsUrl$ = new BehaviorSubject<string | undefined>(undefined);
     this.projectFeaturesUrl$ = new BehaviorSubject<string | undefined>(undefined);
     this.availableSteps$ = new BehaviorSubject<StepId[]>([]);
-
+    this.getStartedPageService = new GetStartedPageService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
@@ -50,6 +52,9 @@ export class PluginContract {
       availableSteps$: this.availableSteps$.asObservable(),
       getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
       upselling: this.upsellingService,
+      getStartedPageSettings: this.getStartedPageService.getSettings.bind(
+        this.getStartedPageService
+      ),
     };
   }
 
@@ -80,6 +85,7 @@ export class PluginContract {
       setAvailableSteps: (availableSteps) => {
         this.availableSteps$.next(availableSteps);
       },
+      setGetStartedPageSettings: this.getStartedPageService,
       getNavLinks$: () => navLinks$,
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setComponents: (components) => {

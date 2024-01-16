@@ -7,12 +7,9 @@
 
 import React from 'react';
 
-import type { SecurityProductTypes } from './configs';
 import { GetStarted } from './lazy';
 
-export const getSecurityGetStartedComponent = (
-  productTypes: SecurityProductTypes
-): React.ComponentType<{ indicesExist?: boolean }> =>
+export const getSecurityGetStartedComponent = (): React.ComponentType<{ indicesExist?: boolean }> =>
   function GetStartedComponent({ indicesExist }: { indicesExist?: boolean }) {
-    return <GetStarted productTypes={productTypes} indicesExist={indicesExist} />;
+    return <GetStarted indicesExist={indicesExist} />;
   };

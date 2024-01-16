@@ -14,8 +14,8 @@ import * as i18n from './translations';
 import { useSetUpSections } from './hooks/use_setup_sections';
 
 import type { ActiveSections } from './types';
-import type { ProductLine } from '../../common/product';
 import { useStepContext } from './context/step_context';
+import type { ProductLine } from './configs';
 
 const TogglePanelComponent: React.FC<{
   activeProducts: Set<ProductLine>;

@@ -85,6 +85,7 @@ import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { SecurityProductTypes } from './common/components/landing_page/get_started/configs';
 import type { StepId } from './common/components/landing_page/get_started/types';
+import type { GetStartedPageService } from './contract_get_started_page';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -155,6 +156,7 @@ export interface ContractStartServices {
   availableSteps$: Observable<StepId[]>;
   getComponents$: GetComponents$;
   upselling: UpsellingService;
+  getStartedPageSettings: GetStartedPageService['getSettings'];
 }
 
 export type StartServices = CoreStart &
@@ -198,6 +200,7 @@ export interface PluginStart {
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
+  setGetStartedPageSettings: GetStartedPageService;
 }
 
 export interface AppObservableLibs {

@@ -77,12 +77,13 @@ export class SecuritySolutionServerlessPlugin
     registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
     securitySolution.setComponents({
-      // GetStarted: getSecurityGetStartedComponent(services, productTypes),
       DashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
-    securitySolution.setProductTypes(productTypes);
-    securitySolution.setProjectFeaturesUrl(getProjectFeaturesUrl(services.cloud));
-    securitySolution.setAvailableSteps([
+    securitySolution.setGetStartedPageSettings.setProductTypes(productTypes);
+    securitySolution.setGetStartedPageSettings.setProjectFeaturesUrl(
+      getProjectFeaturesUrl(services.cloud)
+    );
+    securitySolution.setGetStartedPageSettings.setAvailableSteps([
       CreateProjectSteps.createFirstProject,
       OverviewSteps.getToKnowElasticSecurity,
       AddIntegrationsSteps.connectToDataSources,

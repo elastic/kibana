@@ -8,12 +8,12 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingLogo } from '@elastic/eui';
 import type { GetStartedProps } from './get_started';
 
-const GetStartedLazy = lazy(() => import('./get_started'));
+const GetStartedLazy = lazy(() => import('./get_started_with_context'));
 
 const centerLogoStyle = { display: 'flex', margin: 'auto' };
 
-export const GetStarted = ({ productTypes, indicesExist }: GetStartedProps) => (
+export const GetStarted = ({ indicesExist }: GetStartedProps) => (
   <Suspense fallback={<EuiLoadingLogo logo="logoSecurity" size="xl" style={centerLogoStyle} />}>
-    <GetStartedLazy productTypes={productTypes} indicesExist={indicesExist} />
+    <GetStartedLazy indicesExist={indicesExist} />
   </Suspense>
 );

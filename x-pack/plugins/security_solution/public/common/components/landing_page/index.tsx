@@ -7,11 +7,11 @@
 
 import React, { memo } from 'react';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import GetStarted from './get_started/get_started';
+import { GetStartedWithContext } from './get_started/get_started_with_context';
 
 export const LandingPageComponent = memo(() => {
   const { indicesExist } = useSourcererDataView();
-  return <GetStarted indicesExist={indicesExist} />;
+  return <GetStartedWithContext indicesExist={indicesExist} />;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

@@ -13,7 +13,7 @@ import {
   GetStartedWithAlertsCardsId,
 } from './types';
 
-import { defaultFinishedSteps, isDefaultFinishedCardStep } from './helpers';
+import { DEFAULT_FINISHED_STEPS, isDefaultFinishedCardStep } from './helpers';
 import { getSections } from './sections';
 import { storage } from '../../../lib/local_storage';
 import type { ProductLine } from './configs';
@@ -34,7 +34,7 @@ export const defaultExpandedCards = {
 export const getStartedStorage = {
   setDefaultFinishedSteps: (cardId: CardId) => {
     const allFinishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY);
-    const defaultFinishedStepsByCardId = defaultFinishedSteps[cardId];
+    const defaultFinishedStepsByCardId = DEFAULT_FINISHED_STEPS[cardId];
     const hasDefaultFinishedSteps = defaultFinishedStepsByCardId != null;
     if (!hasDefaultFinishedSteps) {
       return;
@@ -71,7 +71,7 @@ export const getStartedStorage = {
   getAllFinishedStepsFromStorage: () => {
     const allFinishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY);
     if (allFinishedSteps == null) {
-      storage.set(FINISHED_STEPS_STORAGE_KEY, defaultFinishedSteps);
+      storage.set(FINISHED_STEPS_STORAGE_KEY, DEFAULT_FINISHED_STEPS);
     } else {
       getSections().forEach((section) => {
         section.cards?.forEach((card) => {
@@ -90,8 +90,8 @@ export const getStartedStorage = {
       storage.set(FINISHED_STEPS_STORAGE_KEY, { ...finishedSteps, [cardId]: card });
     }
   },
-  removeFinishedStepFromStorage: (cardId: CardId, stepId: StepId) => {
-    if (isDefaultFinishedCardStep(cardId, stepId)) {
+  removeFinishedStepFromStorage: (cardId: CardId, stepId: StepId, getStartedSteps: StepId[]) => {
+    if (isDefaultFinishedCardStep(cardId, stepId, getStartedSteps)) {
       return;
     }
     const finishedSteps = getStartedStorage.getAllFinishedStepsFromStorage();

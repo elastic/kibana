@@ -50,7 +50,7 @@ export class SecuritySolutionEssPlugin
       registerUpsellings(securitySolution.getUpselling(), license, services);
     });
 
-    securitySolution.setAvailableSteps([
+    securitySolution.setGetStartedPageSettings.setAvailableSteps([
       OverviewSteps.getToKnowElasticSecurity,
       AddIntegrationsSteps.connectToDataSources,
       ViewDashboardSteps.analyzeData,

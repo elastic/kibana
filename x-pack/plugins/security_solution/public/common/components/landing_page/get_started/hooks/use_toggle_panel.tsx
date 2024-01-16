@@ -177,12 +177,12 @@ export const useTogglePanel = ({
         payload: { stepId, cardId, sectionId },
       });
       if (undo) {
-        removeFinishedStepFromStorage(cardId, stepId);
+        removeFinishedStepFromStorage(cardId, stepId, getStartedSteps);
       } else {
         addFinishedStepToStorage(cardId, stepId);
       }
     },
-    [addFinishedStepToStorage, removeFinishedStepFromStorage]
+    [addFinishedStepToStorage, getStartedSteps, removeFinishedStepFromStorage]
   );
 
   const onProductSwitchChanged = useCallback(

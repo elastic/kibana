@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
 
 import { useUserName } from '../hooks/use_user_name';
 
@@ -29,13 +28,12 @@ import { CONTENT_WIDTH } from '../helpers';
 import { ProductTierBadge } from './product_tier_badge';
 import { useWelcomeHeaderStyles } from '../styles/welcome_header.styles';
 import type { ProductTier } from '../configs';
-import { useKibana } from '../../../../lib/kibana';
+import { useGetStartedContext } from '../context/get_started_context';
 
 const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ productTier }) => {
   const { euiTheme } = useEuiTheme();
   const userName = useUserName();
-  const { projectFeaturesUrl$ } = useKibana().services;
-  const projectFeaturesUrl = useObservable(projectFeaturesUrl$);
+  const { projectFeaturesUrl } = useGetStartedContext();
   const {
     headerStyles,
     headerTitleStyles,

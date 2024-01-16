@@ -9,7 +9,6 @@ import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/css';
-import useObservable from 'react-use/lib/useObservable';
 
 import { TogglePanel } from './toggle_panel';
 
@@ -20,19 +19,17 @@ import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
 import { Footer } from './footer';
 import { useScrollToHash } from './hooks/use_scroll';
-import type { SecurityProductTypes } from './configs';
 import { ProductLine } from './configs';
-import { useKibana } from '../../../lib/kibana';
+import { useGetStartedContext } from './context/get_started_context';
 
 export interface GetStartedProps {
   indicesExist?: boolean;
-  productTypes?: SecurityProductTypes;
 }
 
-export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, indicesExist }) => {
+export const GetStartedComponent: React.FC<GetStartedProps> = ({ indicesExist }) => {
   const { euiTheme } = useEuiTheme();
-  const { availableSteps$ } = useKibana().services;
-  const getStartedSteps = useObservable(availableSteps$);
+
+  const { availableSteps: getStartedSteps, productTypes } = useGetStartedContext();
   const {
     onStepClicked,
     toggleTaskCompleteStatus,
@@ -119,6 +116,3 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, i
 };
 
 export const GetStarted = React.memo(GetStartedComponent);
-
-// eslint-disable-next-line import/no-default-export
-export default GetStarted;

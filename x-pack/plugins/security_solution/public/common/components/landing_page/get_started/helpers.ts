@@ -21,12 +21,15 @@ import { CreateProjectSteps, QuickStartSectionCardsId } from './types';
 
 export const CONTENT_WIDTH = 1150;
 
-export const defaultFinishedSteps: Partial<Record<CardId, StepId[]>> = {
+export const DEFAULT_FINISHED_STEPS: Partial<Record<CardId, StepId[]>> = {
   [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
 };
 
-export const isDefaultFinishedCardStep = (cardId: CardId, stepId: StepId) =>
-  !!defaultFinishedSteps[cardId]?.includes(stepId);
+export const isDefaultFinishedCardStep = (
+  cardId: CardId,
+  stepId: StepId,
+  getStartedSteps: StepId[]
+) => !!DEFAULT_FINISHED_STEPS[cardId]?.includes(stepId) && getStartedSteps.includes(stepId);
 
 export const getCardTimeInMinutes = (activeSteps: Step[] | undefined, stepsDone: Set<StepId>) =>
   activeSteps?.reduce(
