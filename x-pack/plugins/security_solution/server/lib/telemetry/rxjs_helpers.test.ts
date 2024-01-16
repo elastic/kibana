@@ -147,7 +147,7 @@ describe('CachedSubject', () => {
     const elements = [1, 2, 3, 4, 5];
     const subject$ = new rx.Subject<number>();
     const cache = new CachedSubject(subject$);
-    const values = [];
+    const values: number[] = [];
 
     elements.forEach((v) => subject$.next(v));
 
