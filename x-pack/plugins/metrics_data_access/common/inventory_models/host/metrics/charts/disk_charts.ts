@@ -49,6 +49,11 @@ export const diskSpaceUsageAvailable = {
       show: true,
       position: 'bottom',
     },
+    yBounds: {
+      mode: 'custom',
+      lowerBound: 0,
+      upperBound: 1,
+    },
     axisTitleVisibility: {
       showXAxisTitle: false,
       showYAxisTitle: false,

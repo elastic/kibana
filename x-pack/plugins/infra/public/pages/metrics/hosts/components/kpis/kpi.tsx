@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import useAsync from 'react-use/lib/useAsync';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChartType, ChartTypeLensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { ChartType, ChartTypeLensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { LensConfigWithId } from '../../../types';
 import type { HostFormulaNames } from '../formulas';
 import { formulas } from '../formulas';
