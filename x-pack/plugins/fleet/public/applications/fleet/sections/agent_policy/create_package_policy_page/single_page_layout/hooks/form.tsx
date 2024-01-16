@@ -236,7 +236,6 @@ export function useOnSubmit({
     if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
       updatePackagePolicy({
         policy_id: agentPolicy.id,
-        namespace: agentPolicy.namespace,
       });
     }
   }, [packagePolicy, agentPolicy, updatePackagePolicy]);

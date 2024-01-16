@@ -24,7 +24,7 @@ export const storedPackagePolicyToAgentInputs = (
   packagePolicy: PackagePolicy,
   packageInfo?: PackageInfo,
   outputId: string = DEFAULT_OUTPUT.name,
-  defaultNamespace?: string
+  agentPolicyNamespace?: string
 ): FullAgentPolicyInput[] => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -53,7 +53,7 @@ export const storedPackagePolicyToAgentInputs = (
       name: packagePolicy.name,
       type: input.type,
       data_stream: {
-        namespace: packagePolicy?.namespace || defaultNamespace || 'default', // custom namespace has precedence on agent policy's one
+        namespace: packagePolicy?.namespace || agentPolicyNamespace || 'default', // custom namespace has precedence on agent policy's one
       },
       use_output: outputId,
       package_policy_id: packagePolicy.id,
@@ -98,7 +98,6 @@ export const storedPackagePolicyToAgentInputs = (
 
     fullInputs.push(fullInput);
   });
-
   return fullInputs;
 };
 
@@ -106,7 +105,7 @@ export const storedPackagePoliciesToAgentInputs = async (
   packagePolicies: PackagePolicy[],
   packageInfoCache: Map<string, PackageInfo>,
   outputId: string = DEFAULT_OUTPUT.name,
-  defaultNamespace: string
+  agentPolicyNamespace: string
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -120,7 +119,12 @@ export const storedPackagePoliciesToAgentInputs = async (
       : undefined;
 
     fullInputs.push(
-      ...storedPackagePolicyToAgentInputs(packagePolicy, packageInfo, outputId, defaultNamespace)
+      ...storedPackagePolicyToAgentInputs(
+        packagePolicy,
+        packageInfo,
+        outputId,
+        agentPolicyNamespace
+      )
     );
   }
 

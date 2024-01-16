@@ -190,6 +190,7 @@ export async function getFullAgentPolicy(
   const dataPermissions =
     (await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
+      agentPolicy.namespace,
       agentPolicy.package_policies
     )) || {};
 
