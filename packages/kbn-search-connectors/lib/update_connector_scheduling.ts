@@ -11,6 +11,7 @@ import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 
 import { ConnectorDocument, SchedulingConfiguraton } from '../types/connectors';
+import { ConnectorsAPIUpdateResponse } from '../types/connectors_api';
 
 export const updateConnectorScheduling = async (
   client: ElasticsearchClient,
@@ -18,7 +19,7 @@ export const updateConnectorScheduling = async (
   scheduling: SchedulingConfiguraton
 ) => {
   try {
-    const result = await client.transport.request<ConnectorDocument>({
+    const result = await client.transport.request<ConnectorsAPIUpdateResponse>({
       method: 'PUT',
       path: `/_connector/${connectorId}/_scheduling`,
       body: {
