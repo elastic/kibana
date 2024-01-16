@@ -1155,6 +1155,8 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
 export const customFieldsMock: CaseUICustomField[] = [
   { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: 'My text test value 1' },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_3', value: null },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', value: null },
 ];
 
 export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
@@ -1172,4 +1174,6 @@ export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = 
     required: true,
     defaultValue: true,
   },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_3', label: 'My test label 3', required: false },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', label: 'My test label 4', required: false },
 ];

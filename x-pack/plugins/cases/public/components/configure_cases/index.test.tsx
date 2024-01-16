@@ -701,7 +701,11 @@ describe('ConfigureCases', () => {
             fields: null,
           },
           closureType: 'close-by-user',
-          customFields: [{ ...customFieldsConfigurationMock[1] }],
+          customFields: [
+            { ...customFieldsConfigurationMock[1] },
+            { ...customFieldsConfigurationMock[2] },
+            { ...customFieldsConfigurationMock[3] },
+          ],
           id: '',
           version: '',
         });
@@ -748,6 +752,8 @@ describe('ConfigureCases', () => {
               required: !customFieldsConfigurationMock[0].required,
             },
             { ...customFieldsConfigurationMock[1] },
+            { ...customFieldsConfigurationMock[2] },
+            { ...customFieldsConfigurationMock[3] },
           ],
           id: '',
           version: '',
