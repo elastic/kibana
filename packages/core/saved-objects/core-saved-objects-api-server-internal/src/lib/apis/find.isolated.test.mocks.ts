@@ -6,15 +6,12 @@
  * Side Public License, v 1.
  */
 
-export type {
-  IKibanaMigrator,
-  KibanaMigratorStatus,
-  MigrationStatus,
-  MigrationResult,
-  MigrateDocumentOptions,
-} from './kibana_migrator';
-export type {
-  IDocumentMigrator,
-  DocumentMigrateOptions,
-  IsDowngradeRequiredOptions,
-} from './document_migrator';
+export const isSupportedEsServerMock = jest.fn();
+
+jest.doMock('@kbn/core-elasticsearch-server-internal', () => {
+  const actual = jest.requireActual('@kbn/core-elasticsearch-server-internal');
+  return {
+    ...actual,
+    isSupportedEsServer: isSupportedEsServerMock,
+  };
+});

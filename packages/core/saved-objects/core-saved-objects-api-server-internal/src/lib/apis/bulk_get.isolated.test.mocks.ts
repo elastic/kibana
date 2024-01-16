@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type {
-  IKibanaMigrator,
-  KibanaMigratorStatus,
-  MigrationStatus,
-  MigrationResult,
-  MigrateDocumentOptions,
-} from './kibana_migrator';
-export type {
-  IDocumentMigrator,
-  DocumentMigrateOptions,
-  IsDowngradeRequiredOptions,
-} from './document_migrator';
+export const getSavedObjectFromSourceMock = jest.fn();
+export const rawDocExistsInNamespaceMock = jest.fn();
+
+jest.doMock('./utils', () => {
+  const actual = jest.requireActual('./utils');
+  return {
+    ...actual,
+    getSavedObjectFromSource: getSavedObjectFromSourceMock,
+    rawDocExistsInNamespace: rawDocExistsInNamespaceMock,
+  };
+});
