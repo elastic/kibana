@@ -44,8 +44,6 @@ export const DocCountChart: FC<{
 
   const [errorAttempts, setErrorAttempts] = useState(ERROR_ATTEMPTS);
   const recordFailure = useCallback(() => {
-    // eslint-disable-next-line no-console
-    console.log('incrementFailedAttempts', errorAttempts);
     setErrorAttempts(errorAttempts - 1);
   }, [errorAttempts]);
 
@@ -83,9 +81,6 @@ export const DocCountChart: FC<{
         endMs,
         timeBuckets
       );
-
-      // eslint-disable-next-line no-console
-      console.log('data', data);
 
       const newData =
         fullData === true
