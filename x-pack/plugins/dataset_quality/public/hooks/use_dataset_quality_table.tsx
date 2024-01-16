@@ -28,14 +28,14 @@ export const useDatasetQualityTable = () => {
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(1);
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<DIRECTION>(DEFAULT_SORT_DIRECTION);
 
   const defaultTimeRange = getDefaultTimeRange();
 
-  const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
+  const { dataStreamsStatsServiceClient: client, store } = useDatasetQualityContext();
+
   const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
   const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
     async () =>
@@ -52,7 +52,7 @@ export const useDatasetQualityTable = () => {
   );
 
   const pagination = {
-    pageIndex,
+    pageIndex: store.state.page,
     pageSize,
     totalItemCount: data.length,
     hidePerPageOptions: true,
@@ -63,12 +63,12 @@ export const useDatasetQualityTable = () => {
       page: { index: number; size: number };
       sort?: { field: SORT_FIELD; direction: DIRECTION };
     }) => {
-      setPageIndex(options.page.index);
+      store.actions.setPage(options.page.index);
       setPageSize(options.page.size);
       setSortField(options.sort?.field || DEFAULT_SORT_FIELD);
       setSortDirection(options.sort?.direction || DEFAULT_SORT_DIRECTION);
     },
-    []
+    [store.actions]
   );
 
   const sort = {
@@ -88,12 +88,12 @@ export const useDatasetQualityTable = () => {
 
     const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
 
-    return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [data, degradedStats, sortField, sortDirection, pageIndex, pageSize]);
+    return sortedItems.slice(store.state.page * pageSize, (store.state.page + 1) * pageSize);
+  }, [data, degradedStats, sortField, sortDirection, store.state.page, pageSize]);
 
   const resultsCount = useMemo(() => {
-    const startNumberItemsOnPage = pageSize * pageIndex + (renderedItems.length ? 1 : 0);
-    const endNumberItemsOnPage = pageSize * pageIndex + renderedItems.length;
+    const startNumberItemsOnPage = pageSize * store.state.page + (renderedItems.length ? 1 : 0);
+    const endNumberItemsOnPage = pageSize * store.state.page + renderedItems.length;
 
     return pageSize === 0 ? (
       <strong>{tableSummaryAllText}</strong>
@@ -105,7 +105,7 @@ export const useDatasetQualityTable = () => {
         {tableSummaryOfText} {data.length}
       </>
     );
-  }, [data.length, pageIndex, pageSize, renderedItems.length]);
+  }, [data.length, store.state.page, pageSize, renderedItems.length]);
 
   return {
     sort,

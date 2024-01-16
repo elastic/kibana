@@ -4,15 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { distinctUntilChanged } from 'rxjs';
 import { DataStreamsStatsService } from '../../services/data_streams_stats/data_streams_stats_service';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
 import { Header } from './header';
 import { Table } from './table';
+import { DatasetQualityController } from '../../controller';
+
+export interface DatasetQualityProps {
+  controller: DatasetQualityController;
+}
 
 export interface CreateDatasetQualityArgs {
   core: CoreStart;
@@ -20,16 +26,35 @@ export interface CreateDatasetQualityArgs {
 }
 
 export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs) => {
-  return () => {
+  return ({ controller }: DatasetQualityProps) => {
     const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
 
     const dataStreamsStatsServiceClient = new DataStreamsStatsService().start({
       http: core.http,
     }).client;
 
-    const datasetQualityProviderValue: DatasetQualityContextValue = {
-      dataStreamsStatsServiceClient,
-    };
+    const [state, setState] = useState(controller.state);
+
+    useEffect(() => {
+      const sub = controller.state$.pipe(distinctUntilChanged()).subscribe((s) => setState(s));
+
+      return () => {
+        sub.unsubscribe();
+      };
+    }, [controller.state$]);
+
+    const datasetQualityProviderValue: DatasetQualityContextValue = useMemo(
+      () => ({
+        dataStreamsStatsServiceClient,
+        store: {
+          actions: {
+            ...controller.actions,
+          },
+          state,
+        },
+      }),
+      [controller.actions, dataStreamsStatsServiceClient, state]
+    );
 
     return (
       <DatasetQualityContext.Provider value={datasetQualityProviderValue}>

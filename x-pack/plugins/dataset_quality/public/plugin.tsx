@@ -7,6 +7,7 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createDatasetQuality } from './components/dataset_quality';
+import { createDatasetQualityControllerLazyFactory } from './controller/lazy_create_controller';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,
@@ -29,6 +30,8 @@ export class DatasetQualityPlugin
       plugins,
     });
 
-    return { DatasetQuality };
+    const createDatasetQualityController = createDatasetQualityControllerLazyFactory();
+
+    return { DatasetQuality, createDatasetQualityController };
   }
 }

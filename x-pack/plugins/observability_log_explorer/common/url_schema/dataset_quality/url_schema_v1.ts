@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-export {
-  OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
-  OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
-} from './common';
-export * as urlSchemaV1 from './url_schema_v1';
-export * as datasetQualityUrlSchema from './dataset_quality/url_schema_v1';
+import * as rt from 'io-ts';
+
+export const urlSchemaRT = rt.exact(
+  rt.partial({
+    v: rt.literal(1),
+    page: rt.number,
+  })
+);
+
+export type UrlSchema = rt.TypeOf<typeof urlSchemaRT>;
