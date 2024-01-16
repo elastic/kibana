@@ -6,8 +6,12 @@
  */
 import axios from 'axios';
 
-import type { QueueConfig, ITelemetryEventsSenderV2 } from './sender_v2.types';
-import { DEFAULT_QUEUE_CONFIG, DEFAULT_RETRY_CONFIG, TelemetryEventsSenderV2 } from './sender_v2';
+import type { QueueConfig, IAsyncTelemetryEventsSender } from './async_sender.types';
+import {
+  DEFAULT_QUEUE_CONFIG,
+  DEFAULT_RETRY_CONFIG,
+  AsyncTelemetryEventsSender,
+} from './async_sender';
 import { TelemetryChannel, TelemetryCounter } from './types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -21,7 +25,7 @@ import { TelemetryEventsSender } from './sender';
 jest.mock('axios');
 jest.mock('./receiver');
 
-describe('TelemetryEventsSenderV2', () => {
+describe('AsyncTelemetryEventsSender', () => {
   const mockedAxiosPost = jest.spyOn(axios, 'post');
   const mockedAxiosGet = jest.spyOn(axios, 'get');
   const telemetryPluginSetup = createMockTelemetryPluginSetup();
@@ -47,10 +51,10 @@ describe('TelemetryEventsSenderV2', () => {
     maxPayloadSizeBytes: 10_000,
   };
 
-  let service: ITelemetryEventsSenderV2;
+  let service: IAsyncTelemetryEventsSender;
 
   beforeEach(() => {
-    service = new TelemetryEventsSenderV2(loggingSystemMock.createLogger());
+    service = new AsyncTelemetryEventsSender(loggingSystemMock.createLogger());
     jest.useFakeTimers({ advanceTimers: true });
     mockedAxiosPost.mockClear();
     telemetryUsageCounter.incrementCounter.mockClear();
@@ -897,7 +901,7 @@ describe('TelemetryEventsSenderV2', () => {
   });
 
   describe('ITelemetryEventsSender integration', () => {
-    it('should send events using the V2 service', async () => {
+    it('should send events using the async service', async () => {
       const serviceV1 = new TelemetryEventsSender(loggingSystemMock.createLogger());
 
       service.setup(DEFAULT_RETRY_CONFIG, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
@@ -925,7 +929,7 @@ describe('TelemetryEventsSenderV2', () => {
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
     });
 
-    it('should configure the default queue config in V2 service', async () => {
+    it('should configure the default queue config in the async service', async () => {
       const initialTimeSpan = DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis;
       const bufferTimeSpanMillis = initialTimeSpan * 10;
       const events = ['e1', 'e2', 'e3'];
@@ -961,7 +965,7 @@ describe('TelemetryEventsSenderV2', () => {
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
     });
 
-    it('should configure a queue config in the V2 service', async () => {
+    it('should configure a queue config in the async service', async () => {
       const channel = TelemetryChannel.DETECTION_ALERTS;
       const detectionAlertsBefore = {
         bufferTimeSpanMillis: 900,

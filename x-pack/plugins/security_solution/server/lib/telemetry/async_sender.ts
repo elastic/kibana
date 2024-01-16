@@ -13,10 +13,10 @@ import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ITelemetryReceiver } from './receiver';
 import {
-  type ITelemetryEventsSenderV2,
+  type IAsyncTelemetryEventsSender,
   type QueueConfig,
   type RetryConfig,
-} from './sender_v2.types';
+} from './async_sender.types';
 import { TelemetryChannel, TelemetryCounter } from './types';
 import * as collections from './collections_helpers';
 import { CachedSubject, retryOnError$ } from './rxjs_helpers';
@@ -33,7 +33,7 @@ export const DEFAULT_RETRY_CONFIG: RetryConfig = {
   retryDelayMillis: 1000,
 };
 
-export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
+export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   private retryConfig: RetryConfig | undefined;
   private fallbackQueueConfig: QueueConfig | undefined;
   private queues: Map<TelemetryChannel, QueueConfig> | undefined;
@@ -63,7 +63,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
     telemetrySetup?: TelemetryPluginSetup,
     telemetryUsageCounter?: IUsageCounter
   ): void {
-    this.logger.l(`Setting up ${TelemetryEventsSenderV2.name}`);
+    this.logger.l(`Setting up ${AsyncTelemetryEventsSender.name}`);
 
     this.ensureStatus(ServiceStatus.CREATED);
 
@@ -79,7 +79,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   }
 
   public start(telemetryStart?: TelemetryPluginStart): void {
-    this.logger.l(`Starting ${TelemetryEventsSenderV2.name}`);
+    this.logger.l(`Starting ${AsyncTelemetryEventsSender.name}`);
 
     this.ensureStatus(ServiceStatus.CONFIGURED);
 
@@ -134,7 +134,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   }
 
   public async stop(): Promise<void> {
-    this.logger.l(`Stopping ${TelemetryEventsSenderV2.name}`);
+    this.logger.l(`Stopping ${AsyncTelemetryEventsSender.name}`);
 
     this.ensureStatus(ServiceStatus.CONFIGURED, ServiceStatus.STARTED);
 

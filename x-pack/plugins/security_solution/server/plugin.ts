@@ -58,13 +58,13 @@ import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import type { ITelemetryEventsSender } from './lib/telemetry/sender';
-import { type ITelemetryEventsSenderV2 } from './lib/telemetry/sender_v2.types';
+import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import {
   DEFAULT_QUEUE_CONFIG,
   DEFAULT_RETRY_CONFIG,
-  TelemetryEventsSenderV2,
-} from './lib/telemetry/sender_v2';
+  AsyncTelemetryEventsSender,
+} from './lib/telemetry/async_sender';
 import type { ITelemetryReceiver } from './lib/telemetry/receiver';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
@@ -135,7 +135,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
-  private readonly telemetryEventsSenderV2: ITelemetryEventsSenderV2;
+  private readonly telemetryEventsSenderV2: IAsyncTelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -157,7 +157,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
-    this.telemetryEventsSenderV2 = new TelemetryEventsSenderV2(this.logger);
+    this.telemetryEventsSenderV2 = new AsyncTelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
     this.logger.debug('plugin initialized');

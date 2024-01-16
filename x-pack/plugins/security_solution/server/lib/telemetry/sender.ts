@@ -26,7 +26,7 @@ import type { TelemetryChannel, TelemetryEvent } from './types';
 import type { SecurityTelemetryTaskConfig } from './task';
 import { SecurityTelemetryTask } from './task';
 import { telemetryConfiguration } from './configuration';
-import type { ITelemetryEventsSenderV2, QueueConfig } from './sender_v2.types';
+import type { IAsyncTelemetryEventsSender, QueueConfig } from './async_sender.types';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -36,7 +36,7 @@ export interface ITelemetryEventsSender {
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
     telemetryUsageCounter?: UsageCounter,
-    telemetrySenderV2?: ITelemetryEventsSenderV2
+    asyncTelemetrySender?: IAsyncTelemetryEventsSender
   ): void;
 
   getTelemetryUsageCluster(): UsageCounter | undefined;
@@ -60,7 +60,7 @@ export interface ITelemetryEventsSender {
   sendOnDemand(channel: string, toSend: unknown[], axiosInstance?: AxiosInstance): Promise<void>;
   getV3UrlFromV2(v2url: string, channel: string): string;
 
-  // As a transition to the new sender, `ITelemetryEventsSenderV2`, we wrap
+  // As a transition to the new sender, `IAsyncTelemetryEventsSender`, we wrap
   // its "public API" here to expose a single Sender interface to the rest
   // of the code. The `queueTelemetryEvents` is deprecated in favor of
   // `sendAsync`.
@@ -100,7 +100,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
   private telemetryUsageCounter?: UsageCounter;
   private telemetryTasks?: SecurityTelemetryTask[];
 
-  private telemetrySenderV2?: ITelemetryEventsSenderV2;
+  private asyncTelemetrySender?: IAsyncTelemetryEventsSender;
 
   constructor(logger: Logger) {
     this.logger = logger.get('telemetry_events');
@@ -111,7 +111,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     telemetrySetup?: TelemetryPluginSetup,
     taskManager?: TaskManagerSetupContract,
     telemetryUsageCounter?: UsageCounter,
-    telemetrySenderV2?: ITelemetryEventsSenderV2
+    asyncTelemetrySender?: IAsyncTelemetryEventsSender
   ) {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
@@ -124,7 +124,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
         }
       );
     }
-    this.telemetrySenderV2 = telemetrySenderV2;
+    this.asyncTelemetrySender = asyncTelemetrySender;
   }
 
   public getTelemetryUsageCluster(): UsageCounter | undefined {
@@ -406,11 +406,11 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     this.getAsyncTelemetrySender().updateDefaultQueueConfig(config);
   }
 
-  private getAsyncTelemetrySender(): ITelemetryEventsSenderV2 {
-    if (!this.telemetrySenderV2) {
+  private getAsyncTelemetrySender(): IAsyncTelemetryEventsSender {
+    if (!this.asyncTelemetrySender) {
       throw new Error('Telemetry Sender V2 not initialized');
     }
-    return this.telemetrySenderV2;
+    return this.asyncTelemetrySender;
   }
 
   private async fetchTelemetryPingUrl(): Promise<string> {

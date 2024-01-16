@@ -19,7 +19,7 @@ import type { ITelemetryEventsSender } from './sender';
 import type { TelemetryChannel, TelemetryEvent } from './types';
 import type { ITelemetryReceiver } from './receiver';
 import { tlog } from './helpers';
-import type { QueueConfig } from './sender_v2.types';
+import type { QueueConfig } from './async_sender.types';
 
 /**
  * Preview telemetry events sender for the telemetry route.
@@ -116,7 +116,7 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   }
 
   public async queueTelemetryEvents(events: TelemetryEvent[]) {
-    // TODO(sebastian.zaffarano): useITelemetryEventsSenderV2#sendAsync()
+    // TODO(sebastian.zaffarano): use IAsyncTelemetryEventsSender#sendAsync()
     const result = this.composite.queueTelemetryEvents(events);
     await this.composite.sendIfDue(this.axiosInstance);
     return result;

@@ -14,7 +14,7 @@ import type { ITelemetryReceiver } from './receiver';
  * different configurations per channel and changing them dynamically without restarting
  * the service is possible.
  */
-export interface ITelemetryEventsSenderV2 {
+export interface IAsyncTelemetryEventsSender {
   setup: (
     retryConfig: RetryConfig,
     fallbackQueueConfig: QueueConfig,
