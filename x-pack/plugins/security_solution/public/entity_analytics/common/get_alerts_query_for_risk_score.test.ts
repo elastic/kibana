@@ -12,6 +12,10 @@ const risk = {
   calculated_score_norm: 70,
   rule_risks: [],
   multipliers: [],
+  category_1_score: 0,
+  category_1_count: 0,
+  category_2_score: 0,
+  category_2_count: 0,
 };
 
 describe('getAlertsQueryForRiskScore', () => {
