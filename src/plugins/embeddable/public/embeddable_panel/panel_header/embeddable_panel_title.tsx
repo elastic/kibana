@@ -12,6 +12,7 @@ import { EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { IEmbeddable, ViewMode } from '../../lib';
 import { getEditTitleAriaLabel, placeholderTitle } from '../embeddable_panel_strings';
+import { EmbeddablePanelPopover } from './embeddable_panel_popover';
 import { EditPanelAction } from '../panel_actions';
 import { openCustomizePanelFlyout } from '../panel_actions/customize_panel_action/open_customize_panel';
 
@@ -65,9 +66,12 @@ export const EmbeddablePanelTitle = ({
   const titleComponentWithDescription = useMemo(() => {
     if (!description)
       return (
-        <span className="embPanel__titleInner" data-test-subj="embeddablePanelTitleInner">
-          {titleComponent}
-        </span>
+        <>
+          <span className="embPanel__titleInner" data-test-subj="embeddablePanelTitleInner">
+            {titleComponent}
+          </span>
+          <EmbeddablePanelPopover title={title} />
+        </>
       );
     return (
       <EuiToolTip
@@ -87,7 +91,7 @@ export const EmbeddablePanelTitle = ({
         </span>
       </EuiToolTip>
     );
-  }, [description, titleComponent]);
+  }, [description, title, titleComponent]);
 
   return titleComponentWithDescription;
 };

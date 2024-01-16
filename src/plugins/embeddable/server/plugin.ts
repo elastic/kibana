@@ -32,6 +32,7 @@ import {
   EmbeddableRegistryDefinition,
 } from '../common/types';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
+import { initGetPanelExplanation } from './routes/panel_explanation';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
@@ -47,11 +48,14 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private migrateFn: PersistableStateMigrateFn | undefined;
 
   public setup(core: CoreSetup) {
+    const router = core.http.createRouter();
     const commonContract: CommonEmbeddableStartContract = {
       getEmbeddableFactory: this
         .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
+
+    initGetPanelExplanation({ router, core });
 
     this.migrateFn = getMigrateFunction(commonContract);
     return {
