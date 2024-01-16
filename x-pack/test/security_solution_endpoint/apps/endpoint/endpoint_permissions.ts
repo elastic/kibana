@@ -38,15 +38,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const ROLES: SecurityRoleName[] = [
       't1_analyst',
       't2_analyst',
-      't3_analyst',
       'rule_author',
       'soc_manager',
       'detections_admin',
       'platform_engineer',
-      'reader',
       'hunter',
       'hunter_no_actions',
-      'no_risk_engine_privileges',
     ];
 
     for (const role of ROLES) {
