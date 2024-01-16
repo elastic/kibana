@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // open the share menu and check that reporting is disabled
           await PageObjects.lens.clickShareMenu();
 
-          expect(await PageObjects.lens.isShareActionEnabled(`${type}Reports`));
+          expect(await PageObjects.lens.isShareActionEnabled(`imageExports`));
         });
 
         it(`should be able to download report of the current visualization`, async () => {
@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             field: 'bytes',
           });
 
-          await PageObjects.lens.openReportingShare(type);
+          await PageObjects.lens.openReportingShare();
           await PageObjects.reporting.clickGenerateReportButton();
           const url = await PageObjects.reporting.getReportURL(60000);
           expect(url).to.be.ok();
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it(`should show a warning message for curl reporting of unsaved visualizations`, async () => {
-          await PageObjects.lens.openReportingShare(type);
+          await PageObjects.lens.openReportingShare();
           await testSubjects.click('shareReportingAdvancedOptionsButton');
           await testSubjects.existOrFail('shareReportingUnsavedState');
           expect(await testSubjects.getVisibleText('shareReportingUnsavedState')).to.eql(
@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it(`should enable curl reporting if the visualization is saved`, async () => {
           await PageObjects.lens.save(`ASavedVisualizationToShareIn${type}`);
 
-          await PageObjects.lens.openReportingShare(type);
+          await PageObjects.lens.openReportingShare();
           await testSubjects.click('shareReportingAdvancedOptionsButton');
           await testSubjects.existOrFail('shareReportingCopyURL');
           expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql(

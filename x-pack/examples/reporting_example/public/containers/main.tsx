@@ -215,6 +215,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
         <reporting.components.ReportingModalPDFV2
           getJobParams={getPDFJobParamsDefault}
           onClose={closePopover}
+          objectType="dashboard"
         />
       ),
     },
@@ -226,6 +227,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
           layoutOption="canvas"
           getJobParams={getPDFJobParamsDefault}
           onClose={closePopover}
+          objectType="dashboard"
         />
       ),
     },
@@ -236,6 +238,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
         <reporting.components.ReportingModalPDFV2
           getJobParams={getPDFJobParamsDefaultV2}
           onClose={closePopover}
+          objectType="dashboard"
         />
       ),
     },
@@ -246,6 +249,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
         <reporting.components.ReportingModalPNGV2
           getJobParams={getPNGJobParamsDefaultV2}
           onClose={closePopover}
+          objectType="dashboard"
         />
       ),
     },
@@ -256,6 +260,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
         <reporting.components.ReportingModalPNGV2
           getJobParams={getCaptureTestPNGJobParams}
           onClose={closePopover}
+          objectType="dashboard"
         />
       ),
     },
@@ -266,6 +271,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
         <reporting.components.ReportingModalPDFV2
           getJobParams={getCaptureTestPDFJobParams(false)}
           onClose={closePopover}
+          objectType="dashboard"
         />
       ),
     },
@@ -277,6 +283,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
           layoutOption="print"
           getJobParams={getCaptureTestPDFJobParams(true)}
           onClose={closePopover}
+          objectType="dashboard"
         />
       ),
     },
