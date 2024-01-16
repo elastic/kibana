@@ -60,7 +60,11 @@ run(
       return acc;
     }, {} as Record<typeof checkTypes[number], { files: Array<{ path: string; file: File }> }>);
 
-    const diff = await git.diff(['--merge-base', 'main']);
+    const { current } = await git.branchLocal();
+
+    const commonAncestor = (await git.raw(['merge-base', 'origin/main', current])).trim();
+
+    const diff = await git.diff([`${commonAncestor}..${current}`]);
 
     const filesChangedSummaryTable = new Table({
       head: ['Files changed in this PR compared to upstream:', 'Status'],
@@ -119,7 +123,7 @@ run(
 
     if (!(await git.branchLocal().status()).isClean()) {
       const warning = new Table({
-        head: ['Warning'],
+        head: ['Warning: You have changes on your branch that are not committed or stashed!'],
         chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
         colWidths: [80],
         wordWrap: true,
@@ -127,10 +131,15 @@ run(
       });
 
       warning.push([
-        `You have changes that are not committed or stashed yet!
-Preflight checks will be peformed on your files including these changes. This might influence the outcome of these tests.
-For the best results either commit your changes, stash them, or reset your branch to HEAD before running this script.
+        `Preflight checks will be peformed on your files including these changes. 
+This might influence the outcome of these tests.
 `,
+      ]);
+
+      warning.push(['']);
+
+      warning.push([
+        'For the best results either commit your changes, stash them, or reset your branch to HEAD before running this script.',
       ]);
 
       log.info(warning.toString());
