@@ -12,6 +12,10 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
+    "@kbn/config-schema",
+    "@kbn/core-saved-objects-server",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": [
     "target/**/*",
