@@ -121,9 +121,7 @@ describe(
 
         goToRuleEditSettings();
 
-        // check if suppress settings display correctly
-        cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));
-
+        // check duration settings
         cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
           .eq(0)
           .should('be.enabled')
@@ -133,9 +131,11 @@ describe(
           .should('be.enabled')
           .should('have.value', 's');
 
-        cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).should('be.checked');
-
         selectAlertSuppressionPerRuleExecution();
+
+        // check if the rest of suppress settings display correctly
+        cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));
+        cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).should('be.checked');
 
         saveEditedRule();
 
