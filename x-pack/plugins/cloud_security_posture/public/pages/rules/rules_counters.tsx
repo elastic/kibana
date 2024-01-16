@@ -55,10 +55,20 @@ const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number
         baseTheme={charts.theme.useChartsBaseTheme()}
       />
       <Partition
-        id={'id'}
+        id={'evaluation-pie-chart'}
         data={[
-          { label: 'Failed', value: failed },
-          { label: 'Passed', value: passed },
+          {
+            label: i18n.translate('xpack.csp.rulesPage.evaluationPieChart.failedTitle', {
+              defaultMessage: 'Failed',
+            }),
+            value: failed,
+          },
+          {
+            label: i18n.translate('xpack.csp.rulesPage.evaluationPieChart.passedTitle', {
+              defaultMessage: 'Passed',
+            }),
+            value: passed,
+          },
         ]}
         valueGetter="percent"
         valueAccessor={(d) => d.value}
@@ -181,7 +191,6 @@ export const RulesCounters = () => {
             color="primary"
             fill
             href={benchmarkDynamicValues[benchmarkRulesStats.id].integrationLink}
-            target="_blank"
           >
             <FormattedMessage
               id="xpack.csp.rulesPage.rulesCounterEmptyState.emptyPrimapryButtonTitle"
@@ -226,7 +235,6 @@ export const RulesCounters = () => {
       button: (
         <EuiButtonEmpty
           iconType="pivot"
-          target="_blank"
           href={http.basePath.prepend(`/app/security${cloudPosturePages.dashboard.path}`)}
         >
           {i18n.translate('xpack.csp.rulesCounters.postureScoreButton', {
@@ -247,7 +255,6 @@ export const RulesCounters = () => {
       button: (
         <EuiButtonEmpty
           iconType="listAdd"
-          target="_blank"
           href={benchmarkDynamicValues[benchmarkRulesStats.id].integrationLink}
         >
           {i18n.translate('xpack.csp.rulesCounters.accountsEvaluatedButton', {
@@ -270,7 +277,6 @@ export const RulesCounters = () => {
       button: (
         <EuiButtonEmpty
           iconType="pivot"
-          target="_blank"
           onClick={() =>
             navToFindings({
               'result.evaluation': RULE_FAILED,
