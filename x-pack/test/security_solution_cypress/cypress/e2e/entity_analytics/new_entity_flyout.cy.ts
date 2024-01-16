@@ -27,6 +27,7 @@ import {
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_TITLE,
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
 } from '../../screens/asset_criticality/flyouts';
+import { deleteCriticality } from '../../tasks/api_calls/entity_analytics';
 
 const USER_NAME = 'user1';
 const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
@@ -56,6 +57,8 @@ describe(
     after(() => {
       cy.task('esArchiverUnload', 'risk_scores_new_complete_data');
       deleteAlertsAndRules(); // esArchiverUnload doesn't work properly when using with `useCreate` and `docsOnly` flags
+      deleteCriticality({ idField: 'host.name', idValue: SIEM_KIBANA_HOST_NAME });
+      deleteCriticality({ idField: 'user.name', idValue: USER_NAME });
     });
 
     beforeEach(() => {
