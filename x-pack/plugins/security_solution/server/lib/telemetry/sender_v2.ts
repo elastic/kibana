@@ -136,7 +136,7 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
   public async stop(): Promise<void> {
     this.logger.l(`Stopping ${TelemetryEventsSenderV2.name}`);
 
-    this.ensureStatus(ServiceStatus.STARTED);
+    this.ensureStatus(ServiceStatus.CONFIGURED, ServiceStatus.STARTED);
 
     const finishPromise = rx.firstValueFrom(this.finished$);
     this.events$.complete();
