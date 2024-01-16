@@ -10,6 +10,8 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { EuiPanel, EuiAccordion, EuiTablePagination } from '@elastic/eui';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
+import { useFetchRulesForSlo } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+
 import { SloListItems } from '../slo_list_items';
 
 interface Props {
@@ -39,6 +41,9 @@ export function GroupListView({ isCompact, group, kqlQuery }: Props) {
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
+  const { data: rulesBySlo } = useFetchRulesForSlo({
+    sloIds: sloIdsAndInstanceIds.map((item) => item[0]),
+  });
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
@@ -55,6 +60,7 @@ export function GroupListView({ isCompact, group, kqlQuery }: Props) {
             loading={isLoading || isRefetching}
             error={isError}
             isCompact={isCompact}
+            rulesBySlo={rulesBySlo}
           />
           <EuiTablePagination
             pageCount={Math.ceil(total / ITEMS_PER_PAGE)}
