@@ -243,6 +243,13 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
           timeout: 10000,
         })
         .then((r) => {
+          this.senderUtils?.incrementCounter(
+            TelemetryCounter.HTTP_STATUS,
+            events.length,
+            channel,
+            r.status.toString()
+          );
+
           if (r.status < 400) {
             return { events: events.length, channel };
           } else {
@@ -251,10 +258,18 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
           }
         })
         .catch((err) => {
+          this.senderUtils?.incrementCounter(
+            TelemetryCounter.RUNTIME_ERROR,
+            events.length,
+            channel
+          );
+
           this.logger.l(`Runtime error: ${err.message}`);
           throw newFailure(`Error posting events: ${err}`, channel, events.length);
         });
     } catch (err: unknown) {
+      this.senderUtils?.incrementCounter(TelemetryCounter.FATAL_ERROR, events.length, channel);
+
       throw newFailure(`Unexpected error posting events: ${err}`, channel, events.length);
     }
   }

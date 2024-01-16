@@ -100,6 +100,9 @@ export enum TelemetryCounter {
   DOCS_SENT = 'docs_sent',
   DOCS_LOST = 'docs_lost',
   DOCS_DROPPED = 'docs_dropped',
+  HTTP_STATUS = 'http_status',
+  RUNTIME_ERROR = 'runtime_error',
+  FATAL_ERROR = 'fatal_error',
 }
 
 // EP Policy Response

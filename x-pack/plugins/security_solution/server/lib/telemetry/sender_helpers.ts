@@ -40,12 +40,14 @@ export class SenderUtils {
       clusterInfo,
       telemetryRequestHeaders: () => {
         const clusterName = clusterInfo?.cluster_name;
+        const clusterUuid = clusterInfo?.cluster_uuid;
         const clusterVersionNumber = clusterInfo?.version?.number;
         const licenseId = licenseInfo?.uid;
 
         return {
           'Content-Type': 'application/x-ndjson',
           ...(clusterName ? { 'X-Elastic-Cluster-Name': clusterName } : undefined),
+          ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         };
