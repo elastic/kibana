@@ -48,7 +48,7 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
 
   return (
     <EuiButton
-      data-test-subj="transformEditFlyoutUpdateButton"
+      data-test-subj="editTransformFlyoutUpdateButton"
       onClick={submitFormHandler}
       fill
       isDisabled={isUpdateButtonDisabled}

@@ -52,7 +52,7 @@ export const EditTransformIngestPipeline: FC = () => {
               contentAriaLabel={ingestPipelineLabel}
             >
               <EuiComboBox
-                data-test-subj="transformEditFlyoutDestinationIngestPipelineFieldSelect"
+                data-test-subj="editTransformFlyoutDestinationIngestPipelineFieldSelect"
                 aria-label={i18n.translate(
                   'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectAriaLabel',
                   {

@@ -15,20 +15,20 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
 
   return {
     async assertTransformEditFlyoutExists() {
-      await testSubjects.existOrFail('transformEditFlyout');
+      await testSubjects.existOrFail('editTransformFlyout');
     },
 
     async assertTransformEditFlyoutMissing() {
-      await testSubjects.missingOrFail('transformEditFlyout');
+      await testSubjects.missingOrFail('editTransformFlyout');
     },
 
     async assertTransformEditFlyoutInputExists(input: string) {
-      await testSubjects.existOrFail(`transformEditFlyout${input}Input`);
+      await testSubjects.existOrFail(`editTransformFlyout${input}Input`);
     },
 
     async assertTransformEditFlyoutInputValue(input: string, expectedValue: string) {
       const actualValue = await testSubjects.getAttribute(
-        `transformEditFlyout${input}Input`,
+        `editTransformFlyout${input}Input`,
         'value'
       );
       expect(actualValue).to.eql(
@@ -38,18 +38,18 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async assertTransformEditFlyoutIngestPipelineFieldSelectExists() {
-      await testSubjects.existOrFail(`transformEditFlyoutDestinationIngestPipelineFieldSelect`);
+      await testSubjects.existOrFail(`editTransformFlyoutDestinationIngestPipelineFieldSelect`);
     },
 
     async assertTransformEditFlyoutRetentionPolicySwitchEnabled(expectedValue: boolean) {
-      await testSubjects.existOrFail(`transformEditRetentionPolicySwitch`, {
+      await testSubjects.existOrFail(`transformRetentionPolicySwitch`, {
         timeout: 1000,
       });
       await retry.tryForTime(5000, async () => {
-        const isEnabled = await testSubjects.isEnabled(`transformEditRetentionPolicySwitch`);
+        const isEnabled = await testSubjects.isEnabled(`transformRetentionPolicySwitch`);
         expect(isEnabled).to.eql(
           expectedValue,
-          `Expected 'transformEditRetentionPolicySwitch' input to be '${
+          `Expected 'transformRetentionPolicySwitch' input to be '${
             expectedValue ? 'enabled' : 'disabled'
           }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
         );
@@ -57,16 +57,16 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(expectedValue: boolean) {
-      await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
+      await testSubjects.existOrFail(`editTransformFlyoutRetentionPolicyFieldSelect`, {
         timeout: 1000,
       });
       await retry.tryForTime(5000, async () => {
         const isEnabled = await testSubjects.isEnabled(
-          `transformEditFlyoutRetentionPolicyFieldSelect`
+          `editTransformFlyoutRetentionPolicyFieldSelect`
         );
         expect(isEnabled).to.eql(
           expectedValue,
-          `Expected 'transformEditFlyoutRetentionPolicyFieldSelect' input to be '${
+          `Expected 'editTransformFlyoutRetentionPolicyFieldSelect' input to be '${
             expectedValue ? 'enabled' : 'disabled'
           }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
         );
@@ -74,11 +74,11 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async assertTransformEditFlyoutRetentionPolicyFieldSelectValue(expectedValue: string) {
-      await testSubjects.existOrFail(`transformEditFlyoutRetentionPolicyFieldSelect`, {
+      await testSubjects.existOrFail(`editTransformFlyoutRetentionPolicyFieldSelect`, {
         timeout: 1000,
       });
       const actualValue = await testSubjects.getAttribute(
-        'transformEditFlyoutRetentionPolicyFieldSelect',
+        'editTransformFlyoutRetentionPolicyFieldSelect',
         'value'
       );
       expect(actualValue).to.eql(
@@ -89,15 +89,15 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
 
     async setTransformEditFlyoutRetentionPolicyFieldSelectValue(fieldOptionValue: string) {
       await testSubjects.selectValue(
-        'transformEditFlyoutRetentionPolicyFieldSelect',
+        'editTransformFlyoutRetentionPolicyFieldSelect',
         fieldOptionValue
       );
       await this.assertTransformEditFlyoutRetentionPolicyFieldSelectValue(fieldOptionValue);
     },
 
     async assertTransformEditFlyoutInputEnabled(input: string, expectedValue: boolean) {
-      await testSubjects.existOrFail(`transformEditFlyout${input}Input`, { timeout: 1000 });
-      const isEnabled = await testSubjects.isEnabled(`transformEditFlyout${input}Input`);
+      await testSubjects.existOrFail(`editTransformFlyout${input}Input`, { timeout: 1000 });
+      const isEnabled = await testSubjects.isEnabled(`editTransformFlyout${input}Input`);
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected '${input}' input to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -118,7 +118,7 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async clickTransformEditRetentionPolicySettings(expectExists: boolean) {
-      await testSubjects.click('transformEditRetentionPolicySwitch');
+      await testSubjects.click('transformRetentionPolicySwitch');
       if (expectExists) {
         await testSubjects.existOrFail('transformEditRetentionPolicyContent');
       } else {
@@ -127,18 +127,18 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async setTransformEditFlyoutInputValue(input: string, value: string) {
-      await testSubjects.setValue(`transformEditFlyout${input}Input`, value, {
+      await testSubjects.setValue(`editTransformFlyout${input}Input`, value, {
         clearWithKeyboard: true,
       });
       await this.assertTransformEditFlyoutInputValue(input, value);
     },
 
     async assertUpdateTransformButtonExists() {
-      await testSubjects.existOrFail('transformEditFlyoutUpdateButton');
+      await testSubjects.existOrFail('editTransformFlyoutUpdateButton');
     },
 
     async assertUpdateTransformButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('transformEditFlyoutUpdateButton');
+      const isEnabled = await testSubjects.isEnabled('editTransformFlyoutUpdateButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "Update" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
@@ -148,7 +148,7 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async updateTransform() {
-      await testSubjects.click('transformEditFlyoutUpdateButton');
+      await testSubjects.click('editTransformFlyoutUpdateButton');
       await retry.tryForTime(5000, async () => {
         await this.assertTransformEditFlyoutMissing();
       });
