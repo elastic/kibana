@@ -10,6 +10,7 @@ export enum BUCKET_TYPES {
   FILTER = 'filter',
   FILTERS = 'filters',
   HISTOGRAM = 'histogram',
+  IP_PREFIX = 'ip_prefix',
   IP_RANGE = 'ip_range',
   DATE_RANGE = 'date_range',
   RANGE = 'range',
