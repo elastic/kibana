@@ -97,7 +97,7 @@ export class DataStreamSpacesAdapter extends DataStreamAdapter {
     return this._installSpace(spaceId);
   }
 
-  public async getSpaceIndexName(spaceId: string): Promise<string | undefined> {
+  public async getInstalledSpaceName(spaceId: string): Promise<string | undefined> {
     return this.installedSpaceDataStreamName.get(spaceId);
   }
 }

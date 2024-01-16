@@ -80,7 +80,7 @@ describe('ResultsDataStream', () => {
     });
   });
 
-  describe('getSpaceIndexName', () => {
+  describe('installSpace', () => {
     it('should install space', async () => {
       const resultsDataStream = new ResultsDataStream({ kibanaVersion: '8.13.0' });
       const params: InstallParams = {
@@ -92,15 +92,15 @@ describe('ResultsDataStream', () => {
       (dataStreamSpacesAdapter.install as jest.Mock).mockResolvedValueOnce(undefined);
 
       await resultsDataStream.install(params);
-      await resultsDataStream.getSpaceIndexName('space1');
+      await resultsDataStream.installSpace('space1');
 
-      expect(dataStreamSpacesAdapter.getSpaceIndexName).toHaveBeenCalledWith('space1');
+      expect(dataStreamSpacesAdapter.getInstalledSpaceName).toHaveBeenCalledWith('space1');
       expect(dataStreamSpacesAdapter.installSpace).toHaveBeenCalledWith('space1');
     });
 
     it('should not install space if install not executed', async () => {
       const resultsDataStream = new ResultsDataStream({ kibanaVersion: '8.13.0' });
-      expect(resultsDataStream.getSpaceIndexName('space1')).rejects.toThrowError();
+      expect(resultsDataStream.installSpace('space1')).rejects.toThrowError();
     });
 
     it('should throw error if main install had error', async () => {
@@ -115,7 +115,7 @@ describe('ResultsDataStream', () => {
       (dataStreamSpacesAdapter.install as jest.Mock).mockRejectedValueOnce(error);
       await resultsDataStream.install(params);
 
-      expect(resultsDataStream.getSpaceIndexName('space1')).rejects.toThrowError(error);
+      expect(resultsDataStream.installSpace('space1')).rejects.toThrowError(error);
     });
   });
 });

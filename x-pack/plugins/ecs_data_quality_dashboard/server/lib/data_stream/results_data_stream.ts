@@ -54,17 +54,16 @@ export class ResultsDataStream {
     }
   }
 
-  async getSpaceIndexName(spaceId: string) {
+  async installSpace(spaceId: string): Promise<string> {
     if (!this.installPromise) {
       throw new Error('Results data stream not installed');
     }
     // wait for install to complete, may reject if install failed, routes should handle this
     await this.installPromise;
-
-    let indexName = await this.dataStream.getSpaceIndexName(spaceId);
-    if (!indexName) {
-      indexName = await this.dataStream.installSpace(spaceId);
+    let dataStreamName = await this.dataStream.getInstalledSpaceName(spaceId);
+    if (!dataStreamName) {
+      dataStreamName = await this.dataStream.installSpace(spaceId);
     }
-    return indexName;
+    return dataStreamName;
   }
 }

@@ -61,10 +61,10 @@ export class EcsDataQualityDashboardPlugin
       'dataQualityDashboard'
     >('dataQualityDashboard', (_context, request) => {
       const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-      const getResultsIndexName = async (): Promise<string> =>
-        this.resultsDataStream.getSpaceIndexName(spaceId);
-
-      return { spaceId, getResultsIndexName };
+      return {
+        spaceId,
+        getResultsIndexName: async () => this.resultsDataStream.installSpace(spaceId),
+      };
     });
 
     const router = core.http.createRouter<DataQualityDashboardRequestHandlerContext>();
