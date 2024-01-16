@@ -28,7 +28,7 @@ import { LogDateRow } from './log_date_row';
 import { LogEntry } from '../../../../common/log_entry';
 import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
-interface ScrollableLogTextStreamViewProps {
+export interface ScrollableLogTextStreamViewProps {
   columnConfigurations: LogColumnRenderConfiguration[];
   items: StreamItem[];
   scale: TextScale;
