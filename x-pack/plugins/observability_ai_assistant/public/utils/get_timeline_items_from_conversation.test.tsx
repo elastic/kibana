@@ -266,7 +266,8 @@ describe('getTimelineItemsFromConversation', () => {
         'my_render_function',
         JSON.stringify({ foo: 'bar' }),
         { content: '[]', name: 'my_render_function', role: 'user' },
-        expect.any(Function)
+        expect.any(Function),
+        undefined
       );
 
       expect(container.textContent).toEqual('Rendered');
