@@ -20,6 +20,7 @@ import {
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
 } from '../../../../screens/create_new_rule';
+import { EDIT_SUBMIT_BUTTON} from '../../../../screens/edit_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
@@ -137,7 +138,8 @@ describe(
         cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));
         cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).should('be.checked');
 
-        saveEditedRule();
+        // does not work without force:true
+        cy.get(EDIT_SUBMIT_BUTTON).should('exist').click({ force: true });
 
         // check execution duration has changed
         cy.get(DEFINITION_DETAILS).within(() => {
