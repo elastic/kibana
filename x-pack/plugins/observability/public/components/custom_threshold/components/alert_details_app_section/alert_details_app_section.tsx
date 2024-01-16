@@ -115,7 +115,7 @@ export default function AlertDetailsAppSection({
         value: <Groups groups={groups} />,
       });
     }
-    if (tags) {
+    if (tags && tags.length > 0) {
       alertSummaryFields.push({
         label: i18n.translate(
           'xpack.observability.customThreshold.rule.alertDetailsAppSection.summaryField.tags',

@@ -95,7 +95,7 @@ export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
   groupBy?: string | string[];
 }
 export interface CustomThresholdAlertFields {
-  [ALERT_GROUP]: Array<{ field: string; value: string }>;
+  [ALERT_GROUP]?: Array<{ field: string; value: string }>;
 }
 
 export const expressionTimestampsRT = rt.type({

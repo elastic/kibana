@@ -6,6 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { CustomThresholdAlertFields } from '../types';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
 import {
@@ -145,7 +147,8 @@ export const buildCustomThresholdRule = (
 };
 
 export const buildCustomThresholdAlert = (
-  alert: Partial<CustomThresholdAlert> = {}
+  alert: Partial<CustomThresholdAlert> = {},
+  alertFields: Partial<ParsedTechnicalFields & CustomThresholdAlertFields> = {}
 ): CustomThresholdAlert => {
   return {
     link: '/app/metrics/explorer',
@@ -215,6 +218,7 @@ export const buildCustomThresholdAlert = (
       'kibana.version': '8.8.0',
       'kibana.alert.flapping': false,
       'kibana.alert.rule.revision': 1,
+      ...alertFields,
     },
     active: true,
     start: 1678716383695,
