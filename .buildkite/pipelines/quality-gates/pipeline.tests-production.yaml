@@ -30,6 +30,7 @@ steps:
     soft_fail:
       # A manual cancel of that step produces return code 255.
       # We're treating this case as a soft fail to allow manual bake time skipping.
+      # To stop the promotion entirely, instead click the "Cancel" button at the top of the page
       - exit_status: 255
     agents:
       # How long can this agent live for in minutes - 25 hours
