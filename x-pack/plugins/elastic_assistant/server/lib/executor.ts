@@ -10,13 +10,15 @@ import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/s
 import { KibanaRequest } from '@kbn/core-http-server';
 import { Stream } from 'openai/src/streaming';
 import { ChatCompletionChunk } from 'openai/src/resources/chat/completions';
-import { Readable, PassThrough } from 'stream';
+import { streamFactory } from '@kbn/ml-response-stream/server';
+import { Logger } from '@kbn/logging';
 import { RequestBody } from './langchain/types';
 
 export interface Props {
   actions: ActionsPluginStart;
   connectorId: string;
   request: KibanaRequest<unknown, unknown, RequestBody>;
+  logger: Logger;
 }
 interface StaticResponse {
   connector_id: string;
@@ -30,6 +32,7 @@ export const executeAction = async ({
   actions,
   request,
   connectorId,
+  logger,
 }: Props): Promise<StaticResponse | StreamResponse> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
@@ -58,30 +61,28 @@ export const executeAction = async ({
     readableTy: typeof readable.iterator,
   });
 
+  const {
+    end: streamEnd,
+    push,
+    responseWithHeaders,
+  } = streamFactory<any>(request.headers, logger, false, false);
+
   if (typeof readable?.toReadableStream !== 'function') {
     throw new Error('Action result status is error: result is not streamable');
   }
-  // for await (const chunk of readable) {
-  //   console.log('chunk', chunk);
-  // }
+  async function readStream() {
+    for await (const chunk of readable) {
+      const delta = chunk.choices[0].delta;
+      if (delta.content && delta.content.length > 0) {
+        console.log('SERVER CHUNK', delta.content);
+        push(delta.content);
+      }
+    }
+    console.log('stream end');
+    streamEnd();
+  }
+  // Do not call this using `await` so it will run asynchronously while we return the stream in responseWithHeaders
+  readStream();
 
-  console.log('before toReadableStream');
-  const rs = readable.toReadableStream();
-  console.log('after toReadableStream', rs);
-  return Readable.from(rs).pipe(new PassThrough());
-  // const transformStream = readable.toReadableStream();
-  //   new ReadableStream({
-  //   async start(controller) {
-  //     for await (const chunk of readable) {
-  //       console.log('chunk', chunk);
-  //       controller.enqueue(chunk);
-  //     }
-  //     controller.close();
-  //   },
-  // });
-  console.timeEnd('transformStream');
-  console.log('transformStream', transformStream);
-
-  return Readable.from(transformStream).pipe(new PassThrough());
-  return transformStream; // .pipe(new PassThrough());
+  return responseWithHeaders;
 };

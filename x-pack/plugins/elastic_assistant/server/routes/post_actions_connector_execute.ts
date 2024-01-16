@@ -60,7 +60,7 @@ export const postActionsConnectorExecuteRoute = (
           !requestHasRequiredAnonymizationParams(request)
         ) {
           logger.debug('Executing via actions framework directly');
-          const result = await executeAction({ actions, request, connectorId });
+          const result = await executeAction({ actions, request, connectorId, logger });
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
@@ -72,11 +72,7 @@ export const postActionsConnectorExecuteRoute = (
           // }
           //
           // response.end();
-          return response.ok({
-            body: result,
-
-            headers: { 'Content-Type': 'text/plain' },
-          });
+          return response.ok(result);
         }
 
         // TODO: Add `traceId` to actions request when calling via langchain
