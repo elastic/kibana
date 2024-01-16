@@ -273,7 +273,7 @@ export class ChromeService {
       }
     };
 
-    const setSideNavComponent = (component: ISideNavComponent | null) => {
+    const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
       validateChromeStyle();
       projectNavigation.setSideNavComponent(component);
     };
@@ -544,7 +544,7 @@ export class ChromeService {
         setProjectName,
         initNavigation: initProjectNavigation,
         getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
-        setSideNavComponent,
+        setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
       },
