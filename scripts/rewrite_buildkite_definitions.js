@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/rewrite_buildkite_agent_rules');
+require('../src/dev/buildkite_migration/rewrite_buildkite_agent_rules');
