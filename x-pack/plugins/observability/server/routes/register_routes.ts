@@ -7,6 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import {
@@ -37,6 +38,7 @@ export interface RegisterRoutesDependencies {
   spaces?: SpacesPluginStart;
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
+  getRacClientWithRequest: (request: KibanaRequest) => Promise<AlertsClient>;
 }
 
 export function registerRoutes({ config, repository, core, logger, dependencies }: RegisterRoutes) {

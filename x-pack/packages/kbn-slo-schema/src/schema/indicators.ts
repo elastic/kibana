@@ -265,6 +265,15 @@ const indicatorSchema = t.union([
   histogramIndicatorSchema,
 ]);
 
+const indicators: t.OutputOf<typeof indicatorTypesSchema> = [
+  'sli.apm.transactionDuration',
+  'sli.apm.transactionErrorRate',
+  'sli.kql.custom',
+  'sli.metric.custom',
+  'sli.metric.timeslice',
+  'sli.histogram.custom',
+];
+
 export {
   apmTransactionDurationIndicatorSchema,
   apmTransactionDurationIndicatorTypeSchema,
@@ -289,4 +298,5 @@ export {
   indicatorTypesArraySchema,
   indicatorTypesSchema,
   indicatorDataSchema,
+  indicators,
 };

@@ -436,6 +436,14 @@ export class Plugin
     const { application } = coreStart;
     const config = this.initContext.config.get();
 
+    pluginsStart.observabilityAIAssistant.service.register(async ({ registerRenderFunction }) => {
+      const mod = await import('./assistant_functions');
+
+      mod.registerAssistantFunctions({
+        registerRenderFunction,
+      });
+    });
+
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,

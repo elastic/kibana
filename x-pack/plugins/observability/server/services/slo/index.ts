@@ -20,4 +20,5 @@ export * from './transform_manager';
 export * from './summay_transform_manager';
 export * from './update_slo';
 export * from './summary_client';
+export * from './summary_search_client';
 export * from './get_slo_instances';
