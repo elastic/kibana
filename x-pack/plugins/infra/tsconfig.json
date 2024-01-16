@@ -79,7 +79,8 @@
     "@kbn/profiling-utils",
     "@kbn/profiling-data-access-plugin",
     "@kbn/core-http-request-handler-context-server",
-    "@kbn/observability-get-padded-alert-time-range-util"
+    "@kbn/observability-get-padded-alert-time-range-util",
+    "@kbn/ebt-tools"
   ],
   "exclude": ["target/**/*"]
 }
