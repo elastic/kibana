@@ -60,7 +60,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
         return;
       }
 
-      if (agentType === 'sentinel_one' && !isEnterpriseLicense) {
+      if (agentType !== 'endpoint' && !isEnterpriseLicense) {
         window.console.error(new Error(`Access denied to ${agentType} response actions console`));
         return;
       }
