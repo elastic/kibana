@@ -16,7 +16,7 @@ enum ExternalPageName {
 const AddIntegrationButtonComponent: React.FC = () => (
   <LinkButton id={ExternalPageName.integrationsSecurity} fill className="step-paragraph">
     <FormattedMessage
-      id="xpack.securitySolutionServerless.getStarted.togglePanel.configure.step3.description2.button"
+      id="xpack.securitySolution.getStarted.togglePanel.configure.step3.description2.button"
       defaultMessage="Add integrations"
     />
   </LinkButton>

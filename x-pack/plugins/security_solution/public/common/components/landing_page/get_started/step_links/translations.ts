@@ -8,56 +8,53 @@
 import { i18n } from '@kbn/i18n';
 
 export const MANAGE_PROJECTS = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.manageProjects',
+  'xpack.securitySolution.getStarted.task.manageProjects',
   {
     defaultMessage: 'Manage projects',
   }
 );
 
 export const ADD_ELASTIC_RULES = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.addElasticRules',
+  'xpack.securitySolution.getStarted.task.addElasticRules',
   {
     defaultMessage: 'Add Elastic rules',
   }
 );
 
 export const ADD_ELASTIC_RULES_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.addElasticRules.callout.title',
+  'xpack.securitySolution.getStarted.task.addElasticRules.callout.title',
   {
     defaultMessage: 'add Elastic rules',
   }
 );
 
 export const ADD_INTEGRATIONS_STEP = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.addIntegrationsStep.title',
+  'xpack.securitySolution.getStarted.task.addIntegrationsStep.title',
   {
     defaultMessage: 'Add integrations step',
   }
 );
 
-export const VIEW_ALERTS = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.viewAlerts',
-  {
-    defaultMessage: 'View alerts',
-  }
-);
+export const VIEW_ALERTS = i18n.translate('xpack.securitySolution.getStarted.task.viewAlerts', {
+  defaultMessage: 'View alerts',
+});
 
 export const VIEW_ALERTS_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.viewAlerts.callout.title',
+  'xpack.securitySolution.getStarted.task.viewAlerts.callout.title',
   {
     defaultMessage: 'view alerts',
   }
 );
 
 export const GO_TO_DASHBOARDS = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.goToDashboards',
+  'xpack.securitySolution.getStarted.task.goToDashboards',
   {
     defaultMessage: 'Go to dashboards',
   }
 );
 
 export const VIEW_DASHBOARDS_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.task.viewDashboards.callout.title',
+  'xpack.securitySolution.getStarted.task.viewDashboards.callout.title',
   {
     defaultMessage: 'view dashboards',
   }
