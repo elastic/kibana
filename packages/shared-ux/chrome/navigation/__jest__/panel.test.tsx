@@ -7,101 +7,102 @@
  */
 import './setup_jest_mocks';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { BehaviorSubject, of } from 'rxjs';
+import type {
+  ChromeProjectNavigationNode,
+  NavigationTreeDefinitionUI,
+} from '@kbn/core-chrome-browser';
 
-import type { RootNavigationItemDefinition } from '../src/ui/types';
 import { PanelContentProvider } from '../src/ui';
-import { renderNavigation, getMockFn, ProjectNavigationChangeListener } from './utils';
+import { renderNavigation } from './utils';
 
 describe('Panel', () => {
   test('should render group as panel opener', async () => {
-    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const navigationBody: RootNavigationItemDefinition[] = [
-      {
-        type: 'navGroup',
-        id: 'root',
-        isCollapsible: false,
-        children: [
-          {
-            id: 'group1',
-            link: 'dashboards',
-            renderAs: 'panelOpener',
-            children: [{ link: 'management' }],
-          },
-        ],
-      },
-    ];
+    const navigationTree: NavigationTreeDefinitionUI = {
+      body: [
+        {
+          id: 'root',
+          title: 'Root',
+          path: 'root',
+          isCollapsible: false,
+          children: [
+            {
+              id: 'group1',
+              title: 'Group 1',
+              href: '/app/item1',
+              path: 'root.group1',
+              renderAs: 'panelOpener',
+              children: [
+                {
+                  id: 'item1',
+                  title: 'Item 1',
+                  href: '/app/item1',
+                  path: 'root.group1.item1',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
 
     const { findByTestId, queryByTestId } = renderNavigation({
-      navTreeDef: { body: navigationBody },
-      onProjectNavigationChange,
+      navTreeDef: of(navigationTree),
     });
 
     expect(await findByTestId(/panelOpener-root.group1/)).toBeVisible();
     expect(queryByTestId(/sideNavPanel/)).toBeNull();
     (await findByTestId(/panelOpener-root.group1/)).click(); // open the panel
     expect(queryByTestId(/sideNavPanel/)).toBeVisible();
-
-    expect(onProjectNavigationChange).toHaveBeenCalled();
-    const lastCall =
-      onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
-    const [{ navigationTree }] = lastCall;
-
-    const [root] = navigationTree;
-    expect(root.id).toBe('root');
-    expect(root.children?.[0]).toMatchObject({
-      id: 'group1',
-      renderAs: 'panelOpener',
-      children: [
-        {
-          id: 'management',
-          title: 'Deeplink management',
-        },
-      ],
-    });
   });
 
   test('should not render group if all children are hidden', async () => {
-    const onProjectNavigationChange = getMockFn<ProjectNavigationChangeListener>();
-
-    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-      {
-        type: 'navGroup',
-        id: 'root',
-        isCollapsible: false,
-        children: [
-          {
-            id: 'group1',
-            link: 'dashboards',
-            renderAs: 'panelOpener',
-            children: [{ link: 'unknown' }],
-          },
-          {
-            id: 'group2',
-            link: 'dashboards',
-            renderAs: 'panelOpener',
-            children: [{ link: 'management', sideNavStatus: 'hidden' }],
-          },
-          {
-            id: 'group3',
-            link: 'dashboards',
-            renderAs: 'panelOpener',
-            children: [{ link: 'management' }], // sideNavStatus is "visible" by default
-          },
-        ],
-      },
-    ];
+    const navigationTree: NavigationTreeDefinitionUI = {
+      body: [
+        {
+          id: 'root',
+          title: 'Root',
+          path: 'root',
+          isCollapsible: false,
+          children: [
+            {
+              id: 'group1',
+              title: 'Group 1',
+              path: 'root.group1',
+              href: '/app/item1',
+              renderAs: 'panelOpener',
+              children: [
+                // All children are hidden, this group should not render
+                {
+                  id: 'item1',
+                  title: 'Item 1',
+                  href: '/app/item1',
+                  path: 'root.group1.item1',
+                  sideNavStatus: 'hidden',
+                },
+              ],
+            },
+            {
+              id: 'group2',
+              title: 'Group 2',
+              path: 'root.group2',
+              renderAs: 'panelOpener',
+              children: [
+                // sideNavStatus is "visible" by default
+                { id: 'item1', title: 'Item 1', href: '/app/item1', path: 'root.group2.item1' },
+              ],
+            },
+          ],
+        },
+      ],
+    };
 
     const { queryByTestId } = renderNavigation({
-      navTreeDef: { body: navigationBody },
-      onProjectNavigationChange,
+      navTreeDef: of(navigationTree),
     });
 
     expect(queryByTestId(/panelOpener-root.group1/)).toBeNull();
-    expect(queryByTestId(/panelOpener-root.group2/)).toBeNull();
-    expect(queryByTestId(/panelOpener-root.group3/)).toBeVisible();
+    expect(queryByTestId(/panelOpener-root.group2/)).toBeVisible();
   });
 
   describe('custom content', () => {
@@ -142,30 +143,42 @@ describe('Panel', () => {
         ],
       ]);
 
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          isCollapsible: false,
-          children: [
-            {
-              id: 'group1',
-              link: 'dashboards',
-              renderAs: 'panelOpener',
-              children: [{ link: 'management' }],
-            },
-          ],
-        },
-      ];
+      const navTree: NavigationTreeDefinitionUI = {
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            path: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
+                renderAs: 'panelOpener',
+                children: [
+                  { id: 'item1', title: 'Item 1', href: '/app/item1', path: 'root.group1.item1' },
+                ],
+              },
+            ],
+          },
+        ],
+      };
 
       const { queryByTestId } = renderNavigation({
-        navTreeDef: { body: navigationBody },
+        navTreeDef: of(navTree),
         panelContentProvider,
         services: { activeNodes$ },
       });
 
+      expect(queryByTestId(/sideNavPanel/)).toBeNull();
+      expect(queryByTestId(/customPanelContent/)).toBeNull();
+
       queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
 
+      expect(queryByTestId(/sideNavPanel/)).not.toBeNull();
+      expect(queryByTestId(/customPanelContent/)).not.toBeNull();
       expect(queryByTestId(/customPanelContent/)).toBeVisible();
       // Test that the selected node is correclty passed
       expect(queryByTestId(/customPanelSelectedNode/)?.textContent).toBe('root.group1');
@@ -180,34 +193,56 @@ describe('Panel', () => {
 
   describe('auto generated content', () => {
     test('should rendre block groups with title', async () => {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          isCollapsible: false,
-          children: [
-            {
-              id: 'group1',
-              link: 'dashboards',
-              renderAs: 'panelOpener',
-              children: [
-                {
-                  id: 'foo',
-                  title: 'Foo',
-                  children: [
-                    { id: 'item1', link: 'management', title: 'Item 1' },
-                    { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
-                    { id: 'item3', link: 'management', title: 'Item 3' },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ];
+      const navTree: NavigationTreeDefinitionUI = {
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            path: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    id: 'foo',
+                    title: 'Foo',
+                    path: 'root.group1.foo',
+                    children: [
+                      {
+                        id: 'item1',
+                        href: '/app/item1',
+                        path: 'root.group2.foo.item1',
+                        title: 'Item 1',
+                      },
+                      {
+                        id: 'item2',
+                        href: '/app/item2',
+                        path: 'root.group2.foo.item2',
+                        title: 'Item 2',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'item3',
+                        href: '/app/item3',
+                        path: 'root.group2.foo.item3',
+                        title: 'Item 3',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
 
       const { queryByTestId, queryAllByTestId } = renderNavigation({
-        navTreeDef: { body: navigationBody },
+        navTreeDef: of(navTree),
       });
 
       queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
@@ -224,33 +259,56 @@ describe('Panel', () => {
     });
 
     test('should rendre block groups without title', async () => {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          isCollapsible: false,
-          children: [
-            {
-              id: 'group1',
-              link: 'dashboards',
-              renderAs: 'panelOpener',
-              children: [
-                {
-                  id: 'foo',
-                  children: [
-                    { id: 'item1', link: 'management', title: 'Item 1' },
-                    { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
-                    { id: 'item3', link: 'management', title: 'Item 3' },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ];
+      const navTree: NavigationTreeDefinitionUI = {
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            path: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    id: 'foo',
+                    title: '', // Empty title are not rendered
+                    path: 'root.group1.foo',
+                    children: [
+                      {
+                        id: 'item1',
+                        href: '/app/item1',
+                        path: 'root.group2.foo.item1',
+                        title: 'Item 1',
+                      },
+                      {
+                        id: 'item2',
+                        href: '/app/item2',
+                        path: 'root.group2.foo.item2',
+                        title: 'Item 2',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'item3',
+                        href: '/app/item3',
+                        path: 'root.group2.foo.item3',
+                        title: 'Item 3',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
 
       const { queryByTestId, queryAllByTestId } = renderNavigation({
-        navTreeDef: { body: navigationBody },
+        navTreeDef: of(navTree),
       });
 
       queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
@@ -266,35 +324,57 @@ describe('Panel', () => {
     });
 
     test('should rendre accordion groups', async () => {
-      const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-        {
-          type: 'navGroup',
-          id: 'root',
-          isCollapsible: false,
-          children: [
-            {
-              id: 'group1',
-              link: 'dashboards',
-              renderAs: 'panelOpener',
-              children: [
-                {
-                  id: 'foo',
-                  title: 'Foo',
-                  renderAs: 'accordion',
-                  children: [
-                    { id: 'item1', link: 'management', title: 'Item 1' },
-                    { id: 'item2', link: 'management', title: 'Item 2', sideNavStatus: 'hidden' },
-                    { id: 'item3', link: 'management', title: 'Item 3' },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ];
+      const navTree: NavigationTreeDefinitionUI = {
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            path: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    id: 'foo',
+                    title: 'Foo',
+                    path: 'root.group1.foo',
+                    renderAs: 'accordion',
+                    children: [
+                      {
+                        id: 'item1',
+                        href: '/app/item1',
+                        path: 'root.group2.foo.item1',
+                        title: 'Item 1',
+                      },
+                      {
+                        id: 'item2',
+                        href: '/app/item2',
+                        path: 'root.group2.foo.item2',
+                        title: 'Item 2',
+                        sideNavStatus: 'hidden',
+                      },
+                      {
+                        id: 'item3',
+                        href: '/app/item3',
+                        path: 'root.group2.foo.item3',
+                        title: 'Item 3',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
 
       const { queryByTestId, queryAllByTestId } = renderNavigation({
-        navTreeDef: { body: navigationBody },
+        navTreeDef: of(navTree),
       });
 
       queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel

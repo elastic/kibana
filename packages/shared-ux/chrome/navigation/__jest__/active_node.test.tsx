@@ -8,34 +8,12 @@
 import './setup_jest_mocks';
 import { act } from '@testing-library/react';
 import { of, BehaviorSubject } from 'rxjs';
-import type {
-  ChromeProjectNavigation,
-  ChromeProjectNavigationNode,
-} from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import type { RootNavigationItemDefinition } from '../src/ui/types';
-import { NavigationServices } from '../src/types';
 import { renderNavigation } from './utils';
 
 describe('Active node', () => {
   test('should set the active node', async () => {
-    const deepLinks$: NavigationServices['deepLinks$'] = of({
-      item1: {
-        id: 'item1',
-        title: 'Item 1',
-        baseUrl: '',
-        url: '',
-        href: '',
-      },
-      item2: {
-        id: 'item2',
-        title: 'Item 2',
-        baseUrl: '',
-        url: '',
-        href: '',
-      },
-    });
-
     let activeNodes$: BehaviorSubject<ChromeProjectNavigationNode[][]>;
 
     const getActiveNodes$ = () => {
@@ -57,20 +35,43 @@ describe('Active node', () => {
       return activeNodes$;
     };
 
-    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
+    const navigationBody: ChromeProjectNavigationNode[] = [
       {
-        type: 'navGroup',
         id: 'group1',
+        title: 'Group 1',
+        path: 'group1',
         children: [
-          { link: 'item1', title: 'Item 1' },
-          { link: 'item2', title: 'Item 2' },
+          {
+            title: 'Item 1',
+            id: 'item1',
+            path: 'group1.item1',
+            deepLink: {
+              id: 'item1',
+              title: 'Item 1',
+              baseUrl: '',
+              url: '',
+              href: '',
+            },
+          },
+          {
+            title: 'Item 2',
+            id: 'item2',
+            path: 'group1.item2',
+            deepLink: {
+              id: 'item2',
+              title: 'Item 2',
+              baseUrl: '',
+              url: '',
+              href: '',
+            },
+          },
         ],
       },
     ];
 
     const { findByTestId } = renderNavigation({
-      navTreeDef: { body: navigationBody },
-      services: { deepLinks$, activeNodes$: getActiveNodes$() },
+      navTreeDef: of({ body: navigationBody }),
+      services: { activeNodes$: getActiveNodes$() },
     });
 
     expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
@@ -101,62 +102,6 @@ describe('Active node', () => {
       /nav-item-isActive/
     );
     expect((await findByTestId(/nav-item-group1.item2/)).dataset.testSubj).toMatch(
-      /nav-item-isActive/
-    );
-  });
-
-  test('should override the URL location to set the active node', async () => {
-    const deepLinks$: NavigationServices['deepLinks$'] = of({
-      item1: {
-        id: 'item1',
-        title: 'Item 1',
-        baseUrl: '',
-        url: '',
-        href: '',
-      },
-    });
-
-    let activeNodes$: BehaviorSubject<ChromeProjectNavigationNode[][]>;
-
-    const getActiveNodes$ = () => {
-      activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
-
-      return activeNodes$;
-    };
-
-    const onProjectNavigationChange = (nav: ChromeProjectNavigation) => {
-      nav.navigationTree.forEach((node) => {
-        node.children?.forEach((child) => {
-          if (child.getIsActive?.({} as any)) {
-            activeNodes$.next([[child]]);
-          }
-        });
-      });
-    };
-
-    const navigationBody: Array<RootNavigationItemDefinition<any>> = [
-      {
-        type: 'navGroup',
-        id: 'group1',
-        children: [
-          {
-            link: 'item1',
-            title: 'Item 1',
-            getIsActive: () => {
-              return true; // Always active
-            },
-          },
-        ],
-      },
-    ];
-
-    const { findByTestId } = renderNavigation({
-      navTreeDef: { body: navigationBody },
-      services: { deepLinks$, activeNodes$: getActiveNodes$() },
-      onProjectNavigationChange,
-    });
-
-    expect((await findByTestId(/nav-item-group1.item1/)).dataset.testSubj).toMatch(
       /nav-item-isActive/
     );
   });
