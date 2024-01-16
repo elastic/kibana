@@ -20,7 +20,6 @@ import {
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
 } from '../../../../screens/create_new_rule';
-import { EDIT_SUBMIT_BUTTON} from '../../../../screens/edit_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
 
@@ -122,7 +121,7 @@ describe(
 
         goToRuleEditSettings();
 
-        // check duration settings
+        // check saved suppression settings
         cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
           .eq(0)
           .should('be.enabled')
@@ -132,14 +131,14 @@ describe(
           .should('be.enabled')
           .should('have.value', 's');
 
-        selectAlertSuppressionPerRuleExecution();
-
-        // check if the rest of suppress settings display correctly
         cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.join(''));
         cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).should('be.checked');
 
-        // does not work without force:true
-        cy.get(EDIT_SUBMIT_BUTTON).should('exist').click({ force: true });
+        // set new duration first to overcome some flaky racing conditions during form save
+        setAlertSuppressionDuration(2, 'h');
+        selectAlertSuppressionPerRuleExecution();
+
+        saveEditedRule();
 
         // check execution duration has changed
         cy.get(DEFINITION_DETAILS).within(() => {
