@@ -1,0 +1,185 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useHistory } from 'react-router-dom';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { isEmpty } from 'lodash';
+import { RuleStatus } from '../../../../../common';
+import { RulesListFilters, RulesListProps, UpdateFiltersProps } from '../../../../../types';
+
+type FilterStoreProps = Pick<
+  RulesListProps,
+  | 'lastResponseFilter'
+  | 'lastRunOutcomeFilter'
+  | 'rulesListKey'
+  | 'ruleParamFilter'
+  | 'statusFilter'
+  | 'searchFilter'
+  | 'typeFilter'
+>;
+const RULES_LIST_FILTERS_KEY = 'triggersActionsUi_rulesList';
+
+interface FilterAttributes {
+  actionTypes?: string[];
+  lastResponse?: string[];
+  params?: Record<string, string | number | object>;
+  search?: string;
+  status?: RuleStatus[];
+  tags?: string[];
+  type?: string[];
+}
+
+export const convertRulesListFiltersToFilterAttributes = (
+  rulesListFilter: RulesListFilters
+): FilterAttributes => {
+  return {
+    actionTypes: rulesListFilter.actionTypes,
+    lastResponse: rulesListFilter.ruleLastRunOutcomes,
+    params: rulesListFilter.ruleParams,
+    search: rulesListFilter.searchText,
+    status: rulesListFilter.ruleStatuses,
+    tags: rulesListFilter.tags,
+    type: rulesListFilter.types,
+  };
+};
+
+export const useRulesListFilterStore = ({
+  lastResponseFilter,
+  lastRunOutcomeFilter,
+  rulesListKey = RULES_LIST_FILTERS_KEY,
+  ruleParamFilter,
+  statusFilter,
+  searchFilter,
+  typeFilter,
+}: FilterStoreProps): {
+  filters: RulesListFilters;
+  setFiltersStore: (params: UpdateFiltersProps) => void;
+  numberOfFiltersStore: number;
+  resetFiltersStore: () => void;
+} => {
+  const history = useHistory();
+  const urlStateStorage = createKbnUrlStateStorage({
+    history,
+    useHash: false,
+    useHashQuery: false,
+  });
+
+  const [rulesListFilterLocal, setRulesListFilterLocal] = useLocalStorage<FilterAttributes>(
+    `${RULES_LIST_FILTERS_KEY}_filters`,
+    {}
+  );
+  const hasFilterFromLocalStorage = rulesListFilterLocal
+    ? !Object.values(rulesListFilterLocal).every((filters) => isEmpty(filters))
+    : false;
+
+  const rulesListFilterUrl = urlStateStorage.get<FilterAttributes>('_a') ?? {};
+  const hasFilterFromUrl = rulesListFilterLocal
+    ? !Object.values(rulesListFilterUrl).every((filters) => isEmpty(filters))
+    : false;
+
+  const filtersStore = hasFilterFromUrl
+    ? rulesListFilterLocal
+    : hasFilterFromLocalStorage
+    ? rulesListFilterLocal
+    : {};
+  const [filters, setFilters] = useState<RulesListFilters>({
+    actionTypes: filtersStore?.actionTypes ?? [],
+    ruleExecutionStatuses: lastResponseFilter ?? [],
+    ruleLastRunOutcomes: filtersStore?.lastResponse ?? lastRunOutcomeFilter ?? [],
+    ruleParams: filtersStore?.params ?? ruleParamFilter ?? {},
+    ruleStatuses: filtersStore?.status ?? statusFilter ?? [],
+    searchText: filtersStore?.search ?? searchFilter ?? '',
+    tags: filtersStore?.tags ?? [],
+    types: filtersStore?.type ?? typeFilter ?? [],
+    kueryNode: undefined,
+  });
+
+  const updateUrlFilters = useCallback(
+    (updatedParams: RulesListFilters) => {
+      urlStateStorage.set('_a', convertRulesListFiltersToFilterAttributes(updatedParams));
+    },
+    [urlStateStorage]
+  );
+
+  const updateLocalFilters = useCallback(
+    (updatedParams: RulesListFilters) => {
+      setRulesListFilterLocal(convertRulesListFiltersToFilterAttributes(updatedParams));
+    },
+    [setRulesListFilterLocal]
+  );
+
+  const setFiltersStore = useCallback(
+    (updateFiltersProps: UpdateFiltersProps) => {
+      const { filter, value } = updateFiltersProps;
+      setFilters((prev) => {
+        const newFilters = {
+          ...prev,
+          [filter]: value,
+        };
+        updateUrlFilters(newFilters);
+        updateLocalFilters(newFilters);
+        return newFilters;
+      });
+    },
+    [updateLocalFilters, updateUrlFilters]
+  );
+
+  const resetFiltersStore = useCallback(() => {
+    setFilters({
+      actionTypes: [],
+      ruleExecutionStatuses: lastResponseFilter ?? [],
+      ruleLastRunOutcomes: lastRunOutcomeFilter ?? [],
+      ruleParams: ruleParamFilter ?? {},
+      ruleStatuses: statusFilter ?? [],
+      searchText: searchFilter ?? '',
+      tags: [],
+      types: typeFilter ?? [],
+      kueryNode: undefined,
+    });
+  }, [
+    lastResponseFilter,
+    lastRunOutcomeFilter,
+    ruleParamFilter,
+    searchFilter,
+    statusFilter,
+    typeFilter,
+  ]);
+
+  useEffect(() => {
+    if (hasFilterFromUrl || hasFilterFromLocalStorage) {
+      const updatedFiltersStore = hasFilterFromUrl
+        ? rulesListFilterLocal
+        : hasFilterFromLocalStorage
+        ? rulesListFilterLocal
+        : {};
+      setFilters({
+        actionTypes: updatedFiltersStore?.actionTypes ?? [],
+        ruleExecutionStatuses: lastResponseFilter ?? [],
+        ruleLastRunOutcomes: updatedFiltersStore?.lastResponse ?? lastRunOutcomeFilter ?? [],
+        ruleParams: updatedFiltersStore?.params ?? ruleParamFilter ?? {},
+        ruleStatuses: updatedFiltersStore?.status ?? statusFilter ?? [],
+        searchText: updatedFiltersStore?.search ?? searchFilter ?? '',
+        tags: updatedFiltersStore?.tags ?? [],
+        types: updatedFiltersStore?.type ?? typeFilter ?? [],
+        kueryNode: undefined,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return useMemo(
+    () => ({
+      filters,
+      setFiltersStore,
+      numberOfFiltersStore: Object.values(filters).filter((filter) => !isEmpty(filter)).length,
+      resetFiltersStore,
+    }),
+    [filters, resetFiltersStore, setFiltersStore]
+  );
+};
