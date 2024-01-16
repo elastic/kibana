@@ -9,8 +9,14 @@ import React from 'react';
 import { GroupListView } from './group_list_view';
 import { useFetchSloGroups } from '../../../../hooks/slo/use_fetch_slo_groups';
 
-export function GroupView({ groupBy, sloView, isCompact, kqlQuery }) {
-  const { data, isLoading } = useFetchSloGroups({ kqlQuery, groupBy });
+interface Props {
+  isCompact: boolean;
+  groupBy: string;
+  kqlQuery: string;
+}
+
+export function GroupView({ groupBy, isCompact, kqlQuery }: Props) {
+  const { data, isLoading } = useFetchSloGroups();
   if (isLoading) {
     return (
       <div>
@@ -24,14 +30,7 @@ export function GroupView({ groupBy, sloView, isCompact, kqlQuery }) {
     <>
       {data &&
         Object.keys(data).map((group) => {
-          return (
-            <GroupListView
-              group={group}
-              groupBy={groupBy}
-              kqlQuery={kqlQuery}
-              isCompact={isCompact}
-            />
-          );
+          return <GroupListView group={group} kqlQuery={kqlQuery} isCompact={isCompact} />;
         })}
     </>
   );

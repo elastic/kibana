@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export function GroupCardView({ group }) {}
+export function GroupCardView() {}

@@ -126,7 +126,7 @@ export function SloList({ autoRefresh }: Props) {
 
       {groupBy !== 'ungrouped' && (
         <>
-          <GroupView groupBy={groupBy} sloView={view} isCompact={isCompact} kqlQuery={query} />
+          <GroupView groupBy={groupBy} isCompact={isCompact} kqlQuery={query} />
         </>
       )}
 

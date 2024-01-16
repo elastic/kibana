@@ -6,14 +6,20 @@
  */
 
 import React, { memo, useState } from 'react';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { EuiPanel, EuiAccordion, EuiTablePagination } from '@elastic/eui';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
+import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import { SloListItems } from '../slo_list_items';
-import { useUrlSearchState } from '../../hooks/use_url_search_state';
 
-export function GroupListView({ isCompact, group, groupBy, kqlQuery }) {
+interface Props {
+  isCompact: boolean;
+  group: string;
+  kqlQuery: string;
+}
+
+export function GroupListView({ isCompact, group, kqlQuery }: Props) {
   const query = kqlQuery ? `"slo.tags": ${group} and ${kqlQuery}` : `"slo.tags": ${group}`;
-  const { state, store: storeState } = useUrlSearchState();
   const [page, setPage] = useState(0);
   const ITEMS_PER_PAGE = 10;
   // TODO get sortBy and sortDirection from parent
@@ -29,6 +35,11 @@ export function GroupListView({ isCompact, group, groupBy, kqlQuery }) {
   });
   const { results = [], total = 0 } = sloList ?? {};
 
+  const sloIdsAndInstanceIds = results.map(
+    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
+  );
+  const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
+
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
     // storeState({ page: pageNumber });
@@ -36,10 +47,10 @@ export function GroupListView({ isCompact, group, groupBy, kqlQuery }) {
 
   return (
     <EuiPanel>
-      <MemoEuiAccordion buttonContent={group}>
+      <MemoEuiAccordion buttonContent={group} id={group} initialIsOpen={false}>
         <>
-          {/* TODO pass activeAlertsBySlo, currently compact view is broken */}
           <SloListItems
+            activeAlertsBySlo={activeAlertsBySlo}
             sloList={results}
             loading={isLoading || isRefetching}
             error={isError}
