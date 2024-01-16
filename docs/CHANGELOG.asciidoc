@@ -325,7 +325,6 @@ Presentation::
 === Bug fixes and enhancements
 There are no user-facing changes in the 8.11.4 release.
 
-
 [[release-notes-8.11.3]]
 == {kib} 8.11.3
 
