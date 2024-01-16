@@ -271,7 +271,7 @@ export class KibanaClient {
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
                 
-                For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and what the
+                For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
                 assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
               },
             },
