@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { htmlIdGenerator, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
+import fastIsEqual from 'fast-deep-equal';
 import { getFieldIconType } from '@kbn/field-utils';
 import { useExistingFieldsReader } from '@kbn/unified-field-list';
 import {
   FieldOption,
   FieldOptionValue,
   FieldPicker,
-  useDebouncedValue,
   NewBucketButton,
   DragDropBuckets,
   DraggableBucketContainer,
@@ -27,7 +27,6 @@ import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-comm
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 2;
 
-const generateId = htmlIdGenerator();
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
 export interface FieldInputsProps {
@@ -37,76 +36,49 @@ export interface FieldInputsProps {
   invalidFields?: string[];
 }
 
-interface WrappedValue {
-  id: string;
-  value: string | undefined;
-  isNew?: boolean;
+function removeNewEmptyField(v: string) {
+  return v !== '';
 }
 
-type SafeWrappedValue = Omit<WrappedValue, 'value'> & { value: string };
-
-function removeNewEmptyField(v: WrappedValue): v is SafeWrappedValue {
-  return v.value != null;
-}
-
-export function TooltipSection({
-  currentConfig,
-  setConfig,
-  dataView,
-  invalidFields,
-}: FieldInputsProps) {
+export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInputsProps) {
   const { hasFieldData } = useExistingFieldsReader();
-  const onChangeWrapped = useCallback(
-    (values: WrappedValue[]) => {
-      setConfig({
-        ...currentConfig,
-        extraFields: values.filter(removeNewEmptyField).map(({ value }) => value),
-      });
+
+  // This is a local state that is not synced with the global state
+  const [currentFields, _setFields] = useState<string[]>(currentConfig.extraFields ?? []);
+
+  const setFields = useCallback(
+    (fields: string[]) => {
+      _setFields(fields);
+
+      let newExtraFields: QueryPointEventAnnotationConfig['extraFields'] =
+        fields.filter(removeNewEmptyField);
+      newExtraFields = newExtraFields.length ? newExtraFields : undefined;
+
+      if (!fastIsEqual(newExtraFields, currentConfig.extraFields)) {
+        setConfig({
+          ...currentConfig,
+          extraFields: newExtraFields,
+        });
+      }
     },
     [setConfig, currentConfig]
   );
-  const { wrappedValues, rawValuesLookup } = useMemo(() => {
-    const rawValues = currentConfig.extraFields ?? [];
-    return {
-      wrappedValues: rawValues.map((value) => ({ id: generateId(), value })),
-      rawValuesLookup: new Set(rawValues),
-    };
-  }, [currentConfig]);
 
-  const { inputValue: localValues, handleInputChange } = useDebouncedValue<WrappedValue[]>({
-    onChange: onChangeWrapped,
-    value: wrappedValues,
-  });
-
-  const onFieldSelectChange = useCallback(
-    (choice, index = 0) => {
-      const fields = [...localValues];
-
-      if (dataView.getFieldByName(choice.field)) {
-        fields[index] = { id: generateId(), value: choice.field };
-
-        // update the layer state
-        handleInputChange(fields);
-      }
-    },
-    [localValues, dataView, handleInputChange]
-  );
-
-  const newBucketButton = (
+  const addFieldButton = (
     <NewBucketButton
       className="lnsConfigPanelAnnotations__addButton"
       data-test-subj={`lnsXY-annotation-tooltip-add_field`}
       onClick={() => {
-        handleInputChange([...localValues, { id: generateId(), value: undefined, isNew: true }]);
+        setFields([...currentFields, '']);
       }}
       label={i18n.translate('eventAnnotationComponents.xyChart.annotation.tooltip.addField', {
         defaultMessage: 'Add field',
       })}
-      isDisabled={localValues.length > MAX_TOOLTIP_FIELDS_SIZE}
+      isDisabled={currentFields.length > MAX_TOOLTIP_FIELDS_SIZE}
     />
   );
 
-  if (localValues.length === 0) {
+  if (currentFields.length === 0) {
     return (
       <>
         <EuiFlexItem grow={true}>
@@ -122,7 +94,7 @@ export function TooltipSection({
             </EuiText>
           </EuiPanel>
         </EuiFlexItem>
-        {newBucketButton}
+        {addFieldButton}
       </>
     );
   }
@@ -131,7 +103,7 @@ export function TooltipSection({
     .filter(isFieldLensCompatible)
     .filter(
       ({ displayName, type }) =>
-        displayName && !rawValuesLookup.has(displayName) && supportedTypes.has(type)
+        displayName && !currentConfig.extraFields?.includes(displayName) && supportedTypes.has(type)
     )
     .map(
       (field) =>
@@ -152,23 +124,23 @@ export function TooltipSection({
   return (
     <>
       <DragDropBuckets
-        onDragEnd={(updatedValues: WrappedValue[]) => {
-          handleInputChange(updatedValues);
+        onDragEnd={(updatedFields: string[]) => {
+          setFields(updatedFields);
         }}
         droppableId="ANNOTATION_TOOLTIP_DROPPABLE_AREA"
-        items={localValues}
+        items={currentFields}
         bgColor="subdued"
       >
-        {localValues.map(({ id, value, isNew }, index, arrayRef) => {
-          const fieldIsValid = value ? Boolean(dataView.getFieldByName(value)) : true;
+        {currentFields.map((field, index, arrayRef) => {
+          const fieldIsValid = field === '' ? true : Boolean(dataView.getFieldByName(field));
 
           return (
             <DraggableBucketContainer
-              id={(value ?? 'newField') + id}
-              key={(value ?? 'newField') + id}
+              id={field === '' ? 'newField' : field}
+              key={field === '' ? 'newField' : field}
               idx={index}
               onRemoveClick={() => {
-                handleInputChange(arrayRef.filter((_, i) => i !== index));
+                setFields(arrayRef.filter((_, i) => i !== index));
               }}
               removeTitle={i18n.translate(
                 'eventAnnotationComponents.xyChart.annotation.tooltip.deleteButtonLabel',
@@ -184,29 +156,37 @@ export function TooltipSection({
               <FieldPicker
                 compressed
                 selectedOptions={
-                  value
+                  field
                     ? [
                         {
-                          label: value,
-                          value: { type: 'field', field: value },
+                          label: field,
+                          value: { type: 'field', field },
                         },
                       ]
                     : []
                 }
                 options={options}
                 onChoose={(choice) => {
-                  onFieldSelectChange(choice, index);
+                  if (!choice) {
+                    return;
+                  }
+
+                  if (dataView.getFieldByName(choice.field)) {
+                    const newFields = [...currentFields];
+                    newFields[index] = choice.field;
+                    setFields(newFields);
+                  }
                 }}
                 fieldIsInvalid={!fieldIsValid}
                 className="lnsConfigPanelAnnotations__fieldPicker"
                 data-test-subj={`lnsXY-annotation-tooltip-field-picker--${index}`}
-                autoFocus={isNew && value == null}
+                autoFocus={field === ''}
               />
             </DraggableBucketContainer>
           );
         })}
       </DragDropBuckets>
-      {newBucketButton}
+      {addFieldButton}
     </>
   );
 }
