@@ -7,5 +7,11 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/data-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core",
+    "@kbn/utility-types",
+    "@kbn/core-saved-objects-api-browser",
+  ]
 }
