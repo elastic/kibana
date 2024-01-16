@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
+import ReactDOM from 'react-dom';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -16,10 +17,12 @@ import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { MultiPaneFlyout } from './multipanel_flyout';
 import { ChatBody } from './chat_body';
 
 const containerClassName = css`
   max-height: 100%;
+  block-size: 100%;
 `;
 
 const bodyClassName = css`
@@ -54,7 +57,8 @@ export function ChatFlyout({
   const knowledgeBase = useKnowledgeBase();
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
-
+  const [secondSlotContainer, setSecondSlotContainer] = useState<HTMLDivElement | null>(null);
+  const [isSecondSlotVisible, setIsSecondSlotVisible] = useState(false);
   const conversationsHeaderClassName = css`
     padding-top: 12px;
     padding-bottom: 12px;
@@ -62,58 +66,73 @@ export function ChatFlyout({
   `;
 
   return isOpen ? (
-    <EuiFlyout onClose={onClose}>
-      <EuiFlexGroup
-        responsive={false}
-        gutterSize="none"
-        direction="column"
-        className={containerClassName}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={false}
-            borderRadius="none"
-            className={conversationsHeaderClassName}
-          >
-            {conversationId ? (
-              <EuiLink
-                data-test-subj="observabilityAiAssistantChatFlyoutOpenConversationLink"
-                href={router.link('/conversations/{conversationId}', {
-                  path: { conversationId },
-                })}
-              >
-                {i18n.translate('xpack.observabilityAiAssistant.conversationDeepLinkLabel', {
-                  defaultMessage: 'Open conversation',
-                })}
-              </EuiLink>
-            ) : (
-              <EuiLink
-                data-test-subj="observabilityAiAssistantChatFlyoutGoToConversationsLink"
-                href={router.link('/conversations/new')}
-              >
-                {i18n.translate('xpack.observabilityAiAssistant.conversationListDeepLinkLabel', {
-                  defaultMessage: 'Go to conversations',
-                })}
-              </EuiLink>
-            )}
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow className={bodyClassName}>
-          <ChatBody
-            connectors={connectors}
-            initialTitle={initialTitle}
-            initialMessages={initialMessages}
-            currentUser={currentUser}
-            connectorsManagementHref={getConnectorsManagementHref(http)}
-            knowledgeBase={knowledgeBase}
-            startedFrom={startedFrom}
-            onConversationUpdate={(conversation) => {
-              setConversationId(conversation.conversation.id);
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyout>
+    <MultiPaneFlyout
+      mainContent={
+        <EuiFlexGroup
+          responsive={false}
+          gutterSize="none"
+          direction="column"
+          className={containerClassName}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              hasShadow={false}
+              hasBorder={false}
+              borderRadius="none"
+              className={conversationsHeaderClassName}
+            >
+              {conversationId ? (
+                <EuiLink
+                  data-test-subj="observabilityAiAssistantChatFlyoutOpenConversationLink"
+                  href={router.link('/conversations/{conversationId}', {
+                    path: { conversationId },
+                  })}
+                >
+                  {i18n.translate('xpack.observabilityAiAssistant.conversationDeepLinkLabel', {
+                    defaultMessage: 'Open conversation',
+                  })}
+                </EuiLink>
+              ) : (
+                <EuiLink
+                  data-test-subj="observabilityAiAssistantChatFlyoutGoToConversationsLink"
+                  href={router.link('/conversations/new')}
+                >
+                  {i18n.translate('xpack.observabilityAiAssistant.conversationListDeepLinkLabel', {
+                    defaultMessage: 'Go to conversations',
+                  })}
+                </EuiLink>
+              )}
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem grow className={bodyClassName}>
+            <ChatBody
+              connectors={connectors}
+              initialTitle={initialTitle}
+              initialMessages={initialMessages}
+              currentUser={currentUser}
+              connectorsManagementHref={getConnectorsManagementHref(http)}
+              knowledgeBase={knowledgeBase}
+              startedFrom={startedFrom}
+              onConversationUpdate={(conversation) => {
+                setConversationId(conversation.conversation.id);
+              }}
+              chatFlyoutSecondSlotHandler={{
+                container: secondSlotContainer,
+                setVisibility: setIsSecondSlotVisible,
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      secondSlotContentVisibility={isSecondSlotVisible}
+      setSecondSlotContainer={setSecondSlotContainer}
+      onClose={() => {
+        onClose();
+        setIsSecondSlotVisible(false);
+        if (secondSlotContainer) {
+          ReactDOM.unmountComponentAtNode(secondSlotContainer);
+        }
+      }}
+    />
   ) : null;
 }

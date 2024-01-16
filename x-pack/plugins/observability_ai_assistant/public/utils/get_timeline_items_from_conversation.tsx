@@ -17,7 +17,7 @@ import { RenderFunction } from '../components/render_function';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { ChatState } from '../hooks/use_chat';
 import { safeJsonParse } from './safe_json_parse';
-import type { ChatActionClickHandler } from '../components/chat/types';
+import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from '../components/chat/types';
 
 function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   let value: object;
@@ -65,6 +65,7 @@ export function getTimelineItemsfromConversation({
   messages,
   startedFrom,
   chatState,
+  chatFlyoutSecondSlotHandler,
   onActionClick,
 }: {
   chatService: ObservabilityAIAssistantChatService;
@@ -73,6 +74,7 @@ export function getTimelineItemsfromConversation({
   messages: Message[];
   startedFrom?: StartedFrom;
   chatState: ChatState;
+  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   onActionClick: ChatActionClickHandler;
 }): ChatTimelineItem[] {
   const messagesWithoutSystem = messages.filter(
@@ -167,6 +169,7 @@ export function getTimelineItemsfromConversation({
                   arguments={prevFunctionCall?.arguments}
                   response={message.message}
                   onActionClick={onActionClick}
+                  chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
                 />
               ) : undefined;
 

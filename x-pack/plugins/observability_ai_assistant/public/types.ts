@@ -38,7 +38,7 @@ import type {
   FunctionResponse,
   Message,
 } from '../common/types';
-import type { ChatActionClickHandler } from './components/chat/types';
+import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
 import type { StreamingChatResponseEvent } from '../common/conversation_complete';
@@ -71,7 +71,8 @@ export interface ObservabilityAIAssistantChatService {
     name: string,
     args: string | undefined,
     response: { data?: string; content?: string },
-    onActionClick: ChatActionClickHandler
+    onActionClick: ChatActionClickHandler,
+    chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler
   ) => React.ReactNode;
 }
 
@@ -89,6 +90,7 @@ export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (op
   arguments: TArguments;
   response: TResponse;
   onActionClick: ChatActionClickHandler;
+  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
 }) => React.ReactNode;
 
 export type RegisterRenderFunctionDefinition<

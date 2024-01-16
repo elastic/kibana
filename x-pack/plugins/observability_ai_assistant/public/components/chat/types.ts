@@ -26,3 +26,8 @@ export enum ChatActionClickType {
 }
 
 export type ChatActionClickHandler = (payload: ChatActionClickPayload) => void;
+
+export interface ChatFlyoutSecondSlotHandler {
+  container?: HTMLDivElement | null;
+  setVisibility?: (status: boolean) => void;
+}

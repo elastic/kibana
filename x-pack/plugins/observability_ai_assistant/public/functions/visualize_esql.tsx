@@ -32,7 +32,11 @@ import type {
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '../types';
-import { type ChatActionClickHandler, ChatActionClickType } from '../components/chat/types';
+import {
+  type ChatActionClickHandler,
+  ChatActionClickType,
+  ChatFlyoutSecondSlotHandler,
+} from '../components/chat/types';
 
 interface VisualizeLensResponse {
   content: DatatableColumn[];
@@ -49,6 +53,7 @@ function VisualizeESQL({
   query,
   onActionClick,
   initialInput,
+  chatFlyoutSecondSlotHandler,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
@@ -57,6 +62,7 @@ function VisualizeESQL({
   query: string;
   onActionClick: ChatActionClickHandler;
   initialInput?: unknown;
+  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
 }) {
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromESQLQuery(query);
@@ -153,6 +159,7 @@ function VisualizeESQL({
             newInput,
             query,
           });
+          chatFlyoutSecondSlotHandler?.setVisibility?.(false);
         },
         onCancel: () => {
           onActionClick({
@@ -160,10 +167,12 @@ function VisualizeESQL({
             newInput: lensInput,
             query,
           });
+          chatFlyoutSecondSlotHandler?.setVisibility?.(false);
         },
+        container: chatFlyoutSecondSlotHandler?.container,
       };
     }
-  }, [lensInput, lensLoadEvent, onActionClick, query]);
+  }, [chatFlyoutSecondSlotHandler, lensInput, lensLoadEvent, onActionClick, query]);
 
   if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
     return <EuiLoadingSpinner />;
@@ -185,6 +194,7 @@ function VisualizeESQL({
                 onClick={() => {
                   if (triggerOptions) {
                     uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
+                    chatFlyoutSecondSlotHandler?.setVisibility?.(true);
                   }
                 }}
                 data-test-subj="observabilityAiAssistantLensESQLEditButton"
@@ -254,6 +264,7 @@ export function registerVisualizeQueryRenderFunction({
       arguments: { query, newInput },
       response,
       onActionClick,
+      chatFlyoutSecondSlotHandler,
     }: Parameters<RenderFunction<VisualizeESQLFunctionArguments, {}>>[0]) => {
       const { content } = response as VisualizeLensResponse;
       return (
@@ -265,6 +276,7 @@ export function registerVisualizeQueryRenderFunction({
           query={query}
           onActionClick={onActionClick}
           initialInput={newInput}
+          chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
         />
       );
     }

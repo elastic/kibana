@@ -34,7 +34,7 @@ import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
-import { ChatActionClickType } from './types';
+import { ChatActionClickType, type ChatFlyoutSecondSlotHandler } from './types';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
 
@@ -95,6 +95,7 @@ export function ChatBody({
   connectorsManagementHref,
   currentUser,
   startedFrom,
+  chatFlyoutSecondSlotHandler,
   onConversationUpdate,
 }: {
   initialTitle?: string;
@@ -105,6 +106,7 @@ export function ChatBody({
   connectorsManagementHref: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
+  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
 }) {
   const license = useLicense();
@@ -272,6 +274,7 @@ export function ChatBody({
                   onStopGenerating={() => {
                     stop();
                   }}
+                  chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
                   onActionClick={(payload) => {
                     setStickToBottom(true);
                     switch (payload.type) {
