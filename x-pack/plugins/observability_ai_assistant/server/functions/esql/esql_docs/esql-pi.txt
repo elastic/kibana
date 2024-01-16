@@ -1,0 +1,7 @@
+PI
+
+
+The ratio of a circle’s circumference to its diameter.
+```esql
+ROW PI()
+```

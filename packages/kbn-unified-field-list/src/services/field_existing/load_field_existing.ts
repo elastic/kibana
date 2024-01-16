@@ -9,7 +9,7 @@
 import { IUiSettingsClient } from '@kbn/core/public';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-service/src/constants';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { fetchFieldExistence } from './field_existing_utils';
 
@@ -27,6 +27,7 @@ interface FetchFieldExistenceParams {
 export type LoadFieldExistingHandler = (params: FetchFieldExistenceParams) => Promise<{
   existingFieldNames: string[];
   indexPatternTitle: string;
+  newFields?: FieldSpec[];
 }>;
 
 export const loadFieldExisting: LoadFieldExistingHandler = async ({
