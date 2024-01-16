@@ -49,12 +49,12 @@ export async function getServiceInstancesMainStatistics(
 
     const transactionStats = await getServiceInstancesTransactionStatistics({
       ...paramsForSubQueries,
-      isComparisonSearch: false,
+      includeTimeseries: false,
     });
     const serviceNodeIds = transactionStats.map((item) => item.serviceNodeName);
     const systemMetricStats = await getServiceInstancesSystemMetricStatistics({
       ...paramsForSubQueries,
-      isComparisonSearch: false,
+      includeTimeseries: false,
       serviceNodeIds,
     });
 

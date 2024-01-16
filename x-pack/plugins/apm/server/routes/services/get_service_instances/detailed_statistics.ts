@@ -51,11 +51,11 @@ async function getServiceInstancesDetailedStatistics(
     const [transactionStats, systemMetricStats = []] = await Promise.all([
       getServiceInstancesTransactionStatistics({
         ...params,
-        isComparisonSearch: true,
+        includeTimeseries: true,
       }),
       getServiceInstancesSystemMetricStatistics({
         ...params,
-        isComparisonSearch: true,
+        includeTimeseries: true,
       }),
     ]);
 

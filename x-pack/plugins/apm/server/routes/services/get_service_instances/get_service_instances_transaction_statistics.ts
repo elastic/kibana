@@ -78,7 +78,7 @@ export async function getServiceInstancesTransactionStatistics<
   end,
   serviceNodeIds,
   numBuckets,
-  isComparisonSearch,
+  includeTimeseries,
   offset,
   sortField,
   sortDirection = 'desc',
@@ -90,7 +90,7 @@ export async function getServiceInstancesTransactionStatistics<
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
-  isComparisonSearch: T;
+  includeTimeseries: T;
   serviceNodeIds?: string[];
   environment: string;
   kuery: string;
@@ -179,7 +179,7 @@ export async function getServiceInstancesTransactionStatistics<
           ? { order: getOrderInstructions(sortField, sortDirection) }
           : {}),
       },
-      aggs: isComparisonSearch
+      aggs: includeTimeseries
         ? {
             timeseries: {
               date_histogram: {
@@ -215,7 +215,7 @@ export async function getServiceInstancesTransactionStatistics<
         const { doc_count: count, key } = serviceNodeBucket;
         const serviceNodeName = String(key);
 
-        // Timeseries is returned when isComparisonSearch is true
+        // Timeseries is returned when includeTimeseries is true
         if ('timeseries' in serviceNodeBucket) {
           const { timeseries } = serviceNodeBucket;
           return {
