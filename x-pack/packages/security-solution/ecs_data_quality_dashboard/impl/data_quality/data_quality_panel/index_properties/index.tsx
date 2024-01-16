@@ -104,7 +104,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
-  const { telemetryEvents, isILMAvailable, httpFetch } = useDataQualityContext();
+  const { telemetryEvents, isILMAvailable, httpFetch, toasts } = useDataQualityContext();
 
   const requestItems = useMemo(
     () =>
@@ -293,14 +293,8 @@ const IndexPropertiesComponent: React.FC<Props> = ({
           };
           telemetryEvents.reportDataQualityIndexChecked?.(checkMetadata);
 
-          postResult({
-            abortController: new AbortController(),
-            httpFetch,
-            result: {
-              meta: checkMetadata,
-              rollup: updatedRollup,
-            },
-          });
+          const result = { meta: checkMetadata, rollup: updatedRollup };
+          postResult({ result, httpFetch, toasts, abortController: new AbortController() });
         }
       }
     }
@@ -321,6 +315,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     patternRollup,
     requestTime,
     telemetryEvents,
+    toasts,
     unallowedValuesError,
     updatePatternRollup,
   ]);

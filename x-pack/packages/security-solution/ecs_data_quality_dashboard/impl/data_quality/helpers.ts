@@ -11,6 +11,7 @@ import type {
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
 import { getFillColor } from './data_quality_panel/tabs/summary_tab/helpers';
 
@@ -454,15 +455,15 @@ export interface ResultData {
 }
 
 export async function postResult({
-  abortController,
-  httpFetch,
   result,
-  onError,
+  httpFetch,
+  toasts,
+  abortController,
 }: {
-  abortController: AbortController;
-  httpFetch: HttpHandler;
   result: ResultData;
-  onError: (error: Error) => void;
+  httpFetch: HttpHandler;
+  toasts: IToasts;
+  abortController: AbortController;
 }): Promise<void> {
   try {
     await httpFetch<void>(RESULTS_API_ROUTE, {
@@ -472,20 +473,20 @@ export async function postResult({
       body: JSON.stringify(result),
     });
   } catch (err) {
-    onError(err);
+    toasts.addError(err, { title: i18n.POST_RESULT_ERROR_TITLE });
   }
 }
 
 export async function getResults({
-  abortController,
-  httpFetch,
   patterns,
-  onError,
+  httpFetch,
+  toasts,
+  abortController,
 }: {
-  abortController: AbortController;
-  httpFetch: HttpHandler;
   patterns: string[];
-  onError: (error: Error) => void;
+  httpFetch: HttpHandler;
+  toasts: IToasts;
+  abortController: AbortController;
 }): Promise<ResultData[]> {
   try {
     const results = await httpFetch<ResultData[]>(RESULTS_API_ROUTE, {
@@ -496,7 +497,7 @@ export async function getResults({
     });
     return results;
   } catch (err) {
-    onError(err);
+    toasts.addError(err, { title: i18n.GET_RESULTS_ERROR_TITLE });
     return [];
   }
 }

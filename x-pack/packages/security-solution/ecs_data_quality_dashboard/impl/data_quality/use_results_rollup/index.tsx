@@ -35,7 +35,6 @@ import {
   getIncompatibleValuesFields,
   getSameFamilyFields,
 } from '../data_quality_panel/tabs/incompatible_tab/helpers';
-import { GET_RESULTS_ERROR_TITLE, POST_RESULT_ERROR_TITLE } from '../translations';
 
 interface Props {
   ilmPhases: string[];
@@ -69,14 +68,7 @@ const useStoredPatternRollups = (patterns: string[]) => {
     const abortController = new AbortController();
 
     const fetchStoredRollups = async () => {
-      const results = await getResults({
-        httpFetch,
-        abortController,
-        patterns,
-        onError: (err: Error) => {
-          toasts.addError(err, { title: GET_RESULTS_ERROR_TITLE });
-        },
-      });
+      const results = await getResults({ httpFetch, abortController, patterns, toasts });
       if (results?.length && !abortController.signal.aborted) {
         setStoredRollups(Object.fromEntries(results.map(({ rollup }) => [rollup.pattern, rollup])));
       }
@@ -203,15 +195,8 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
           };
           telemetryEvents.reportDataQualityIndexChecked?.(metadata);
 
-          postResult({
-            abortController: new AbortController(),
-            httpFetch,
-            result: {
-              meta: metadata,
-              rollup: updatedRollup,
-            },
-            onError: (err: Error) => toasts.addError(err, { title: POST_RESULT_ERROR_TITLE }),
-          });
+          const result = { meta: metadata, rollup: updatedRollup };
+          postResult({ result, httpFetch, toasts, abortController: new AbortController() });
         }
 
         if (isLastCheck) {

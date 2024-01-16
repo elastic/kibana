@@ -81,6 +81,7 @@ import {
   UnallowedValueCount,
 } from './types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
 
@@ -1496,6 +1497,7 @@ describe('helpers', () => {
 
   describe('postResult', () => {
     const { fetch } = httpServiceMock.createStartContract();
+    const { toasts } = notificationServiceMock.createStartContract();
     beforeEach(() => {
       fetch.mockClear();
     });
@@ -1506,7 +1508,7 @@ describe('helpers', () => {
         httpFetch: fetch,
         result,
         abortController: new AbortController(),
-        onError: jest.fn(),
+        toasts,
       });
 
       expect(fetch).toHaveBeenCalledWith(
@@ -1521,19 +1523,19 @@ describe('helpers', () => {
     test('it throws error', async () => {
       const result = { meta: {}, rollup: {} } as unknown as ResultData;
       fetch.mockRejectedValueOnce('test-error');
-      const onError = jest.fn();
       await postResult({
         httpFetch: fetch,
         result,
         abortController: new AbortController(),
-        onError,
+        toasts,
       });
-      expect(onError).toHaveBeenCalledWith('test-error');
+      expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
     });
   });
 
   describe('getResults', () => {
     const { fetch } = httpServiceMock.createStartContract();
+    const { toasts } = notificationServiceMock.createStartContract();
     beforeEach(() => {
       fetch.mockClear();
     });
@@ -1543,7 +1545,7 @@ describe('helpers', () => {
         httpFetch: fetch,
         abortController: new AbortController(),
         patterns: ['auditbeat-*', 'packetbeat-*'],
-        onError: jest.fn(),
+        toasts,
       });
 
       expect(fetch).toHaveBeenCalledWith(
@@ -1557,16 +1559,15 @@ describe('helpers', () => {
 
     it('should catch error', async () => {
       fetch.mockRejectedValueOnce('test-error');
-      const onError = jest.fn();
 
       const results = await getResults({
         httpFetch: fetch,
         abortController: new AbortController(),
         patterns: ['auditbeat-*', 'packetbeat-*'],
-        onError,
+        toasts,
       });
 
-      expect(onError).toHaveBeenCalledWith('test-error');
+      expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
       expect(results).toEqual([]);
     });
   });
