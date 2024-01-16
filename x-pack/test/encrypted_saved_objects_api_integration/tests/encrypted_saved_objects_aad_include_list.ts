@@ -41,6 +41,49 @@ export default function ({ getService }: FtrProviderContext) {
         const decryptedObject = JSON.parse(decryptResponse.text);
         expect(decryptedObject.attributes.passphrase).to.eql('This is the passphrase');
       });
+
+      it(`successfully decrypts 'alert' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/alert/903b890f-4e98-4ea5-bc10-71433f01de18`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.apiKey).to.eql(
+          'b0F0U0ZJMEJJbVVLTnNEYUw2cHU6RDJSLUNYWFNReWVqSF8tMFVNXzQ5Zw=='
+        );
+      });
+
+      it(`successfully decrypts 'action' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/action/5ebfb140-3a76-4875-9f31-967851bd1e0b`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.secrets).to.eql({}); // ToDo: need an action with secrets
+      });
+
+      it(`successfully decrypts 'synthetics-monitor' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-monitor/85e2583e-d02e-4cff-8b23-a91ae75e8dc2`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        const secrets = JSON.parse(decryptedObject.attributes.secrets);
+        expect(secrets).to.eql({
+          params: '',
+          'source.inline.script': `step('Go to localhost', async () => {\n  await page.goto('localhost');\n});`,
+          'source.project.content': '',
+          synthetics_args: ['param1', 'param2', 'param3'],
+          'ssl.key': '',
+          'ssl.key_passphrase': '',
+        });
+      });
     });
   });
 }

@@ -19,3 +19,253 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "alert:903b890f-4e98-4ea5-bc10-71433f01de18",
+    "source": {
+      "alert": {
+        "name": "test_rule",
+        "tags": [],
+        "enabled": true,
+        "alertTypeId": "apm.transaction_error_rate",
+        "consumer": "alerts",
+        "legacyId": null,
+        "schedule": {
+          "interval": "1m"
+        },
+        "actions": [
+          {
+            "group": "threshold_met",
+            "params": {
+              "documents": [
+                {
+                  "it-worked": true
+                }
+              ]
+            },
+            "actionTypeId": ".index",
+            "frequency": {
+              "summary": false,
+              "throttle": null,
+              "notifyWhen": "onActionGroupChange"
+            },
+            "uuid": "974b1bed-4eac-41af-b34a-d751b916d811",
+            "actionRef": "action_0"
+          }
+        ],
+        "params": {
+          "threshold": 30,
+          "windowSize": 5,
+          "windowUnit": "m",
+          "environment": "ENVIRONMENT_ALL"
+        },
+        "createdBy": "elastic",
+        "updatedBy": "elastic",
+        "createdAt": "2024-01-16T22:09:07.964Z",
+        "updatedAt": "2024-01-16T22:09:07.964Z",
+        "apiKey": "S7odcWLc1kd/BaRMg5Z1f/RouQ2iVkB2m2+NE2LWPN0QLg5iTVmhS1jiaS7gVfnAbhd0ZNu83L9oOXhBGZ+l/smeMqnAv1p67SMbEn3uhPQGuW1l8PppFDcPxBbfOee+zI7oziSxIrI51P09c5vi2alwpUzpob8b6WccuQuh0nRbI4dtv15NM8fpwzsFeU7/5DjeESlp9wmrUQ==",
+        "apiKeyOwner": "elastic",
+        "apiKeyCreatedByUser": false,
+        "throttle": null,
+        "notifyWhen": null,
+        "muteAll": false,
+        "mutedInstanceIds": [],
+        "executionStatus": {
+          "status": "ok",
+          "lastExecutionDate": "2024-01-16T22:09:09.482Z",
+          "lastDuration": 1651,
+          "error": null,
+          "warning": null
+        },
+        "monitoring": {
+          "run": {
+            "history": [
+              {
+                "success": true,
+                "timestamp": 1705442949482,
+                "duration": 1651
+              }
+            ],
+            "calculated_metrics": {
+              "success_ratio": 1,
+              "p50": 1651,
+              "p95": 1651,
+              "p99": 1651
+            },
+            "last_run": {
+              "timestamp": "2024-01-16T22:09:09.482Z",
+              "metrics": {
+                "duration": 1651,
+                "total_search_duration_ms": null,
+                "total_indexing_duration_ms": null,
+                "total_alerts_detected": null,
+                "total_alerts_created": null,
+                "gap_duration_s": null
+              }
+            }
+          }
+        },
+        "snoozeSchedule": [],
+        "revision": 0,
+        "running": false,
+        "meta": {
+          "versionApiKeyLastmodified": "8.13.0"
+        },
+        "scheduledTaskId": "903b890f-4e98-4ea5-bc10-71433f01de18",
+        "lastRun": {
+          "outcome": "succeeded",
+          "outcomeOrder": 0,
+          "outcomeMsg": null,
+          "warning": null,
+          "alertsCount": {
+            "active": 0,
+            "new": 0,
+            "recovered": 0,
+            "ignored": 0
+          }
+        },
+        "nextRun": "2024-01-16T22:10:09.409Z"
+      },
+      "type": "alert",
+      "references": [
+        {
+          "id": "5ebfb140-3a76-4875-9f31-967851bd1e0b",
+          "name": "action_0",
+          "type": "action"
+        }
+      ],
+      "managed": false,
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "10.1.0",
+      "updated_at": "2024-01-16T22:09:11.135Z",
+      "created_at": "2024-01-16T22:09:07.965Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "action:5ebfb140-3a76-4875-9f31-967851bd1e0b",
+    "source": {
+      "action": {
+        "actionTypeId": ".index",
+        "name": "test_index_connector",
+        "isMissingSecrets": false,
+        "config": {
+          "index": ".alerts-default.alerts-default",
+          "refresh": false,
+          "executionTimeField": null
+        },
+        "secrets": "IjVohrL6NNraSK2Qc3TWud7qJSadXiUzx7mlUScUG8AHbZjm/p3OIWA2Ec6LfwK39PN6Pq2sgQMyugM2cRcNA4u28FDt9NPCgXcFk6ospISzQwZ9cSap16LmBUIw6Q=="
+      },
+      "type": "action",
+      "references": [],
+      "managed": false,
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.3.0",
+      "updated_at": "2024-01-16T22:08:34.209Z",
+      "created_at": "2024-01-16T22:08:34.209Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "synthetics-monitor:85e2583e-d02e-4cff-8b23-a91ae75e8dc2",
+    "source": {
+      "synthetics-monitor": {
+        "type": "browser",
+        "form_monitor_type": "multistep",
+        "enabled": true,
+        "alert": {
+          "status": {
+            "enabled": true
+          },
+          "tls": {
+            "enabled": true
+          }
+        },
+        "schedule": {
+          "unit": "m",
+          "number": "10"
+        },
+        "service.name": "",
+        "config_id": "85e2583e-d02e-4cff-8b23-a91ae75e8dc2",
+        "tags": [],
+        "timeout": null,
+        "name": "localhost",
+        "locations": [
+          {
+            "id": "b9ba5cfb-a676-4e3e-ab74-316ae2d697de",
+            "label": "test_location",
+            "geo": {
+              "lat": 0,
+              "lon": 0
+            },
+            "isServiceManaged": false
+          }
+        ],
+        "namespace": "default",
+        "origin": "ui",
+        "journey_id": "",
+        "hash": "",
+        "id": "85e2583e-d02e-4cff-8b23-a91ae75e8dc2",
+        "max_attempts": 2,
+        "project_id": "",
+        "playwright_options": "",
+        "__ui": {
+          "script_source": {
+            "is_generated_script": false,
+            "file_name": ""
+          }
+        },
+        "url.port": null,
+        "playwright_text_assertion": "",
+        "urls": "localhost",
+        "screenshots": "on",
+        "filter_journeys.match": "",
+        "filter_journeys.tags": [],
+        "ignore_https_errors": false,
+        "throttling": {
+          "value": {
+            "download": "5",
+            "upload": "3",
+            "latency": "20"
+          },
+          "id": "default",
+          "label": "Default"
+        },
+        "ssl.certificate_authorities": "",
+        "ssl.certificate": "",
+        "ssl.verification_mode": "full",
+        "ssl.supported_protocols": [
+          "TLSv1.1",
+          "TLSv1.2",
+          "TLSv1.3"
+        ],
+        "revision": 2,
+        "secrets": "HGbJmokq3zhhyvf6AdGWNuQLe50TJzGTjg1D25igXiqEHKub+kN0b2X2gDkgT2gZGSBtdG9vOAGElERGjX9/I094lHhCUFlH9lx+nKHn7Rd6LEvB3splnGrhCGOPazin8lLvPBfF1EgyOExzOMkOLT7oGiT6iU7ILY6uu8gXah0gJhdn06iBoqncoAS234jswyEgBI3cejQhiS7hSGQMxvRWxPQa+bK2QIvKbwAvOsycV0Wmw/ItOqa01m4Iul4YCRkqSafQ7DC3Qt/DBF9zx1gMjv+p6h4yPzuiVJNAXelt2UydcPYfgPkz0Vum7ItHWSD3ZOII0LB3BUS0dgBBvaxYOlSczkcVcY4U2RW6x7U2yaPOgL7a1fIK7sqeeoeG0hTZ1OW/twt2QvMVJ3zSq6VjYnI8VjAIl5lZqmpZlQ3Pfc3+s2nGiiDbaeyMIStHwp6+FgJwmAScmqKRIGk="
+      },
+      "type": "synthetics-monitor",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.9.0",
+      "updated_at": "2024-01-16T22:52:01.957Z",
+      "created_at": "2024-01-16T22:26:57.615Z"
+    }
+  }
+}

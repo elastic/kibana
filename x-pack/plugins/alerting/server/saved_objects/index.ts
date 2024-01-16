@@ -66,7 +66,6 @@ export const RuleAttributesIncludedInAAD = [
   'mapped_params',
   'createdBy',
   'createdAt',
-  'apiKey',
   'apiKeyOwner',
   'apiKeyCreatedByUser',
   'throttle',
