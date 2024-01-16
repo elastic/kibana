@@ -25,11 +25,11 @@ import {
 import { isEmpty } from 'lodash';
 import React from 'react';
 import {
+  BottomBarActions,
   useEditableSettings,
   useUiTracker,
 } from '@kbn/observability-shared-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { BottomBarActions } from '../bottom_bar_actions';
 
 const apmSettingsKeys = [
   enableComparisonByDefault,

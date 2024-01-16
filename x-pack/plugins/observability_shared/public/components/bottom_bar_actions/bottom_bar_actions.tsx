@@ -24,13 +24,13 @@ interface Props {
   saveLabel: string;
 }
 
-export function BottomBarActions({
+export const BottomBarActions = ({
   isLoading,
   onDiscardChanges,
   onSave,
   unsavedChangesCount,
   saveLabel,
-}: Props) {
+}: Props) => {
   return (
     <EuiBottomBar paddingSize="s">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -43,7 +43,7 @@ export function BottomBarActions({
         >
           <EuiHealth color="warning" />
           <EuiText>
-            {i18n.translate('xpack.apm.bottomBarActions.unsavedChanges', {
+            {i18n.translate('xpack.observabilityShared.bottomBarActions.unsavedChanges', {
               defaultMessage:
                 '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
               values: { unsavedChangesCount },
@@ -58,12 +58,9 @@ export function BottomBarActions({
                 color="text"
                 onClick={onDiscardChanges}
               >
-                {i18n.translate(
-                  'xpack.apm.bottomBarActions.discardChangesButton',
-                  {
-                    defaultMessage: 'Discard changes',
-                  }
-                )}
+                {i18n.translate('xpack.observabilityShared.bottomBarActions.discardChangesButton', {
+                  defaultMessage: 'Discard changes',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -83,4 +80,4 @@ export function BottomBarActions({
       </EuiFlexGroup>
     </EuiBottomBar>
   );
-}
+};
