@@ -77,16 +77,16 @@ export class ReplacePanelFlyout extends React.Component<Props> {
       />
     );
 
-    const panelToReplace =
-      'Replace panel ' + this.props.api.panelTitle?.value ??
-      this.props.api.defaultPanelTitle?.value + ' with:';
-
     return (
       <>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <span>{panelToReplace}</span>
+              <span>
+                {dashboardReplacePanelActionStrings.getFlyoutHeader(
+                  this.props.api.panelTitle?.value ?? this.props.api.defaultPanelTitle?.value
+                )}
+              </span>
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>

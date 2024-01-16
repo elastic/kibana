@@ -95,9 +95,9 @@ export const dashboardUnlinkFromLibraryActionStrings = {
       defaultMessage: `Panel {panelTitle} is no longer connected to the library.`,
       values: { panelTitle },
     }),
-  getFailureMessage: () =>
+  getFailureMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.unlinkFromLibrary.failureMessage', {
-      defaultMessage: `An error occured while unlinking a panel from the library.`,
+      defaultMessage: `An error occured while unlinking {panelTitle} from the library.`,
     }),
 };
 
@@ -121,6 +121,13 @@ export const dashboardReplacePanelActionStrings = {
   getDisplayName: () =>
     i18n.translate('dashboard.panel.removePanel.replacePanel', {
       defaultMessage: 'Replace panel',
+    }),
+  getFlyoutHeader: (panelName?: string) =>
+    i18n.translate('dashboard.panel.replacePanel.flyoutHeader', {
+      defaultMessage: 'Replace panel {panelName} with:',
+      values: {
+        panelName: `'${panelName}'`,
+      },
     }),
   getSuccessMessage: (savedObjectName?: string) =>
     savedObjectName

@@ -69,7 +69,7 @@ export const PresentationPanelContextMenu = ({
        * Build and update all actions
        */
       let compatibleActions: Array<Action<object>> = await (async () => {
-        if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, { api });
+        if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, { embeddable: api });
         return (
           (await uiActions.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
             embeddable: api,

@@ -91,13 +91,7 @@ export const PresentationPanelError = ({
       iconType="warning"
       iconColor="danger"
       layout="vertical"
-      actions={
-        isEditable && (
-          <EuiButtonEmpty aria-label={ariaLabel} onClick={handleErrorClick} size="s">
-            {label}
-          </EuiButtonEmpty>
-        )
-      }
+      actions={actions}
     />
   );
 };

@@ -53,10 +53,8 @@ describe('library notification action', () => {
 
   it('calls onChange when view mode changes', async () => {
     const onChange = jest.fn();
-    updateViewMode('view');
     action.subscribeToCompatibilityChanges(context, onChange);
+    updateViewMode('view');
     await waitFor(() => expect(onChange).toHaveBeenCalledWith(false, action));
   });
-
-  it('is incompatible when api publishes a saved object id', async () => {});
 });
