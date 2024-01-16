@@ -6,7 +6,7 @@
  */
 
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { CoreKibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 import { getRuleAttributes, getFakeKibanaRequest, validateRule } from './rule_loader';
@@ -20,7 +20,6 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 import { mockedRawRuleSO, mockedRule } from './fixtures';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import Boom from '@hapi/boom';
 
 // create mocks
 const rulesClient = rulesClientMock.create();
@@ -244,9 +243,7 @@ describe('rule_loader', () => {
 
     test('returns USER error for a "not found SO"', async () => {
       encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(
-        new Boom.Boom(`Not Found`, {
-          statusCode: 404,
-        })
+        SavedObjectsErrorHelpers.createGenericNotFoundError()
       );
 
       try {

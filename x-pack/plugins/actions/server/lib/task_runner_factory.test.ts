@@ -30,7 +30,7 @@ import {
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import Boom from '@hapi/boom';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const executeParamsFields = [
   'actionId',
@@ -957,9 +957,7 @@ describe('Task Runner Factory', () => {
     });
 
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
-      new Boom.Boom(`Not Found`, {
-        statusCode: 404,
-      })
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
     );
 
     try {

@@ -17,6 +17,7 @@ import {
   Logger,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import {
   createTaskRunError,
@@ -29,7 +30,6 @@ import {
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { isBoom } from '@hapi/boom';
 import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
   ActionTaskExecutorParams,
@@ -312,7 +312,7 @@ async function getActionTaskParams(
         },
       };
     } catch (e) {
-      if (isBoom(e, 404)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw createTaskRunError(e, TaskErrorSource.USER);
       }
       throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);

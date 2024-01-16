@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
@@ -25,7 +25,6 @@ import { PassThrough } from 'stream';
 import { SecurityConnectorFeatureId } from '../../common';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import Boom from '@hapi/boom';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -1278,9 +1277,7 @@ test('throws an error when failing to load action through savedObjectsClient', a
 
 test('throws a USER error when the action SO is not found', async () => {
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
-    new Boom.Boom(`Not Found`, {
-      statusCode: 404,
-    })
+    SavedObjectsErrorHelpers.createGenericNotFoundError()
   );
 
   try {

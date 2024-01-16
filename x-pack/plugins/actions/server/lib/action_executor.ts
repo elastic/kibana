@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
@@ -15,7 +15,6 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { isBoom } from '@hapi/boom';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -488,7 +487,7 @@ export class ActionExecutor {
         rawAction: rawAction.attributes,
       };
     } catch (e) {
-      if (isBoom(e, 404)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw createTaskRunError(e, TaskErrorSource.USER);
       }
       throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);

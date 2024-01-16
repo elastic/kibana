@@ -6,14 +6,19 @@
  */
 
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest, FakeRawRequest, Headers, SavedObject } from '@kbn/core/server';
+import {
+  CoreKibanaRequest,
+  FakeRawRequest,
+  Headers,
+  SavedObject,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   LoadedIndirectParams,
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { isBoom } from '@hapi/boom';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -135,7 +140,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
       { namespace }
     );
   } catch (e) {
-    if (isBoom(e, 404)) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       throw createTaskRunError(e, TaskErrorSource.USER);
     }
     throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
