@@ -61,7 +61,7 @@ export async function fetchFieldExistence({
   const newFields = existingFieldList.filter((field) => !dataView.getFieldByName(field.name));
   // refresh the data view in case there are new fields
   if (newFields.length) {
-    await dataViewsService.refreshFields(dataView, false);
+    await dataViewsService.refreshFields(dataView, false, true);
   }
   const allFields = buildFieldList(dataView, metaFields);
   return {
