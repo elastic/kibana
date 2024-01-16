@@ -20,6 +20,7 @@ NOTIFICATIONS=${2:-./legacy_notifications/one_action.json}
 curl -s -k \
  -H 'Content-Type: application/json' \
  -H 'kbn-xsrf: 123' \
+ -H 'elastic-api-version: 1' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
  -X POST ${KIBANA_URL}${SPACE_URL}/internal/api/detection/legacy/notifications?alert_id="$1" \
   -d @${NOTIFICATIONS} | jq .
