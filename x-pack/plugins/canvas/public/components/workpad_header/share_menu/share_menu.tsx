@@ -49,6 +49,7 @@ export const ShareMenu = () => {
             layoutOption="canvas"
             onClose={onClose}
             objectId={workpad.id}
+            objectType="canvas"
             getJobParams={getPdfJobParams(sharingData, platformService.getKibanaVersion())}
           />
         )

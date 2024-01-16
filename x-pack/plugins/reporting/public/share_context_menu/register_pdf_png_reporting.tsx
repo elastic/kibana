@@ -24,6 +24,7 @@ export const reportingScreenshotShareProvider = ({
   theme,
   overlays,
   i18nStart,
+  intl,
 }: ExportModalShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -85,9 +86,6 @@ export const reportingScreenshotShareProvider = ({
     const isV2Job = isJobV2Params(jobProviderOptions);
     const requiresSavedState = !isV2Job;
 
-    const pngReportType = 'pngV2';
-    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
-
     const openImageModal = () => {
       const session = overlays.openModal(
         toMountPoint(
@@ -95,7 +93,6 @@ export const reportingScreenshotShareProvider = ({
             apiClient={apiClient}
             toasts={toasts}
             uiSettings={uiSettings}
-            reportType={pngReportType || pdfReportType}
             objectId={objectId}
             requiresSavedState={requiresSavedState}
             layoutOption={objectType === 'dashboard' ? 'print' : undefined}
@@ -107,6 +104,7 @@ export const reportingScreenshotShareProvider = ({
             }}
             theme={theme}
             objectType={objectType}
+            intl={intl}
           />,
           { theme, i18n: i18nStart }
         ),

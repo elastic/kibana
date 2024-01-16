@@ -55,7 +55,7 @@ export interface ReportingModalProps {
   objectType: string;
 }
 
-export type Props = ReportingModalProps & { intl?: InjectedIntl };
+export type Props = ReportingModalProps & { intl: InjectedIntl };
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const {
@@ -85,13 +85,11 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     type: 'pngV2' | 'printablePdf' | 'printablePdfV2',
     opts?: JobParamsProviderOptions
   ) => {
-    // catch for canvas
     if (!opts) {
       return { ...props.getJobParams };
     }
 
     const {
-      objectType,
       sharingData: { title, layout, locatorParams },
     } = opts;
 
@@ -334,12 +332,6 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     );
   };
 
-  const renderDescription = (object: string) => {
-    return object === 'dashboard'
-      ? `Reports can take a few minutes to generate based upon the size of your dashboard.`
-      : `CSV exports can take a few minutes to generate based upon the size of your report.`;
-  };
-
   const saveWarningMessageWithButton =
     objectId === undefined || objectId === '' || !isSaved || props.isDirty || isStale ? (
       <EuiFormRow
@@ -383,12 +375,14 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         <EuiModalHeaderTitle>Export</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut
-          size="s"
-          id="xpack.reporting.modalContent.generationTimeDescription"
-          title={renderDescription(objectType)}
-          iconType="iInCircle"
-        />
+        {objectType === 'dashboard' && (
+          <EuiCallOut
+            size="s"
+            id="xpack.reporting.modalContent.generationTimeDescription"
+            title="Reports can take a few minutes to generate based upon the size of your dashboard."
+            iconType="iInCircle"
+          />
+        )}
         <EuiSpacer size="m" />
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
           <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
@@ -432,5 +426,4 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   );
 };
 
-// @ts-ignore
 export const ReportingModalContent = injectI18n(ReportingModalContentUI);
