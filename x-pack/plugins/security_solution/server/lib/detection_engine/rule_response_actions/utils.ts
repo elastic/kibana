@@ -7,9 +7,9 @@
 
 import { get } from 'lodash';
 import type { AlertAgent, AlertWithAgent, AlertsAction } from './types';
-import type { EndpointParams } from '../../../../common/api/detection_engine';
+import type { ProcessesParams } from '../../../../common/api/detection_engine';
 
-export const getProcessAlerts = (alerts: AlertWithAgent[], config: EndpointParams['config']) => {
+export const getProcessAlerts = (alerts: AlertWithAgent[], config: ProcessesParams['config']) => {
   if (!config) {
     return {};
   }
@@ -46,7 +46,7 @@ export const getProcessAlerts = (alerts: AlertWithAgent[], config: EndpointParam
 
 export const getErrorProcessAlerts = (
   alerts: AlertWithAgent[],
-  config: EndpointParams['config']
+  config: ProcessesParams['config']
 ) => {
   if (!config) {
     return {};
@@ -111,20 +111,23 @@ export const getExecuteAlerts = (
     const { id: agentId, name: agentName } = alert.agent || {};
 
     const hostName = alert.host?.name;
+    // We calculate actions to be triggered per agentId - because execute seems to not yet support multiple agents
     return {
       ...acc,
-      hosts: {
-        ...(acc.hosts || {}),
-        [agentId]: {
-          name: agentName || hostName || '',
-          id: agentId,
+      [agentId]: {
+        hosts: {
+          ...(acc?.[agentId]?.hosts || {}),
+          [agentId]: {
+            name: agentName || hostName || '',
+            id: agentId,
+          },
         },
+        parameters: {
+          command: config.command,
+          ...(config.timeout ? { timeout: config.timeout } : {}),
+        },
+        endpoint_ids: [agentId],
+        alert_ids: [...(acc?.[agentId]?.alert_ids || []), alert._id],
       },
-      parameters: {
-        command: config.command,
-        timeout: config.timeout,
-      },
-      endpoint_ids: [...new Set([...(acc.endpoint_ids || []), agentId])],
-      alert_ids: [...(acc.alert_ids || []), alert._id],
     };
-  }, {} as AlertsAction);
+  }, {} as Record<string, AlertsAction>);

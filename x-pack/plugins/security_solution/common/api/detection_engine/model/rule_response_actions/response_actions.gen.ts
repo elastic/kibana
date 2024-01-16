@@ -77,34 +77,66 @@ export const RuleResponseOsqueryAction = z.object({
   params: OsqueryParamsCamelCase,
 });
 
-export type EndpointParams = z.infer<typeof EndpointParams>;
-export const EndpointParams = z.object({
-  command: z.enum(['isolate', 'kill-process', 'suspend-process']),
+export type IsolateParams = z.infer<typeof IsolateParams>;
+export const IsolateParams = z.object({
+  command: z.literal('isolate'),
   comment: z.string().optional(),
-  config: z
-    .object({
-      /**
-       * Field to use instead of process.pid
-       */
-      field: z.string(),
-      /**
-       * Whether to overwrite field with process.pid
-       */
-      overwrite: z.boolean().optional().default(true),
-    })
-    .optional(),
+});
+
+export type ProcessesParams = z.infer<typeof ProcessesParams>;
+export const ProcessesParams = z.object({
+  command: z.enum(['kill-process', 'suspend-process']),
+  comment: z.string().optional(),
+  config: z.object({
+    /**
+     * Field to use instead of process.pid
+     */
+    field: z.string(),
+    /**
+     * Whether to overwrite field with process.pid
+     */
+    overwrite: z.boolean().optional().default(true),
+  }),
+});
+
+export type GetFileParams = z.infer<typeof GetFileParams>;
+export const GetFileParams = z.object({
+  command: z.literal('get-file'),
+  comment: z.string().optional(),
+  config: z.object({
+    /**
+     * Path to retrieve a file from the host
+     */
+    path: z.string().min(1),
+  }),
+});
+
+export type ExecuteParams = z.infer<typeof ExecuteParams>;
+export const ExecuteParams = z.object({
+  command: z.literal('execute'),
+  comment: z.string().optional(),
+  config: z.object({
+    /**
+     * Command to execute on the host
+     */
+    command: z.string().min(1),
+    /**
+     * Timeout for execute on the host
+     */
+    timeout: z.number().optional(),
+  }),
 });
 
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
 export const EndpointResponseAction = z.object({
   action_type_id: z.literal('.endpoint'),
-  params: EndpointParams,
+  params: z.union([IsolateParams, ProcessesParams, GetFileParams, ExecuteParams]),
 });
 
 export type RuleResponseEndpointAction = z.infer<typeof RuleResponseEndpointAction>;
 export const RuleResponseEndpointAction = z.object({
   actionTypeId: z.literal('.endpoint'),
-  params: EndpointParams,
+  params: z.union([IsolateParams, ProcessesParams, GetFileParams, ExecuteParams]),
 });
 
 export type ResponseAction = z.infer<typeof ResponseAction>;

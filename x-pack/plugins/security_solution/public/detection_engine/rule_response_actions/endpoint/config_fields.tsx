@@ -10,7 +10,7 @@ import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib
 import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash';
 import { TimeoutField } from './timeout';
-import { ExecuteScriptField } from './script';
+import { ExecuteCommandField } from './execute_command_field';
 import { FilePathField } from './file_path';
 import { OverwriteField } from './overwrite_process_field';
 import { FieldNameField } from './field_name';
@@ -70,7 +70,7 @@ export const ConfigFieldsComponent = ({
     return (
       <>
         <EuiSpacer />
-        <ExecuteScriptField
+        <ExecuteCommandField
           path={`${basePath}.config.command`}
           disabled={disabled}
           readDefaultValueOnForm={readDefaultValueOnForm}

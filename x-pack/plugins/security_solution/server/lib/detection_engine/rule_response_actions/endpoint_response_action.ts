@@ -53,16 +53,17 @@ export const endpointResponseAction = (
   };
 
   if (isExecuteAction(responseAction.params)) {
-    const actionPayload = getExecuteAlerts(alerts, responseAction.params.config);
-    return Promise.all([
-      endpointAppContextService.getActionCreateService().createActionFromAlert(
+    const actionAlerts = getExecuteAlerts(alerts, responseAction.params.config);
+
+    return each(actionAlerts, (actionPayload) => {
+      return endpointAppContextService.getActionCreateService().createActionFromAlert(
         {
           ...actionPayload,
           ...commonData,
         },
         actionPayload.endpoint_ids
-      ),
-    ]);
+      );
+    });
   }
 
   const createProcessActionFromAlerts = (actionAlerts: Record<string, AlertsAction>) => {

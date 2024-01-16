@@ -17,18 +17,18 @@ interface ActionTypeFieldProps {
 }
 
 const CONFIG = {
-  label: i18n.translate('xpack.securitySolution.responseActions.endpoint.config.script', {
-    defaultMessage: 'Script',
+  label: i18n.translate('xpack.securitySolution.responseActions.endpoint.config.command', {
+    defaultMessage: 'Command',
   }),
   helpText: (
     <FormattedMessage
-      id="xpack.securitySolution.responseActions.endpoint.config.scriptDescription"
+      id="xpack.securitySolution.responseActions.endpoint.config.commandDescription"
       defaultMessage="TODO: SPECIFY SCRIPT  DESCRIPTION "
     />
   ),
 };
 
-const ExecuteScriptFieldComponent = ({
+const ExecuteCommandFieldComponent = ({
   path,
   disabled,
   readDefaultValueOnForm,
@@ -42,4 +42,4 @@ const ExecuteScriptFieldComponent = ({
   />
 );
 
-export const ExecuteScriptField = React.memo(ExecuteScriptFieldComponent);
+export const ExecuteCommandField = React.memo(ExecuteCommandFieldComponent);
