@@ -94,9 +94,6 @@ export class ComboBoxService extends FtrService {
     await this.openOptionsList(comboBoxElement);
 
     if (trimmedValue !== undefined) {
-      const allOptions = await this.find.allByCssSelector(`.euiFilterSelectItem`);
-      // eslint-disable-next-line no-console
-      console.log('allOptions::', allOptions);
       const selectOptions = await this.find.allByCssSelector(
         `.euiFilterSelectItem[title="${trimmedValue}"]`,
         this.WAIT_FOR_EXISTS_TIME
