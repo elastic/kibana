@@ -28,7 +28,6 @@ export const useDatasetQualityTable = () => {
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
-  const [pageSize, setPageSize] = useState(1);
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<DIRECTION>(DEFAULT_SORT_DIRECTION);
 
@@ -52,8 +51,8 @@ export const useDatasetQualityTable = () => {
   );
 
   const pagination = {
-    pageIndex: store.state.page,
-    pageSize,
+    pageIndex: store.state.table.page,
+    pageSize: store.state.table.rowsPerPage,
     totalItemCount: data.length,
     hidePerPageOptions: true,
   };
@@ -64,7 +63,7 @@ export const useDatasetQualityTable = () => {
       sort?: { field: SORT_FIELD; direction: DIRECTION };
     }) => {
       store.actions.setPage(options.page.index);
-      setPageSize(options.page.size);
+      store.actions.setRowsPerPage(options.page.size);
       setSortField(options.sort?.field || DEFAULT_SORT_FIELD);
       setSortDirection(options.sort?.direction || DEFAULT_SORT_DIRECTION);
     },
@@ -88,14 +87,26 @@ export const useDatasetQualityTable = () => {
 
     const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
 
-    return sortedItems.slice(store.state.page * pageSize, (store.state.page + 1) * pageSize);
-  }, [data, degradedStats, sortField, sortDirection, store.state.page, pageSize]);
+    return sortedItems.slice(
+      store.state.table.page * store.state.table.rowsPerPage,
+      (store.state.table.page + 1) * store.state.table.rowsPerPage
+    );
+  }, [
+    sortField,
+    data,
+    sortDirection,
+    store.state.table.page,
+    store.state.table.rowsPerPage,
+    degradedStats,
+  ]);
 
   const resultsCount = useMemo(() => {
-    const startNumberItemsOnPage = pageSize * store.state.page + (renderedItems.length ? 1 : 0);
-    const endNumberItemsOnPage = pageSize * store.state.page + renderedItems.length;
+    const startNumberItemsOnPage =
+      store.state.table.rowsPerPage * store.state.table.page + (renderedItems.length ? 1 : 0);
+    const endNumberItemsOnPage =
+      store.state.table.rowsPerPage * store.state.table.page + renderedItems.length;
 
-    return pageSize === 0 ? (
+    return store.state.table.rowsPerPage === 0 ? (
       <strong>{tableSummaryAllText}</strong>
     ) : (
       <>
@@ -105,7 +116,7 @@ export const useDatasetQualityTable = () => {
         {tableSummaryOfText} {data.length}
       </>
     );
-  }, [data.length, store.state.page, pageSize, renderedItems.length]);
+  }, [data.length, store.state.table.page, store.state.table.rowsPerPage, renderedItems.length]);
 
   return {
     sort,

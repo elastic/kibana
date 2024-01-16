@@ -7,10 +7,15 @@
 
 import * as rt from 'io-ts';
 
+export const tableRT = rt.strict({
+  page: rt.number,
+  rowsPerPage: rt.number,
+});
+
 export const urlSchemaRT = rt.exact(
   rt.partial({
     v: rt.literal(1),
-    page: rt.number,
+    table: tableRT,
   })
 );
 

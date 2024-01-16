@@ -421,6 +421,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
@@ -456,6 +457,7 @@ enabled:
   - x-pack/performance/journeys/tags_listing_page.ts
   - x-pack/performance/journeys/cloud_security_dashboard.ts
   - x-pack/performance/journeys/apm_service_inventory.ts
+  - x-pack/performance/journeys/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/serverless.config.ts
@@ -494,6 +496,8 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/detection_engine/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/rule_management/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/basic_essentials_license/rule_management/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/exception_lists_items/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/exception_lists_items/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/default_license/lists_items/configs/serverless.config.ts

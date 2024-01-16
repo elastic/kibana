@@ -7,9 +7,7 @@
  */
 
 import color from 'color';
-import { getUISettings } from '../../services';
-
-const isDarkTheme = () => getUISettings().get('theme:darkMode');
+import { getCoreStart } from '../../services';
 
 /**
  * Returns true if the color that is passed has low luminosity
@@ -23,7 +21,7 @@ const isColorDark = (c) => {
  * Defaults to checking `theme:darkMode`.
  */
 export const isThemeDark = (currentTheme) => {
-  let themeIsDark = currentTheme || isDarkTheme();
+  let themeIsDark = currentTheme || getCoreStart().theme.getTheme().darkMode;
 
   // If passing a string, check the luminosity
   if (typeof currentTheme === 'string') {

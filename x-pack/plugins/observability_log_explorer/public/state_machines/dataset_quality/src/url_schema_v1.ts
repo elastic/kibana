@@ -13,14 +13,14 @@ export const getStateFromUrlValue = (
   urlValue: datasetQualityUrlSchema.UrlSchema
 ): DatasetQualityPublicStateUpdate =>
   deepCompactObject<DatasetQualityPublicStateUpdate>({
-    page: urlValue.page,
+    table: urlValue.table,
   });
 
 export const getUrlValueFromState = (
   state: DatasetQualityPublicStateUpdate
 ): datasetQualityUrlSchema.UrlSchema =>
   deepCompactObject<datasetQualityUrlSchema.UrlSchema>({
-    page: state.page,
+    table: state.table,
     v: 1,
   });
 

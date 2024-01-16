@@ -12,7 +12,10 @@ import { DatasetQualityController, DatasetQualityPublicStateUpdate } from './typ
 type InitialState = DatasetQualityPublicStateUpdate;
 
 const state = {
-  page: 0,
+  table: {
+    page: 0,
+    rowsPerPage: 10,
+  },
 };
 
 export const createDatasetQualityControllerFactory =
@@ -32,7 +35,19 @@ export const createDatasetQualityControllerFactory =
         setPage: (page: number) => {
           datasetQualityState.next({
             ...datasetQualityState.getValue(),
-            page,
+            table: {
+              ...datasetQualityState.getValue().table,
+              page,
+            },
+          });
+        },
+        setRowsPerPage: (rowsPerPage: number) => {
+          datasetQualityState.next({
+            ...datasetQualityState.getValue(),
+            table: {
+              ...datasetQualityState.getValue().table,
+              rowsPerPage,
+            },
           });
         },
       },

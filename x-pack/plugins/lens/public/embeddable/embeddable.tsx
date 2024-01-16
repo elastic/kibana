@@ -1126,12 +1126,11 @@ export class Embeddable
               style={input.style}
               executionContext={this.getExecutionContext()}
               addUserMessages={(messages) => this.addUserMessages(messages)}
-              onRuntimeError={(message) => {
-                this.updateOutput({ error: new Error(message) });
+              onRuntimeError={(error) => {
+                this.updateOutput({ error });
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
-              docLinks={this.deps.coreStart.docLinks}
             />
           </KibanaThemeProvider>
           <MessagesBadge
@@ -1508,6 +1507,10 @@ export class Embeddable
   }
 
   public getIsEditable() {
+    // for ES|QL, editing is allowed only if the advanced setting is on
+    if (Boolean(this.isTextBasedLanguage()) && !this.deps.uiSettings.get('discover:enableESQL')) {
+      return false;
+    }
     return (
       this.deps.capabilities.canSaveVisualizations ||
       (!this.inputIsRefType(this.getInput()) &&

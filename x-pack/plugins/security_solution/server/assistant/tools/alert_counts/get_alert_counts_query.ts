@@ -7,9 +7,16 @@
 
 export const getAlertsCountQuery = (alertsIndexPattern: string) => ({
   aggs: {
-    statusBySeverity: {
+    kibanaAlertSeverity: {
       terms: {
         field: 'kibana.alert.severity',
+      },
+      aggs: {
+        kibanaAlertWorkflowStatus: {
+          terms: {
+            field: 'kibana.alert.workflow_status',
+          },
+        },
       },
     },
   },
@@ -21,11 +28,24 @@ export const getAlertsCountQuery = (alertsIndexPattern: string) => ({
           bool: {
             filter: [
               {
-                match_phrase: {
-                  'kibana.alert.workflow_status': 'open',
+                bool: {
+                  should: [
+                    {
+                      match_phrase: {
+                        'kibana.alert.workflow_status': 'open',
+                      },
+                    },
+                    {
+                      match_phrase: {
+                        'kibana.alert.workflow_status': 'acknowledged',
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
                 },
               },
             ],
+            must: [],
             must_not: [
               {
                 exists: {
@@ -33,13 +53,14 @@ export const getAlertsCountQuery = (alertsIndexPattern: string) => ({
                 },
               },
             ],
+            should: [],
           },
         },
         {
           range: {
             '@timestamp': {
-              gte: 'now/d',
-              lte: 'now/d',
+              gte: 'now-24h',
+              lte: 'now',
             },
           },
         },

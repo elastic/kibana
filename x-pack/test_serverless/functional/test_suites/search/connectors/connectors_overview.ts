@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
       });
 
-      it('searchBar and select filter connector table', async () => {
+      it('searchBar and select, filters connector table', async () => {
         pageObjects.svlSearchConnectorsPage.connectorOverviewPage.getConnectorFromConnectorTable(
           TEST_CONNECTOR_NAME
         );

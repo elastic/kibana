@@ -10,13 +10,19 @@ import { Observable } from 'rxjs';
 export interface DatasetQualityController {
   actions: {
     setPage: (page: number) => void;
+    setRowsPerPage: (rowsPerPage: number) => void;
   };
   state: DatasetQualityPublicState;
   state$: Observable<DatasetQualityPublicState>;
 }
 
-export interface DatasetQualityPublicState {
+export interface DatasetQualityTableOptions {
   page: number;
+  rowsPerPage: number;
+}
+
+export interface DatasetQualityPublicState {
+  table: DatasetQualityTableOptions;
 }
 
 export type DatasetQualityPublicStateUpdate = Partial<DatasetQualityPublicState>;

@@ -36,6 +36,7 @@ export const callOpenAIFunctionsExecutor = async ({
   request,
   elserId,
   kbResource,
+  telemetry,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
@@ -56,6 +57,7 @@ export const callOpenAIFunctionsExecutor = async ({
     esClient,
     KNOWLEDGE_BASE_INDEX_PATTERN,
     logger,
+    telemetry,
     elserId,
     kbResource
   );

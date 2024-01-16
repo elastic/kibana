@@ -300,6 +300,18 @@ exports[`XYChart component it renders area 1`] = `
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -763,6 +775,19 @@ exports[`XYChart component it renders area 1`] = `
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -1082,7 +1107,7 @@ exports[`XYChart component it renders area 1`] = `
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -1116,6 +1141,7 @@ exports[`XYChart component it renders area 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={0}
         showLegend={false}
         showLegendExtra={false}
@@ -1823,6 +1849,18 @@ exports[`XYChart component it renders bar 1`] = `
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -2286,6 +2324,19 @@ exports[`XYChart component it renders bar 1`] = `
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -2605,7 +2656,7 @@ exports[`XYChart component it renders bar 1`] = `
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -2639,6 +2690,7 @@ exports[`XYChart component it renders bar 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={0}
         showLegend={false}
         showLegendExtra={false}
@@ -3346,6 +3398,18 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -3809,6 +3873,19 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -4128,7 +4205,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -4162,6 +4239,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={90}
         showLegend={false}
         showLegendExtra={false}
@@ -4869,6 +4947,18 @@ exports[`XYChart component it renders line 1`] = `
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -5332,6 +5422,19 @@ exports[`XYChart component it renders line 1`] = `
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -5651,7 +5754,7 @@ exports[`XYChart component it renders line 1`] = `
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -5685,6 +5788,7 @@ exports[`XYChart component it renders line 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={0}
         showLegend={false}
         showLegendExtra={false}
@@ -6392,6 +6496,18 @@ exports[`XYChart component it renders stacked area 1`] = `
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -6855,6 +6971,19 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -7174,7 +7303,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -7208,6 +7337,7 @@ exports[`XYChart component it renders stacked area 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={0}
         showLegend={false}
         showLegendExtra={false}
@@ -7915,6 +8045,18 @@ exports[`XYChart component it renders stacked bar 1`] = `
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -8378,6 +8520,19 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -8697,7 +8852,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -8731,6 +8886,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={0}
         showLegend={false}
         showLegendExtra={false}
@@ -9438,6 +9594,18 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -9901,6 +10069,19 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -10220,7 +10401,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -10254,6 +10435,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={90}
         showLegend={false}
         showLegendExtra={false}
@@ -10961,6 +11143,18 @@ exports[`XYChart component split chart should render split chart if both, splitR
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -11454,6 +11648,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -11773,7 +11980,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -11807,6 +12014,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={0}
         showLegend={false}
         showLegendExtra={false}
@@ -12728,6 +12936,18 @@ exports[`XYChart component split chart should render split chart if splitColumnA
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -13215,6 +13435,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -13534,7 +13767,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -13568,6 +13801,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={0}
         showLegend={false}
         showLegendExtra={false}
@@ -14482,6 +14716,18 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
     }
   }
 >
+  <div
+    css={
+      Object {
+        "backgroundColor": "#ffffff",
+        "display": "none",
+        "height": "100%",
+        "position": "absolute",
+        "width": "100%",
+        "zIndex": 1,
+      }
+    }
+  />
   <ContextProvider
     value={
       Object {
@@ -14969,6 +15215,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -15288,7 +15547,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }
@@ -15322,6 +15581,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         onElementClick={[Function]}
         onPointerUpdate={[Function]}
         onRenderChange={[Function]}
+        onResize={[Function]}
         rotation={0}
         showLegend={false}
         showLegendExtra={false}
