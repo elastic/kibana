@@ -99,6 +99,7 @@ export enum TelemetryChannel {
 export enum TelemetryCounter {
   DOCS_SENT = 'docs_sent',
   DOCS_LOST = 'docs_lost',
+  DOCS_DROPPED = 'docs_dropped',
 }
 
 // EP Policy Response

@@ -172,6 +172,8 @@ export class TelemetryEventsSenderV2 implements ITelemetryEventsSenderV2 {
         this.logger.l(
           `>> Dropping event ${event} (channel: ${channel}, inflightEventsCounter: ${inflightEventsCounter})`
         );
+        this.senderUtils?.incrementCounter(TelemetryCounter.DOCS_DROPPED, 1, channel);
+
         return rx.EMPTY;
       }),
 

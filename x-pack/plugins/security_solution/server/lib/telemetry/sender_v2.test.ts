@@ -811,6 +811,54 @@ describe('TelemetryEventsSenderV2', () => {
       expect(param.counterType).toBe(TelemetryCounter.DOCS_SENT);
       expect(param.incrementBy).toBe(2);
     });
+
+    it('should increment the counter when drops events', async () => {
+      const inflightEventsThreshold = 3;
+      const bufferTimeSpanMillis = 2000;
+
+      service.setup(
+        DEFAULT_RETRY_CONFIG,
+        DEFAULT_QUEUE_CONFIG,
+        receiver,
+        telemetryPluginSetup,
+        telemetryUsageCounter
+      );
+      service.updateQueueConfig(ch1, {
+        ...ch1Config,
+        bufferTimeSpanMillis,
+        inflightEventsThreshold,
+      });
+      service.start();
+
+      // send five events
+      service.send(ch1, ['a', 'b', 'c', 'd']);
+
+      // check that no events are sent before the buffer time span
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+
+      // advance time
+      await jest.advanceTimersByTimeAsync(bufferTimeSpanMillis * 2);
+
+      // check that only `inflightEventsThreshold` events were sent
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      expect(mockedAxiosPost).toHaveBeenCalledWith(
+        expect.anything(),
+        '"a"\n"b"\n"c"',
+        expect.anything()
+      );
+
+      // one time because of the docs_sent event and the second one because of
+      // the dropped events
+      expect(telemetryUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+      const [param] = telemetryUsageCounter.incrementCounter.mock.calls[0];
+      expect(param.counterType).toBe(TelemetryCounter.DOCS_DROPPED);
+      expect(param.incrementBy).toBe(1);
+
+      await service.stop();
+
+      // check that no more events are sent
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('ITelemetryEventsSender integration', () => {
