@@ -29,19 +29,31 @@ the match_field defined in the enrich policy and
 requires that the input table has a column with the same name (language_code
 in this example). ENRICH will look for records in the
 enrich index based on the match field value.
+```esql
 ROW language_code = "1"
 | ENRICH languages_policy
+```
+
 To use a column with a different name than the match_field defined in the
 policy as the match field, use ON <column-name>:
+```esql
 ROW a = "1"
 | ENRICH languages_policy ON a
+```
+
 By default, each of the enrich fields defined in the policy is added as a
 column. To explicitly select the enrich fields that are added, use
 WITH <field1>, <field2>, ...:
+```esql
 ROW a = "1"
 | ENRICH languages_policy ON a WITH language_name
+```
+
 You can rename the columns that are added using WITH new_name=<field1>:
+```esql
 ROW a = "1"
 | ENRICH languages_policy ON a WITH name = language_name
+```
+
 In case of name collisions, the newly created columns will override existing
 columns.
