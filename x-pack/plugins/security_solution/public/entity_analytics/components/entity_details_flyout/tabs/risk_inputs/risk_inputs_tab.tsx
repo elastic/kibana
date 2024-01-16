@@ -7,27 +7,21 @@
 
 import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
 import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
-import { euiLightVars } from '@kbn/ui-theme';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import styled from '@emotion/styled';
-import { BasicTable } from '../../../../common/components/ml/tables/basic_table';
-import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { ActionColumn } from '../components/action_column';
-import { RiskInputsUtilityBar } from '../components/utility_bar';
-import { AssetCriticalityBadgeAllowMissing } from '../../asset_criticality';
-import { useRiskContributingAlerts } from '../../../hooks/use_risk_contributing_alerts';
-import { useRiskScore } from '../../../api/hooks/use_risk_score';
-import type { UserRiskScore, HostRiskScore } from '../../../../../common/search_strategy';
+import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
+import { ActionColumn } from '../../components/action_column';
+import { RiskInputsUtilityBar } from '../../components/utility_bar';
+import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
+import { useRiskScore } from '../../../../api/hooks/use_risk_score';
 import {
   buildHostNamesFilter,
   buildUserNamesFilter,
-  isUserRiskScore,
-} from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
-
+} from '../../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
+import { ContextsTable } from './contexts_table';
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
   entityName: string;
@@ -38,73 +32,6 @@ export interface AlertRawData {
   _index: string;
   _id: string;
 }
-
-const FieldLabel = styled.span`
-  font-weight: ${euiLightVars.euiFontWeightMedium};
-  color: ${euiLightVars.euiTitleColor};
-`;
-
-const ContextsTable: React.FC<{ riskScore?: UserRiskScore | HostRiskScore; loading: boolean }> = ({
-  riskScore,
-  loading,
-}) => {
-  const criticalityLevel = useMemo(() => {
-    if (!riskScore) {
-      return undefined;
-    }
-
-    if (isUserRiskScore(riskScore)) {
-      return riskScore.user.risk.criticality_level;
-    }
-
-    return riskScore.host.risk.criticality_level;
-  }, [riskScore]);
-
-  const columns = [
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.entityDetails.fieldColumnTitle"
-          defaultMessage="Field"
-        />
-      ),
-      field: 'label',
-      render: (label: string) => <FieldLabel>{label}</FieldLabel>,
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.entityDetails.valuesColumnTitle"
-          defaultMessage="Values"
-        />
-      ),
-      field: 'field',
-      render: (field: string | undefined, { render }: { render: () => JSX.Element }) => render(),
-    },
-  ];
-
-  const items = [
-    {
-      label: 'Asset Criticality Level',
-      render: () => (
-        <AssetCriticalityBadgeAllowMissing
-          criticalityLevel={criticalityLevel}
-          dataTestSubj="risk-inputs-asset-criticality-badge"
-        />
-      ),
-    },
-  ];
-
-  return (
-    <BasicTable
-      data-test-subj="contexts-table"
-      columns={columns}
-      items={items}
-      compressed={true}
-      loading={loading}
-    />
-  );
-};
 
 const FIRST_RECORD_PAGINATION = {
   cursorStart: 0,
