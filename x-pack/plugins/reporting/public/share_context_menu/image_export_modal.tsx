@@ -52,14 +52,23 @@ export interface ReportingModalProps {
   jobProviderOptions?: JobParamsProviderOptions;
   // needed for canvas
   getJobParams?: JobAppParamsPDFV2;
+  objectType: string;
 }
 
 export type Props = ReportingModalProps & { intl?: InjectedIntl };
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
-  const { apiClient, intl, toasts, theme, onClose, objectId, layoutOption, jobProviderOptions } =
-    props;
-
+  const {
+    apiClient,
+    intl,
+    toasts,
+    theme,
+    onClose,
+    objectId,
+    layoutOption,
+    jobProviderOptions,
+    objectType,
+  } = props;
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
@@ -70,7 +79,6 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const [useCanvasLayout, setCanvasLayout] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
   const isMounted = useMountedState();
-  const [objectType] = useState<string>('dashboard');
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
   const getJobsParams = (
@@ -83,12 +91,12 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     }
 
     const {
-      objectType: jobObjectType,
+      objectType,
       sharingData: { title, layout, locatorParams },
     } = opts;
 
     const baseParams = {
-      jobObjectType,
+      objectType,
       layout,
       title,
     };

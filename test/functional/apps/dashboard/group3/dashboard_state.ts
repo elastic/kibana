@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
       const sharedUrl = await PageObjects.share.getSharedUrl();
-      await PageObjects.share.clickShareTopNavButton();
+      await PageObjects.share.closeShareModal();
       log.debug(`sharedUrl: ${sharedUrl}`);
       return sharedUrl;
     };

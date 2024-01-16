@@ -108,4 +108,5 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   objectTypeTitle?: string;
   overlays: CoreStart['overlays'];
   http?: HttpStart;
+  objectType: string;
 }

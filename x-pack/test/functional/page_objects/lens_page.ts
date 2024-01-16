@@ -1817,20 +1817,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports') {
+    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'imageExports') {
       switch (action) {
         case 'csvDownload':
           return await testSubjects.isEnabled('sharePanel-CSVDownload');
         case 'permalinks':
           return await testSubjects.isEnabled('sharePanel-Permalinks');
         default:
-          return await testSubjects.isEnabled(`sharePanel-${action}`);
+          return await testSubjects.isEnabled(`sharePanel-imageExports`);
       }
     },
 
-    async ensureShareMenuIsOpen(
-      action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports'
-    ) {
+    async ensureShareMenuIsOpen(action: 'csvDownload' | 'permalinks' | 'imageExports') {
       await this.clickShareMenu();
 
       if (!(await testSubjects.exists('shareContextMenu'))) {
@@ -1883,9 +1881,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }, value);
     },
 
-    async openReportingShare(type: 'PNG' | 'PDF') {
-      await this.ensureShareMenuIsOpen(`${type}Reports`);
-      await testSubjects.click(`sharePanel-${type}Reports`);
+    async openReportingShare() {
+      await this.ensureShareMenuIsOpen(`imageExports`);
+      await testSubjects.click(`sharePanel-imageExports`);
     },
 
     async getCSVContent() {
