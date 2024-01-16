@@ -147,8 +147,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return field ? `${field} 的最大值` : '最大值';
       case 'terms':
         return field ? `${field} 的排名前 ${values} 的值` : `排名最前值`;
-      case 'sum':
-        return '求和';
+      // case 'sum':
+      //   return '求和';
       default:
         return term;
     }
