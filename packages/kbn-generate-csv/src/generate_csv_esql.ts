@@ -201,7 +201,10 @@ export class CsvESQLGenerator {
       const escape = this.escapeValues(settings);
 
       for (const column of columns) {
-        rowDefinition.push(escape(`${dataTableRow[column]}`));
+        let formattedValue: string = escape(`${dataTableRow[column]}`);
+        if (formattedValue === 'null') formattedValue = '';
+        if (formattedValue === 'undefined') formattedValue = '';
+        rowDefinition.push(formattedValue);
       }
 
       if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {

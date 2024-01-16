@@ -128,8 +128,9 @@ describe('CsvESQLGenerator', () => {
         { name: 'date', type: 'date' },
         { name: 'ip', type: 'ip' },
         { name: 'message', type: 'string' },
+        { name: 'geo.coordinates', type: 'geo_point' },
       ],
-      values: [['2020-12-31T00:14:28.000Z', '110.135.176.89', 'This is a great message!']],
+      values: [['2020-12-31T00:14:28.000Z', '110.135.176.89', 'This is a great message!', null]],
     });
 
     const generateCsv = new CsvESQLGenerator(
@@ -146,8 +147,8 @@ describe('CsvESQLGenerator', () => {
     );
     const csvResult = await generateCsv.generateData();
     expect(content).toMatchInlineSnapshot(`
-      "date,ip,message
-      \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"This is a great message!\\"
+      "date,ip,message,\\"geo.coordinates\\"
+      \\"2020-12-31T00:14:28.000Z\\",\\"110.135.176.89\\",\\"This is a great message!\\",
       "
     `);
     expect(csvResult.csv_contains_formulas).toBe(false);

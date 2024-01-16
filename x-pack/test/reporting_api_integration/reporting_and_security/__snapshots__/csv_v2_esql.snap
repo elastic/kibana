@@ -4,12 +4,12 @@ exports[`Reporting APIs CSV Generation from ES|QL export from non-timebased data
 "eon,epoch,era,period
 Phanerozoic,\\" Pliocene\\",Cenozoic,Neogene
 Phanerozoic,\\" Holocene\\",Cenozoic,Quaternary
-Phanerozoic,null,Mesozoic,Cretaceous
-Phanerozoic,null,Mesozoic,Jurassic
-Phanerozoic,null,Paleozoic,Cambrian
-Proterozoic,null,Paleozoic,Permian
-Archean,null,null,null
-Hadean,null,null,null
+Phanerozoic,,Mesozoic,Cretaceous
+Phanerozoic,,Mesozoic,Jurassic
+Phanerozoic,,Paleozoic,Cambrian
+Proterozoic,,Paleozoic,Permian
+Archean,,,
+Hadean,,,
 "
 `;
 
