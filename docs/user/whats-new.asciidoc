@@ -127,12 +127,12 @@ image::images/alerts.png[A screenshot of details of the alerts]
 === ResponseOps
 
 [discrete]
-==== Maintenance windows
+==== Maintenance window filters
 
-In 8.12 you can add KQL filters to your <<maintenance-windows,maintenance windows>> to further refine their scope.
+In 8.12 you can add KQL filters to your <<maintenance-windows,maintenance windows>> to further refine their scope:
 
 [role="screenshot"]
-image::images/maintenance-window.png[A screenshot of the create maintenance window UI]
+image::images/maintenance-window-filter.png[A screenshot of the create maintenance window UI]
 
 [discrete]
 ==== Case improvements
