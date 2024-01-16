@@ -24,7 +24,7 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { AlertDetails } from './alert_details';
 import { ConfigSchema } from '../../plugin';
-import { alert, alertWithNoData } from './mock/alert';
+import { alertDetail, alertWithNoData } from './mock/alert';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -124,7 +124,7 @@ describe('Alert details', () => {
     );
 
   it('should show the alert detail page with all necessary components', async () => {
-    useFetchAlertDetailMock.mockReturnValue([false, alert]);
+    useFetchAlertDetailMock.mockReturnValue([false, alertDetail]);
 
     const alertDetails = renderComponent();
 

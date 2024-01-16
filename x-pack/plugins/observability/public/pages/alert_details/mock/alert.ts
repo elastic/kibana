@@ -66,6 +66,13 @@ export const alert: TopAlert = {
   lastUpdated: 1630588131750,
 };
 
+export const alertDetail = {
+  alert,
+  rawAlert: Object.fromEntries(
+    Object.entries(alert.fields).map(([k, v]) => [k, !Array.isArray(v) ? [v] : v])
+  ),
+};
+
 export const alertWithTags: TopAlert = {
   ...alert,
   fields: {
