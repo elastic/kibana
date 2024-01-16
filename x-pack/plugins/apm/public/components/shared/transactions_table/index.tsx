@@ -276,9 +276,9 @@ export function TransactionsTable({
           onChangeCurrentPage={setCurrentPage}
           onChangeSearchQuery={onChangeSearchQuery}
           placeholder={i18n.translate(
-            'xpack.apm.errorGroupList.tableSearch.placeholder',
+            'xpack.apm.transactionsTable.tableSearch.placeholder',
             {
-              defaultMessage: 'Search for error message and group ID',
+              defaultMessage: 'Search for transaction name',
             }
           )}
         />
