@@ -26,7 +26,7 @@
     "@kbn/monaco",
     "@kbn/es-ui-shared-plugin",
     "@kbn/utility-types",
-    "@kbn/saved-search-plugin",
+    "@kbn/saved-search",
     "@kbn/code-editor",
   ],
   "exclude": [

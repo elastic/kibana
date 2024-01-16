@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedSearch, SavedSearchAttributes } from '.';
+import { SavedSearchCommon, SavedSearchAttributes } from '.';
 
 export const fromSavedSearchAttributes = (
   id: string | undefined,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
-  searchSource: SavedSearch['searchSource']
-): SavedSearch => ({
+  searchSource: SavedSearchCommon['searchSource']
+): SavedSearchCommon => ({
   id,
   searchSource,
   title: attributes.title,

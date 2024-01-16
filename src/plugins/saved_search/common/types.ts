@@ -6,19 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsResolveResponse } from '@kbn/core/server';
-import type { SerializableRecord } from '@kbn/utility-types';
-import { VIEW_MODE } from '.';
-
-export interface DiscoverGridSettings extends SerializableRecord {
-  columns?: Record<string, DiscoverGridSettingsColumn>;
-}
-
-export interface DiscoverGridSettingsColumn extends SerializableRecord {
-  width?: number;
-}
+import type { DiscoverGridSettings as SearchDiscoverGridSettings } from '@kbn/saved-search/types';
+import { VIEW_MODE } from '@kbn/saved-search/types';
+import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+export type {
+  SavedSearchCommon,
+  SortOrder,
+  DiscoverGridSettingsColumn,
+  DiscoverGridSettings,
+} from '@kbn/saved-search/types';
 
 /** @internal **/
 export interface SavedSearchAttributes {
@@ -26,7 +22,7 @@ export interface SavedSearchAttributes {
   sort: Array<[string, string]>;
   columns: string[];
   description: string;
-  grid: DiscoverGridSettings;
+  grid: SearchDiscoverGridSettings;
   hideChart: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
@@ -44,41 +40,4 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
-}
-
-/** @internal **/
-export type SortOrder = [string, string];
-
-/** @public **/
-export interface SavedSearch {
-  searchSource: ISearchSource;
-  id?: string;
-  title?: string;
-  sort?: SortOrder[];
-  columns?: string[];
-  description?: string;
-  tags?: string[] | undefined;
-  grid?: DiscoverGridSettings;
-  hideChart?: boolean;
-  viewMode?: VIEW_MODE;
-  hideAggregatedPreview?: boolean;
-  rowHeight?: number;
-  isTextBasedQuery?: boolean;
-  usesAdHocDataView?: boolean;
-
-  // for restoring time range with a saved search
-  timeRestore?: boolean;
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-
-  rowsPerPage?: number;
-  sampleSize?: number;
-  breakdownField?: string;
-  references?: SavedObjectReference[];
-  sharingSavedObjectProps?: {
-    outcome?: SavedObjectsResolveResponse['outcome'];
-    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
-    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
-    errorJSON?: string;
-  };
 }

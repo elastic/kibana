@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search/types';
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getFieldsFormats, getSavedSearch } from './services';
 import { BaseVisType } from './vis_types';

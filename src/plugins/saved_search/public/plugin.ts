@@ -25,7 +25,7 @@ import {
   getNewSavedSearch,
   SavedSearchUnwrapResult,
 } from './services/saved_searches';
-import { SavedSearch, SavedSearchAttributes } from '../common/types';
+import { SavedSearchCommon, SavedSearchAttributes } from '../common/types';
 import { SavedSearchType, LATEST_VERSION } from '../common';
 import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
 import { kibanaContext } from '../common/expressions';
@@ -50,7 +50,7 @@ export interface SavedSearchPublicPluginStart {
   getNew: () => ReturnType<typeof getNewSavedSearch>;
   getAll: () => Promise<Array<SOWithMetadata<SavedSearchAttributes>>>;
   save: (
-    savedSearch: SavedSearch,
+    savedSearch: SavedSearchCommon,
     options?: SaveSavedSearchOptions
   ) => ReturnType<typeof saveSavedSearch>;
   byValue: {
@@ -58,7 +58,7 @@ export interface SavedSearchPublicPluginStart {
     toSavedSearch: (
       id: string | undefined,
       result: SavedSearchUnwrapResult
-    ) => Promise<SavedSearch>;
+    ) => Promise<SavedSearchCommon>;
   };
 }
 
@@ -135,7 +135,7 @@ export class SavedSearchPublicPlugin
       get: (savedSearchId: string) => service.get(savedSearchId),
       getAll: () => service.getAll(),
       getNew: () => service.getNew(),
-      save: (savedSearch: SavedSearch, options?: SaveSavedSearchOptions) => {
+      save: (savedSearch: SavedSearchCommon, options?: SaveSavedSearchOptions) => {
         return service.save(savedSearch, options);
       },
       byValue: {
