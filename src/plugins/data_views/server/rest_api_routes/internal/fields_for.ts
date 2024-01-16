@@ -95,6 +95,7 @@ const FieldDescriptorSchema = schema.object({
   conflictDescriptions: schema.maybe(
     schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
   ),
+  meta: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
 
 export const validate: FullValidationConfig<any, any, any> = {
