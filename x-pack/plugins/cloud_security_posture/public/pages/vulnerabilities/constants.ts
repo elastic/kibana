@@ -19,16 +19,23 @@ export const VULNERABILITY_FIELDS = {
   PACKAGE_NAME: 'package.name',
   PACKAGE_VERSION: 'package.version',
   PACKAGE_FIXED_VERSION: 'package.fixed_version',
+  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  CLOUD_PROVIDER: 'cloud.provider',
 } as const;
 
 export const GROUPING_OPTIONS = {
   RESOURCE_NAME: VULNERABILITY_FIELDS.RESOURCE_NAME,
+  CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
 };
 
 export const defaultGroupingOptions: GroupOption[] = [
   {
     label: GROUPING_LABELS.RESOURCE_NAME,
     key: GROUPING_OPTIONS.RESOURCE_NAME,
+  },
+  {
+    label: GROUPING_LABELS.CLOUD_ACCOUNT_NAME,
+    key: GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME,
   },
 ];
 

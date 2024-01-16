@@ -40,17 +40,26 @@ export const NULL_GROUPING_MESSAGES = {
   RESOURCE_NAME: i18n.translate('xpack.csp.vulnerabilities.grouping.resource.nullGroupTitle', {
     defaultMessage: 'No resource',
   }),
+  CLOUD_ACCOUNT_NAME: i18n.translate(
+    'xpack.csp.vulnerabilities.grouping.cloudAccount.nullGroupTitle',
+    {
+      defaultMessage: 'No cloud account',
+    }
+  ),
   DEFAULT: i18n.translate('xpack.csp.vulnerabilities.grouping.default.nullGroupTitle', {
     defaultMessage: 'No grouping',
   }),
 };
 
 export const GROUPING_LABELS = {
-  RESOURCE_NAME: i18n.translate('xpack.csp.findings.latestFindings.groupByResource', {
+  RESOURCE_NAME: i18n.translate('xpack.csp.vulnerabilities.groupBy.resource', {
     defaultMessage: 'Resource',
+  }),
+  CLOUD_ACCOUNT_NAME: i18n.translate('xpack.csp.vulnerabilities.groupBy.cloudAccount', {
+    defaultMessage: 'Cloud account',
   }),
 };
 
-export const groupingTitle = i18n.translate('xpack.csp.vulnerabilities.latestFindings.groupBy', {
+export const groupingTitle = i18n.translate('xpack.csp.vulnerabilities.groupBy', {
   defaultMessage: 'Group vulnerabilities by',
 });
