@@ -134,7 +134,7 @@ This might influence the outcome of these tests.
     const multibar = new cliProgress.MultiBar(
       {
         clearOnComplete: false,
-        hideCursor: false,
+        hideCursor: true,
         fps: 60,
         barCompleteChar: '\u2588',
         barIncompleteChar: '\u2591',
@@ -146,6 +146,7 @@ This might influence the outcome of these tests.
     const { tsc, eslint, jest, fileCasing } = await createTests({
       diffedFiles,
       multibar,
+      flags: { ci: Boolean(flags.ci) },
     });
 
     const checkResponses = await Promise.all([
@@ -163,6 +164,8 @@ This might influence the outcome of these tests.
       const resultsSummaryTable = new Table({
         head: ['Check', 'Errors'],
         colWidths: [15, 120],
+        wordWrap: true,
+        wrapOnWordBoundary: false,
       });
 
       for (const checkResponse of checkResponses) {
@@ -199,6 +202,7 @@ This might influence the outcome of these tests.
       help: `
       --fix              Attempt to autofix problems
       --max-files        Max files number to check against. If exceeded the script will skip the execution
+      --ci               Run in CI mode. This will not display progress bars.
       `,
     },
   }

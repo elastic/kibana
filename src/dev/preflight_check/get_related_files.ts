@@ -7,26 +7,44 @@
  */
 
 import dependencyTree from 'dependency-tree';
+import { flatMapDeep } from 'lodash';
 import { dirname } from 'node:path';
 import { findFileUpwards } from './find_file_upwards';
 
-export async function getRelatedFiles({ path }: { path: string }) {
-  const tsConfigForFile = await findFileUpwards(dirname(path), 'tsconfig.json');
+interface NestedObject {
+  [key: string]: NestedObject | undefined;
+}
 
-  if (!tsConfigForFile) return;
+function flattenObject(obj: NestedObject, depth: number): string[] {
+  return flatMapDeep(obj, (value, key) => {
+    if (depth > 1 && value && typeof value === 'object') {
+      return flattenObject(value, depth - 1).map((nestedKey) => `${key}.${nestedKey}`);
+    } else {
+      return key;
+    }
+  });
+}
+export async function getRelatedFiles({ path }: { path: string }): Promise<string[]> {
+  const tsConfigForFile = await findFileUpwards(dirname(path), 'tsconfig.json');
 
   return new Promise((resolve, reject) => {
     try {
+      if (!tsConfigForFile) {
+        return reject(`Could not find tsconfig.json for ${path}`);
+      }
+
       resolve(
         dependencyTree({
           filename: path,
           directory: dirname(tsConfigForFile),
           tsConfig: tsConfigForFile,
-          filter: (p) => p.indexOf('node_modules') === -1, // optional
+          filter: (p) => p.indexOf('node_modules') === -1,
         })
       );
     } catch (error) {
       reject(error);
     }
+  }).then((tree) => {
+    return tree && typeof tree === 'object' ? flattenObject(tree as NestedObject, 2) : [];
   });
 }

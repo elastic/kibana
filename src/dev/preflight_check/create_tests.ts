@@ -41,9 +41,11 @@ export interface DiffedFile {
 export async function createTests({
   diffedFiles,
   multibar,
+  flags,
 }: {
   diffedFiles: DiffedFile[];
   multibar: MultiBar;
+  flags: { ci: boolean };
 }) {
   const checks = checkTypes.reduce((acc, check) => {
     acc[check] = {
@@ -55,10 +57,19 @@ export async function createTests({
 
   // add bars
   const barTypescript = multibar.create(0, 0, getDefaults('typescript'));
-  const barJest = multibar.create(0, 0, getDefaults('unit tests'));
   const barEslint = multibar.create(0, 0, getDefaults('eslint'));
+  const barJest = multibar.create(0, 0, getDefaults('unit tests'));
   const barFilecase = multibar.create(0, 0, getDefaults('file case'));
   const barI18n = multibar.create(0, 0, getDefaults('i18n'));
+
+  if (flags.ci) {
+    multibar.remove(barTypescript);
+    multibar.remove(barJest);
+    multibar.remove(barEslint);
+    multibar.remove(barFilecase);
+    multibar.remove(barI18n);
+    multibar.stop();
+  }
 
   for (const { path, mode, removed = [] } of diffedFiles) {
     const match = path.match(/^(.+?)((\.test|\.stories)?(\.tsx?|\.jsx?))$/);

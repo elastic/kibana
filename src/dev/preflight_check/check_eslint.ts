@@ -14,46 +14,51 @@ import type { TestResponse } from './create_tests';
 
 export async function checkEsLint(
   files: Array<{ path: string; file: File }>,
-  bar: SingleBar,
+  bar?: SingleBar,
   { fix }: { fix?: boolean } = {}
 ): Promise<TestResponse> {
   const response: TestResponse = { test: 'eslint', errors: [] };
 
-  for (const { path, file } of files) {
-    bar.increment();
-    bar.update({ filename: path });
-
-    const eslint = new ESLint({
-      cache: true,
-      cwd: REPO_ROOT,
-      fix,
-    });
-
-    const relativePath = file.getRelativePath();
-    const reports = await eslint.lintFiles(relativePath);
-
-    if (fix) {
-      await ESLint.outputFixes(reports);
-    }
-
-    let foundError = false;
-    let foundWarning = false;
-
-    reports.some((report) => {
-      if (report.errorCount !== 0) {
-        foundError = true;
-        return true;
-      } else if (report.warningCount !== 0) {
-        foundWarning = true;
-      }
-    });
-
-    if (foundError || foundWarning) {
-      const formatter = await eslint.loadFormatter();
-      const msg = await formatter.format(reports);
-
-      response.errors.push(msg);
-    }
+  if (files.length === 0) {
+    return response;
   }
+
+  bar?.increment();
+  bar?.update({ filename: files[0].path });
+
+  const eslint = new ESLint({
+    cache: true,
+    cwd: REPO_ROOT,
+    fix,
+  });
+
+  const paths = files.map(({ file }) => file.getRelativePath());
+  const reports = await eslint.lintFiles(paths);
+
+  if (fix) {
+    await ESLint.outputFixes(reports);
+  }
+
+  let foundError = false;
+  let foundWarning = false;
+
+  reports.some((report) => {
+    if (report.errorCount !== 0) {
+      foundError = true;
+      return true;
+    } else if (report.warningCount !== 0) {
+      foundWarning = true;
+    }
+  });
+
+  if (foundError || foundWarning) {
+    const formatter = await eslint.loadFormatter();
+    const msg = await formatter.format(reports);
+
+    response.errors.push(msg);
+  }
+
+  bar?.update(files.length, { filename: files[files.length - 1].path });
+
   return response;
 }
