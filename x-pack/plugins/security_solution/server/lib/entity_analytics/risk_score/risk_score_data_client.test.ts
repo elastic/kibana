@@ -454,7 +454,7 @@ describe('RiskScoreDataClient', () => {
   });
   describe('upgrade process', () => {
     it('upserts the configuration for the latest risk score index when upgrading', async () => {
-      await riskScoreDataClient.upgrade();
+      await riskScoreDataClient.upgradeIfNeeded();
 
       expect(esClient.indices.putMapping).toHaveBeenCalledWith(
         expect.objectContaining({

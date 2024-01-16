@@ -33,7 +33,7 @@ export const calculateAndPersistRiskScores = async (
   }
 
   try {
-    await riskScoreDataClient.upgrade();
+    await riskScoreDataClient.upgradeIfNeeded();
   } catch (err) {
     params.logger.error(
       `There was an error upgrading the risk score indices. Continuing with risk score persistence. ${err.message}`

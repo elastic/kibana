@@ -173,7 +173,7 @@ export class RiskScoreDataClient {
    * unmapped fields are allowed within stored documents.
    *
    */
-  public async upgrade() {
+  public async upgradeIfNeeded() {
     const desiredDynamicValue = 'false';
     const currentDynamicValue = await this.getRiskScoreLatestIndexDynamicConfiguration();
     if (currentDynamicValue !== desiredDynamicValue) {
