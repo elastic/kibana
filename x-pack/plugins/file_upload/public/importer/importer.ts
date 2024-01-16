@@ -226,8 +226,10 @@ export abstract class Importer implements IImporter {
       throw new Error('Import has not been initialized');
     }
 
-    const firstDocs = this._getFirstReadDocs(5);
-    const lastDocs = this._getLastReadDocs(5);
+    // take the first and last 10 docs from the file, to reduce the chance of getting
+    // bad data or out of order data.
+    const firstDocs = this._getFirstReadDocs(10);
+    const lastDocs = this._getLastReadDocs(10);
 
     const body = JSON.stringify({
       docs: firstDocs.concat(lastDocs),
