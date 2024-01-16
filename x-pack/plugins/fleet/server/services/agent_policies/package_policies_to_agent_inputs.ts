@@ -105,7 +105,7 @@ export const storedPackagePoliciesToAgentInputs = async (
   packagePolicies: PackagePolicy[],
   packageInfoCache: Map<string, PackageInfo>,
   outputId: string = DEFAULT_OUTPUT.name,
-  agentPolicyNamespace: string
+  agentPolicyNamespace?: string
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
