@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiResizableContainer, useGeneratedHtmlId, useResizeObserver } from '@elastic/eui';
+import {
+  EuiResizableContainer,
+  useGeneratedHtmlId,
+  useResizeObserver,
+  useEuiTheme,
+  mathWithUnits,
+} from '@elastic/eui';
 import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
 import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
@@ -47,6 +53,7 @@ export const PanelsResizable = ({
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
   setPanelSizes: (panelSizes: { fixedPanelSizePct: number; flexPanelSizePct: number }) => void;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const fixedPanelId = useGeneratedHtmlId({ prefix: 'fixedPanel' });
   const { height: containerHeight, width: containerWidth } = useResizeObserver(container);
   const containerSize = getContainerSize(direction, containerWidth, containerHeight);
@@ -64,16 +71,13 @@ export const PanelsResizable = ({
     () => setResizeWithPortalsHackIsResizing(false),
     []
   );
-  const baseButtonCss = css`
-    background-color: transparent !important;
-    gap: 0 !important;
-
-    &:not(:hover):not(:focus) {
-      &:before,
-      &:after {
-        width: 0;
-      }
-    }
+  // Align the resizable button border to overlap exactly over existing panel/layout borders
+  const buttonBorderCss = css`
+    position: relative;
+    inset-${direction === 'horizontal' ? 'inline-start' : 'block-end'}: -${mathWithUnits(
+    euiTheme.border.width.thin,
+    (x) => x / 2
+  )};
   `;
   const defaultButtonCss = css`
     z-index: 3;
@@ -218,8 +222,9 @@ export const PanelsResizable = ({
           </EuiResizablePanel>
           <EuiResizableButton
             className={resizeButtonClassName}
+            indicator="border"
             css={[
-              baseButtonCss,
+              buttonBorderCss,
               resizeWithPortalsHackIsResizing ? resizeWithPortalsHackButtonCss : defaultButtonCss,
             ]}
             data-test-subj={`${dataTestSubj}ResizableButton`}
