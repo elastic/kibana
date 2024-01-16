@@ -22,7 +22,9 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
       const instances = times(NUMBER_OF_SERVICES).map((index) =>
-        service(`opbeans-java-${index}`, ENVIRONMENT, 'java').instance(`java-instance-${index}`)
+        service(`synthtrace-high-cardinality-${index}`, ENVIRONMENT, 'java').instance(
+          `java-instance-${index}`
+        )
       );
 
       const instanceDependencies = (instance: Instance, id: string) => {

@@ -214,7 +214,9 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
           tableSearchBar.fieldsToSearch as Array<keyof T & string>
         }
         maxCountExceeded={tableSearchBar.maxCountExceeded}
-        isServerSearchQueryActive={tableSearchBar.isSearchSideSearchQueryActive}
+        isServerSideSearchQueryActive={
+          tableSearchBar.isSearchSideSearchQueryActive
+        }
         onChangeSearchQuery={onChangeSearchQuery}
         tableOptions={tableOptions}
         onChangeCurrentPage={onChangeCurrentPage}

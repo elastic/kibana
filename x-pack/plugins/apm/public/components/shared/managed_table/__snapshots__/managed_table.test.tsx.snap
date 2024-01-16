@@ -5,7 +5,7 @@ exports[`ManagedTable should render a page-full of items, with defaults 1`] = `
   <TableSearchBar
     fieldsToSearch={Array []}
     isEnabled={false}
-    isServerSearchQueryActive={false}
+    isServerSideSearchQueryActive={false}
     items={
       Array [
         Object {
@@ -99,7 +99,7 @@ exports[`ManagedTable should render when specifying initial values 1`] = `
   <TableSearchBar
     fieldsToSearch={Array []}
     isEnabled={false}
-    isServerSearchQueryActive={false}
+    isServerSideSearchQueryActive={false}
     items={
       Array [
         Object {

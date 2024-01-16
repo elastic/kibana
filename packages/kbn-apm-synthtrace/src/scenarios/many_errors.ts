@@ -15,7 +15,6 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-
   const severities = ['critical', 'error', 'warning', 'info', 'debug', 'trace'];
 
   return {
@@ -23,7 +22,11 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       const transactionName = 'DELETE /api/orders/{id}';
 
       const instance = apm
-        .service({ name: `synth-node`, environment: ENVIRONMENT, agentName: 'nodejs' })
+        .service({
+          name: `synthtrace-high-cardinality-0`,
+          environment: ENVIRONMENT,
+          agentName: 'nodejs',
+        })
         .instance('instance');
 
       const failedTraceEvents = range

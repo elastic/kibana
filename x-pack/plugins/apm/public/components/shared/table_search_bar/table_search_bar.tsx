@@ -6,20 +6,10 @@
  */
 
 import { EuiFieldSearch } from '@elastic/eui';
-import { memoize, orderBy, pick } from 'lodash';
+import { orderBy } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-
-const memoizeResult = memoize(
-  <T, P extends keyof T>(page: CurrentPage<T>, fieldsToSearch: P[]) => page,
-  <T, P extends keyof T>(page: CurrentPage<T>, fieldsToSearch: P[]) => {
-    return (
-      page.items.map((item) => pick(item, fieldsToSearch)).join('__') +
-      `${page.totalCount}`
-    );
-  }
-);
 
 interface TableOptions<F extends string> {
   page: { index: number; size: number };
@@ -34,7 +24,7 @@ export interface CurrentPage<T> {
 export function TableSearchBar<T, P extends keyof T & string>(props: {
   items: T[];
   fieldsToSearch: P[];
-  isServerSearchQueryActive: boolean;
+  isServerSideSearchQueryActive: boolean;
   maxCountExceeded: boolean;
   onChangeCurrentPage: (page: CurrentPage<T>) => void;
   onChangeSearchQuery: OnChangeSearchQuery;
@@ -47,7 +37,7 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
   const {
     items,
     fieldsToSearch,
-    isServerSearchQueryActive,
+    isServerSideSearchQueryActive,
     maxCountExceeded,
     onChangeCurrentPage,
     onChangeSearchQuery,
@@ -67,7 +57,7 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
   );
 
   const currentPage = useMemo(() => {
-    const _currentPage = getCurrentPage({
+    return getCurrentPage({
       items,
       fieldsToSearch,
       maxCountExceeded,
@@ -76,10 +66,6 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
       sortItems,
       sortFn,
     });
-
-    return fieldsToSearch.length > 0 && isTableSearchBarEnabled
-      ? memoizeResult(_currentPage, fieldsToSearch)
-      : _currentPage;
 
     // we need to spread `fieldsToSearch` because it's an array and we want to compare its values
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,7 +88,7 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
   if (
     !isTableSearchBarEnabled ||
     !isEnabled ||
-    (!isServerSearchQueryActive &&
+    (!isServerSideSearchQueryActive &&
       !searchQuery &&
       items.length < MINIMUM_NUMBER_OF_ITEMS_FOR_SEARCH_BAR_TO_SHOW)
   ) {
@@ -118,7 +104,8 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
       onChange={(e) => {
         const shouldFetchServer =
           maxCountExceeded ||
-          (isServerSearchQueryActive && !e.target.value.includes(searchQuery));
+          (isServerSideSearchQueryActive &&
+            !e.target.value.includes(searchQuery));
 
         setSearchQuery(e.target.value);
         onChangeSearchQuery({ searchQuery: e.target.value, shouldFetchServer });

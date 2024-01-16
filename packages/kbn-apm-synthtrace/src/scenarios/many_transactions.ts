@@ -37,7 +37,11 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
     generate: ({ range, clients: { apmEsClient } }) => {
       const instances = times(numServices).map((index) =>
         apm
-          .service({ name: `synth-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
+          .service({
+            name: `synthtrace-high-cardinality-${index}`,
+            environment: ENVIRONMENT,
+            agentName: 'go',
+          })
           .instance(`instance-${index}`)
       );
 

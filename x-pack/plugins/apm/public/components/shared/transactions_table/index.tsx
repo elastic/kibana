@@ -270,7 +270,7 @@ export function TransactionsTable({
           fieldsToSearch={['name']}
           maxCountExceeded={mainStatistics.maxCountExceeded}
           tableOptions={tableOptions}
-          isServerSearchQueryActive={
+          isServerSideSearchQueryActive={
             mainStatistics.isSearchSideSearchQueryActive
           }
           onChangeCurrentPage={setCurrentPage}

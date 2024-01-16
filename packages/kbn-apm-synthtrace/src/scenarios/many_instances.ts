@@ -19,7 +19,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { instance
   const numInstances = scenarioOpts.instances;
   const agentVersions = ['2.1.0', '2.0.0', '1.15.0', '1.14.0', '1.13.1'];
   const language = 'go';
-  const serviceName = 'synth-many-instances';
+  const serviceName = 'synthtrace-high-cardinality-0';
   const transactionName = 'GET /order/{id}';
 
   return {
