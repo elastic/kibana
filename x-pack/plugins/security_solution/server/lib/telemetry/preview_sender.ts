@@ -16,9 +16,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { ITelemetryEventsSender } from './sender';
-import type { TelemetryEvent } from './types';
+import type { TelemetryChannel, TelemetryEvent } from './types';
 import type { ITelemetryReceiver } from './receiver';
 import { tlog } from './helpers';
+import type { QueueConfig } from './sender_v2.types';
 
 /**
  * Preview telemetry events sender for the telemetry route.
@@ -115,6 +116,7 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   }
 
   public async queueTelemetryEvents(events: TelemetryEvent[]) {
+    // TODO(sebastian.zaffarano): useITelemetryEventsSenderV2#sendAsync()
     const result = this.composite.queueTelemetryEvents(events);
     await this.composite.sendIfDue(this.axiosInstance);
     return result;
@@ -147,5 +149,17 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
 
   public getV3UrlFromV2(v2url: string, channel: string): string {
     return this.composite.getV3UrlFromV2(v2url, channel);
+  }
+
+  public sendAsync(channel: TelemetryChannel, events: unknown[]): void {
+    this.composite.sendAsync(channel, events);
+  }
+
+  public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {
+    this.composite.updateQueueConfig(channel, config);
+  }
+
+  public updateDefaultQueueConfig(config: QueueConfig): void {
+    this.composite.updateDefaultQueueConfig(config);
   }
 }
