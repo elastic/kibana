@@ -10,13 +10,15 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { ContentColumnTooltip } from './column_tooltips/content_column_tooltip';
 import { CONTENT_FIELD } from '../../../common/constants';
 
-export const renderColumn = (field: string) => (column: EuiDataGridColumn) => {
-  switch (field) {
-    case CONTENT_FIELD:
-      column.display = <ContentColumnTooltip column={column} />;
-      break;
-    default:
-      break;
-  }
-  return column;
-};
+export const renderColumn =
+  (field: string) =>
+  ({ column, headerRowHeight }: { column: EuiDataGridColumn; headerRowHeight?: number }) => {
+    switch (field) {
+      case CONTENT_FIELD:
+        column.display = <ContentColumnTooltip column={column} headerRowHeight={headerRowHeight} />;
+        break;
+      default:
+        break;
+    }
+    return column;
+  };

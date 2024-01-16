@@ -46,4 +46,13 @@ export type CustomCellRenderer = Record<
   (props: DataGridCellValueElementProps) => React.ReactNode
 >;
 
-export type CustomColumn = Record<string, (column: EuiDataGridColumn) => EuiDataGridColumn>;
+export type CustomColumn = Record<
+  string,
+  ({
+    column,
+    headerRowHeight,
+  }: {
+    column: EuiDataGridColumn;
+    headerRowHeight?: number;
+  }) => EuiDataGridColumn
+>;

@@ -197,7 +197,7 @@ function buildEuiGridColumn({
   }
 
   if (customiseColumn && customiseColumn[column.id]) {
-    return customiseColumn[column.id](column);
+    return customiseColumn[column.id]({ column, headerRowHeight });
   }
   return column;
 }

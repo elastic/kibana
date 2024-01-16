@@ -28,7 +28,7 @@ const ColumnHeaderTruncateContainer = dynamic(
 
 export const ContentColumnTooltip = ({
   column,
-  headerRowHeight = 1,
+  headerRowHeight,
 }: {
   column: EuiDataGridColumn;
   headerRowHeight?: number;
