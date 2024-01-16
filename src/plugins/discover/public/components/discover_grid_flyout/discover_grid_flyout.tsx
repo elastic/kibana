@@ -259,7 +259,9 @@ export function DiscoverGridFlyout({
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-                Close
+                {i18n.translate('discover.grid.flyout.close', {
+                  defaultMessage: 'Close',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
