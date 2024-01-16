@@ -10,7 +10,7 @@ import { RuleStateAttributes } from '../../../common/types/latest';
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
 
 export type RuleStateAttributesWithoutStatus = Omit<RuleStateAttributes, 'muted'>;
-export const useChangeCspRuleStatus = () => {
+export const useChangeCspRuleState = () => {
   const { http } = useKibana().services;
 
   return async (actionOnRule: 'mute' | 'unmute', ruleIds: RuleStateAttributesWithoutStatus[]) => {

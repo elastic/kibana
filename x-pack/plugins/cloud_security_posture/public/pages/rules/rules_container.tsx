@@ -23,15 +23,15 @@ import type {
 } from '../../../common/types/latest';
 import { useCspGetRulesStates } from './use_csp_rules_state';
 
-export interface CspBenchmarkRulesWithStatus {
+export interface CspBenchmarkRulesWithStates {
   metadata: CspBenchmarkRule['metadata'];
   status: 'muted' | 'unmuted';
 }
 
 interface RulesPageData {
-  rules_page: CspBenchmarkRulesWithStatus[];
-  all_rules: CspBenchmarkRulesWithStatus[];
-  rules_map: Map<string, CspBenchmarkRulesWithStatus>;
+  rules_page: CspBenchmarkRulesWithStates[];
+  all_rules: CspBenchmarkRulesWithStates[];
+  rules_map: Map<string, CspBenchmarkRulesWithStates>;
   total: number;
   error?: string;
   loading: boolean;
@@ -40,7 +40,7 @@ interface RulesPageData {
 export type RulesState = RulesPageData & RulesQuery;
 
 const getRulesPage = (
-  data: CspBenchmarkRulesWithStatus[],
+  data: CspBenchmarkRulesWithStates[],
   status: string,
   error: unknown,
   query: RulesQuery
@@ -57,7 +57,7 @@ const getRulesPage = (
   };
 };
 
-const getPage = (data: CspBenchmarkRulesWithStatus[], { page, perPage }: RulesQuery) =>
+const getPage = (data: CspBenchmarkRulesWithStates[], { page, perPage }: RulesQuery) =>
   data.slice(page * perPage, (page + 1) * perPage);
 
 const MAX_ITEMS_PER_PAGE = 10000;
@@ -102,28 +102,31 @@ export const RulesContainer = () => {
   const rulesStates = useCspGetRulesStates();
   const arrayRulesStates: RuleStateAttributes[] = Object.values(rulesStates.data || {});
   const filteredRulesStates: RuleStateAttributes[] = arrayRulesStates.filter(
-    (e: any) =>
-      e.benchmark_id === params.benchmarkId && e.benchmark_version === 'v' + params.benchmarkVersion
+    (ruleState: RuleStateAttributes) =>
+      ruleState.benchmark_id === params.benchmarkId &&
+      ruleState.benchmark_version === 'v' + params.benchmarkVersion
   );
 
-  const rulesWithStatus: CspBenchmarkRulesWithStatus[] = useMemo(() => {
+  const rulesWithStatus: CspBenchmarkRulesWithStates[] = useMemo(() => {
     if (!data) return [];
 
-    return data.items.map((rule) => {
-      const rulesKey = buildRuleKey(
-        rule.metadata.benchmark.id,
-        rule.metadata.benchmark.version,
-        rule.metadata.benchmark.rule_number
-      );
+    return data.items
+      .filter((rule: CspBenchmarkRule) => rule.metadata.benchmark.rule_number !== undefined)
+      .map((rule: CspBenchmarkRule) => {
+        const rulesKey = buildRuleKey(
+          rule.metadata.benchmark.id,
+          'v' + params.benchmarkVersion,
+          rule.metadata.benchmark.rule_number
+        );
 
-      const match = rulesStates?.data?.[rulesKey];
-      const rulesStatus = match?.muted ? 'muted' : 'unmuted';
+        const match = rulesStates?.data?.[rulesKey];
+        const rulesStatus = match?.muted ? 'muted' : 'unmuted';
 
-      return { ...rule, status: rulesStatus || 'unmuted' };
-    });
-  }, [data, rulesStates?.data]);
+        return { ...rule, status: rulesStatus || 'unmuted' };
+      });
+  }, [data, params.benchmarkVersion, rulesStates?.data]);
 
-  const filteredRulesWithStatuses: CspBenchmarkRulesWithStatus[] = useMemo(() => {
+  const filteredRulesWithStatuses: CspBenchmarkRulesWithStates[] = useMemo(() => {
     if (enabledDisabledItemsFilter === 'disabled')
       return rulesWithStatus?.filter((e) => e?.status === 'muted');
     else if (enabledDisabledItemsFilter === 'enabled')
@@ -149,16 +152,18 @@ export const RulesContainer = () => {
     [filteredRulesWithStatuses, status, error, rulesQuery]
   );
 
-  const [selectedRules, setSelectedRules] = useState<CspBenchmarkRulesWithStatus[]>([]);
+  const [selectedRules, setSelectedRules] = useState<CspBenchmarkRulesWithStates[]>([]);
 
   const setSelectAllRules = () => {
     setSelectedRules(rulesPageData.all_rules);
   };
 
-  const rulesFlyoutData: CspBenchmarkRulesWithStatus = {
+  const rulesFlyoutData: CspBenchmarkRulesWithStates = {
     ...{
       status:
-        filteredRulesStates.find((e) => e.rule_id === selectedRuleId)?.muted === true
+        filteredRulesStates.find(
+          (filteredRuleState) => filteredRuleState.rule_id === selectedRuleId
+        )?.muted === true
           ? 'muted'
           : 'unmuted',
     },

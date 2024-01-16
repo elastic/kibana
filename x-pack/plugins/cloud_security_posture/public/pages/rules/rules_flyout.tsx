@@ -25,12 +25,12 @@ import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleStatus } from './change_csp_rule_status';
-import { CspBenchmarkRulesWithStatus } from './rules_container';
+import { useChangeCspRuleState } from './change_csp_rule_state';
+import { CspBenchmarkRulesWithStates } from './rules_container';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  rule: CspBenchmarkRulesWithStatus;
+  rule: CspBenchmarkRulesWithStates;
   refetchRulesStates: () => void;
 }
 
@@ -55,7 +55,7 @@ type RuleTab = typeof tabs[number]['id'];
 
 export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
-  const postRequestChangeRulesStatus = useChangeCspRuleStatus();
+  const postRequestChangeRulesStatus = useChangeCspRuleState();
   const isRuleMuted = rule?.status === 'muted';
 
   const switchRuleStatus = async () => {

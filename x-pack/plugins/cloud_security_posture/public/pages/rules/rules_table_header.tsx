@@ -26,8 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { RuleStateAttributesWithoutStatus, useChangeCspRuleStatus } from './change_csp_rule_status';
-import { CspBenchmarkRulesWithStatus } from './rules_container';
+import { RuleStateAttributesWithoutStatus, useChangeCspRuleState } from './change_csp_rule_state';
+import { CspBenchmarkRulesWithStates } from './rules_container';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -47,21 +47,21 @@ interface RulesTableToolbarProps {
   searchValue: string;
   isSearching: boolean;
   pageSize: number;
-  selectedRules: CspBenchmarkRulesWithStatus[];
+  selectedRules: CspBenchmarkRulesWithStates[];
   refetchRulesStates: () => void;
   setEnabledDisabledItemsFilter: (filterState: string) => void;
   currentEnabledDisabledItemsFilterState: string;
   setSelectAllRules: () => void;
-  setSelectedRules: (rules: CspBenchmarkRulesWithStatus[]) => void;
+  setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 }
 
 interface RuleTableCount {
   pageSize: number;
   total: number;
-  selectedRules: CspBenchmarkRulesWithStatus[];
+  selectedRules: CspBenchmarkRulesWithStates[];
   refetchRulesStates: () => void;
   setSelectAllRules: () => void;
-  setSelectedRules: (rules: CspBenchmarkRulesWithStatus[]) => void;
+  setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 }
 
 export const RulesTableHeader = ({
@@ -277,14 +277,14 @@ const CurrentPageOfTotal = ({
     setIsPopoverOpen((e) => !e);
   };
 
-  const postRequestChangeRulesStatus = useChangeCspRuleStatus();
+  const postRequestChangeRulesStatus = useChangeCspRuleState();
   const closePopover = () => setIsPopoverOpen(false);
   const changeRulesStatus = async (status: 'mute' | 'unmute') => {
     const bulkSelectedRules: RuleStateAttributesWithoutStatus[] = selectedRules.map(
-      (e: CspBenchmarkRulesWithStatus) => ({
-        benchmark_id: e?.metadata?.benchmark.id,
+      (e: CspBenchmarkRulesWithStates) => ({
+        benchmark_id: e?.metadata.benchmark.id,
         benchmark_version: e?.metadata.benchmark.version,
-        rule_number: e?.metadata.benchmark?.rule_number,
+        rule_number: e?.metadata.benchmark.rule_number,
         rule_id: e?.metadata.id,
       })
     );

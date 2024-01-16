@@ -30,10 +30,6 @@ export const buildMutedRulesFilter = (
   return mutedRulesFilterQuery;
 };
 
-export const buildRuleKey = (
-  benchmarkId: string,
-  benchmarkVersion: string,
-  ruleNumber?: string
-) => {
+export const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {
   return `${benchmarkId};${benchmarkVersion};${ruleNumber}`;
 };

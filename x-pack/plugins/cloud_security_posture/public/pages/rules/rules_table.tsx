@@ -17,9 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import type { CspBenchmarkRulesWithStatus, RulesState } from './rules_container';
+import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleStatus } from './change_csp_rule_status';
+import { useChangeCspRuleState } from './change_csp_rule_state';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
@@ -32,8 +32,8 @@ type RulesTableProps = Pick<
   setSelectedRuleId(id: string | null): void;
   selectedRuleId: string | null;
   refetchRulesStates: () => void;
-  selectedRules: CspBenchmarkRulesWithStatus[];
-  setSelectedRules: (e: CspBenchmarkRulesWithStatus[]) => void;
+  selectedRules: CspBenchmarkRulesWithStates[];
+  setSelectedRules: (e: CspBenchmarkRulesWithStates[]) => void;
 };
 
 type GetColumnProps = Pick<
@@ -41,12 +41,12 @@ type GetColumnProps = Pick<
   'setSelectedRuleId' | 'refetchRulesStates' | 'selectedRules' | 'setSelectedRules'
 > & {
   postRequestChangeRulesStatus: (actionOnRule: 'mute' | 'unmute', ruleIds: any[]) => void;
-  items: CspBenchmarkRulesWithStatus[];
+  items: CspBenchmarkRulesWithStates[];
   setSelectAllRulesThisPage: (e: boolean) => void;
   selectAllRulesThisPage: boolean;
   isArraySubset: (
-    smallArr: CspBenchmarkRulesWithStatus[],
-    bigArr: CspBenchmarkRulesWithStatus[]
+    smallArr: CspBenchmarkRulesWithStates[],
+    bigArr: CspBenchmarkRulesWithStates[]
   ) => boolean;
 };
 
@@ -65,19 +65,19 @@ export const RulesTable = ({
   setSelectedRules,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStatus>['pagination'] = {
+  const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
     pageIndex: page,
     pageSize,
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
 
-  const onTableChange = ({ page: pagination }: Criteria<CspBenchmarkRulesWithStatus>) => {
+  const onTableChange = ({ page: pagination }: Criteria<CspBenchmarkRulesWithStates>) => {
     if (!pagination) return;
     setPagination({ page: pagination.index, perPage: pagination.size });
   };
 
-  const rowProps = (row: CspBenchmarkRulesWithStatus) => ({
+  const rowProps = (row: CspBenchmarkRulesWithStates) => ({
     ['data-test-subj']: TEST_SUBJECTS.getCspBenchmarkRuleTableRowItemTestId(row.metadata?.id),
     style: {
       background: row.metadata?.id === selectedRuleId ? euiTheme.colors.highlight : undefined,
@@ -85,11 +85,11 @@ export const RulesTable = ({
   });
 
   const [selectAllRulesThisPage, setSelectAllRulesThisPage] = useState<boolean>(false);
-  const postRequestChangeRulesStatus = useChangeCspRuleStatus();
+  const postRequestChangeRulesStatus = useChangeCspRuleState();
 
   const isArraySubset = (
-    smallArr: CspBenchmarkRulesWithStatus[],
-    bigArr: CspBenchmarkRulesWithStatus[]
+    smallArr: CspBenchmarkRulesWithStates[],
+    bigArr: CspBenchmarkRulesWithStates[]
   ) => {
     let i: number = 0;
     const newSmallArr = smallArr.map((e) => e.metadata);
@@ -157,7 +157,7 @@ const getColumns = ({
   items,
   selectAllRulesThisPage,
   isArraySubset,
-}: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStatus>> => [
+}: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStates>> => [
   {
     field: 'action',
     name: (
@@ -172,9 +172,9 @@ const getColumns = ({
           const onChangeDeselectAllThisPageFn = () => {
             setSelectedRules(
               selectedRules.filter(
-                (element: CspBenchmarkRulesWithStatus) =>
+                (element: CspBenchmarkRulesWithStates) =>
                   !items.find(
-                    (item: CspBenchmarkRulesWithStatus) =>
+                    (item: CspBenchmarkRulesWithStates) =>
                       item.metadata?.id === element.metadata?.id
                   )
               )
@@ -188,11 +188,11 @@ const getColumns = ({
     ),
     width: '30px',
     sortable: false,
-    render: (rules, item: CspBenchmarkRulesWithStatus) => {
+    render: (rules, item: CspBenchmarkRulesWithStates) => {
       return (
         <EuiCheckbox
           checked={selectedRules.some(
-            (e: CspBenchmarkRulesWithStatus) => e.metadata?.id === item.metadata?.id
+            (e: CspBenchmarkRulesWithStates) => e.metadata?.id === item.metadata?.id
           )}
           id={`cloud-security-fields-selector-item-${item.metadata?.id}`}
           data-test-subj={`cloud-security-fields-selector-item-${item.metadata?.id}`}
@@ -202,7 +202,7 @@ const getColumns = ({
               ? setSelectedRules([...selectedRules, item])
               : setSelectedRules(
                   selectedRules.filter(
-                    (rule: CspBenchmarkRulesWithStatus) => rule.metadata?.id !== item.metadata?.id
+                    (rule: CspBenchmarkRulesWithStates) => rule.metadata?.id !== item.metadata?.id
                   )
                 );
           }}
@@ -225,7 +225,7 @@ const getColumns = ({
     }),
     width: '60%',
     truncateText: true,
-    render: (name, rule: CspBenchmarkRulesWithStatus) => (
+    render: (name, rule: CspBenchmarkRulesWithStates) => (
       <EuiButtonEmpty
         className="eui-textTruncate"
         title={name}
@@ -253,7 +253,7 @@ const getColumns = ({
     }),
     width: '10%',
     truncateText: true,
-    render: (name, rule: CspBenchmarkRulesWithStatus) => {
+    render: (name, rule: CspBenchmarkRulesWithStates) => {
       const rulesObjectRequest = {
         benchmark_id: rule?.metadata.benchmark.id,
         benchmark_version: rule?.metadata.benchmark.version,
