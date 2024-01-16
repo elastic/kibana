@@ -21,6 +21,7 @@ interface RangeSliderEditorState {
 export const RangeSliderEditorOptions = ({
   initialInput,
   onChange,
+  setControlEditorValid,
 }: ControlEditorProps<RangeSliderEmbeddableInput>) => {
   const [state, setState] = useState<RangeSliderEditorState>({
     step: initialInput?.step || 1,
@@ -35,8 +36,10 @@ export const RangeSliderEditorOptions = ({
             const step = event.target.valueAsNumber;
             onChange({ step });
             setState((s) => ({ ...s, step }));
+            setControlEditorValid(step > 0);
           }}
-          isInvalid={state.step < 1}
+          min={0}
+          isInvalid={state.step <= 0}
         />
       </EuiFormRow>
     </>
