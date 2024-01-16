@@ -40,14 +40,9 @@ export function isTimeRangeCompatible({ embeddable }: { embeddable: IEmbeddable 
     (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
 
   const isImage = embeddable.type === 'image';
-  const isNavigation = embeddable.type === 'navigation';
+  const isLinks = embeddable.type === 'links';
 
   return Boolean(
-    embeddable &&
-      hasTimeRange(embeddable) &&
-      !isInputControl &&
-      !isMarkdown &&
-      !isImage &&
-      !isNavigation
+    embeddable && hasTimeRange(embeddable) && !isInputControl && !isMarkdown && !isImage && !isLinks
   );
 }
