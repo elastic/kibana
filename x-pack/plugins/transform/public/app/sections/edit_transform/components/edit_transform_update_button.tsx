@@ -12,6 +12,7 @@ import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { useIsFormTouched } from '@kbn/ml-form-utils/use_is_form_touched';
+import { useUpdatedConfig } from '@kbn/ml-form-utils/use_updated_config';
 
 import { useIsFormValid } from '@kbn/ml-form-utils/use_is_form_valid';
 import { getErrorMessage } from '../../../../../common/utils/errors';
@@ -19,7 +20,6 @@ import { getErrorMessage } from '../../../../../common/utils/errors';
 import { useUpdateTransform } from '../../../hooks';
 
 import { useTransformConfig } from '../../create_transform/components/wizard/wizard';
-import { useUpdatedTransformConfig } from '../state_management/selectors/updated_transform_config';
 import { editTransformFlyoutSlice } from '../state_management/edit_transform_flyout_state';
 import { getDefaultState } from '../state_management/get_default_state';
 interface EditTransformUpdateButtonProps {
@@ -31,7 +31,7 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
   const config = useTransformConfig();
   const isFormValid = useIsFormValid(editTransformFlyoutSlice.name);
   const isFormTouched = useIsFormTouched(editTransformFlyoutSlice.name, getDefaultState(config));
-  const requestConfig = useUpdatedTransformConfig();
+  const requestConfig = useUpdatedConfig(editTransformFlyoutSlice.name, config);
   const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
 
   const updateTransfrom = useUpdateTransform(config.id, requestConfig);

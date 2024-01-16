@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 
 import type { State } from './form_slice';
 
-const createSelectFormSections =
+export const createSelectFormSections =
   <FF extends string, FS extends string, VN extends string, S extends State<FF, FS, VN>>(
     stateAccessor: string
   ) =>
