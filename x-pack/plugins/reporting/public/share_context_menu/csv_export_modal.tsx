@@ -48,7 +48,7 @@ const renderDescription = (objectType: string): string => {
 };
 
 export const CsvModalContentUI: FC<Props> = (props: Props) => {
-  const { apiClient, getJobParams, intl, toasts, theme, onClose } = props;
+  const { apiClient, getJobParams, intl, toasts, theme, onClose, objectType } = props;
   const isMounted = useMountedState();
   const [createReportingJob, setCreatingReportJob] = useState(false);
 
@@ -62,9 +62,9 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
           title: intl.formatMessage(
             {
               id: 'xpack.reporting.modalContent.successfullyQueuedReportNotificationTitle',
-              defaultMessage: 'Queued report for discover',
+              defaultMessage: 'Queued report for {objectType}',
             },
-            {}
+            { objectType }
           ),
           text: toMountPoint(
             <FormattedMessage
