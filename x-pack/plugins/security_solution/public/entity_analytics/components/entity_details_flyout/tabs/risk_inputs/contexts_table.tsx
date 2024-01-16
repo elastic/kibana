@@ -14,10 +14,34 @@ import { AssetCriticalityBadgeAllowMissing } from '../../../asset_criticality';
 import { isUserRiskScore } from '../../../../../../common/search_strategy';
 
 import type { UserRiskScore, HostRiskScore } from '../../../../../../common/search_strategy';
+
 const FieldLabel = styled.span`
   font-weight: ${euiLightVars.euiFontWeightMedium};
   color: ${euiLightVars.euiTitleColor};
 `;
+
+const columns = [
+  {
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.fieldColumnTitle"
+        defaultMessage="Field"
+      />
+    ),
+    field: 'label',
+    render: (label: string) => <FieldLabel>{label}</FieldLabel>,
+  },
+  {
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.valuesColumnTitle"
+        defaultMessage="Values"
+      />
+    ),
+    field: 'field',
+    render: (field: string | undefined, { render }: { render: () => JSX.Element }) => render(),
+  },
+];
 
 export const ContextsTable: React.FC<{
   riskScore?: UserRiskScore | HostRiskScore;
@@ -35,40 +59,20 @@ export const ContextsTable: React.FC<{
     return riskScore.host.risk.criticality_level;
   }, [riskScore]);
 
-  const columns = [
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.entityDetails.fieldColumnTitle"
-          defaultMessage="Field"
-        />
-      ),
-      field: 'label',
-      render: (label: string) => <FieldLabel>{label}</FieldLabel>,
-    },
-    {
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.entityDetails.valuesColumnTitle"
-          defaultMessage="Values"
-        />
-      ),
-      field: 'field',
-      render: (field: string | undefined, { render }: { render: () => JSX.Element }) => render(),
-    },
-  ];
-
-  const items = [
-    {
-      label: 'Asset Criticality Level',
-      render: () => (
-        <AssetCriticalityBadgeAllowMissing
-          criticalityLevel={criticalityLevel}
-          dataTestSubj="risk-inputs-asset-criticality-badge"
-        />
-      ),
-    },
-  ];
+  const items = useMemo(
+    () => [
+      {
+        label: 'Asset Criticality Level',
+        render: () => (
+          <AssetCriticalityBadgeAllowMissing
+            criticalityLevel={criticalityLevel}
+            dataTestSubj="risk-inputs-asset-criticality-badge"
+          />
+        ),
+      },
+    ],
+    [criticalityLevel]
+  );
 
   return (
     <BasicTable
