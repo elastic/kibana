@@ -47,12 +47,12 @@ export const useSendMessages = (): UseSendMessages => {
 
       try {
         return await fetchConnectorExecuteAction({
-          alerts: knowledgeBase.alerts, // settings toggle
+          isEnabledRAGAlerts: knowledgeBase.isEnabledRAGAlerts, // settings toggle
           alertsIndexPattern,
           allow: defaultAllow,
           allowReplacement: defaultAllowReplacement,
           apiConfig,
-          assistantLangChain: knowledgeBase.assistantLangChain,
+          isEnabledKnowledgeBase: knowledgeBase.isEnabledKnowledgeBase,
           assistantStreamingEnabled,
           http,
           replacements,
@@ -69,8 +69,8 @@ export const useSendMessages = (): UseSendMessages => {
       assistantStreamingEnabled,
       defaultAllow,
       defaultAllowReplacement,
-      knowledgeBase.alerts,
-      knowledgeBase.assistantLangChain,
+      knowledgeBase.isEnabledRAGAlerts,
+      knowledgeBase.isEnabledKnowledgeBase,
       knowledgeBase.latestAlerts,
     ]
   );

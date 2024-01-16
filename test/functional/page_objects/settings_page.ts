@@ -177,9 +177,20 @@ export class SettingsPageObject extends FtrService {
   async selectTimeFieldOption(selection: string) {
     // open dropdown
     const timefield = await this.getTimeFieldNameField();
-    await timefield.click();
-    await this.browser.pressKeys(selection);
-    await this.browser.pressKeys(this.browser.keys.TAB);
+    const prevValue = await timefield.getAttribute('value');
+    const enabled = await timefield.isEnabled();
+
+    if (prevValue === selection || !enabled) {
+      return;
+    }
+    await this.retry.waitFor('time field dropdown have the right value', async () => {
+      await timefield.click();
+      await timefield.type(this.browser.keys.DELETE, { charByChar: true });
+      await this.browser.pressKeys(selection);
+      await this.browser.pressKeys(this.browser.keys.TAB);
+      const value = await timefield.getAttribute('value');
+      return value === selection;
+    });
   }
 
   async getTimeFieldOption(selection: string) {
@@ -192,7 +203,7 @@ export class SettingsPageObject extends FtrService {
 
   async setNameField(dataViewName: string) {
     const field = await this.getNameField();
-    await field.clearValue();
+    await field.clearValueWithKeyboard();
     await field.type(dataViewName);
   }
 
@@ -486,7 +497,7 @@ export class SettingsPageObject extends FtrService {
   async allowHiddenClick() {
     await this.testSubjects.click('toggleAdvancedSetting');
     const allowHiddenField = await this.testSubjects.find('allowHiddenField');
-    (await allowHiddenField.findByTagName('button')).click();
+    await (await allowHiddenField.findByTagName('button')).click();
   }
 
   async createIndexPattern(
@@ -567,19 +578,26 @@ export class SettingsPageObject extends FtrService {
       throw new Error('No Data View name provided for edit');
     }
 
-    this.clickEditIndexButton();
+    await this.clickEditIndexButton();
     await this.header.waitUntilLoadingHasFinished();
 
     await this.retry.try(async () => {
+      if (dataViewName) {
+        await this.setNameField(dataViewName);
+      }
       await this.setIndexPatternField(indexPatternName);
+      await this.header.waitUntilLoadingHasFinished();
+      if (timefield) {
+        await this.selectTimeFieldOption(timefield);
+      }
+      const indexPatternSaveBtn = await this.getSaveIndexPatternButton();
+      await indexPatternSaveBtn.click();
+
+      const form = await this.testSubjects.findAll('indexPatternEditorForm');
+      const hasValidationErrors =
+        form.length !== 0 && (await form[0].getAttribute('data-validation-error')) === '1';
+      expect(hasValidationErrors).to.eql(false);
     });
-    if (dataViewName) {
-      await this.setNameField(dataViewName);
-    }
-    if (timefield) {
-      await this.selectTimeFieldOption(timefield);
-    }
-    await (await this.getSaveIndexPatternButton()).click();
 
     if (errorCheck) {
       await this.retry.try(async () => {
@@ -653,6 +671,10 @@ export class SettingsPageObject extends FtrService {
     const currentName = await field.getAttribute('value');
     this.log.debug(`setIndexPatternField set to ${currentName}`);
     expect(currentName).to.eql(indexPatternName);
+    await this.retry.waitFor('validating the given index pattern should be finished', async () => {
+      const isValidating = await field.getAttribute('data-is-validating');
+      return isValidating === '0';
+    });
   }
 
   async getCreateIndexPatternGoToStep2Button() {

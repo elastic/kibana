@@ -30,6 +30,7 @@ import type { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/publi
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import { WithSuspenseExtendedDeps } from '@kbn/shared-ux-utility';
+import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ContextDefinition,
   FunctionDefinition,
@@ -106,6 +107,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  ml: MlPluginSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
@@ -117,6 +119,7 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  ml: MlPluginStart;
 }
 
 export interface ObservabilityAIAssistantPluginSetup {}

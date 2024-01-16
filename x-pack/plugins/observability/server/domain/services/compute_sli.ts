@@ -14,9 +14,5 @@ export function computeSLI(good: number, total: number): number {
     return NO_DATA;
   }
 
-  if (good >= total) {
-    return 1;
-  }
-
   return toHighPrecision(good / total);
 }
