@@ -10,7 +10,6 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-// import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
 import { initProjectNavigation } from './project_navigation';
 import { projectAppLinksSwitcher } from './links/app_links';
@@ -36,6 +35,7 @@ export const startNavigation = (services: Services) => {
     serverless.initNavigation(navigationTree$, { panelContentProvider, dataTestSubj });
   } else {
     // TODO: Remove this else block as platform is enabled by default
+    // Issue: https://github.com/elastic/kibana/issues/174944
 
     // const projectNavigationTree = new ProjectNavigationTree(services);
     // projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
