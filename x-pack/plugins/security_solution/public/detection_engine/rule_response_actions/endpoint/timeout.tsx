@@ -28,6 +28,7 @@ const CONFIG = {
   ),
 };
 
+// TODO: TC - change field to be number field
 const TimeoutFieldComponent = ({
   path,
   disabled,
