@@ -34,6 +34,7 @@ export const createMockTelemetryEventsSender = (
     getTelemetryUsageCluster: jest.fn(),
     fetchTelemetryUrl: jest.fn(),
     queueTelemetryEvents: jest.fn(),
+    sendAsync: jest.fn(),
     processEvents: jest.fn(),
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemetry ?? jest.fn()),
     isTelemetryServicesReachable: jest.fn().mockReturnValue(canConnect ?? jest.fn()),
