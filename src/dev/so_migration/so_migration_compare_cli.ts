@@ -17,9 +17,9 @@ run(
     const outputPath = flagsReader.string('outputPath');
     const from = flagsReader.requiredString('from');
     const to = flagsReader.requiredString('to');
-    const shortOutput = flagsReader.boolean('short');
+    const emitJson = flagsReader.boolean('json');
 
-    const result = await compareSnapshots({ from, to, outputPath, log, shortOutput });
+    const result = await compareSnapshots({ from, to, outputPath, log, emitJson });
 
     return {
       outputPath,
@@ -35,17 +35,17 @@ run(
       '--from <rev|filename|url>',
       '--to <rev|filename|url>',
       '[--outputPath <outputPath>]',
-      '[--short]',
+      '[--json]',
     ].join(' '),
     description: `Compares two Saved Object snapshot files based on hashes, filenames or urls.`,
     flags: {
-      boolean: ['short'],
+      boolean: ['json'],
       string: ['outputPath', 'from', 'to'],
       help: `
         --from            The source snapshot to compare from. Can be a revision, filename or url.
         --to              The target snapshot to compare to. Can be a revision, filename or url.
-        --outputPath      The path to write the comparison report to. If omitted, raw JSON will be output to stdout.
-        --short           If true, only the list of changed plugins will be output.
+        --outputPath      The path to write the JSON comparison report to (assumes --json=true).
+        --json            If true, the JSON output will be emitted to stdout. Add --quiet for the JSON only.
       `,
     },
   }

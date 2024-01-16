@@ -22,7 +22,7 @@ interface CompareSnapshotsParameters {
   to: string;
   log: ToolingLog;
   outputPath?: string;
-  shortOutput?: boolean;
+  emitJson?: boolean;
 }
 
 interface SnapshotComparisonResult {
@@ -45,7 +45,7 @@ async function compareSnapshots({
   log,
   from,
   to,
-  shortOutput = false,
+  emitJson = false,
 }: CompareSnapshotsParameters): Promise<SnapshotComparisonResult> {
   validateInput({
     from,
@@ -75,12 +75,10 @@ async function compareSnapshots({
   if (outputPath) {
     writeSnapshot(outputPath, result);
     log.info(`Output written to: ${outputPath}`);
-  } else if (!shortOutput) {
-    log.info(
-      `Emitting result to STDOUT... (Use '--quiet' to disable non-parseable output, or --short to disable JSON output)`
-    );
+  } else if (emitJson) {
     // eslint-disable-next-line no-console
     console.log(JSON.stringify(result, null, 2));
+    log.info(`Emitted result as JSON to stdout... (Use '--quiet' to disable non-parseable output)`);
   }
 
   return result;
@@ -188,8 +186,8 @@ function compareSnapshotFiles(
 
   return {
     hasChanges: pluginNamesWithChangedHash.length > 0,
-    from: fromSnapshot.meta.kibanaCommitHash,
-    to: toSnapshot.meta.kibanaCommitHash,
+    from: fromSnapshot.meta.kibanaCommitHash!,
+    to: toSnapshot.meta.kibanaCommitHash!,
     changed: pluginNamesWithChangedHash,
     unchanged: restOfPluginNames,
     changes,
