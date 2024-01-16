@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch('ecommerce');
-        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.openImageReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
 
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.clickGo();
         await PageObjects.visualize.saveVisualization('my viz');
-        await PageObjects.reporting.openPdfReportingPanel();
+        await PageObjects.reporting.openImageReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
     });
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         log.debug('open png reporting panel');
-        await PageObjects.reporting.openPngReportingPanel();
+        await PageObjects.reporting.openImageReportingPanel();
         log.debug('click generate report button');
         await PageObjects.reporting.clickGenerateReportButton();
 

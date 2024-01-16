@@ -88,13 +88,8 @@ export class ReportingPageObject extends FtrService {
     await this.share.openShareMenuItem('CSVDownload');
   }
 
-  async openPdfReportingPanel() {
-    this.log.debug('openPdfReportingPanel');
-    await this.share.openShareMenuItem('imageExports');
-  }
-
-  async openPngReportingPanel() {
-    this.log.debug('openPngReportingPanel');
+  async openImageReportingPanel() {
+    this.log.debug('openPdfAndPngReportingPanel');
     await this.share.openShareMenuItem('imageExports');
   }
 

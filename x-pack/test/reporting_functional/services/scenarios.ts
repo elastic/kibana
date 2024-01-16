@@ -120,7 +120,7 @@ export function createScenarios(
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePdfFail = async () => {
-    await PageObjects.reporting.openPdfReportingPanel();
+    await PageObjects.reporting.openImageReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
     expect(queueReportError).to.be(true);
@@ -130,11 +130,7 @@ export function createScenarios(
     await testSubjects.missingOrFail(`sharePanel-imageExports`);
   };
   const tryGeneratePdfSuccess = async () => {
-    await PageObjects.reporting.openPdfReportingPanel();
-    expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
-  };
-  const tryGeneratePngSuccess = async () => {
-    await PageObjects.reporting.openPngReportingPanel();
+    await PageObjects.reporting.openImageReportingPanel();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryReportsNotAvailable = async () => {
@@ -157,7 +153,6 @@ export function createScenarios(
     tryGeneratePdfFail,
     tryGeneratePdfNotAvailable,
     tryGeneratePdfSuccess,
-    tryGeneratePngSuccess,
     tryReportsNotAvailable,
     loginDataAnalyst,
     loginReportingUser,

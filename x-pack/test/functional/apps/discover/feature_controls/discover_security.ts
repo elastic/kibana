@@ -129,7 +129,6 @@ export default function (ctx: FtrProviderContext) {
       it('shows CSV reports', async () => {
         await PageObjects.share.clickShareTopNavButton();
         await testSubjects.existOrFail('sharePanel-CSVDownload');
-        await PageObjects.share.closeShareModal();
       });
 
       savedQuerySecurityUtils.shouldAllowSavingQueries();

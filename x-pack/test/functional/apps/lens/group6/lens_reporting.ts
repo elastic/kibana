@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not cause PDF reports to fail', async () => {
       await PageObjects.dashboard.navigateToApp();
       await listingTable.clickItemLink('dashboard', 'Lens reportz');
-      await PageObjects.reporting.openPdfReportingPanel();
+      await PageObjects.reporting.openImageReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
       const url = await PageObjects.reporting.getReportURL(60000);
       expect(url).to.be.ok();
