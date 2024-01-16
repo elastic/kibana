@@ -31,6 +31,10 @@ import { convertHistoryStartToSize, getHumanizedDuration } from '../helpers/rule
 
 import {
   ABOUT_CONTINUE_BTN,
+  ALERT_SUPPRESSION_DURATION_INPUT,
+  THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
+  ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
+  ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL,
   ABOUT_EDIT_TAB,
   ACTIONS_EDIT_TAB,
   ADD_FALSE_POSITIVE_BTN,
@@ -51,6 +55,7 @@ import {
   EQL_TYPE,
   ESQL_TYPE,
   ESQL_QUERY_BAR,
+  ESQL_QUERY_BAR_EXPAND_BTN,
   ESQL_QUERY_BAR_INPUT_AREA,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
@@ -426,6 +431,13 @@ export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
 
+/**
+ * use default schedule options
+ */
+export const skipScheduleRuleAction = () => {
+  cy.get(SCHEDULE_CONTINUE_BUTTON).click();
+};
+
 export const fillFrom = (from: RuleIntervalFrom = ruleFields.ruleIntervalFrom) => {
   const value = from.slice(0, from.length - 1);
   const type = from.slice(from.length - 1);
@@ -524,6 +536,14 @@ export const clearEsqlQueryBar = () => {
 
 export const fillEsqlQueryBar = (query: string) => {
   cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(query);
+};
+
+/**
+ * expands query bar, so query is not obscured on narrow screens
+ * and validation message is not covered by input menu tooltip
+ */
+export const expandEsqlQueryBar = () => {
+  cy.get(ESQL_QUERY_BAR_EXPAND_BTN).click();
 };
 
 export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
@@ -761,6 +781,28 @@ export const selectAndLoadSavedQuery = (queryName: string, queryValue: string) =
   cy.get(APPLY_SELECTED_SAVED_QUERY_BUTTON).click();
 
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', queryValue);
+};
+
+export const enablesAndPopulatesThresholdSuppression = (
+  interval: number,
+  timeUnit: 's' | 'm' | 'h'
+) => {
+  // enable suppression is unchecked so the rest of suppression components are disabled
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.disabled').should('be.checked');
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION)
+    .should('be.disabled')
+    .should('not.be.checked');
+
+  // enables suppression for threshold rule
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).siblings('label').click();
+
+  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).first().type(`{selectall}${interval}`);
+  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).select(timeUnit);
+
+  // rule execution radio option is disabled, per time interval becomes enabled when suppression enabled
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).should('be.disabled');
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
 };
 
 export const checkLoadQueryDynamically = () => {

@@ -34,7 +34,7 @@ export const RiskScore: FC = memo(() => {
   }
 
   return (
-    <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
+    <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxs" data-test-subj={RISK_SCORE_TITLE_TEST_ID}>
           <h3>

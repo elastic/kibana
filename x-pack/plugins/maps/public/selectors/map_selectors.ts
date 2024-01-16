@@ -15,8 +15,8 @@ import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
+  hasVectorLayerMethod,
   BlendedVectorLayer,
-  IVectorLayer,
   MvtVectorLayer,
   GeoJsonVectorLayer,
 } from '../classes/layers/vector_layer';
@@ -351,7 +351,7 @@ export const getLayerList = createSelector(
       if (!parentLayer || !isLayerGroup(parentLayer)) {
         return;
       }
-      (parentLayer as LayerGroup).setChildren(children);
+      parentLayer.setChildren(children);
     });
 
     return layers;
@@ -402,11 +402,11 @@ export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
 );
 
 export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, (selectedLayer) => {
-  if (!selectedLayer || !('getJoins' in selectedLayer)) {
+  if (!selectedLayer || !hasVectorLayerMethod(selectedLayer, 'getJoins')) {
     return [];
   }
 
-  return (selectedLayer as IVectorLayer).getJoins().map((join: InnerJoin) => {
+  return selectedLayer.getJoins().map((join: InnerJoin) => {
     return join.toDescriptor();
   });
 });
@@ -432,6 +432,42 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
       });
     }
     return _.uniq(indexPatternIds);
+  }
+);
+
+export const getMostCommonDataViewId = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const counts: { [key: string]: number } = {};
+    function incrementCount(ids: string[]) {
+      ids.forEach((id) => {
+        const count = counts.hasOwnProperty(id) ? counts[id] : 0;
+        counts[id] = count + 1;
+      });
+    }
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
+        incrementCount(layer.getIndexPatternIds());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        incrementCount(layer.getIndexPatternIds());
+      });
+    }
+
+    let mostCommonId: string | undefined;
+    let mostCommonCount = 0;
+    Object.keys(counts).forEach((id) => {
+      if (counts[id] > mostCommonCount) {
+        mostCommonId = id;
+        mostCommonCount = counts[id];
+      }
+    });
+
+    return mostCommonId;
   }
 );
 

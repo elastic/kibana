@@ -57,9 +57,9 @@ export function getRequestBase(options: {
 
   if ('sources' in options.apm) {
     options.apm.sources.forEach((source) => {
-      const { getQuery } = getConfigForDocumentType(source.documentType);
-      if (getQuery) {
-        filters.push(getQuery(source.rollupInterval));
+      const documentTypeConfig = getConfigForDocumentType(source.documentType);
+      if ('getQuery' in documentTypeConfig) {
+        filters.push(documentTypeConfig.getQuery(source.rollupInterval));
       }
     });
   }

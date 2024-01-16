@@ -24,7 +24,6 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../../../../common/es_fields/apm';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../../common/data_view_constants';
 import { getLayerStyle, PalleteColors } from './get_map_layer_style';
 import {
   MobileSpanSubtype,
@@ -48,7 +47,10 @@ const label = i18n.translate(
   }
 );
 
-export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
+export async function getHttpRequestsLayerList(
+  maps: MapsStartApi | undefined,
+  dataViewId: string
+) {
   const whereQuery = {
     language: 'kuery',
     query: `${PROCESSOR_EVENT}:${ProcessorEvent.span} and ${SPAN_SUBTYPE}:${MobileSpanSubtype.Http} and ${SPAN_TYPE}:${MobileSpanType.External}`,
@@ -72,7 +74,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
             },
           ],
           whereQuery,
-          indexPatternId: APM_STATIC_DATA_VIEW_ID,
+          indexPatternId: dataViewId,
           applyGlobalQuery: true,
           applyGlobalTime: true,
           applyForceRefresh: true,
@@ -114,7 +116,7 @@ export async function getHttpRequestsLayerList(maps?: MapsStartApi) {
             },
           ],
           whereQuery,
-          indexPatternId: APM_STATIC_DATA_VIEW_ID,
+          indexPatternId: dataViewId,
           applyGlobalQuery: true,
           applyGlobalTime: true,
           applyForceRefresh: true,

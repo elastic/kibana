@@ -61,6 +61,7 @@ jest.mock('../../../../common/lib/kibana', () => {
 
 const NO_DATA_MESSAGE =
   "There are no response actions defined for this event. To add some, edit the rule's settings and set up response actionsExternal link(opens in a new tab or window).";
+const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
 
 const defaultContextValue = {
   dataAsNestedObject: {
@@ -138,5 +139,11 @@ describe('<ResponseDetails />', () => {
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);
+  });
+
+  it('should render preview message if flyout is in preview', () => {
+    const wrapper = renderResponseDetails({ ...defaultContextValue, isPreview: true });
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
   });
 });

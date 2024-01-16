@@ -39,7 +39,7 @@ const getMockState = ({
       jobIdEmpty: false,
       jobIdValid: true,
       jobIdExists: false,
-      createIndexPattern: false,
+      createDataView: false,
     },
     jobConfig: {
       source: { index },

@@ -25,139 +25,147 @@ export const SentinelOneGetAgentsResponseSchema = schema.object({
   }),
   errors: schema.nullable(schema.arrayOf(schema.string())),
   data: schema.arrayOf(
-    schema.object({
-      modelName: schema.string(),
-      firewallEnabled: schema.boolean(),
-      totalMemory: schema.number(),
-      osName: schema.string(),
-      cloudProviders: schema.recordOf(schema.string(), schema.any()),
-      siteName: schema.string(),
-      cpuId: schema.string(),
-      isPendingUninstall: schema.boolean(),
-      isUpToDate: schema.boolean(),
-      osArch: schema.string(),
-      accountId: schema.string(),
-      locationEnabled: schema.boolean(),
-      consoleMigrationStatus: schema.string(),
-      scanFinishedAt: schema.nullable(schema.string()),
-      operationalStateExpiration: schema.nullable(schema.string()),
-      agentVersion: schema.string(),
-      isActive: schema.boolean(),
-      locationType: schema.string(),
-      activeThreats: schema.number(),
-      inRemoteShellSession: schema.boolean(),
-      allowRemoteShell: schema.boolean(),
-      serialNumber: schema.nullable(schema.string()),
-      updatedAt: schema.string(),
-      lastActiveDate: schema.string(),
-      firstFullModeTime: schema.nullable(schema.string()),
-      operationalState: schema.string(),
-      externalId: schema.string(),
-      mitigationModeSuspicious: schema.string(),
-      licenseKey: schema.string(),
-      cpuCount: schema.number(),
-      mitigationMode: schema.string(),
-      networkStatus: schema.string(),
-      installerType: schema.string(),
-      uuid: schema.string(),
-      detectionState: schema.nullable(schema.string()),
-      infected: schema.boolean(),
-      registeredAt: schema.string(),
-      lastIpToMgmt: schema.string(),
-      storageName: schema.nullable(schema.string()),
-      osUsername: schema.string(),
-      groupIp: schema.string(),
-      createdAt: schema.string(),
-      remoteProfilingState: schema.string(),
-      groupUpdatedAt: schema.nullable(schema.string()),
-      scanAbortedAt: schema.nullable(schema.string()),
-      isUninstalled: schema.boolean(),
-      networkQuarantineEnabled: schema.boolean(),
-      tags: schema.object({
-        sentinelone: schema.arrayOf(
+    schema.object(
+      {
+        modelName: schema.string(),
+        firewallEnabled: schema.boolean(),
+        totalMemory: schema.number(),
+        osName: schema.string(),
+        cloudProviders: schema.recordOf(schema.string(), schema.any()),
+        siteName: schema.string(),
+        cpuId: schema.string(),
+        isPendingUninstall: schema.boolean(),
+        isUpToDate: schema.boolean(),
+        osArch: schema.string(),
+        accountId: schema.string(),
+        locationEnabled: schema.boolean(),
+        consoleMigrationStatus: schema.string(),
+        scanFinishedAt: schema.nullable(schema.string()),
+        operationalStateExpiration: schema.nullable(schema.string()),
+        agentVersion: schema.string(),
+        isActive: schema.boolean(),
+        locationType: schema.string(),
+        activeThreats: schema.number(),
+        inRemoteShellSession: schema.boolean(),
+        allowRemoteShell: schema.boolean(),
+        serialNumber: schema.nullable(schema.string()),
+        updatedAt: schema.string(),
+        lastActiveDate: schema.string(),
+        firstFullModeTime: schema.nullable(schema.string()),
+        operationalState: schema.string(),
+        externalId: schema.string(),
+        mitigationModeSuspicious: schema.string(),
+        licenseKey: schema.string(),
+        cpuCount: schema.number(),
+        mitigationMode: schema.string(),
+        networkStatus: schema.string(),
+        installerType: schema.string(),
+        uuid: schema.string(),
+        detectionState: schema.nullable(schema.string()),
+        infected: schema.boolean(),
+        registeredAt: schema.string(),
+        lastIpToMgmt: schema.string(),
+        storageName: schema.nullable(schema.string()),
+        osUsername: schema.string(),
+        groupIp: schema.string(),
+        createdAt: schema.string(),
+        remoteProfilingState: schema.string(),
+        groupUpdatedAt: schema.nullable(schema.string()),
+        scanAbortedAt: schema.nullable(schema.string()),
+        isUninstalled: schema.boolean(),
+        networkQuarantineEnabled: schema.boolean(),
+        tags: schema.object({
+          sentinelone: schema.arrayOf(
+            schema.object({
+              assignedBy: schema.string(),
+              assignedAt: schema.string(),
+              assignedById: schema.string(),
+              key: schema.string(),
+              value: schema.string(),
+              id: schema.string(),
+            })
+          ),
+        }),
+        externalIp: schema.string(),
+        siteId: schema.string(),
+        machineType: schema.string(),
+        domain: schema.string(),
+        scanStatus: schema.string(),
+        osStartTime: schema.string(),
+        accountName: schema.string(),
+        lastLoggedInUserName: schema.string(),
+        showAlertIcon: schema.boolean(),
+        rangerStatus: schema.string(),
+        groupName: schema.string(),
+        threatRebootRequired: schema.boolean(),
+        remoteProfilingStateExpiration: schema.nullable(schema.string()),
+        policyUpdatedAt: schema.nullable(schema.string()),
+        activeDirectory: schema.object({
+          userPrincipalName: schema.nullable(schema.string()),
+          lastUserDistinguishedName: schema.nullable(schema.string()),
+          computerMemberOf: schema.arrayOf(schema.object({ type: schema.string() })),
+          lastUserMemberOf: schema.arrayOf(schema.object({ type: schema.string() })),
+          mail: schema.nullable(schema.string()),
+          computerDistinguishedName: schema.nullable(schema.string()),
+        }),
+        isDecommissioned: schema.boolean(),
+        rangerVersion: schema.string(),
+        userActionsNeeded: schema.arrayOf(
           schema.object({
-            assignedBy: schema.string(),
-            assignedAt: schema.string(),
-            assignedById: schema.string(),
-            key: schema.string(),
-            value: schema.string(),
+            type: schema.string(),
+            example: schema.string(),
+            enum: schema.arrayOf(schema.string()),
+          })
+        ),
+        locations: schema.nullable(
+          schema.arrayOf(
+            schema.object({ name: schema.string(), scope: schema.string(), id: schema.string() })
+          )
+        ),
+        id: schema.string(),
+        coreCount: schema.number(),
+        osRevision: schema.string(),
+        osType: schema.string(),
+        groupId: schema.string(),
+        computerName: schema.string(),
+        scanStartedAt: schema.string(),
+        encryptedApplications: schema.boolean(),
+        storageType: schema.nullable(schema.string()),
+        networkInterfaces: schema.arrayOf(
+          schema.object({
+            gatewayMacAddress: schema.nullable(schema.string()),
+            inet6: schema.arrayOf(schema.string()),
+            name: schema.string(),
+            inet: schema.arrayOf(schema.string()),
+            physical: schema.string(),
+            gatewayIp: schema.nullable(schema.string()),
             id: schema.string(),
           })
         ),
-      }),
-      externalIp: schema.string(),
-      siteId: schema.string(),
-      machineType: schema.string(),
-      domain: schema.string(),
-      scanStatus: schema.string(),
-      osStartTime: schema.string(),
-      accountName: schema.string(),
-      lastLoggedInUserName: schema.string(),
-      showAlertIcon: schema.boolean(),
-      rangerStatus: schema.string(),
-      groupName: schema.string(),
-      threatRebootRequired: schema.boolean(),
-      remoteProfilingStateExpiration: schema.nullable(schema.string()),
-      policyUpdatedAt: schema.nullable(schema.string()),
-      activeDirectory: schema.object({
-        userPrincipalName: schema.nullable(schema.string()),
-        lastUserDistinguishedName: schema.nullable(schema.string()),
-        computerMemberOf: schema.arrayOf(schema.object({ type: schema.string() })),
-        lastUserMemberOf: schema.arrayOf(schema.object({ type: schema.string() })),
-        mail: schema.nullable(schema.string()),
-        computerDistinguishedName: schema.nullable(schema.string()),
-      }),
-      isDecommissioned: schema.boolean(),
-      rangerVersion: schema.string(),
-      userActionsNeeded: schema.arrayOf(
-        schema.object({
-          type: schema.string(),
-          example: schema.string(),
-          enum: schema.arrayOf(schema.string()),
-        })
-      ),
-      locations: schema.nullable(
-        schema.arrayOf(
-          schema.object({ name: schema.string(), scope: schema.string(), id: schema.string() })
-        )
-      ),
-      id: schema.string(),
-      coreCount: schema.number(),
-      osRevision: schema.string(),
-      osType: schema.string(),
-      groupId: schema.string(),
-      computerName: schema.string(),
-      scanStartedAt: schema.string(),
-      encryptedApplications: schema.boolean(),
-      storageType: schema.nullable(schema.string()),
-      networkInterfaces: schema.arrayOf(
-        schema.object({
-          gatewayMacAddress: schema.nullable(schema.string()),
-          inet6: schema.arrayOf(schema.string()),
-          name: schema.string(),
-          inet: schema.arrayOf(schema.string()),
-          physical: schema.string(),
-          gatewayIp: schema.nullable(schema.string()),
-          id: schema.string(),
-        })
-      ),
-      fullDiskScanLastUpdatedAt: schema.string(),
-      appsVulnerabilityStatus: schema.string(),
-    })
+        fullDiskScanLastUpdatedAt: schema.string(),
+        appsVulnerabilityStatus: schema.string(),
+      },
+      { unknowns: 'allow' }
+    )
   ),
 });
 
-export const SentinelOneIsolateAgentResponseSchema = schema.object({
+export const SentinelOneIsolateHostResponseSchema = schema.object({
   errors: schema.nullable(schema.arrayOf(schema.string())),
-  data: schema.object({
-    affected: schema.number(),
-  }),
+  data: schema.object(
+    {
+      affected: schema.number(),
+    },
+    { unknowns: 'allow' }
+  ),
 });
 
 export const SentinelOneGetRemoteScriptsParamsSchema = schema.object({
   query: schema.nullable(schema.string()),
-  osTypes: schema.nullable(schema.arrayOf(schema.string())),
+  osTypes: schema.nullable(schema.string()),
 });
+
+export const AlertIds = schema.maybe(schema.arrayOf(schema.string()));
 
 export const SentinelOneGetRemoteScriptsResponseSchema = schema.object({
   errors: schema.nullable(schema.arrayOf(schema.string())),
@@ -238,6 +246,7 @@ export const SentinelOneExecuteScriptParamsSchema = schema.object({
     ),
     password: schema.maybe(schema.string()),
   }),
+  alertIds: AlertIds,
 });
 
 export const SentinelOneGetRemoteScriptStatusParamsSchema = schema.object(
@@ -252,40 +261,39 @@ export const SentinelOneGetRemoteScriptStatusResponseSchema = schema.object({
     totalItems: schema.number(),
     nextCursor: schema.nullable(schema.string()),
   }),
-  errors: schema.arrayOf(schema.object({ type: schema.string() })),
+  errors: schema.nullable(schema.arrayOf(schema.object({ type: schema.string() }))),
   data: schema.arrayOf(
-    schema.object({
-      agentIsDecommissioned: schema.boolean(),
-      agentComputerName: schema.string(),
-      status: schema.string(),
-      groupName: schema.string(),
-      initiatedById: schema.string(),
-      parentTaskId: schema.string(),
-      updatedAt: schema.string(),
-      createdAt: schema.string(),
-      agentIsActive: schema.boolean(),
-      agentOsType: schema.string(),
-      agentMachineType: schema.string(),
-      id: schema.string(),
-      siteName: schema.string(),
-      detailedStatus: schema.string(),
-      siteId: schema.string(),
-      scriptResultsSignature: schema.nullable(schema.string()),
-      initiatedBy: schema.string(),
-      accountName: schema.string(),
-      groupId: schema.string(),
-      statusDescription: schema.object({
-        readOnly: schema.boolean(),
-        description: schema.string(),
-      }),
-      agentUuid: schema.string(),
-      accountId: schema.string(),
-      type: schema.string(),
-      scriptResultsPath: schema.string(),
-      scriptResultsBucket: schema.string(),
-      description: schema.string(),
-      agentId: schema.string(),
-    })
+    schema.object(
+      {
+        agentIsDecommissioned: schema.nullable(schema.boolean()),
+        agentComputerName: schema.nullable(schema.string()),
+        status: schema.nullable(schema.string()),
+        groupName: schema.nullable(schema.string()),
+        initiatedById: schema.nullable(schema.string()),
+        parentTaskId: schema.nullable(schema.string()),
+        updatedAt: schema.nullable(schema.string()),
+        createdAt: schema.nullable(schema.string()),
+        agentIsActive: schema.nullable(schema.boolean()),
+        agentOsType: schema.nullable(schema.string()),
+        agentMachineType: schema.nullable(schema.string()),
+        id: schema.nullable(schema.string()),
+        siteName: schema.nullable(schema.string()),
+        detailedStatus: schema.nullable(schema.string()),
+        siteId: schema.nullable(schema.string()),
+        scriptResultsSignature: schema.nullable(schema.nullable(schema.string())),
+        initiatedBy: schema.nullable(schema.string()),
+        accountName: schema.nullable(schema.string()),
+        groupId: schema.nullable(schema.string()),
+        agentUuid: schema.nullable(schema.string()),
+        accountId: schema.nullable(schema.string()),
+        type: schema.nullable(schema.string()),
+        scriptResultsPath: schema.nullable(schema.string()),
+        scriptResultsBucket: schema.nullable(schema.string()),
+        description: schema.nullable(schema.string()),
+        agentId: schema.nullable(schema.string()),
+      },
+      { unknowns: 'allow' }
+    )
   ),
 });
 
@@ -439,13 +447,14 @@ export const SentinelOneBaseFilterSchema = schema.object({
   lastLoggedInUserName__contains: schema.nullable(schema.string()),
   awsRole__contains: schema.nullable(schema.string()),
   K8SVersion__contains: schema.nullable(schema.string()),
+  alertIds: AlertIds,
 });
 
 export const SentinelOneKillProcessParamsSchema = SentinelOneBaseFilterSchema.extends({
   processName: schema.string(),
 });
 
-export const SentinelOneIsolateAgentParamsSchema = SentinelOneBaseFilterSchema;
+export const SentinelOneIsolateHostParamsSchema = SentinelOneBaseFilterSchema;
 
 export const SentinelOneGetAgentsParamsSchema = SentinelOneBaseFilterSchema;
 
@@ -472,14 +481,14 @@ export const SentinelOneKillProcessSchema = schema.object({
   subActionParams: SentinelOneKillProcessParamsSchema,
 });
 
-export const SentinelOneIsolateAgentSchema = schema.object({
-  subAction: schema.literal(SUB_ACTION.ISOLATE_AGENT),
-  subActionParams: SentinelOneIsolateAgentParamsSchema,
+export const SentinelOneIsolateHostSchema = schema.object({
+  subAction: schema.literal(SUB_ACTION.ISOLATE_HOST),
+  subActionParams: SentinelOneIsolateHostParamsSchema,
 });
 
-export const SentinelOneReleaseAgentSchema = schema.object({
-  subAction: schema.literal(SUB_ACTION.RELEASE_AGENT),
-  subActionParams: SentinelOneIsolateAgentParamsSchema,
+export const SentinelOneReleaseHostSchema = schema.object({
+  subAction: schema.literal(SUB_ACTION.RELEASE_HOST),
+  subActionParams: SentinelOneIsolateHostParamsSchema,
 });
 
 export const SentinelOneExecuteScriptSchema = schema.object({
@@ -489,7 +498,7 @@ export const SentinelOneExecuteScriptSchema = schema.object({
 
 export const SentinelOneActionParamsSchema = schema.oneOf([
   SentinelOneKillProcessSchema,
-  SentinelOneIsolateAgentSchema,
-  SentinelOneReleaseAgentSchema,
+  SentinelOneIsolateHostSchema,
+  SentinelOneReleaseHostSchema,
   SentinelOneExecuteScriptSchema,
 ]);

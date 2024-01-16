@@ -10,21 +10,8 @@ import { act, screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import OpsgenieParamFields from './params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { OpsgenieSubActions } from '../../../common';
 import type { OpsgenieActionParams } from '../../../server/connector_types';
-
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('OpsgenieParamFields', () => {
   const editAction = jest.fn();
@@ -82,7 +69,7 @@ describe('OpsgenieParamFields', () => {
   it('renders the create alert component', async () => {
     render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
-    expect(screen.getByText('Message (required)')).toBeInTheDocument();
+    expect(screen.getByText('Message')).toBeInTheDocument();
     expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
@@ -94,7 +81,7 @@ describe('OpsgenieParamFields', () => {
     render(<OpsgenieParamFields {...defaultCloseAlertProps} />);
 
     expect(screen.queryByText('Message')).not.toBeInTheDocument();
-    expect(screen.getByText('Alias (required)')).toBeInTheDocument();
+    expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
@@ -109,7 +96,7 @@ describe('OpsgenieParamFields', () => {
       />
     );
 
-    expect(screen.getByText('Message (required)')).toBeInTheDocument();
+    expect(screen.getByText('Message')).toBeInTheDocument();
     expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.queryByTestId('opsgenie-subActionSelect')).not.toBeInTheDocument();
 

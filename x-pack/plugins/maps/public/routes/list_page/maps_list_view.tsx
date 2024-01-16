@@ -10,7 +10,7 @@ import type { SavedObjectsFindOptionsReference, ScopedHistory } from '@kbn/core/
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { TableListView } from '@kbn/content-management-table-list-view';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import type { MapAttributes, MapItem } from '../../../common/content_management';
 import { APP_ID, APP_NAME, getEditPath, MAP_PATH } from '../../../common/constants';

@@ -16,8 +16,8 @@ import type { NavigationID as DevNavId } from '@kbn/default-nav-devtools';
 // use this for nicer type suggestions, but allow any string anyway
 type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;
 
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import type { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId}`;
 
@@ -106,6 +106,19 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
           });
         }
       },
+      async findLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
+        await this.expectLinkExists(by);
+        if ('deepLinkId' in by) {
+          return testSubjects.find(`~nav-item-deepLinkId-${by.deepLinkId}`);
+        } else if ('navId' in by) {
+          return testSubjects.find(`~nav-item-id-${by.navId}`);
+        } else {
+          return retry.try(async () => {
+            const link = await getByVisibleText('~nav-item', by.text);
+            return link;
+          });
+        }
+      },
       async expectSectionExists(sectionId: NavigationId) {
         log.debug('ServerlessCommonNavigation.sidenav.expectSectionExists', sectionId);
         await testSubjects.existOrFail(getSectionIdTestSubj(sectionId));
@@ -152,6 +165,20 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
     breadcrumbs: {
       async expectExists() {
         await testSubjects.existOrFail('breadcrumbs');
+      },
+      async clickBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if ('deepLinkId' in by) {
+          await testSubjects.click(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+        } else {
+          (await getByVisibleText('~breadcrumb', by.text))?.click();
+        }
+      },
+      getBreadcrumb(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
+        if ('deepLinkId' in by) {
+          return testSubjects.find(`~breadcrumb-deepLinkId-${by.deepLinkId}`);
+        } else {
+          return getByVisibleText('~breadcrumb', by.text);
+        }
       },
       async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
         log.debug(

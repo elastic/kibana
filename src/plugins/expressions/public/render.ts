@@ -33,10 +33,10 @@ export interface ExpressionRenderHandlerParams {
   syncCursor?: boolean;
   syncTooltips?: boolean;
   interactive?: boolean;
+  shouldUseSizeTransitionVeil?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
   getCompatibleCellValueActions?: (data: object[]) => Promise<unknown[]>;
   executionContext?: KibanaExecutionContext;
-  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
@@ -63,11 +63,11 @@ export class ExpressionRenderHandler {
       syncColors,
       syncTooltips,
       syncCursor,
+      shouldUseSizeTransitionVeil,
       interactive,
       hasCompatibleActions = async () => false,
       getCompatibleCellValueActions = async () => [],
       executionContext,
-      shouldShowLegendAction,
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
@@ -115,14 +115,14 @@ export class ExpressionRenderHandler {
       isSyncCursorEnabled: () => {
         return syncCursor || true;
       },
+      shouldUseSizeTransitionVeil: () => {
+        return Boolean(shouldUseSizeTransitionVeil);
+      },
       isInteractive: () => {
         return interactive ?? true;
       },
       hasCompatibleActions,
       getCompatibleCellValueActions,
-      shouldShowLegendAction: (actionId: string) => {
-        return shouldShowLegendAction?.(actionId) ?? true;
-      },
     };
   }
 

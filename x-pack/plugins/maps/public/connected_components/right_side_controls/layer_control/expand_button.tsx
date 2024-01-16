@@ -10,12 +10,12 @@ import { EuiButtonEmpty, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
-  hasErrors: boolean;
+  hasErrorsOrWarnings: boolean;
   isLoading: boolean;
   onClick: () => void;
 }
 
-export function ExpandButton({ hasErrors, isLoading, onClick }: Props) {
+export function ExpandButton({ hasErrorsOrWarnings, isLoading, onClick }: Props) {
   // isLoading indicates at least one layer is loading.
   // Expand button should never be disabled.
   // Not using EuiButton* with iconType props because EuiButton* disables button when isLoading prop is true.
@@ -34,7 +34,7 @@ export function ExpandButton({ hasErrors, isLoading, onClick }: Props) {
           <EuiLoadingSpinner />
         </div>
       ) : (
-        <EuiIcon type={hasErrors ? 'warning' : 'menuLeft'} />
+        <EuiIcon type={hasErrorsOrWarnings ? 'warning' : 'menuLeft'} />
       )}
     </EuiButtonEmpty>
   );

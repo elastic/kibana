@@ -55,6 +55,7 @@ async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataVie
       page = JOB_TYPE.POPULATION;
       break;
     case CREATED_BY_LABEL.CATEGORIZATION:
+    case CREATED_BY_LABEL.CATEGORIZATION_FROM_PATTERN_ANALYSIS:
       page = JOB_TYPE.CATEGORIZATION;
       break;
     case CREATED_BY_LABEL.RARE:

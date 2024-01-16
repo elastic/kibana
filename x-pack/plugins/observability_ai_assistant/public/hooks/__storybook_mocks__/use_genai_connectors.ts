@@ -14,5 +14,6 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
     error: undefined,
     selectedConnector: 'foo',
     selectConnector: (id: string) => {},
+    reloadConnectors: () => {},
   };
 }

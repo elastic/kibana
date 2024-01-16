@@ -6,31 +6,33 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PassThrough, Readable } from 'stream';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
-  validateParams,
   validateConfig,
-  validateSecrets,
   validateConnector,
+  validateParams,
+  validateSecrets,
 } from './validate_with_schema';
 import {
   ActionType,
-  ActionTypeExecutorResult,
+  ActionTypeConfig,
   ActionTypeExecutorRawResult,
+  ActionTypeExecutorResult,
   ActionTypeRegistryContract,
+  ActionTypeSecrets,
   GetServicesFunction,
   InMemoryConnector,
   RawAction,
   ValidatorServices,
-  ActionTypeSecrets,
-  ActionTypeConfig,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { ActionExecutionSource } from './action_execution_source';
@@ -38,7 +40,6 @@ import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
-import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -147,7 +148,11 @@ export class ActionExecutor {
         }
 
         if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
-          actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+          try {
+            actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+          } catch (e) {
+            throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+          }
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
@@ -259,12 +264,14 @@ export class ActionExecutor {
             configurationUtilities,
             logger,
             source,
+            ...(actionType.isSystemActionType ? { request } : {}),
           });
+
+          if (rawResult && rawResult.status === 'error') {
+            rawResult.errorSource = TaskErrorSource.USER;
+          }
         } catch (err) {
-          if (
-            err.reason === ActionExecutionErrorReason.Validation ||
-            err.reason === ActionExecutionErrorReason.Authorization
-          ) {
+          if (err.reason === ActionExecutionErrorReason.Authorization) {
             rawResult = err.result;
           } else {
             rawResult = {
@@ -274,6 +281,7 @@ export class ActionExecutor {
               serviceMessage: err.message,
               error: err,
               retry: true,
+              errorSource: TaskErrorSource.USER,
             };
           }
         }
@@ -328,55 +336,33 @@ export class ActionExecutor {
           eventLogger.logEvent(event);
         }
 
-        // start openai extension
-        // add event.kibana.action.execution.openai to event log when OpenAI Connector is executed
-        if (result.status === 'ok' && actionTypeId === '.gen-ai') {
-          const data = result.data as unknown as {
-            usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-          };
-          event.kibana = event.kibana || {};
-          event.kibana.action = event.kibana.action || {};
-          event.kibana = {
-            ...event.kibana,
-            action: {
-              ...event.kibana.action,
-              execution: {
-                ...event.kibana.action.execution,
-                gen_ai: {
-                  usage: {
-                    total_tokens: data.usage?.total_tokens,
-                    prompt_tokens: data.usage?.prompt_tokens,
-                    completion_tokens: data.usage?.completion_tokens,
-                  },
-                },
-              },
-            },
-          };
-
-          if (result.data instanceof Readable) {
-            getTokenCountFromOpenAIStream({
-              responseStream: result.data.pipe(new PassThrough()),
-              body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
+        // start genai extension
+        if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
+          getGenAiTokenTracking({
+            actionTypeId,
+            logger,
+            result,
+            validatedParams,
+          })
+            .then((tokenTracking) => {
+              if (tokenTracking != null) {
+                set(event, 'kibana.action.execution.gen_ai.usage', {
+                  total_tokens: tokenTracking.total_tokens,
+                  prompt_tokens: tokenTracking.prompt_tokens,
+                  completion_tokens: tokenTracking.completion_tokens,
+                });
+              }
             })
-              .then(({ total, prompt, completion }) => {
-                event.kibana!.action!.execution!.gen_ai!.usage = {
-                  total_tokens: total,
-                  prompt_tokens: prompt,
-                  completion_tokens: completion,
-                };
-              })
-              .catch((err) => {
-                logger.error('Failed to calculate tokens from streaming response');
-                logger.error(err);
-              })
-              .finally(() => {
-                completeEventLogging();
-              });
-
-            return resultWithoutError;
-          }
+            .catch((err) => {
+              logger.error('Failed to calculate tokens from streaming response');
+              logger.error(err);
+            })
+            .finally(() => {
+              completeEventLogging();
+            });
+          return resultWithoutError;
         }
-        // end openai extension
+        // end genai extension
 
         completeEventLogging();
 
@@ -472,31 +458,37 @@ export class ActionExecutor {
     }
 
     if (!this.isESOCanEncrypt) {
-      throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      throw createTaskRunError(
+        new Error(
+          `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        ),
+        TaskErrorSource.USER
       );
     }
 
-    const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
-      'action',
-      actionId,
-      {
-        namespace: namespace === 'default' ? undefined : namespace,
-      }
-    );
+    try {
+      const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
+        'action',
+        actionId,
+        {
+          namespace: namespace === 'default' ? undefined : namespace,
+        }
+      );
+      const {
+        attributes: { secrets, actionTypeId, config, name },
+      } = rawAction;
 
-    const {
-      attributes: { secrets, actionTypeId, config, name },
-    } = rawAction;
-
-    return {
-      actionTypeId,
-      name,
-      config,
-      secrets,
-      actionId,
-      rawAction: rawAction.attributes,
-    };
+      return {
+        actionTypeId,
+        name,
+        config,
+        secrets,
+        actionId,
+        rawAction: rawAction.attributes,
+      };
+    } catch (e) {
+      throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    }
   }
 }
 
@@ -561,6 +553,7 @@ function validateAction(
       status: 'error',
       message: err.message,
       retry: !!taskInfo,
+      errorSource: TaskErrorSource.FRAMEWORK,
     });
   }
 }
@@ -587,7 +580,18 @@ const ensureAuthorizedToExecute = async ({
         params
       );
 
-      await authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
+      await authorization.ensureAuthorized({
+        operation: 'execute',
+        additionalPrivileges,
+        actionTypeId,
+      });
+    } else if (actionTypeId === '.sentinelone') {
+      // SentinelOne sub-actions require that a user have `all` privilege to Actions and Connectors.
+      // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
+      await authorization.ensureAuthorized({
+        operation: 'execute',
+        actionTypeId,
+      });
     }
   } catch (error) {
     throw new ActionExecutionError(error.message, ActionExecutionErrorReason.Authorization, {
@@ -595,6 +599,7 @@ const ensureAuthorizedToExecute = async ({
       status: 'error',
       message: error.message,
       retry: false,
+      errorSource: TaskErrorSource.USER,
     });
   }
 };

@@ -178,10 +178,10 @@ export const getMultipassVmCountNotice = async (threshold: number = 1): Promise<
   if (output.list.length > threshold) {
     return `-----------------------------------------------------------------
 ${chalk.red('NOTE:')} ${chalk.bold(
-      chalk.cyan(`You currently have ${chalk.red(output.list.length)} VMs running.`)
-    )} Remember to delete those
-      no longer being used.
-      View running VMs: ${chalk.bold('multipass list')}
+      chalk.red(`You currently have ${chalk.red(output.list.length)} VMs running.`)
+    )}
+      Remember to delete those no longer being used.
+      View running VMs: ${chalk.cyan('multipass list')}
   -----------------------------------------------------------------
 `;
   }
@@ -249,6 +249,7 @@ const createVagrantVm = async ({
           VMNAME: name,
           CACHED_AGENT_SOURCE: agentFullFilePath,
           CACHED_AGENT_FILENAME: agentFileName,
+          AGENT_DESTINATION_FOLDER: agentFileName.replace('.tar.gz', ''),
         },
         // Only `pipe` STDERR to parent process
         stdio: ['inherit', 'inherit', 'pipe'],

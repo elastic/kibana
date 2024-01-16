@@ -37,8 +37,10 @@ describe('GroupSelection', () => {
     {
       name: 'visWithAliasUrl',
       title: 'Vis with alias Url',
-      aliasApp: 'aliasApp',
-      aliasPath: '#/aliasApp',
+      alias: {
+        app: 'aliasApp',
+        path: '#/aliasApp',
+      },
       description: 'Vis with alias Url',
       stage: 'production',
       group: VisGroups.PROMOTED,
@@ -49,8 +51,10 @@ describe('GroupSelection', () => {
       description: 'Vis alias with promotion',
       stage: 'production',
       group: VisGroups.PROMOTED,
-      aliasApp: 'anotherApp',
-      aliasPath: '#/anotherUrl',
+      alias: {
+        app: 'anotherApp',
+        path: '#/anotherUrl',
+      },
       promotion: true,
     } as unknown,
   ] as BaseVisType[];

@@ -40,6 +40,13 @@ export const SettingsApplication: Story = () => {
       showReloadPagePrompt={action('showReloadPagePrompt')}
       subscribeToUpdates={() => new Subscription()}
       addUrlToHistory={action('addUrlToHistory')}
+      validateChange={async (key, value) => {
+        action(`validateChange`)({
+          key,
+          value,
+        });
+        return { successfulValidation: true, valid: true };
+      }}
     >
       <Component />
     </SettingsApplicationProvider>

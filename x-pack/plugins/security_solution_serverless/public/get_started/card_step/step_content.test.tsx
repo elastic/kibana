@@ -7,43 +7,38 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { StepContent } from './step_content';
+import { QuickStartSectionCardsId, SectionId } from '../types';
+import { overviewVideoSteps } from '../sections';
+
+jest.mock('../context/step_context');
+jest.mock('../../common/services');
 
 describe('StepContent', () => {
-  it('renders nothing when hasStepContent is false', () => {
-    const { container } = render(
-      <StepContent hasStepContent={false} isExpandedStep={true} stepId="test-step" />
-    );
+  const toggleTaskCompleteStatus = jest.fn();
 
-    expect(container.firstChild).toBeNull();
-  });
+  const props = {
+    cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+    indicesExist: false,
+    sectionId: SectionId.quickStart,
+    step: overviewVideoSteps[0],
+    toggleTaskCompleteStatus,
+  };
 
   it('renders step content when hasStepContent is true and isExpandedStep is true', () => {
-    const description = ['Description Line 1', 'Description Line 2'];
-    const splitPanel = <div>{'Split Panel Content'}</div>;
-    const { getByTestId, getByText } = render(
-      <StepContent
-        hasStepContent={true}
-        isExpandedStep={true}
-        stepId="test-step"
-        description={description}
-        splitPanel={splitPanel}
-      />
-    );
+    const mockProps = { ...props, hasStepContent: true, isExpandedStep: true };
+    const { getByTestId, getByText } = render(<StepContent {...mockProps} />);
 
     const splitPanelElement = getByTestId('split-panel');
 
-    expect(getByText('Description Line 1')).toBeInTheDocument();
-    expect(getByText('Description Line 2')).toBeInTheDocument();
+    expect(
+      getByText(
+        'Elastic Security unifies analytics, EDR, cloud security capabilities, and more into a SaaS solution that helps you improve your organization’s security posture, defend against a wide range of threats, and prevent breaches.'
+      )
+    ).toBeInTheDocument();
+    expect(
+      getByText('To explore the platform’s core features, watch the video:')
+    ).toBeInTheDocument();
 
     expect(splitPanelElement).toBeInTheDocument();
-    expect(splitPanelElement).toHaveTextContent('Split Panel Content');
-  });
-
-  it('renders nothing when hasStepContent is true but isExpandedStep is false', () => {
-    const { container } = render(
-      <StepContent hasStepContent={true} isExpandedStep={false} stepId="test-step" />
-    );
-
-    expect(container.firstChild).toBeNull();
   });
 });

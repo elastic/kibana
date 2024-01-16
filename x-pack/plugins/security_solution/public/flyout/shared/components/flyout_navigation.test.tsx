@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, render } from '@testing-library/react';
+import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { TestProviders } from '../../../common/mock';
 import { FlyoutNavigation } from './flyout_navigation';
@@ -24,7 +25,7 @@ describe('<FlyoutNavigation />', () => {
     it('should render expand button', () => {
       const flyoutContextValue = {
         panels: {},
-      } as unknown as ExpandableFlyoutContext;
+      } as unknown as ExpandableFlyoutContextValue;
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
@@ -47,7 +48,7 @@ describe('<FlyoutNavigation />', () => {
         panels: {
           left: {},
         },
-      } as unknown as ExpandableFlyoutContext;
+      } as unknown as ExpandableFlyoutContextValue;
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>

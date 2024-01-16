@@ -14,7 +14,7 @@ echo "--- Serverless Security Second Quality Gate"
 cd x-pack/test/security_solution_api_integration
 set +e
 
-QA_API_KEY=$(retry 5 5 vault read -field=qa_api_key secret/kibana-issues/dev/security-solution-qg-enc-key)
+QA_API_KEY=$(vault_get security-solution-qg-enc-key qa_api_key)
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
@@ -47,7 +47,7 @@ while : ; do
     echo "Sleeping for 40s to wait for ES status to be green..."
     sleep 40
   else
-    echo "Elasticsearch has status green." 
+    echo "Elasticsearch has status green."
     break
   fi
 done
@@ -59,17 +59,17 @@ while : ; do
     echo "Sleeping for 15s to wait for Kibana to be available..."
     sleep 15
   else
-    echo "Kibana is available." 
+    echo "Kibana is available."
     break
   fi
 done
 
 # Removing the https:// part of the url provided in order to use it in the command below.
-FORMATTED_ES_URL="${ES_URL/https:\/\//}"    
+FORMATTED_ES_URL="${ES_URL/https:\/\//}"
 FORMATTED_KB_URL="${KB_URL/https:\/\//}"
 
 # Find a way to remove this in the future
-# This is used in order to wait for the environment to be ready. 
+# This is used in order to wait for the environment to be ready.
 sleep 150
 
 TEST_CLOUD=1 TEST_ES_URL="https://elastic:$PASSWORD@$FORMATTED_ES_URL:443" TEST_KIBANA_URL="https://elastic:$PASSWORD@$FORMATTED_KB_URL:443" yarn run $1

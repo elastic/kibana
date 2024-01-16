@@ -158,9 +158,9 @@ export interface UseIndexDataReturnType
    */
   renderCellValue: RenderCellValue;
   /**
-   * Optional index pattern fields.
+   * Optional data view fields.
    */
-  indexPatternFields?: string[];
+  dataViewFields?: string[];
   /**
    * Optional time range.
    */

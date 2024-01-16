@@ -10,7 +10,6 @@ import { xyVisFunction } from '.';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { sampleArgs, sampleLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
-import { shouldShowLegendActionDefault } from '../helpers/visualization';
 
 describe('xyVis', () => {
   test('it renders with the specified data and args', async () => {
@@ -43,7 +42,6 @@ describe('xyVis', () => {
         syncColors: false,
         syncTooltips: false,
         syncCursor: true,
-        shouldShowLegendAction: shouldShowLegendActionDefault,
       },
     });
   });
@@ -354,7 +352,6 @@ describe('xyVis', () => {
         syncColors: false,
         syncTooltips: false,
         syncCursor: true,
-        shouldShowLegendAction: shouldShowLegendActionDefault,
       },
     });
   });
@@ -404,7 +401,6 @@ describe('xyVis', () => {
         syncTooltips: false,
         syncCursor: true,
         overrides,
-        shouldShowLegendAction: shouldShowLegendActionDefault,
       },
     });
   });

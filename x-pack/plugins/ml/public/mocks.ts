@@ -20,7 +20,7 @@ const createElasticModelsMock = (): jest.Mocked<ElasticModels> => {
         },
       },
       description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
-      name: '.elser_model_2',
+      model_id: '.elser_model_2',
     }),
   } as unknown as jest.Mocked<ElasticModels>;
 };

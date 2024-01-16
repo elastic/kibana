@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useUiSetting } from '../../lib/kibana';
+import { useDarkMode } from '../../lib/kibana';
 import type { ChartSeriesData } from './common';
 import {
   checkIfAllValuesAreZero,
@@ -19,7 +19,7 @@ import {
   WrappedByAutoSizer,
   useThemes,
 } from './common';
-import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
 
@@ -178,17 +178,17 @@ describe('checkIfAllValuesAreZero', () => {
     });
 
     it('should return light baseTheme when isDarkMode false', () => {
-      (useUiSetting as jest.Mock).mockImplementation(() => false);
+      (useDarkMode as jest.Mock).mockImplementation(() => false);
       const { result } = renderHook(() => useThemes());
 
-      expect(result.current.baseTheme).toBe(LIGHT_THEME);
+      expect(result.current.baseTheme).toBe(LEGACY_LIGHT_THEME);
     });
 
     it('should return dark baseTheme when isDarkMode true', () => {
-      (useUiSetting as jest.Mock).mockImplementation(() => true);
+      (useDarkMode as jest.Mock).mockImplementation(() => true);
       const { result } = renderHook(() => useThemes());
 
-      expect(result.current.baseTheme).toBe(DARK_THEME);
+      expect(result.current.baseTheme).toBe(LEGACY_DARK_THEME);
     });
   });
 });

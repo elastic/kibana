@@ -93,6 +93,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RiskEngineDisableResponse'
+  /engine/privileges:
+    get:
+      summary: Check if the user has access to the risk engine
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEnginePrivilegesResponse'
+  /engine/settings:
+    get:
+      summary: Get the settings of the Risk Engine
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineSettingsResponse'
 
 
 components:
@@ -436,4 +456,30 @@ components:
           type: boolean
         error:
           type: string
-          
+    RiskEnginePrivilegesResponse:
+      type: object
+        properties:
+          privileges:
+            type: object
+            properties:
+              elasticsearch:
+                type: object
+                properties:
+                  cluster:
+                    type: object
+                    additionalProperties:
+                      type: boolean
+                  index:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      additionalProperties:
+                        type: boolean
+          has_all_required:
+            description: If true then the user has full access to the risk engine
+            type: boolean
+    RiskEngineSettingsResponse:
+      type: object
+        properties:
+          range:
+            $ref: '#/components/schemas/DateRange'

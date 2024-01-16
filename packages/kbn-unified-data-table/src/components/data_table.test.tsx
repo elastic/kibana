@@ -300,6 +300,54 @@ describe('UnifiedDataTable', () => {
         }
       `);
     });
+
+    it('should apply sorting', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sort: [['message', 'desc']],
+        columns: ['message'],
+      });
+
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
+        Object {
+          "columns": Array [
+            Object {
+              "direction": "desc",
+              "id": "message",
+            },
+          ],
+          "onSort": [Function],
+        }
+      `);
+    });
+
+    it('should not apply unknown sorting', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        sort: [
+          ['bytes', 'desc'],
+          ['unknown', 'asc'],
+          ['message', 'desc'],
+        ],
+        columns: ['bytes', 'message'],
+      });
+
+      expect(component.find(EuiDataGrid).last().prop('sorting')).toMatchInlineSnapshot(`
+        Object {
+          "columns": Array [
+            Object {
+              "direction": "desc",
+              "id": "bytes",
+            },
+            Object {
+              "direction": "desc",
+              "id": "message",
+            },
+          ],
+          "onSort": [Function],
+        }
+      `);
+    });
   });
 
   describe('display settings', () => {
@@ -311,7 +359,7 @@ describe('UnifiedDataTable', () => {
         onUpdateRowHeight: jest.fn(),
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
@@ -337,7 +385,7 @@ describe('UnifiedDataTable', () => {
         onUpdateRowHeight: jest.fn(),
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
@@ -358,7 +406,7 @@ describe('UnifiedDataTable', () => {
         onUpdateSampleSize: undefined,
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,

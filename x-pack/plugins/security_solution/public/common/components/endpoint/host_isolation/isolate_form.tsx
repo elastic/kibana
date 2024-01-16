@@ -31,10 +31,20 @@ export interface EndpointIsolatedFormProps {
   messageAppend?: ReactNode;
   /** If true, then `Confirm` and `Cancel` buttons will be disabled, and `Confirm` button will loading loading style */
   isLoading?: boolean;
+  hideCommentField?: boolean;
 }
 
 export const EndpointIsolateForm = memo<EndpointIsolatedFormProps>(
-  ({ hostName, onCancel, onConfirm, onChange, comment = '', messageAppend, isLoading = false }) => {
+  ({
+    hostName,
+    onCancel,
+    onConfirm,
+    onChange,
+    comment = '',
+    messageAppend,
+    isLoading = false,
+    hideCommentField = false,
+  }) => {
     const handleCommentChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback(
       (event) => {
         onChange({ comment: event.target.value });
@@ -66,15 +76,17 @@ export const EndpointIsolateForm = memo<EndpointIsolatedFormProps>(
             </EuiText>
           </EuiFormRow>
 
-          <EuiFormRow label={COMMENT} fullWidth>
-            <EuiTextArea
-              data-test-subj="host_isolation_comment"
-              fullWidth
-              placeholder={COMMENT_PLACEHOLDER}
-              value={comment}
-              onChange={handleCommentChange}
-            />
-          </EuiFormRow>
+          {!hideCommentField && (
+            <EuiFormRow label={COMMENT} fullWidth>
+              <EuiTextArea
+                data-test-subj="host_isolation_comment"
+                fullWidth
+                placeholder={COMMENT_PLACEHOLDER}
+                value={comment}
+                onChange={handleCommentChange}
+              />
+            </EuiFormRow>
+          )}
 
           <EuiFormRow fullWidth>
             <EuiFlexGroup justifyContent="flexEnd">

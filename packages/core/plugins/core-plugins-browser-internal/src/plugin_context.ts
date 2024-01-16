@@ -82,7 +82,13 @@ export function createPluginSetupContext<
     customBranding: deps.customBranding,
     fatalErrors: deps.fatalErrors,
     executionContext: deps.executionContext,
-    http: deps.http,
+    http: {
+      ...deps.http,
+      staticAssets: {
+        getPluginAssetHref: (assetPath: string) =>
+          deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
+      },
+    },
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
     settings: deps.settings,
@@ -133,7 +139,13 @@ export function createPluginStartContext<
     customBranding: deps.customBranding,
     docLinks: deps.docLinks,
     executionContext: deps.executionContext,
-    http: deps.http,
+    http: {
+      ...deps.http,
+      staticAssets: {
+        getPluginAssetHref: (assetPath: string) =>
+          deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
+      },
+    },
     chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,

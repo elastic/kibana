@@ -39,7 +39,17 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    profilingStacktraces({ query, sampleSize }) {
+    profilingStacktraces({
+      query,
+      sampleSize,
+      durationSeconds,
+      co2PerKWH,
+      datacenterPUE,
+      awsCostDiscountRate,
+      costPervCPUPerHour,
+      pervCPUWattArm64,
+      pervCPUWattX86,
+    }) {
       const controller = new AbortController();
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
         return esClient.transport.request(
@@ -49,6 +59,13 @@ export function createProfilingEsClient({
             body: {
               query,
               sample_size: sampleSize,
+              requested_duration: durationSeconds,
+              co2_per_kwh: co2PerKWH,
+              per_core_watt_x86: pervCPUWattX86,
+              per_core_watt_arm64: pervCPUWattArm64,
+              datacenter_pue: datacenterPUE,
+              aws_cost_factor: awsCostDiscountRate,
+              cost_per_core_hour: costPervCPUPerHour,
             },
           },
           {
@@ -83,7 +100,17 @@ export function createProfilingEsClient({
     getEsClient() {
       return esClient;
     },
-    profilingFlamegraph({ query, sampleSize }) {
+    profilingFlamegraph({
+      query,
+      sampleSize,
+      durationSeconds,
+      co2PerKWH,
+      datacenterPUE,
+      awsCostDiscountRate,
+      costPervCPUPerHour,
+      pervCPUWattArm64,
+      pervCPUWattX86,
+    }) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/flamegraph', () => {
@@ -94,6 +121,13 @@ export function createProfilingEsClient({
             body: {
               query,
               sample_size: sampleSize,
+              requested_duration: durationSeconds,
+              co2_per_kwh: co2PerKWH,
+              per_core_watt_x86: pervCPUWattX86,
+              per_core_watt_arm64: pervCPUWattArm64,
+              datacenter_pue: datacenterPUE,
+              aws_cost_factor: awsCostDiscountRate,
+              cost_per_core_hour: costPervCPUPerHour,
             },
           },
           {

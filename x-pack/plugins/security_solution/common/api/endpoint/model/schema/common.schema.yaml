@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Common Endpoint Attributes
   version: '2023-10-31'
-paths: { }
+paths: {}
 components:
   schemas:
     Id:
@@ -145,6 +145,7 @@ components:
       description: Optional parameters object
 
     BaseActionSchema:
+      x-inline: true
       type: object
       properties:
         endpoint_ids:
@@ -181,4 +182,3 @@ components:
       type: object
       properties: {}
       # Define properties for the success response if needed
-

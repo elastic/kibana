@@ -31,7 +31,7 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '33.79 lbs / 15.33 kg' },
+        { id: 'annualizedCo2', value: '74.49 lbs / 33.79 kg' },
         { id: 'annualizedCost', value: '$318.32' },
         { id: 'totalNumberOfSamples', value: '513' },
       ].forEach((item) => {
@@ -50,7 +50,7 @@ describe('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '33.79 lbs / 15.33 kg' },
+        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '74.49 lbs / 33.79 kg' },
         { id: 'annualizedCost', value: '$0', comparisonValue: '$318.32' },
         { id: 'totalNumberOfSamples', value: '0', comparisonValue: '15,390' },
       ].forEach((item) => {
@@ -76,8 +76,8 @@ describe('Differential Functions page', () => {
         { id: 'overallPerformance', value: '65.89%', icon: 'sortUp_success' },
         {
           id: 'annualizedCo2',
-          value: '33.79 lbs / 15.33 kg',
-          comparisonValue: '11.53 lbs / 5.23 kg (65.89%)',
+          value: '74.49 lbs / 33.79 kg',
+          comparisonValue: '25.41 lbs / 11.53 kg (65.89%)',
           icon: 'comparison_sortUp_success',
         },
         {
@@ -116,8 +116,8 @@ describe('Differential Functions page', () => {
         { id: 'overallPerformance', value: '193.14%', icon: 'sortDown_danger' },
         {
           id: 'annualizedCo2',
-          value: '11.53 lbs / 5.23 kg',
-          comparisonValue: '33.79 lbs / 15.33 kg (193.14%)',
+          value: '25.41 lbs / 11.53 kg',
+          comparisonValue: '74.49 lbs / 33.79 kg (193.14%)',
           icon: 'comparison_sortDown_danger',
         },
         {
@@ -167,17 +167,8 @@ describe('Differential Functions page', () => {
       });
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
-      cy.get('[data-test-subj="topNFunctionsGrid"] .euiDataGridRow').should('have.length.gt', 1);
-      cy.get('[data-test-subj="TopNFunctionsComparisonGrid"] .euiDataGridRow').should(
-        'have.length.gt',
-        1
-      );
-      cy.get(
-        '[data-test-subj="topNFunctionsGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('vmlinux');
-      cy.get(
-        '[data-test-subj="TopNFunctionsComparisonGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('vmlinux');
+      cy.get('[data-test-subj="frame"]').contains('vmlinux');
+      cy.get('[data-test-subj="comparison_frame"]').contains('vmlinux');
 
       cy.addKqlFilter({
         key: 'process.thread.name',
@@ -190,12 +181,8 @@ describe('Differential Functions page', () => {
       });
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
-      cy.get(
-        '[data-test-subj="topNFunctionsGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('libsystemd-shared-237.so');
-      cy.get(
-        '[data-test-subj="TopNFunctionsComparisonGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('libjvm.so');
+      cy.get('[data-test-subj="frame"]').contains('libsystemd-shared-237.so');
+      cy.get('[data-test-subj="comparison_frame"]').contains('libjvm.so');
     });
   });
 });

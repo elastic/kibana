@@ -65,9 +65,9 @@ interface PreviewSectionProps {
    */
   component: React.ReactElement;
   /**
-   * Width used when rendering the panel
+   * Left position used when rendering the panel
    */
-  width: number;
+  leftPosition: number;
   /**
    * Display the back button in the header
    */
@@ -85,12 +85,13 @@ interface PreviewSectionProps {
 export const PreviewSection: React.FC<PreviewSectionProps> = ({
   component,
   showBackButton,
-  width,
+  leftPosition,
   banner,
 }: PreviewSectionProps) => {
   const { euiTheme } = useEuiTheme();
   const { closePreviewPanel, previousPreviewPanel } = useExpandableFlyoutContext();
-  const left = `${(1 - width) * 100}%`;
+
+  const left = leftPosition + 4;
 
   const closeButton = (
     <EuiFlexItem grow={false}>
@@ -103,7 +104,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
     </EuiFlexItem>
   );
   const header = showBackButton ? (
-    <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           size="xs"
@@ -119,32 +120,43 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       {closeButton}
     </EuiFlexGroup>
   ) : (
-    <EuiFlexGroup justifyContent="flexEnd">{closeButton}</EuiFlexGroup>
+    <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+      {closeButton}
+    </EuiFlexGroup>
   );
 
   return (
     <div
       css={css`
         position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        left: ${left};
+        top: 4px;
+        bottom: 12px;
+        right: 4px;
+        left: ${left}px;
         z-index: 1000;
       `}
     >
       <EuiSplitPanel.Outer
         css={css`
           margin: ${euiTheme.size.xs};
-          height: 99%;
-          box-shadow: 0px 0px 5px 5px ${euiTheme.colors.darkShade};
+          box-shadow: 0 0 4px 4px ${euiTheme.colors.darkShade};
         `}
         className="eui-yScroll"
         data-test-subj={PREVIEW_SECTION_TEST_ID}
       >
         {isPreviewBanner(banner) && (
-          <EuiSplitPanel.Inner grow={false} color={banner.backgroundColor} paddingSize="none">
-            <EuiText textAlign="center" color={banner.textColor} size="s">
+          <EuiSplitPanel.Inner
+            grow={false}
+            color={banner.backgroundColor}
+            paddingSize="none"
+            data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerPanel`}
+          >
+            <EuiText
+              textAlign="center"
+              color={banner.textColor}
+              size="s"
+              data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerText`}
+            >
               {banner.title}
             </EuiText>
           </EuiSplitPanel.Inner>

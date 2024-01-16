@@ -8,8 +8,14 @@
 import { createTestConfig } from '../../../../../config/serverless/config.base';
 
 export default createTestConfig({
+  kbnTestServerArgs: [
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'entityAnalyticsAssetCriticalityEnabled',
+    ])}`,
+  ],
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'Entity Analytics API Integration Tests -  Serverless - Risk Engine',
+    reportName:
+      'Entity Analytics - Risk Engine Integration Tests - Serverless Env - Complete License',
   },
 });

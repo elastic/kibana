@@ -29,18 +29,21 @@ describe('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
         system_memory_linux_elastic: {
           ecs_mapping: {},
           interval: 3600,
+          timeout: 700,
           platform: 'linux',
           query: 'SELECT * FROM memory_info;',
         },
         system_info_elastic: {
           ecs_mapping: {},
           interval: 3600,
+          timeout: 200,
           platform: 'linux,windows,darwin',
           query: 'SELECT * FROM system_info;',
         },
         failingQuery: {
           ecs_mapping: {},
           interval: 10,
+          timeout: 90,
           query: 'select opera_extensions.* from users join opera_extensions using (uid);',
         },
       },

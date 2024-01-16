@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
@@ -23,6 +23,7 @@ import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historic
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { BurnRates } from './burn_rates';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
+import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
@@ -35,6 +36,7 @@ export interface Props {
 const TAB_ID_URL_PARAM = 'tabId';
 const OVERVIEW_TAB_ID = 'overview';
 const ALERTS_TAB_ID = 'alerts';
+const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 type TabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID;
 
@@ -55,6 +57,22 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
       historicalSummary.sloId === slo.id &&
       historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
   );
+
+  const [range, setRange] = useState({
+    start: new Date().getTime() - DAY_IN_MILLISECONDS,
+    end: new Date().getTime(),
+  });
+
+  useEffect(() => {
+    let intervalId: any;
+    if (isAutoRefreshing) {
+      intervalId = setInterval(() => {
+        setRange({ start: new Date().getTime() - DAY_IN_MILLISECONDS, end: new Date().getTime() });
+      }, 60 * 1000);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isAutoRefreshing]);
 
   const errorBudgetBurnDownData = formatHistoricalData(
     sloHistoricalSummary?.data,
@@ -94,6 +112,11 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
                   slo={slo}
                 />
               </EuiFlexItem>
+              {slo.indicator.type !== 'sli.metric.timeslice' ? (
+                <EuiFlexItem>
+                  <EventsChartPanel slo={slo} range={range} />
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexGroup>
         </Fragment>

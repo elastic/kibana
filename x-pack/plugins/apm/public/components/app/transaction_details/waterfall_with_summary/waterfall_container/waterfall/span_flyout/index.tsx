@@ -25,6 +25,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
+import { PlaintextStacktrace } from '../../../../../error_group_details/error_sampler/plaintext_stacktrace';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
@@ -204,6 +205,7 @@ function SpanFlyoutBody({
   flyoutDetailTab?: string;
 }) {
   const stackframes = span.span.stacktrace;
+  const plaintextStacktrace = span.code?.stacktrace;
   const codeLanguage = parentTransaction?.service.language?.name;
   const spanDb = span.span.db;
   const spanTypes = getSpanTypes(span);
@@ -232,10 +234,11 @@ function SpanFlyoutBody({
         </Fragment>
       ),
     },
-    ...(!isEmpty(stackframes)
+    ...(!isEmpty(stackframes) || !isEmpty(plaintextStacktrace)
       ? [
           {
             id: 'stack-trace',
+            'data-test-subj': 'spanStacktraceTab',
             name: i18n.translate(
               'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
               {
@@ -245,10 +248,17 @@ function SpanFlyoutBody({
             content: (
               <Fragment>
                 <EuiSpacer size="l" />
-                <Stacktrace
-                  stackframes={stackframes}
-                  codeLanguage={codeLanguage}
-                />
+                {stackframes ? (
+                  <Stacktrace
+                    stackframes={stackframes}
+                    codeLanguage={codeLanguage}
+                  />
+                ) : (
+                  <PlaintextStacktrace
+                    stacktrace={plaintextStacktrace}
+                    codeLanguage={codeLanguage}
+                  />
+                )}
               </Fragment>
             ),
           },

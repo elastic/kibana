@@ -45,7 +45,7 @@ async function compareSnapshots({
 
   log.info(
     `Snapshots compared: ${from} <=> ${to}. ` +
-      `${result.hasChanges ? 'No changes' : 'Changed: ' + result.changed.join(', ')}`
+      `${result.hasChanges ? 'Changed: ' + result.changed.join(', ') : 'No changes'}`
   );
 
   if (outputPath) {

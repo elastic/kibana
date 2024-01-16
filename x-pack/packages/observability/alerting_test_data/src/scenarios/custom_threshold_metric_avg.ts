@@ -22,7 +22,6 @@ export const scenario4 = {
     params: {
       criteria: [
         {
-          aggType: Aggregators.CUSTOM,
           comparator: Comparator.GT,
           threshold: [80],
           timeSize: 1,

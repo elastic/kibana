@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import { ExecutionContextSearch } from '@kbn/es-query';
 import { Datatable, ExpressionType } from '../expression_types';
 import { TablesAdapter } from '../util/tables_adapter';
 import { ExpressionsInspectorAdapter } from '../util';
@@ -19,10 +19,7 @@ import { ExpressionsInspectorAdapter } from '../util';
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<
-  InspectorAdapters extends Adapters = Adapters,
-  ExecutionContextSearch extends SerializableRecord = SerializableRecord
-> {
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> {
   /**
    * Get search context of the expression.
    */
@@ -76,6 +73,11 @@ export interface ExecutionContext<
   isSyncTooltipsEnabled?: () => boolean;
 
   /**
+   * Returns whether or not to use the size transition veil when resizing visualizations.
+   */
+  shouldUseSizeTransitionVeil?: () => boolean;
+
+  /**
    * Contains the meta-data about the source of the expression.
    */
   getExecutionContext: () => KibanaExecutionContext | undefined;
@@ -84,8 +86,6 @@ export interface ExecutionContext<
    * Logs datatable.
    */
   logDatatable?(name: string, datatable: Datatable): void;
-
-  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 /**

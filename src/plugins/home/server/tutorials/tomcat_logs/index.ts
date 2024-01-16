@@ -39,7 +39,7 @@ export function tomcatLogsSpecProvider(context: TutorialContext): TutorialSchema
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-tomcat.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/tomcat.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/tomcat.svg'),
     artifacts: {
       dashboards: [],
       application: {

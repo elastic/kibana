@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStream, Locations, LocationStatus } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -99,7 +99,7 @@ describe('icmp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.ICMP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.ICMP],
             config_id: '',
             custom_heartbeat_id: 'Cloudflare-DNS-test-project-id-test-space',
             enabled: true,
@@ -139,7 +139,7 @@ describe('icmp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.ICMP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.ICMP],
             config_id: '',
             custom_heartbeat_id: 'Cloudflare-DNS-2-test-project-id-test-space',
             enabled: true,
@@ -192,7 +192,7 @@ describe('icmp normalizers', () => {
             },
           ],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.ICMP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.ICMP],
             config_id: '',
             custom_heartbeat_id: 'Cloudflare-DNS-3-test-project-id-test-space',
             enabled: true,

@@ -136,10 +136,6 @@ describe('IndexPattern', () => {
       expect(indexPattern.getComputedFields).toBeInstanceOf(Function);
     });
 
-    test('should request all stored fields', () => {
-      expect(indexPattern.getComputedFields().storedFields).toContain('*');
-    });
-
     test('should request date fields as docvalue_fields', () => {
       const { docvalueFields } = indexPattern.getComputedFields();
       const docValueFieldNames = docvalueFields.map((field) => field.field);

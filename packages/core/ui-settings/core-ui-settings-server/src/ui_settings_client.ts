@@ -8,6 +8,11 @@
 
 import type { UserProvidedValues, UiSettingsParams } from '@kbn/core-ui-settings-common';
 
+interface ValueValidation {
+  valid: boolean;
+  errorMessage?: string;
+}
+
 /**
  * Server-side client that provides access to the advanced settings stored in elasticsearch.
  * The settings provide control over the behavior of the Kibana application.
@@ -57,4 +62,8 @@ export interface IUiSettingsClient {
    * Shows whether the uiSetting is a sensitive value. Used by telemetry to not send sensitive values.
    */
   isSensitive: (key: string) => boolean;
+  /**
+   * Validates the uiSettings value and returns a ValueValidation object.
+   */
+  validate: (key: string, value: unknown) => Promise<ValueValidation>;
 }

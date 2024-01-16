@@ -10,8 +10,7 @@ import { isString } from 'lodash/fp';
 import type { AppError } from '@kbn/securitysolution-t-grid';
 import { isAppError, isKibanaError, isSecurityAppError } from '@kbn/securitysolution-t-grid';
 
-import type { IEsError } from '@kbn/data-plugin/public';
-import { isEsError } from '@kbn/data-plugin/public';
+import { type IEsError, isEsError } from '@kbn/search-errors';
 
 import type { ErrorToastOptions, ToastsStart, Toast } from '@kbn/core/public';
 import { useToasts } from '../lib/kibana';

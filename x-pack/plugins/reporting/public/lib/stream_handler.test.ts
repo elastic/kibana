@@ -6,9 +6,12 @@
  */
 
 import sinon, { stub } from 'sinon';
+
 import { NotificationsStart } from '@kbn/core/public';
-import { coreMock, themeServiceMock, docLinksServiceMock } from '@kbn/core/public/mocks';
-import { JobSummary, ReportApiJSON } from '../../common/types';
+import { coreMock, docLinksServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
+
+import { JobSummary } from '../types';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';

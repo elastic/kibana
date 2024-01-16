@@ -43,7 +43,7 @@ export const startMlModelDeployment = async (
   // we're downloaded already, but not deployed yet - let's deploy it
   const startRequest: MlStartTrainedModelDeploymentRequest = {
     model_id: modelName,
-    wait_for: 'started',
+    wait_for: 'starting',
   };
 
   await trainedModelsProvider.startTrainedModelDeployment(startRequest);

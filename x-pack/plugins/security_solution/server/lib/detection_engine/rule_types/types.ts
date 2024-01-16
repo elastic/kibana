@@ -100,6 +100,7 @@ export interface RunOpts<TParams extends RuleParams> {
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
   inputIndexFields: DataViewFieldBase[];
+  experimentalFeatures?: ExperimentalFeatures;
 }
 
 export type SecurityAlertType<

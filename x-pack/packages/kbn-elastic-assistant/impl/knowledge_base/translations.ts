@@ -7,6 +7,51 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERTS_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsLabel',
+  {
+    defaultMessage: 'Alerts',
+  }
+);
+
+export const ASK_QUESTIONS_ABOUT = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.askQuestionsAboutLabel',
+  {
+    defaultMessage: 'Ask questions about the',
+  }
+);
+
+export const LATEST_AND_RISKIEST_OPEN_ALERTS = (alertsCount: number) =>
+  i18n.translate(
+    'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.latestAndRiskiestOpenAlertsLabel',
+    {
+      defaultMessage:
+        'Send AI Assistant information about your {alertsCount} newest and riskiest open or acknowledged alerts.',
+      values: { alertsCount },
+    }
+  );
+
+export const YOUR_ANONYMIZATION_SETTINGS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.yourAnonymizationSettingsLabel',
+  {
+    defaultMessage: 'Your anonymization settings will apply to these alerts.',
+  }
+);
+
+export const SELECT_FEWER_ALERTS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.selectFewerAlertsLabel',
+  {
+    defaultMessage: "Send fewer alerts if the model's context window is too small.",
+  }
+);
+
+export const ALERTS_RANGE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsRangeSliderLabel',
+  {
+    defaultMessage: 'Alerts range',
+  }
+);
+
 export const SETTINGS_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.settingsTitle',
   {

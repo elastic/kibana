@@ -33,6 +33,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/i18n-react",
     "@kbn/logging",
-    "@kbn/core-http-request-handler-context-server"
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/lens-embeddable-utils"
   ]
 }

@@ -5,47 +5,37 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ChartModel } from '@kbn/lens-embeddable-utils';
 import type { TimeRange } from '@kbn/es-query';
+import { METRIC_CHART_HEIGHT } from '../../../../../common/visualizations/constants';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { type BrushEndArgs, LensChart, type OnFilterEvent } from '../../../../lens';
-import { METRIC_CHART_HEIGHT } from '../../../constants';
+import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../../../lens';
 import { useDatePickerContext } from '../../../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
-import type { XYConfig } from '../../../../../common/visualizations';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
-export interface ChartProps extends XYConfig {
-  visualOptions?: XYVisualOptions;
-  metricsDataView?: DataView;
-  logsDataView?: DataView;
-  filterFieldName: string;
-  dateRange: TimeRange;
-  assetName: string;
-  ['data-test-subj']: string;
-}
+export type ChartProps = ChartModel &
+  Pick<LensChartProps, 'overrides'> & {
+    filterFieldName: string;
+    dateRange: TimeRange;
+    assetName: string;
+    dataViewOrigin?: 'metrics' | 'logs';
+    ['data-test-subj']: string;
+  };
 
 export const Chart = ({
   id,
-  title,
-  layers,
-  metricsDataView,
-  logsDataView,
   filterFieldName,
-  visualOptions,
   dataViewOrigin,
   overrides,
   dateRange,
   assetName,
+  dataView,
   ...props
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
   const { searchSessionId } = useLoadingStateContext();
-
-  const dataView = useMemo(() => {
-    return dataViewOrigin === 'metrics' ? metricsDataView : logsDataView;
-  }, [dataViewOrigin, logsDataView, metricsDataView]);
+  const { ['data-test-subj']: dataTestSubj, ...chartProps } = { ...props };
 
   const filters = useMemo(() => {
     return [
@@ -85,18 +75,15 @@ export const Chart = ({
 
   return (
     <LensChart
-      id={`${props['data-test-subj']}${id}`}
+      {...chartProps}
+      id={`${dataTestSubj}${id}`}
       borderRadius="m"
       dataView={dataView}
       dateRange={dateRange}
       height={METRIC_CHART_HEIGHT}
-      visualOptions={visualOptions}
       searchSessionId={searchSessionId}
-      layers={layers}
       filters={filters}
-      title={title}
       overrides={overrides}
-      visualizationType="lnsXY"
       onBrushEnd={handleBrushEnd}
       onFilter={handleFilter}
     />

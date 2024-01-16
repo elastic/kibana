@@ -60,7 +60,7 @@ import {
   deleteAllExceptions,
   deleteListsIndex,
   importFile,
-} from '../../../../../../lists_api_integration/utils';
+} from '../../../../lists_and_exception_lists/utils';
 import {
   createUserAndRole,
   deleteUserAndRole,
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
+  // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
@@ -526,7 +526,7 @@ export default ({ getService }: FtrProviderContext) => {
             })
             .expect(200);
 
-          const status = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const status = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(status.rules_not_installed).toEqual(0);
         });
       });
@@ -561,7 +561,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('tests with auditbeat data', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/169664
+      describe.skip('tests with auditbeat data', () => {
         before(async () => {
           await esArchiver.load(path);
         });

@@ -30,6 +30,7 @@ import {
 } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type * as CSS from 'csstype';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -37,8 +38,9 @@ import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 import { APP_STATE_STORAGE_KEY } from './edit_index_pattern_state_container';
 
-const codeStyle = {
+const codeStyle: CSS.Properties = {
   marginLeft: '8px',
+  overflowWrap: 'anywhere',
 };
 
 export interface EditIndexPatternProps extends RouteComponentProps {
@@ -93,6 +95,9 @@ export const EditIndexPattern = withRouter(
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
     const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
     const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
+    const [refreshCount, setRefreshCount] = useState<number>(0); // used for forcing rerender of field list
+    const [isRefreshing, setIsRefreshing] = React.useState(false);
+
     const conflictFieldsUrl = useMemo(() => {
       return setStateToKbnUrl(
         APP_STATE_STORAGE_KEY,
@@ -142,7 +147,7 @@ export const EditIndexPattern = withRouter(
       setConflictedFields(
         indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
       );
-    }, [indexPattern]);
+    }, [indexPattern, refreshCount]);
 
     useEffect(() => {
       setTags(
@@ -330,6 +335,13 @@ export const EditIndexPattern = withRouter(
             setFields(indexPattern.getNonScriptedFields());
             setCompositeRuntimeFields(getCompositeRuntimeFields(indexPattern));
           }}
+          refreshIndexPatternClick={async () => {
+            setIsRefreshing(true);
+            await dataViews.refreshFields(indexPattern, false, true);
+            setRefreshCount(refreshCount + 1); // rerender field list
+            setIsRefreshing(false);
+          }}
+          isRefreshing={isRefreshing}
         />
         {displayIndexPatternEditor}
       </div>

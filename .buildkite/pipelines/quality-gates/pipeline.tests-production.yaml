@@ -11,6 +11,8 @@ steps:
         TARGET_ENV: production
         CHECK_SLO: true
         CHECK_SLO_TAG: kibana
+        CHECK_SLO_WAITING_PERIOD: 15m
+        CHECK_SLO_BURN_RATE_THRESHOLD: 0.1
     soft_fail: true
 
   - label: ":rocket: control-plane e2e tests"
@@ -25,6 +27,11 @@ steps:
   - label: ":cookie: 24h bake time before continuing promotion"
     if: build.env("ENVIRONMENT") == "production-canary"
     command: "sleep 86400"
+    soft_fail:
+      # A manual cancel of that step produces return code 255.
+      # We're treating this case as a soft fail to allow manual bake time skipping.
+      # To stop the promotion entirely, instead click the "Cancel" button at the top of the page
+      - exit_status: 255
     agents:
       # How long can this agent live for in minutes - 25 hours
       instanceMaxAge: 1500

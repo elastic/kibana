@@ -77,6 +77,7 @@ import {
   TiebreakerField,
   TimestampField,
   AlertSuppressionCamel,
+  ThresholdAlertSuppression,
   ThresholdNormalized,
   AnomalyThreshold,
   HistoryWindowStart,
@@ -237,6 +238,7 @@ export const ThresholdSpecificRuleParams = z.object({
   savedId: SavedQueryId.optional(),
   threshold: ThresholdNormalized,
   dataViewId: DataViewId.optional(),
+  alertSuppression: ThresholdAlertSuppression.optional(),
 });
 
 export type ThresholdRuleParams = BaseRuleParams & ThresholdSpecificRuleParams;

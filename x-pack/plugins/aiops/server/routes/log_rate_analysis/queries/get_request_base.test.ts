@@ -5,36 +5,20 @@
  * 2.0.
  */
 
+import { paramsMock } from './__mocks__/params_match_all';
+
 import { getRequestBase } from './get_request_base';
 
 describe('getRequestBase', () => {
   it('defaults to not setting `ignore_throttled`', () => {
-    const requestBase = getRequestBase({
-      index: 'the-index',
-      timeFieldName: 'the-time-field-name',
-      searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
-      start: 1577836800000,
-      end: 1609459200000,
-      baselineMin: 10,
-      baselineMax: 20,
-      deviationMin: 30,
-      deviationMax: 40,
-    });
+    const requestBase = getRequestBase(paramsMock);
     expect(requestBase.ignore_throttled).toEqual(undefined);
   });
 
   it('adds `ignore_throttled=false` when `includeFrozen=true`', () => {
     const requestBase = getRequestBase({
-      index: 'the-index',
-      timeFieldName: 'the-time-field-name',
+      ...paramsMock,
       includeFrozen: true,
-      searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
-      start: 1577836800000,
-      end: 1609459200000,
-      baselineMin: 10,
-      baselineMax: 20,
-      deviationMin: 30,
-      deviationMax: 40,
     });
     expect(requestBase.ignore_throttled).toEqual(false);
   });

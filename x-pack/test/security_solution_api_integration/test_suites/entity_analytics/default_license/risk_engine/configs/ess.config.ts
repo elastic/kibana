@@ -13,9 +13,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'entityAnalyticsAssetCriticalityEnabled',
+        ])}`,
+      ],
+    },
     testFiles: [require.resolve('..')],
     junit: {
-      reportName: 'Entity Analytics API Integration Tests -  ESS - Risk Engine',
+      reportName: 'Entity Analytics - Risk Engine Integration Tests - ESS Env - Trial License',
     },
   };
 }

@@ -306,13 +306,22 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
               }
             )}
           >
-            {i18n.translate(
-              'xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled',
-              {
-                defaultMessage:
-                  'Manifest will always be updated to the latest available version. If you want to control updates manually, disable "Update manifest automatically".',
-              }
-            )}
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled"
+              defaultMessage="Protection updates will always be updated to the latest available version. If you want to control updates manually, disable the {toggleName} toggle."
+              values={{
+                toggleName: (
+                  <strong>
+                    {i18n.translate(
+                      'xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled.toggleName',
+                      {
+                        defaultMessage: 'Enable automatic updates',
+                      }
+                    )}
+                  </strong>
+                ),
+              }}
+            />
           </EuiCallOut>
         );
       }

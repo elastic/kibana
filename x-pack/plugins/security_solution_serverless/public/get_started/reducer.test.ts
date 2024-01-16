@@ -13,24 +13,35 @@ import {
   getActiveProductsInitialStates,
   getActiveSectionsInitialStates,
 } from './reducer';
-import type { ExpandedCardSteps } from './types';
+import type {
+  AddFinishedStepAction,
+  CardId,
+  ExpandedCardSteps,
+  StepId,
+  ToggleProductAction,
+} from './types';
 import {
-  GetSetUpCardId,
+  AddAndValidateYourDataCardsId,
+  AddIntegrationsSteps,
+  CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
   GetStartedPageActions,
-  IntroductionSteps,
+  GetStartedWithAlertsCardsId,
+  OverviewSteps,
+  QuickStartSectionCardsId,
   SectionId,
-  type CardId,
-  type StepId,
-  type ToggleProductAction,
-  type AddFinishedStepAction,
-  ConfigureSteps,
-  ExploreSteps,
+  ViewAlertsSteps,
+  ViewDashboardSteps,
 } from './types';
 
 describe('reducer', () => {
   it('should toggle section correctly', () => {
     const activeProducts = new Set([ProductLine.security]);
-    const finishedSteps = {} as Record<CardId, Set<StepId>>;
+    const finishedSteps = {
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
+    } as Record<CardId, Set<StepId>>;
     const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
       finishedSteps,
       activeProducts
@@ -57,7 +68,11 @@ describe('reducer', () => {
 
   it('should add a finished step correctly', () => {
     const activeProducts = new Set([ProductLine.security]);
-    const finishedSteps = {} as Record<CardId, Set<StepId>>;
+    const finishedSteps = {
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
+    } as Record<CardId, Set<StepId>>;
     const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
       finishedSteps,
       activeProducts
@@ -74,41 +89,58 @@ describe('reducer', () => {
     const action: AddFinishedStepAction = {
       type: GetStartedPageActions.AddFinishedStep,
       payload: {
-        cardId: GetSetUpCardId.introduction,
-        stepId: IntroductionSteps.getToKnowElasticSecurity,
-        sectionId: SectionId.getSetUp,
+        cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+        stepId: OverviewSteps.getToKnowElasticSecurity,
+        sectionId: SectionId.quickStart,
       },
     };
 
     const nextState = reducer(initialState, action);
 
-    expect(nextState.finishedSteps[GetSetUpCardId.introduction]).toEqual(
-      new Set([IntroductionSteps.getToKnowElasticSecurity])
+    expect(nextState.finishedSteps[QuickStartSectionCardsId.watchTheOverviewVideo]).toEqual(
+      new Set([OverviewSteps.getToKnowElasticSecurity])
     );
     expect(nextState.activeSections).toEqual({
-      getSetUp: {
-        [GetSetUpCardId.introduction]: {
-          id: GetSetUpCardId.introduction,
+      [SectionId.quickStart]: {
+        [QuickStartSectionCardsId.createFirstProject]: {
+          id: QuickStartSectionCardsId.createFirstProject,
+          timeInMins: 0,
           stepsLeft: 0,
-          timeInMins: 0,
-          activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+          activeStepIds: [CreateProjectSteps.createFirstProject],
         },
-        [GetSetUpCardId.configure]: {
-          id: GetSetUpCardId.configure,
-          stepsLeft: 4,
+        [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+          id: QuickStartSectionCardsId.watchTheOverviewVideo,
           timeInMins: 0,
-          activeStepIds: [
-            ConfigureSteps.learnAbout,
-            ConfigureSteps.deployElasticAgent,
-            ConfigureSteps.connectToDataSources,
-            ConfigureSteps.enablePrebuiltRules,
-          ],
+          stepsLeft: 0,
+          activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
         },
-        [GetSetUpCardId.explore]: {
-          id: GetSetUpCardId.explore,
-          stepsLeft: 2,
+      },
+      [SectionId.addAndValidateYourData]: {
+        [AddAndValidateYourDataCardsId.addIntegrations]: {
+          id: AddAndValidateYourDataCardsId.addIntegrations,
           timeInMins: 0,
-          activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
+          stepsLeft: 1,
+          activeStepIds: [AddIntegrationsSteps.connectToDataSources],
+        },
+        [AddAndValidateYourDataCardsId.viewDashboards]: {
+          id: AddAndValidateYourDataCardsId.viewDashboards,
+          timeInMins: 0,
+          stepsLeft: 1,
+          activeStepIds: [ViewDashboardSteps.analyzeData],
+        },
+      },
+      [SectionId.getStartedWithAlerts]: {
+        [GetStartedWithAlertsCardsId.enablePrebuiltRules]: {
+          id: GetStartedWithAlertsCardsId.enablePrebuiltRules,
+          timeInMins: 0,
+          stepsLeft: 1,
+          activeStepIds: [EnablePrebuiltRulesSteps.enablePrebuiltRules],
+        },
+        [GetStartedWithAlertsCardsId.viewAlerts]: {
+          id: GetStartedWithAlertsCardsId.viewAlerts,
+          timeInMins: 0,
+          stepsLeft: 1,
+          activeStepIds: [ViewAlertsSteps.viewAlerts],
         },
       },
     });
@@ -118,16 +150,16 @@ describe('reducer', () => {
 describe('getFinishedStepsInitialStates', () => {
   it('should return the initial states of finished steps correctly', () => {
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: [IntroductionSteps.getToKnowElasticSecurity],
-      [GetSetUpCardId.configure]: [],
+      [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
+      [QuickStartSectionCardsId.watchTheOverviewVideo]: [],
     } as unknown as Record<CardId, StepId[]>;
 
     const initialStates = getFinishedStepsInitialStates({ finishedSteps });
 
-    expect(initialStates[GetSetUpCardId.introduction]).toEqual(
-      new Set([IntroductionSteps.getToKnowElasticSecurity])
+    expect(initialStates[QuickStartSectionCardsId.createFirstProject]).toEqual(
+      new Set([CreateProjectSteps.createFirstProject])
     );
-    expect(initialStates[GetSetUpCardId.configure]).toEqual(new Set([]));
+    expect(initialStates[QuickStartSectionCardsId.watchTheOverviewVideo]).toEqual(new Set([]));
   });
 });
 
@@ -145,7 +177,9 @@ describe('getActiveSectionsInitialStates', () => {
   it('should return the initial states of active cards correctly', () => {
     const activeProducts = new Set([ProductLine.security]);
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
     } as unknown as Record<CardId, Set<StepId>>;
 
     const {
@@ -158,34 +192,51 @@ describe('getActiveSectionsInitialStates', () => {
     });
 
     expect(initialStates).toEqual({
-      [SectionId.getSetUp]: {
-        [GetSetUpCardId.introduction]: {
-          id: GetSetUpCardId.introduction,
+      [SectionId.quickStart]: {
+        [QuickStartSectionCardsId.createFirstProject]: {
+          id: QuickStartSectionCardsId.createFirstProject,
           timeInMins: 0,
           stepsLeft: 0,
-          activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+          activeStepIds: [CreateProjectSteps.createFirstProject],
         },
-        [GetSetUpCardId.configure]: {
-          id: GetSetUpCardId.configure,
+        [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+          id: QuickStartSectionCardsId.watchTheOverviewVideo,
           timeInMins: 0,
-          stepsLeft: 4,
-          activeStepIds: [
-            ConfigureSteps.learnAbout,
-            ConfigureSteps.deployElasticAgent,
-            ConfigureSteps.connectToDataSources,
-            ConfigureSteps.enablePrebuiltRules,
-          ],
+          stepsLeft: 1,
+          activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
         },
-        [GetSetUpCardId.explore]: {
-          id: GetSetUpCardId.explore,
+      },
+      [SectionId.addAndValidateYourData]: {
+        [AddAndValidateYourDataCardsId.addIntegrations]: {
+          id: AddAndValidateYourDataCardsId.addIntegrations,
           timeInMins: 0,
-          stepsLeft: 2,
-          activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
+          stepsLeft: 1,
+          activeStepIds: [AddIntegrationsSteps.connectToDataSources],
+        },
+        [AddAndValidateYourDataCardsId.viewDashboards]: {
+          id: AddAndValidateYourDataCardsId.viewDashboards,
+          timeInMins: 0,
+          stepsLeft: 1,
+          activeStepIds: [ViewDashboardSteps.analyzeData],
+        },
+      },
+      [SectionId.getStartedWithAlerts]: {
+        [GetStartedWithAlertsCardsId.enablePrebuiltRules]: {
+          id: GetStartedWithAlertsCardsId.enablePrebuiltRules,
+          timeInMins: 0,
+          stepsLeft: 1,
+          activeStepIds: [EnablePrebuiltRulesSteps.enablePrebuiltRules],
+        },
+        [GetStartedWithAlertsCardsId.viewAlerts]: {
+          id: GetStartedWithAlertsCardsId.viewAlerts,
+          timeInMins: 0,
+          stepsLeft: 1,
+          activeStepIds: [ViewAlertsSteps.viewAlerts],
         },
       },
     });
 
-    expect(totalActiveSteps).toEqual(7);
-    expect(totalStepsLeft).toEqual(6);
+    expect(totalActiveSteps).toEqual(6);
+    expect(totalStepsLeft).toEqual(5);
   });
 });

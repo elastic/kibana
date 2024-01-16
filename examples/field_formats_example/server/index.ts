@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FieldFormatsExamplePlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { FieldFormatsExamplePlugin } = await import('./plugin');
   return new FieldFormatsExamplePlugin();
 }

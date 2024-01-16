@@ -11,6 +11,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../../common/constants';
 import type { ConfigType } from '../../../../config';
 
 import type { validateTree } from '../../../../../common/endpoint/schema/resolver';
@@ -30,6 +31,9 @@ export function handleTree(
     const license = await firstValueFrom(licensing.license$);
     const hasAccessToInsightsRelatedByProcessAncestry =
       insightsRelatedAlertsByProcessAncestry && license.hasAtLeast('platinum');
+    const shouldExcludeColdAndFrozenTiers = await (
+      await context.core
+    ).uiSettings.client.get<boolean>(EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER);
 
     if (hasAccessToInsightsRelatedByProcessAncestry) {
       featureUsageService.notifyUsage('ALERTS_BY_PROCESS_ANCESTRY');
@@ -39,7 +43,7 @@ export function handleTree(
       ? await ruleRegistry.getRacClientWithRequest(req)
       : undefined;
     const fetcher = new Fetcher(client, alertsClient);
-    const body = await fetcher.tree(req.body);
+    const body = await fetcher.tree({ ...req.body, shouldExcludeColdAndFrozenTiers });
     return res.ok({
       body,
     });

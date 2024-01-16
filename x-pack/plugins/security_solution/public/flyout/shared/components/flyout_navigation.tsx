@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, SyntheticEvent } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiFlyoutHeader,
@@ -24,7 +24,7 @@ import {
   EXPAND_DETAILS_BUTTON_TEST_ID,
 } from './test_ids';
 
-export interface PanelNavigationProps {
+export interface FlyoutNavigationProps {
   /**
    * If true, the expand detail button will be displayed
    */
@@ -32,19 +32,23 @@ export interface PanelNavigationProps {
   /**
    * If flyoutIsExpandable is true, pass a callback to open left panel
    */
-  expandDetails?: () => void;
+  expandDetails?: (e: SyntheticEvent) => void;
   /**
    * Optional actions to be placed on the right hand side of navigation
    */
   actions?: React.ReactElement;
 }
 
-export const FlyoutNavigation: FC<PanelNavigationProps> = memo(
+/**
+ * Navigation menu on the right panel only, with expand/collapse button and option to
+ * pass in a list of actions to be displayed on top.
+ */
+export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
   ({ flyoutIsExpandable = false, expandDetails, actions }) => {
     const { euiTheme } = useEuiTheme();
     const { closeLeftPanel, panels } = useExpandableFlyoutContext();
 
-    const isExpanded: boolean = panels.left != null;
+    const isExpanded: boolean = !!panels.left;
     const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);
 
     const collapseButton = useMemo(
@@ -105,7 +109,7 @@ export const FlyoutNavigation: FC<PanelNavigationProps> = memo(
           responsive={false}
           css={css`
             padding-left: ${euiTheme.size.s};
-            padding-right: ${euiTheme.size.l};
+            padding-right: ${euiTheme.size.xl};
             height: ${euiTheme.size.xxl};
           `}
         >

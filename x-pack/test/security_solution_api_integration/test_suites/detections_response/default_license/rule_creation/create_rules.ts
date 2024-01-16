@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
+  // TODO: add a new service for pulling kibana username, similar to getService('es')
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
@@ -431,8 +431,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).toEqual({
             error: 'Bad Request',
-            message:
-              '[request body]: type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", saved_id: Required, and 14 more',
+            message: '[request body]: threshold: Required',
             statusCode: 400,
           });
         });
@@ -541,7 +540,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body.message).toBe(
-            '[request body]: investigation_fields: Expected object, received array, type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", investigation_fields: Expected object, received array, investigation_fields: Expected object, received array, and 22 more'
+            '[request body]: investigation_fields: Expected object, received array'
           );
         });
       });

@@ -6,7 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { ContentTabIds, type Tab } from '../../components/asset_details/types';
+import { NewBadge } from '../../components/new_badge';
 
 export const commonFlyoutTabs: Tab[] = [
   {
@@ -26,6 +28,13 @@ export const commonFlyoutTabs: Tab[] = [
     name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
       defaultMessage: 'Processes',
     }),
+  },
+  {
+    id: ContentTabIds.PROFILING,
+    name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.profiling', {
+      defaultMessage: 'Universal Profiling',
+    }),
+    append: <NewBadge />,
   },
   {
     id: ContentTabIds.LOGS,

@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { Subject } from 'rxjs';
 
 export interface EmbeddableSloProps {
   sloId: string | undefined;
   sloInstanceId: string | undefined;
-  lastReloadRequestTime?: number | undefined;
+  reloadSubject?: Subject<boolean>;
   onRenderComplete?: () => void;
 }
 

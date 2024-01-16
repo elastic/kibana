@@ -16,7 +16,7 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneConnectorOn: false,
 });
 
-type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
+export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;

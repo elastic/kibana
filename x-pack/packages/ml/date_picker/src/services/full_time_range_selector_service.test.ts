@@ -20,7 +20,11 @@ import { getTimeFieldRange } from './time_field_range';
 const mockParamsFactory = () => ({
   timefilter: { setTime: jest.fn() } as unknown as TimefilterContract,
   dataView: { getIndexPattern: jest.fn(), getRuntimeMappings: jest.fn() } as unknown as DataView,
-  toasts: { addWarning: jest.fn(), addDanger: jest.fn() } as unknown as ToastsStart,
+  toasts: {
+    addWarning: jest.fn(),
+    addDanger: jest.fn(),
+    addError: jest.fn(),
+  } as unknown as ToastsStart,
 });
 
 describe('setFullTimeRange', () => {

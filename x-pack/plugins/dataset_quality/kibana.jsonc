@@ -8,7 +8,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "datasetQuality"],
-    "requiredPlugins": ["data", "kibanaReact", "kibanaUtils", "controls", "embeddable", "share"],
+    "requiredPlugins": ["data", "kibanaReact", "kibanaUtils", "controls", "embeddable", "share", "observabilityShared", "fleet", "fieldFormats"],
     "optionalPlugins": [],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]

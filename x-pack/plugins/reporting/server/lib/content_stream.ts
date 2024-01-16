@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { defaults, get } from 'lodash';
+import { Duplex } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { defaults, get } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
-import { Duplex } from 'stream';
+import type { ReportSource } from '@kbn/reporting-common/types';
 import type { ReportingCore } from '..';
-import type { ReportSource } from '../../common/types';
 
 /**
  * @note The Elasticsearch `http.max_content_length` is including the whole POST body.

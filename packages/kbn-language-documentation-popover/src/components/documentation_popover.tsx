@@ -17,9 +17,15 @@ interface DocumentationPopoverProps {
   language: string;
   sections?: LanguageDocumentationSections;
   buttonProps?: Omit<EuiButtonIconProps, 'iconType'>;
+  searchInDescription?: boolean;
 }
 
-function DocumentationPopover({ language, sections, buttonProps }: DocumentationPopoverProps) {
+function DocumentationPopover({
+  language,
+  sections,
+  buttonProps,
+  searchInDescription,
+}: DocumentationPopoverProps) {
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
 
   const toggleDocumentationPopover = useCallback(() => {
@@ -50,7 +56,11 @@ function DocumentationPopover({ language, sections, buttonProps }: Documentation
         </EuiToolTip>
       }
     >
-      <LanguageDocumentationPopoverContent language={language} sections={sections} />
+      <LanguageDocumentationPopoverContent
+        language={language}
+        sections={sections}
+        searchInDescription={searchInDescription}
+      />
     </EuiPopover>
   );
 }

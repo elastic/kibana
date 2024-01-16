@@ -7,7 +7,10 @@
 
 import { merge } from 'lodash';
 import type { KnowledgeBaseEntry } from '../../../common/types';
-import { type KnowledgeBaseEntryOperation, KnowledgeBaseEntryOperationType } from '../kb_service';
+import {
+  type KnowledgeBaseEntryOperation,
+  KnowledgeBaseEntryOperationType,
+} from '../knowledge_base_service';
 
 export function splitKbText({
   id,
@@ -17,17 +20,15 @@ export function splitKbText({
   return [
     {
       type: KnowledgeBaseEntryOperationType.Delete,
-      labels: {
-        document_id: id,
-      },
+      doc_id: id,
+      labels: {},
     },
     ...texts.map((text, index) => ({
       type: KnowledgeBaseEntryOperationType.Index,
       document: merge({}, rest, {
         id: [id, index].join('_'),
-        labels: {
-          document_id: id,
-        },
+        doc_id: id,
+        labels: {},
         text,
       }),
     })),

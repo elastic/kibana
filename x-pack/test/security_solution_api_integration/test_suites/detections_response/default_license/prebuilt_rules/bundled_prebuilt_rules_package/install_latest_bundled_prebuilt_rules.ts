@@ -22,6 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const retry = getService('retry');
 
   /* This test simulates an air-gapped environment in which the user doesn't have access to EPR.
   /* We first download the package from the registry as done during build time, and then
@@ -31,7 +32,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInQA install_bundled_prebuilt_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     it('should list `security_detection_engine` as a bundled fleet package in the `fleet_package.json` file', async () => {
@@ -51,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should install prebuilt rules from the package that comes bundled with Kibana', async () => {
       // Verify that status is empty before package installation
-      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
@@ -59,18 +60,19 @@ export default ({ getService }: FtrProviderContext): void => {
       const bundledInstallResponse = await installPrebuiltRulesPackageByVersion(
         es,
         supertest,
-        '99.0.0'
+        '99.0.0',
+        retry
       );
 
       // As opposed to "registry"
       expect(bundledInstallResponse._meta.install_source).toBe('bundled');
 
       // Refresh ES indices to avoid race conditions between write and reading of indeces
-      // See implementation utility function at x-pack/test/detection_engine_api_integration/utils/prebuilt_rules/install_prebuilt_rules_fleet_package.ts
+      // See implementation utility function at x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/prebuilt_rules/install_prebuilt_rules_fleet_package.ts
       await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
       // Verify that status is updated after package installation
-      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBeGreaterThan(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
