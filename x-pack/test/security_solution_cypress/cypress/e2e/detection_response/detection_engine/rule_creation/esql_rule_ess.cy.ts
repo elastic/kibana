@@ -46,7 +46,7 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-describe('Detection ES|QL rules, creation', { tags: ['@ess'] }, () => {
+describe('Detection ES|QL rules, creation', { tags: ['@iss'] }, () => {
   const rule = getEsqlRule();
   const expectedNumberOfRules = 1;
 

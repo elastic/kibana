@@ -24,7 +24,7 @@ import {
 describe.skip(
   'Alert user assignment - Serverless Essentials',
   {
-    tags: ['@serverless'],
+    tags: ['@serverliss'],
     env: {
       ftrConfig: {
         productTypes: [

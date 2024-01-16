@@ -18,7 +18,7 @@ import {
   loadPageAs,
 } from '../../../../../tasks/alert_assignments';
 
-describe('Alert user assignment - ESS', { tags: ['@ess'] }, () => {
+describe('Alert user assignment - ESS', { tags: ['@iss'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });

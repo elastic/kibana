@@ -31,7 +31,7 @@ const rule = getNewRule();
 describe(
   'Rule actions PLI essentials product tier',
   {
-    tags: ['@serverless'],
+    tags: ['@serverliss'],
 
     env: {
       ftrConfig: {

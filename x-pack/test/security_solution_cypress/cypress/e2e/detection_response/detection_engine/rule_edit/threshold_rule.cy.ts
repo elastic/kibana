@@ -40,7 +40,7 @@ const rule = getNewThresholdRule();
 describe(
   'Detection threshold rules, edit',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@iss', '@serverliss'],
   },
   () => {
     describe('without suppression', () => {

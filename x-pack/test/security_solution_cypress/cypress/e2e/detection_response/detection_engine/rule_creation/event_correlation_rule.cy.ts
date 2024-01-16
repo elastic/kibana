@@ -57,7 +57,7 @@ import { visit } from '../../../../tasks/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('EQL rules', { tags: ['@iss', '@serverliss'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

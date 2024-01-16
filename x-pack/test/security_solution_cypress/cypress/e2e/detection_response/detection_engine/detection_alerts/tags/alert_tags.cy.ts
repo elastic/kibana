@@ -25,7 +25,7 @@ import {
   UNSELECTED_ALERT_TAG,
 } from '../../../../../screens/alerts';
 
-describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert tagging', { tags: ['@iss', '@serverliss'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'endpoint' });
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });

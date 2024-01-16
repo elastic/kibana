@@ -53,7 +53,7 @@ let exceptionListResponse: Cypress.Response<ExceptionListSchema>;
 
 describe(
   'Manage lists from "Shared Exception Lists" page',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@iss', '@serverliss'] },
   () => {
     describe('Create/Export/Delete List', () => {
       before(() => {

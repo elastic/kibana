@@ -15,7 +15,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 describe(
   'Threshold rules, Serverless essentials license',
   {
-    tags: ['@serverless'],
+    tags: ['@serverliss'],
 
     env: {
       ftrConfig: {

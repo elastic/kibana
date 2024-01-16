@@ -39,7 +39,7 @@ import { closeTimeline, openTimelineById } from '../../../../tasks/timeline';
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-describe('Timeline scope', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Timeline scope', { tags: ['@iss', '@serverliss', '@brokenInServerless'] }, () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     login();

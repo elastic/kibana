@@ -42,7 +42,7 @@ import {
 } from '../../../../../tasks/alert_assignments';
 import { ALERTS_COUNT } from '../../../../../screens/alerts';
 
-describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert user assignment - ESS & Serverless', { tags: ['@iss', '@serverliss'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
 
