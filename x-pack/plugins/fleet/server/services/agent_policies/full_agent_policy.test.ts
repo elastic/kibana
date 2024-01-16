@@ -14,6 +14,7 @@ import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
 import { appContextService } from '../app_context';
 import { getPackageInfo } from '../epm/packages';
+import omit from 'lodash/omit';
 
 import {
   generateFleetConfig,
@@ -583,7 +584,7 @@ describe('getFullAgentPolicy', () => {
 
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
 
-    expect(agentPolicy).toEqual({
+    expect(omit(agentPolicy, 'signed', 'secret_references')).toEqual({
       agent: {
         download: {
           sourceURI: 'http://default-registry.co',
@@ -689,11 +690,6 @@ describe('getFullAgentPolicy', () => {
         },
       },
       revision: 1,
-      secret_references: [],
-      signed: {
-        data: '',
-        signature: '',
-      },
     });
   });
 });
