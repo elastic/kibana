@@ -8,7 +8,7 @@
     "server": true,
     "browser": false,
     "requiredPlugins": ["data"],
-    "optionalPlugins": [],
+    "optionalPlugins": ["lens"],
     "requiredBundles": [],
     "extraPublicDirs": ["common"]
   }
