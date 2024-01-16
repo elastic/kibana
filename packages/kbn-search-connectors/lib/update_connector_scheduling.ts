@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorDocument, SchedulingConfiguraton } from '../types/connectors';
+import { SchedulingConfiguraton } from '../types/connectors';
 import { ConnectorsAPIUpdateResponse } from '../types/connectors_api';
 
 export const updateConnectorScheduling = async (
