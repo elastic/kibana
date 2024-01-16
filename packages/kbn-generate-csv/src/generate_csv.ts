@@ -14,7 +14,6 @@ import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type {
   IEsSearchRequest,
-  IKibanaSearchResponse,
   ISearchSource,
   ISearchStartSearchSource,
 } from '@kbn/data-plugin/common';
@@ -35,11 +34,12 @@ import {
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 
-import { CONTENT_TYPE_CSV } from './constants';
-import { CsvExportSettings, getExportSettings } from './get_export_settings';
-import { i18nTexts } from './i18n_texts';
-import { MaxSizeStringBuilder } from './max_size_string_builder';
+import { CONTENT_TYPE_CSV } from '../constants';
 import { JobParamsCSV } from '../types';
+import { CsvExportSettings, getExportSettings } from './lib/get_export_settings';
+import { i18nTexts } from './lib/i18n_texts';
+import { MaxSizeStringBuilder } from './lib/max_size_string_builder';
+import { SearchCursor } from './lib/search_cursor';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -68,93 +68,20 @@ export class CsvGenerator {
     private stream: Writable
   ) {}
 
-  private async openPointInTime(indexPatternTitle: string, settings: CsvExportSettings) {
-    const {
-      includeFrozen,
-      maxConcurrentShardRequests,
-      scroll: { duration },
-    } = settings;
-    let pitId: string | undefined;
-    this.logger.debug(`Requesting PIT for: [${indexPatternTitle}]...`);
-    try {
-      // NOTE: if ES is overloaded, this request could time out
-      const response = await this.clients.es.asCurrentUser.openPointInTime(
-        {
-          index: indexPatternTitle,
-          keep_alive: duration,
-          ignore_unavailable: true,
-          // @ts-expect-error ignore_throttled is not in the type definition, but it is accepted by es
-          ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
-        },
-        {
-          requestTimeout: duration,
-          maxRetries: 0,
-          maxConcurrentShardRequests,
-        }
-      );
-      pitId = response.id;
-    } catch (err) {
-      this.logger.error(err);
-    }
-
-    if (!pitId) {
-      throw new Error(`Could not receive a PIT ID!`);
-    }
-
-    this.logger.debug(`Opened PIT ID: ${this.formatPit(pitId)}`);
-
-    return pitId;
-  }
-
-  /**
-   * @param clientDetails: Details from the data.search client
-   * @param results:       Raw data from ES
-   */
-  private logResults(
-    clientDetails: Omit<IKibanaSearchResponse<unknown>, 'rawResponse'>,
-    results: estypes.SearchResponse<unknown>
-  ) {
-    const { hits: resultsHits, ...headerWithPit } = results;
-    const { hits, ...hitsMeta } = resultsHits;
-    const trackedTotal = resultsHits.total as estypes.SearchTotalHits;
-    const currentTotal = trackedTotal?.value ?? resultsHits.total;
-
-    const totalAccuracy = trackedTotal?.relation ?? 'unknown';
-    this.logger.debug(`Received total hits: ${currentTotal}. Accuracy: ${totalAccuracy}.`);
-
-    // reconstruct the data.search response (w/out the data) for logging
-    const { pit_id: newPitId, ...header } = headerWithPit;
-    const logInfo = {
-      ...clientDetails,
-      rawResponse: {
-        ...header,
-        hits: hitsMeta,
-        pit_id: `${this.formatPit(newPitId)}`,
-      },
-    };
-    this.logger.debug(`Result details: ${JSON.stringify(logInfo)}`);
-
-    // use the most recently received id for the next search request
-    this.logger.debug(`Received PIT ID: [${this.formatPit(results.pit_id)}]`);
-  }
-
   private async doSearch(
     searchSource: ISearchSource,
     settings: CsvExportSettings,
-    searchAfter?: estypes.SortResults
+    cursor: SearchCursor
   ) {
     const { scroll: scrollSettings, maxConcurrentShardRequests } = settings;
     searchSource.setField('size', scrollSettings.size);
 
+    const searchAfter = cursor.getSearchAfter();
     if (searchAfter) {
       searchSource.setField('searchAfter', searchAfter);
     }
 
-    const pitId = searchSource.getField('pit')?.id;
-    this.logger.debug(
-      `Executing search request with PIT ID: [${this.formatPit(pitId)}]` +
-        (searchAfter ? ` search_after: [${searchAfter}]` : '')
-    );
+    cursor.doSearchPrior();
 
     const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
     if (searchBody == null) {
@@ -180,7 +107,7 @@ export class CsvGenerator {
         })
       );
       results = rawResponse;
-      this.logResults(rawDetails, rawResponse);
+      cursor.doSearchPost(rawDetails, rawResponse);
     } catch (err) {
       this.logger.error(`CSV export search error: ${err}`);
       throw err;
@@ -375,10 +302,11 @@ export class CsvGenerator {
     let first = true;
     let currentRecord = -1;
     let totalRecords: number | undefined;
-    let searchAfter: estypes.SortResults | undefined;
-
     let reportingError: undefined | ReportingError;
-    let pitId = await this.openPointInTime(indexPatternTitle, settings);
+
+    // use a class to internalize the paging strategy
+    const cursor = new SearchCursor(indexPatternTitle, settings, this.clients, this.logger);
+    await cursor.initialize();
 
     // apply timezone from the job to all date field formatters
     try {
@@ -404,10 +332,12 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
-        // set the latest pit, which could be different from the last request
-        searchSource.setField('pit', { id: pitId, keep_alive: settings.scroll.duration });
+        const pagingFieldsForSearchSource = cursor.getPagingFieldsForSearchSource();
+        if (pagingFieldsForSearchSource) {
+          searchSource.setField(...pagingFieldsForSearchSource);
+        }
 
-        const results = await this.doSearch(searchSource, settings, searchAfter);
+        const results = await this.doSearch(searchSource, settings, cursor);
         if (!results) {
           logger.warn(`Search results are undefined!`);
           break;
@@ -423,13 +353,11 @@ export class CsvGenerator {
           totalRecords = currentTotal;
         }
 
-        // use the most recently received id for the next search request
-        pitId = results.pit_id ?? pitId;
+        // use the most recently received cursor id for the next search request
+        cursor.updateIdFromResults(results);
 
-        // Update last sort results for next query. PIT is used, so the sort results
-        // automatically include _shard_doc as a tiebreaker
-        searchAfter = hits[hits.length - 1]?.sort as estypes.SortResults | undefined;
-        logger.debug(`Received search_after: [${searchAfter}]`);
+        // track the beginning of the next page of search results
+        cursor.setSearchAfter(hits);
 
         // check for shard failures, log them and add a warning if found
         const { _shards: shards } = results;
@@ -492,12 +420,7 @@ export class CsvGenerator {
     }
 
     try {
-      if (pitId) {
-        logger.debug(`Closing PIT ${this.formatPit(pitId)}`);
-        await this.clients.es.asCurrentUser.closePointInTime({ body: { id: pitId } });
-      } else {
-        logger.warn(`No PIT ID to clear!`);
-      }
+      await cursor.closeCursorId();
     } catch (err) {
       logger.error(err);
       warnings.push(i18nTexts.csvUnableToClosePit());
@@ -507,9 +430,11 @@ export class CsvGenerator {
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       logger.warn(
-        `ES scroll returned fewer total hits than expected! ` +
-          `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}`
+        `ES scroll returned ` +
+          `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`
       );
+      logger.warn(`Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}`);
+
       if (totalRecords || totalRecords === 0) {
         warnings.push(
           i18nTexts.csvRowCountError({ expected: totalRecords, received: this.csvRowCount })
@@ -529,13 +454,5 @@ export class CsvGenerator {
       warnings,
       error_code: reportingError?.code,
     };
-  }
-
-  /**
-   * Method to avoid logging the entire PIT: it could be megabytes long
-   */
-  private formatPit(pitId: string | undefined) {
-    const byteSize = pitId ? Buffer.byteLength(pitId, 'utf-8') : 0;
-    return pitId?.substring(0, 12) + `[${byteSize} bytes]`;
   }
 }

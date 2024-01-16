@@ -16,11 +16,13 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-} from './constants';
+} from '../../constants';
+import { CsvPagingStrategy } from '../../types';
 
 export interface CsvExportSettings {
   timezone: string;
   scroll: {
+    strategy?: CsvPagingStrategy;
     size: number;
     duration: string;
   };
@@ -73,6 +75,7 @@ export const getExportSettings = async (
   return {
     timezone: setTimezone,
     scroll: {
+      strategy: config.scroll.strategy as CsvPagingStrategy,
       size: config.scroll.size,
       duration: config.scroll.duration,
     },

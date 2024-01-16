@@ -56,6 +56,7 @@ const CaptureSchema = schema.object({
   ),
 });
 
+const csvPagingStrategies = ['pit', 'scroll'];
 const CsvSchema = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
@@ -65,6 +66,15 @@ const CsvSchema = schema.object({
   }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
+    strategy: schema.maybe(
+      schema.string({
+        validate(value) {
+          if (!csvPagingStrategies.includes(value)) {
+            return 'csv paging strategy must equal "pit" or "scroll"';
+          }
+        },
+      })
+    ),
     duration: schema.string({
       defaultValue: '30s', // this value is passed directly to ES, so string only format is preferred
       validate(value) {

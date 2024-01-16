@@ -68,6 +68,9 @@ exports[`CsvGenerator formulas escapes formula values in a header, doesn't warn 
 exports[`CsvGenerator keeps order of the columns during the scroll 1`] = `
 Array [
   Array [
+    "Using search strategy: pit",
+  ],
+  Array [
     "Requesting PIT for: [logstash-*]...",
   ],
   Array [

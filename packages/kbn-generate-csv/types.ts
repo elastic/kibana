@@ -16,3 +16,5 @@ export interface JobParamsCSV {
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
 }
+
+export type CsvPagingStrategy = 'pit' | 'scroll' | undefined;

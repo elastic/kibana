@@ -31,7 +31,7 @@ import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
-} from './constants';
+} from '../constants';
 import { CsvGenerator } from './generate_csv';
 
 const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
