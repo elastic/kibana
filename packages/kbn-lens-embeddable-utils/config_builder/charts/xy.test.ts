@@ -148,6 +148,7 @@ test('generates xy chart config', async () => {
             "yLeft": true,
             "yRight": true,
           },
+          "hideEndzones": true,
           "labelsOrientation": Object {
             "x": 0,
             "yLeft": 0,
