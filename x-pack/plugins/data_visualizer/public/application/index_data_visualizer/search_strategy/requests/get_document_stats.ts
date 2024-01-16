@@ -94,6 +94,8 @@ export const getESQLDocumentCountStats = async (
         { ...searchOptions, strategy: 'esql' }
       )
     );
+    // @TODO: remove
+    console.log(`--@@esqlResults If not time field, get the total count`, esqlResults);
 
     // @ts-expect-error ES types needs to be updated with columns and values as part of esql response
     return { documentCountStats: undefined, totalCount: esqlResults.rawResponse.values[0][0] };

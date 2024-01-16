@@ -207,12 +207,12 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
     const tf = timefilter;
 
-    if (!buckets || !tf || !currentDataView) return;
+    if (!buckets || !tf || query.esql === '') return;
     const activeBounds = tf.getActiveBounds();
 
     let earliest: number | undefined;
     let latest: number | undefined;
-    if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
+    if (activeBounds !== undefined && currentDataView?.timeFieldName !== undefined) {
       earliest = activeBounds.min?.valueOf();
       latest = activeBounds.max?.valueOf();
     }
@@ -228,7 +228,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
     const aggInterval = buckets.getInterval();
 
-    const filter = currentDataView.timeFieldName
+    const filter = currentDataView?.timeFieldName
       ? ({
           bool: {
             must: [],
@@ -257,8 +257,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       samplerShardSize: undefined,
       sessionId: undefined,
       indexPattern,
-      timeFieldName: currentDataView.timeFieldName,
-      runtimeFieldMap: currentDataView.getRuntimeMappings(),
+      timeFieldName: currentDataView?.timeFieldName,
+      runtimeFieldMap: currentDataView?.getRuntimeMappings(),
       lastRefresh,
       filter,
     };

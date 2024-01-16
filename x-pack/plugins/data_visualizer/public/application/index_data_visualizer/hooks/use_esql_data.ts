@@ -167,7 +167,6 @@ export const useESQLFieldStatsData = <T extends Column>({
                 {
                   params: {
                     query: esqlBaseQuery + numericStatsQuery,
-                    locale: 'en',
                     ...(filter ? { filter } : {}),
                   },
                 },
@@ -287,7 +286,6 @@ export const useESQLFieldStatsData = <T extends Column>({
                     {
                       params: {
                         query: esqlBaseQuery + query,
-                        locale: 'en',
                         ...(filter ? { filter } : {}),
                       },
                     },
@@ -520,7 +518,6 @@ export const useESQLOverallStatsData = (
             {
               params: {
                 query: esqlBaseQuery + '| LIMIT 0',
-                locale: 'en',
                 ...(filter ? { filter } : {}),
               },
             },
@@ -583,10 +580,10 @@ export const useESQLOverallStatsData = (
           type: string;
           secondaryType: string;
         }> = [];
-
         const fields = columns
           // Some field types are not supported by ESQL yet
-          .filter((c) => c.type !== 'unsupported')
+          // Temporarily removing null columns because it causes problems with some aggs
+          .filter((c) => c.type !== 'unsupported' && c.type !== 'null')
           .map((field) => {
             return { ...field, aggregatable: !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) };
           });
@@ -611,6 +608,7 @@ export const useESQLOverallStatsData = (
             }
           }
         });
+
         // COUNT + CARDINALITY
         setTableData({ aggregatableFields, nonAggregatableFields });
 
@@ -633,7 +631,6 @@ export const useESQLOverallStatsData = (
               {
                 params: {
                   query: searchQuery.esql + countQuery,
-                  locale: 'en',
                   ...(filter ? { filter } : {}),
                 },
               },
