@@ -30,7 +30,7 @@ export function CpuProfilingPrompt() {
     >
       <NewBadge />
       <EuiFlexGroup alignItems="baseline" justifyContent="flexStart" gutterSize="xs">
-        {i18n.translate('xpack.infra.cpuProfilingPrompt.p.viewCPUBreakdownUsingLabel', {
+        {i18n.translate('xpack.infra.cpuProfilingPrompt.promptText', {
           defaultMessage: 'View CPU Breakdown using',
         })}
         <EuiButtonEmpty
@@ -38,7 +38,7 @@ export function CpuProfilingPrompt() {
           onClick={() => showTab('profiling')}
           flush="both"
         >
-          {i18n.translate('xpack.infra.cpuProfilingPrompt.profilingButtonEmptyLabel', {
+          {i18n.translate('xpack.infra.cpuProfilingPrompt.profilingLinkLabel', {
             defaultMessage: 'Profiling',
           })}
         </EuiButtonEmpty>
