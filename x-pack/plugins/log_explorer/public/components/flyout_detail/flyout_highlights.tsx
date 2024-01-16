@@ -46,7 +46,11 @@ export function FlyoutHighlights({
   return (
     <HighlightContainer ref={ref}>
       {/* Service & Infrastructure highlight */}
-      <HighlightSection title={serviceInfraAccordionTitle} columns={columns}>
+      <HighlightSection
+        title={serviceInfraAccordionTitle}
+        columns={columns}
+        data-test-subj="logExplorerFlyoutHighlightSectionServiceInfra"
+      >
         {formattedDoc[constants.SERVICE_NAME_FIELD] && (
           <HighlightField
             data-test-subj="logExplorerFlyoutService"
@@ -99,7 +103,11 @@ export function FlyoutHighlights({
         )}
       </HighlightSection>
       {/* Cloud highlight */}
-      <HighlightSection title={cloudAccordionTitle} columns={columns}>
+      <HighlightSection
+        title={cloudAccordionTitle}
+        columns={columns}
+        data-test-subj="logExplorerFlyoutHighlightSectionCloud"
+      >
         {formattedDoc[constants.CLOUD_PROVIDER_FIELD] && (
           <HighlightField
             data-test-subj="logExplorerFlyoutCloudProvider"
@@ -159,7 +167,11 @@ export function FlyoutHighlights({
         )}
       </HighlightSection>
       {/* Other highlights */}
-      <HighlightSection title={otherAccordionTitle} columns={columns}>
+      <HighlightSection
+        title={otherAccordionTitle}
+        columns={columns}
+        data-test-subj="logExplorerFlyoutHighlightSectionOther"
+      >
         {formattedDoc[constants.LOG_FILE_PATH_FIELD] && (
           <HighlightField
             data-test-subj="logExplorerFlyoutLogPathFile"
