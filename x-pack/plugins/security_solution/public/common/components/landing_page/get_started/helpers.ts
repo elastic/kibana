@@ -142,12 +142,14 @@ export const setupActiveSections = (
               acc.totalStepsLeft += stepsLeft;
               acc.totalActiveSteps += activeStepIds?.length ?? 0;
 
-              accCards[card.id] = {
-                id: card.id,
-                timeInMins,
-                stepsLeft,
-                activeStepIds,
-              };
+              if (activeSteps && activeSteps.length > 0) {
+                accCards[card.id] = {
+                  id: card.id,
+                  timeInMins,
+                  stepsLeft,
+                  activeStepIds,
+                };
+              }
 
               return accCards;
             }, {} as Record<CardId, ActiveCard>) ?? {};
@@ -202,12 +204,16 @@ export const updateActiveSections = ({
     ...activeSections,
     [sectionId]: {
       ...activeSections[sectionId],
-      [cardId]: {
-        id: cardId,
-        timeInMins,
-        stepsLeft,
-        activeStepIds,
-      },
+      ...(activeStepIds && activeStepIds?.length > 0
+        ? {
+            [cardId]: {
+              id: cardId,
+              timeInMins,
+              stepsLeft,
+              activeStepIds,
+            },
+          }
+        : {}),
     },
   };
 
