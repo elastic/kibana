@@ -7,9 +7,8 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-
-import { CONNECTORS_INDEX } from '..';
 
 import { ConnectorDocument, SchedulingConfiguraton } from '../types/connectors';
 
@@ -18,24 +17,29 @@ export const updateConnectorScheduling = async (
   connectorId: string,
   scheduling: SchedulingConfiguraton
 ) => {
-  const connectorResult = await client.get<ConnectorDocument>({
-    id: connectorId,
-    index: CONNECTORS_INDEX,
-  });
-  const connector = connectorResult._source;
-  if (connector) {
-    const result = await client.index<ConnectorDocument>({
-      document: { ...connector, scheduling },
-      id: connectorId,
-      index: CONNECTORS_INDEX,
+  try {
+    const result = await client.transport.request<ConnectorDocument>({
+      method: 'PUT',
+      path: `/_connector/${connectorId}/_scheduling`,
+      body: {
+        scheduling,
+      },
     });
-    await client.indices.refresh({ index: CONNECTORS_INDEX });
     return result;
-  } else {
-    throw new Error(
-      i18n.translate('searchConnectors.server.connectors.scheduling.error', {
-        defaultMessage: 'Could not find document',
-      })
-    );
+  } catch (err) {
+    const isResponseError = err instanceof errors.ResponseError;
+
+    const isDocumentMissingError =
+      isResponseError && err?.body?.error?.type === 'document_missing_exception';
+
+    if (isDocumentMissingError) {
+      throw new Error(
+        i18n.translate('searchConnectors.server.connectors.scheduling.error', {
+          defaultMessage: 'Could not find document',
+        })
+      );
+    }
+
+    throw err;
   }
 };
