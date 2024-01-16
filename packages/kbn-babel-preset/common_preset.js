@@ -15,6 +15,12 @@ module.exports = () => ({
       plugins: [
         require.resolve('babel-plugin-add-module-exports'),
 
+        // Required for TypeScript decorators support
+        require.resolve('babel-plugin-transform-typescript-metadata'),
+
+        // Required for TypeScript decorators support
+        [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
+
         // The class properties proposal was merged with the private fields proposal
         // into the "class fields" proposal. Babel doesn't support this combined
         // proposal yet, which includes private field, so this transform is

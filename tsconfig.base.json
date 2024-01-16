@@ -1792,6 +1792,10 @@
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
+    // Allow usage of experimental decorators
+    "experimentalDecorators": true,
+    // Emits decorators metadata
+    "emitDecoratorMetadata": true,
     // adding global typings
     "types": [
       "node",
