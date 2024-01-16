@@ -4428,7 +4428,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/discover-utils@link:packages/kbn-discover-utils":
+"@kbn/discover-utils@link:packages/discover/utils":
   version "0.0.0"
   uid ""
 

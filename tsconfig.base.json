@@ -684,8 +684,8 @@
       "@kbn/discover-enhanced-plugin/*": ["x-pack/plugins/discover_enhanced/*"],
       "@kbn/discover-plugin": ["src/plugins/discover"],
       "@kbn/discover-plugin/*": ["src/plugins/discover/*"],
-      "@kbn/discover-utils": ["packages/kbn-discover-utils"],
-      "@kbn/discover-utils/*": ["packages/kbn-discover-utils/*"],
+      "@kbn/discover-utils": ["packages/discover/utils"],
+      "@kbn/discover-utils/*": ["packages/discover/utils/*"],
       "@kbn/doc-links": ["packages/kbn-doc-links"],
       "@kbn/doc-links/*": ["packages/kbn-doc-links/*"],
       "@kbn/docs-utils": ["packages/kbn-docs-utils"],
@@ -1742,7 +1742,9 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
