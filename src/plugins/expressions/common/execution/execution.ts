@@ -287,6 +287,7 @@ export class Execution<
       isSyncColorsEnabled: () => execution.params.syncColors!,
       isSyncCursorEnabled: () => execution.params.syncCursor!,
       isSyncTooltipsEnabled: () => execution.params.syncTooltips!,
+      shouldUseSizeTransitionVeil: () => execution.params.shouldUseSizeTransitionVeil!,
       ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };
