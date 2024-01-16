@@ -86,7 +86,7 @@ describe('reducer', () => {
     const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
       finishedSteps,
       activeProducts,
-      [OverviewSteps.getToKnowElasticSecurity]
+      getStartedSteps
     );
     const initialState = {
       activeProducts: new Set([ProductLine.security]),

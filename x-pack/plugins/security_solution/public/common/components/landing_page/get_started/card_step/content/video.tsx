@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { useStepContext } from '../../context/step_context';
 import { WATCH_VIDEO_BUTTON_TITLE } from '../../translations';

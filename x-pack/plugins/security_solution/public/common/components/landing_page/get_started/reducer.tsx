@@ -11,22 +11,6 @@ import type { ExpandedCardSteps, ReducerActions } from './types';
 import { type CardId, type StepId, type TogglePanelReducer, GetStartedPageActions } from './types';
 
 export const reducer = (state: TogglePanelReducer, action: ReducerActions): TogglePanelReducer => {
-  if (action.type === GetStartedPageActions.UpdateGetStartedSteps) {
-    const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
-      state.finishedSteps,
-      state.activeProducts,
-      action.payload.getStartedSteps
-    );
-
-    return {
-      ...state,
-      getStartedSteps: action.payload.getStartedSteps,
-      activeSections,
-      totalStepsLeft,
-      totalActiveSteps,
-    };
-  }
-
   if (action.type === GetStartedPageActions.ToggleProduct) {
     const activeProducts = new Set([...state.activeProducts]);
 
@@ -182,5 +166,5 @@ export const getActiveSectionsInitialStates = ({
 }: {
   activeProducts: Set<ProductLine>;
   finishedSteps: Record<CardId, Set<StepId>>;
-  getStartedSteps: StepId[] | undefined;
+  getStartedSteps: StepId[];
 }) => setupActiveSections(finishedSteps, activeProducts, getStartedSteps);

@@ -232,7 +232,7 @@ describe('setupActiveSections', () => {
         CreateProjectSteps.createFirstProject,
       ]),
     } as unknown as Record<CardId, Set<StepId>>;
-    const activeProducts: Set<ProductLine> = new Set();
+    const activeProducts: Set<ProductLine> = new Set([ProductLine.security]);
 
     const activeSections = setupActiveSections(finishedSteps, activeProducts, getStartedSteps);
 

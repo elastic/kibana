@@ -70,7 +70,7 @@ export const useTogglePanel = ({
   getStartedSteps,
 }: {
   productTypes?: SecurityProductTypes;
-  getStartedSteps: StepId[] | undefined;
+  getStartedSteps: StepId[];
 }) => {
   const { navigateTo } = useNavigateTo();
 
@@ -157,16 +157,6 @@ export const useTogglePanel = ({
     totalStepsLeft: totalStepsLeftInitialStates,
     getStartedSteps: getStartedSteps ?? [],
   });
-
-  useEffect(() => {
-    if (!getStartedSteps) {
-      return;
-    }
-    dispatch({
-      type: GetStartedPageActions.UpdateGetStartedSteps,
-      payload: { getStartedSteps },
-    });
-  }, [getStartedSteps]);
 
   const toggleTaskCompleteStatus: ToggleTaskCompleteStatus = useCallback(
     ({ stepId, cardId, sectionId, undo }) => {

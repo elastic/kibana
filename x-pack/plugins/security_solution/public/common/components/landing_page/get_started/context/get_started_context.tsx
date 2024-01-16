@@ -14,7 +14,7 @@ export interface GetStartedContextType {
   productTypes: SecurityProductTypes | undefined;
   projectsUrl: string | undefined;
   projectFeaturesUrl: string | undefined;
-  availableSteps: StepId[] | undefined;
+  availableSteps: StepId[];
 }
 
 const GetStartedContext = React.createContext<GetStartedContextType | null>(null);

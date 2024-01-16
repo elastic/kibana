@@ -147,7 +147,7 @@ export interface TogglePanelReducer {
   finishedSteps: Record<CardId, Set<StepId>>;
   totalActiveSteps: number | null;
   totalStepsLeft: number | null;
-  getStartedSteps: StepId[] | undefined;
+  getStartedSteps: StepId[];
 }
 
 export interface ToggleProductAction {
@@ -170,17 +170,11 @@ export interface ToggleStepAction {
   payload: { stepId: StepId; cardId: CardId; isStepExpanded?: boolean };
 }
 
-export interface UpdateGetStartedStepsAction {
-  type: GetStartedPageActions.UpdateGetStartedSteps;
-  payload: { getStartedSteps: StepId[] };
-}
-
 export type ReducerActions =
   | ToggleProductAction
   | AddFinishedStepAction
   | RemoveFinishedStepAction
-  | ToggleStepAction
-  | UpdateGetStartedStepsAction;
+  | ToggleStepAction;
 
 export interface Switch {
   id: ProductLine;
@@ -192,7 +186,6 @@ export enum GetStartedPageActions {
   RemoveFinishedStep = 'removeFinishedStep',
   ToggleProduct = 'toggleProduct',
   ToggleExpandedStep = 'toggleExpandedStep',
-  UpdateGetStartedSteps = 'updateGetStartedSteps',
 }
 
 export type OnStepClicked = ({

@@ -29,7 +29,7 @@ export const isDefaultFinishedCardStep = (
   cardId: CardId,
   stepId: StepId,
   getStartedSteps: StepId[]
-) => !!DEFAULT_FINISHED_STEPS[cardId]?.includes(stepId) && getStartedSteps.includes(stepId);
+) => !!DEFAULT_FINISHED_STEPS[cardId]?.includes(stepId) && getStartedSteps?.includes(stepId);
 
 export const getCardTimeInMinutes = (activeSteps: Step[] | undefined, stepsDone: Set<StepId>) =>
   activeSteps?.reduce(
@@ -39,7 +39,7 @@ export const getCardTimeInMinutes = (activeSteps: Step[] | undefined, stepsDone:
   ) ?? 0;
 
 export const getCardStepsLeft = (activeSteps: Step[] | undefined, stepsDone: Set<StepId>) =>
-  (activeSteps?.length ?? 0) - (stepsDone.size ?? 0);
+  Math.max((activeSteps?.length ?? 0) - (stepsDone.size ?? 0), 0);
 
 export const isStepActive = (step: Step, activeProducts: Set<ProductLine>) =>
   !step.productLineRequired ||
@@ -48,9 +48,9 @@ export const isStepActive = (step: Step, activeProducts: Set<ProductLine>) =>
 export const getActiveSteps = (
   steps: Step[] | undefined,
   activeProducts: Set<ProductLine>,
-  getStartedSteps: StepId[] | undefined
+  getStartedSteps: StepId[]
 ) =>
-  steps?.filter((step) => getStartedSteps?.includes(step.id) && isStepActive(step, activeProducts));
+  steps?.filter((step) => getStartedSteps.includes(step.id) && isStepActive(step, activeProducts));
 
 const getfinishedActiveSteps = (
   finishedStepIds: StepId[] | undefined,
@@ -113,7 +113,7 @@ export const getStepsByActiveProduct = ({
   activeProducts: Set<ProductLine>;
   cardId: CardId;
   sectionId: SectionId;
-  getStartedSteps: StepId[] | undefined;
+  getStartedSteps: StepId[];
 }) => {
   const card = getCard({ cardId, sectionId });
   const steps = getActiveSteps(card?.steps, activeProducts, getStartedSteps);
@@ -124,7 +124,7 @@ export const getStepsByActiveProduct = ({
 export const setupActiveSections = (
   finishedSteps: Record<CardId, Set<StepId>>,
   activeProducts: Set<ProductLine>,
-  getStartedSteps: StepId[] | undefined
+  getStartedSteps: StepId[]
 ) =>
   activeProducts.size > 0
     ? getSections().reduce(
@@ -175,7 +175,7 @@ export const updateActiveSections = ({
   activeSections: ActiveSections | null;
   cardId: CardId;
   finishedSteps: Record<CardId, Set<StepId>>;
-  getStartedSteps: StepId[] | undefined;
+  getStartedSteps: StepId[];
   sectionId: SectionId;
 }): {
   activeSections: ActiveSections | null;
