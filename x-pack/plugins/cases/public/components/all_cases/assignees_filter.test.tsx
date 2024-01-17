@@ -40,28 +40,30 @@ describe('AssigneesFilterPopover', () => {
     useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
   });
 
-  it('calls onSelectionChange when 1 user is selected 2 ', async () => {
-    const onSelectionChange = jest.fn();
-    const props = { ...defaultProps, onSelectionChange };
+  for (let i = 0; i < 100; i = i + 1) {
+    it('calls onSelectionChange when 1 user is selected', async () => {
+      const onSelectionChange = jest.fn();
+      const props = { ...defaultProps, onSelectionChange };
 
-    appMockRender.render(<AssigneesFilterPopover {...props} />);
+      appMockRender.render(<AssigneesFilterPopover {...props} />);
 
-    userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
+      userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
 
-    await waitForEuiPopoverOpen();
+      await waitForEuiPopoverOpen();
 
-    fireEvent.change(await screen.findByPlaceholderText('Search users'), {
-      target: { value: 'dingo' },
-    });
-    userEvent.click(await screen.findByText('WD'), undefined, { skipPointerEventsCheck: true });
+      fireEvent.change(await screen.findByPlaceholderText('Search users'), {
+        target: { value: 'dingo' },
+      });
+      userEvent.click(await screen.findByText('WD'), undefined, { skipPointerEventsCheck: true });
 
-    await waitFor(() => {
-      expect(onSelectionChange).toHaveBeenCalledWith({
-        filterId: 'assignees',
-        selectedOptionKeys: ['u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0'],
+      await waitFor(() => {
+        expect(onSelectionChange).toHaveBeenCalledWith({
+          filterId: 'assignees',
+          selectedOptionKeys: ['u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0'],
+        });
       });
     });
-  });
+  }
 
   it('calls onSelectionChange with a single user when different users are selected', async () => {
     const onSelectionChange = jest.fn();
