@@ -35,10 +35,10 @@ describe('ResultsDataStream', () => {
       new ResultsDataStream({ kibanaVersion: '8.13.0' });
       const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
       expect(dataStreamSpacesAdapter.setComponentTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: '.kibana-dqa-dashboard-ecs-mappings' })
+        expect.objectContaining({ name: '.kibana-data-quality-dashboard-ecs-mappings' })
       );
       expect(dataStreamSpacesAdapter.setComponentTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: '.kibana-dqa-dashboard-results-mappings' })
+        expect.objectContaining({ name: '.kibana-data-quality-dashboard-results-mappings' })
       );
     });
 
@@ -46,7 +46,7 @@ describe('ResultsDataStream', () => {
       new ResultsDataStream({ kibanaVersion: '8.13.0' });
       const [dataStreamSpacesAdapter] = MockedDataStreamSpacesAdapter.mock.instances;
       expect(dataStreamSpacesAdapter.setIndexTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({ name: '.kibana-dqa-dashboard-results-index-template' })
+        expect.objectContaining({ name: '.kibana-data-quality-dashboard-results-index-template' })
       );
     });
   });
