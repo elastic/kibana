@@ -59,9 +59,9 @@ export const callAgentExecutor = async ({
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
-  const chatHistory = new ChatMessageHistory(pastMessages);
+
   const memory = new BufferMemory({
-    chatHistory,
+    chatHistory: new ChatMessageHistory(pastMessages),
     memoryKey: 'chat_history', // this is the key expected by https://github.com/langchain-ai/langchainjs/blob/a13a8969345b0f149c1ca4a120d63508b06c52a5/langchain/src/agents/initialize.ts#L166
     inputKey: 'input',
     outputKey: 'output',

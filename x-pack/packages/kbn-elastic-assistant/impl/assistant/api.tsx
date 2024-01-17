@@ -126,15 +126,6 @@ export const fetchConnectorExecuteAction = async ({
         }
       );
 
-      const streamResponse = response?.response?.body;
-      if (!streamResponse) {
-        return {
-          response: `${API_ERROR}\n\nCould not get reader from response`,
-          isError: true,
-          isStream: false,
-        };
-      }
-
       const reader = response?.response?.body?.getReader();
 
       if (!reader) {

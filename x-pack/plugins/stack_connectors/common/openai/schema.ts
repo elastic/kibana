@@ -28,43 +28,12 @@ export const RunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 
-// OpenAI ChatCompletionMessageParam in schema
-export const ChatCompletionSystemMessageParam = schema.object({
-  role: schema.string(),
-  content: schema.string(),
-  name: schema.maybe(schema.string()),
-});
-
-export const ChatCompletionUserMessageParam = schema.object({
-  role: schema.string(),
-  content: schema.string(),
-  name: schema.maybe(schema.string()),
-});
-export const ChatCompletionAssistantMessageParam = schema.object({
-  role: schema.literal('assistant'),
-  content: schema.nullable(schema.string()),
-  name: schema.maybe(schema.nullable(schema.string())),
-});
-
-export const ChatCompletionToolMessageParam = schema.object({
-  role: schema.literal('tool'),
-  content: schema.string(),
-  tool_call_id: schema.string(),
-});
-
-export const ChatCompletionFunctionMessageParam = schema.object({
-  role: schema.literal('function'),
-  content: schema.nullable(schema.string()),
-  name: schema.string(),
-});
-
 // Run action schema
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.arrayOf(
     schema.object({
       role: schema.string(),
       content: schema.string(),
-      name: schema.maybe(schema.string()),
     })
   ),
   model: schema.maybe(schema.string()),

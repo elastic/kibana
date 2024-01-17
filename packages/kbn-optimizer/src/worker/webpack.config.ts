@@ -214,7 +214,7 @@ export function getWebpackConfig(
         },
         {
           test: /\.(js|tsx?)$/,
-          exclude: /node_modules\/(?!(openai)\/).*/,
+          exclude: /node_modules/,
           use: {
             loader: 'babel-loader',
             options: {
