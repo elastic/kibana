@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EditTransformFlyout } from './edit_transform_flyout';
+export { EditTransformFlyout } from './components/edit_transform_flyout';

@@ -11,29 +11,38 @@ import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { getErrorMessage } from '../../../../../../common/utils/errors';
+import { getErrorMessage } from '../../../../../common/utils/errors';
 
-import { useUpdateTransform } from '../../../../hooks';
+import { useUpdateTransform } from '../../../hooks';
 
-import { useEditTransformFlyout } from './use_edit_transform_flyout';
+import {
+  useEditTransformFlyoutActions,
+  useEditTransformFlyoutContext,
+} from '../state_management/edit_transform_flyout_state';
+import { useIsFormTouched } from '../state_management/selectors/is_form_touched';
+import { useIsFormValid } from '../state_management/selectors/is_form_valid';
+import { useUpdatedTransformConfig } from '../state_management/selectors/updated_transform_config';
 
 interface EditTransformUpdateButtonProps {
   closeFlyout: () => void;
 }
 
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
-  const requestConfig = useEditTransformFlyout('requestConfig');
-  const isUpdateButtonDisabled = useEditTransformFlyout('isUpdateButtonDisabled');
-  const config = useEditTransformFlyout('config');
-  const { apiError } = useEditTransformFlyout('actions');
+  const { config } = useEditTransformFlyoutContext();
+  const isFormValid = useIsFormValid();
+  const isFormTouched = useIsFormTouched();
+  const requestConfig = useUpdatedTransformConfig();
+  const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
+
+  const { setApiError } = useEditTransformFlyoutActions();
 
   const updateTransfrom = useUpdateTransform(config.id, requestConfig);
 
   async function submitFormHandler() {
-    apiError(undefined);
+    setApiError(undefined);
 
     updateTransfrom(undefined, {
-      onError: (error) => apiError(getErrorMessage(error)),
+      onError: (error) => setApiError(getErrorMessage(error)),
       onSuccess: () => closeFlyout(),
     });
   }

@@ -22,7 +22,6 @@ import { hostsUrl } from '../../../urls/navigation';
 import { kqlSearch } from '../../../tasks/security_header';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
-// Tracked by https://github.com/elastic/security-team/issues/7696
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
@@ -35,6 +34,11 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       // by some reason after navigate to host risk, page is sometimes is reload or go to all host tab
       // this fix wait until we fave host in all host table, and then we go to risk tab
       cy.contains('siem-kibana');
+
+      // Sometimes it doesn't navigate to the risk tab an causes flakiness
+      // Curiously the "renders the table" test doesn't fail
+      // https://github.com/elastic/kibana/issues/174860
+      // https://github.com/elastic/kibana/issues/174859
       navigateToHostRiskDetailTab();
     });
 
@@ -50,7 +54,8 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Low');
     });
 
-    it('filters the table', () => {
+    // Flaky
+    it.skip('filters the table', () => {
       openRiskTableFilterAndSelectTheCriticalOption();
 
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
@@ -58,7 +63,8 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       removeCriticalFilterAndCloseRiskTableFilter();
     });
 
-    it('should be able to change items count per page', () => {
+    // Flaky
+    it.skip('should be able to change items count per page', () => {
       selectFiveItemsPerPageOption();
 
       cy.get(HOST_BY_RISK_TABLE_HOSTNAME_CELL).should('have.length', 5);
@@ -97,7 +103,8 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Critical');
     });
 
-    it('filters the table', () => {
+    // Flaky
+    it.skip('filters the table', () => {
       openRiskTableFilterAndSelectTheCriticalOption();
 
       cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
@@ -106,7 +113,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // Flaky
-    it('should be able to change items count per page', () => {
+    it.skip('should be able to change items count per page', () => {
       selectFiveItemsPerPageOption();
 
       cy.get(HOST_BY_RISK_TABLE_HOSTNAME_CELL).should('have.length', 5);
