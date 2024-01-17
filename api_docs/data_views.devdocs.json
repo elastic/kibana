@@ -160,6 +160,54 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.DataView.getEtag",
+            "type": "Function",
+            "tags": [],
+            "label": "getEtag",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-public.DataView.setEtag",
+            "type": "Function",
+            "tags": [],
+            "label": "setEtag",
+            "description": [],
+            "signature": [
+              "(etag: string | undefined) => string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataView.setEtag.$1",
+                "type": "string",
+                "tags": [],
+                "label": "etag",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.DataView.getComputedFields",
             "type": "Function",
             "tags": [],
@@ -1803,6 +1851,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsApiClient.Unnamed.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "getCurrentUserId",
+                "description": [],
+                "signature": [
+                  "() => Promise<string | undefined>"
+                ],
+                "path": "src/plugins/data_views/public/data_views/data_views_api_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1825,9 +1888,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<",
-              "FieldsForWildcardResponse",
-              ">"
+              ") => Promise<{ indices: string[]; fields: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]; etag: string; }>"
             ],
             "path": "src/plugins/data_views/public/data_views/data_views_api_client.ts",
             "deprecated": false,
@@ -2925,7 +2994,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", displayErrors?: boolean) => Promise<void>"
+              ", displayErrors?: boolean, forceRefresh?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -2961,6 +3030,21 @@
                 "description": [
                   "- If set false, API consumer is responsible for displaying and handling errors."
                 ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.refreshFields.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "forceRefresh",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -6346,6 +6430,23 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.UserIdGetter",
+        "type": "Type",
+        "tags": [],
+        "label": "UserIdGetter",
+        "description": [],
+        "signature": [
+          "() => Promise<string | undefined>"
+        ],
+        "path": "src/plugins/data_views/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [],
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -6559,6 +6660,54 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataView.getEtag",
+            "type": "Function",
+            "tags": [],
+            "label": "getEtag",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-server.DataView.setEtag",
+            "type": "Function",
+            "tags": [],
+            "label": "setEtag",
+            "description": [],
+            "signature": [
+              "(etag: string | undefined) => string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataView.setEtag.$1",
+                "type": "string",
+                "tags": [],
+                "label": "etag",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -8332,7 +8481,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", displayErrors?: boolean) => Promise<void>"
+              ", displayErrors?: boolean, forceRefresh?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -8368,6 +8517,21 @@
                 "description": [
                   "- If set false, API consumer is responsible for displaying and handling errors."
                 ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.refreshFields.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "forceRefresh",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -12007,6 +12171,54 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.DataView.getEtag",
+            "type": "Function",
+            "tags": [],
+            "label": "getEtag",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataView.setEtag",
+            "type": "Function",
+            "tags": [],
+            "label": "setEtag",
+            "description": [],
+            "signature": [
+              "(etag: string | undefined) => string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataView.setEtag.$1",
+                "type": "string",
+                "tags": [],
+                "label": "etag",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.DataView.getComputedFields",
             "type": "Function",
             "tags": [],
@@ -14438,7 +14650,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", displayErrors?: boolean) => Promise<void>"
+              ", displayErrors?: boolean, forceRefresh?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -14474,6 +14686,21 @@
                 "description": [
                   "- If set false, API consumer is responsible for displaying and handling errors."
                 ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.refreshFields.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "forceRefresh",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -17612,7 +17839,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", displayErrors?: boolean | undefined) => Promise<void>"
+              ", displayErrors?: boolean | undefined, forceRefresh?: boolean | undefined) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -17645,6 +17872,21 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "displayErrors",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.refreshFields.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "forceRefresh",
                 "description": [],
                 "signature": [
                   "boolean | undefined"
@@ -18134,6 +18376,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "allowHidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.GetFieldsOptions.forceRefresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "forceRefresh",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -20369,7 +20625,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", displayErrors?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
+          ", displayErrors?: boolean, forceRefresh?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
