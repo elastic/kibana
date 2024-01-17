@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     ).getVisibleText();
     expect(actualIndexPattern).to.be('*stash*');
 
-    const actualDiscoverQueryHits = await testSubjects.getVisibleText('unifiedHistogramQueryHits');
+    const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
     expect(actualDiscoverQueryHits).to.be('14,005');
     expect(await PageObjects.unifiedSearch.isAdHocDataView()).to.be(true);
   };
@@ -208,9 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).getVisibleText();
       expect(actualIndexPattern).to.be('*stash*');
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
-        'unifiedHistogramQueryHits'
-      );
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
       expect(actualDiscoverQueryHits).to.be('14,005');
 
       const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();

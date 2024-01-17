@@ -33,7 +33,7 @@ describe('Execute Report Task', () => {
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
         "createTaskRunner": [Function],
-        "maxAttempts": 1,
+        "maxAttempts": ${configType.capture.maxAttempts + 1},
         "maxConcurrency": 1,
         "timeout": "120s",
         "title": "Reporting: execute job",
@@ -75,7 +75,7 @@ describe('Execute Report Task', () => {
     expect(task.getTaskDefinition()).toMatchInlineSnapshot(`
       Object {
         "createTaskRunner": [Function],
-        "maxAttempts": 1,
+        "maxAttempts": 2,
         "maxConcurrency": 0,
         "timeout": "55s",
         "title": "Reporting: execute job",
@@ -97,7 +97,7 @@ describe('Execute Report Task', () => {
       validLicenses: [],
     } as unknown as ExportType);
     const store = await mockReporting.getStore();
-    store.setReportFailed = jest.fn(() => Promise.resolve({} as any));
+    store.setReportError = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);
     task._claimJob = jest.fn(() =>
       Promise.resolve({ _id: 'test', jobtype: 'noop', status: 'pending' } as SavedReport)
@@ -117,15 +117,15 @@ describe('Execute Report Task', () => {
     setImmediate(() => {
       mockReporting.pluginStop();
     });
-    await taskPromise;
+    await taskPromise.catch(() => {});
 
-    expect(store.setReportFailed).toHaveBeenLastCalledWith(
+    expect(store.setReportError).toHaveBeenLastCalledWith(
       expect.objectContaining({
         _id: 'test',
       }),
       expect.objectContaining({
-        output: expect.objectContaining({
-          error_code: new KibanaShuttingDownError().code,
+        error: expect.objectContaining({
+          message: `ReportingError(code: ${new KibanaShuttingDownError().code})`,
         }),
       })
     );
