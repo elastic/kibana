@@ -8,14 +8,21 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ALERT_RULE_CATEGORY, ALERT_STATUS } from '@kbn/rule-data-utils';
+import {
+  AlertStatus,
+  ALERT_RULE_CATEGORY,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { PageTitle, PageTitleProps } from './page_title';
 import { alert } from '../mock/alert';
 
 describe('Page Title', () => {
   const defaultProps = {
     alert,
-    alertStatus: 'active',
+    alertStatus: ALERT_STATUS_ACTIVE as AlertStatus,
     dataTestSubj: 'ruleTypeId',
   };
 
@@ -42,7 +49,7 @@ describe('Page Title', () => {
           [ALERT_RULE_CATEGORY]: 'Anomaly',
         },
       },
-      alertStatus: defaultProps.alertStatus,
+      alertStatus: defaultProps.alertStatus as AlertStatus,
       dataTestSubj: defaultProps.dataTestSubj,
     };
 
@@ -60,7 +67,7 @@ describe('Page Title', () => {
           [ALERT_RULE_CATEGORY]: 'Inventory',
         },
       },
-      alertStatus: defaultProps.alertStatus,
+      alertStatus: defaultProps.alertStatus as AlertStatus,
       dataTestSubj: defaultProps.dataTestSubj,
     };
 
@@ -80,10 +87,10 @@ describe('Page Title', () => {
         ...defaultProps.alert,
         fields: {
           ...defaultProps.alert.fields,
-          [ALERT_STATUS]: 'recovered',
+          [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
         },
       },
-      alertStatus: 'recovered',
+      alertStatus: ALERT_STATUS_RECOVERED as AlertStatus,
       dataTestSubj: defaultProps.dataTestSubj,
     };
 
@@ -97,10 +104,10 @@ describe('Page Title', () => {
         ...defaultProps.alert,
         fields: {
           ...defaultProps.alert.fields,
-          [ALERT_STATUS]: 'untracked',
+          [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
         },
       },
-      alertStatus: 'untracked',
+      alertStatus: ALERT_STATUS_UNTRACKED as AlertStatus,
       dataTestSubj: defaultProps.dataTestSubj,
     };
 
