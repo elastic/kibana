@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { runBuildApiDocsCli } from './src';
-
-export { findPlugins, findTeamPlugins } from './src/find_plugins';
+export { getPlugin } from './get_plugin';
+export { getPluginClasses } from './get_plugin_classes';
+export { getAllPlugins } from './get_all_plugins';

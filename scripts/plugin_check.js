@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { runBuildApiDocsCli } from './src';
-
-export { findPlugins, findTeamPlugins } from './src/find_plugins';
+require('../src/setup_node_env');
+require('@kbn/plugin-check').runPluginCheckCli();
