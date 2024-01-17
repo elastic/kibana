@@ -29,18 +29,14 @@ const DiscoverSourcePopoverContent = dynamic(
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
   return (
-    <>
+    <EuiText size="xs" style={{ display: 'inline', marginLeft: '5px' }}>
       {renderFieldPrefix && (
-        <EuiText size="xs" style={{ display: 'inline', marginLeft: '5px' }}>
-          <span data-test-subj="logExplorerDataTableMessageKey">
-            <strong>{field}</strong>
-          </span>
-          <span data-test-subj="logExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
-            {value}
-          </span>
-        </EuiText>
+        <strong data-test-subj="logExplorerDataTableMessageKey">{field}</strong>
       )}
-    </>
+      <span data-test-subj="logExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
+        {value}
+      </span>
+    </EuiText>
   );
 };
 
