@@ -23,6 +23,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
+import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
@@ -63,6 +64,88 @@ const mapAlertsToBulkCreate = <T>(alerts: Array<{ _id: string; _source: T }>) =>
   return alerts.flatMap((alert) => [{ create: { _id: alert._id } }, alert._source]);
 };
 
+const filterDuplicateAlerts = async <T extends { _id: string }>({
+  alerts,
+  spaceId,
+  ruleDataClient,
+}: {
+  alerts: T[];
+  spaceId: string;
+  ruleDataClient: IRuleDataClient;
+}) => {
+  const CHUNK_SIZE = 10000;
+  const alertChunks = chunk(alerts, CHUNK_SIZE);
+  const filteredAlerts: typeof alerts = [];
+
+  for (const alertChunk of alertChunks) {
+    const request: estypes.SearchRequest = {
+      body: {
+        query: {
+          ids: {
+            values: alertChunk.map((alert) => alert._id),
+          },
+        },
+        aggs: {
+          uuids: {
+            terms: {
+              field: ALERT_UUID,
+              size: CHUNK_SIZE,
+            },
+          },
+        },
+        size: 0,
+      },
+    };
+    const response = await ruleDataClient.getReader({ namespace: spaceId }).search(request);
+    const uuidsMap: Record<string, boolean> = {};
+    const aggs = response.aggregations as
+      | Record<estypes.AggregateName, { buckets: Array<{ key: string }> }>
+      | undefined;
+    if (aggs != null) {
+      aggs.uuids.buckets.forEach((bucket) => (uuidsMap[bucket.key] = true));
+      const newAlerts = alertChunk.filter((alert) => !uuidsMap[alert._id]);
+      filteredAlerts.push(...newAlerts);
+    } else {
+      filteredAlerts.push(...alertChunk);
+    }
+  }
+
+  return filteredAlerts;
+};
+
+/**
+ * suppress alerts by ALERT_INSTANCE_ID in memory
+ */
+const suppressAlertsInMemory = <
+  T extends { [ALERT_SUPPRESSION_DOCS_COUNT]: number; [ALERT_INSTANCE_ID]: string }
+>(
+  alerts: Array<{
+    _id: string;
+    _source: T;
+  }>
+) => {
+  const idsMap: Record<string, number> = {};
+
+  const filteredAlerts = alerts.filter((alert) => {
+    const instanceId = alert._source[ALERT_INSTANCE_ID];
+    const suppressionDocsCount = alert._source[ALERT_SUPPRESSION_DOCS_COUNT];
+
+    if (idsMap[instanceId] != null) {
+      idsMap[instanceId] += suppressionDocsCount + 1;
+      return false;
+    } else {
+      idsMap[instanceId] = suppressionDocsCount;
+      return true;
+    }
+  }, []);
+
+  return filteredAlerts.map((alert) => {
+    const instanceId = alert._source[ALERT_INSTANCE_ID];
+    alert._source[ALERT_SUPPRESSION_DOCS_COUNT] = idsMap[instanceId];
+    return alert;
+  });
+};
+
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient, formatAlert }) =>
   (type) => {
@@ -91,44 +174,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
 
               if (writeAlerts && numAlerts) {
-                const CHUNK_SIZE = 10000;
-                const alertChunks = chunk(alerts, CHUNK_SIZE);
-                const filteredAlerts: typeof alerts = [];
-
-                for (const alertChunk of alertChunks) {
-                  const request: estypes.SearchRequest = {
-                    body: {
-                      query: {
-                        ids: {
-                          values: alertChunk.map((alert) => alert._id),
-                        },
-                      },
-                      aggs: {
-                        uuids: {
-                          terms: {
-                            field: ALERT_UUID,
-                            size: CHUNK_SIZE,
-                          },
-                        },
-                      },
-                      size: 0,
-                    },
-                  };
-                  const response = await ruleDataClient
-                    .getReader({ namespace: options.spaceId })
-                    .search(request);
-                  const uuidsMap: Record<string, boolean> = {};
-                  const aggs = response.aggregations as
-                    | Record<estypes.AggregateName, { buckets: Array<{ key: string }> }>
-                    | undefined;
-                  if (aggs != null) {
-                    aggs.uuids.buckets.forEach((bucket) => (uuidsMap[bucket.key] = true));
-                    const newAlerts = alertChunk.filter((alert) => !uuidsMap[alert._id]);
-                    filteredAlerts.push(...newAlerts);
-                  } else {
-                    filteredAlerts.push(...alertChunk);
-                  }
-                }
+                const filteredAlerts: typeof alerts = await filterDuplicateAlerts({
+                  alerts,
+                  ruleDataClient,
+                  spaceId: options.spaceId,
+                });
 
                 if (filteredAlerts.length === 0) {
                   return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
@@ -238,13 +288,36 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
                   forceNow: currentTimeOverride,
                 });
+
+                console.log(
+                  '......... suppressionWindowStart',
+                  suppressionWindowStart,
+                  suppressionWindowStart?.toISOString()
+                );
                 if (!suppressionWindowStart) {
                   throw new Error('Failed to parse suppression window');
                 }
 
+                const filteredDuplicates = await filterDuplicateAlerts({
+                  alerts,
+                  ruleDataClient,
+                  spaceId: options.spaceId,
+                });
+
+                const filteredAlerts = suppressAlertsInMemory(filteredDuplicates);
+
+                console.log('alerts', alerts.length);
+                console.log('filteredDuplicates', filteredDuplicates.length);
+                console.log('filteredAlerts', filteredAlerts.length);
+                console.log('filteredAlerts', JSON.stringify(filteredAlerts, null, 2));
+
+                if (filteredAlerts.length === 0) {
+                  return { createdAlerts: [], errors: {} };
+                }
+
                 const suppressionAlertSearchRequest = {
                   body: {
-                    size: alerts.length,
+                    size: filteredAlerts.length,
                     query: {
                       bool: {
                         filter: [
@@ -257,7 +330,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                           },
                           {
                             terms: {
-                              [ALERT_INSTANCE_ID]: alerts.map(
+                              [ALERT_INSTANCE_ID]: filteredAlerts.map(
                                 (alert) => alert._source['kibana.alert.instance.id']
                               ),
                             },
@@ -304,7 +377,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 }, {});
 
                 const [duplicateAlerts, newAlerts] = partition(
-                  alerts,
+                  filteredAlerts,
                   (alert) =>
                     existingAlertsByInstanceId[alert._source['kibana.alert.instance.id']] != null
                 );

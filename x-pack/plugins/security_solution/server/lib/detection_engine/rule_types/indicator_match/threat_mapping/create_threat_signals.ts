@@ -56,6 +56,8 @@ export const createThreatSignals = async ({
   tuple,
   type,
   wrapHits,
+  wrapSuppressedHits,
+  runOpts,
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
@@ -247,6 +249,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          wrapSuppressedHits,
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
@@ -256,6 +259,7 @@ export const createThreatSignals = async ({
           threatMatchedFields,
           inputIndexFields,
           threatIndexFields,
+          runOpts,
         }),
     });
   } else {
@@ -302,6 +306,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          wrapSuppressedHits,
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
@@ -317,6 +322,7 @@ export const createThreatSignals = async ({
           allowedFieldsForTermsQuery,
           inputIndexFields,
           threatIndexFields,
+          runOpts,
         }),
     });
   }

@@ -34,7 +34,9 @@ import type {
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
+  WrapSuppressedHits,
   OverrideBodyQuery,
+  RunOpts,
 } from '../../types';
 import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
@@ -67,12 +69,14 @@ export interface CreateThreatSignalsOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  wrapSuppressedHits: WrapSuppressedHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
   inputIndexFields: DataViewFieldBase[];
+  runOpts: RunOpts<ThreatRuleParams>;
 }
 
 export interface CreateThreatSignalOptions {
@@ -96,6 +100,7 @@ export interface CreateThreatSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  wrapSuppressedHits: WrapSuppressedHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
@@ -112,6 +117,7 @@ export interface CreateThreatSignalOptions {
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
+  runOpts: RunOpts<ThreatRuleParams>;
 }
 
 export interface CreateEventSignalOptions {
@@ -134,6 +140,7 @@ export interface CreateEventSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  wrapSuppressedHits: WrapSuppressedHits;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPath;
@@ -152,6 +159,7 @@ export interface CreateEventSignalOptions {
   threatMatchedFields: ThreatMatchedFields;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
+  runOpts: RunOpts<ThreatRuleParams>;
 }
 
 type EntryKey = 'field' | 'value';
