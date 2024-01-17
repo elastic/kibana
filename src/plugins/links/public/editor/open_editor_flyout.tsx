@@ -12,11 +12,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import { tracksOverlays } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { Link, LinksLayoutType } from '../../common/content_management';
 import { runSaveToLibrary } from '../content_management/save_to_library';
 import { LinksByReferenceInput, LinksEditorFlyoutReturn, LinksInput } from '../embeddable/types';
