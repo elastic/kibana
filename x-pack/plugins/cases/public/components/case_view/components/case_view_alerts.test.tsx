@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import { OBSERVABILITY_OWNER } from '../../../../common/constants';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
@@ -23,117 +23,117 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/174819
-describe.skip('CaseUI View Page activity tab', () => {
-  const getAlertsStateTableMock = jest.fn();
-  let appMockRender: AppMockRenderer;
+for (let i = 0; i < 500; i++) {
+  describe('CaseUI View Page activity tab', () => {
+    const getAlertsStateTableMock = jest.fn();
+    let appMockRender: AppMockRenderer;
 
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-    appMockRender.coreStart.triggersActionsUi.getAlertsStateTable =
-      getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
-    appMockRender.coreStart.triggersActionsUi.alertsTableConfigurationRegistry.register({
-      id: 'case-details-alerts-observability',
-      columns: [],
-      ruleTypeIds: ['log-threshold'],
-    });
-  });
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should render the alerts table', async () => {
-    const result = appMockRender.render(<CaseViewAlerts caseData={caseData} />);
-    await waitFor(async () => {
-      expect(result.getByTestId('alerts-table')).toBeTruthy();
-    });
-  });
-
-  it('should call the alerts table with correct props for security solution', async () => {
-    appMockRender.render(<CaseViewAlerts caseData={caseData} />);
-    await waitFor(async () => {
-      expect(getAlertsStateTableMock).toHaveBeenCalledWith({
-        alertsTableConfigurationRegistry: expect.anything(),
-        configurationId: 'securitySolution-case',
-        featureIds: ['siem'],
-        id: 'case-details-alerts-securitySolution',
-        query: {
-          ids: {
-            values: ['alert-id-1'],
-          },
-        },
-        showAlertStatusWithFlapping: false,
-      });
-    });
-  });
-
-  it('should call the alerts table with correct props for observability', async () => {
-    const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
-    getFeatureIdsMock.mockResolvedValueOnce({
-      aggregations: {
-        consumer: { buckets: [{ doc_count: 1, key: 'observability' }] },
-        producer: { buckets: [] },
-        ruleTypeIds: { buckets: [{ doc_count: 1, key: 'log-threshold' }] },
-      },
-    } as unknown as FeatureIdsResponse);
-    appMockRender.render(
-      <CaseViewAlerts
-        caseData={{
-          ...caseData,
-          owner: OBSERVABILITY_OWNER,
-        }}
-      />
-    );
-
-    await waitFor(async () => {
-      expect(getAlertsStateTableMock).toHaveBeenCalledWith({
-        alertsTableConfigurationRegistry: expect.anything(),
-        configurationId: 'case-details-alerts-observability',
-        featureIds: ['observability'],
+    beforeEach(() => {
+      appMockRender = createAppMockRenderer();
+      appMockRender.coreStart.triggersActionsUi.getAlertsStateTable =
+        getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
+      appMockRender.coreStart.triggersActionsUi.alertsTableConfigurationRegistry.register({
         id: 'case-details-alerts-observability',
-        query: {
-          ids: {
-            values: ['alert-id-1'],
-          },
-        },
-        showAlertStatusWithFlapping: true,
+        columns: [],
+        ruleTypeIds: ['log-threshold'],
       });
     });
-  });
 
-  it('should call the getFeatureIds with the correct alert ID', async () => {
-    const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
-    appMockRender.render(
-      <CaseViewAlerts
-        caseData={{
-          ...caseData,
-          owner: OBSERVABILITY_OWNER,
-        }}
-      />
-    );
-    await waitFor(async () => {
-      expect(getFeatureIdsMock).toHaveBeenCalledWith({
-        query: {
-          ids: {
-            values: ['alert-id-1'],
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should render the alerts table', async () => {
+      appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+
+      expect(await screen.findByTestId('alerts-table')).toBeInTheDocument();
+    });
+
+    it('should call the alerts table with correct props for security solution', async () => {
+      appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+      await waitFor(async () => {
+        expect(getAlertsStateTableMock).toHaveBeenCalledWith({
+          alertsTableConfigurationRegistry: expect.anything(),
+          configurationId: 'securitySolution-case',
+          featureIds: ['siem'],
+          id: 'case-details-alerts-securitySolution',
+          query: {
+            ids: {
+              values: ['alert-id-1'],
+            },
           },
-        },
-        signal: expect.anything(),
+          showAlertStatusWithFlapping: false,
+        });
       });
     });
-  });
 
-  it('should show an empty prompt when the cases has no alerts', async () => {
-    const result = appMockRender.render(
-      <CaseViewAlerts
-        caseData={{
-          ...caseData,
-          comments: [],
-        }}
-      />
-    );
-    await waitFor(async () => {
-      expect(result.getByTestId('caseViewAlertsEmpty')).toBeTruthy();
+    it('should call the alerts table with correct props for observability', async () => {
+      const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
+      getFeatureIdsMock.mockResolvedValueOnce({
+        aggregations: {
+          consumer: { buckets: [{ doc_count: 1, key: 'observability' }] },
+          producer: { buckets: [] },
+          ruleTypeIds: { buckets: [{ doc_count: 1, key: 'log-threshold' }] },
+        },
+      } as unknown as FeatureIdsResponse);
+      appMockRender.render(
+        <CaseViewAlerts
+          caseData={{
+            ...caseData,
+            owner: OBSERVABILITY_OWNER,
+          }}
+        />
+      );
+
+      await waitFor(async () => {
+        expect(getAlertsStateTableMock).toHaveBeenCalledWith({
+          alertsTableConfigurationRegistry: expect.anything(),
+          configurationId: 'case-details-alerts-observability',
+          featureIds: ['observability'],
+          id: 'case-details-alerts-observability',
+          query: {
+            ids: {
+              values: ['alert-id-1'],
+            },
+          },
+          showAlertStatusWithFlapping: true,
+        });
+      });
+    });
+
+    it('should call the getFeatureIds with the correct alert ID', async () => {
+      const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
+      appMockRender.render(
+        <CaseViewAlerts
+          caseData={{
+            ...caseData,
+            owner: OBSERVABILITY_OWNER,
+          }}
+        />
+      );
+      await waitFor(async () => {
+        expect(getFeatureIdsMock).toHaveBeenCalledWith({
+          query: {
+            ids: {
+              values: ['alert-id-1'],
+            },
+          },
+          signal: expect.anything(),
+        });
+      });
+    });
+
+    it('should show an empty prompt when the cases has no alerts', async () => {
+      appMockRender.render(
+        <CaseViewAlerts
+          caseData={{
+            ...caseData,
+            comments: [],
+          }}
+        />
+      );
+
+      expect(await screen.findByTestId('caseViewAlertsEmpty')).toBeInTheDocument();
     });
   });
-});
+}
