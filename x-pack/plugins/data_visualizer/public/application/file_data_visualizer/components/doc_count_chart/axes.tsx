@@ -6,10 +6,10 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { Axis, Position, timeFormatter, niceTimeFormatByDay } from '@elastic/charts';
+import { Axis, Position } from '@elastic/charts';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { LineChartPoint } from './event_rate_chart';
-
-const dateFormatter = timeFormatter(niceTimeFormatByDay(3));
+import { useDataVisualizerKibana } from '../../../kibana_context';
 
 interface Props {
   chartData?: LineChartPoint[];
@@ -22,6 +22,11 @@ function tickFormatter(d: number): string {
 
 export const Axes: FC<Props> = ({ chartData }) => {
   const yDomain = getYRange(chartData);
+  const {
+    services: { fieldFormats, uiSettings },
+  } = useDataVisualizerKibana();
+  const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
+  const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
 
   return (
     <Fragment>
@@ -29,7 +34,10 @@ export const Axes: FC<Props> = ({ chartData }) => {
         id="bottom"
         position={Position.Bottom}
         showOverlappingTicks={true}
-        tickFormat={dateFormatter}
+        tickFormat={(value) => xAxisFormatter.convert(value)}
+        labelFormat={useLegacyTimeAxis ? undefined : () => ''}
+        timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
+        style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
       />
       <Axis id="left" position={Position.Left} tickFormat={tickFormatter} domain={yDomain} />
     </Fragment>
