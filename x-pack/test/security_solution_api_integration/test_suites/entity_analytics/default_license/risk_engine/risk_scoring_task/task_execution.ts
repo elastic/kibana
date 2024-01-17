@@ -160,8 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
               await riskEngineRoutes.disable();
             });
 
-            // Temporary, expected failure: See https://github.com/elastic/security-team/issues/8012
-            describe.skip('when task interval is modified', () => {
+            describe('when task interval is modified', () => {
               beforeEach(async () => {
                 await updateRiskEngineConfigSO({
                   attributes: {
