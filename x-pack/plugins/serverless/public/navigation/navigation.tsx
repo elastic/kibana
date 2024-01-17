@@ -25,5 +25,6 @@ export const SideNavigation: FC<Props> = ({ navProps, deps }) => {
   );
 };
 
+// We need to use the default export here because of the way React.lazy works
 // eslint-disable-next-line import/no-default-export
 export default SideNavigation;

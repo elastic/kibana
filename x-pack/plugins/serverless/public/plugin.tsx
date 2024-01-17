@@ -75,9 +75,7 @@ export class ServerlessPlugin
       project.setProjectUrl(cloud.deploymentUrl);
     }
 
-    const activeNavigationNodes$ = (
-      core.chrome as InternalChromeStart
-    ).project.getActiveNavigationNodes$();
+    const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
 
     return {

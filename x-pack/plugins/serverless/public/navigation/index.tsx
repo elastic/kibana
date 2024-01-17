@@ -7,11 +7,11 @@
 
 import React, { Suspense, type FC } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { Props } from './navigation';
+import type { Props as NavigationProps } from './navigation';
 
 const SideNavComponentLazy = React.lazy(() => import('./navigation'));
 
-export const SideNavComponent: FC<Props> = (props) => (
+export const SideNavComponent: FC<NavigationProps> = (props) => (
   <Suspense fallback={<EuiLoadingSpinner size="s" />}>
     <SideNavComponentLazy {...props} />
   </Suspense>
