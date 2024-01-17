@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { get } from 'lodash';
 import {
   DefaultItemAction,
   EuiBasicTable,
@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiToolTip,
   EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -233,7 +234,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       field: 'name',
       name: 'Name',
-      width: '20%',
+      width: '15%',
       truncateText: { lines: 2 },
       'data-test-subj': 'sloItem',
       render: (_, slo: SLOWithSummaryResponse) => {
@@ -261,23 +262,33 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       field: 'instance',
       name: 'Instance',
-      render: (_, slo: SLOWithSummaryResponse) =>
-        slo.groupBy !== ALL_VALUE ? (
-          <EuiToolTip
-            position="top"
-            content={i18n.translate('xpack.observability.slo.groupByBadge', {
-              defaultMessage: 'Group by {groupKey}',
-              values: {
-                groupKey: slo.groupBy,
-              },
-            })}
-            display="block"
-          >
-            <span>{slo.instanceId}</span>
-          </EuiToolTip>
+      render: (_, slo: SLOWithSummaryResponse) => {
+        const groups = [slo.groupBy].flat();
+        return !groups.includes(ALL_VALUE) ? (
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            {groups.map((group) => (
+              <EuiFlexItem key={group}>
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate('xpack.observability.slo.groupByBadge', {
+                    defaultMessage: 'Group by {groupKey}',
+                    values: {
+                      groupKey: group,
+                    },
+                  })}
+                  display="block"
+                >
+                  <span>
+                    <strong>{group}</strong>: {get(slo.groupings, group)}
+                  </span>
+                </EuiToolTip>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         ) : (
           <span>{NOT_AVAILABLE_LABEL}</span>
-        ),
+        );
+      },
     },
     {
       field: 'objective',

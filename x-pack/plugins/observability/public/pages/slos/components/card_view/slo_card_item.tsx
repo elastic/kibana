@@ -68,7 +68,8 @@ const getGroupings = (slo: SLOWithSummaryResponse) => {
 
   if (isArray) {
     groupByFields = slo.groupBy.reduce<string>((acc, group) => {
-      acc += `${group}: ${get(slo.groupings, group)}`;
+      const value = get(slo.groupings, group);
+      acc += value ? `${group}: ${get(slo.groupings, group)}\n` : '';
       return acc;
     }, '');
   } else {
