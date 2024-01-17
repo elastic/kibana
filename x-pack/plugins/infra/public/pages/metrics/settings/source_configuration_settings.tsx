@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { Prompt, useEditableSettings } from '@kbn/observability-shared-plugin/public';
+import {
+  BottomBarActions,
+  Prompt,
+  useEditableSettings,
+} from '@kbn/observability-shared-plugin/public';
 import {
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
@@ -91,6 +87,10 @@ export const SourceConfigurationSettings = ({
     createSourceConfiguration,
     formState,
   ]);
+
+  const unsavedChangesFromStateCount: number = Object.keys(formStateChanges)
+    .filter((key) => formStateChanges[key as keyof typeof formStateChanges])
+    .filter(Boolean).length;
 
   const hasUnsavedChanges = isFormDirty || Object.keys(infraUiSettings.unsavedChanges).length > 0;
 
@@ -171,54 +171,21 @@ export const SourceConfigurationSettings = ({
       <EuiFlexGroup>
         {isWriteable && (
           <EuiFlexItem>
-            {isLoading || infraUiSettings.isSaving ? (
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="infraSourceConfigurationSettingsLoadingButton"
-                    color="primary"
-                    isLoading
-                    fill
-                  >
-                    {i18n.translate('xpack.infra.sourceConfiguration.loadingButtonLabel', {
-                      defaultMessage: 'Loading',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <>
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="discardSettingsButton"
-                      color="danger"
-                      iconType="cross"
-                      isDisabled={!hasUnsavedChanges}
-                      onClick={resetAllUnsavedChanges}
-                    >
-                      <FormattedMessage
-                        id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
-                        defaultMessage="Discard"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="applySettingsButton"
-                      color="primary"
-                      isDisabled={!hasUnsavedChanges || !isFormValid}
-                      fill
-                      onClick={persistUpdates}
-                    >
-                      <FormattedMessage
-                        id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
-                        defaultMessage="Apply"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
+            {hasUnsavedChanges && isFormValid && (
+              <BottomBarActions
+                isLoading={infraUiSettings.isSaving}
+                onDiscardChanges={resetAllUnsavedChanges}
+                onSave={persistUpdates}
+                saveLabel={i18n.translate(
+                  'xpack.infra.sourceConfiguration.applySettingsButtonLabel',
+                  {
+                    defaultMessage: 'Apply',
+                  }
+                )}
+                unsavedChangesCount={
+                  Object.keys(infraUiSettings.unsavedChanges).length + unsavedChangesFromStateCount
+                }
+              />
             )}
           </EuiFlexItem>
         )}
