@@ -67,31 +67,19 @@ const ensureArtifactListExists = memoize(
   }
 );
 
-export const createTrustedApp = async (
-  kbnClient: KbnClient,
-  data: NewTrustedApp
-): Promise<ExceptionListItemSchema> => {
-  await ensureArtifactListExists(kbnClient, 'trustedApps');
-
-  return kbnClient
-    .request<ExceptionListItemSchema>({
-      method: 'POST',
-      path: EXCEPTION_LIST_ITEM_URL,
-      body: newTrustedAppToCreateExceptionListItem(data),
-      headers: {
-        'elastic-api-version': '2023-10-31',
-      },
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .then((response) => response.data);
-};
-
-export const createEventFilter = async (
+/**
+ * Creates an exception list item.
+ * NOTE: this method does NOT create the list itself.
+ *
+ * @private
+ *
+ * @param kbnClient
+ * @param data
+ */
+const createExceptionListItem = async (
   kbnClient: KbnClient,
   data: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
-  await ensureArtifactListExists(kbnClient, 'eventFilters');
-
   return kbnClient
     .request<ExceptionListItemSchema>({
       method: 'POST',
@@ -103,4 +91,36 @@ export const createEventFilter = async (
     })
     .catch(catchAxiosErrorFormatAndThrow)
     .then((response) => response.data);
+};
+
+export const createTrustedApp = async (
+  kbnClient: KbnClient,
+  data: NewTrustedApp
+): Promise<ExceptionListItemSchema> => {
+  await ensureArtifactListExists(kbnClient, 'trustedApps');
+  return createExceptionListItem(kbnClient, newTrustedAppToCreateExceptionListItem(data));
+};
+
+export const createEventFilter = async (
+  kbnClient: KbnClient,
+  data: CreateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> => {
+  await ensureArtifactListExists(kbnClient, 'eventFilters');
+  return createExceptionListItem(kbnClient, data);
+};
+
+export const createBlocklist = async (
+  kbnClient: KbnClient,
+  data: CreateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> => {
+  await ensureArtifactListExists(kbnClient, 'blocklists');
+  return createExceptionListItem(kbnClient, data);
+};
+
+export const createHostIsolationException = async (
+  kbnClient: KbnClient,
+  data: CreateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> => {
+  await ensureArtifactListExists(kbnClient, 'hostIsolationExceptions');
+  return createExceptionListItem(kbnClient, data);
 };
