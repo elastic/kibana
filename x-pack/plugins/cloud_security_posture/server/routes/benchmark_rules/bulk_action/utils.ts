@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsUpdateResponse,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
 import type {
   CspBenchmarkRule,
+  RulesToUpdate,
   CspBenchmarkRulesStates,
   CspSettings,
-} from '../../../../common/types/rules/v3';
+} from '../../../../common/types/rules/v4';
 import {
   convertRuleTagsToKQL,
   generateBenchmarkRuleTags,
@@ -27,7 +25,9 @@ import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
 
-export const getRuleIdsToDisable = async (detectionRules: Array<FindResult<RuleParams>>) => {
+export const getDetectionRuleIdsToDisable = async (
+  detectionRules: Array<FindResult<RuleParams>>
+) => {
   const idsToDisable = detectionRules
     .map((detectionRule) => {
       return detectionRule.data.map((data) => data.id);
@@ -39,10 +39,11 @@ export const getRuleIdsToDisable = async (detectionRules: Array<FindResult<RuleP
 const disableDetectionRules = async (
   detectionRulesClient: RulesClient,
   detectionRules: Array<FindResult<RuleParams>>
-) => {
-  const idsToDisable = await getRuleIdsToDisable(detectionRules);
-  if (!idsToDisable.length) return;
-  return await detectionRulesClient.bulkDisableRules({ ids: idsToDisable });
+): Promise<string[]> => {
+  const detectionRulesIdsToDisable = await getDetectionRuleIdsToDisable(detectionRules);
+  if (!detectionRulesIdsToDisable.length) return [];
+  await detectionRulesClient.bulkDisableRules({ ids: detectionRulesIdsToDisable });
+  return detectionRulesIdsToDisable;
 };
 
 export const getDetectionRules = async (
@@ -86,7 +87,7 @@ export const muteDetectionRules = async (
   soClient: SavedObjectsClientContract,
   detectionRulesClient: RulesClient,
   rulesIds: string[]
-): Promise<number> => {
+): Promise<string[]> => {
   const benchmarkRules = await getBenchmarkRules(soClient, rulesIds);
   if (benchmarkRules.includes(undefined)) {
     throw new Error('At least one of the provided benchmark rule IDs does not exist');
@@ -98,43 +99,46 @@ export const muteDetectionRules = async (
   const detectionRules = await getDetectionRules(detectionRulesClient, benchmarkRulesTags);
 
   const disabledDetectionRules = await disableDetectionRules(detectionRulesClient, detectionRules);
-
-  return disabledDetectionRules ? disabledDetectionRules.rules.length : 0;
+  return disabledDetectionRules;
 };
 
-export const updateRulesStates = async (
+export const updateBenchmarkRulesStates = async (
   encryptedSoClient: SavedObjectsClientContract,
   newRulesStates: CspBenchmarkRulesStates
-): Promise<SavedObjectsUpdateResponse<CspSettings>> => {
-  return await encryptedSoClient.update<CspSettings>(
+): Promise<CspBenchmarkRulesStates> => {
+  if (!Object.keys(newRulesStates).length) {
+    return {};
+  }
+
+  const response = await encryptedSoClient.update<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
     { rules: newRulesStates },
     // if there is no saved object yet, insert a new SO
     { upsert: { rules: newRulesStates } }
   );
+  return response.attributes.rules || {};
 };
 
 export const setRulesStates = (
   ruleIds: string[],
   state: boolean,
-  benchmarkRules: CspBenchmarkRule[]
+  rulesToUpdate: RulesToUpdate
 ): CspBenchmarkRulesStates => {
   const rulesStates: CspBenchmarkRulesStates = {};
   ruleIds.forEach((ruleId, index) => {
-    const benchmarkRule = benchmarkRules[index];
+    const benchmarkRule = rulesToUpdate[index];
     rulesStates[ruleId] = {
       muted: state,
-      benchmark_id: benchmarkRule.metadata.benchmark.id,
-      benchmark_version: benchmarkRule.metadata.benchmark.version,
-      rule_number: benchmarkRule.metadata.benchmark.rule_number || '',
-      rule_id: benchmarkRule.metadata.id,
+      benchmark_id: benchmarkRule.benchmark_id,
+      benchmark_version: benchmarkRule.benchmark_version,
+      rule_number: benchmarkRule.rule_number,
+      rule_id: benchmarkRule.rule_id,
     };
   });
   return rulesStates;
 };
 
-export const buildRuleKey = (benchmarkRule: CspBenchmarkRule) => {
-  const ruleNumber = benchmarkRule.metadata.benchmark.rule_number;
-  return `${benchmarkRule.metadata.benchmark.id};${benchmarkRule.metadata.benchmark.version};${ruleNumber}`;
+export const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {
+  return `${benchmarkId};${benchmarkVersion};${ruleNumber}`;
 };

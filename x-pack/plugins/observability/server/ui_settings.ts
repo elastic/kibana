@@ -20,6 +20,7 @@ import {
   apmTraceExplorerTab,
   apmLabsButton,
   enableAgentExplorerView,
+  apmEnableTableSearchBar,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -245,11 +246,7 @@ export const uiSettings: Record<string, UiSettings> = {
     description: i18n.translate(
       'xpack.observability.enableInfrastructureProfilingIntegrationDescription',
       {
-        defaultMessage:
-          '{betaLabel} Enable Universal Profiling integration in the Infrastructure app.',
-        values: {
-          betaLabel: `<em>[${betaLabel}]</em>`,
-        },
+        defaultMessage: 'Enable Universal Profiling integration in the Infrastructure app.',
       }
     ),
     schema: schema.boolean(),
@@ -286,6 +283,23 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.boolean(),
     value: true,
     requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmEnableTableSearchBar]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableTableSearchBar', {
+      defaultMessage: 'Instant table search',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableTableSearchBarDescription', {
+      defaultMessage:
+        '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions and Errors',
+      values: {
+        betaLabel: `<em>[${betaLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: false,
     type: 'boolean',
   },
   [apmAWSLambdaPriceFactor]: {

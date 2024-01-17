@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { SelectedChangePoint } from '../components/change_point_detection/change_point_detection_context';
 import {
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput,
@@ -19,3 +21,9 @@ export type EmbeddableChangePointChartExplicitInput = {
 export interface EditChangePointChartsPanelContext {
   embeddable: IEmbeddable<EmbeddableChangePointChartInput, EmbeddableChangePointChartOutput>;
 }
+
+export type ViewComponent = FC<{
+  changePoints: SelectedChangePoint[];
+  interval: string;
+  onRenderComplete?: () => void;
+}>;

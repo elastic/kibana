@@ -117,6 +117,7 @@ const Application = (props: UptimeAppProps) => {
                 ...plugins,
                 storage,
                 data: startPlugins.data,
+                unifiedSearch: startPlugins.unifiedSearch,
                 fleet: startPlugins.fleet,
                 inspector: startPlugins.inspector,
                 triggersActionsUi: startPlugins.triggersActionsUi,
