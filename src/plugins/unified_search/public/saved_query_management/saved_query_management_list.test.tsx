@@ -7,12 +7,7 @@
  */
 
 import React from 'react';
-import { EuiSelectable } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { act } from 'react-dom/test-utils';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock, applicationServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -20,6 +15,8 @@ import {
   SavedQueryManagementListProps,
   SavedQueryManagementList,
 } from './saved_query_management_list';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('Saved query management list component', () => {
   const startMock = coreMock.createStart();
@@ -32,11 +29,15 @@ describe('Saved query management list component', () => {
       savedObjectsManagement: { edit: true },
     },
   };
-  function wrapSavedQueriesListComponentInContext(testProps: SavedQueryManagementListProps) {
+
+  const wrapSavedQueriesListComponentInContext = (
+    testProps: SavedQueryManagementListProps,
+    applicationService = application
+  ) => {
     const services = {
       uiSettings: startMock.uiSettings,
       http: startMock.http,
-      application,
+      application: applicationService,
     };
 
     return (
@@ -46,16 +47,30 @@ describe('Saved query management list component', () => {
         </KibanaContextProvider>
       </I18nProvider>
     );
-  }
+  };
 
-  function flushEffect(component: ReactWrapper) {
-    return act(async () => {
-      await component;
-      await new Promise((r) => setImmediate(r));
-      component.update();
-    });
-  }
+  const generateSavedQueries = (total: number) => {
+    const queries = [];
+    for (let i = 0; i < total; i++) {
+      queries.push({
+        id: `8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a${i}`,
+        attributes: {
+          title: `Test ${i}`,
+          description: '',
+          query: {
+            query: 'category.keyword : "Men\'s Shoes" ',
+            language: 'kuery',
+          },
+          filters: [],
+        },
+        namespaces: ['default'],
+      });
+    }
+    return queries;
+  };
+
   let props: SavedQueryManagementListProps;
+
   beforeEach(() => {
     props = {
       onLoad: jest.fn(),
@@ -87,13 +102,13 @@ describe('Saved query management list component', () => {
       queryBarMenuRef: React.createRef(),
     };
   });
+
   it('should render the list component if saved queries exist', async () => {
-    const component = mount(wrapSavedQueriesListComponentInContext(props));
-    await flushEffect(component);
-    expect(component.find('[data-test-subj="saved-query-management-list"]').length).toBeTruthy();
+    render(wrapSavedQueriesListComponentInContext(props));
+    expect(await screen.findByRole('listbox', { name: 'Query list' })).toBeInTheDocument();
   });
 
-  it('should not rendet the list component if not saved queries exist', async () => {
+  it('should not render the list component if saved queries do not exist', async () => {
     const newProps = {
       ...props,
       savedQueryService: {
@@ -101,68 +116,96 @@ describe('Saved query management list component', () => {
         findSavedQueries: jest.fn().mockResolvedValue({ total: 0, queries: [] }),
       },
     };
-    const component = mount(wrapSavedQueriesListComponentInContext(newProps));
-    await flushEffect(component);
-    expect(component.find('[data-test-subj="saved-query-management-empty"]').length).toBeTruthy();
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    await waitFor(() => {
+      expect(screen.queryByRole('listbox', { name: 'Query list' })).not.toBeInTheDocument();
+    });
+    expect(screen.queryAllByText(/No saved queries/)[0]).toBeInTheDocument();
   });
 
   it('should render the saved queries on the selectable component', async () => {
-    const component = mount(wrapSavedQueriesListComponentInContext(props));
-    await flushEffect(component);
-    expect(component.find(EuiSelectable).prop('options').length).toBe(1);
-    expect(component.find(EuiSelectable).prop('options')[0].label).toBe('Test');
+    render(wrapSavedQueriesListComponentInContext(props));
+    expect(await screen.findAllByRole('option')).toHaveLength(1);
+    expect(screen.getByRole('option', { name: 'Test' })).toBeInTheDocument();
   });
 
-  it('should call the onLoad function', async () => {
+  it('should display the total and selected count', async () => {
+    const newProps = {
+      ...props,
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: jest.fn().mockResolvedValue({
+          total: 6,
+          queries: generateSavedQueries(5),
+        }),
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findByText('6 queries')).toBeInTheDocument();
+    expect(screen.queryByText('6 queries | 1 selected')).not.toBeInTheDocument();
+    userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
+    expect(screen.queryByText('6 queries')).not.toBeInTheDocument();
+    expect(screen.getByText('6 queries | 1 selected')).toBeInTheDocument();
+  });
+
+  it('should not display the "Manage queries" link if application.capabilities.savedObjectsManagement.edit is false', async () => {
+    render(
+      wrapSavedQueriesListComponentInContext(props, {
+        ...application,
+        capabilities: {
+          ...application.capabilities,
+          savedObjectsManagement: { edit: false },
+        },
+      })
+    );
+    await waitFor(() => {
+      expect(screen.queryByRole('link', { name: 'Manage queries' })).not.toBeInTheDocument();
+    });
+  });
+
+  it('should display the "Manage queries" link if application.capabilities.savedObjectsManagement.edit is true', async () => {
+    render(wrapSavedQueriesListComponentInContext(props));
+    expect(await screen.findByRole('link', { name: 'Manage queries' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Manage queries' })).toHaveAttribute(
+      'href',
+      '/app/management/kibana/objects?initialQuery=type:("query")'
+    );
+  });
+
+  it('should call the onLoad and onClose function', async () => {
     const onLoadSpy = jest.fn();
+    const onCloseSpy = jest.fn();
     const newProps = {
       ...props,
       onLoad: onLoadSpy,
+      onClose: onCloseSpy,
     };
-    const component = mount(wrapSavedQueriesListComponentInContext(newProps));
-    await flushEffect(component);
-    component.find('[data-test-subj="load-saved-query-Test-button"]').first().simulate('click');
-    expect(
-      component.find('[data-test-subj="saved-query-management-apply-changes-button"]').length
-    ).toBeTruthy();
-    component
-      .find('button[data-test-subj="saved-query-management-apply-changes-button"]')
-      .first()
-      .simulate('click');
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findByLabelText('Load query')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Delete query' })).toBeDisabled();
+    userEvent.click(screen.getByRole('option', { name: 'Test' }));
+    expect(screen.getByLabelText('Load query')).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Delete query' })).toBeEnabled();
+    userEvent.click(screen.getByLabelText('Load query'));
     expect(onLoadSpy).toBeCalled();
+    expect(onCloseSpy).toBeCalled();
   });
 
   it('should render the button with the correct text', async () => {
-    const component = mount(wrapSavedQueriesListComponentInContext(props));
-    await flushEffect(component);
+    render(wrapSavedQueriesListComponentInContext(props));
     expect(
-      component
-        .find('[data-test-subj="saved-query-management-apply-changes-button"]')
-        .first()
-        .text()
-    ).toBe('Load query');
-
-    const newProps = {
-      ...props,
-      hasFiltersOrQuery: true,
-    };
-    const updatedComponent = mount(wrapSavedQueriesListComponentInContext(newProps));
-    await flushEffect(component);
-    expect(
-      updatedComponent
-        .find('[data-test-subj="saved-query-management-apply-changes-button"]')
-        .first()
-        .text()
-    ).toBe('Load query');
+      await screen.findByTestId('saved-query-management-apply-changes-button')
+    ).toHaveTextContent('Load query');
   });
 
   it('should render the modal on delete', async () => {
-    const component = mount(wrapSavedQueriesListComponentInContext(props));
-    await flushEffect(component);
-    component.find('[data-test-subj="load-saved-query-Test-button"]').first().simulate('click');
-    findTestSubject(component, 'delete-saved-query-button').simulate('click');
-    expect(component.find('[data-test-subj="confirmModalConfirmButton"]').length).toBeTruthy();
-    expect(component.text()).not.toContain('you remove it from every space');
+    render(wrapSavedQueriesListComponentInContext(props));
+    userEvent.click(await screen.findByRole('option', { name: 'Test' }));
+    userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
+    expect(screen.getByRole('heading', { name: 'Delete "Test"?' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.queryByText(/you remove it from every space/)).not.toBeInTheDocument();
   });
 
   it('should render the modal with warning for multiple namespaces on delete', async () => {
@@ -191,15 +234,17 @@ describe('Saved query management list component', () => {
         deleteSavedQuery: jest.fn(),
       },
     };
-    const component = mount(wrapSavedQueriesListComponentInContext(newProps));
-    await flushEffect(component);
-    component.find('[data-test-subj="load-saved-query-Test-button"]').first().simulate('click');
-    findTestSubject(component, 'delete-saved-query-button').simulate('click');
-    expect(component.find('[data-test-subj="confirmModalConfirmButton"]').length).toBeTruthy();
-    expect(component.text()).toContain('you remove it from every space');
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    userEvent.click(await screen.findByRole('option', { name: 'Test' }));
+    userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
+    expect(screen.getByRole('heading', { name: 'Delete "Test"?' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+    expect(screen.queryByText(/you remove it from every space/)).toBeInTheDocument();
   });
 
-  it('should render the onClearSavedQuery on delete of the current selected query', async () => {
+  it('should call deleteSavedQuery and onClearSavedQuery on delete of the current selected query', async () => {
+    const deleteSavedQuerySpy = jest.fn();
     const onClearSavedQuerySpy = jest.fn();
     const newProps = {
       ...props,
@@ -216,12 +261,390 @@ describe('Saved query management list component', () => {
         },
         namespaces: ['default'],
       },
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: jest.fn().mockResolvedValue({
+          total: 2,
+          queries: generateSavedQueries(1),
+        }),
+        deleteSavedQuery: deleteSavedQuerySpy,
+      },
       onClearSavedQuery: onClearSavedQuerySpy,
     };
-    const component = mount(wrapSavedQueriesListComponentInContext(newProps));
-    await flushEffect(component);
-    findTestSubject(component, 'delete-saved-query-button').simulate('click');
-    findTestSubject(component, 'confirmModalConfirmButton').simulate('click');
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findByText('2 queries | 1 selected')).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(2);
+    expect(screen.getByLabelText('Load query')).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Delete query' })).toBeEnabled();
+    userEvent.click(screen.getByRole('button', { name: 'Delete query' }));
+    userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(screen.getByText('1 query')).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    expect(screen.getByLabelText('Load query')).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Delete query' })).toBeDisabled();
+    expect(deleteSavedQuerySpy).toHaveBeenLastCalledWith('8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9');
     expect(onClearSavedQuerySpy).toBeCalled();
+  });
+
+  it('should not render pagination if there are less than 5 saved queries', async () => {
+    render(wrapSavedQueriesListComponentInContext(props));
+    await waitFor(() => {
+      expect(screen.queryByText(/1 of/)).not.toBeInTheDocument();
+    });
+  });
+
+  it('should render pagination if there are more than 5 saved queries', async () => {
+    const newProps = {
+      ...props,
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: jest.fn().mockResolvedValue({
+          total: 6,
+          queries: generateSavedQueries(5),
+        }),
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findByText(/1 of 2/)).toBeInTheDocument();
+  });
+
+  it('should allow navigating between saved query pages', async () => {
+    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+      total: 6,
+      queries: generateSavedQueries(5),
+    });
+    const newProps = {
+      ...props,
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: findSavedQueriesSpy,
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
+    });
+    expect(screen.getByText(/1 of 2/)).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(5);
+    findSavedQueriesSpy.mockResolvedValue({
+      total: 6,
+      queries: generateSavedQueries(1),
+    });
+    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
+    });
+    expect(screen.getByText(/2 of 2/)).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    findSavedQueriesSpy.mockResolvedValue({
+      total: 6,
+      queries: generateSavedQueries(5),
+    });
+    userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
+    });
+    expect(screen.getByText(/1 of 2/)).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(5);
+  });
+
+  it('should clear the currently selected saved query when navigating between pages', async () => {
+    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+      total: 6,
+      queries: generateSavedQueries(5),
+    });
+    const newProps = {
+      ...props,
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: findSavedQueriesSpy,
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
+    });
+    expect(screen.getByRole('option', { name: 'Test 0', selected: false })).toBeInTheDocument();
+    userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
+    expect(screen.getByRole('option', { name: 'Test 0', selected: true })).toBeInTheDocument();
+    findSavedQueriesSpy.mockResolvedValue({
+      total: 6,
+      queries: generateSavedQueries(1),
+    });
+    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
+    });
+    findSavedQueriesSpy.mockResolvedValue({
+      total: 6,
+      queries: generateSavedQueries(5),
+    });
+    userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
+    });
+    expect(screen.getByRole('option', { name: 'Test 0', selected: false })).toBeInTheDocument();
+  });
+
+  it('should allow providing a search term', async () => {
+    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+      total: 6,
+      queries: generateSavedQueries(5),
+    });
+    const newProps = {
+      ...props,
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: findSavedQueriesSpy,
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
+    });
+    expect(screen.getByText(/1 of 2/)).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(5);
+    findSavedQueriesSpy.mockResolvedValue({
+      total: 6,
+      queries: generateSavedQueries(1),
+    });
+    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
+    });
+    expect(screen.getByText(/2 of 2/)).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    findSavedQueriesSpy.mockResolvedValue({
+      total: 1,
+      queries: generateSavedQueries(1),
+    });
+    userEvent.type(screen.getByRole('combobox', { name: 'Query list' }), 'Test');
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('Test*', 5, 1);
+    });
+    expect(screen.queryByText(/1 of/)).not.toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+  });
+
+  it('should not display an "Active" badge if there is no currently loaded saved query', async () => {
+    render(wrapSavedQueriesListComponentInContext(props));
+    await waitFor(() => {
+      expect(screen.queryByText(/Active/)).not.toBeInTheDocument();
+    });
+  });
+
+  it('should display an "Active" badge for the currently loaded saved query', async () => {
+    const newProps = {
+      ...props,
+      loadedSavedQuery: {
+        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+        attributes: {
+          title: 'Test',
+          description: '',
+          query: {
+            query: 'category.keyword : "Men\'s Shoes" ',
+            language: 'kuery',
+          },
+          filters: [],
+        },
+        namespaces: ['default'],
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findByText(/Active/)).toBeInTheDocument();
+  });
+
+  it('should hoist the currently loaded saved query to the top of the list', async () => {
+    const newProps = {
+      ...props,
+      loadedSavedQuery: {
+        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+        attributes: {
+          title: 'Foo',
+          description: '',
+          query: {
+            query: 'category.keyword : "Men\'s Shoes" ',
+            language: 'kuery',
+          },
+          filters: [],
+        },
+        namespaces: ['default'],
+      },
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: jest.fn().mockResolvedValue({
+          total: 2,
+          queries: [
+            {
+              id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a8',
+              attributes: {
+                title: 'Bar',
+                description: '',
+                query: {
+                  query: 'category.keyword : "Men\'s Shoes" ',
+                  language: 'kuery',
+                },
+                filters: [],
+              },
+              namespaces: ['default'],
+            },
+            {
+              id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+              attributes: {
+                title: 'Foo',
+                description: '',
+                query: {
+                  query: 'category.keyword : "Men\'s Shoes" ',
+                  language: 'kuery',
+                },
+                filters: [],
+              },
+              namespaces: ['default'],
+            },
+          ],
+        }),
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Foo');
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Active');
+    expect(screen.getAllByRole('option')[1]).toHaveTextContent('Bar');
+    expect(screen.getAllByRole('option')[1]).not.toHaveTextContent('Active');
+  });
+
+  it('should hoist the currently loaded saved query to the top of the list even if it is not in the first page of results', async () => {
+    const newProps = {
+      ...props,
+      loadedSavedQuery: {
+        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+        attributes: {
+          title: 'Foo',
+          description: '',
+          query: {
+            query: 'category.keyword : "Men\'s Shoes" ',
+            language: 'kuery',
+          },
+          filters: [],
+        },
+        namespaces: ['default'],
+      },
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: jest.fn().mockResolvedValue({
+          total: 6,
+          queries: generateSavedQueries(5),
+        }),
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findAllByRole('option')).toHaveLength(6);
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Foo');
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Active');
+    expect(screen.getAllByRole('option')[1]).toHaveTextContent('Test 0');
+    expect(screen.getAllByRole('option')[1]).not.toHaveTextContent('Active');
+  });
+
+  it('should not hoist the currently loaded saved query to the top of the list if there is a search term', async () => {
+    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+      total: 2,
+      queries: [
+        {
+          id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a8',
+          attributes: {
+            title: 'Bar',
+            description: '',
+            query: {
+              query: 'category.keyword : "Men\'s Shoes" ',
+              language: 'kuery',
+            },
+            filters: [],
+          },
+          namespaces: ['default'],
+        },
+        {
+          id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+          attributes: {
+            title: 'Foo',
+            description: '',
+            query: {
+              query: 'category.keyword : "Men\'s Shoes" ',
+              language: 'kuery',
+            },
+            filters: [],
+          },
+          namespaces: ['default'],
+        },
+      ],
+    });
+    const newProps = {
+      ...props,
+      loadedSavedQuery: {
+        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+        attributes: {
+          title: 'Foo',
+          description: '',
+          query: {
+            query: 'category.keyword : "Men\'s Shoes" ',
+            language: 'kuery',
+          },
+          filters: [],
+        },
+        namespaces: ['default'],
+      },
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: findSavedQueriesSpy,
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Foo');
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Active');
+    userEvent.type(screen.getByRole('searchbox', { name: 'Query list' }), 'Test');
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('Test*', 5, 1);
+    });
+    expect(screen.getAllByRole('option')).toHaveLength(2);
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Bar');
+    expect(screen.getAllByRole('option')[0]).not.toHaveTextContent('Active');
+  });
+
+  it('should not hoist the currently loaded saved query to the top of the list if not on the first page', async () => {
+    const findSavedQueriesSpy = jest.fn().mockResolvedValue({
+      total: 6,
+      queries: generateSavedQueries(5),
+    });
+    const newProps = {
+      ...props,
+      loadedSavedQuery: {
+        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+        attributes: {
+          title: 'Foo',
+          description: '',
+          query: {
+            query: 'category.keyword : "Men\'s Shoes" ',
+            language: 'kuery',
+          },
+          filters: [],
+        },
+        namespaces: ['default'],
+      },
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: findSavedQueriesSpy,
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findAllByRole('option')).toHaveLength(6);
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Foo');
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Active');
+    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
+    });
+    expect(screen.getAllByRole('option')).toHaveLength(5);
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('Test 0');
+    expect(screen.getAllByRole('option')[0]).not.toHaveTextContent('Active');
   });
 });
