@@ -14,6 +14,7 @@ import { createAppMockRenderer } from '../../common/mock';
 import { ColumnsPopover } from './columns_popover';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174682
+// FLAKY: https://github.com/elastic/kibana/issues/174683
 describe.skip('ColumnsPopover', () => {
   let appMockRenderer: AppMockRenderer;
 
