@@ -116,7 +116,7 @@ export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActi
           >
             <EuiText size="s">
               {i18n.translate('xpack.observability.alertDetails.editSnoozeRule', {
-                defaultMessage: 'Snooze',
+                defaultMessage: 'Snooze the rule',
               })}
             </EuiText>
           </EuiButton>
