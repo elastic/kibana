@@ -13,7 +13,7 @@ interface InlineEditingContent {
   visible?: boolean;
 }
 
-interface Props {
+interface MultiPaneFlyoutProps {
   mainContent: JSX.Element;
   secondSlotContentVisibility: boolean;
   setSecondSlotContainer?: (element: HTMLDivElement | null) => void;
@@ -25,7 +25,7 @@ export function MultiPaneFlyout({
   secondSlotContentVisibility,
   onClose,
   setSecondSlotContainer,
-}: Props) {
+}: MultiPaneFlyoutProps) {
   const [flexBasisCol1, setFlexBasisCol1] = useState('100%');
   const [flexBasisCol2, setFlexBasisCol2] = useState(!secondSlotContentVisibility ? '0%' : '30%');
 
@@ -107,8 +107,8 @@ function InlineEditingContent({
 
 function MainContent({ content }: { content: JSX.Element }) {
   const style = css`
-    padding-top: 12px;
-    padding-botton: 12px;
+    padding-top: ${euiThemeVars.euiSizeM};
+    padding-botton: ${euiThemeVars.euiSizeM};
    }
   `;
 
