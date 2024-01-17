@@ -69,12 +69,12 @@ export function AlertDetails() {
     ruleId: alert?.fields[ALERT_RULE_UUID],
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
-  const [alertStatus, setAlertStatus] = useState<string>();
+  const [alertStatus, setAlertStatus] = useState<AlertStatus>();
 
   useEffect(() => {
     if (alert) {
       setRuleTypeModel(ruleTypeRegistry.get(alert?.fields[ALERT_RULE_TYPE_ID]!));
-      setAlertStatus(alert?.fields[ALERT_STATUS]);
+      setAlertStatus(alert?.fields[ALERT_STATUS] as AlertStatus);
     }
   }, [alert, ruleTypeRegistry]);
   useBreadcrumbs([
@@ -135,7 +135,7 @@ export function AlertDetails() {
         pageTitle: (
           <PageTitle
             alert={alert}
-            alertStatus={alertStatus as AlertStatus}
+            alertStatus={alertStatus}
             dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}
           />
         ),
@@ -147,7 +147,7 @@ export function AlertDetails() {
           >
             <HeaderActions
               alert={alert}
-              alertStatus={alertStatus as AlertStatus}
+              alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
             />
           </CasesContext>,

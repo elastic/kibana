@@ -37,7 +37,7 @@ import {
 
 export interface PageTitleProps {
   alert: TopAlert | null;
-  alertStatus: AlertStatus;
+  alertStatus?: AlertStatus;
   dataTestSubj: string;
 }
 
@@ -69,10 +69,12 @@ export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) 
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
-          <AlertLifecycleStatusBadge
-            alertStatus={alertStatus}
-            flapping={alert.fields[ALERT_FLAPPING]}
-          />
+          {alertStatus && (
+            <AlertLifecycleStatusBadge
+              alertStatus={alertStatus}
+              flapping={alert.fields[ALERT_FLAPPING]}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">

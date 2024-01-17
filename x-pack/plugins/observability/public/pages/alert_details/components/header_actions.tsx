@@ -35,7 +35,7 @@ import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
-  alertStatus: AlertStatus;
+  alertStatus?: AlertStatus;
   onUntrackAlert: () => void;
 }
 
