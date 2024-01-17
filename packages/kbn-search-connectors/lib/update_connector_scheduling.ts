@@ -21,7 +21,7 @@ export const updateConnectorScheduling = async (
   try {
     const result = await client.transport.request<ConnectorsAPIUpdateResponse>({
       method: 'PUT',
-      path: `/_connector/${connectorId}3/_scheduling`,
+      path: `/_connector/${connectorId}/_scheduling`,
       body: {
         scheduling,
       },
