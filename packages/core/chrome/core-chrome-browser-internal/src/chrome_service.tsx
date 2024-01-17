@@ -59,6 +59,7 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+  coreContext: CoreContext;
 }
 
 export interface SetupDeps {
@@ -72,7 +73,6 @@ export interface StartDeps {
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
   customBranding: CustomBrandingStart;
-  core: CoreContext;
 }
 
 /** @internal */
@@ -87,9 +87,11 @@ export class ChromeService {
   private readonly projectNavigation = new ProjectNavigationService();
   private mutationObserver: MutationObserver | undefined;
   private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
-  private logger: Logger | undefined;
+  private logger: Logger;
 
-  constructor(private readonly params: ConstructorParams) {}
+  constructor(private readonly params: ConstructorParams) {
+    this.logger = params.coreContext.logger.get('chrome-browser');
+  }
 
   /**
    * These observables allow consumers to toggle the chrome visibility via either:
@@ -182,9 +184,7 @@ export class ChromeService {
     injectedMetadata,
     notifications,
     customBranding,
-    core,
   }: StartDeps): Promise<InternalChromeStart> {
-    this.logger = core.logger.get('chrome-browser');
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
 
