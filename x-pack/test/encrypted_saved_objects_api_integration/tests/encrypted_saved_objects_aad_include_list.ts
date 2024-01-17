@@ -66,6 +66,19 @@ export default function ({ getService }: FtrProviderContext) {
         expect(decryptedObject.attributes.secrets).to.eql({ token: 'some-random-token-value' });
       });
 
+      it(`successfully decrypts 'synthetics-param' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-param/c3938846-6927-4c8e-8af1-d25b4d3da0ca`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.value).to.eql(
+          'This value was encrypted prior to the AAD include list change.'
+        );
+      });
+
       it(`successfully decrypts 'synthetics-monitor' objects`, async () => {
         const decryptResponse = await supertest
           .get(
