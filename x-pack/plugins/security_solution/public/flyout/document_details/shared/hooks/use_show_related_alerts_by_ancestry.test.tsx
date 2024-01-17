@@ -16,6 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { licenseService } from '../../../../common/hooks/use_license';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
 import { mockDataAsNestedObject } from '../mocks/mock_data_as_nested_object';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/hooks/use_license', () => {
@@ -29,6 +30,9 @@ jest.mock('../../../../common/hooks/use_license', () => {
     },
   };
 });
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
+);
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 
 const dataAsNestedObject = mockDataAsNestedObject;
@@ -40,8 +44,9 @@ describe('useShowRelatedAlertsByAncestry', () => {
     UseShowRelatedAlertsByAncestryResult
   >;
 
-  it('should return false if getFieldsData returns null', () => {
+  it('should return false if Process Entity Info is not available', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
     const getFieldsData = () => null;
     hookResult = renderHook(() =>
@@ -69,7 +74,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
 
     expect(hookResult.result.current).toEqual({
       show: false,
-      documentId: 'value',
       indices: ['rule-parameters-index'],
     });
   });
@@ -88,26 +92,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
 
     expect(hookResult.result.current).toEqual({
       show: false,
-      documentId: 'value',
-      indices: ['rule-parameters-index'],
-    });
-  });
-
-  it('should return true if getFieldsData has the correct fields', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    const getFieldsData = () => 'value';
-    hookResult = renderHook(() =>
-      useShowRelatedAlertsByAncestry({
-        getFieldsData,
-        dataAsNestedObject,
-        dataFormattedForFieldBrowser,
-      })
-    );
-
-    expect(hookResult.result.current).toEqual({
-      show: true,
-      documentId: 'value',
       indices: ['rule-parameters-index'],
     });
   });

@@ -189,9 +189,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isAlertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
-  const isAlertSuppressionForEqlRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForEqlRuleEnabled'
-  );
 
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
@@ -819,8 +816,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isAlertSuppressionEnabled =
     isQueryRule(ruleType) ||
     isThresholdRule ||
-    (isAlertSuppressionForIndicatorMatchRuleEnabled && isThreatMatchRule(ruleType)) ||
-    (isAlertSuppressionForEqlRuleEnabled && isEqlRule(ruleType));
+    (isAlertSuppressionForIndicatorMatchRuleEnabled && isThreatMatchRule(ruleType));
 
   return (
     <>

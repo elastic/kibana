@@ -91,9 +91,6 @@ disabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
-  # Failing: See https://github.com/elastic/kibana/issues/174020
-  - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
-
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -188,6 +185,7 @@ enabled:
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
   - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
+  - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
@@ -216,6 +214,7 @@ enabled:
   - x-pack/test/api_integration/apis/stats/config.ts
   - x-pack/test/api_integration/apis/status/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
+  - x-pack/test/api_integration/apis/slos/config.ts
   - x-pack/test/api_integration/apis/telemetry/config.ts
   - x-pack/test/api_integration/apis/transform/config.ts
   - x-pack/test/api_integration/apis/upgrade_assistant/config.ts
@@ -459,6 +458,7 @@ enabled:
   - x-pack/performance/journeys/tags_listing_page.ts
   - x-pack/performance/journeys/cloud_security_dashboard.ts
   - x-pack/performance/journeys/apm_service_inventory.ts
+  - x-pack/performance/journeys/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/serverless.config.ts

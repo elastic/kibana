@@ -121,7 +121,7 @@ describe('CaseViewTabs', () => {
     expect(screen.queryByTestId('case-view-files-stats-badge')).not.toBeInTheDocument();
   });
 
-  it('the files tab count has a different colour if the tab is not active', async () => {
+  it('the files tab count has a different color if the tab is not active', async () => {
     appMockRenderer.render(<CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />);
 
     expect(
@@ -140,7 +140,7 @@ describe('CaseViewTabs', () => {
     expect(badge).toHaveTextContent('3');
   });
 
-  it('the alerts tab count has a different colour if the tab is not active', async () => {
+  it('the alerts tab count has a different color if the tab is not active', async () => {
     appMockRenderer.render(
       <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.FILES} />
     );
@@ -190,5 +190,55 @@ describe('CaseViewTabs', () => {
         tabId: CASE_VIEW_PAGE_TABS.FILES,
       });
     });
+  });
+
+  it('should display the alerts tab when the feature is enabled', async () => {
+    appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: true } } });
+
+    appMockRenderer.render(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+    );
+
+    expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
+  });
+
+  it('should not display the alerts tab when the feature is disabled', async () => {
+    appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: false } } });
+
+    appMockRenderer.render(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+    );
+
+    expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
+    expect(screen.queryByTestId('case-view-tab-title-alerts')).not.toBeInTheDocument();
+  });
+
+  it('should not show the experimental badge on the alerts table', async () => {
+    appMockRenderer = createAppMockRenderer({
+      features: { alerts: { isExperimental: false } },
+    });
+
+    appMockRenderer.render(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+    );
+
+    expect(await screen.findByTestId('case-view-tabs')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('case-view-alerts-table-experimental-badge')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should show the experimental badge on the alerts table', async () => {
+    appMockRenderer = createAppMockRenderer({
+      features: { alerts: { isExperimental: true } },
+    });
+
+    appMockRenderer.render(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+    );
+
+    expect(
+      await screen.findByTestId('case-view-alerts-table-experimental-badge')
+    ).toBeInTheDocument();
   });
 });
