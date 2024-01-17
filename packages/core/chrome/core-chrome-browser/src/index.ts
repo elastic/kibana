@@ -50,7 +50,6 @@ export type {
   ItemDefinition,
   PresetDefinition,
   RecentlyAccessedDefinition,
-  RecentItem,
   NavigationGroupPreset,
   RootNavigationItemDefinition,
   NavigationTreeDefinitionUI,

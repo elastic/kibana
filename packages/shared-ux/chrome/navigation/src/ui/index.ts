@@ -12,5 +12,3 @@ export type { Props as NavigationProps } from './navigation';
 export { RecentlyAccessed } from './components';
 
 export type { PanelContent, PanelComponentProps, PanelContentProvider } from './components';
-
-export type { RecentItem } from './types';

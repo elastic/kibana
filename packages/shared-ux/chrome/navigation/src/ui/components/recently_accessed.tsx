@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { EuiCollapsibleNavItem } from '@elastic/eui';
 import React, { FC } from 'react';
+import { EuiCollapsibleNavItem } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
 import { useNavigation as useServices } from '../../services';
 
 import { getI18nStrings } from '../i18n_strings';
-import { RecentItem } from '../types';
 
 export interface Props {
   /**
    * Optional observable for recently accessed items. If not provided, the
    * recently items from the Chrome service will be used.
    */
-  recentlyAccessed$?: Observable<RecentItem[]>;
+  recentlyAccessed$?: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   /**
    * If true, the recently accessed list will be collapsed by default.
    * @default false

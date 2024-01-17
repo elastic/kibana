@@ -39,12 +39,6 @@ export interface NodeProps<
   index?: number;
 }
 
-export interface RecentItem {
-  link: string;
-  label: string;
-  id: string;
-}
-
 /**
  * @internal
  *

@@ -10,8 +10,11 @@ import type { Observable } from 'rxjs';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
-import type { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import type { RecentItem } from './ui';
+import type {
+  ChromeNavLink,
+  ChromeProjectNavigationNode,
+  ChromeRecentlyAccessedHistoryItem,
+} from '@kbn/core-chrome-browser';
 
 type BasePathService = Pick<IBasePath, 'prepend'>;
 
@@ -27,7 +30,7 @@ export type NavigateToUrlFn = ApplicationStart['navigateToUrl'];
  */
 export interface NavigationServices {
   basePath: BasePathService;
-  recentlyAccessed$: Observable<RecentItem[]>;
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
@@ -43,7 +46,7 @@ export interface NavigationKibanaDependencies {
   core: {
     application: { navigateToUrl: NavigateToUrlFn };
     chrome: {
-      recentlyAccessed: { get$: () => Observable<RecentItem[]> };
+      recentlyAccessed: { get$: () => Observable<ChromeRecentlyAccessedHistoryItem[]> };
       navLinks: {
         getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
       };

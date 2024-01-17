@@ -28,6 +28,7 @@ import type {
 
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
+import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 
 /** @public */
 export type AppId =
@@ -221,9 +222,6 @@ export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }
 
-// --- NOTE: The following types are the ones that the consumer uses to configure their navigation.
-// ---       They are converted to the ChromeProjectNavigationNode type above.
-
 /**
  * @public
  *
@@ -266,12 +264,6 @@ export type NodeDefinitionWithChildren<
 /** The preset that can be pass to the NavigationBucket component */
 export type NavigationGroupPreset = 'analytics' | 'devtools' | 'ml' | 'management';
 
-export interface RecentItem {
-  link: string;
-  label: string;
-  id: string;
-}
-
 /**
  * @public
  *
@@ -283,7 +275,7 @@ export interface RecentlyAccessedDefinition {
    * Optional observable for recently accessed items. If not provided, the
    * recently items from the Chrome service will be used.
    */
-  recentlyAccessed$?: Observable<RecentItem[]>;
+  recentlyAccessed$?: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   /**
    * If true, the recently accessed list will be collapsed by default.
    * @default false
@@ -322,7 +314,7 @@ export interface PresetDefinition<
 /**
  * @public
  *
- * An item root.
+ * An navigation item at root level.
  */
 export interface ItemDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -359,12 +351,12 @@ export interface NavigationTreeDefinition<
 > {
   /**
    * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
-   * or "group" items. Be mindeful though, with great power comes great responsibility.
+   * or "group" items.
    * */
   body: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
   /**
    * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
-   * or "group" items. Be mindeful though, with great power comes great responsibility.
+   * or "group" items.
    * */
   footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
@@ -374,6 +366,8 @@ export interface NavigationTreeDefinition<
  *
  * Definition for the complete navigation tree, including body and footer
  * that is used by the UI to render the navigation.
+ * This interface is the result of parsing the definition above (validating, replacing "link" props
+ * with their corresponding "deepLink"...)
  */
 export interface NavigationTreeDefinitionUI {
   body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
