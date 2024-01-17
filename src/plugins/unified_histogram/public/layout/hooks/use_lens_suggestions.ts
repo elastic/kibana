@@ -16,11 +16,11 @@ import {
   TimeRange,
 } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
+import type { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { computeInterval } from './compute_interval';
-import type { LensSuggestion, ExternalVisContext } from '../../types';
+import type { ExternalVisContext } from '../../types';
 import { isSuggestionAndVisContextCompatible } from '../../utils/external_vis_context';
 
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
@@ -39,13 +39,13 @@ export const useLensSuggestions = ({
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
-  originalSuggestion?: LensSuggestion;
+  originalSuggestion?: Suggestion;
   isPlainRecord?: boolean;
   columns?: DatatableColumn[];
   data: DataPublicPluginStart;
   timeRange?: TimeRange;
   lensSuggestionsApi: LensSuggestionsApi;
-  onSuggestionChange?: (suggestion: LensSuggestion | undefined) => void;
+  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   externalVisContext?: ExternalVisContext;
 }) => {
   const suggestions = useMemo(() => {

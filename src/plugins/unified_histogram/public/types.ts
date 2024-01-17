@@ -13,7 +13,6 @@ import type {
   LensEmbeddableOutput,
   LensPublicStart,
   TypedLensByValueInput,
-  Suggestion,
 } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -148,10 +147,6 @@ export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
  * Unified histogram input observable
  */
 export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
-
-export interface LensSuggestion extends Suggestion {
-  internalVersion?: number;
-}
 
 export interface LensRequestData {
   dataViewId?: string;

@@ -16,11 +16,12 @@ import type {
   GenericIndexPatternColumn,
   TermsIndexPatternColumn,
   TypedLensByValueInput,
+  Suggestion,
 } from '@kbn/lens-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import { fieldSupportsBreakdown } from './field_supports_breakdown';
-import type { ExternalVisContext, LensAttributesContext, LensSuggestion } from '../../types';
+import type { ExternalVisContext, LensAttributesContext } from '../../types';
 import { isSuggestionAndVisContextCompatible } from '../../utils/external_vis_context';
 
 export const getLensAttributes = ({
@@ -40,7 +41,7 @@ export const getLensAttributes = ({
   dataView: DataView;
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
-  suggestion: LensSuggestion | undefined;
+  suggestion: Suggestion | undefined;
   externalVisContext?: ExternalVisContext;
   onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
 }): LensAttributesContext => {

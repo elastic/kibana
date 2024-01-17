@@ -14,10 +14,10 @@ import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
   Suggestion,
+  LensEmbeddableInput,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { Histogram } from './histogram';
@@ -32,7 +32,6 @@ import type {
   UnifiedHistogramInput$,
   UnifiedHistogramInputMessage,
   ExternalVisContext,
-  LensSuggestion,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { SuggestionSelector } from './suggestion_selector';
@@ -55,7 +54,7 @@ export interface ChartProps {
   query?: Query | AggregateQuery;
   filters?: Filter[];
   isPlainRecord?: boolean;
-  currentSuggestion?: LensSuggestion;
+  currentSuggestion?: Suggestion;
   externalVisContext?: ExternalVisContext;
   allSuggestions?: Suggestion[];
   timeRange?: TimeRange;
@@ -79,7 +78,7 @@ export interface ChartProps {
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
-  onSuggestionChange?: (suggestion: LensSuggestion | undefined) => void;
+  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
@@ -182,7 +181,7 @@ export function Chart({
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
   const getLensAttributesCallback = useCallback(
-    (suggestion: LensSuggestion | undefined, visContext: ExternalVisContext | undefined) =>
+    (suggestion: Suggestion | undefined, visContext: ExternalVisContext | undefined) =>
       getLensAttributes({
         title: chart?.title,
         filters,
@@ -212,7 +211,7 @@ export function Chart({
   );
 
   const onSuggestionSelectorChange = useCallback(
-    (s: LensSuggestion | undefined) => {
+    (s: Suggestion | undefined) => {
       onSuggestionChange?.(s);
       onVisContextChanged?.(s ? getLensAttributesCallback(s, undefined) : undefined);
     },

@@ -25,7 +25,6 @@ import { SuggestionSelector } from './suggestion_selector';
 import { checkChartAvailability } from './check_chart_availability';
 
 import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
-import { LensSuggestion } from '../types';
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
 
@@ -54,7 +53,7 @@ async function mountComponent({
   chartHidden?: boolean;
   appendHistogram?: ReactElement;
   dataView?: DataView;
-  currentSuggestion?: LensSuggestion;
+  currentSuggestion?: Suggestion;
   allSuggestions?: Suggestion[];
   isPlainRecord?: boolean;
   hasDashboardPermissions?: boolean;

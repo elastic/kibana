@@ -18,12 +18,11 @@ import { css } from '@emotion/react';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
-import type { LensSuggestion } from '../types';
 
 export interface SuggestionSelectorProps {
   suggestions: Suggestion[];
-  activeSuggestion?: LensSuggestion;
-  onSuggestionChange?: (sug: LensSuggestion | undefined) => void;
+  activeSuggestion?: Suggestion;
+  onSuggestionChange?: (sug: Suggestion | undefined) => void;
 }
 
 export const SuggestionSelector = ({

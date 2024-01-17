@@ -7,14 +7,13 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
   ExternalVisContext,
-  LensSuggestion,
 } from '../../types';
 import {
   getBreakdownField,
@@ -36,7 +35,7 @@ export interface UnifiedHistogramState {
   /**
    * The current Lens suggestion
    */
-  currentSuggestion: LensSuggestion | undefined;
+  currentSuggestion: Suggestion | undefined;
   /**
    * Lens vis which can be stored externally
    */
@@ -108,7 +107,7 @@ export interface UnifiedHistogramStateService {
   /**
    * Sets current Lens suggestion
    */
-  setCurrentSuggestion: (suggestion: LensSuggestion | undefined) => void;
+  setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
   /**
    * Sets external custom Lens vis
    */
@@ -207,7 +206,7 @@ export const createStateService = (
       updateState({ breakdownField });
     },
 
-    setCurrentSuggestion: (suggestion: LensSuggestion | undefined) => {
+    setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
       updateState({ currentSuggestion: suggestion });
     },
 

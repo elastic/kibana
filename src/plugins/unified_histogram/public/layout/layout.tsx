@@ -18,6 +18,7 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
   LensSuggestionsApi,
+  Suggestion,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
@@ -36,7 +37,6 @@ import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramInput$,
   ExternalVisContext,
-  LensSuggestion,
 } from '../types';
 import { useLensSuggestions } from './hooks/use_lens_suggestions';
 
@@ -68,7 +68,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The current Lens suggestion
    */
-  currentSuggestion?: LensSuggestion;
+  currentSuggestion?: Suggestion;
   /**
    * The external custom Lens vis
    */
@@ -162,7 +162,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * Callback to update the suggested chart
    */
-  onSuggestionChange?: (suggestion: LensSuggestion | undefined) => void;
+  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   /**
    * Callback to notify about the change in Lens attributes
    */
