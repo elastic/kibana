@@ -54,7 +54,9 @@ describe('CustomFieldFlyout ', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(i18n.MAX_LENGTH_ERROR('label', MAX_CUSTOM_FIELD_LABEL_LENGTH))
+        screen.getByText(
+          i18n.MAX_LENGTH_ERROR(i18n.FIELD_LABEL.toLocaleLowerCase(), MAX_CUSTOM_FIELD_LABEL_LENGTH)
+        )
       ).toBeInTheDocument();
     });
   });
@@ -65,7 +67,9 @@ describe('CustomFieldFlyout ', () => {
     userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
 
     await waitFor(() => {
-      expect(screen.getByText(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL))).toBeInTheDocument();
+      expect(
+        screen.getByText(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL.toLocaleLowerCase()))
+      ).toBeInTheDocument();
     });
 
     expect(props.onSaveField).not.toBeCalled();

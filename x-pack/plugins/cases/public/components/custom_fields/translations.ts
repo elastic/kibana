@@ -36,7 +36,7 @@ export const SAVE_FIELD = i18n.translate('xpack.cases.customFields.saveField', {
 });
 
 export const FIELD_LABEL = i18n.translate('xpack.cases.customFields.fieldLabel', {
-  defaultMessage: 'Label',
+  defaultMessage: 'Field label',
 });
 
 export const FIELD_LABEL_HELP_TEXT = i18n.translate('xpack.cases.customFields.fieldLabelHelpText', {
