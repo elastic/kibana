@@ -209,7 +209,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
                       size="m"
                       color="hollow"
                       tooltipContent={i18n.translate(
-                        'xpack.ml.datavisualizer.selector.technicalPreviewBadge.titleMsg',
+                        'xpack.ml.datavisualizer.selector.technicalPreviewBadge.tooltipMsg',
                         {
                           defaultMessage:
                             'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
