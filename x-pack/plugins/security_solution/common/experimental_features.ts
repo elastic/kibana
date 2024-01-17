@@ -21,7 +21,6 @@ export const allowedExperimentalValues = Object.freeze({
   kubernetesEnabled: true,
   chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
-  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -100,10 +99,23 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /*
-   * Enables the new user details flyout displayed on the Alerts page and timeline.
+   * Enables the new user details flyout displayed on the Alerts table.
    *
    **/
   newUserDetailsFlyout: false,
+
+  /*
+   * Enables the Managed User section inside the new user details flyout.
+   * To see this section you also need newUserDetailsFlyout flag enabled.
+   *
+   **/
+  newUserDetailsFlyoutManagedUser: false,
+
+  /*
+   * Enables the new host details flyout displayed on the Alerts table.
+   *
+   **/
+  newHostDetailsFlyout: false,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings

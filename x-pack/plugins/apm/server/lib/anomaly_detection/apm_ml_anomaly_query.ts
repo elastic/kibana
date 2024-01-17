@@ -8,8 +8,8 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
-  ApmMlDetectorType,
-  getApmMlDetectorIndex,
+  AnomalyDetectorType,
+  getAnomalyDetectorIndex,
 } from '../../../common/anomaly_detection/apm_ml_detectors';
 
 export function apmMlAnomalyQuery({
@@ -18,7 +18,7 @@ export function apmMlAnomalyQuery({
   detectorTypes,
 }: {
   serviceName?: string;
-  detectorTypes?: ApmMlDetectorType[];
+  detectorTypes?: AnomalyDetectorType[];
   transactionType?: string;
 }) {
   return [
@@ -47,7 +47,8 @@ export function apmMlAnomalyQuery({
           },
           ...termsQuery(
             'detector_index',
-            ...(detectorTypes?.map((type) => getApmMlDetectorIndex(type)) ?? [])
+            ...(detectorTypes?.map((type) => getAnomalyDetectorIndex(type)) ??
+              [])
           ),
           ...termQuery('partition_field_value', serviceName),
           ...termQuery('by_field_value', transactionType),

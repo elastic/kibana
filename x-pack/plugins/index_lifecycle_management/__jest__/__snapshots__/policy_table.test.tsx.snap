@@ -4,14 +4,14 @@ exports[`policy table changes pages when a pagination link is clicked on 1`] = `
 Array [
   "testy0",
   "testy1",
-  "testy10",
-  "testy100",
   "testy101",
   "testy103",
-  "testy104",
   "testy11",
   "testy13",
-  "testy14",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
 ]
 `;
 
@@ -19,14 +19,14 @@ exports[`policy table changes pages when a pagination link is clicked on 2`] = `
 Array [
   "testy0",
   "testy1",
-  "testy10",
-  "testy100",
   "testy101",
   "testy103",
-  "testy104",
   "testy11",
   "testy13",
-  "testy14",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
 ]
 `;
 
@@ -122,15 +122,15 @@ Array [
 exports[`policy table sorts when linked index templates header is clicked 2`] = `
 Array [
   "testy0",
-  "testy2",
-  "testy4",
-  "testy8",
-  "testy10",
-  "testy14",
-  "testy16",
-  "testy20",
-  "testy22",
-  "testy26",
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
 ]
 `;
 
@@ -152,60 +152,60 @@ Array [
 exports[`policy table sorts when linked indices header is clicked 2`] = `
 Array [
   "testy0",
-  "testy2",
-  "testy4",
-  "testy8",
-  "testy10",
-  "testy14",
-  "testy16",
-  "testy20",
-  "testy22",
-  "testy26",
+  "testy1",
+  "testy5",
+  "testy7",
+  "testy11",
+  "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
 ]
 `;
 
 exports[`policy table sorts when modified date header is clicked 1`] = `
 Array [
   "testy0",
-  "testy104",
   "testy103",
   "testy101",
-  "testy100",
-  "testy98",
   "testy97",
   "testy95",
-  "testy94",
-  "testy92",
+  "testy91",
+  "testy89",
+  "testy85",
+  "testy83",
+  "testy79",
 ]
 `;
 
 exports[`policy table sorts when modified date header is clicked 2`] = `
 Array [
   "testy1",
-  "testy2",
-  "testy4",
   "testy5",
   "testy7",
-  "testy8",
-  "testy10",
   "testy11",
   "testy13",
-  "testy14",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
+  "testy29",
 ]
 `;
 
 exports[`policy table sorts when name header is clicked 1`] = `
 Array [
-  "testy98",
   "testy97",
   "testy95",
-  "testy94",
-  "testy92",
   "testy91",
   "testy89",
-  "testy88",
-  "testy86",
   "testy85",
+  "testy83",
+  "testy79",
+  "testy77",
+  "testy73",
+  "testy71",
 ]
 `;
 
@@ -213,13 +213,13 @@ exports[`policy table sorts when name header is clicked 2`] = `
 Array [
   "testy0",
   "testy1",
-  "testy2",
-  "testy4",
   "testy5",
   "testy7",
-  "testy8",
-  "testy10",
   "testy11",
   "testy13",
+  "testy17",
+  "testy19",
+  "testy23",
+  "testy25",
 ]
 `;
