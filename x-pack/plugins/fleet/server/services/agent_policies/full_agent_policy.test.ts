@@ -7,6 +7,8 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import omit from 'lodash/omit';
+
 import type { AgentPolicy, Output, DownloadSource, PackageInfo } from '../../types';
 import { createAppContextStartContractMock } from '../../mocks';
 
@@ -14,7 +16,6 @@ import { agentPolicyService } from '../agent_policy';
 import { agentPolicyUpdateEventHandler } from '../agent_policy_update';
 import { appContextService } from '../app_context';
 import { getPackageInfo } from '../epm/packages';
-import omit from 'lodash/omit';
 
 import {
   generateFleetConfig,
