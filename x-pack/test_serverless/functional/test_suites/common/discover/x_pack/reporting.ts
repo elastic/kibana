@@ -72,6 +72,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // so it was switched to `savedObjects.cleanStandardList()`
         await kibanaServer.savedObjects.cleanStandardList();
       });
+      afterEach(async () => {
+        // modal does not allow closing beyond clicking done or the x button
+        await PageObjects.share.closeShareModal();
+      });
 
       it('is available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();

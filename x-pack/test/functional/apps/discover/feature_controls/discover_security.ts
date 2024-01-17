@@ -127,7 +127,8 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it('shows CSV reports', async () => {
-        await PageObjects.share.openShareMenuItem('CSVDownload');
+        await testSubjects.click('sharePanel-CSVDownload');
+        await PageObjects.share.closeShareModal();
       });
 
       savedQuerySecurityUtils.shouldAllowSavingQueries();
