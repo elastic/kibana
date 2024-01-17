@@ -198,6 +198,16 @@ describe('Saved query management list component', () => {
     ).toHaveTextContent('Load query');
   });
 
+  it('should not render the delete button if showSaveQuery is false', async () => {
+    const newProps = {
+      ...props,
+      showSaveQuery: false,
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    expect(await screen.findByLabelText('Load query')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Delete query' })).not.toBeInTheDocument();
+  });
+
   it('should render the modal on delete', async () => {
     render(wrapSavedQueriesListComponentInContext(props));
     userEvent.click(await screen.findByRole('option', { name: 'Test' }));
@@ -424,6 +434,77 @@ describe('Saved query management list component', () => {
     });
     expect(screen.queryByText(/1 of/)).not.toBeInTheDocument();
     expect(screen.getAllByRole('option')).toHaveLength(1);
+  });
+
+  it('should correctly handle out of order responses', async () => {
+    const completionOrder: number[] = [];
+    let triggerResolve = () => {};
+    const findSavedQueriesSpy = jest.fn().mockImplementation(async (_, __, page) => {
+      let queries: ReturnType<typeof generateSavedQueries> = [];
+      if (page === 1) {
+        queries = generateSavedQueries(5);
+        completionOrder.push(1);
+      } else if (page === 2) {
+        queries = await new Promise((resolve) => {
+          triggerResolve = () => resolve(generateSavedQueries(5));
+        });
+        completionOrder.push(2);
+      } else if (page === 3) {
+        queries = generateSavedQueries(1);
+        completionOrder.push(3);
+      }
+      return {
+        total: 11,
+        queries,
+      };
+    });
+    const newProps = {
+      ...props,
+      savedQueryService: {
+        ...props.savedQueryService,
+        findSavedQueries: findSavedQueriesSpy,
+      },
+    };
+    render(wrapSavedQueriesListComponentInContext(newProps));
+    await waitFor(() => {
+      expect(completionOrder).toEqual([1]);
+    });
+    expect(screen.getByText(/1 of 3/)).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(5);
+    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
+    });
+    expect(completionOrder).toEqual([1]);
+    expect(screen.getByText(/2 of 3/)).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(5);
+    userEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 3);
+    });
+    expect(completionOrder).toEqual([1, 3]);
+    triggerResolve();
+    await waitFor(() => {
+      expect(completionOrder).toEqual([1, 3, 2]);
+    });
+    expect(screen.getByText(/3 of 3/)).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 2);
+    });
+    expect(completionOrder).toEqual([1, 3, 2]);
+    expect(screen.getByText(/2 of 3/)).toBeInTheDocument();
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    userEvent.click(screen.getByRole('button', { name: 'Previous page' }));
+    await waitFor(() => {
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
+    });
+    expect(completionOrder).toEqual([1, 3, 2, 1]);
+    triggerResolve();
+    await waitFor(() => {
+      expect(completionOrder).toEqual([1, 3, 2, 1, 2]);
+    });
   });
 
   it('should not display an "Active" badge if there is no currently loaded saved query', async () => {
