@@ -71,7 +71,7 @@ export function IndexFieldSelector({
                 isLoading={isLoading}
                 onChange={(selected: EuiComboBoxOptionOption[]) => {
                   if (selected.length) {
-                    return field.onChange(selected[0].value);
+                    return field.onChange(selected.map((selection) => selection.value));
                   }
 
                   field.onChange(defaultValue);
