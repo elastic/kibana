@@ -55,7 +55,6 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     notifications: notificationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
-    core: coreContextMock.create(),
   };
 
   if (availableApps) {
@@ -77,6 +76,7 @@ function defaultStartTestOptions({
   return {
     browserSupportsCsp,
     kibanaVersion,
+    coreContext: coreContextMock.create(),
   };
 }
 
@@ -85,7 +85,10 @@ async function start({
   cspConfigMock = { warnLegacyBrowsers: true },
   startDeps = defaultStartDeps(),
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
-  const service = new ChromeService(options);
+  const service = new ChromeService({
+    ...options,
+    coreContext: options.coreContext ?? coreContextMock.create(),
+  });
 
   if (cspConfigMock) {
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
