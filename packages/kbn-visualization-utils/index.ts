@@ -7,5 +7,5 @@
  */
 
 export { getTimeZone } from './src/get_timezone';
-export { getLensAttributes } from './src/get_lens_attributes';
+export { getLensAttributesFromSuggestion } from './src/get_lens_attributes';
 export { TooltipWrapper } from './src/tooltip_wrapper';

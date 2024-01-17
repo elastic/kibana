@@ -24,4 +24,6 @@ export const visualizeESQLFunction = {
   contexts: ['core'],
 };
 
-export type VisualizeESQLFunctionArguments = FromSchema<typeof visualizeESQLFunction['parameters']>;
+export type VisualizeESQLFunctionArguments = FromSchema<
+  (typeof visualizeESQLFunction)['parameters']
+>;

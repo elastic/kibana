@@ -17,7 +17,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { getLensAttributes } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type {
   LensPublicStart,
   TypedLensByValueInput,
@@ -117,7 +117,7 @@ function VisualizeESQL({
       if (chartSuggestions?.length) {
         const [firstSuggestion] = chartSuggestions;
 
-        const attrs = getLensAttributes({
+        const attrs = getLensAttributesFromSuggestion({
           filters: [],
           query: {
             esql: query,
