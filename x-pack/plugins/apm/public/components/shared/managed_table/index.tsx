@@ -7,15 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
-import { orderBy } from 'lodash';
+import { isEmpty, orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
+import { CurrentPage } from '../table_search_bar/table_search_bar';
 import {
-  CurrentPage,
-  TableSearchBar,
-} from '../table_search_bar/table_search_bar';
+  getItemsFilteredBySearchQuery,
+  TableSearchBarV2,
+} from '../table_search_bar/table_search_bar_v2';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T extends object> {
@@ -49,7 +50,6 @@ interface Props<T extends object> {
     isEnabled?: boolean;
     fieldsToSearch: string[];
     maxCountExceeded: boolean;
-
     placeholder: string;
     onChangeSearchQuery: (searchQuery: string) => void;
     onChangeCurrentPage: (page: CurrentPage<T>) => void;
@@ -73,6 +73,7 @@ export type SortFunction<T> = (
 ) => T[];
 
 function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
+  const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
   const {
     items,
@@ -108,21 +109,33 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
     },
   } = useLegacyUrlParams();
 
-  const [currentPage, setCurrentPage] = useState<{
-    items: T[];
-    totalCount: number;
-  }>({ items: [], totalCount: 0 });
+  const filteredItems = useMemo(() => {
+    return isEmpty(searchQuery)
+      ? items
+      : getItemsFilteredBySearchQuery({
+          items,
+          fieldsToSearch: tableSearchBar.fieldsToSearch as Array<
+            keyof T & string
+          >,
+          searchQuery,
+        });
+  }, [items, searchQuery, tableSearchBar.fieldsToSearch]);
 
-  const tableOptions = useMemo(
-    () => ({
-      page: { index: pageIndex, size: pageSize },
-      sort: {
-        field: sortField as keyof T & string,
-        direction: sortDirection as 'asc' | 'desc',
-      },
-    }),
-    [pageIndex, pageSize, sortDirection, sortField]
-  );
+  const renderedItems = useMemo(() => {
+    const sortedItems = sortItems
+      ? sortFn(filteredItems, sortField, sortDirection as 'asc' | 'desc')
+      : filteredItems;
+
+    return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+  }, [
+    sortItems,
+    sortFn,
+    filteredItems,
+    sortField,
+    sortDirection,
+    pageIndex,
+    pageSize,
+  ]);
 
   const sorting = useMemo(() => {
     return {
@@ -158,66 +171,36 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
     }
     return {
       showPerPageOptions,
-      totalItemCount: currentPage.totalCount,
+      totalItemCount: filteredItems.length,
       pageIndex,
       pageSize,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
-  }, [
-    pagination,
-    showPerPageOptions,
-    currentPage.totalCount,
-    pageIndex,
-    pageSize,
-  ]);
-
-  const showNoItemsMessage = useMemo(() => {
-    return isLoading
-      ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
-          defaultMessage: 'Loading…',
-        })
-      : noItemsMessage;
-  }, [isLoading, noItemsMessage]);
+  }, [pagination, showPerPageOptions, filteredItems, pageIndex, pageSize]);
 
   const onChangeSearchQuery = useCallback(
-    ({
-      searchQuery: q,
-      shouldFetchServer,
-    }: {
-      searchQuery: string;
-      shouldFetchServer: boolean;
-    }) => {
+    (value: string) => {
+      setSearchQuery(value);
+      const shouldFetchServer =
+        tableSearchBar.maxCountExceeded || !value.includes(searchQuery);
       if (shouldFetchServer) {
-        tableSearchBar.onChangeSearchQuery(q);
+        tableSearchBar.onChangeSearchQuery(value);
       }
     },
-    [tableSearchBar]
+    [searchQuery, tableSearchBar]
   );
 
-  const onChangeCurrentPage = useCallback(
-    (page: CurrentPage<T>) => {
-      setCurrentPage(page);
-      tableSearchBar.onChangeCurrentPage(page);
-    },
-    [tableSearchBar]
-  );
+  const isSearchBarEnabled = tableSearchBar.isEnabled ?? true;
 
   return (
     <>
-      <TableSearchBar
-        isEnabled={tableSearchBar.isEnabled ?? true}
-        sortItems={sortItems}
-        sortFn={sortFn}
-        items={items}
-        fieldsToSearch={
-          tableSearchBar.fieldsToSearch as Array<keyof T & string>
-        }
-        maxCountExceeded={tableSearchBar.maxCountExceeded}
-        onChangeSearchQuery={onChangeSearchQuery}
-        tableOptions={tableOptions}
-        onChangeCurrentPage={onChangeCurrentPage}
-        placeholder={tableSearchBar.placeholder}
-      />
+      {isSearchBarEnabled ? (
+        <TableSearchBarV2
+          placeholder={tableSearchBar.placeholder}
+          searchQuery={searchQuery}
+          onChangeSearchQuery={onChangeSearchQuery}
+        />
+      ) : null}
 
       {/* @ts-expect-error TS thinks pagination should be non-nullable, but it's not */}
       <EuiBasicTable<T>
@@ -230,8 +213,14 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
               })
             : ''
         }
-        noItemsMessage={showNoItemsMessage}
-        items={currentPage.items}
+        noItemsMessage={
+          isLoading
+            ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+                defaultMessage: 'Loading…',
+              })
+            : noItemsMessage
+        }
+        items={renderedItems}
         columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
         sorting={sorting}
         onChange={onTableChange}

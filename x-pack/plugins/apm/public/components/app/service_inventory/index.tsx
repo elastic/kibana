@@ -9,6 +9,7 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { compact } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useStateDebounced } from '../../../hooks/use_debounce';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -33,7 +34,8 @@ import { SortFunction } from '../../shared/managed_table';
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
 const INITIAL_PAGE_SIZE = 25;
-const INITIAL_DATA: MainStatisticsApiResponse = {
+const INITIAL_DATA: MainStatisticsApiResponse & { requestId: string } = {
+  requestId: '',
   items: [],
   serviceOverflowCount: 0,
   maxCountExceeded: false,
@@ -83,6 +85,11 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
               searchQuery,
             },
           },
+        }).then((mainStatisticsData) => {
+          return {
+            requestId: uuidv4(),
+            ...mainStatisticsData,
+          };
         });
       }
     },
@@ -95,7 +102,6 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
       serviceGroup,
       preferred,
       searchQuery,
-
       // not used, but needed to update the requestId to call the details statistics API when table options are updated
       page,
       pageSize,
@@ -108,9 +114,15 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
 }
 
 function useServicesDetailedStatisticsFetcher({
-  currentPageItems,
+  mainStatisticsFetch,
+  initialSortField,
+  initialSortDirection,
+  tiebreakerField,
 }: {
-  currentPageItems: ServiceListItem[];
+  mainStatisticsFetch: ReturnType<typeof useServicesMainStatisticsFetcher>;
+  initialSortField: ServiceInventoryFieldName;
+  initialSortDirection: 'asc' | 'desc';
+  tiebreakerField: ServiceInventoryFieldName;
 }) {
   const {
     query: {
@@ -120,6 +132,10 @@ function useServicesDetailedStatisticsFetcher({
       kuery,
       offset,
       comparisonEnabled,
+      page = 0,
+      pageSize = INITIAL_PAGE_SIZE,
+      sortDirection = initialSortDirection,
+      sortField = initialSortField,
     },
   } = useApmParams('/services');
 
@@ -133,13 +149,27 @@ function useServicesDetailedStatisticsFetcher({
     numBuckets: 20,
   });
 
+  const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
+
+  const currentPageItems = orderServiceItems({
+    items: mainStatisticsData.items,
+    primarySortField: sortField as ServiceInventoryFieldName,
+    sortDirection,
+    tiebreakerField,
+  }).slice(page * pageSize, (page + 1) * pageSize);
+
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
       const serviceNames = compact(
         currentPageItems.map(({ serviceName }) => serviceName)
       );
-
-      if (start && end && serviceNames.length > 0 && dataSourceOptions) {
+      if (
+        start &&
+        end &&
+        serviceNames.length > 0 &&
+        mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+        dataSourceOptions
+      ) {
         return callApmApi('POST /internal/apm/services/detailed_statistics', {
           params: {
             query: {
@@ -156,8 +186,10 @@ function useServicesDetailedStatisticsFetcher({
               bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
             },
             body: {
-              // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
-              serviceNames: JSON.stringify(serviceNames.sort()),
+              serviceNames: JSON.stringify(
+                // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
+                serviceNames.sort()
+              ),
             },
           },
         });
@@ -165,7 +197,7 @@ function useServicesDetailedStatisticsFetcher({
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentPageItems, offset, comparisonEnabled],
+    [mainStatisticsData.requestId, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
@@ -183,8 +215,9 @@ export function ServiceInventory() {
     200
   );
 
-  const { mainStatisticsData, mainStatisticsStatus } =
+  const mainStatisticsFetch =
     useServicesMainStatisticsFetcher(debouncedSearchQuery);
+  const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
   const displayHealthStatus = mainStatisticsData.items.some(
     (item) => 'healthStatus' in item
@@ -205,7 +238,10 @@ export function ServiceInventory() {
   const initialSortDirection = 'desc';
 
   const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
-    currentPageItems: currentPage.items,
+    mainStatisticsFetch,
+    initialSortField,
+    initialSortDirection,
+    tiebreakerField,
   });
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
