@@ -38,6 +38,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFieldType } from '@kbn/field-utils';
+import { UI_SETTINGS } from '@kbn/data-service';
 import type { SupportedFieldType } from '../../../../../common/types';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -70,6 +71,7 @@ import {
 } from '../../hooks/use_esql_data';
 import type { NonAggregatableField, OverallStats } from '../../types/overall_stats';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { DEFAULT_BAR_TARGET } from '../../../common/constants';
 
 const defaults = getDefaultPageState();
 
@@ -134,7 +136,7 @@ export interface IndexDataVisualizerESQLProps {
 
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { data, fieldFormats } = services;
+  const { data, fieldFormats, uiSettings } = services;
   const euiTheme = useCurrentEuiTheme();
 
   const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
@@ -219,12 +221,12 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     }
 
     const bounds = tf.getActiveBounds();
-    const BAR_TARGET = 75;
+    const barTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET) ?? DEFAULT_BAR_TARGET;
     buckets.setInterval('auto');
 
     if (bounds) {
       buckets.setBounds(bounds);
-      buckets.setBarTarget(BAR_TARGET);
+      buckets.setBarTarget(barTarget);
     }
 
     const aggInterval = buckets.getInterval();

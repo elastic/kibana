@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type DataViewField } from '@kbn/data-plugin/common';
+import { UI_SETTINGS, type DataViewField } from '@kbn/data-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import seedrandom from 'seedrandom';
 import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
@@ -44,6 +44,7 @@ import { useOverallStats } from './use_overall_stats';
 import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getSupportedAggs } from '../utils/get_supported_aggs';
+import { DEFAULT_BAR_TARGET } from '../../common/constants';
 
 const defaults = getDefaultPageState();
 
@@ -205,12 +206,12 @@ export const useDataVisualizerGridData = (
       }
 
       const bounds = tf.getActiveBounds();
-      const BAR_TARGET = 75;
+      const barTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET) ?? DEFAULT_BAR_TARGET;
       buckets.setInterval('auto');
 
       if (bounds) {
         buckets.setBounds(bounds);
-        buckets.setBarTarget(BAR_TARGET);
+        buckets.setBarTarget(barTarget);
       }
 
       const aggInterval = buckets.getInterval();

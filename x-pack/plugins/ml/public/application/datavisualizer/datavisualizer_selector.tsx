@@ -176,7 +176,7 @@ export const DatavisualizerSelector: FC = () => {
                       tooltipContent={
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.technicalPreviewBadge.titleMsg"
-                          defaultMessage="ES|QL is currently in technical preview."
+                          defaultMessage="ES|QL is in technical preview."
                         />
                       }
                       tooltipPosition={'right'}
