@@ -159,19 +159,6 @@ describe('Header Actions', () => {
         expect(queryByTestId('untrack-alert-button')).not.toHaveAttribute('disabled');
       });
 
-      it('should disable the "Mark as untracked" button when alert status is untracked', async () => {
-        const { queryByTestId, findByTestId } = render(
-          <HeaderActions
-            alert={untrackedAlert}
-            alertStatus={untrackedAlert.fields[ALERT_STATUS] as AlertStatus}
-            onUntrackAlert={mockOnUntrackAlert}
-          />
-        );
-
-        fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
-        expect(queryByTestId('untrack-alert-button')).toHaveAttribute('disabled');
-      });
-
       it('should offer a "Go to rule details" button which opens the rule details page in a new tab', async () => {
         const { queryByTestId, findByTestId } = render(
           <HeaderActions
@@ -208,6 +195,19 @@ describe('Header Actions', () => {
 
       fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
       expect(queryByTestId('edit-rule-button')).toHaveAttribute('disabled');
+    });
+
+    it('should disable the "Mark as untracked" button when alert status is untracked', async () => {
+      const { queryByTestId, findByTestId } = render(
+        <HeaderActions
+          alert={untrackedAlert}
+          alertStatus={untrackedAlert.fields[ALERT_STATUS] as AlertStatus}
+          onUntrackAlert={mockOnUntrackAlert}
+        />
+      );
+
+      fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+      expect(queryByTestId('untrack-alert-button')).toHaveAttribute('disabled');
     });
 
     it("should disable the 'View rule details' when the rule is not available/deleted", async () => {
