@@ -280,8 +280,6 @@ export function Chart({
     });
   }
 
-  console.log(currentSuggestion, externalVisContext?.attributes);
-
   return (
     <EuiFlexGroup
       {...a11yCommonProps}

@@ -22,7 +22,6 @@ export const toExternalVisContextJSONString = (
 export const fromExternalVisContextJSONString = (
   visContextJSON: string | undefined
 ): ExternalVisContext | undefined => {
-  console.log('parsing JSON for', visContextJSON);
   if (!visContextJSON) {
     return undefined;
   }
@@ -39,8 +38,6 @@ export const fromExternalVisContextJSONString = (
   } catch {
     // nothing
   }
-
-  console.log('parsed custom vis context', visContext);
 
   return visContext;
 };

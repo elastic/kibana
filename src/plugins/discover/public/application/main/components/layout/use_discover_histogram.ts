@@ -337,7 +337,7 @@ export const useDiscoverHistogram = ({
 
   const onVisContextChanged = useCallback(
     (visContext: ExternalVisContext | undefined) => {
-      console.log('histogram vis context changed', visContext);
+      console.log('got new vis context from histogram', visContext);
       stateContainer.appState.update({ visContext });
     },
     [stateContainer]
@@ -409,8 +409,6 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
     map(([prev, curr]) => {
       const changes: Partial<UnifiedHistogramState> = {};
 
-      console.log('app state changed', curr);
-
       if (!curr) {
         return changes;
       }
@@ -428,7 +426,7 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
       }
 
       if (!isEqual(prev?.visContext, curr.visContext)) {
-        console.log('noticed new discover vis', curr.visContext);
+        console.log('noticed changes in discover vis context', curr.visContext);
         changes.externalVisContext = curr.visContext;
       }
 
