@@ -65,18 +65,19 @@ const useStoredPatternRollups = (patterns: string[]) => {
   const [storedRollups, setStoredRollups] = useState<Record<string, PatternRollup>>({});
 
   useEffect(() => {
+    let ignore = false;
     const abortController = new AbortController();
 
     const fetchStoredRollups = async () => {
       const results = await getResults({ httpFetch, abortController, patterns, toasts });
-      if (results?.length && !abortController.signal.aborted) {
+      if (results?.length && !ignore) {
         setStoredRollups(Object.fromEntries(results.map(({ rollup }) => [rollup.pattern, rollup])));
       }
     };
 
     fetchStoredRollups();
     return () => {
-      abortController.abort();
+      ignore = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [patterns]);

@@ -37,9 +37,9 @@ export const createResultFromDocument = (document: ResultDocument): Result => {
   return result;
 };
 
-// convert objects with indexName as key to arrays so they can be stored in ES
-// this is needed since ES parses object keys as dot-separated field names
-// and it crashes trying to index document with object key starting with `.` (e.g. `.index-name-checked`)
+// ES parses object keys containing `.` as nested dot-separated field names (e.g. `event.name`).
+// we need to convert documents containing objects with "indexName" keys (e.g. `.index-name-checked`)
+// to object arrays so they can be stored correctly, we keep the key in the `_indexName` field.
 const indexObjectToIndexArray = (obj: IndexObject): IndexArray =>
   Object.entries(obj).map(([key, value]) => ({ ...value, _indexName: key }));
 

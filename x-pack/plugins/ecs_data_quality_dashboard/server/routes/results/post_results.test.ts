@@ -46,6 +46,18 @@ describe('postResultsRoute route', () => {
     expect(response.body).toEqual({ result: 'created' });
   });
 
+  it('handles results data stream error', async () => {
+    const errorMessage = 'Installation Error!';
+    context.dataQualityDashboard.getResultsIndexName.mockRejectedValueOnce(new Error(errorMessage));
+    const response = await server.inject(req, requestContextMock.convertContext(context));
+    expect(response.status).toEqual(503);
+    expect(response.body).toEqual({
+      message: expect.stringContaining(errorMessage),
+      status_code: 503,
+    });
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(errorMessage));
+  });
+
   it('handles error', async () => {
     const errorMessage = 'Error!';
     const mockIndex = context.core.elasticsearch.client.asInternalUser.index;

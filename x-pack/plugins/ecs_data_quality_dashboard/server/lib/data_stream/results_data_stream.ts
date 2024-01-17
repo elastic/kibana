@@ -12,11 +12,11 @@ import { resultsFieldMap } from './results_field_map';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
-export const RESULTS_DATA_STREAM_NAME = '.kibana-dqa-dashboard-results';
+const RESULTS_DATA_STREAM_NAME = '.kibana-data-quality-dashboard-results';
 
-const RESULTS_INDEX_TEMPLATE_NAME = '.kibana-dqa-dashboard-results-index-template';
-const RESULTS_COMPONENT_TEMPLATE_NAME = '.kibana-dqa-dashboard-results-mappings';
-const ECS_COMPONENT_TEMPLATE_NAME = '.kibana-dqa-dashboard-ecs-mappings';
+const RESULTS_INDEX_TEMPLATE_NAME = '.kibana-data-quality-dashboard-results-index-template';
+const RESULTS_COMPONENT_TEMPLATE_NAME = '.kibana-data-quality-dashboard-results-mappings';
+const ECS_COMPONENT_TEMPLATE_NAME = '.kibana-data-quality-dashboard-ecs-mappings';
 
 export class ResultsDataStream {
   private readonly dataStream: DataStreamSpacesAdapter;

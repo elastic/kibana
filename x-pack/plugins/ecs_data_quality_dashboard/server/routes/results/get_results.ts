@@ -50,15 +50,14 @@ export const getResultsRoute = (
         validate: { request: { query: buildRouteValidation(GetResultQuery) } },
       },
       async (context, request, response) => {
-        const { dataQualityDashboard } = await context.resolve(['core', 'dataQualityDashboard']);
-        const { getResultsIndexName } = dataQualityDashboard;
+        const services = await context.resolve(['core', 'dataQualityDashboard']);
         const resp = buildResponse(response);
 
         let index: string;
         try {
-          index = await getResultsIndexName();
+          index = await services.dataQualityDashboard.getResultsIndexName();
         } catch (err) {
-          logger.error(JSON.stringify(err));
+          logger.error(`[GET results] Error retrieving results index name: ${err.message}`);
           return resp.error({
             body: `${API_RESULTS_INDEX_NOT_AVAILABLE}: ${err.message}`,
             statusCode: 503,
@@ -67,7 +66,7 @@ export const getResultsRoute = (
 
         try {
           const query = { index, ...getQuery(request.query.patterns) };
-          const esClient = (await context.core).elasticsearch.client.asInternalUser;
+          const esClient = services.core.elasticsearch.client.asInternalUser;
 
           const { aggregations } = await esClient.search<
             ResultDocument,

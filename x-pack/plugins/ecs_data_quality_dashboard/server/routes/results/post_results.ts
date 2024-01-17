@@ -35,15 +35,14 @@ export const postResultsRoute = (
         },
       },
       async (context, request, response) => {
-        const { dataQualityDashboard } = await context.resolve(['core', 'dataQualityDashboard']);
-        const { getResultsIndexName } = dataQualityDashboard;
+        const services = await context.resolve(['core', 'dataQualityDashboard']);
         const resp = buildResponse(response);
 
         let index: string;
         try {
-          index = await getResultsIndexName();
+          index = await services.dataQualityDashboard.getResultsIndexName();
         } catch (err) {
-          logger.error(JSON.stringify(err));
+          logger.error(`[POST result] Error retrieving results index name: ${err.message}`);
           return resp.error({
             body: `${API_RESULTS_INDEX_NOT_AVAILABLE}: ${err.message}`,
             statusCode: 503,
@@ -52,7 +51,7 @@ export const postResultsRoute = (
 
         try {
           const document = createDocumentFromResult(request.body);
-          const esClient = (await context.core).elasticsearch.client.asInternalUser;
+          const esClient = services.core.elasticsearch.client.asInternalUser;
           const outcome = await esClient.index({ index, body: document });
 
           return response.ok({ body: { result: outcome.result } });
