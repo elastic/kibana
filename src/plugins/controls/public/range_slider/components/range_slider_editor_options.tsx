@@ -40,6 +40,7 @@ export const RangeSliderEditorOptions = ({
           }}
           min={0}
           isInvalid={state.step <= 0}
+          data-test-subj="rangeSliderControl__stepAdditionalSetting"
         />
       </EuiFormRow>
     </>

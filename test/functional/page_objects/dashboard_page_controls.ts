@@ -627,6 +627,12 @@ export class DashboardPageControls extends FtrService {
     return dataViewName;
   }
 
+  // Range Slider editor functions
+  public async rangeSliderEditorSetStep(value: number) {
+    this.log.debug(`Setting range slider step to ${value}`);
+    await this.testSubjects.setValue('rangeSliderControl__stepAdditionalSetting', `${value}`);
+  }
+
   // Range slider functions
   public async rangeSliderGetLowerBoundAttribute(controlId: string, attribute: string) {
     this.log.debug(`Getting range slider lower bound ${attribute} for ${controlId}`);

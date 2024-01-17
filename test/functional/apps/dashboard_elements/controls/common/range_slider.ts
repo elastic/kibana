@@ -134,6 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(false);
         await dashboardControls.controlsEditorSetfield('dayOfWeek');
         await dashboardControls.controlsEditorSetControlType(RANGE_SLIDER_CONTROL);
+        await dashboardControls.rangeSliderEditorSetStep(5);
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading(firstId);
         await dashboardControls.validateRange('placeholder', firstId, '0', '6');
