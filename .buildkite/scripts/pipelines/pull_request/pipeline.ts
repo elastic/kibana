@@ -88,7 +88,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/observability_onboarding/])) ||
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/observability_onboarding/,
+        /^x-pack\/plugins\/fleet/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(
