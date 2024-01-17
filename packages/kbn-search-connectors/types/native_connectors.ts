@@ -709,61 +709,6 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      repo_type: {
-        default_value: null,
-        depends_on: [],
-        display: DisplayType.DROPDOWN,
-        label: i18n.translate('searchConnectors.nativeConnectors.github.repo_type.label', {
-          defaultMessage: 'Repository Type',
-        }),
-        options: [
-          {
-            label: i18n.translate('searchConnectors.nativeConnectors.github.options.organization', {
-              defaultMessage: 'Organization',
-            }),
-            value: 'organization',
-          },
-          {
-            label: i18n.translate('searchConnectors.nativeConnectors.github.options.other', {
-              defaultMessage: 'Other',
-            }),
-            value: 'other',
-          },
-        ],
-        order: 4,
-        required: true,
-        sensitive: false,
-        tooltip: i18n.translate('searchConnectors.nativeConnectors.github.repo_type', {
-          defaultMessage:
-            'The Document Level Security feature is not available for the Other Repository Type',
-        }),
-        type: FieldType.STRING,
-        ui_restrictions: [],
-        validations: [],
-        value: 'other',
-      },
-      org_name: {
-        default_value: null,
-        depends_on: [
-          {
-            field: 'repo_type',
-            value: 'organization',
-          },
-        ],
-        display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.github.org_name.label', {
-          defaultMessage: 'Organization Name',
-        }),
-        options: [],
-        order: 5,
-        required: true,
-        sensitive: false,
-        tooltip: null,
-        type: FieldType.STRING,
-        ui_restrictions: [],
-        validations: [],
-        value: '',
-      },
       repositories: {
         default_value: null,
         depends_on: [],
@@ -772,7 +717,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'List of repositories',
         }),
         options: [],
-        order: 6,
+        order: 4,
         required: true,
         sensitive: false,
         tooltip: i18n.translate('searchConnectors.nativeConnectors.github.listOfRepos.tooltip', {
@@ -789,7 +734,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: ENABLE_SSL_LABEL,
         options: [],
-        order: 7,
+        order: 5,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -809,7 +754,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TEXTBOX,
         label: SSL_CERTIFICATE_LABEL,
         options: [],
-        order: 8,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -824,7 +769,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.NUMERIC,
         label: RETRIES_PER_REQUEST_LABEL,
         options: [],
-        order: 9,
+        order: 7,
         required: false,
         sensitive: false,
         tooltip: null,
@@ -839,38 +784,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: DisplayType.TOGGLE,
         label: USE_TEXT_EXTRACTION_SERVICE_LABEL,
         options: [],
-        order: 10,
+        order: 8,
         required: true,
         sensitive: false,
         tooltip: USE_TEXT_EXTRACTION_SERVICE_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: ['advanced'],
-        validations: [],
-        value: false,
-      },
-      use_document_level_security: {
-        default_value: null,
-        depends_on: [
-          {
-            field: 'repo_type',
-            value: 'organization',
-          },
-        ],
-        display: DisplayType.TOGGLE,
-        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
-        options: [],
-        order: 11,
-        required: true,
-        sensitive: false,
-        tooltip: i18n.translate(
-          'searchConnectors.nativeConnectors.github.configuration.useDocumentLevelSecurityTooltip',
-          {
-            defaultMessage:
-              'Document level security ensures identities and permissions set in GitHub are maintained in Elasticsearch. This enables you to restrict and personalize read-access users and groups have to documents in this index. Access control syncs ensure this metadata is kept up to date in your Elasticsearch documents.',
-          }
-        ),
-        type: FieldType.BOOLEAN,
-        ui_restrictions: [],
         validations: [],
         value: false,
       },
