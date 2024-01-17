@@ -16,7 +16,7 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Detection Engine Serverless / Large Prebuilt Rules Package Installation API Integration Tests',
+      'Rules Management - Large Prebuilt Rules Package Installation Integration Tests - Serverless Env - Complete License',
   },
   kbnTestServerArgs: [
     /*  Tests in this directory simulate an air-gapped environment in which the instance doesn't have access to EPR.
