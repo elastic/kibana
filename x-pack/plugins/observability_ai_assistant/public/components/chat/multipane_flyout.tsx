@@ -6,7 +6,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyout } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 interface InlineEditingContent {
@@ -41,12 +41,12 @@ export function MultiPaneFlyout({
           style={{
             flexBasis: flexBasisCol1,
             ...(secondSlotContentVisibility
-              ? { borderRight: `solid 1px ${euiThemeVars.euiBorderColor}` }
+              ? { borderRight: `solid 1px ${euiThemeVars.euiBorderColor}`, zIndex: 1 }
               : {}),
           }}
           data-test-subj="observabilityAiAssistantFlyoutMainContentWrapper"
         >
-          <MainContent content={mainContent} />
+          {mainContent}
         </EuiFlexItem>
 
         <EuiFlexItem
@@ -77,7 +77,7 @@ function InlineEditingContent({
   const style = css`
     padding: 0;
     position: relative;
-    block-size: 100%;
+    block-size: ${visible ? '100%' : 0};
    }
 `;
 
@@ -87,34 +87,13 @@ function InlineEditingContent({
     }
   }, [setContainer]);
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m" css={style}>
-      <EuiFlexGroup
-        className="lnsConfigPanel__overlay"
-        css={css`
-           block-size: ${visible ? '100%' : 0};
-          }
-        `}
-        direction="column"
-        ref={containerRef}
-        gutterSize="none"
-        data-test-subj="observabilityAiAssistantFlyoutSecondSlot"
-      />
-    </EuiPanel>
-  );
-}
-
-function MainContent({ content }: { content: JSX.Element }) {
-  const style = css`
-    padding-top: ${euiThemeVars.euiSizeM};
-    padding-botton: ${euiThemeVars.euiSizeM};
-    block-size: 100%;
-    pointer-events: auto;
-   }
-  `;
-
-  return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m" css={style}>
-      {content}
-    </EuiPanel>
+    <EuiFlexGroup
+      className="lnsConfigPanel__overlay"
+      css={style}
+      direction="column"
+      ref={containerRef}
+      gutterSize="none"
+      data-test-subj="observabilityAiAssistantFlyoutSecondSlot"
+    />
   );
 }
