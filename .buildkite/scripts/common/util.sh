@@ -200,6 +200,7 @@ vault_set() {
   shift
   fields=("$@")
 
+
   fullPath="$VAULT_PATH_PREFIX/$key_path"
 
   # shellcheck disable=SC2068
