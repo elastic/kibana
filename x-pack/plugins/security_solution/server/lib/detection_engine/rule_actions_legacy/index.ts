@@ -8,13 +8,13 @@
 export * from './api/register_routes';
 
 // eslint-disable-next-line no-restricted-imports
-export { legacyRulesNotificationAlertType } from './logic/notifications/legacy_rules_notification_alert_type';
+export { legacyRulesNotificationRuleType } from './logic/notifications/legacy_rules_notification_rule_type';
 // eslint-disable-next-line no-restricted-imports
-export { legacyIsNotificationAlertExecutor } from './logic/notifications/legacy_types';
+export { isLegacyNotificationRuleExecutor } from './logic/notifications/legacy_types';
 // eslint-disable-next-line no-restricted-imports
 export type {
-  LegacyRuleNotificationAlertType,
-  LegacyRuleNotificationAlertTypeParams,
+  LegacyRuleNotificationRuleType,
+  LegacyRuleNotificationRuleTypeParams,
 } from './logic/notifications/legacy_types';
 export type { NotificationRuleTypeParams } from './logic/notifications/schedule_notification_actions';
 export { scheduleNotificationActions } from './logic/notifications/schedule_notification_actions';

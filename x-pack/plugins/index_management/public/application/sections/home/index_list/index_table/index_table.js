@@ -42,7 +42,6 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
-import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
@@ -182,14 +181,6 @@ export class IndexTable extends Component {
 
   componentDidMount() {
     this.props.loadIndices();
-    this.interval = setInterval(
-      () =>
-        this.props.reloadIndices(
-          this.props.indices.map((i) => i.name),
-          { asSystemRequest: true }
-        ),
-      REFRESH_RATE_INDEX_LIST
-    );
     const { location, filterChanged } = this.props;
     const { filter } = qs.parse((location && location.search) || '');
     if (filter) {
@@ -210,7 +201,6 @@ export class IndexTable extends Component {
     // navigating back to this tab would just show an empty list because the backing indices
     // would be hidden.
     this.props.filterChanged('');
-    clearInterval(this.interval);
   }
 
   readURLParams() {
@@ -653,9 +643,7 @@ export class IndexTable extends Component {
                       <EuiButton
                         isLoading={indicesLoading}
                         color="success"
-                        onClick={() => {
-                          loadIndices();
-                        }}
+                        onClick={loadIndices}
                         iconType="refresh"
                         data-test-subj="reloadIndicesButton"
                       >
