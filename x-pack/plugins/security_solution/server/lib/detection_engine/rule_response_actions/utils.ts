@@ -132,13 +132,12 @@ export const getExecuteAlerts = (
     };
   }, {} as Record<string, AlertsAction>);
 
-export const getGetFileAlerts = (alerts: AlertWithAgent[], config: { path: string }) =>
+export const getGetFileAlerts = (alerts: AlertWithAgent[]) =>
   alerts.reduce((acc, alert) => {
     const { id: agentId, name: agentName } = alert.agent || {};
 
     const hostName = alert.host?.name;
     const filePath = get(alert, 'file.path');
-    // We calculate actions to be triggered per agentId - because execute seems to not yet support multiple agents
     return {
       ...acc,
       [filePath]: {

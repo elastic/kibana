@@ -126,7 +126,7 @@ components:
       required:
         - command
 
-    KillProcessParams:
+    ProcessesParams:
       type: object
       properties:
         command:
@@ -187,7 +187,7 @@ components:
         params:
           oneOf:
             - $ref: '#/components/schemas/DefaultParams'
-            - $ref: '#/components/schemas/KillProcessParams'
+            - $ref: '#/components/schemas/ProcessesParams'
             - $ref: '#/components/schemas/ExecuteParams'
       required:
         - action_type_id
@@ -204,7 +204,7 @@ components:
         params:
           oneOf:
             - $ref: '#/components/schemas/DefaultParams'
-            - $ref: '#/components/schemas/KillProcessParams'
+            - $ref: '#/components/schemas/ProcessesParams'
             - $ref: '#/components/schemas/ExecuteParams'
       required:
         - actionTypeId

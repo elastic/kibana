@@ -7,6 +7,13 @@
 
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { each } from 'lodash';
+
+import {
+  isExecuteAction,
+  isGetFileAction,
+  isIsolateAction,
+  isProcessesAction,
+} from './endpoint_params_type_guards';
 import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
@@ -18,8 +25,6 @@ import {
 } from './utils';
 
 import type { ResponseActionAlerts, AlertsAction } from './types';
-import type { ExecuteParams } from '../../../../common/api/detection_engine';
-import type { DefaultParams } from '../../../../common/api/detection_engine';
 
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
@@ -35,7 +40,7 @@ export const endpointResponseAction = (
     rule_name: alerts[0][ALERT_RULE_NAME],
   };
 
-  if (command === 'isolate') {
+  if (isIsolateAction(responseAction.params)) {
     const actionPayload = getIsolateAlerts(alerts);
     return Promise.all([
       endpointAppContextService.getActionCreateService().createActionFromAlert(
@@ -47,18 +52,6 @@ export const endpointResponseAction = (
       ),
     ]);
   }
-
-  const isExecuteAction = (
-    params: RuleResponseEndpointAction['params']
-  ): params is ExecuteParams => {
-    return params.command === 'execute';
-  };
-
-  const isGetFileAction = (
-    params: RuleResponseEndpointAction['params']
-  ): params is DefaultParams => {
-    return params.command === 'get-file';
-  };
 
   if (isExecuteAction(responseAction.params)) {
     const actionAlerts = getExecuteAlerts(alerts, responseAction.params.config);
@@ -75,7 +68,7 @@ export const endpointResponseAction = (
   }
 
   if (isGetFileAction(responseAction.params)) {
-    const actionAlerts = getGetFileAlerts(alerts, responseAction.params.config);
+    const actionAlerts = getGetFileAlerts(alerts);
 
     return each(actionAlerts, (actionPayload) => {
       return endpointAppContextService.getActionCreateService().createActionFromAlert(
@@ -88,7 +81,7 @@ export const endpointResponseAction = (
     });
   }
 
-  const createProcessActionFromAlerts = (actionAlerts: Record<string, AlertsAction>) => {
+  export const createProcessActionFromAlerts = (actionAlerts: Record<string, AlertsAction>) => {
     const createAction = async (alert: AlertsAction) => {
       const { hosts, parameters, error } = alert;
 
@@ -108,7 +101,7 @@ export const endpointResponseAction = (
     return each(actionAlerts, createAction);
   };
 
-  if (command === 'kill-process' || command === 'suspend-process') {
+  if (isProcessesAction(responseAction.params)) {
     const foundFields = getProcessAlerts(alerts, responseAction.params.config);
     const notFoundField = getErrorProcessAlerts(alerts, responseAction.params.config);
 

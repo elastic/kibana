@@ -83,8 +83,8 @@ export const DefaultParams = z.object({
   comment: z.string().optional(),
 });
 
-export type KillProcessParams = z.infer<typeof KillProcessParams>;
-export const KillProcessParams = z.object({
+export type ProcessesParams = z.infer<typeof ProcessesParams>;
+export const ProcessesParams = z.object({
   command: z.enum(['kill-process', 'suspend-process']),
   comment: z.string().optional(),
   config: z.object({
@@ -118,13 +118,13 @@ export const ExecuteParams = z.object({
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
 export const EndpointResponseAction = z.object({
   action_type_id: z.literal('.endpoint'),
-  params: z.union([DefaultParams, KillProcessParams, ExecuteParams]),
+  params: z.union([DefaultParams, ProcessesParams, ExecuteParams]),
 });
 
 export type RuleResponseEndpointAction = z.infer<typeof RuleResponseEndpointAction>;
 export const RuleResponseEndpointAction = z.object({
   actionTypeId: z.literal('.endpoint'),
-  params: z.union([DefaultParams, KillProcessParams, ExecuteParams]),
+  params: z.union([DefaultParams, ProcessesParams, ExecuteParams]),
 });
 
 export type ResponseAction = z.infer<typeof ResponseAction>;
