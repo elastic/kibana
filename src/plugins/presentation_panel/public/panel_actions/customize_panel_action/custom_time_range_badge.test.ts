@@ -54,8 +54,8 @@ describe('custom time range badge action', () => {
   it('calls onChange when time range changes', () => {
     const onChange = jest.fn();
     updateTimeRange(mockTimeRange);
-    updateTimeRange(undefined);
     action.subscribeToCompatibilityChanges(context, onChange);
+    updateTimeRange(undefined);
     expect(onChange).toHaveBeenCalledWith(false, action);
   });
 });

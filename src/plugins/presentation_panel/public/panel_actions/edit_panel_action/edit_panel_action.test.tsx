@@ -64,8 +64,8 @@ describe('Edit panel action', () => {
 
   it('calls onChange when view mode changes', () => {
     const onChange = jest.fn();
-    updateViewMode('view');
     action.subscribeToCompatibilityChanges(context, onChange);
+    updateViewMode('view');
     expect(onChange).toHaveBeenCalledWith(false, action);
   });
 });

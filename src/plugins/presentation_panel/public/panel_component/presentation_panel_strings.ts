@@ -30,6 +30,11 @@ export const getErrorCallToAction = (title: string) =>
     values: { value: title },
   });
 
+export const getErrorLoadingPanel = () =>
+  i18n.translate('presentationPanel.error.errorWhenLoadingPanel', {
+    defaultMessage: 'An error occurred while loading this panel.',
+  });
+
 export const getEditTitleAriaLabel = (title?: string) =>
   i18n.translate('presentationPanel.header.titleAriaLabel', {
     defaultMessage: 'Click to edit title: {title}',

@@ -16,6 +16,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { untilPluginStartServicesReady } from '../kibana_services';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelProps } from './types';
+import { getErrorLoadingPanel } from './presentation_panel_strings';
 
 export const PresentationPanel = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -37,7 +38,7 @@ export const PresentationPanel = <
     return { Panel, unwrappedComponent };
   }, []);
 
-  if (error) {
+  if (error || (!loading && (!value?.Panel || !value?.unwrappedComponent))) {
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -45,7 +46,7 @@ export const PresentationPanel = <
         data-test-subj="embeddableError"
         justifyContent="center"
       >
-        <PresentationPanelError error={error} />
+        <PresentationPanelError error={error ?? new Error(getErrorLoadingPanel())} />
       </EuiFlexGroup>
     );
   }
