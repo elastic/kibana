@@ -100,7 +100,7 @@ export const getStreamObservable = ({
             observer.error(err);
             return;
           }
-          readLangChain();
+          readSSE();
         })
         .catch((err) => {
           observer.error(err);
