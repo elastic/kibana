@@ -27,6 +27,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { DragDrop, useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -43,6 +44,7 @@ import {
   UserMessagesGetter,
   AddUserMessages,
   isMessageRemovable,
+  VisualizationDisplayOptions,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
@@ -72,7 +74,11 @@ import {
   selectExecutionContextSearch,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
-import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
+import {
+  inferTimeField,
+  DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS,
+  EXPRESSION_BUILD_ERROR_ID,
+} from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { WorkspaceErrors } from './workspace_errors';
 
@@ -112,8 +118,6 @@ const executionContext: KibanaExecutionContext = {
     type: 'lens',
   },
 };
-
-const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';
 
 export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
   const { getSuggestionForField, ...restProps } = props;
@@ -295,11 +299,13 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const workspaceErrors = useCallback(() => {
-    return getUserMessages(['visualization', 'visualizationInEditor'], {
-      severity: 'error',
-    });
-  }, [getUserMessages]);
+  const workspaceErrors = useCallback(
+    () =>
+      getUserMessages(['visualization', 'visualizationInEditor'], {
+        severity: 'error',
+      }),
+    [getUserMessages]
+  );
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
@@ -409,6 +415,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [expressionExists, localState.expressionToRender]);
 
+  const [chartSizeSpec, setChartSize] = useState<ChartSizeSpec | undefined>();
+
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
       if (!plugins.uiActions) {
@@ -439,10 +447,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           })
         );
       }
+
+      if (isChartSizeEvent(event)) {
+        setChartSize(event.data);
+      }
     },
     [plugins.data.datatableUtilities, plugins.uiActions, activeVisualization, dispatchLens]
   );
 
+  const displayOptions = activeVisualization?.getDisplayOptions?.();
   const hasCompatibleActions = useCallback(
     async (event: ExpressionRendererEvent) => {
       if (!plugins.uiActions) {
@@ -474,6 +487,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
 
   const renderDragDropPrompt = () => {
+    if (chartSizeSpec) {
+      setChartSize(undefined);
+    }
+
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
@@ -528,6 +545,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderApplyChangesPrompt = () => {
+    if (chartSizeSpec) {
+      setChartSize(undefined);
+    }
+
     const applyChangesString = i18n.translate('xpack.lens.editorFrame.applyChanges', {
       defaultMessage: 'Apply changes',
     });
@@ -586,6 +607,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         onComponentRendered={() => {
           visualizationRenderStartTime.current = performance.now();
         }}
+        displayOptions={displayOptions}
       />
     );
   };
@@ -635,7 +657,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   return (
     <WorkspacePanelWrapper
       framePublicAPI={framePublicAPI}
-      visualizationState={visualization.state}
       visualizationId={visualization.activeId}
       datasourceStates={datasourceStates}
       datasourceMap={datasourceMap}
@@ -643,6 +664,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       isFullscreen={isFullscreen}
       lensInspector={lensInspector}
       getUserMessages={getUserMessages}
+      displayOptions={chartSizeSpec}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>
@@ -682,6 +704,7 @@ export const VisualizationWrapper = ({
   onRender$,
   onData$,
   onComponentRendered,
+  displayOptions,
 }: {
   expression: string | null | undefined;
   lensInspector: LensInspector;
@@ -695,6 +718,7 @@ export const VisualizationWrapper = ({
   onRender$: () => void;
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onComponentRendered: () => void;
+  displayOptions: VisualizationDisplayOptions | undefined;
 }) => {
   useEffect(() => {
     onComponentRendered();
@@ -747,7 +771,7 @@ export const VisualizationWrapper = ({
     >
       <ExpressionRendererComponent
         className="lnsExpressionRenderer__component"
-        padding="m"
+        padding={displayOptions?.noPadding ? undefined : 'm'}
         expression={expression!}
         searchContext={searchContext}
         searchSessionId={searchSessionId}
