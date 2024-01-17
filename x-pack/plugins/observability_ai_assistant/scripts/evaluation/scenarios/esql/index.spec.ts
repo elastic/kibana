@@ -302,6 +302,21 @@ describe('ES|QL query generation', () => {
       });
     });
 
+    it('error message and date', async () => {
+      await evaluateEsqlQuery({
+        question:
+          'From logs-apm*, I want to see the 5 latest messages, I want to display only the date that they were indexed, processor.event and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
+        expected: `FROM logs-apm*
+        | SORT @timestamp DESC
+        | EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
+        | KEEP formatted_date, log.level, message
+        | LIMIT 5`,
+        execute: true
+      });
+    });
+
+
+
     after(async () => {
       await synthtraceEsClients.apmSynthtraceEsClient.clean();
     });
