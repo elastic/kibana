@@ -46,8 +46,8 @@ export class SharePageObject extends FtrService {
    * in a pure OSS environment, the permalinks sharing panel is displayed initially
    */
   async openPermaLinks() {
-    if (await this.testSubjects.exists('shareModal-links')) {
-      await this.testSubjects.click(`shareModal-links`);
+    if (await this.testSubjects.exists('sharePanel-Permalinks')) {
+      await this.testSubjects.click(`sharePanel-Permalinks`);
     }
   }
 
