@@ -25,7 +25,7 @@ export const getPersisted = async ({
   history,
 }: {
   initialInput: LensEmbeddableInput;
-  lensServices: LensAppServices;
+  lensServices: Pick<LensAppServices, 'attributeService' | 'notifications' | 'spaces' | 'http'>;
   history?: History<unknown>;
 }): Promise<
   | {

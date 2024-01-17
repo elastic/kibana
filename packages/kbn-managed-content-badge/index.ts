@@ -16,7 +16,9 @@ export const getManagedContentBadge: (tooltipText: string) => TopNavMenuBadgePro
   badgeText: i18n.translate('managedContentBadge.text', {
     defaultMessage: 'Managed',
   }),
-  title: '', // TODO
+  title: i18n.translate('managedContentBadge.text', {
+    defaultMessage: 'Managed',
+  }),
   color: 'primary',
   iconType: 'glasses',
   toolTipProps: {

@@ -36,7 +36,19 @@ export type SaveModalContainerProps = {
   runSave?: (saveProps: SaveProps, options: { saveToLibrary: boolean }) => void;
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
-  lensServices: LensAppServices;
+  lensServices: Pick<
+    LensAppServices,
+    | 'attributeService'
+    | 'savedObjectsTagging'
+    | 'application'
+    | 'dashboardFeatureFlag'
+    | 'notifications'
+    | 'http'
+    | 'chrome'
+    | 'overlays'
+    | 'stateTransfer'
+    | 'savedObjectStore'
+  >;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   // is this visualization managed by the system?
   managed: boolean;
@@ -208,7 +220,17 @@ export const runSaveLensVisualization = async (
     switchDatasource?: () => void;
     savedObjectStore: SavedObjectIndexStore;
   } & ExtraProps &
-    LensAppServices,
+    Pick<
+      LensAppServices,
+      | 'application'
+      | 'chrome'
+      | 'overlays'
+      | 'notifications'
+      | 'stateTransfer'
+      | 'dashboardFeatureFlag'
+      | 'attributeService'
+      | 'savedObjectsTagging'
+    >,
   saveProps: SaveProps,
   options: { saveToLibrary: boolean }
 ): Promise<Partial<LensAppState> | undefined> => {

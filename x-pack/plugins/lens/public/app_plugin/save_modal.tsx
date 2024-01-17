@@ -107,10 +107,14 @@ export const SaveModal = (props: Props) => {
       })}
       data-test-subj="lnsApp_saveModalDashboard"
       getOriginatingPath={getOriginatingPath}
-      mustCopyOnSaveMessage={i18n.translate('xpack.lens.app.mustCopyOnSave', {
-        defaultMessage:
-          'This visualization is managed by Elastic. Changes here must be saved to a new visualization.',
-      })}
+      mustCopyOnSaveMessage={
+        managed
+          ? i18n.translate('xpack.lens.app.mustCopyOnSave', {
+              defaultMessage:
+                'This visualization is managed by Elastic. Changes here must be saved to a new visualization.',
+            })
+          : undefined
+      }
     />
   );
 };
