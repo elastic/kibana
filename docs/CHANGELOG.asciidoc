@@ -325,7 +325,6 @@ Presentation::
 === Bug fixes and enhancements
 There are no user-facing changes in the 8.11.4 release.
 
-
 [[release-notes-8.11.3]]
 == {kib} 8.11.3
 
@@ -825,17 +824,80 @@ Before you upgrade to 8.10.0, review the breaking changes, then mitigate the imp
 
 [discrete]
 [[breaking-162665]]
-.New summary search capabilities
+.New summary search capabilities cause existing SLOs to stop working
 [%collapsible]
 ====
 *Details* +
-New summary search capabilities introduce breaking changes in various places, and we have decided to not handle backward compatibility:
+New summary search capabilities introduce breaking changes in various places, and we have decided not to handle backward compatibility:
 
-* SLO find API body parameters have changed
-* The index mapping used by the rollup data has changed, and we have added a summary index that becomes the new source of truth for search
-* The rollup transform have been updated, but existing SLO with their transform won't be updated.
+* SLO find API body parameters have changed.
+* The index mapping used by the rollup data has changed, and we have added a summary index that becomes the new source of truth for search.
+* The rollup transforms have been updated, but existing SLO with their transforms won't be updated.
 
-If some SLOs have been installed in a prior version at 8.10, the user will need to remove them manually from the UI, or by deleting the Saved Object and the associated Transform.
+If some SLOs have been installed in a prior version at 8.10, they won't work after migrating to 8.10. There are two approaches to handle this breaking change. The recommended route is to delete all SLOs before migrating to 8.10. The alternative is to migrate to 8.10 and manually remove the SLOs.
+
+*Removing SLOs before migrating to 8.10*
+
+Use the SLO UI or the SLO delete API to delete all existing SLOs. This takes care of the Saved Object, Transform and rollup data. When all SLOs have been deleted, then delete the residual rollup indices: `.slo-observability.sli-v1*`. Note that this is v1. 
+
+*Removing SLOs after migrating to 8.10*
+
+After migrating to 8.10, the previously created SLOs won’t appear in the UI because the API is using a new index. The previously created SLOs still exist, and associated transforms are still rolling up data into the previous index `.slo-observability.sli-v1*`. The SLO delete API can't be used now, so remove the resources resources manually:
+
+. Find all existing transforms
+All SLO related transforms start with the `slo-` prefix, this request returns them all:
++
+[source, bash]
+----
+GET _transform/slo-*
+----
++
+Make a note of all the transforms IDs for later.
+
+. Stop all transforms
++
+[source, bash]
+----
+POST _transform/slo-*/_stop?force=true
+----
+
+. Remove all transforms
++
+From the list of transforms returned during the first step, now delete them one by one:
++
+[source, bash]
+----
+DELETE _transform/{transform_id}?force=true
+----
+
+. Find the SLO saved objects
++
+This request lists all the SLO saved objects. The SLO IDs and the saved object IDs are not the same.
++
+[source, bash]
+----
+GET kbn:/api/saved_objects/_find?type=slo
+----
++
+Make a note of all the saved object IDs from the response.
+
+. Remove the SLO saved objects
++
+For each saved object ID, run the following:
++
+[source, bash]
+----
+DELETE kbn:/api/saved_objects/slo/{Saved_Object_Id}
+----
+
+. Delete the rollup indices v1
++
+Note that this is v1.
++
+[source, bash]
+----
+DELETE .slo-observability.sli-v1*
+----
 ====
 
 [discrete]
@@ -946,7 +1008,6 @@ Observability::
 
 For more information about the features introduced in 8.10.0, refer to <<whats-new,What's new in 8.10>>.
 
-[discrete]
 [[enhancements-and-bug-fixes-v8.10.0-revised]]
 === Enhancements and bug fixes
 
@@ -5733,7 +5794,7 @@ conditions are true:
 
 In 8.0.0 and later, weak links break because <<saved-object-ids-impact-when-using-import-and-copy,saved object IDs can change during import or copy>>.
 This applies to both the UI and the API.
-This issue will be fixed 8.0.1 and 8.1.0. For more information, refer to {kibana-issue}123550[#123550].
+For more information, refer to {kibana-issue}123550[#123550].
 
 *Impact* +
 Saved objects in 7.x that are migrated during upgrade are **not** impacted.
