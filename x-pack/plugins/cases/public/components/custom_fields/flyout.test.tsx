@@ -172,7 +172,7 @@ describe('CustomFieldFlyout ', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            i18n.MAX_LENGTH_ERROR('default value', MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH)
+            i18n.MAX_LENGTH_ERROR('Default value', MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH)
           )
         ).toBeInTheDocument();
       });
