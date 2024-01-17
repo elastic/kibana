@@ -15,6 +15,15 @@ export enum ListOperatorEnum {
   EXCLUDED = 'excluded',
 }
 
+export const listOperatorType = t.keyof({
+  nested: null,
+  match: null,
+  match_any: null,
+  wildcard: null,
+  exists: null,
+  list: null,
+});
+export type ListOperatorType = t.TypeOf<typeof listOperatorType>;
 export enum ListOperatorTypeEnum {
   NESTED = 'nested',
   MATCH = 'match',
