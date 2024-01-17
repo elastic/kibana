@@ -14,8 +14,8 @@ properties:
     example: 'my description'
   namespace:
     type: string
-    description: namespace by default "default"
-    example: 'default'
+    description: package policy namespace. It can be left blank to inherit agent policy's one
+    example: 'customnamespace'
   policy_id:
     type: string
     description: Agent policy ID where that package policy will be added
