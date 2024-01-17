@@ -16,7 +16,7 @@ import {
 import { configureStore } from '@reduxjs/toolkit';
 
 import { reducer } from '../reducer';
-import { State } from '../state';
+import { initialState, State } from '../state';
 import type { ExpandableFlyoutApi, FlyoutPanelProps } from '../types';
 import {
   closeLeftPanelAction,
@@ -29,12 +29,6 @@ import {
   openRightPanelAction,
   previousPreviewPanelAction,
 } from '../actions';
-
-const initialState: State = {
-  left: undefined,
-  right: undefined,
-  preview: [],
-};
 
 export const store = configureStore({
   reducer,
