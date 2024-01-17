@@ -11,9 +11,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-interface TableOptions<F extends string> {
+interface TableOptions<T> {
   page: { index: number; size: number };
-  sort: { direction: 'asc' | 'desc'; field: F };
+  sort: { direction: 'asc' | 'desc'; field: keyof T };
 }
 
 export interface CurrentPage<T> {
@@ -21,17 +21,17 @@ export interface CurrentPage<T> {
   totalCount: number;
 }
 
-export function TableSearchBar<T, P extends keyof T & string>(props: {
+export function TableSearchBar<T>(props: {
   items: T[];
-  fieldsToSearch: P[];
+  fieldsToSearch: Array<keyof T>;
   maxCountExceeded: boolean;
   onChangeCurrentPage: (page: CurrentPage<T>) => void;
   onChangeSearchQuery: OnChangeSearchQuery;
   placeholder: string;
-  tableOptions: TableOptions<P>;
+  tableOptions: TableOptions<T>;
   isEnabled: boolean;
   sortItems?: boolean;
-  sortFn?: SortFunction<T, P>;
+  sortFn?: SortFunction<T>;
 }) {
   const {
     items,
@@ -103,7 +103,7 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
   );
 }
 
-function getCurrentPage<T, P extends keyof T & string>({
+function getCurrentPage<T>({
   items,
   fieldsToSearch,
   maxCountExceeded,
@@ -113,12 +113,12 @@ function getCurrentPage<T, P extends keyof T & string>({
   sortFn,
 }: {
   items: T[];
-  fieldsToSearch: P[];
+  fieldsToSearch: Array<keyof T>;
   maxCountExceeded: boolean;
   searchQuery?: string;
-  tableOptions: TableOptions<P>;
+  tableOptions: TableOptions<T>;
   sortItems: boolean;
-  sortFn: SortFunction<T, P>;
+  sortFn: SortFunction<T>;
 }): CurrentPage<T> {
   const shouldFilterClientSide = searchQuery && !maxCountExceeded;
   const itemsToPaginate = shouldFilterClientSide
@@ -140,13 +140,13 @@ function getCurrentPage<T, P extends keyof T & string>({
   };
 }
 
-function getItemsFilteredBySearchQuery<T, P extends keyof T>({
+function getItemsFilteredBySearchQuery<T>({
   items,
   fieldsToSearch,
   searchQuery,
 }: {
   items: T[];
-  fieldsToSearch: P[];
+  fieldsToSearch: Array<keyof T>;
   searchQuery: string;
 }) {
   return items.filter((item) => {
@@ -157,11 +157,11 @@ function getItemsFilteredBySearchQuery<T, P extends keyof T>({
   });
 }
 
-function getCurrentPageItems<T, P extends keyof T & string>(
+function getCurrentPageItems<T>(
   items: T[],
-  tableOptions: TableOptions<P>,
+  tableOptions: TableOptions<T>,
   sortItems: boolean,
-  sortFn: SortFunction<T, P>
+  sortFn: SortFunction<T>
 ) {
   const sortedItems = sortItems
     ? sortFn(items, tableOptions.sort.field, tableOptions.sort.direction)
@@ -173,17 +173,17 @@ function getCurrentPageItems<T, P extends keyof T & string>(
   );
 }
 
-function defaultSortFn<T, P extends keyof T & string>(
+function defaultSortFn<T>(
   items: T[],
-  sortField: P,
+  sortField: keyof T,
   sortDirection: 'asc' | 'desc'
 ) {
   return orderBy(items, sortField, sortDirection) as T[];
 }
 
-export type SortFunction<T, P extends keyof T & string> = (
+export type SortFunction<T> = (
   items: T[],
-  sortField: P,
+  sortField: keyof T,
   sortDirection: 'asc' | 'desc'
 ) => T[];
 

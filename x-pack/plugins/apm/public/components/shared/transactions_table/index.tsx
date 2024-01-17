@@ -109,7 +109,7 @@ export function TransactionsTable({
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('', 300);
   const [tableOptions, setTableOptions] = useTableOptions<SortField>({
-    defaultUrlPageSize: numberOfTransactionsPerPage,
+    initialPageSize: numberOfTransactionsPerPage,
   });
 
   const [currentPage, setCurrentPage] = useState<{
@@ -185,24 +185,25 @@ export function TransactionsTable({
 
   const history = useHistory();
   const onChangeHandler = useCallback(
-    (newTableOptions: Partial<TableOptions<string>>) => {
-      const nextOptions = merge({}, tableOptions, newTableOptions);
-      setTableOptions(nextOptions);
+    (changedTableOptions: Partial<TableOptions<string>>) => {
+      setTableOptions((prevTableOptions) =>
+        merge({}, prevTableOptions, changedTableOptions)
+      );
 
       if (saveTableOptionsToUrl) {
         history.push({
           ...history.location,
           search: fromQuery({
             ...toQuery(history.location.search),
-            page: newTableOptions.page?.index,
-            pageSize: newTableOptions.page?.size,
-            sortField: newTableOptions.sort?.field,
-            sortDirection: newTableOptions.sort?.direction,
+            page: changedTableOptions.page?.index,
+            pageSize: changedTableOptions.page?.size,
+            sortField: changedTableOptions.sort?.field,
+            sortDirection: changedTableOptions.sort?.direction,
           }),
         });
       }
     },
-    [setTableOptions, tableOptions, saveTableOptionsToUrl, history]
+    [setTableOptions, saveTableOptionsToUrl, history]
   );
 
   const onChangeSearchQuery = useCallback(
@@ -478,14 +479,14 @@ interface TableOptions<F extends string> {
 }
 
 function useTableOptions<T extends string>({
-  defaultUrlPageSize,
+  initialPageSize,
 }: {
-  defaultUrlPageSize: number;
+  initialPageSize: number;
 }) {
   const {
     query: {
       page: urlPage = 0,
-      pageSize: urlPageSize = defaultUrlPageSize,
+      pageSize: urlPageSize = initialPageSize,
       sortField: urlSortField = 'impact',
       sortDirection: urlSortDirection = 'desc',
     },
