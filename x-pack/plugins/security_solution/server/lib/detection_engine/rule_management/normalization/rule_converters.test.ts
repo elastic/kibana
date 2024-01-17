@@ -175,27 +175,6 @@ describe('rule_converters', () => {
       );
     });
 
-    test('should accept eql alerts suppression params', () => {
-      const patchParams = {
-        alert_suppression: {
-          duration: { value: 4, unit: 'h' as const },
-          group_by: ['agent.name'],
-          missing_fields_strategy: 'doNotSuppress' as const,
-        },
-      };
-      const rule = getEqlRuleParams();
-      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
-      expect(patchedParams).toEqual(
-        expect.objectContaining({
-          alertSuppression: {
-            duration: { value: 4, unit: 'h' },
-            groupBy: ['agent.name'],
-            missingFieldsStrategy: 'doNotSuppress',
-          },
-        })
-      );
-    });
-
     test('should accept threat_match alerts suppression params', () => {
       const patchParams = {
         alert_suppression: {

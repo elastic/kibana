@@ -428,7 +428,6 @@ const prepareDefinitionSectionListItems = (
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
   {
-    alertSuppressionForEqlRuleEnabled,
     alertSuppressionForIndicatorMatchRuleEnabled,
   }: Partial<ExperimentalFeatures> = {}
 ): EuiDescriptionListProps['listItems'] => {
@@ -661,7 +660,6 @@ const prepareDefinitionSectionListItems = (
   }
 
   const isSuppressionEnabled =
-    (rule.type === 'eql' && alertSuppressionForEqlRuleEnabled) ||
     (rule.type === 'threat_match' && alertSuppressionForIndicatorMatchRuleEnabled) ||
     (rule.type && (['query', 'saved_query', 'threshold'] as Type[]).includes(rule.type));
 
@@ -750,15 +748,13 @@ export const RuleDefinitionSection = ({
   const alertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
-  const alertSuppressionForEqlRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForEqlRuleEnabled'
-  );
+
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
     savedQuery,
-    { alertSuppressionForIndicatorMatchRuleEnabled, alertSuppressionForEqlRuleEnabled }
+    { alertSuppressionForIndicatorMatchRuleEnabled }
   );
 
   return (
