@@ -26,7 +26,7 @@ export const assetDetailsFlyout = {
   }) => {
     const { cpuUsage, memoryUsage } = createBasicCharts({
       chartType: 'xy',
-      formFormulas: ['cpuUsage', 'memoryUsage'],
+      fromFormulas: ['cpuUsage', 'memoryUsage'],
       chartConfig: {
         fittingFunction: 'Linear',
         yBounds: {
@@ -46,7 +46,7 @@ export const assetDetailsFlyout = {
 
     const { logRate } = createBasicCharts({
       chartType: 'xy',
-      formFormulas: ['logRate'],
+      fromFormulas: ['logRate'],
       chartConfig: {
         fittingFunction: 'Linear',
         ...(logsDataViewId

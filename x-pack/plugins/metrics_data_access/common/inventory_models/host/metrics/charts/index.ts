@@ -20,14 +20,14 @@ type Args<T extends ChartType> = T extends 'xy'
 
 export const createBasicCharts = <T extends ChartType>({
   chartType,
-  formFormulas,
+  fromFormulas,
   chartConfig,
 }: {
   chartType: T;
-  formFormulas: HostFormulaNames[];
+  fromFormulas: HostFormulaNames[];
   chartConfig: Args<T>;
 }): Record<HostFormulaNames, CustomLensConfig<T>> => {
-  return formFormulas.reduce((acc, curr) => {
+  return fromFormulas.reduce((acc, curr) => {
     const baseConfig = {
       ...chartConfig,
       id: curr,

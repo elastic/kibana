@@ -22,7 +22,7 @@ export const hostsView = {
       tx,
     } = createBasicCharts({
       chartType: 'xy',
-      formFormulas: [
+      fromFormulas: [
         'memoryUsage',
         'memoryFree',
         'diskSpaceAvailable',
@@ -54,7 +54,7 @@ export const hostsView = {
 
     const { cpuUsage, diskUsage } = createBasicCharts({
       chartType: 'xy',
-      formFormulas: ['cpuUsage', 'diskUsage'],
+      fromFormulas: ['cpuUsage', 'diskUsage'],
       chartConfig: {
         layerConfig: {
           breakdown: {

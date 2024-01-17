@@ -23,7 +23,7 @@ export const kpi = {
   }) => {
     const { cpuUsage, diskUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({
       chartType: 'metric',
-      formFormulas: ['cpuUsage', 'diskUsage', 'memoryUsage', 'normalizedLoad1m'],
+      fromFormulas: ['cpuUsage', 'diskUsage', 'memoryUsage', 'normalizedLoad1m'],
       chartConfig: {
         trendLine: true,
         subtitle: options?.subtitle ?? AVERAGE,
