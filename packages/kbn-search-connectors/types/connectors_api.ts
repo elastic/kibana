@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './connectors';
-export * from './connectors_api';
-export * from './native_connectors';
-export * from './optimistic_concurrency';
-export * from './pagination';
+// TODO: delete this once ES client can be used for Connectors API
+
+enum Result {
+  created = 'created',
+  updated = 'updated',
+  deleted = 'deleted',
+  not_found = 'not_found',
+  no_op = 'noop',
+}
+
+export interface ConnectorsAPIUpdateResponse {
+  result: Result;
+}
