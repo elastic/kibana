@@ -623,7 +623,7 @@ export default ({ getService }: FtrProviderContext) => {
           const previewAlerts = await getPreviewAlerts({
             es,
             previewId,
-            sort: ['host.name', ALERT_ORIGINAL_TIME],
+            sort: ['host.name', 'agent.version', ALERT_ORIGINAL_TIME],
           });
           // 3 alerts should be generated:
           // 1. for pair 'host-a', 1 - suppressed
@@ -638,7 +638,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
               {
                 field: 'agent.version',
-                value: 1,
+                value: '1',
               },
             ],
             [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
@@ -657,7 +657,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
               {
                 field: 'agent.version',
-                value: 2,
+                value: '2',
               },
             ],
             [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
@@ -776,6 +776,7 @@ export default ({ getService }: FtrProviderContext) => {
                   host: {
                     name: `host-a`,
                   },
+                  'agent.name': `agent-${index}`,
                 }),
               })
             )
@@ -794,7 +795,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule: ThreatMatchRuleCreateProps = {
             ...indicatorMatchRule(id),
             alert_suppression: {
-              group_by: ['host.name'],
+              group_by: ['agent.name'],
               duration: {
                 value: 300,
                 unit: 'm',
@@ -816,15 +817,15 @@ export default ({ getService }: FtrProviderContext) => {
             es,
             previewId,
             size: 1000,
-            sort: ['host.name', ALERT_ORIGINAL_TIME],
+            sort: ['agent.name', ALERT_ORIGINAL_TIME],
           });
           expect(previewAlerts.length).toEqual(expectedMaxSignals);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
                 {
-                  field: 'host.name',
-                  value: 'host-a',
+                  field: 'agent.name',
+                  value: 'agent-0',
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -871,7 +872,7 @@ export default ({ getService }: FtrProviderContext) => {
           const rule: ThreatMatchRuleCreateProps = {
             ...indicatorMatchRule(id),
             alert_suppression: {
-              group_by: ['agent.name'],
+              group_by: ['host.name'],
               duration: {
                 value: 300,
                 unit: 'm',
@@ -892,15 +893,15 @@ export default ({ getService }: FtrProviderContext) => {
           const previewAlerts = await getPreviewAlerts({
             es,
             previewId,
-            sort: ['agent.name', ALERT_ORIGINAL_TIME],
+            sort: ['host.name', ALERT_ORIGINAL_TIME],
           });
           expect(previewAlerts.length).toEqual(1);
           expect(previewAlerts[0]._source).toEqual({
             ...previewAlerts[0]._source,
             [ALERT_SUPPRESSION_TERMS]: [
               {
-                field: 'agent.name',
-                value: 'agent-1',
+                field: 'host.name',
+                value: 'host-a',
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -1183,7 +1184,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 'host-a',
                 },
               ],
-              [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+              [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
               [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
               [ALERT_ORIGINAL_TIME]: timestamp,
               [ALERT_SUPPRESSION_START]: '2020-10-28T07:00:00.000Z',
@@ -1253,7 +1254,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 'agent-1',
                 },
               ],
-              [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+              [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
               [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
               [ALERT_ORIGINAL_TIME]: timestamp,
               [ALERT_SUPPRESSION_START]: '2020-10-28T07:00:00.000Z',
@@ -1269,7 +1270,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: null,
                 },
               ],
-              [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+              [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
               [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
               [ALERT_ORIGINAL_TIME]: timestamp,
               [ALERT_SUPPRESSION_START]: '2020-10-28T07:00:00.000Z',
@@ -1339,7 +1340,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 'agent-1',
                 },
               ],
-              [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
+              [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
               [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
               [ALERT_ORIGINAL_TIME]: timestamp,
               [ALERT_SUPPRESSION_START]: '2020-10-28T07:00:00.000Z',
