@@ -295,10 +295,10 @@ export const WARM_PATTERN_TOOLTIP = ({ indices, pattern }: { indices: number; pa
 
 export const POST_RESULT_ERROR_TITLE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.postResultErrorTitle',
-  { defaultMessage: 'Error saving data quality check' }
+  { defaultMessage: 'Error writing saved data quality check results' }
 );
 
 export const GET_RESULTS_ERROR_TITLE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.getResultErrorTitle',
-  { defaultMessage: 'Error getting past data quality checks' }
+  { defaultMessage: 'Error reading saved data quality check results' }
 );
