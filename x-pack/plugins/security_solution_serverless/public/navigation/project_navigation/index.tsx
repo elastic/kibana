@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { init as initProjectNavigation } from './project_navigation';
+import { type Services } from '../../common/services';
+
+export const initProjectNavigation = async (services: Services) => {
+  const { init } = await import('./project_navigation');
+  return init(services);
+};

@@ -31,8 +31,11 @@ export const startNavigation = (services: Services) => {
   enableManagementCardsLanding(services);
 
   if (services.experimentalFeatures.platformNavEnabled) {
-    const { navigationTree$, panelContentProvider, dataTestSubj } = initProjectNavigation(services);
-    serverless.initNavigation(navigationTree$, { panelContentProvider, dataTestSubj });
+    initProjectNavigation(services).then(
+      ({ navigationTree$, panelContentProvider, dataTestSubj }) => {
+        serverless.initNavigation(navigationTree$, { panelContentProvider, dataTestSubj });
+      }
+    );
   } else {
     // TODO: Remove this else block as platform is enabled by default
     // Issue: https://github.com/elastic/kibana/issues/174944
