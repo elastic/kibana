@@ -46,6 +46,14 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import {
+  DiscoverSingleDocLocator,
+  DiscoverSingleDocLocatorDefinition,
+  DiscoverContextAppLocator,
+  DiscoverContextAppLocatorDefinition,
+  DiscoverAppLocator,
+  DiscoverAppLocatorDefinition,
+} from '@kbn/discover-locators';
 import { PLUGIN_ID } from '../common';
 import {
   setHeaderActionMenuMounter,
@@ -60,15 +68,6 @@ import { SearchEmbeddableFactory } from './embeddable';
 import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
-import {
-  DiscoverContextAppLocator,
-  DiscoverContextAppLocatorDefinition,
-} from './application/context/services/locator';
-import {
-  DiscoverSingleDocLocator,
-  DiscoverSingleDocLocatorDefinition,
-} from './application/doc/locator';
-import { DiscoverAppLocator, DiscoverAppLocatorDefinition } from '../common';
 import type { RegisterCustomizationProfile } from './customizations';
 import {
   createRegisterCustomizationProfile,

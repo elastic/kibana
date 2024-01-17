@@ -12,7 +12,7 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { addProfile } from '../../../../common/customizations';
+import { addProfile } from '@kbn/discover-utils';
 
 export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
 

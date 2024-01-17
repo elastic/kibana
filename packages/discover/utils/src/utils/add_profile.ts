@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverContextAppLocator, DiscoverContextAppLocatorParams } from '@kbn/discover-locators';
+export const addProfile = (path: string, profile: string) => {
+  const trimmedPath = path.trim();
+  const hasSlash = trimmedPath.endsWith('/');
 
-export const replaceContextLocation = (
-  contextLocator: DiscoverContextAppLocator,
-  params: DiscoverContextAppLocatorParams
-) => contextLocator.navigate(params, { replace: true });
+  return `${trimmedPath}${hasSlash ? '' : '/'}p/${profile}${hasSlash ? '/' : ''}`;
+};

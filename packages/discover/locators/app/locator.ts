@@ -13,8 +13,16 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public'
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
-import { VIEW_MODE } from './constants';
-import { addProfile } from './customizations';
+import { addProfile } from '@kbn/discover-utils';
+
+// This posed a circular dependency issue, so I copied it in.  Ideally this type
+// would be in the proposed @kbn/discover-plugin/types location.
+// import type { VIEW_MODE } from '@kbn/discover-plugin/common/constants';
+
+enum VIEW_MODE {
+  DOCUMENT_LEVEL = 'documents',
+  AGGREGATED_LEVEL = 'aggregated',
+}
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 

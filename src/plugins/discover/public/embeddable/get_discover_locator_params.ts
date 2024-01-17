@@ -9,7 +9,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SearchByReferenceInput } from '@kbn/saved-search-plugin/public';
-import type { DiscoverAppLocatorParams } from '../../common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import type { SearchInput } from './types';
 
 export const getDiscoverLocatorParams = ({

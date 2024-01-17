@@ -21,7 +21,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { Logger } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { OnlySearchSourceRuleParams } from '../types';

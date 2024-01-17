@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import {
   DEFAULT_LOG_VIEW,

@@ -120,7 +120,6 @@
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/security-api-integration-helpers",
     "@kbn/alerts-as-data-utils",
-    "@kbn/discover-plugin",
     "@kbn/files-plugin",
     "@kbn/shared-ux-file-types",
     "@kbn/alerting-state-types",
@@ -167,5 +166,6 @@
     "@kbn/slo-schema",
     "@kbn/typed-react-router-config",
     "@kbn/ftr-common-functional-ui-services",
+    "@kbn/discover-locators",
   ]
 }

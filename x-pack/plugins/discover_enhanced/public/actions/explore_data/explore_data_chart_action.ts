@@ -6,7 +6,7 @@
  */
 
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { SearchInput } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';

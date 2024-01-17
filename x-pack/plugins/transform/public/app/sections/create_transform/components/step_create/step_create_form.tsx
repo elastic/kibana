@@ -26,7 +26,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 

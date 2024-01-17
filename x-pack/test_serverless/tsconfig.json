@@ -58,7 +58,6 @@
     "@kbn/data-views-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/rison",
-    "@kbn/discover-plugin",
     "@kbn/data-plugin",
     "@kbn/std",
     "@kbn/data-view-field-editor-plugin",
@@ -88,5 +87,6 @@
     "@kbn/core",
     "@kbn/alerting-plugin",
     "@kbn/ftr-common-functional-ui-services",
+    "@kbn/discover-locators",
   ]
 }

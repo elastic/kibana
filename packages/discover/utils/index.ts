@@ -38,4 +38,5 @@ export {
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,
+  addProfile,
 } from './src';

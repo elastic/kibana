@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DiscoverAppLocator } from '../../common';
+import type { DiscoverAppLocator } from '@kbn/discover-locators';
 
 /**
  * Global search provider adding an ES|QL and ESQL entry.

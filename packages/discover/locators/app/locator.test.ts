@@ -15,7 +15,7 @@ import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item
 import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverAppLocatorDefinition } from './locator';
 import { SerializableRecord } from '@kbn/utility-types';
-import { addProfile } from './customizations';
+import { addProfile } from '@kbn/discover-utils';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';

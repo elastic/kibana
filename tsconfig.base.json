@@ -682,6 +682,8 @@
       "@kbn/discover-customization-examples-plugin/*": ["examples/discover_customization_examples/*"],
       "@kbn/discover-enhanced-plugin": ["x-pack/plugins/discover_enhanced"],
       "@kbn/discover-enhanced-plugin/*": ["x-pack/plugins/discover_enhanced/*"],
+      "@kbn/discover-locators": ["packages/discover/locators"],
+      "@kbn/discover-locators/*": ["packages/discover/locators/*"],
       "@kbn/discover-plugin": ["src/plugins/discover"],
       "@kbn/discover-plugin/*": ["src/plugins/discover/*"],
       "@kbn/discover-utils": ["packages/discover/utils"],

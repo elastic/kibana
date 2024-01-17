@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverContextAppLocator, DiscoverContextAppLocatorParams } from '@kbn/discover-locators';
+export type {
+  ContextHistoryLocationState,
+  DiscoverContextAppLocator,
+  DiscoverContextAppLocatorDependencies,
+  DiscoverContextAppLocatorParams,
+} from './locator';
 
-export const replaceContextLocation = (
-  contextLocator: DiscoverContextAppLocator,
-  params: DiscoverContextAppLocatorParams
-) => contextLocator.navigate(params, { replace: true });
+export { DISCOVER_CONTEXT_APP_LOCATOR, DiscoverContextAppLocatorDefinition } from './locator';

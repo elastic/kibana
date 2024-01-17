@@ -12,8 +12,8 @@ import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { LocatorServicesDeps } from '.';
-import { DiscoverAppLocatorParams } from '../../common';
 import { getSortForSearchSource } from '../../common/utils/sorting';
 import { getColumns } from './columns_from_locator';
 

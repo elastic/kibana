@@ -38,6 +38,7 @@
     "@kbn/xstate-utils",
     "@kbn/router-utils",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/discover-locators",
   ],
   "exclude": [
     "target/**/*"

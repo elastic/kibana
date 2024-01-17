@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import {
   CSV_REPORT_TYPE_V2,
   JobParamsCsvFromSavedObject,

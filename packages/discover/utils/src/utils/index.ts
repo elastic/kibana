@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export * from './add_profile';
 export * from './build_data_record';
 export * from './format_hit';
 export * from './format_value';

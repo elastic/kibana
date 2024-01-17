@@ -6,7 +6,7 @@
  */
 
 import { EuiHeaderLink } from '@elastic/eui';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { hydrateDatasetSelection } from '@kbn/log-explorer-plugin/common';
 import {

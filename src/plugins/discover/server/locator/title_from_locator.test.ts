@@ -12,7 +12,7 @@ import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { LocatorServicesDeps as Services } from '.';
-import { DiscoverAppLocatorParams } from '../../common';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { titleFromLocatorFactory } from './title_from_locator';
 

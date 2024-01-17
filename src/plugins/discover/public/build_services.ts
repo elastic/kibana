@@ -54,11 +54,10 @@ import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { memoize } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { DiscoverContextAppLocator, DiscoverSingleDocLocator } from '@kbn/discover-locators';
+import { DiscoverAppLocator } from '@kbn/discover-locators';
 import { getHistory } from './kibana_services';
 import { DiscoverStartPlugins } from './plugin';
-import { DiscoverContextAppLocator } from './application/context/services/locator';
-import { DiscoverSingleDocLocator } from './application/doc/locator';
-import { DiscoverAppLocator } from '../common';
 
 /**
  * Location state of internal Discover history instance

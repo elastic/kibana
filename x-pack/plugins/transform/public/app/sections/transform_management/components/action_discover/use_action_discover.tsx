@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { TransformListAction, TransformListRow } from '../../../../common';
 
 import { useSearchItems } from '../../../../hooks/use_search_items';

@@ -33,7 +33,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/ace",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/discover-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/core-http-browser",
@@ -74,7 +73,8 @@
     "@kbn/ml-creation-wizard-utils",
     "@kbn/alerts-as-data-utils",
     "@kbn/code-editor",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/discover-locators"
   ],
   "exclude": [
     "target/**/*",

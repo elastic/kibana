@@ -1,0 +1,5 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/discover-locators",
+  "owner": "@elastic/kibana-data-discovery"
+}

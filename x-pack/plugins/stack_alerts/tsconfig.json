@@ -35,7 +35,6 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/share-plugin",
-    "@kbn/discover-plugin",
     "@kbn/rule-data-utils",
     "@kbn/alerts-as-data-utils",
     "@kbn/text-based-languages",
@@ -48,6 +47,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/react-field",
     "@kbn/code-editor",
+    "@kbn/discover-locators",
   ],
   "exclude": [
     "target/**/*",

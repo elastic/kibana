@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import expect from '@kbn/expect';
 import { decompressFromBase64 } from 'lz-string';
 

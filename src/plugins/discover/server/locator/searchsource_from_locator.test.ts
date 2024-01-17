@@ -15,7 +15,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { LocatorServicesDeps as Services } from '.';
-import { DiscoverAppLocatorParams } from '../../common';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
 import { searchSourceFromLocatorFactory } from './searchsource_from_locator';
 
