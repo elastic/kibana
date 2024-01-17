@@ -269,6 +269,9 @@ export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
 export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
 export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
 
+export const INTERNAL_ENTITY_STORE_URL = '/internal/entity_store' as const;
+export const ENTITY_STORE_INIT_URL = `${INTERNAL_ENTITY_STORE_URL}/init`;
+
 /**
  * Public Risk Score routes
  */

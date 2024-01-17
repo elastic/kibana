@@ -76,6 +76,7 @@ import {
   assetCriticalityDeleteRoute,
   assetCriticalityPrivilegesRoute,
 } from '../lib/entity_analytics/asset_criticality/routes';
+import { entityStoreInitRoute } from '../lib/entity_analytics/entity_store/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -177,5 +178,9 @@ export const initRoutes = (
     assetCriticalityGetRoute(router, logger);
     assetCriticalityDeleteRoute(router, logger);
     assetCriticalityPrivilegesRoute(router, getStartServices, logger);
+  }
+
+  if (config.experimentalFeatures.entityStoreEnabled) {
+    entityStoreInitRoute(router);
   }
 };

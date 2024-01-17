@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-// 🚧 TODO: make the entity store
-
-export {};
+export { entityStoreInitRoute } from './init';
