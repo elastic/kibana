@@ -61,6 +61,7 @@ export const getLensAttributes = ({
     console.log('suggestion', suggestion, 'external vis context', externalVisContext?.attributes);
     if (
       isEqual(externalVisContext.attributes?.state?.query, query) &&
+      timeInterval === externalVisContext?.requestData?.timeInterval &&
       isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
     ) {
       console.log('using the external lens attributes');
