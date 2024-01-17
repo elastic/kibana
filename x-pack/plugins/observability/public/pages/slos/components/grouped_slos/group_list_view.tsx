@@ -9,15 +9,18 @@ import React, { memo, useState } from 'react';
 import { EuiPanel, EuiAccordion, EuiTablePagination } from '@elastic/eui';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SlosView } from '../slos_view';
+import type { SortDirection } from '../slo_list_search_bar';
 
 interface Props {
   isCompact: boolean;
   group: string;
   kqlQuery: string;
   sloView: string;
+  sort: string;
+  direction: SortDirection;
 }
 
-export function GroupListView({ isCompact, group, kqlQuery, sloView }: Props) {
+export function GroupListView({ isCompact, group, kqlQuery, sloView, sort, direction }: Props) {
   const query = kqlQuery ? `"slo.tags": ${group} and ${kqlQuery}` : `"slo.tags": ${group}`;
   const [page, setPage] = useState(0);
   const ITEMS_PER_PAGE = 10;
@@ -29,6 +32,8 @@ export function GroupListView({ isCompact, group, kqlQuery, sloView }: Props) {
     data: sloList,
   } = useFetchSloList({
     kqlQuery: query,
+    sortBy: sort,
+    sortDirection: direction,
     perPage: ITEMS_PER_PAGE,
     page: page + 1,
   });

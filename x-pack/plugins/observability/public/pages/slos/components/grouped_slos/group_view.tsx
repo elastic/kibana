@@ -8,15 +8,18 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { GroupListView } from './group_list_view';
 import { useFetchSloGroups } from '../../../../hooks/slo/use_fetch_slo_groups';
+import type { SortDirection } from '../slo_list_search_bar';
 
 interface Props {
   isCompact: boolean;
   groupBy: string;
   kqlQuery: string;
   sloView: string;
+  sort: string;
+  direction: SortDirection;
 }
 
-export function GroupView({ isCompact, kqlQuery, sloView }: Props) {
+export function GroupView({ isCompact, kqlQuery, sloView, sort, direction }: Props) {
   const { data, isLoading } = useFetchSloGroups();
 
   if (isLoading) {
@@ -38,6 +41,8 @@ export function GroupView({ isCompact, kqlQuery, sloView }: Props) {
               group={group}
               kqlQuery={kqlQuery}
               isCompact={isCompact}
+              sort={sort}
+              direction={direction}
             />
           );
         })}
