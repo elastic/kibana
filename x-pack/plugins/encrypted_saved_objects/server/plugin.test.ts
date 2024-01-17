@@ -22,6 +22,7 @@ describe('EncryptedSavedObjects Plugin', () => {
         Object {
           "canEncrypt": false,
           "createMigration": [Function],
+          "createModelVersion": [Function],
           "registerType": [Function],
         }
       `);
@@ -39,6 +40,7 @@ describe('EncryptedSavedObjects Plugin', () => {
         Object {
           "canEncrypt": true,
           "createMigration": [Function],
+          "createModelVersion": [Function],
           "registerType": [Function],
         }
       `);

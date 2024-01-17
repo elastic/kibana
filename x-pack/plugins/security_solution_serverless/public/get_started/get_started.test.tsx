@@ -10,16 +10,33 @@ import { GetStartedComponent } from './get_started';
 import type { SecurityProductTypes } from '../../common/config';
 
 jest.mock('./toggle_panel');
-jest.mock('./welcome_panel');
+jest.mock('../common/services');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: jest.fn().mockReturnValue({
-      euiTheme: { base: 16, size: { xs: '4px' } },
+      euiTheme: {
+        base: 16,
+        size: { xs: '4px', m: '12px', l: '24px', xl: '32px', xxl: '40px' },
+        colors: { lightestShade: '' },
+        font: {
+          weight: { bold: 700 },
+        },
+      },
     }),
   };
 });
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn().mockReturnValue({ hash: '#watch_the_overview_video' }),
+}));
+jest.mock('../common/hooks/use_user_name');
+jest.mock('@kbn/security-solution-navigation', () => ({
+  useNavigateTo: jest.fn().mockReturnValue({ navigateTo: jest.fn() }),
+  SecurityPageName: {
+    landing: 'landing',
+  },
+}));
 
 const productTypes = [
   { product_line: 'security', product_tier: 'essentials' },
@@ -31,10 +48,10 @@ describe('GetStartedComponent', () => {
   it('should render page title, subtitle, and description', () => {
     const { getByText } = render(<GetStartedComponent productTypes={productTypes} />);
 
-    const pageTitle = getByText('Welcome!');
-    const subtitle = getByText(`Let's get started`);
+    const pageTitle = getByText('Hi mocked_user_name!');
+    const subtitle = getByText(`Get started with Security`);
     const description = getByText(
-      `Set up your Elastic Security workspace. Use the toggles below to curate a list of tasks that best fits your environment`
+      `This area shows you everything you need to know. Feel free to explore all content. You can always come back later at any time.`
     );
 
     expect(pageTitle).toBeInTheDocument();
@@ -42,21 +59,13 @@ describe('GetStartedComponent', () => {
     expect(description).toBeInTheDocument();
   });
 
-  it('should render Product Switch', () => {
+  it('should render welcomeHeader and TogglePanel', () => {
     const { getByTestId } = render(<GetStartedComponent productTypes={productTypes} />);
 
-    const productSwitch = getByTestId('product-switch');
-
-    expect(productSwitch).toBeInTheDocument();
-  });
-
-  it('should render WelcomePanel and TogglePanel', () => {
-    const { getByTestId } = render(<GetStartedComponent productTypes={productTypes} />);
-
-    const welcomePanel = getByTestId('welcome-panel');
+    const welcomeHeader = getByTestId('welcome-header');
     const togglePanel = getByTestId('toggle-panel');
 
-    expect(welcomePanel).toBeInTheDocument();
+    expect(welcomeHeader).toBeInTheDocument();
     expect(togglePanel).toBeInTheDocument();
   });
 });

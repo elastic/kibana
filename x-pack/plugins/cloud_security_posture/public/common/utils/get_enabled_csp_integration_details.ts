@@ -6,7 +6,7 @@
  */
 
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { PostureInput } from '../../../common/types';
+import type { PostureInput } from '../../../common/types_old';
 import { SUPPORTED_CLOUDBEAT_INPUTS } from '../../../common/constants';
 import { cloudPostureIntegrations, type CloudPostureIntegrations } from '../constants';
 

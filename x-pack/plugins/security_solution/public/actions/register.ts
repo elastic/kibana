@@ -29,6 +29,7 @@ import {
   createCopyToClipboardDiscoverCellActionFactory,
 } from './copy_to_clipboard';
 import { createToggleColumnCellActionFactory } from './toggle_column';
+import { createToggleUserAssetFieldCellActionFactory } from './toggle_asset_column';
 import { SecurityCellActionsTrigger } from './constants';
 import type {
   DiscoverCellActionName,
@@ -117,6 +118,7 @@ const registerCellActions = (
     showTopN: createShowTopNCellActionFactory({ services }),
     copyToClipboard: createCopyToClipboardCellActionFactory({ services }),
     toggleColumn: createToggleColumnCellActionFactory({ store, services }),
+    toggleUserAssetField: createToggleUserAssetFieldCellActionFactory({ store }),
   };
 
   const registerCellActionsTrigger = (
@@ -147,6 +149,7 @@ const registerCellActions = (
     'filterOut',
     'addToTimeline',
     'toggleColumn',
+    'toggleUserAssetField',
     'showTopN',
     'copyToClipboard',
   ]);

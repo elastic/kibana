@@ -8,8 +8,10 @@
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
+  App,
   AppDeepLink,
   AppMountParameters,
   AppNavLinkStatus,
@@ -26,6 +28,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -34,6 +37,8 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -59,9 +64,11 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom } from 'rxjs';
+
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -90,7 +97,7 @@ export interface ConfigSchema {
       metrics: {
         enabled: boolean;
       };
-      logs: {
+      logs?: {
         enabled: boolean;
       };
       uptime: {
@@ -100,7 +107,7 @@ export interface ConfigSchema {
         enabled: boolean;
       };
     };
-    thresholdRule: {
+    thresholdRule?: {
       enabled: boolean;
     };
   };
@@ -108,6 +115,7 @@ export interface ConfigSchema {
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
+  fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   share: SharePluginSetup;
@@ -115,7 +123,10 @@ export interface ObservabilityPublicPluginsSetup {
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   embeddable: EmbeddableSetup;
+  uiActions: UiActionsSetup;
   licensing: LicensingPluginSetup;
+  serverless?: ServerlessPluginSetup;
+  presentationUtil?: PresentationUtilPluginStart;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -128,6 +139,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
+  fieldFormats: FieldFormatsStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -144,6 +156,9 @@ export interface ObservabilityPublicPluginsStart {
   cloud?: CloudStart;
   aiops: AiopsPluginStart;
   serverless?: ServerlessPluginStart;
+  uiSettings: IUiSettingsClient;
+  uiActions: UiActionsStart;
+  presentationUtil?: PresentationUtilPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -263,7 +278,8 @@ export class Plugin
     };
 
     const appUpdater$ = this.appUpdater$;
-    const app = {
+
+    const app: App = {
       appRoute: OBSERVABILITY_BASE_PATH,
       category,
       deepLinks: this.deepLinks,
@@ -289,6 +305,7 @@ export class Plugin
         'user',
         'experience',
       ],
+      searchable: !Boolean(pluginsSetup.serverless),
     };
 
     coreSetup.application.register(app);
@@ -309,6 +326,25 @@ export class Plugin
           pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
         };
         registerSloOverviewEmbeddableFactory();
+        const registerSloAlertsEmbeddableFactory = async () => {
+          const { SloAlertsEmbeddableFactoryDefinition } = await import(
+            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
+          );
+          const factory = new SloAlertsEmbeddableFactoryDefinition(
+            coreSetup.getStartServices,
+            kibanaVersion
+          );
+          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+        };
+        registerSloAlertsEmbeddableFactory();
+
+        const registerAsyncSloAlertsUiActions = async () => {
+          if (pluginsSetup.uiActions) {
+            const { registerSloAlertsUiActions } = await import('./ui_actions');
+            registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
+          }
+        };
+        registerAsyncSloAlertsUiActions();
       }
     };
 
@@ -343,13 +379,17 @@ export class Plugin
         map((value) => {
           const deepLinks = value(app)?.deepLinks ?? [];
 
-          const overviewLink = {
-            label: i18n.translate('xpack.observability.overviewLinkTitle', {
-              defaultMessage: 'Overview',
-            }),
-            app: observabilityAppId,
-            path: OVERVIEW_PATH,
-          };
+          const overviewLink = !Boolean(pluginsSetup.serverless)
+            ? [
+                {
+                  label: i18n.translate('xpack.observability.overviewLinkTitle', {
+                    defaultMessage: 'Overview',
+                  }),
+                  app: observabilityAppId,
+                  path: OVERVIEW_PATH,
+                },
+              ]
+            : [];
 
           // Reformat the visible links to be NavigationEntry objects instead of
           // AppDeepLink objects.
@@ -369,15 +409,13 @@ export class Plugin
               path: link.path ?? '',
             }));
 
-          const sections = [
+          return [
             {
               label: '',
               sortKey: 100,
-              entries: [overviewLink, ...otherLinks],
+              entries: [...overviewLink, ...otherLinks],
             },
           ];
-
-          return sections;
         })
       )
     );
@@ -414,6 +452,17 @@ export class Plugin
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
 
     getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
+      alertsTableConfigurationRegistry.register(alertsTableConfig);
+    });
+
+    const getAsyncSloEmbeddableAlertsTableConfiguration = async () => {
+      const { getSloAlertsTableConfiguration } = await import(
+        './components/alerts_table/slo/get_slo_alerts_table_configuration'
+      );
+      return getSloAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
+    };
+
+    getAsyncSloEmbeddableAlertsTableConfiguration().then((alertsTableConfig) => {
       alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 

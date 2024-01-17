@@ -5,18 +5,21 @@
  * 2.0.
  */
 
+import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
+
+import { mockManagedUserData, mockOktaUserFields } from './__mocks__';
 import { ManagedUser } from './managed_user';
-import { mockManagedUser } from './__mocks__';
 
 describe('ManagedUser', () => {
   const mockProps = {
-    managedUser: mockManagedUser,
+    managedUser: mockManagedUserData,
     contextID: '',
     scopeId: '',
     isDraggable: false,
+    openDetailsPanel: () => {},
   };
 
   it('renders', () => {
@@ -36,7 +39,7 @@ describe('ManagedUser', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('managedUser-data')).toHaveTextContent('Updated Mar 23, 2023');
+    expect(getByTestId('managedUser-data')).toHaveTextContent('Nov 16, 2023');
   });
 
   it('renders enable integration callout when the integration is disabled', () => {
@@ -46,7 +49,7 @@ describe('ManagedUser', () => {
           {...{
             ...mockProps,
             managedUser: {
-              ...mockManagedUser,
+              ...mockManagedUserData,
               isIntegrationEnabled: false,
             },
           }}
@@ -57,23 +60,13 @@ describe('ManagedUser', () => {
     expect(getByTestId('managedUser-integration-disable-callout')).toBeInTheDocument();
   });
 
-  it('renders phone number separated by comma', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ManagedUser {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('managedUser-data')).toHaveTextContent('123456, 654321');
-  });
-
-  it('it renders the call out when the integration is disabled', () => {
+  it('renders the call out when the integration is disabled', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <ManagedUser
           {...{
             ...mockProps,
-            managedUser: { ...mockManagedUser, isIntegrationEnabled: false },
+            managedUser: { ...mockManagedUserData, isIntegrationEnabled: false },
           }}
         />
       </TestProviders>
@@ -88,12 +81,46 @@ describe('ManagedUser', () => {
         <ManagedUser
           {...{
             ...mockProps,
-            managedUser: { ...mockManagedUser, isLoading: true, isIntegrationEnabled: false },
+            managedUser: { ...mockManagedUserData, isLoading: true, isIntegrationEnabled: false },
           }}
         />
       </TestProviders>
     );
 
     expect(queryByTestId('managedUser-integration-disable-callout')).not.toBeInTheDocument();
+  });
+
+  it('renders Entra managed user', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <ManagedUser {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('managedUser-table')).toBeInTheDocument();
+  });
+
+  it('renders Okta managed user', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <ManagedUser
+          {...{
+            ...mockProps,
+            managedUser: {
+              ...mockManagedUserData,
+              data: {
+                [ManagedUserDatasetKey.OKTA]: {
+                  fields: mockOktaUserFields,
+                  _index: '123',
+                  _id: '12234',
+                },
+              },
+            },
+          }}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('managedUser-table')).toBeInTheDocument();
   });
 });

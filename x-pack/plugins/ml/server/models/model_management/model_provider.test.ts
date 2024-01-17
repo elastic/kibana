@@ -87,6 +87,7 @@ describe('modelsProvider', () => {
           version: 1,
           modelName: 'e5',
           license: 'MIT',
+          licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small',
           type: ['pytorch', 'text_embedding'],
         },
         {
@@ -100,6 +101,7 @@ describe('modelsProvider', () => {
           version: 1,
           modelName: 'e5',
           license: 'MIT',
+          licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small_linux-x86_64',
           type: ['pytorch', 'text_embedding'],
         },
       ]);
@@ -167,6 +169,7 @@ describe('modelsProvider', () => {
           modelName: 'e5',
           type: ['pytorch', 'text_embedding'],
           license: 'MIT',
+          licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small',
         },
         {
           arch: 'amd64',
@@ -179,6 +182,7 @@ describe('modelsProvider', () => {
           modelName: 'e5',
           type: ['pytorch', 'text_embedding'],
           license: 'MIT',
+          licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small_linux-x86_64',
         },
       ]);
     });

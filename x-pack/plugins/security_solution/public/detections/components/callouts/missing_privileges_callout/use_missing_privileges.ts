@@ -11,7 +11,7 @@ import type { Privilege } from '../../../containers/detection_engine/alerts/type
 import { useUserData } from '../../user_info';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-const REQUIRED_INDEX_PRIVILIGES = ['read', 'write', 'view_index_metadata', 'maintenance'] as const;
+const REQUIRED_INDEX_PRIVILEGES = ['read', 'write', 'view_index_metadata', 'manage'] as const;
 
 const getIndexName = (indexPrivileges: Privilege['index']) => {
   const [indexName] = Object.keys(indexPrivileges);
@@ -24,7 +24,7 @@ const getMissingIndexPrivileges = (
 ): MissingIndexPrivileges | undefined => {
   const indexName = getIndexName(indexPrivileges);
   const privileges = indexPrivileges[indexName];
-  const missingPrivileges = REQUIRED_INDEX_PRIVILIGES.filter((privelege) => !privileges[privelege]);
+  const missingPrivileges = REQUIRED_INDEX_PRIVILEGES.filter((privilege) => !privileges[privilege]);
 
   if (missingPrivileges.length) {
     return [indexName, missingPrivileges];

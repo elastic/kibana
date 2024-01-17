@@ -4,28 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import {
-  useConversation,
-  type UseConversationProps,
-  type UseConversationResult,
-} from './use_conversation';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import {
   act,
   renderHook,
   type RenderHookResult,
   type WrapperComponent,
 } from '@testing-library/react-hooks';
-import type { ObservabilityAIAssistantService, PendingMessage } from '../types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
-import * as useKibanaModule from './use_kibana';
-import { Message, MessageRole } from '../../common';
-import { ChatState } from './use_chat';
-import { createMockChatService } from '../service/create_mock_chat_service';
+import { merge } from 'lodash';
+import React from 'react';
 import { Subject } from 'rxjs';
+import { MessageRole } from '../../common';
+import {
+  StreamingChatResponseEvent,
+  StreamingChatResponseEventType,
+} from '../../common/conversation_complete';
+import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
-import { merge, omit } from 'lodash';
+import { createMockChatService } from '../service/create_mock_chat_service';
+import type { ObservabilityAIAssistantService } from '../types';
+import { ChatState } from './use_chat';
+import {
+  useConversation,
+  type UseConversationProps,
+  type UseConversationResult,
+} from './use_conversation';
+import * as useKibanaModule from './use_kibana';
 
 let hookResult: RenderHookResult<UseConversationProps, UseConversationResult>;
 
@@ -38,6 +42,7 @@ const mockService: MockedService = {
   getLicenseManagementLocator: jest.fn(),
   isEnabled: jest.fn(),
   start: jest.fn(),
+  register: jest.fn(),
 };
 
 const mockChatService = createMockChatService();
@@ -269,8 +274,9 @@ describe('useConversation', () => {
     });
   });
 
-  describe('when chat completes without an initial conversation id', () => {
-    let subject: Subject<PendingMessage>;
+  describe('when chat completes', () => {
+    const subject: Subject<StreamingChatResponseEvent> = new Subject();
+    let onConversationUpdate: jest.Mock;
     const expectedMessages = [
       {
         '@timestamp': expect.any(String),
@@ -309,7 +315,6 @@ describe('useConversation', () => {
       },
     ];
     beforeEach(() => {
-      subject = new Subject();
       mockService.callApi.mockImplementation(async (endpoint, request) =>
         merge(
           {
@@ -321,6 +326,8 @@ describe('useConversation', () => {
           (request as any).params.body
         )
       );
+
+      onConversationUpdate = jest.fn();
 
       hookResult = renderHook(useConversation, {
         initialProps: {
@@ -342,224 +349,66 @@ describe('useConversation', () => {
               },
             },
           ],
+          onConversationUpdate,
         },
         wrapper,
       });
 
-      mockChatService.chat.mockImplementationOnce(() => {
+      mockChatService.complete.mockImplementationOnce(() => {
         return subject;
       });
-
-      act(() => {
-        hookResult.result.current.next(
-          hookResult.result.current.messages.concat({
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.User,
-              content: 'Hello again',
-            },
-          })
-        );
-      });
     });
 
-    describe('when chat completes with an error', () => {
+    describe('and the conversation is created or updated', () => {
       beforeEach(async () => {
-        mockService.callApi.mockClear();
-        act(() => {
+        await act(async () => {
+          hookResult.result.current.next(
+            hookResult.result.current.messages.concat({
+              '@timestamp': new Date().toISOString(),
+              message: {
+                content: 'Hello again',
+                role: MessageRole.User,
+              },
+            })
+          );
           subject.next({
+            type: StreamingChatResponseEventType.ChatCompletionChunk,
+            id: 'my-message',
             message: {
-              role: MessageRole.Assistant,
               content: 'Goodbye',
             },
-            error: new Error(),
           });
-          subject.complete();
-        });
-        await act(async () => {});
-      });
-
-      it('does not store the conversation', () => {
-        expect(mockService.callApi).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('when chat completes without an error', () => {
-      beforeEach(async () => {
-        act(() => {
           subject.next({
+            type: StreamingChatResponseEventType.MessageAdd,
+            id: 'my-message',
             message: {
-              role: MessageRole.Assistant,
-              content: 'Goodbye again',
+              '@timestamp': new Date().toISOString(),
+              message: {
+                content: 'Goodbye',
+                role: MessageRole.Assistant,
+              },
+            },
+          });
+          subject.next({
+            type: StreamingChatResponseEventType.ConversationUpdate,
+            conversation: {
+              id: 'my-conversation-id',
+              title: 'My title',
+              last_updated: new Date().toISOString(),
             },
           });
           subject.complete();
         });
-
-        await act(async () => {});
       });
-      it('the conversation is created including the initial messages', async () => {
-        expect(mockService.callApi.mock.calls[0]).toEqual([
-          'POST /internal/observability_ai_assistant/conversation',
-          {
-            params: {
-              body: {
-                conversation: {
-                  '@timestamp': expect.any(String),
-                  conversation: {
-                    title: EMPTY_CONVERSATION_TITLE,
-                  },
-                  messages: expectedMessages,
-                  labels: {},
-                  numeric_labels: {},
-                  public: false,
-                },
-              },
-            },
-            signal: null,
+
+      it('calls the onConversationUpdate hook', () => {
+        expect(onConversationUpdate).toHaveBeenCalledWith({
+          conversation: {
+            id: 'my-conversation-id',
+            last_updated: expect.any(String),
+            title: 'My title',
           },
-        ]);
-
-        expect(hookResult.result.current.conversation.error).toBeUndefined();
-
-        expect(hookResult.result.current.messages).toEqual(expectedMessages);
-      });
-    });
-  });
-
-  describe('when chat completes with an initial conversation id', () => {
-    let subject: Subject<PendingMessage>;
-
-    const initialMessages: Message[] = [
-      {
-        '@timestamp': new Date().toISOString(),
-        message: {
-          role: MessageRole.System,
-          content: '',
-        },
-      },
-      {
-        '@timestamp': new Date().toISOString(),
-        message: {
-          role: MessageRole.User,
-          content: 'user',
-        },
-      },
-      {
-        '@timestamp': new Date().toISOString(),
-        message: {
-          role: MessageRole.Assistant,
-          content: 'assistant',
-        },
-      },
-    ];
-
-    beforeEach(async () => {
-      mockService.callApi.mockImplementation(async (endpoint, request) => ({
-        '@timestamp': new Date().toISOString(),
-        conversation: {
-          id: 'my-conversation-id',
-          title: EMPTY_CONVERSATION_TITLE,
-        },
-        labels: {},
-        numeric_labels: {},
-        public: false,
-        messages: initialMessages,
-      }));
-
-      hookResult = renderHook(useConversation, {
-        initialProps: {
-          chatService: mockChatService,
-          connectorId: 'my-connector',
-          initialConversationId: 'my-conversation-id',
-        },
-        wrapper,
-      });
-
-      await act(async () => {});
-    });
-
-    it('the conversation is loadeded', async () => {
-      expect(mockService.callApi.mock.calls[0]).toEqual([
-        'GET /internal/observability_ai_assistant/conversation/{conversationId}',
-        {
-          signal: expect.anything(),
-          params: {
-            path: {
-              conversationId: 'my-conversation-id',
-            },
-          },
-        },
-      ]);
-
-      expect(hookResult.result.current.messages).toEqual(
-        initialMessages.map((msg) => ({ ...msg, '@timestamp': expect.any(String) }))
-      );
-    });
-
-    describe('after chat completes', () => {
-      const nextUserMessage: Message = {
-        '@timestamp': new Date().toISOString(),
-        message: {
-          role: MessageRole.User,
-          content: 'Hello again',
-        },
-      };
-
-      const nextAssistantMessage: Message = {
-        '@timestamp': new Date().toISOString(),
-        message: {
-          role: MessageRole.Assistant,
-          content: 'Goodbye again',
-        },
-      };
-
-      beforeEach(async () => {
-        mockService.callApi.mockClear();
-        subject = new Subject();
-
-        mockChatService.chat.mockImplementationOnce(() => {
-          return subject;
         });
-
-        act(() => {
-          hookResult.result.current.next(
-            hookResult.result.current.messages.concat(nextUserMessage)
-          );
-          subject.next(omit(nextAssistantMessage, '@timestamp'));
-          subject.complete();
-        });
-
-        await act(async () => {});
-      });
-
-      it('saves the updated message', () => {
-        expect(mockService.callApi.mock.calls[0]).toEqual([
-          'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
-          {
-            params: {
-              path: {
-                conversationId: 'my-conversation-id',
-              },
-              body: {
-                conversation: {
-                  '@timestamp': expect.any(String),
-                  conversation: {
-                    title: EMPTY_CONVERSATION_TITLE,
-                    id: 'my-conversation-id',
-                  },
-                  messages: initialMessages
-                    .concat([nextUserMessage, nextAssistantMessage])
-                    .map((msg) => ({ ...msg, '@timestamp': expect.any(String) })),
-                  labels: {},
-                  numeric_labels: {},
-                  public: false,
-                },
-              },
-            },
-            signal: null,
-          },
-        ]);
       });
     });
   });

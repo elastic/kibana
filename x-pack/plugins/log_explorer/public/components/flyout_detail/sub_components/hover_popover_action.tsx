@@ -9,29 +9,34 @@ import React, { useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiPopover,
-  IconType,
   EuiButtonIcon,
   EuiPopoverTitle,
   EuiToolTip,
+  PopoverAnchorPosition,
+  type EuiPopoverProps,
 } from '@elastic/eui';
-
-export interface HoverActionType {
-  id: string;
-  tooltipContent: string;
-  iconType: IconType;
-  onClick: () => void;
-  display: boolean;
-}
+import { useHoverActions } from '../../../hooks/use_hover_actions';
 
 interface HoverPopoverActionProps {
   children: React.ReactChild;
-  actions: HoverActionType[];
-  title: string;
+  field: string;
+  value: string;
+  title?: string;
+  anchorPosition?: PopoverAnchorPosition;
+  display?: EuiPopoverProps['display'];
 }
 
-export const HoverActionPopover = ({ children, actions, title }: HoverPopoverActionProps) => {
+export const HoverActionPopover = ({
+  children,
+  title,
+  field,
+  value,
+  anchorPosition = 'upCenter',
+  display = 'inline-block',
+}: HoverPopoverActionProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
+  const hoverActions = useHoverActions({ field, value });
 
   // The timeout hack is required because we are using a Popover which ideally should be used with a mouseclick,
   // but we are using it as a Tooltip. Which means we now need to manually handle the open and close
@@ -53,15 +58,18 @@ export const HoverActionPopover = ({ children, actions, title }: HoverPopoverAct
       <EuiPopover
         button={children}
         isOpen={isPopoverOpen}
-        anchorPosition="upCenter"
+        anchorPosition={anchorPosition}
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
+        display={display}
       >
-        <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
-          {title}
-        </EuiPopoverTitle>
+        {title && (
+          <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
+            {title}
+          </EuiPopoverTitle>
+        )}
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-          {actions.map((action) => (
+          {hoverActions.map((action) => (
             <EuiToolTip content={action.tooltipContent} key={action.id}>
               <EuiButtonIcon
                 size="xs"

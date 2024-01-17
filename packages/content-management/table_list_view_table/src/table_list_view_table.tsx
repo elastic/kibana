@@ -27,7 +27,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useOpenContentEditor } from '@kbn/content-management-content-editor';
-import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
+import type {
+  OpenContentEditorParams,
+  SavedObjectsReference,
+} from '@kbn/content-management-content-editor';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import {
   Table,
@@ -37,7 +41,7 @@ import {
   UpdatedAtField,
 } from './components';
 import { useServices } from './services';
-import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
+import type { SavedObjectsFindOptionsReference } from './services';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
@@ -140,18 +144,6 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   tableSort: {
     field: SortColumnField;
     direction: Direction;
-  };
-}
-
-export interface UserContentCommonSchema {
-  id: string;
-  updatedAt: string;
-  managed?: boolean;
-  references: SavedObjectsReference[];
-  type: string;
-  attributes: {
-    title: string;
-    description?: string;
   };
 }
 

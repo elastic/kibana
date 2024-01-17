@@ -170,3 +170,34 @@ npm_install_global() {
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
 }
+
+
+vault_get() {
+  key_path=$1
+  field=$2
+
+  fullPath="secret/ci/elastic-kibana/$key_path"
+  if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
+    fullPath="secret/kibana-issues/dev/$key_path"
+  fi
+
+  if [[ -z "${2:-}" || "${2:-}" =~ ^-.* ]]; then
+    retry 5 5 vault read "$fullPath" "${@:2}"
+  else
+    retry 5 5 vault read -field="$field" "$fullPath" "${@:3}"
+  fi
+}
+
+vault_set() {
+  key_path=$1
+  shift
+  fields=("$@")
+
+  fullPath="secret/ci/elastic-kibana/$key_path"
+  if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
+    fullPath="secret/kibana-issues/dev/$key_path"
+  fi
+
+  # shellcheck disable=SC2068
+  retry 5 5 vault write "$fullPath" ${fields[@]}
+}

@@ -8,8 +8,14 @@
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { Logger } from '@kbn/core/server';
 
-import { PackagePolicyRestrictionRelatedError, FleetUnauthorizedError } from '../errors';
+import {
+  PackagePolicyRestrictionRelatedError,
+  FleetUnauthorizedError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../errors';
 import type {
   AgentPolicy,
   FullAgentPolicy,
@@ -105,8 +111,13 @@ function getAgentPolicyCreateMock() {
   });
   return soClient;
 }
-
+let mockedLogger: jest.Mocked<Logger>;
 describe('agent policy', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
   });
@@ -468,6 +479,26 @@ describe('agent policy', () => {
           },
         ],
       } as any);
+      soClient.get.mockImplementation((type, id, options): any => {
+        if (id === 'test1') {
+          return Promise.resolve({
+            id,
+            attributes: {
+              data_output_id: 'output-id-123',
+              monitoring_output_id: 'output-id-another-output',
+            },
+          });
+        }
+        if (id === 'test2') {
+          return Promise.resolve({
+            id,
+            attributes: {
+              data_output_id: 'output-id-another-output',
+              monitoring_output_id: 'output-id-123',
+            },
+          });
+        }
+      });
 
       await agentPolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
 
@@ -476,13 +507,15 @@ describe('agent policy', () => {
         expect.anything(),
         expect.anything(),
         'test1',
-        { data_output_id: null, monitoring_output_id: 'output-id-another-output' }
+        { data_output_id: null, monitoring_output_id: 'output-id-another-output' },
+        { skipValidation: true }
       );
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test2',
-        { data_output_id: 'output-id-another-output', monitoring_output_id: null }
+        { data_output_id: 'output-id-another-output', monitoring_output_id: null },
+        { skipValidation: true }
       );
     });
   });
@@ -594,6 +627,27 @@ describe('agent policy', () => {
       // soClient.update is called with updated values
       calledWith = soClient.update.mock.calls[1];
       expect(calledWith[2]).toHaveProperty('is_managed', true);
+    });
+
+    it('should throw a HostedAgentRestrictionRelated error if user enables "is_protected" for a managed policy', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.get.mockResolvedValue({
+        attributes: { is_managed: true },
+        id: 'mocked',
+        type: 'mocked',
+        references: [],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          is_protected: true,
+        })
+      ).rejects.toThrowError(
+        new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected')
+      );
     });
 
     it('should call audit logger', async () => {

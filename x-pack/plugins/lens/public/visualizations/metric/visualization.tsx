@@ -45,7 +45,7 @@ export const showingBar = (
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
   return showingBar(state) && isMetricNumeric
     ? euiLightVars.euiColorPrimary
-    : euiThemeVars.euiColorLightestShade;
+    : euiThemeVars.euiColorEmptyShade;
 };
 
 export interface MetricVisualizationState {
@@ -526,7 +526,7 @@ export const getMetricVisualization = ({
     return state.trendlineLayerId ? [state.trendlineLayerId] : [];
   },
 
-  toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
+  toExpression: (state, datasourceLayers, _attributes, datasourceExpressionsByLayers) =>
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
 
   setDimension({ prevState, columnId, groupId }) {

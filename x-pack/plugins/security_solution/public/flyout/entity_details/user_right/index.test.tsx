@@ -10,12 +10,12 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
-import { mockRiskScoreState } from './mocks';
 
 import {
-  mockManagedUser,
-  mockObservedUser,
+  mockManagedUserData,
+  mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { mockObservedUser } from './mocks';
 
 const mockProps: UserPanelProps = {
   userName: 'test',
@@ -27,28 +27,33 @@ const mockProps: UserPanelProps = {
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 const mockedUseRiskScore = jest.fn().mockReturnValue(mockRiskScoreState);
-jest.mock('../../../explore/containers/risk_score', () => ({
+jest.mock('../../../entity_analytics/api/hooks/use_risk_score', () => ({
   useRiskScore: () => mockedUseRiskScore(),
 }));
 
-const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUser);
+const mockedUseManagedUser = jest.fn().mockReturnValue(mockManagedUserData);
 const mockedUseObservedUser = jest.fn().mockReturnValue(mockObservedUser);
 
-jest.mock('../../../timelines/components/side_panel/new_user_detail/hooks', () => {
-  const originalModule = jest.requireActual(
-    '../../../timelines/components/side_panel/new_user_detail/hooks'
-  );
-  return {
-    ...originalModule,
+jest.mock(
+  '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user',
+  () => ({
     useManagedUser: () => mockedUseManagedUser(),
-    useObservedUser: () => mockedUseObservedUser(),
-  };
-});
+  })
+);
+
+jest.mock('./hooks/use_observed_user', () => ({
+  useObservedUser: () => mockedUseObservedUser(),
+}));
+
+const mockedUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => mockedUseIsExperimentalFeatureEnabled(),
+}));
 
 describe('UserPanel', () => {
   beforeEach(() => {
     mockedUseRiskScore.mockReturnValue(mockRiskScoreState);
-    mockedUseManagedUser.mockReturnValue(mockManagedUser);
+    mockedUseManagedUser.mockReturnValue(mockManagedUserData);
     mockedUseObservedUser.mockReturnValue(mockObservedUser);
   });
 
@@ -95,9 +100,21 @@ describe('UserPanel', () => {
     expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
   });
 
+  it('does not render managed user when experimental flag is disabled', () => {
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <UserPanel {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('managedUser-accordion-button')).not.toBeInTheDocument();
+  });
+
   it('renders loading state when managed user is loading', () => {
     mockedUseManagedUser.mockReturnValue({
-      ...mockManagedUser,
+      ...mockManagedUserData,
       isLoading: true,
     });
 

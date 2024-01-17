@@ -366,6 +366,19 @@ async function sendReleaseSlackAnnouncement({
           text:
             '*Useful links:*\n\n' +
             Object.entries(usefulLinksSection)
+              .filter(([name]) => !name.includes('GPCTL'))
+              .map(([name, link]) => ` • <${link}|${name}>`)
+              .join('\n'),
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text:
+            '*GPCTL Dashboards:*\n\n' +
+            Object.entries(usefulLinksSection)
+              .filter(([name]) => name.includes('GPCTL'))
               .map(([name, link]) => ` • <${link}|${name}>`)
               .join('\n'),
         },

@@ -5,19 +5,32 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import type { CoreStart, Plugin, CoreSetup } from '@kbn/core/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type {
+  BrowserUrlService,
+  SharePluginSetup,
+  SharePluginStart,
+} from '@kbn/share-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
+import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
+import {
+  type FlamegraphLocator,
+  FlamegraphLocatorDefinition,
+} from './locators/profiling/flamegraph_locator';
+import {
+  type StacktracesLocator,
+  StacktracesLocatorDefinition,
+} from './locators/profiling/stacktraces_locator';
+import {
+  type TopNFunctionsLocator,
+  TopNFunctionsLocatorDefinition,
+} from './locators/profiling/topn_functions_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-import { FlamegraphLocatorDefinition } from './locators/profiling/flamegraph_locator';
-import { TopNFunctionsLocatorDefinition } from './locators/profiling/topn_functions_locator';
-import { StacktracesLocatorDefinition } from './locators/profiling/stacktraces_locator';
 
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
@@ -36,6 +49,14 @@ export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugi
 export type ObservabilitySharedPluginStart = ReturnType<ObservabilitySharedPlugin['start']>;
 export type ProfilingLocators = ObservabilitySharedPluginSetup['locators']['profiling'];
 
+interface ObservabilitySharedLocators {
+  profiling: {
+    flamegraphLocator: FlamegraphLocator;
+    topNFunctionsLocator: TopNFunctionsLocator;
+    stacktracesLocator: StacktracesLocator;
+  };
+}
+
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
@@ -46,19 +67,7 @@ export class ObservabilitySharedPlugin implements Plugin {
 
   public setup(coreSetup: CoreSetup, pluginsSetup: ObservabilitySharedSetup) {
     return {
-      locators: {
-        profiling: {
-          flamegraphLocator: pluginsSetup.share.url.locators.create(
-            new FlamegraphLocatorDefinition()
-          ),
-          topNFunctionsLocator: pluginsSetup.share.url.locators.create(
-            new TopNFunctionsLocatorDefinition()
-          ),
-          stacktracesLocator: pluginsSetup.share.url.locators.create(
-            new StacktracesLocatorDefinition()
-          ),
-        },
-      },
+      locators: this.createLocators(pluginsSetup.share.url),
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
@@ -79,6 +88,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     });
 
     return {
+      locators: this.createLocators(plugins.share.url),
       navigation: {
         PageTemplate,
         registerSections: this.navigationRegistry.registerSections,
@@ -89,4 +99,14 @@ export class ObservabilitySharedPlugin implements Plugin {
   }
 
   public stop() {}
+
+  private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {
+    return {
+      profiling: {
+        flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),
+        topNFunctionsLocator: urlService.locators.create(new TopNFunctionsLocatorDefinition()),
+        stacktracesLocator: urlService.locators.create(new StacktracesLocatorDefinition()),
+      },
+    };
+  }
 }

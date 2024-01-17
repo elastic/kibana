@@ -50,6 +50,7 @@ import {
 } from '../common/guided_onboarding/search_guide_config';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
 import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
@@ -64,10 +65,10 @@ import {
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
+import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
-import { registerCreateAPIKeyRoute } from './routes/enterprise_search/create_api_key';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
@@ -76,6 +77,7 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
+import { GlobalConfigService } from './services/global_config_service';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { getSearchResultProvider } from './utils/search_result_provider';
@@ -103,9 +105,8 @@ export interface PluginsStart {
 export interface RouteDependencies {
   config: ConfigType;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
-
   getSavedObjectsService?(): SavedObjectsServiceStart;
-
+  globalConfigService: GlobalConfigService;
   log: Logger;
   ml?: MlPluginSetup;
   router: IRouter;
@@ -114,6 +115,7 @@ export interface RouteDependencies {
 export class EnterpriseSearchPlugin implements Plugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
+  private readonly globalConfigService: GlobalConfigService;
 
   /**
    * Exposed services
@@ -121,11 +123,19 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigType>();
+    this.globalConfigService = new GlobalConfigService();
     this.logger = initializerContext.logger.get();
   }
 
   public setup(
-    { capabilities, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
+    {
+      capabilities,
+      elasticsearch,
+      http,
+      savedObjects,
+      getStartServices,
+      uiSettings,
+    }: CoreSetup<PluginsStart>,
     {
       usageCollection,
       security,
@@ -138,6 +148,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       cloud,
     }: PluginsSetup
   ) {
+    this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
     const config = this.config;
     const log = this.logger;
     const PLUGIN_IDS = [
@@ -184,7 +195,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       async (request: KibanaRequest) => {
         const [, { spaces }] = await getStartServices();
 
-        const dependencies = { config, security, spaces, request, log, ml };
+        const dependencies = {
+          config,
+          security,
+          spaces,
+          request,
+          log,
+          ml,
+        };
 
         const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
         const showEnterpriseSearch =
@@ -227,7 +245,14 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
     const router = http.createRouter();
     const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
-    const dependencies = { router, config, log, enterpriseSearchRequestHandler, ml };
+    const dependencies = {
+      router,
+      config,
+      globalConfigService: this.globalConfigService,
+      log,
+      enterpriseSearchRequestHandler,
+      ml,
+    };
 
     registerConfigDataRoute(dependencies);
     if (config.canDeployEntSearch) registerAppSearchRoutes(dependencies);
@@ -244,7 +269,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     getStartServices().then(([, { security: securityStart }]) => {
-      registerCreateAPIKeyRoute(dependencies, securityStart);
+      registerApiKeysRoutes(dependencies, securityStart);
     });
 
     /**
@@ -262,6 +287,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        registerCNTelemetryUsageCollector(usageCollection);
         if (config.canDeployEntSearch) {
           registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
           registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);

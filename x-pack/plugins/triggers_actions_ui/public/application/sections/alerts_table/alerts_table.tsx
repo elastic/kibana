@@ -38,6 +38,7 @@ import { InspectButtonContainer } from './toolbar/components/inspect';
 import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
+import { AlertsTableQueryContext } from './contexts/alerts_table_context';
 
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const DefaultGridStyle: EuiDataGridStyle = {
@@ -147,7 +148,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     getInspectQuery,
   } = alertsData;
 
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient({ context: AlertsTableQueryContext });
   const { data: cases, isLoading: isLoadingCases } = props.cases;
   const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
     props.maintenanceWindows;
@@ -158,7 +159,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     useActionsColumn({
       options: props.alertsTableConfiguration.useActionsColumn,
     });
-
+  const casesConfig = props.alertsTableConfiguration.cases;
   const renderCellContext = props.alertsTableConfiguration.useFetchPageContext?.({
     alerts,
     columns: props.columns,
@@ -173,7 +174,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     clearSelection,
   } = useBulkActions({
     alerts,
-    casesConfig: props.alertsTableConfiguration.cases,
+    casesConfig,
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
     refresh: alertsRefresh,
@@ -183,6 +184,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const refreshData = useCallback(() => {
     alertsRefresh();
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.cases());
+    queryClient.invalidateQueries(triggersActionsUiQueriesKeys.mutedAlerts());
     queryClient.invalidateQueries(triggersActionsUiQueriesKeys.maintenanceWindows());
   }, [alertsRefresh, queryClient]);
 
@@ -218,10 +220,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
-    (alert) => {
-      const idx = alerts.findIndex((a) =>
-        (a as any)[ALERT_UUID].includes(alert.fields[ALERT_UUID])
-      );
+    (alertId: string) => {
+      const idx = alerts.findIndex((a) => (a as any)[ALERT_UUID].includes(alertId));
       setFlyoutAlertIndex(idx);
     },
     [alerts, setFlyoutAlertIndex]
@@ -405,6 +405,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               cases={cases}
               maintenanceWindows={maintenanceWindows}
               showAlertStatusWithFlapping={showAlertStatusWithFlapping}
+              caseAppId={casesConfig?.appId}
             />
           );
         }
@@ -422,6 +423,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     [
       alerts,
       cases,
+      casesConfig?.appId,
       ecsAlertsData,
       isLoading,
       isLoadingCases,

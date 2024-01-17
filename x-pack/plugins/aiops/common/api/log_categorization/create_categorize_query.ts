@@ -12,8 +12,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 export function createCategorizeQuery(
   queryIn: QueryDslQueryContainer,
   timeField: string,
-  from: number | undefined,
-  to: number | undefined
+  timeRange: { from: number; to: number } | undefined
 ) {
   const query = cloneDeep(queryIn);
 
@@ -34,15 +33,17 @@ export function createCategorizeQuery(
     delete query.multi_match;
   }
 
-  (query.bool.must as QueryDslQueryContainer[]).push({
-    range: {
-      [timeField]: {
-        gte: from,
-        lte: to,
-        format: 'epoch_millis',
+  if (timeRange !== undefined) {
+    (query.bool.must as QueryDslQueryContainer[]).push({
+      range: {
+        [timeField]: {
+          gte: timeRange.from,
+          lte: timeRange.to,
+          format: 'epoch_millis',
+        },
       },
-    },
-  });
+    });
+  }
 
   return query;
 }

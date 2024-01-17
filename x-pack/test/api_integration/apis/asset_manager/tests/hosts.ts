@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body).to.have.property('hosts');
       expect(response.body.hosts.length).to.equal(6);
 
-      const ids = response.body.hosts.map((result: Asset) => result['asset.id'][0]);
+      const ids = response.body.hosts.map((result: Asset) => result['asset.id']);
 
       expect(ids).to.eql([
         'my-host-1',

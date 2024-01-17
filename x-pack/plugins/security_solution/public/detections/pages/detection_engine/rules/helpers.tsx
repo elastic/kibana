@@ -37,7 +37,7 @@ import type {
   ActionsStepRule,
 } from './types';
 import { DataSourceType, GroupByOptions } from './types';
-import { severityOptions } from '../../../components/rules/step_about_rule/data';
+import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
 
@@ -156,7 +156,12 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       ? convertHistoryStartToSize(rule.history_window_start)
       : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
-  groupByFields: ('alert_suppression' in rule && rule.alert_suppression?.group_by) || [],
+  groupByFields:
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'group_by' in rule.alert_suppression &&
+      rule.alert_suppression.group_by) ||
+    [],
   groupByRadioSelection:
     'alert_suppression' in rule && rule.alert_suppression?.duration
       ? GroupByOptions.PerTimePeriod
@@ -166,8 +171,14 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
     unit: 'm',
   },
   suppressionMissingFields:
-    ('alert_suppression' in rule && rule.alert_suppression?.missing_fields_strategy) ||
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'missing_fields_strategy' in rule.alert_suppression &&
+      rule.alert_suppression.missing_fields_strategy) ||
     DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  enableThresholdSuppression: Boolean(
+    'alert_suppression' in rule && rule.alert_suppression?.duration
+  ),
 });
 
 export const convertHistoryStartToSize = (relativeTime: string) => {

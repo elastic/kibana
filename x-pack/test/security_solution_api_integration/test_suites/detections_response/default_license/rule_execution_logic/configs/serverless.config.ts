@@ -9,12 +9,16 @@ import { createTestConfig } from '../../../../../config/serverless/config.base';
 export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'Detection Engine API Integration Tests - Serverless - Rule Execution Logic',
+    reportName:
+      'Detection Engine - Rule Execution Logic Integration Tests - Serverless Env - Complete License',
   },
   kbnTestServerArgs: [
     `--xpack.securitySolution.alertIgnoreFields=${JSON.stringify([
       'testing_ignored.constant',
       '/testing_regex*/',
     ])}`, // See tests within the file "ignore_fields.ts" which use these values in "alertIgnoreFields"
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'entityAnalyticsAssetCriticalityEnabled',
+    ])}`,
   ],
 });

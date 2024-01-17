@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-  // TODO: add a new service
+  // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
@@ -271,6 +271,26 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(fullAlert?.host?.risk?.calculated_level).toBe('Low');
         expect(fullAlert?.host?.risk?.calculated_score_norm).toBe(1);
+      });
+    });
+
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBe(1);
+        const fullAlert = previewAlerts[0]._source;
+
+        expect(fullAlert?.['kibana.alert.host.criticality_level']).toBe('normal');
+        expect(fullAlert?.['kibana.alert.user.criticality_level']).toBe('very_important');
       });
     });
   });

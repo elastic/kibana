@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import type { CustomFieldTypes } from '../../../../common/types/domain';
 import { builderMap as customFieldsBuilder } from '../../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
@@ -84,36 +84,33 @@ export const useCustomFieldsFilterConfig = ({
   isSelectorView: boolean;
   onFilterOptionsChange: FilterChangeHandler;
 }) => {
-  const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
-
   const {
     data: { customFields },
   } = useGetCaseConfiguration();
 
-  useEffect(() => {
-    if (isSelectorView) return;
+  const customFieldsFilterConfig: FilterConfig[] = [];
 
-    const customFieldsFilterConfig: FilterConfig[] = [];
-    for (const { key: fieldKey, type, label: buttonLabel } of customFields ?? []) {
-      if (customFieldsBuilder[type]) {
-        const { filterOptions: customFieldOptions } = customFieldsBuilder[type]();
+  if (isSelectorView) {
+    return { customFieldsFilterConfig: [] };
+  }
 
-        if (customFieldOptions) {
-          customFieldsFilterConfig.push(
-            customFieldFilterOptionFactory({
-              buttonLabel,
-              customFieldOptions,
-              fieldKey,
-              onFilterOptionsChange,
-              type,
-            })
-          );
-        }
+  for (const { key: fieldKey, type, label: buttonLabel } of customFields ?? []) {
+    if (customFieldsBuilder[type]) {
+      const { filterOptions: customFieldOptions } = customFieldsBuilder[type]();
+
+      if (customFieldOptions) {
+        customFieldsFilterConfig.push(
+          customFieldFilterOptionFactory({
+            buttonLabel,
+            customFieldOptions,
+            fieldKey,
+            onFilterOptionsChange,
+            type,
+          })
+        );
       }
     }
+  }
 
-    setFilterConfig(customFieldsFilterConfig);
-  }, [customFields, isSelectorView, onFilterOptionsChange]);
-
-  return { customFieldsFilterConfig: filterConfig };
+  return { customFieldsFilterConfig };
 };

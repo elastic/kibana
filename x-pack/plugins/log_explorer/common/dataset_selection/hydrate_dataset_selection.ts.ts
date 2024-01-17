@@ -13,11 +13,9 @@ import { UnresolvedDatasetSelection } from './unresolved_dataset_selection';
 export const hydrateDatasetSelection = (datasetSelection: DatasetSelectionPlain) => {
   if (datasetSelection.selectionType === 'all') {
     return AllDatasetSelection.create();
-  }
-  if (datasetSelection.selectionType === 'single') {
+  } else if (datasetSelection.selectionType === 'single') {
     return SingleDatasetSelection.fromSelection(datasetSelection.selection);
-  }
-  if (datasetSelection.selectionType === 'unresolved') {
+  } else {
     return UnresolvedDatasetSelection.fromSelection(datasetSelection.selection);
   }
 };

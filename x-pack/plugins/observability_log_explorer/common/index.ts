@@ -10,3 +10,5 @@ export {
   SingleDatasetLocatorDefinition,
   AllDatasetsLocatorDefinition,
 } from './locators';
+export { OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY, urlSchemaV1 } from './url_schema';
+export { deepCompactObject } from './utils/deep_compact_object';

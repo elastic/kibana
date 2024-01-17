@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 import deepMerge from 'deepmerge';
+
+import {
+  getDefaultPresetForEsOutput,
+  outputTypeSupportPresets,
+} from '../../../common/services/output_helpers';
 
 import type {
   FullAgentPolicy,
@@ -311,9 +318,17 @@ export function transformOutputToFullPolicyOutput(
   proxy?: FleetProxy,
   standalone = false
 ): FullAgentPolicyOutput {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { config_yaml, type, hosts, ca_sha256, ca_trusted_fingerprint, ssl, shipper, secrets } =
-    output;
+  const {
+    config_yaml,
+    type,
+    hosts,
+    ca_sha256,
+    ca_trusted_fingerprint,
+    ssl,
+    shipper,
+    secrets,
+    preset,
+  } = output;
 
   const configJs = config_yaml ? safeLoad(config_yaml) : {};
 
@@ -324,7 +339,6 @@ export function transformOutputToFullPolicyOutput(
   let kafkaData = {};
 
   if (type === outputType.Kafka) {
-    /* eslint-disable @typescript-eslint/naming-convention */
     const {
       client_id,
       version,
@@ -480,6 +494,10 @@ export function transformOutputToFullPolicyOutput(
 
   if (output.type === outputType.RemoteElasticsearch) {
     newOutput.service_token = output.service_token;
+  }
+
+  if (outputTypeSupportPresets(output.type)) {
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', safeLoad);
   }
 
   return newOutput;

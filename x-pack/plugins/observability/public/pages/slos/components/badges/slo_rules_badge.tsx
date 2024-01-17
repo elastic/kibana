@@ -14,7 +14,7 @@ import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 
 export interface Props {
   rules: Array<Rule<SloRule>> | undefined;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 export function SloRulesBadge({ rules, onClick }: Props) {

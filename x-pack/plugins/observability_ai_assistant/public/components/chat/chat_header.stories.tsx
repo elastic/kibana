@@ -28,6 +28,7 @@ export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
         { id: 'gpt-3.5-turbo', name: 'OpenAI GPT-3.5 Turbo' },
       ] as FindActionResult[],
       selectConnector: () => {},
+      reloadConnectors: () => {},
     },
     knowledgeBase: {
       status: {

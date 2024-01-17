@@ -471,3 +471,19 @@ components:
         - list_id
         - type
         - namespace_type
+
+    AlertSuppressionDuration:
+      type: object
+      properties:
+        value:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+          enum:
+            - s
+            - m
+            - h
+      required:
+        - value
+        - unit

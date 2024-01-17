@@ -14,6 +14,7 @@ import {
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
 import { ObservabilityConfig } from '..';
@@ -33,6 +34,7 @@ export interface RegisterRoutesDependencies {
   pluginsSetup: {
     core: CoreSetup;
   };
+  spaces?: SpacesPluginStart;
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
 }

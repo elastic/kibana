@@ -6,7 +6,7 @@
  */
 
 import type { RiskScoreService } from './risk_score_service';
-import type { RiskScore } from '../../../../common/risk_engine';
+import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
 
 const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => ({
   '@timestamp': '2023-02-15T00:15:19.231Z',
@@ -17,6 +17,10 @@ const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => (
   calculated_score_norm: 85.332,
   category_1_score: 85,
   category_1_count: 12,
+  category_2_count: 0,
+  category_2_score: 0,
+  criticality_level: 'very_important',
+  criticality_modifier: 2,
   notes: [],
   inputs: [],
   ...overrides,

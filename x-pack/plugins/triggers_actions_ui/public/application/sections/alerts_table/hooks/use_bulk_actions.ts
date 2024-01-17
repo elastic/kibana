@@ -8,6 +8,7 @@ import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
   Alerts,
   AlertsTableConfigurationRegistry,
@@ -17,7 +18,6 @@ import {
   BulkActionsVerbs,
   UseBulkActionsRegistry,
 } from '../../../../types';
-import { BulkActionsContext } from '../bulk_actions/context';
 import {
   getLeadingControlColumn as getBulkActionsLeadingControlColumn,
   GetLeadingControlColumn,
@@ -239,7 +239,9 @@ export function useBulkActions({
   useBulkActionsConfig = () => [],
   featureIds,
 }: BulkActionsProps): UseBulkActions {
-  const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [bulkActionsState, updateBulkActionsState],
+  } = useContext(AlertsTableContext);
   const configBulkActionPanels = useBulkActionsConfig(query);
 
   const clearSelection = useCallback(() => {

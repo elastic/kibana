@@ -536,6 +536,51 @@ describe('API Keys', () => {
       });
     });
 
+    it('calls `grantApiKey` with proper parameters for the Bearer scheme with client authentication', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      mockClusterClient.asInternalUser.security.grantApiKey.mockResponseOnce({
+        id: '123',
+        name: 'key-name',
+        api_key: 'abc123',
+        encoded: 'utf8',
+      });
+      const result = await apiKeys.grantAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: {
+            authorization: `Bearer foo-access-token`,
+            'es-client-authentication': 'SharedSecret secret',
+          },
+        }),
+        {
+          name: 'test_api_key',
+          role_descriptors: { foo: true },
+          expiration: '1d',
+        }
+      );
+      expect(result).toEqual({
+        api_key: 'abc123',
+        id: '123',
+        name: 'key-name',
+        encoded: 'utf8',
+      });
+      expect(mockValidateKibanaPrivileges).not.toHaveBeenCalled(); // this is only called if kibana_role_descriptors is defined
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledWith({
+        body: {
+          api_key: {
+            name: 'test_api_key',
+            role_descriptors: { foo: true },
+            expiration: '1d',
+          },
+          grant_type: 'access_token',
+          access_token: 'foo-access-token',
+          client_authentication: {
+            scheme: 'SharedSecret',
+            value: 'secret',
+          },
+        },
+      });
+    });
+
     it('throw error for other schemes', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       await expect(

@@ -29,7 +29,8 @@ export interface MlModel {
   type: string;
   title: string;
   description?: string;
-  license?: string;
+  licenseType?: string;
+  licensePageUrl?: string;
   modelDetailsPageUrl?: string;
   deploymentState: MlModelDeploymentState;
   deploymentStateReason?: string;

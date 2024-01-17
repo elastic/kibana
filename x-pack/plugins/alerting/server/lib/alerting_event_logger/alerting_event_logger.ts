@@ -13,6 +13,7 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
 import { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
@@ -259,7 +260,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
@@ -286,7 +287,7 @@ export function createActionExecuteRecord(context: RuleContextOpts, action: Acti
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
@@ -319,7 +320,7 @@ export function createExecuteTimeoutRecord(context: RuleContextOpts) {
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
@@ -346,7 +347,7 @@ export function initializeExecuteRecord(context: RuleContext) {
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },

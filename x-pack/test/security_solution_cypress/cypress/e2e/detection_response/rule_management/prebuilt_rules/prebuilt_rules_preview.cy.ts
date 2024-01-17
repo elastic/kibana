@@ -167,8 +167,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     name: 'Custom query index pattern rule',
     rule_id: 'custom_query_index_pattern_rule',
     ...(commonProperties as Record<string, unknown>),
-    type: 'query',
     ...queryProperties,
+    type: 'query',
     index: ['winlogbeat-*', 'logs-endpoint.events.*'],
     alert_suppression: {
       group_by: [
@@ -216,8 +216,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     name: 'Threshold index pattern rule',
     rule_id: 'threshold_index_pattern_rule',
     ...commonProperties,
-    type: 'threshold',
     ...queryProperties,
+    type: 'threshold',
     language: 'lucene',
     index: ['winlogbeat-*', 'logs-endpoint.events.*'],
     threshold: {
@@ -228,6 +228,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       value: 200,
       cardinality: [{ field: 'Ransomware.score', value: 3 }],
     },
+    alert_suppression: undefined,
   });
 
   const EQL_INDEX_PATTERN_RULE = createRuleAssetSavedObject({
@@ -245,8 +246,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     name: 'Threat match index pattern rule',
     rule_id: 'threat_match_index_pattern_rule',
     ...commonProperties,
-    type: 'threat_match',
     ...queryProperties,
+    type: 'threat_match',
     language: 'lucene',
     index: ['winlogbeat-*', 'logs-endpoint.events.*'],
     filters,
@@ -285,8 +286,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     name: 'New terms index pattern rule',
     rule_id: 'new_terms_index_pattern_rule',
     ...commonProperties,
-    type: 'new_terms',
     ...queryProperties,
+    type: 'new_terms',
     query: '_id: *',
     new_terms_fields: ['Endpoint.policy.applied.id', 'Memory_protection.unique_key_v1'],
     history_window_start: 'now-9d',

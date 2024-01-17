@@ -16,6 +16,7 @@ import type {
   KafkaAcknowledgeReliabilityLevel,
   KafkaConnectionTypeType,
   AgentUpgradeDetails,
+  OutputPreset,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -144,6 +145,7 @@ interface OutputSoBaseAttributes {
   allow_edit?: string[];
   output_id?: string;
   ssl?: string | null; // encrypted ssl field
+  preset?: OutputPreset;
 }
 
 interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
@@ -226,6 +228,7 @@ export interface SettingsSOAttributes {
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
+  output_secret_storage_requirements_met?: boolean;
 }
 
 export interface DownloadSourceSOAttributes {

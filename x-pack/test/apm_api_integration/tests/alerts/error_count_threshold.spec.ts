@@ -51,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ],
     };
 
-    before(async () => {
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -96,12 +96,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
 
-      await Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
+      return Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
     });
 
-    after(async () => {
-      await synthtraceEsClient.clean();
-    });
+    after(() => synthtraceEsClient.clean());
 
     describe('create rule without kql filter', () => {
       let ruleId: string;

@@ -115,12 +115,30 @@ export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
   hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 }),
+  preset: schema.maybe(
+    schema.oneOf([
+      schema.literal('balanced'),
+      schema.literal('custom'),
+      schema.literal('throughput'),
+      schema.literal('scale'),
+      schema.literal('latency'),
+    ])
+  ),
 };
 
 const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1 })),
+  preset: schema.maybe(
+    schema.oneOf([
+      schema.literal('balanced'),
+      schema.literal('custom'),
+      schema.literal('throughput'),
+      schema.literal('scale'),
+      schema.literal('latency'),
+    ])
+  ),
 };
 
 /**

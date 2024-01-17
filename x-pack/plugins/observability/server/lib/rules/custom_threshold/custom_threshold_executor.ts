@@ -99,6 +99,7 @@ export const createCustomThresholdExecutor = ({
       getAlertByAlertUuid,
       getAlertStartedDate,
       searchSourceClient,
+      alertFactory: baseAlertFactory,
     } = services;
 
     const alertFactory: CustomThresholdAlertFactory = (
@@ -177,8 +178,17 @@ export const createCustomThresholdExecutor = ({
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
+    const alertLimit = baseAlertFactory.alertLimit.getValue();
+    let hasReachedLimit = false;
+
     // The key of `groups` is the alert instance ID.
     for (const group of groups) {
+      if (scheduledActionsCount >= alertLimit) {
+        // need to set this so that warning is displayed in the UI and in the logs
+        hasReachedLimit = true;
+        break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+      }
+
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
@@ -285,17 +295,19 @@ export const createCustomThresholdExecutor = ({
             }
             return formatAlertResult(evaluation).currentValue;
           }),
-          viewInAppUrl: getViewInAppUrl(
-            alertResults.length === 1 ? alertResults[0][group].metrics : [],
-            indexedStartedAt,
+          viewInAppUrl: getViewInAppUrl({
+            dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+            filter: params.searchConfiguration.query.query,
             logExplorerLocator,
-            params.searchConfiguration.query.query,
-            params.searchConfiguration?.index?.title ?? dataViewId
-          ),
+            metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+            startedAt: indexedStartedAt,
+          }),
           ...additionalContext,
         });
       }
     }
+
+    baseAlertFactory.alertLimit.setLimitReached(hasReachedLimit);
     const { getRecoveredAlerts } = services.alertFactory.done();
     const recoveredAlerts = getRecoveredAlerts();
 
@@ -309,6 +321,7 @@ export const createCustomThresholdExecutor = ({
       const alertUuid = getAlertUuid(recoveredAlertId);
       const timestamp = startedAt.toISOString();
       const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
+      const group = groupByKeysObjectForRecovered[recoveredAlertId];
 
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
@@ -321,8 +334,15 @@ export const createCustomThresholdExecutor = ({
           alertsLocator,
           basePath.publicBaseUrl
         ),
-        group: groupByKeysObjectForRecovered[recoveredAlertId],
+        group,
         timestamp: startedAt.toISOString(),
+        viewInAppUrl: getViewInAppUrl({
+          dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+          filter: params.searchConfiguration.query.query,
+          logExplorerLocator,
+          metrics: params.criteria[0]?.metrics,
+          startedAt: indexedStartedAt,
+        }),
         ...additionalContext,
       });
     }

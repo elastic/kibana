@@ -13,15 +13,14 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
+  AllDatasetsLocatorDefinition,
   ObservabilityLogExplorerLocators,
   SingleDatasetLocatorDefinition,
-  AllDatasetsLocatorDefinition,
 } from '../common/locators';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '../common/constants';
 import { logExplorerAppTitle } from '../common/translations';
-import { renderObservabilityLogExplorer } from './applications/observability_log_explorer';
 import type {
   ObservabilityLogExplorerAppMountParameters,
   ObservabilityLogExplorerPluginSetup,
@@ -44,7 +43,7 @@ export class ObservabilityLogExplorerPlugin
     core: CoreSetup<ObservabilityLogExplorerStartDeps, ObservabilityLogExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogExplorerSetupDeps
   ) {
-    const { share } = _pluginsSetup;
+    const { share, serverless, discover } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -59,6 +58,9 @@ export class ObservabilityLogExplorerPlugin
       keywords: ['logs', 'log', 'explorer', 'logs explorer'],
       mount: async (appMountParams: ObservabilityLogExplorerAppMountParameters) => {
         const [coreStart, pluginsStart, ownPluginStart] = await core.getStartServices();
+        const { renderObservabilityLogExplorer } = await import(
+          './applications/observability_log_explorer'
+        );
 
         return renderObservabilityLogExplorer(
           coreStart,
@@ -68,6 +70,10 @@ export class ObservabilityLogExplorerPlugin
         );
       },
     });
+
+    if (serverless) {
+      discover.showLogExplorerTabs();
+    }
 
     // Register Locators
     const singleDatasetLocator = share.url.locators.create(

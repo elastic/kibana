@@ -7,6 +7,7 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const savedObjectWith500Error = {
   id: 'id2',
@@ -30,7 +31,7 @@ export const savedObjectWith409Error = {
 
 export const defaultRule = {
   id: 'id1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     name: 'fakeName',
     consumer: 'fakeConsumer',
@@ -44,7 +45,7 @@ export const defaultRule = {
 
 export const defaultRuleForBulkDelete = {
   id: 'id1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     tags: ['ups'],
     params: { param: 1 },

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { TelemetryCounter } from '@kbn/analytics-client';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { Observable } from 'rxjs';
 import type { ObservabilityAIAssistantChatService } from '../types';
 
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
@@ -13,7 +15,12 @@ type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
 export const createMockChatService = (): MockedChatService => {
   const mockChatService: MockedChatService = {
     chat: jest.fn(),
-    executeFunction: jest.fn(),
+    complete: jest.fn(),
+    analytics: {
+      optIn: jest.fn(),
+      reportEvent: jest.fn(),
+      telemetryCounter$: new Observable<TelemetryCounter>() as any,
+    },
     getContexts: jest.fn().mockReturnValue([{ name: 'core', description: '' }]),
     getFunctions: jest.fn().mockReturnValue([]),
     hasFunction: jest.fn().mockReturnValue(false),

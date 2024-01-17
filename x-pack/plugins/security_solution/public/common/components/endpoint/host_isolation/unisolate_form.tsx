@@ -23,7 +23,16 @@ import { CANCEL, COMMENT, COMMENT_PLACEHOLDER, CONFIRM, UNISOLATE, ISOLATED } fr
 import type { EndpointIsolatedFormProps } from './isolate_form';
 
 export const EndpointUnisolateForm = memo<EndpointIsolatedFormProps>(
-  ({ hostName, onCancel, onConfirm, onChange, comment = '', messageAppend, isLoading = false }) => {
+  ({
+    hostName,
+    onCancel,
+    onConfirm,
+    onChange,
+    comment = '',
+    messageAppend,
+    isLoading = false,
+    hideCommentField = false,
+  }) => {
     const handleCommentChange: ChangeEventHandler<HTMLTextAreaElement> = useCallback(
       (event) => {
         onChange({ comment: event.target.value });
@@ -52,15 +61,17 @@ export const EndpointUnisolateForm = memo<EndpointIsolatedFormProps>(
             </EuiText>
           </EuiFormRow>
 
-          <EuiFormRow label={COMMENT} fullWidth>
-            <EuiTextArea
-              data-test-subj="host_isolation_comment"
-              fullWidth
-              placeholder={COMMENT_PLACEHOLDER}
-              value={comment}
-              onChange={handleCommentChange}
-            />
-          </EuiFormRow>
+          {!hideCommentField && (
+            <EuiFormRow label={COMMENT} fullWidth>
+              <EuiTextArea
+                data-test-subj="host_isolation_comment"
+                fullWidth
+                placeholder={COMMENT_PLACEHOLDER}
+                value={comment}
+                onChange={handleCommentChange}
+              />
+            </EuiFormRow>
+          )}
 
           <EuiFormRow fullWidth>
             <EuiFlexGroup justifyContent="flexEnd">

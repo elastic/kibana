@@ -228,47 +228,51 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   async syncData(syncContext: DataRequestContext) {
-    if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
-      await this._syncMaxResultWindow(syncContext);
-    }
-    await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
-    await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
-    await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
-
-    let maxLineWidth = 0;
-    const lineWidth = this.getCurrentStyle()
-      .getAllStyleProperties()
-      .find((styleProperty) => {
-        return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
-      });
-    if (lineWidth) {
-      if (!lineWidth.isDynamic() && lineWidth.isComplete()) {
-        maxLineWidth = (lineWidth as StaticSizeProperty).getOptions().size;
-      } else if (lineWidth.isDynamic() && lineWidth.isComplete()) {
-        maxLineWidth = (lineWidth as DynamicSizeProperty).getOptions().maxSize;
+    try {
+      if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
+        await this._syncMaxResultWindow(syncContext);
       }
-    }
-    const buffer = Math.ceil(3.5 * maxLineWidth);
+      await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
+      await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
+      await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
 
-    await syncMvtSourceData({
-      buffer,
-      hasLabels: this.getCurrentStyle().hasLabels(),
-      layerId: this.getId(),
-      layerName: await this.getDisplayName(),
-      prevDataRequest: this.getSourceDataRequest(),
-      requestMeta: await this._getVectorSourceRequestMeta(
-        syncContext.isForceRefresh,
-        syncContext.dataFilters,
-        this.getSource(),
-        this.getCurrentStyle(),
-        syncContext.isFeatureEditorOpenForLayer
-      ),
-      source: this.getSource() as IMvtVectorSource,
-      syncContext,
-    });
+      let maxLineWidth = 0;
+      const lineWidth = this.getCurrentStyle()
+        .getAllStyleProperties()
+        .find((styleProperty) => {
+          return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
+        });
+      if (lineWidth) {
+        if (!lineWidth.isDynamic() && lineWidth.isComplete()) {
+          maxLineWidth = (lineWidth as StaticSizeProperty).getOptions().size;
+        } else if (lineWidth.isDynamic() && lineWidth.isComplete()) {
+          maxLineWidth = (lineWidth as DynamicSizeProperty).getOptions().maxSize;
+        }
+      }
+      const buffer = Math.ceil(3.5 * maxLineWidth);
 
-    if (this.hasJoins()) {
-      await this._syncJoins(syncContext, this.getCurrentStyle());
+      await syncMvtSourceData({
+        buffer,
+        hasLabels: this.getCurrentStyle().hasLabels(),
+        layerId: this.getId(),
+        layerName: await this.getDisplayName(),
+        prevDataRequest: this.getSourceDataRequest(),
+        requestMeta: await this._getVectorSourceRequestMeta(
+          syncContext.isForceRefresh,
+          syncContext.dataFilters,
+          this.getSource(),
+          this.getCurrentStyle(),
+          syncContext.isFeatureEditorOpenForLayer
+        ),
+        source: this.getSource() as IMvtVectorSource,
+        syncContext,
+      });
+
+      if (this.hasJoins()) {
+        await this._syncJoins(syncContext, this.getCurrentStyle());
+      }
+    } catch (error) {
+      // Error used to stop execution flow. Error state stored in data request and displayed to user in layer legend.
     }
   }
 

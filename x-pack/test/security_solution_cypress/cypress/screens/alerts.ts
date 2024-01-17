@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IS_SERVERLESS, CLOUD_SERVERLESS } from '../env_var_names_constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
 import { GLOBAL_FILTERS_CONTAINER } from './date_picker';
 
@@ -32,6 +33,9 @@ export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.r
 export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
+
+export const ALERT_TABLE_ROW = (rowIndex: number) =>
+  `[data-grid-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"]`;
 
 export const ALERT_DATA_GRID_ROW = `${ALERT_DATA_GRID} .euiDataGridRow`;
 
@@ -86,8 +90,6 @@ export const TIMELINE_CONTEXT_MENU_BTN = '[data-test-subj="timeline-context-menu
 export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-case-action"]';
 
 export const ATTACH_TO_NEW_CASE_BUTTON = '[data-test-subj="add-to-new-case-action"]';
-
-export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 
 export const HOST_RISK_HEADER_COLUMN =
   '[data-test-subj="dataGridHeaderCell-host.risk.calculated_level"]';
@@ -183,6 +185,9 @@ export const ALERT_RENDERER_HOST_NAME =
 
 export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
 
+export const SECURITY_SOLUTION_USERS_AVATAR = (user: string) =>
+  `[data-test-subj="securitySolutionUsersAvatar-${user}"]`;
+
 export const ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM = '.euiSelectableListItem';
 export const ALERT_USERS_PROFILES_CLEAR_SEARCH_BUTTON = '[data-test-subj="clearSearchButton"]';
 
@@ -198,9 +203,15 @@ export const ALERT_ASSIGNEES_SELECT_PANEL =
 export const ALERT_ASSIGNEES_UPDATE_BUTTON =
   '[data-test-subj="securitySolutionAssigneesApplyButton"]';
 
-export const ALERT_USER_AVATAR = (assignee: string) =>
-  `[data-test-subj="securitySolutionUsersAvatar-${assignee}"][title='${assignee}']`;
+export const ALERT_USER_AVATAR = (assignee: string) => {
+  let expectedAssignee = assignee;
 
+  if (Cypress.env(IS_SERVERLESS) && !Cypress.env(CLOUD_SERVERLESS)) {
+    expectedAssignee = `test ${expectedAssignee}`;
+  }
+
+  return `[data-test-subj^="securitySolutionUsersAvatar-"][title='${expectedAssignee}']`;
+};
 export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
 
 export const ALERT_ASIGNEES_COLUMN =
@@ -215,3 +226,6 @@ export const ALERT_DETAILS_ASSIGN_BUTTON =
   '[data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"]';
 
 export const ALERT_DETAILS_TAKE_ACTION_BUTTON = '[data-test-subj="take-action-dropdown-btn"]';
+
+export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
+export const TOOLTIP = '[data-test-subj="message-tool-tip"]';

@@ -925,6 +925,11 @@ paths:
         name: format
         description: Format of response - json or yaml
         in: query
+      - schema:
+          type: boolean
+        name: prerelease
+        description: Specify if version is prerelease
+        in: query
   /agents/setup:
     get:
       summary: Get agent setup info
@@ -2916,6 +2921,37 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /outputs/{outputId}/health:
+    get:
+      summary: Get latest output health
+      tags:
+        - Outputs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  state:
+                    type: string
+                    description: state of output, HEALTHY or DEGRADED
+                  message:
+                    type: string
+                    description: long message if unhealthy
+                  timestamp:
+                    type: string
+                    description: timestamp of reported state
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-output-health
+    parameters:
+      - schema:
+          type: string
+        name: outputId
+        in: path
+        required: true
   /logstash_api_keys:
     post:
       summary: Generate Logstash API key
@@ -4535,9 +4571,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         package_policies:
           description: >-
             This field is present only when retrieving a single agent policy, or
@@ -4616,9 +4652,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         agent_features:
           type: array
           items:
@@ -4666,9 +4702,9 @@ components:
           type: string
           nullable: true
         unenroll_timeout:
-          type: number
+          type: integer
         inactivity_timeout:
-          type: number
+          type: integer
         agent_features:
           type: array
           items:
@@ -5099,6 +5135,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:
@@ -5420,6 +5464,14 @@ components:
           type: string
         config:
           type: object
+        preset:
+          type: string
+          enum:
+            - balanced
+            - custom
+            - throughput
+            - scale
+            - latency
         config_yaml:
           type: string
         ssl:

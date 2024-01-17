@@ -8,6 +8,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { Asset } from '../../../common/types_api';
 import { CollectorOptions, QUERY_MAX_SIZE } from '.';
+import { extractFieldValue } from '../utils';
 
 export async function collectPods({
   client,
@@ -37,6 +38,7 @@ export async function collectPods({
     sort: [{ 'kubernetes.pod.uid': 'asc' }],
     _source: false,
     fields: [
+      '@timestamp',
       'kubernetes.*',
       'cloud.provider',
       'orchestrator.cluster.name',
@@ -68,12 +70,12 @@ export async function collectPods({
 
   const assets = esResponse.hits.hits.reduce<Asset[]>((acc: Asset[], hit: any) => {
     const { fields = {} } = hit;
-    const podUid = fields['kubernetes.pod.uid'];
-    const nodeName = fields['kubernetes.node.name'];
-    const clusterName = fields['orchestrator.cluster.name'];
+    const podUid = extractFieldValue(fields['kubernetes.pod.uid']);
+    const nodeName = extractFieldValue(fields['kubernetes.node.name']);
+    const clusterName = extractFieldValue(fields['orchestrator.cluster.name']);
 
     const pod: Asset = {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': extractFieldValue(fields['@timestamp']),
       'asset.kind': 'pod',
       'asset.id': podUid,
       'asset.ean': `pod:${podUid}`,
@@ -81,7 +83,7 @@ export async function collectPods({
     };
 
     if (fields['cloud.provider']) {
-      pod['cloud.provider'] = fields['cloud.provider'];
+      pod['cloud.provider'] = extractFieldValue(fields['cloud.provider']);
     }
 
     if (clusterName) {

@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { APP_ID } from '../../../../../common';
 import type { TimelineTabs } from '../../../../../common/types';
@@ -16,6 +17,7 @@ import { AddToCaseButton } from '../add_to_case_button';
 import { NewTimelineAction } from './new_timeline';
 import { SaveTimelineButton } from './save_timeline_button';
 import { OpenTimelineAction } from './open_timeline';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 
 interface TimelineActionMenuProps {
   mode?: 'compact' | 'normal';
@@ -23,6 +25,12 @@ interface TimelineActionMenuProps {
   isInspectButtonDisabled: boolean;
   activeTab: TimelineTabs;
 }
+
+const VerticalDivider = styled.span`
+  width: 0px;
+  height: 20px;
+  border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+`;
 
 const TimelineActionMenuComponent = ({
   mode = 'normal',
@@ -35,6 +43,7 @@ const TimelineActionMenuComponent = ({
 
   return (
     <EuiFlexGroup
+      id={TIMELINE_TOUR_CONFIG_ANCHORS.ACTION_MENU}
       gutterSize="xs"
       justifyContent="flexEnd"
       alignItems="center"
@@ -47,11 +56,6 @@ const TimelineActionMenuComponent = ({
       <EuiFlexItem data-test-subj="open-timeline-action">
         <OpenTimelineAction />
       </EuiFlexItem>
-      {userCasesPermissions.create && userCasesPermissions.read ? (
-        <EuiFlexItem>
-          <AddToCaseButton timelineId={timelineId} />
-        </EuiFlexItem>
-      ) : null}
       <EuiFlexItem data-test-subj="inspect-timeline-action">
         <InspectButton
           compact={mode === 'compact'}
@@ -61,6 +65,16 @@ const TimelineActionMenuComponent = ({
           title=""
         />
       </EuiFlexItem>
+      {userCasesPermissions.create && userCasesPermissions.read ? (
+        <>
+          <EuiFlexItem>
+            <VerticalDivider />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AddToCaseButton timelineId={timelineId} />
+          </EuiFlexItem>
+        </>
+      ) : null}
       <EuiFlexItem data-test-subj="save-timeline-action">
         <SaveTimelineButton timelineId={timelineId} />
       </EuiFlexItem>

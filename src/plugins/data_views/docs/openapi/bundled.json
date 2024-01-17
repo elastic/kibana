@@ -199,6 +199,9 @@
         ],
         "parameters": [
           {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
             "$ref": "#/components/parameters/view_id"
           }
         ],
@@ -449,7 +452,10 @@
                       "type": "object"
                     },
                     "fields": {
-                      "type": "array"
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
                     }
                   }
                 },
@@ -2687,7 +2693,18 @@
       },
       "sourcefilters": {
         "type": "array",
-        "description": "The array of field names you want to filter out in Discover."
+        "description": "The array of field names you want to filter out in Discover.",
+        "items": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "string"
+            }
+          }
+        }
       },
       "timefieldname": {
         "type": "string",

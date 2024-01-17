@@ -28,6 +28,7 @@
     ],
     "optionalPlugins": [
       "indexManagement",
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact"

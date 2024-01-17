@@ -32,6 +32,8 @@ import {
 
 export type { UpdateAPIKeyParams, UpdateAPIKeyResult };
 
+const ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER = 'es-client-authentication';
+
 /**
  * Represents the options to create an APIKey class instance that will be
  * shared between functions (create, invalidate, etc).
@@ -269,6 +271,13 @@ export class APIKeys implements APIKeysType {
         `Unable to grant an API Key, request does not contain an authorization header`
       );
     }
+
+    // Try to extract optional Elasticsearch client credentials (currently only used by JWT).
+    const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
+      request,
+      ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
+    );
+
     const { expiration, metadata, name } = createParams;
 
     const roleDescriptors =
@@ -281,7 +290,8 @@ export class APIKeys implements APIKeysType {
 
     const params = this.getGrantParams(
       { expiration, metadata, name, role_descriptors: roleDescriptors },
-      authorizationHeader
+      authorizationHeader,
+      clientAuthorizationHeader
     );
 
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
@@ -399,13 +409,22 @@ export class APIKeys implements APIKeysType {
 
   private getGrantParams(
     createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
-    authorizationHeader: HTTPAuthorizationHeader
+    authorizationHeader: HTTPAuthorizationHeader,
+    clientAuthorizationHeader: HTTPAuthorizationHeader | null
   ): GrantAPIKeyParams {
     if (authorizationHeader.scheme.toLowerCase() === 'bearer') {
       return {
         api_key: createParams,
         grant_type: 'access_token',
         access_token: authorizationHeader.credentials,
+        ...(clientAuthorizationHeader
+          ? {
+              client_authentication: {
+                scheme: clientAuthorizationHeader.scheme,
+                value: clientAuthorizationHeader.credentials,
+              },
+            }
+          : {}),
       };
     }
 

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { asyncForEach } from '@kbn/std';
 import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -71,8 +72,26 @@ import { Mask } from './mask';
 
 const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
-export function isVectorLayer(layer: ILayer) {
-  return (layer as IVectorLayer).canShowTooltip !== undefined;
+export function isVectorLayer(layer: ILayer): layer is IVectorLayer {
+  return (
+    typeof (layer as IVectorLayer).addFeature === 'function' &&
+    typeof (layer as IVectorLayer).canShowTooltip === 'function' &&
+    typeof (layer as IVectorLayer).deleteFeature === 'function' &&
+    typeof (layer as IVectorLayer).getFields === 'function' &&
+    typeof (layer as IVectorLayer).getJoins === 'function' &&
+    typeof (layer as IVectorLayer).getLeftJoinFields === 'function' &&
+    typeof (layer as IVectorLayer).getMbTooltipLayerIds === 'function' &&
+    typeof (layer as IVectorLayer).getValidJoins === 'function' &&
+    typeof (layer as IVectorLayer).hasJoins === 'function' &&
+    typeof (layer as IVectorLayer).supportsFeatureEditing === 'function'
+  );
+}
+
+export function hasVectorLayerMethod(
+  layer: ILayer,
+  methodName: keyof IVectorLayer
+): layer is Pick<IVectorLayer, typeof methodName> {
+  return typeof (layer as IVectorLayer)[methodName] === 'function';
 }
 
 export interface VectorLayerArguments {
@@ -274,8 +293,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     });
   }
 
-  getErrors(): LayerMessage[] {
-    const errors = super.getErrors();
+  getErrors(inspectorAdapters: Adapters): LayerMessage[] {
+    const errors = super.getErrors(inspectorAdapters);
 
     this.getValidJoins().forEach((join) => {
       const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
