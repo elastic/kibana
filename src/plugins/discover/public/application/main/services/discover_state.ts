@@ -21,7 +21,6 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
@@ -298,7 +297,10 @@ export function getDiscoverStateContainer({
   const updateAdHocDataViewId = async () => {
     const prevDataView = internalStateContainer.getState().dataView;
     if (!prevDataView || prevDataView.isPersisted()) return;
-    const newDataView = await services.dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
+    const newDataView = await services.dataViews.create({
+      ...prevDataView.toSpec(false),
+      id: undefined,
+    });
     services.dataViews.clearInstanceCache(prevDataView.id);
 
     updateFiltersReferences(prevDataView, newDataView);

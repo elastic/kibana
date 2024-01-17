@@ -11,6 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
+import { createSHA256Hash } from '@kbn/crypto';
 import { PersistenceAPI } from '../types';
 
 import { createDataViewCache } from '.';
@@ -952,8 +953,10 @@ export class DataViewsService {
   private async createFromSpec(
     { id, name, title, ...restOfSpec }: DataViewSpec,
     skipFetchFields = false,
-    displayErrors = true
+    displayErrors = true,
+    generateIdBySpec = true
   ): Promise<DataView> {
+    console.log('createFromSpec', restOfSpec);
     const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
@@ -970,6 +973,13 @@ export class DataViewsService {
       shortDotsEnable,
       metaFields,
     });
+    if (!id && generateIdBySpec) {
+      const newSpec = dataView.toSpec(false);
+      delete newSpec.id;
+      const specId = createSHA256Hash(JSON.stringify(newSpec));
+      dataView.id = specId;
+      console.log('create', spec, generateIdBySpec, id);
+    }
 
     if (!skipFetchFields) {
       await this.refreshFields(dataView, displayErrors);
@@ -988,9 +998,11 @@ export class DataViewsService {
   async create(
     spec: DataViewSpec,
     skipFetchFields = false,
-    displayErrors = true
+    displayErrors = true,
+    generateIdBySpec = true
   ): Promise<DataView> {
-    const doCreate = () => this.createFromSpec(spec, skipFetchFields, displayErrors);
+    const doCreate = () =>
+      this.createFromSpec(spec, skipFetchFields, displayErrors, generateIdBySpec);
 
     if (spec.id) {
       const cachedDataView = this.dataViewCache.get(spec.id);
