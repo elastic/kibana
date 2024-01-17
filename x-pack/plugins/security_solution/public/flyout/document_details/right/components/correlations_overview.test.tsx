@@ -115,7 +115,7 @@ describe('<CorrelationsOverview />', () => {
   it('should show component with all rows in expandable panel', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, documentId: 'documentId', indices: ['index1'] });
+      .mockReturnValue({ show: true, indices: ['index1'] });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
@@ -158,7 +158,7 @@ describe('<CorrelationsOverview />', () => {
   it('should hide rows and show error message if show values are false', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: false, documentId: 'documentId', indices: ['index1'] });
+      .mockReturnValue({ show: false, indices: ['index1'] });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
