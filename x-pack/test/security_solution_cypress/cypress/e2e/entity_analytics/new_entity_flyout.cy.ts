@@ -53,11 +53,11 @@ describe(
       mockRiskEngineEnabled();
       login();
       visitWithTimeRange(ALERTS_URL);
+      waitForAlerts();
     });
 
     describe('User details', () => {
       it('should display entity flyout and open risk input panel', () => {
-        waitForAlerts();
         expandFirstAlertUserFlyout();
 
         cy.log('header section');
@@ -69,17 +69,14 @@ describe(
       });
 
       it('should show asset criticality in the risk input panel', () => {
-        waitForAlerts();
         expandFirstAlertUserFlyout();
         expandRiskInputsFlyoutPanel();
-        cy.get(ASSET_CRITICALITY_BADGE).should('exist');
         cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Very important');
       });
     });
 
     describe('Host details', () => {
       it('should display entity flyout and open risk input panel', () => {
-        waitForAlerts();
         expandFirstAlertHostFlyout();
 
         cy.log('header section');
@@ -94,7 +91,6 @@ describe(
         waitForAlerts();
         expandFirstAlertHostFlyout();
         expandRiskInputsFlyoutPanel();
-        cy.get(ASSET_CRITICALITY_BADGE).should('exist');
         cy.get(ASSET_CRITICALITY_BADGE).should('contain.text', 'Very important');
       });
     });
