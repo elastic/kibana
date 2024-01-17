@@ -6,37 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { isNotFoundException } from '../utils/identify_exceptions';
 
-import { CONNECTORS_INDEX } from '..';
-
-import { Connector, ConnectorDocument } from '../types/connectors';
+import { Connector } from '../types/connectors';
 
 export const updateConnectorNameAndDescription = async (
   client: ElasticsearchClient,
   connectorId: string,
   connectorUpdates: Partial<Pick<Connector, 'name' | 'description'>>
-): Promise<WriteResponseBase> => {
-  const connectorResult = await client.get<ConnectorDocument>({
-    id: connectorId,
-    index: CONNECTORS_INDEX,
-  });
-  const connector = connectorResult._source;
-  if (connector) {
-    const result = await client.index<ConnectorDocument>({
-      document: { ...connector, ...connectorUpdates },
-      id: connectorId,
-      index: CONNECTORS_INDEX,
+): Promise<Result> => {
+  try {
+    const { name, description } = connectorUpdates;
+    const result = await client.transport.request<Result>({
+      method: 'PUT',
+      path: `/_connector/${connectorId}/_name`,
+      body: {
+        name,
+        description,
+      },
     });
-    await client.indices.refresh({ index: CONNECTORS_INDEX });
     return result;
-  } else {
-    throw new Error(
-      i18n.translate('searchConnectors.server.connectors.serviceType.error', {
-        defaultMessage: 'Could not find document',
-      })
-    );
+  } catch (err) {
+    if (isNotFoundException(err)) {
+      throw new Error(
+        i18n.translate('searchConnectors.server.connectors.scheduling.error', {
+          defaultMessage: 'Could not find document',
+        })
+      );
+    }
+
+    throw err;
   }
 };

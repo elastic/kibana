@@ -10,9 +10,9 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import { errors } from '@elastic/elasticsearch';
 
-import { updateConnectorScheduling } from './update_connector_scheduling';
+import { updateConnectorNameAndDescription } from './update_connector_name_and_description';
 
-describe('updateConnectorScheduling lib function', () => {
+describe('updateConnectorNameAndDescription lib function', () => {
   const mockClient = {
     transport: {
       request: jest.fn(),
@@ -23,29 +23,26 @@ describe('updateConnectorScheduling lib function', () => {
     jest.clearAllMocks();
   });
 
-  it('should update connector scheduling', async () => {
+  it('should update connector name and description', async () => {
     mockClient.transport.request.mockImplementation(() => ({ result: 'updated' }));
 
     await expect(
-      updateConnectorScheduling(mockClient as unknown as ElasticsearchClient, 'connectorId', {
-        access_control: { enabled: false, interval: '* * * * *' },
-        full: {
-          enabled: true,
-          interval: '1 2 3 4 5',
-        },
-        incremental: { enabled: false, interval: '* * * * *' },
-      })
+      updateConnectorNameAndDescription(
+        mockClient as unknown as ElasticsearchClient,
+        'connectorId',
+        {
+          name: 'connector-name',
+          description: 'connector-description',
+        }
+      )
     ).resolves.toEqual({ result: 'updated' });
     expect(mockClient.transport.request).toHaveBeenCalledWith({
       body: {
-        scheduling: {
-          access_control: { enabled: false, interval: '* * * * *' },
-          full: { enabled: true, interval: '1 2 3 4 5' },
-          incremental: { enabled: false, interval: '* * * * *' },
-        },
+        name: 'connector-name',
+        description: 'connector-description',
       },
       method: 'PUT',
-      path: '/_connector/connectorId/_scheduling',
+      path: '/_connector/connectorId/_name',
     });
   });
 
@@ -63,14 +60,14 @@ describe('updateConnectorScheduling lib function', () => {
       );
     });
     await expect(
-      updateConnectorScheduling(mockClient as unknown as ElasticsearchClient, 'connectorId', {
-        access_control: { enabled: false, interval: '* * * * *' },
-        full: {
-          enabled: true,
-          interval: '1 2 3 4 5',
-        },
-        incremental: { enabled: false, interval: '* * * * *' },
-      })
+      updateConnectorNameAndDescription(
+        mockClient as unknown as ElasticsearchClient,
+        'connectorId',
+        {
+          name: 'connector-name',
+          description: 'connector-description',
+        }
+      )
     ).rejects.toEqual(new Error('Could not find document'));
   });
 });
