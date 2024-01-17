@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { State } from '../../../../types';
 import { useReportingService, usePlatformService } from '../../../services';
 import { getPages, getWorkpad } from '../../../state/selectors/workpad';
@@ -29,30 +30,45 @@ export const ShareMenu = () => {
   const downloadWorkpad = useDownloadWorkpad();
   const reportingService = useReportingService();
   const platformService = usePlatformService();
+  const overlays = platformService.getOverlays();
+  const theme = platformService.getTheme();
+  const i18nStart = platformService.getI18n();
 
   const { workpad, pageCount } = useSelector((state: State) => ({
     workpad: getWorkpad(state),
     pageCount: getPages(state).length,
   }));
 
-  const ReportingModalComponent = reportingService.getReportingModalContent();
+  const ReportingModalComponent =
+    reportingService.getReportingModalContent !== null
+      ? reportingService.getReportingModalContent({ onClose: () => {}, objectType: 'Canvas' })
+      : () => {};
 
   const sharingData = {
     workpad,
     pageCount,
   };
 
-  const ReportingComponent =
+  const openReportingModal =
     ReportingModalComponent !== null
-      ? ({ onClose }: { onClose: () => void }) => (
-          <ReportingModalComponent
-            layoutOption="canvas"
-            onClose={onClose}
-            objectId={workpad.id}
-            objectType="canvas"
-            getJobParams={getPdfJobParams(sharingData, platformService.getKibanaVersion())}
-          />
-        )
+      ? () => {
+          const session = overlays.openModal(
+            toMountPoint(
+              // @ts-ignore
+              <ReportingModalComponent
+                layoutOption="canvas"
+                onClose={() => session.close()}
+                objectId={workpad.id}
+                objectType="Canvas"
+                getJobParams={getPdfJobParams(sharingData, platformService.getKibanaVersion())}
+              />,
+              { theme, i18n: i18nStart }
+            ),
+            {
+              maxWidth: 400,
+            }
+          );
+        }
       : null;
 
   const onExport = useCallback(
@@ -71,5 +87,7 @@ export const ShareMenu = () => {
     [downloadWorkpad, workpad]
   );
 
-  return <ShareMenuComponent {...{ ReportingComponent, onExport }} />;
+  return openReportingModal !== null ? (
+    <ShareMenuComponent {...{ openReportingModal, onExport }} />
+  ) : null;
 };

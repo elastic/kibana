@@ -42,5 +42,8 @@ export const platformServiceFactory: CanvaPlatformServiceFactory = ({
     getUISettings: () => coreStart.uiSettings,
     getHttp: () => coreStart.http,
     getContentManagement: () => startPlugins.contentManagement,
+    getOverlays: () => coreStart.overlays,
+    getTheme: () => coreStart.theme,
+    getI18n: () => coreStart.i18n,
   };
 };

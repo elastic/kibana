@@ -12,6 +12,9 @@ import {
   IBasePath,
   ChromeStart,
   HttpStart,
+  OverlayStart,
+  ThemeServiceStart,
+  I18nStart,
 } from '@kbn/core/public';
 
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -34,4 +37,7 @@ export interface CanvasPlatformService {
   getUISettings: () => IUiSettingsClient;
   getHttp: () => HttpStart;
   getContentManagement: () => ContentManagementPublicStart;
+  getOverlays: () => OverlayStart;
+  getTheme: () => ThemeServiceStart;
+  getI18n: () => I18nStart;
 }

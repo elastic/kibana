@@ -53,14 +53,14 @@ export type OnCloseFn = (type: CloseTypes) => void;
 export type ReportingComponent = ({ onClose }: { onClose: () => void }) => JSX.Element;
 
 export interface Props {
-  ReportingComponent: ReportingComponent | null;
+  openReportingModal: () => void | null;
   onExport: OnExportFn;
 }
 
 /**
  * The Menu for Exporting a Workpad from Canvas.
  */
-export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
+export const ShareMenu = ({ openReportingModal, onExport }: Props) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
   const onFlyoutClose = () => {
@@ -78,16 +78,12 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
           closePopover();
         },
       },
-      ReportingComponent !== null
+      openReportingModal !== null
         ? {
             name: strings.getShareDownloadPDFTitle(),
             icon: 'document',
-            panel: {
-              id: 1,
-              title: strings.getShareDownloadPDFTitle(),
-              content: <ReportingComponent onClose={closePopover} />,
-            },
             'data-test-subj': 'sharePanel-PDFReports',
+            onClick: openReportingModal,
           }
         : false,
       {

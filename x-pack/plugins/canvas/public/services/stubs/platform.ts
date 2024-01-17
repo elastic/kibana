@@ -36,4 +36,7 @@ export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   getLegacyUrlConflict: undefined,
   getHttp: noop,
   getContentManagement: noop,
+  getOverlays: noop,
+  getTheme: noop,
+  getI18n: noop,
 });
