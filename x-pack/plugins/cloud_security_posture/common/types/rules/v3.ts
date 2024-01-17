@@ -20,7 +20,7 @@ export const cspBenchmarkRuleMetadataSchema = schema.object({
     ),
     id: schema.string(),
     version: schema.string(),
-    rule_number: schema.string(),
+    rule_number: schema.maybe(schema.string()),
   }),
   default_value: schema.maybe(schema.string()),
   description: schema.string(),

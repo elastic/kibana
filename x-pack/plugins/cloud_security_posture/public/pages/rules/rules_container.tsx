@@ -116,7 +116,7 @@ export const RulesContainer = () => {
         const rulesKey = buildRuleKey(
           rule.metadata.benchmark.id,
           'v' + params.benchmarkVersion,
-          rule.metadata.benchmark.rule_number
+          rule.metadata.benchmark.rule_number!
         );
 
         const match = rulesStates?.data?.[rulesKey];

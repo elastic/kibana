@@ -284,7 +284,7 @@ const CurrentPageOfTotal = ({
       (e: CspBenchmarkRulesWithStates) => ({
         benchmark_id: e?.metadata.benchmark.id,
         benchmark_version: e?.metadata.benchmark.version,
-        rule_number: e?.metadata.benchmark.rule_number,
+        rule_number: e?.metadata.benchmark.rule_number!,
         rule_id: e?.metadata.id,
       })
     );
