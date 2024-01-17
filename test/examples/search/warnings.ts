@@ -153,10 +153,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('searchSourceWithoutOther');
 
       // wait for toasts - toasts appear after the response is rendered
-      let toasts: WebElementWrapper[] = [];
+      let allToasts: WebElementWrapper[] = [];
       await retry.try(async () => {
-        toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
+        allToasts = await find.allByCssSelector(toastsSelector);
+        expect(allToasts.length).to.be(2);
       });
 
       // warnings tab
