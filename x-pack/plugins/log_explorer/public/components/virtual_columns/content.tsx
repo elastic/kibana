@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiText } from '@elastic/eui';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { useDocDetail, getMessageWithFallbacks } from '../../hooks/use_doc_detail';
 import { LogDocument, LogExplorerDiscoverServices } from '../../controller';
@@ -25,6 +26,11 @@ const SourceDocument = dynamic(
 const DiscoverSourcePopoverContent = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_popover_content')
 );
+
+const sourceDocumentStyles = css`
+  display: inline !important;
+  margin-left: 5px;
+`;
 
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
@@ -109,7 +115,7 @@ const Content = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={50}
           dataTestSubj="logExplorerCellDescriptionList"
-          style={{ display: 'inline', marginLeft: '5px' }}
+          customStyles={sourceDocumentStyles}
         />
       )}
     </span>
